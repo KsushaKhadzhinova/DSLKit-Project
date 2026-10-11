@@ -1,0 +1,813 @@
+
+<title>DSLKit Requirements Quiz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+
+<style>
+:root {
+  --bg:        #13141a;
+  --surface:   #1e1f26;
+  --surface2:  #272830;
+  --border:    #2e2f3a;
+  --accent:    #6c8ef5;
+  --accent2:   #a78bfa;
+  --green:     #34d399;
+  --yellow:    #fbbf24;
+  --red:       #f87171;
+  --text1:     #e2e4f0;
+  --text2:     #9395a8;
+  --text3:     #565769;
+  --radius:    8px;
+  --font:      'Inter', system-ui, sans-serif;
+  --mono:      'JetBrains Mono', monospace;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --bg: #f0f1f8; --surface: #ffffff; --surface2: #f5f6fc;
+    --border: #d8dae8; --text1: #1a1b26; --text2: #5c5f7a; --text3: #9395a8;
+    color-scheme: light;
+  }
+}
+:root[data-theme="dark"] { color-scheme: dark; }
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; font-family: var(--font); background: var(--bg); color: var(--text1); }
+
+body {
+  display: flex; flex-direction: column;
+  padding: 0 16px 32px;
+  min-height: 100%;
+}
+
+/* ── Header ── */
+.header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 0 12px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 20px;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.logo { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 16px; }
+.logo-badge {
+  width: 28px; height: 28px; border-radius: 6px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 800; color: #fff;
+}
+.subtitle { font-size: 12px; color: var(--text2); }
+
+/* ── Progress ── */
+.progress-wrap {
+  margin-bottom: 24px;
+}
+.progress-info {
+  display: flex; justify-content: space-between;
+  font-size: 12px; color: var(--text2); margin-bottom: 6px;
+}
+.progress-bar-bg {
+  height: 4px; background: var(--border); border-radius: 2px;
+}
+.progress-bar-fill {
+  height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2));
+  border-radius: 2px; transition: width .35s cubic-bezier(.4,0,.2,1);
+}
+.block-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: var(--accent); color: #fff;
+  font-size: 11px; font-weight: 600;
+  padding: 2px 8px; border-radius: 20px; margin-bottom: 10px;
+  letter-spacing: .04em;
+}
+
+/* ── Question card ── */
+.question-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 20px;
+  max-width: 720px;
+  margin-left: auto; margin-right: auto;
+  width: 100%;
+  animation: fadein .2s ease-out;
+}
+@keyframes fadein { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+
+.q-num {
+  font-size: 11px; color: var(--accent); font-weight: 600;
+  margin-bottom: 8px; letter-spacing: .06em;
+}
+.q-text {
+  font-size: 15px; font-weight: 600; line-height: 1.5;
+  margin-bottom: 4px;
+}
+.q-meta {
+  font-size: 12px; color: var(--text2); margin-bottom: 14px;
+}
+code { font-family: var(--mono); background: var(--surface2); padding: 1px 5px; border-radius: 4px; font-size: 11px; color: var(--accent2); }
+
+/* ── Options ── */
+.options { display: flex; flex-direction: column; gap: 8px; }
+
+.option {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 10px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer; position: relative;
+  transition: border-color .15s, background .15s;
+  font-size: 13px; line-height: 1.4;
+}
+.option:hover { border-color: var(--accent); background: rgba(108,142,245,.06); }
+.option.selected { border-color: var(--accent); background: rgba(108,142,245,.12); }
+.option.opt-all  { border-style: dashed; }
+.option.opt-none { color: var(--text2); }
+
+.opt-check {
+  width: 18px; height: 18px; border-radius: 4px;
+  border: 2px solid var(--border); flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; transition: border-color .15s, background .15s;
+  margin-top: 1px;
+}
+.option.radio .opt-check { border-radius: 50%; }
+.option.selected .opt-check {
+  border-color: var(--accent); background: var(--accent); color: #fff;
+}
+.opt-label { flex: 1; }
+.opt-tag {
+  font-size: 10px; color: var(--text3); margin-left: auto;
+  white-space: nowrap; padding-left: 8px;
+  align-self: center;
+}
+
+/* Other input */
+.other-wrap { display: none; margin-top: 8px; }
+.other-wrap.show { display: block; }
+.other-input {
+  width: 100%; padding: 8px 10px;
+  background: var(--surface2); border: 1.5px solid var(--border);
+  border-radius: 6px; color: var(--text1);
+  font-size: 13px; font-family: var(--font);
+  outline: none;
+}
+.other-input:focus { border-color: var(--accent); }
+
+/* ── Navigation ── */
+.nav {
+  display: flex; align-items: center; gap: 10px;
+  max-width: 720px; margin: 0 auto;
+  justify-content: space-between;
+}
+.btn-nav {
+  padding: 9px 20px; border-radius: var(--radius);
+  font-size: 14px; font-weight: 600; font-family: var(--font);
+  cursor: pointer; border: none; transition: opacity .15s, transform .1s;
+}
+.btn-nav:active { transform: scale(.97); }
+.btn-back { background: var(--surface2); color: var(--text1); }
+.btn-back:hover { background: var(--border); }
+.btn-next { background: var(--accent); color: #fff; }
+.btn-next:hover { opacity: .9; }
+.btn-next:disabled { opacity: .4; cursor: not-allowed; }
+.q-counter { font-size: 13px; color: var(--text2); }
+
+/* ── Results ── */
+.results { display: none; max-width: 720px; margin: 0 auto; }
+.results.show { display: block; }
+.results-title { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+.results-sub { color: var(--text2); font-size: 14px; margin-bottom: 20px; }
+.result-block {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px; margin-bottom: 12px;
+}
+.result-block h3 { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--accent); margin-bottom: 10px; }
+.result-row { margin-bottom: 10px; }
+.result-q { font-size: 12px; color: var(--text2); margin-bottom: 2px; }
+.result-a { font-size: 13px; color: var(--text1); font-weight: 500; }
+.result-a.custom { color: var(--accent2); }
+
+.copy-btn {
+  width: 100%; padding: 10px;
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: var(--radius); cursor: pointer;
+  font-size: 13px; font-family: var(--font); color: var(--text2);
+  margin-top: 8px; transition: background .15s;
+}
+.copy-btn:hover { background: var(--border); color: var(--text1); }
+
+.restart-btn {
+  padding: 10px 24px; background: var(--accent); color: #fff;
+  border: none; border-radius: var(--radius);
+  font-size: 14px; font-weight: 600; font-family: var(--font);
+  cursor: pointer; margin-top: 16px;
+}
+.restart-btn:hover { opacity: .9; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+
+<div class="header">
+  <div>
+    <div class="logo">
+      <div class="logo-badge">D</div>
+      DSLKit · Требования
+    </div>
+    <div class="subtitle">Ответь на вопросы — получишь точный макет</div>
+  </div>
+  <div id="headerProgress" style="font-size:13px;color:var(--text2)">Вопрос 1 из 105</div>
+</div>
+
+<div class="progress-wrap">
+  <div class="progress-info">
+    <span id="progressLabel">Блок 1: Продукт и концепция</span>
+    <span id="progressPct">0%</span>
+  </div>
+  <div class="progress-bar-bg">
+    <div class="progress-bar-fill" id="progressFill" style="width:0%"></div>
+  </div>
+</div>
+
+<div id="questionArea" style="max-width:720px;margin:0 auto;width:100%"></div>
+
+<div class="nav" id="navBar">
+  <button class="btn-nav btn-back" id="btnBack" onclick="prevQ()">← Назад</button>
+  <span class="q-counter" id="qCounter">1 / 105</span>
+  <button class="btn-nav btn-next" id="btnNext" onclick="nextQ()">Далее →</button>
+</div>
+
+<div class="results" id="resultsArea">
+  <div class="results-title">✓ Готово!</div>
+  <div class="results-sub">Все ответы собраны. Ниже — твои требования для DSLKit.</div>
+  <div id="resultsContent"></div>
+  <button class="copy-btn" onclick="copyResults()">📋 Скопировать все ответы</button>
+  <br>
+  <button class="restart-btn" onclick="restart()">↩ Пройти заново</button>
+</div>
+
+<script>
+/* ═══════════════════════════════ QUESTIONS ═══════════════════════════════ */
+const BLOCKS = [
+  { name: "Блок 1: Продукт и концепция", color: "#6c8ef5" },
+  { name: "Блок 2: Макет и раскладка",   color: "#a78bfa" },
+  { name: "Блок 3: Редактор кода",        color: "#34d399" },
+  { name: "Блок 4: Холст (Canvas)",       color: "#fbbf24" },
+  { name: "Блок 5: Run / Рендер",         color: "#f87171" },
+  { name: "Блок 6: Toolbar",              color: "#6c8ef5" },
+  { name: "Блок 7: AI-ассистент",         color: "#a78bfa" },
+  { name: "Блок 8: Сохранение / Экспорт","color": "#34d399" },
+  { name: "Блок 9: Темы и визуальный стиль","color": "#fbbf24" },
+  { name: "Блок 10: Лендинг / Дашборд",  color: "#f87171" },
+  { name: "Блок 11: Аутентификация",      color: "#6c8ef5" },
+  { name: "Блок 12: Уведомления",         color: "#a78bfa" },
+  { name: "Блок 13: Мобильная версия",    color: "#34d399" },
+  { name: "Блок 14: Уникальные фичи UX", color: "#fbbf24" },
+  { name: "Блок 15: Контекстное меню",    color: "#f87171" },
+  { name: "Блок 16: Редактор — детали",   color: "#6c8ef5" },
+  { name: "Блок 17: Canvas — детали",     color: "#a78bfa" },
+  { name: "Блок 18: Совместная работа",   color: "#34d399" },
+  { name: "Блок 19: Производительность",  color: "#fbbf24" },
+  { name: "Блок 20: Интеграции",          color: "#f87171" },
+];
+
+// multi=true → чекбоксы (несколько), multi=false → радио (одно)
+const Qs = [
+/* ─ Блок 1 ─────────────────────────────────────────────────────────────── */
+{ b:0, multi:false, q:"Как объяснить DSLKit однокурснице?",
+  hint:"Одно предложение — суть продукта.",
+  opts:["Пишешь код — получаешь диаграмму с проверкой нотации","Редактор диаграмм как VS Code, но с поддержкой IDEF0 и DFD","Инструмент для создания UML, ERD и IDEF0 из текста в браузере","Замена draw.io для программистов: текст → схема с валидацией"] },
+
+{ b:0, multi:false, q:"Что видит пользователь через 5 секунд после открытия сайта?",
+  hint:"Первое впечатление = конверсия.",
+  opts:["Сразу редактор с примером диаграммы (как StackBlitz)","Welcome Screen: шаблоны + последние файлы","Лендинг с описанием продукта и кнопкой «Попробовать»","Дашборд «Мои проекты»"] },
+
+{ b:0, multi:false, q:"Какое первое действие пользователя?",
+  opts:["Выбирает нотацию из списка (UML, IDEF0, ERD…)","Открывает шаблон и редактирует его","Сразу начинает писать DSL-код","Смотрит онбординг-тур (5 шагов)"] },
+
+{ b:0, multi:false, q:"Нужна ли отдельная маркетинговая лендинг-страница?",
+  opts:["Да, с описанием, тарифами, примерами и кнопкой «Попробовать»","Нет — приложение открывается сразу редактором","Да, но минимальная: hero + CTA + 3 фичи","Позже, в MVP не нужна"] },
+
+{ b:0, multi:false, q:"Документация — где находится?",
+  opts:["Встроена как вкладка в редакторе (вкладка «Docs»)","Отдельная страница /docs","Всплывает в боковой панели по нажатию иконки","Отдельный сайт (например docs.dslkit.dev)"] },
+
+{ b:0, multi:false, q:"Дашборд «Мои проекты» нужен?",
+  opts:["Да — как Figma Home, карточки диаграмм с превью","Да — простой список файлов, без превью","Нет — Welcome Screen достаточно","Нет — сразу открываем последний файл"] },
+
+/* ─ Блок 2 ─────────────────────────────────────────────────────────────── */
+{ b:1, multi:false, q:"Базовая раскладка панелей?",
+  hint:"VS Code-стиль уже в макете. Что менять?",
+  opts:["Оставить: ActivityBar | Sidebar | Editor | Canvas","Убрать ActivityBar — слишком сложно для студентов","Поменять: Canvas слева, Editor справа","Переключаемые режимы: только-Editor, только-Canvas, Split"] },
+
+{ b:1, multi:false, q:"Как расположены редактор и холст?",
+  opts:["Горизонтально: редактор слева, холст справа (как в макете)","Вертикально: редактор сверху, холст снизу","Зависит от экрана — автоматически (landscape/portrait)","Пользователь выбирает в настройках"] },
+
+{ b:1, multi:true, q:"Какие режимы скрытия панелей нужны?",
+  opts:["Только холст (скрыть редактор)","Только редактор (скрыть холст)","Полноэкранный холст (скрыть всё кроме диаграммы)","Полноэкранный редактор"] },
+
+{ b:1, multi:true, q:"Вкладки нижней панели (как в VS Code)?",
+  opts:["Проблемы / Errors (с кодами ошибок)","AI Assistant (чат)","Терминал / CLI","Output (лог рендера)","Versions (история)"] },
+
+{ b:1, multi:true, q:"Что показывать в Status Bar (нижняя полоска)?",
+  opts:["Название нотации (UML Class, IDEF0 A-0)","Позиция курсора (Ln, Col)","Статус сохранения (Сохранено / Несохранено)","Количество ошибок/предупреждений","Ветка Git","Статус авторендера (Auto ON/OFF)"] },
+
+{ b:1, multi:false, q:"Breadcrumb (путь декомпозиции IDEF0: A-0 › A0 › A1.2) нужен?",
+  opts:["Да — обязательно для IDEF0/DFD, для остальных тоже","Только для IDEF0 и DFD","Нет — достаточно заголовка вкладки","Позже, не в MVP"] },
+
+{ b:1, multi:false, q:"Вкладки-табы для нескольких открытых файлов нужны?",
+  opts:["Да — как в VS Code, несколько вкладок","Да — но не более 5 одновременно","Нет — один файл = одно окно (переключение через sidebar)","Позже"] },
+
+/* ─ Блок 3 ─────────────────────────────────────────────────────────────── */
+{ b:2, multi:false, q:"Автодополнение кода в редакторе?",
+  hint:"Как выглядит подсказка при наборе.",
+  opts:["Выпадающий список IntelliSense (как в VS Code)","Inline ghost text (как GitHub Copilot)","Оба варианта — пользователь выбирает","Только если нажать Ctrl+Space"] },
+
+{ b:2, multi:true, q:"Как отображать ошибки валидации в редакторе?",
+  opts:["Подчёркивание волнистой линией (как в Word/VS Code)","Иконка в gutter (левое поле) рядом со строкой","Красный фон строки","Tooltip при наведении на строку с ошибкой","Счётчик ошибок в status bar"] },
+
+{ b:2, multi:false, q:"Нужен ли minimap (мини-копия кода) справа?",
+  opts:["Да — включён по умолчанию","Да — но выключен по умолчанию (можно включить)","Нет — занимает место"] },
+
+{ b:2, multi:false, q:"Code folding (сворачивание блоков `class { }`) нужен?",
+  opts:["Да — обязательно","Да — только для классов/функций","Нет"] },
+
+{ b:2, multi:false, q:"«Format Document» (авто-форматирование по Ctrl+Shift+F) нужен?",
+  opts:["Да — форматирует отступы и расставляет пробелы","Да — только убирает лишние пробелы","Нет — пользователь форматирует сам"] },
+
+{ b:2, multi:false, q:"Водяной знак нотации в углу редактора («UML · Class»)?",
+  opts:["Да — красиво и информативно","Нет — мешает читать код","Да — но очень бледно, почти незаметно"] },
+
+{ b:2, multi:false, q:"Поиск и замена в редакторе (Ctrl+H)?",
+  opts:["Да — стандартный поиск/замена","Да — с regex поддержкой","Только поиск (Ctrl+F), замена позже","Нет — в MVP не нужно"] },
+
+{ b:2, multi:false, q:"Автоматически закрывать скобки и кавычки?",
+  opts:["Да — { } [ ] \" \" автоматически","Только { } — фигурные скобки","Нет — раздражает"] },
+
+/* ─ Блок 4 ─────────────────────────────────────────────────────────────── */
+{ b:3, multi:false, q:"Где кнопки Zoom / Fit на холсте?",
+  opts:["Правый нижний угол (как в draw.io)","Toolbar сверху над холстом","Плавающие кнопки в любом углу (drag & drop позиции)","Только клавиатура (+/-/0)"] },
+
+{ b:3, multi:false, q:"Миникарта навигатора на холсте (маленький обзор)?",
+  opts:["Да — правый нижний угол","Да — левый нижний угол, меньший размер","Нет — не нужна в MVP","Появляется при hover на краю холста"] },
+
+{ b:3, multi:false, q:"Сетка на холсте?",
+  opts:["Всегда видна","Включается кнопкой (по умолчанию — выкл.)","Включается кнопкой (по умолчанию — вкл.)","Нет сетки"] },
+
+{ b:3, multi:true, q:"Клик по элементу на холсте → что происходит?",
+  opts:["Подсвечивается строка кода (bidirectional highlight)","Открывается панель свойств элемента","Элемент выделяется рамкой","Показывается tooltip с атрибутами"] },
+
+{ b:3, multi:false, q:"Drag-and-drop элементов на холсте с записью pos в код?",
+  opts:["Да — обязательно (bidirectional)","Да — но только если включён специальный режим","Нет — код = единственный источник истины","Позже, после MVP"] },
+
+{ b:3, multi:false, q:"Мульти-выбор на холсте (Shift+клик)?",
+  opts:["Да — выделить несколько и удалить/переместить","Да — только для выделения (без перемещения)","Нет"] },
+
+{ b:3, multi:true, q:"Правый клик на элементе холста → контекстное меню. Что там?",
+  opts:["Переименовать","Удалить","Копировать как DSL","Зафиксировать позицию","Открыть в коде","Fix with AI"] },
+
+{ b:3, multi:false, q:"Анимация появления диаграммы при рендере?",
+  opts:["Да — плавное появление элементов (fade in)","Да — анимация раскладки (элементы «летят» на позиции)","Нет — мгновенно","Зависит от размера диаграммы"] },
+
+{ b:3, multi:false, q:"Прокрутка холста — как pan?",
+  opts:["Space + drag (как Figma)","Middle mouse button drag","Автоматически — любой drag по пустому месту","Shift + drag"] },
+
+{ b:3, multi:false, q:"Scroll мышью на холсте?",
+  opts:["Zoom in/out (как в Figma, Ctrl+scroll)","Pan вертикально","Ctrl+scroll = zoom, обычный scroll = pan"] },
+
+/* ─ Блок 5 ─────────────────────────────────────────────────────────────── */
+{ b:4, multi:false, q:"Кнопка Run — где?",
+  opts:["В toolbar сверху (как в макете)","Плавающая кнопка над холстом","Только Ctrl+Enter — без кнопки","Toolbar + Ctrl+Enter"] },
+
+{ b:4, multi:false, q:"Авторендер (обновление диаграммы пока пишешь)?",
+  opts:["Включён по умолчанию (debounce 500ms)","Выключен — только по кнопке Run","Включён, но debounce 1500ms (не мешает при быстром вводе)","Пользователь выбирает при первом запуске"] },
+
+{ b:4, multi:false, q:"Что показывается на холсте во время рендера?",
+  opts:["Спиннер поверх предыдущей диаграммы","Прогресс-бар сверху (тонкая линия)","Skeleton (серые прямоугольники на месте узлов)","Ничего — диаграмма обновляется мгновенно без индикатора"] },
+
+{ b:4, multi:false, q:"Если рендер завершился с ошибкой (синтаксическая ошибка в коде)?",
+  opts:["Холст показывает предыдущую диаграмму (не ломается)","Холст показывает сообщение об ошибке поверх","Холст очищается, ошибка только в панели Problems","Частичный рендер — показывает то, что смогло разобраться"] },
+
+/* ─ Блок 6 ─────────────────────────────────────────────────────────────── */
+{ b:5, multi:false, q:"Где расположен главный toolbar?",
+  opts:["Сверху (единый для всего приложения, как в макете)","Встроен в каждую панель отдельно","Toolbar только над холстом","Нет toolbar — всё через Command Palette"] },
+
+{ b:5, multi:true, q:"Что ОБЯЗАТЕЛЬНО в toolbar?",
+  opts:["▶ Run","💾 Сохранить","📤 Экспорт","Селектор нотации","🌙 Переключить тему","🔗 Поделиться","⏱ История версий","🔍 Поиск / Command Palette"] },
+
+{ b:5, multi:false, q:"Селектор нотации — как выглядит?",
+  opts:["Выпадающий список с иконками и поиском (как в макете)","Command Palette (Ctrl+Shift+P) со строкой поиска","Кнопки-пресеты в toolbar (UML | ERD | IDEF0 | DFD)","В боковой панели, не в toolbar"] },
+
+{ b:5, multi:false, q:"Кнопка Share (поделиться ссылкой) нужна?",
+  opts:["Да — копирует ссылку в буфер","Да — открывает диалог с настройками доступа (view/edit)","Нет — в MVP не нужна","Только для Pro-тарифа"] },
+
+{ b:5, multi:false, q:"Кнопка History / Versions прямо в toolbar?",
+  opts:["Да — открывает боковую панель с коммитами","Да — маленький счётчик с выпадающим списком последних","Нет — только через Activity Bar","Нет — только через Ctrl+Z"] },
+
+/* ─ Блок 7 ─────────────────────────────────────────────────────────────── */
+{ b:6, multi:false, q:"AI-панель — где расположена?",
+  opts:["Вкладка в нижней панели (как в макете)","Боковая панель справа (как GitHub Copilot Chat)","Плавающий чат-пузырь в углу","Встроен в сайдбар Activity Bar"] },
+
+{ b:6, multi:false, q:"Когда AI генерирует код — как вставляется результат?",
+  opts:["Напрямую в редактор (с Undo для отмены)","Diff-превью: показывает было/стало, кнопки Принять/Отклонить","Вставляет в отдельный черновик-файл","Показывает в чате, пользователь копирует сам"] },
+
+{ b:6, multi:false, q:"Кнопка «Fix with AI» в tooltip ошибки?",
+  opts:["Да — прямо в tooltip/подсказке над ошибкой","Да — в панели Problems рядом с каждой ошибкой","Нет — пользователь описывает ошибку в чате сам","Оба: и в tooltip, и в панели Problems"] },
+
+{ b:6, multi:false, q:"AI пишет ответ — как отображается?",
+  opts:["Потоком (streaming), символ за символом","Сразу весь ответ после небольшой задержки","Потоком, но с анимацией набора текста (cursor blinking)"] },
+
+{ b:6, multi:true, q:"Какие режимы AI нужны?",
+  opts:["Написать диаграмму по описанию","Исправить ошибки в коде","Объяснить правила нотации","Оптимизировать/упростить диаграмму","Image → DSL (загрузить фото → получить код)","Сравнить две версии диаграммы"] },
+
+/* ─ Блок 8 ─────────────────────────────────────────────────────────────── */
+{ b:7, multi:false, q:"Автосохранение?",
+  opts:["Да — 1 секунда после остановки набора (как VS Code)","Только Ctrl+S / кнопка Сохранить","Да — каждые 30 секунд","Нет — пользователь решает"] },
+
+{ b:7, multi:false, q:"Индикатор несохранённых изменений?",
+  opts:["Точка (●) в заголовке вкладки (как VS Code)","Надпись «Несохранено» в status bar","Оранжевая рамка вокруг редактора","Иконка дискеты меняет цвет"] },
+
+{ b:7, multi:false, q:"Экспорт — как происходит?",
+  opts:["Модальное окно с выбором формата","Выпадающее меню форматов (как в макете)","Сразу скачивается в последнем использованном формате","Правый клик на диаграмме → «Экспортировать как…»"] },
+
+{ b:7, multi:true, q:"Какие форматы экспорта ОБЯЗАТЕЛЬНЫ в MVP?",
+  opts:["SVG","PNG (×2 retina)","PlantUML (.puml)","Mermaid (.mmd)","BPMN XML","XMI (UML)","SQL DDL (для ERD)","draw.io XML","D2","Исходный файл .dsl"] },
+
+{ b:7, multi:false, q:"После успешного экспорта?",
+  opts:["Toast-уведомление внизу справа","Ничего — файл просто скачался","Диалог «Файл сохранён в…»","Маленькая иконка анимации загрузки завершилась"] },
+
+/* ─ Блок 9 ─────────────────────────────────────────────────────────────── */
+{ b:8, multi:false, q:"Тема по умолчанию?",
+  opts:["Тёмная (как в макете)","Светлая","Системная (следует настройке ОС)","Пользователь выбирает при первом запуске"] },
+
+{ b:8, multi:false, q:"Акцентный цвет интерфейса?",
+  opts:["Синий (как VS Code, #0078d4)","Голубой/Cyan (#4fc3f7 — как в макете)","Фиолетовый/Purple (#a78bfa)","Зелёный (терминальный, #34d399)","Монохромный (только серые)"] },
+
+{ b:8, multi:false, q:"Тема Monaco-редактора?",
+  opts:["One Dark Pro (тёмная, популярная)","Tokyo Night (тёмная, синяя гамма)","Dracula (тёмная, фиолетовая)","GitHub Dark (тёмная, официальная GitHub)","Своя тема в цветах DSLKit"] },
+
+{ b:8, multi:false, q:"Шрифт в редакторе?",
+  opts:["JetBrains Mono (как в макете)","Fira Code (с лигатурами → != вместо !=)","Cascadia Code (Microsoft)","Consolas (Windows default)","Пользователь выбирает"] },
+
+{ b:8, multi:false, q:"Шрифт интерфейса (меню, кнопки, текст)?",
+  opts:["Inter (как в макете, стандарт веба)","Geist (Vercel, современный)","Plus Jakarta Sans","Системный (SF Pro / Segoe UI / Ubuntu)"] },
+
+{ b:8, multi:false, q:"Скругление углов у карточек и кнопок?",
+  opts:["Минимальное — 4px (чёткие, технично)","Среднее — 6-8px (как в макете)","Сильное — 12px+ (мягкие, современно)","Острые — 0px (максимально строго)"] },
+
+{ b:8, multi:false, q:"Плотность интерфейса?",
+  opts:["Компактная (VS Code-стиль: маленькие отступы, много контента)","Стандартная","Просторная (больше воздуха, крупнее шрифты)"] },
+
+{ b:8, multi:false, q:"Фон холста?",
+  opts:["Тёмно-серый с точечной сеткой (как в макете)","Белый (с точечной сеткой)","Бумажная текстура","Однотонный без сетки","Синяя чертёжная бумага (blueprint)"] },
+
+/* ─ Блок 10 ─────────────────────────────────────────────────────────────── */
+{ b:9, multi:false, q:"Welcome Screen при первом открытии?",
+  opts:["Да — список шаблонов + кнопка «Новая диаграмма»","Да — + последние файлы + ссылки на документацию","Нет — сразу пустой редактор с шаблоном UML Class","Нет — выбор нотации перед открытием редактора"] },
+
+{ b:9, multi:false, q:"Дашборд «Мои проекты» — как выглядит?",
+  opts:["Карточки с превью SVG (как Figma)","Список строками (как VS Code Recent)","Плитки с именем + нотацией + датой","Нет дашборда"] },
+
+{ b:9, multi:false, q:"Публичная лендинг-страница на /  нужна?",
+  opts:["Да — полноценная (hero, фичи, примеры, тарифы)","Да — минимальная (hero + CTA + 3 фичи)","Нет — редактор открывается сразу","Позже"] },
+
+{ b:9, multi:true, q:"Секции лендинга (если нужен)?",
+  opts:["Hero с живой демо-диаграммой","Сравнение с draw.io / PlantUML","Список поддерживаемых нотаций","Как это работает (3 шага)","Pricing (тарифы)","Testimonials (отзывы студентов)","FAQ"] },
+
+/* ─ Блок 11 ─────────────────────────────────────────────────────────────── */
+{ b:10, multi:false, q:"Экран входа/регистрации — как выглядит?",
+  opts:["Полная страница /login (как в большинстве сервисов)","Модальное окно поверх редактора","Правая боковая панель-drawer","Встроен в Welcome Screen"] },
+
+{ b:10, multi:true, q:"Способы входа — что ОБЯЗАТЕЛЬНО?",
+  opts:["Email + Password","GitHub OAuth","Google OAuth","Без регистрации (гостевой режим)","GitLab OAuth","Microsoft / Azure AD"] },
+
+{ b:10, multi:false, q:"Гостевой режим (без аккаунта)?",
+  opts:["Да — работает полностью, но без облачного сохранения","Да — ограниченный (только 1 файл, без экспорта)","Нет — нужна регистрация","30 дней без регистрации, потом только с аккаунтом"] },
+
+{ b:10, multi:false, q:"После входа — куда попадает пользователь?",
+  opts:["Сразу в редактор (последний открытый файл)","Дашборд «Мои проекты»","Welcome Screen","В то место, откуда был перенаправлен на логин"] },
+
+/* ─ Блок 12 ─────────────────────────────────────────────────────────────── */
+{ b:11, multi:false, q:"Toast-уведомления — где появляются?",
+  opts:["Правый нижний угол (как в макете)","Правый верхний угол","По центру снизу","Под status bar"] },
+
+{ b:11, multi:false, q:"Сколько тостов одновременно на экране?",
+  opts:["Максимум 3 (старые исчезают)","Максимум 1 (новый заменяет старый)","Не ограничено (стек)","2"] },
+
+{ b:11, multi:false, q:"Skeleton-экраны при загрузке?",
+  opts:["Да — серые прямоугольники при загрузке диаграммы","Нет — достаточно спиннера","Да — для дашборда проектов, но не для диаграммы","Только прогресс-бар сверху"] },
+
+/* ─ Блок 13 ─────────────────────────────────────────────────────────────── */
+{ b:12, multi:false, q:"Мобильная версия в MVP?",
+  opts:["Нет — только десктоп (минимум 1024px)","Только просмотр диаграммы на мобильном","Да — полноценная с переключением кода/холста","Да — только холст, без редактора"] },
+
+{ b:12, multi:false, q:"Минимальная ширина экрана для работы?",
+  opts:["1024px","1280px","1440px","768px (tablet)"] },
+
+/* ─ Блок 14 ─────────────────────────────────────────────────────────────── */
+{ b:13, multi:false, q:"Bidirectional highlight — анимация при переходе строка↔элемент?",
+  opts:["Да — жёлтая вспышка строки на 1 секунду (как в IDE)","Да — плавная синяя подсветка остаётся","Без анимации — просто скролл к строке","Да — pulse-анимация элемента на холсте"] },
+
+{ b:13, multi:false, q:"Hover на строке кода → hover-эффект на холсте?",
+  opts:["Да — узел на холсте подсвечивается при наведении в редакторе","Нет — только клик (не hover)","Да — но с задержкой 300ms (не мигает при быстром движении мыши)"] },
+
+{ b:13, multi:false, q:"Drag & drop файла .dsl из Explorer в браузер?",
+  opts:["Да — открывается файл","Да — с подтверждением \"Открыть этот файл?\"","Нет — только через File → Open","Нет — только в Pro-тарифе"] },
+
+{ b:13, multi:false, q:"Онбординг-тур при первом запуске?",
+  opts:["Да — 5 шагов (редактор, холст, Run, Problems, AI)","Нет — пользователь разберётся сам","Интерактивный туториал: мини-задание (напиши первую диаграмму)","Только подсказки при hover, без пошагового тура"] },
+
+{ b:13, multi:false, q:"Colour picker для ручного окрашивания узлов?",
+  opts:["Да — через атрибут color=\"#fff\" в коде","Да — через контекстное меню на холсте","Нет — цвета задаются нотацией, не пользователем","Только в Pro-тарифе"] },
+
+{ b:13, multi:false, q:"Аннотации/стикеры на холсте?",
+  opts:["Да — можно добавить текстовую заметку на холсте","Нет — комментарии только в DSL-коде (// comment)","Да — но только в Pro-тарифе","Позже, не в MVP"] },
+
+/* ─ Блок 15 ─────────────────────────────────────────────────────────────── */
+{ b:14, multi:true, q:"Правый клик на строке кода → что в контекстном меню?",
+  opts:["Переименовать символ (Rename)","Найти использования (Find References)","Перейти к определению (Go to Definition)","Исправить с AI (Fix with AI)","Скопировать как PlantUML","Скопировать как Mermaid","Добавить в шаблоны"] },
+
+{ b:14, multi:true, q:"Правый клик на элементе холста → что там?",
+  opts:["Переименовать","Удалить","Копировать стиль","Зафиксировать позицию (locked)","Открыть в редакторе (перейти к строке)","Fix with AI","Экспортировать этот элемент отдельно"] },
+
+{ b:14, multi:false, q:"Command Palette (Ctrl+Shift+P) нужен?",
+  opts:["Да — все команды в одном поиске (как VS Code)","Да — только команды смены нотации","Нет — всё через меню и кнопки"] },
+
+{ b:14, multi:true, q:"Топ-5 горячих клавиш которые ОБЯЗАТЕЛЬНЫ?",
+  opts:["Ctrl+Enter — Run","Ctrl+S — Сохранить","Ctrl+Shift+E — Экспорт","Ctrl+` — Переключить тему","Ctrl+\\ — Скрыть/показать холст","Ctrl+B — Скрыть/показать sidebar","Ctrl+Shift+P — Command Palette","Ctrl+Z / Ctrl+Y — Undo/Redo"] },
+
+/* ─ Блок 16 ─────────────────────────────────────────────────────────────── */
+{ b:15, multi:false, q:"Вставка шаблонов нотаций — как?",
+  opts:["Snippet при вводе первых букв (как в VS Code: 'class' → вставляет шаблон)","Кнопка «Вставить шаблон» в toolbar","Из панели Template в сайдбаре","Drag & drop из панели шаблонов в редактор"] },
+
+{ b:15, multi:false, q:"Undo/Redo в редакторе — глубина?",
+  opts:["Стандартная Monaco (>100 операций)","Ограниченная — 20 операций","Неограниченная — весь сеанс","Совмещённая с history-коммитами"] },
+
+{ b:15, multi:false, q:"Множественные курсоры (Alt+Click для нескольких точек редактирования)?",
+  opts:["Да — стандартный Monaco multi-cursor","Нет — не нужно в данном продукте","Позже"] },
+
+{ b:15, multi:false, q:"Линейка/ruler в редакторе (вертикальная линия на 80/100 символах)?",
+  opts:["Да — на 80 символах","Нет","Да — настраиваемая"] },
+
+/* ─ Блок 17 ─────────────────────────────────────────────────────────────── */
+{ b:16, multi:false, q:"Кнопка Auto-Layout (пересчитать расположение всех элементов)?",
+  opts:["Да — в canvas toolbar","Да — только в правом клике → Re-layout","Нет — позиции задаются в коде через pos","Да — и в toolbar, и в контекстном меню"] },
+
+{ b:16, multi:false, q:"Snap to grid (элементы «прилипают» к сетке)?",
+  opts:["Да — включён по умолчанию","Да — выключен по умолчанию","Нет — свободное перемещение","Только при Shift+drag"] },
+
+{ b:16, multi:false, q:"Double click на элементе холста?",
+  opts:["Переименовывает элемент (inline rename)","Переходит в код к этому элементу","Открывает диалог свойств","Ничего — только одиночный клик"] },
+
+{ b:16, multi:false, q:"Ruler на холсте (линейки по краям как в Photoshop)?",
+  opts:["Нет — не нужно","Да — включается в настройках","Да — всегда видна"] },
+
+/* ─ Блок 18 ─────────────────────────────────────────────────────────────── */
+{ b:17, multi:false, q:"Совместное редактирование в реальном времени (как Google Docs)?",
+  opts:["Нет — MVP без коллаборации","Да — в Pro-тарифе","Да — базовое (видно курсоры, но нет разрешения конфликтов)","Позже, после диплома (2027)"] },
+
+{ b:17, multi:false, q:"Git-интеграция — хранить диаграммы в GitHub/GitLab?",
+  opts:["Да — сохранять файл .dsl в репозиторий","Да — полный git: commit, branch, diff","Только просмотр (push вручную)","Нет — только DB-аккаунт"] },
+
+/* ─ Блок 19 ─────────────────────────────────────────────────────────────── */
+{ b:18, multi:false, q:"PWA (Progressive Web App — установить на рабочий стол)?",
+  opts:["Да — обязательно в MVP","Да — но не основная фича","Нет — только веб-версия"] },
+
+{ b:18, multi:false, q:"Offline-режим (работать без интернета)?",
+  opts:["Да — создавать и редактировать без интернета","Только просмотр уже открытых диаграмм","Нет — требует подключения","Черновик в localStorage без синхронизации"] },
+
+{ b:18, multi:false, q:"Crash recovery (восстановление при случайном закрытии вкладки)?",
+  opts:["Да — автоматически восстанавливает несохранённые изменения","Да — спрашивает при следующем открытии","Нет — Ctrl+S достаточно","Только если включено автосохранение"] },
+
+/* ─ Блок 20 ─────────────────────────────────────────────────────────────── */
+{ b:19, multi:true, q:"Какие интеграции ОБЯЗАТЕЛЬНЫ в MVP?",
+  opts:["Сохранение на устройство (скачать .dsl)","Сохранение в БД аккаунта","GitHub (сохранить в репозиторий)","Google Drive","Import PlantUML","Import Mermaid","Экспорт в draw.io XML","Импорт изображения (Image → DSL via AI)"] },
+
+{ b:19, multi:false, q:"Импорт PlantUML / Mermaid → конвертация в DSLKit-синтаксис?",
+  opts:["Да — автоматическая конвертация","Да — с предупреждением о частичной конвертации","Нет — только импорт нативного .dsl","Только в Pro-тарифе"] },
+
+{ b:19, multi:false, q:"Embed-виджет (встраивание диаграммы в Notion/Confluence через iframe)?",
+  opts:["Да — в MVP","Да — только в Pro","Нет — позже","Только публичные диаграммы"] },
+];
+
+/* ═══════════════════════════════ ENGINE ═══════════════════════════════════ */
+let current = 0;
+const answers = {};  // index → array of chosen
+
+function buildQ(idx) {
+  const q = Qs[idx];
+  const isMulti = q.multi;
+  const chosen = answers[idx] || [];
+
+  let blockHTML = '';
+  const prevBlock = idx > 0 ? Qs[idx-1].b : -1;
+  if (q.b !== prevBlock) {
+    const blk = BLOCKS[q.b];
+    blockHTML = `<div class="block-badge" style="background:${blk.color}">${blk.name}</div>`;
+  }
+
+  let optsHTML = q.opts.map((o, oi) => {
+    const sel = chosen.includes(oi) ? 'selected' : '';
+    const type = isMulti ? '' : 'radio';
+    return `<div class="option ${type} ${sel}" onclick="toggleOpt(${idx},${oi},${isMulti})" id="opt-${idx}-${oi}">
+      <div class="opt-check">${chosen.includes(oi) ? '✓' : ''}</div>
+      <span class="opt-label">${escQ(o)}</span>
+      ${oi === q.opts.length - 1 ? '' : ''}
+    </div>`;
+  }).join('');
+
+  // Add "Всё из этого" (only for multi)
+  const allSel = isMulti && chosen.length === q.opts.length ? 'selected' : '';
+  if (isMulti) {
+    optsHTML += `<div class="option opt-all ${allSel}" onclick="toggleAll(${idx})" id="opt-${idx}-all">
+      <div class="opt-check">${allSel ? '✓' : ''}</div>
+      <span class="opt-label" style="color:var(--accent)">☑ Всё из этого</span>
+    </div>`;
+  }
+
+  // Add "Ничего / Другое"
+  const noneChosen = chosen.length === 0 && answers[idx] !== undefined && answers[`${idx}_other`];
+  const otherVal = answers[`${idx}_other`] || '';
+  optsHTML += `<div class="option opt-none ${noneChosen ? 'selected' : ''}" onclick="toggleNone(${idx})" id="opt-${idx}-none">
+    <div class="opt-check">${noneChosen ? '✓' : ''}</div>
+    <span class="opt-label">✏️ Другое / Пропустить</span>
+    <div class="other-wrap ${noneChosen ? 'show' : ''}" id="other-${idx}" onclick="event.stopPropagation()">
+      <input class="other-input" placeholder="Опиши своё видение…" value="${escQ(otherVal)}"
+        oninput="answers['${idx}_other']=this.value" id="other-input-${idx}">
+    </div>
+  </div>`;
+
+  return `
+    ${blockHTML}
+    <div class="question-card">
+      <div class="q-num">Вопрос ${idx+1} из ${Qs.length} · ${BLOCKS[q.b].name}</div>
+      <div class="q-text">${escQ(q.q)}</div>
+      ${q.hint ? `<div class="q-meta">💡 ${escQ(q.hint)}</div>` : ''}
+      ${isMulti ? `<div class="q-meta">Можно выбрать несколько</div>` : `<div class="q-meta">Выбери один вариант</div>`}
+      <div class="options" id="opts-${idx}">${optsHTML}</div>
+    </div>`;
+}
+
+function toggleOpt(qIdx, oIdx, isMulti) {
+  if (!answers[qIdx]) answers[qIdx] = [];
+  const arr = answers[qIdx];
+  if (isMulti) {
+    const pos = arr.indexOf(oIdx);
+    if (pos > -1) arr.splice(pos, 1);
+    else arr.push(oIdx);
+  } else {
+    answers[qIdx] = [oIdx];
+  }
+  delete answers[`${qIdx}_other`];
+  refreshQ(qIdx);
+  updateNav();
+}
+
+function toggleAll(qIdx) {
+  const q = Qs[qIdx];
+  const arr = answers[qIdx] || [];
+  if (arr.length === q.opts.length) answers[qIdx] = [];
+  else answers[qIdx] = q.opts.map((_,i) => i);
+  refreshQ(qIdx);
+  updateNav();
+}
+
+function toggleNone(qIdx) {
+  answers[qIdx] = [];
+  answers[`${qIdx}_other`] = answers[`${qIdx}_other`] || '';
+  refreshQ(qIdx);
+  const input = document.getElementById(`other-input-${qIdx}`);
+  if (input) setTimeout(() => input.focus(), 50);
+  updateNav();
+}
+
+function refreshQ(idx) {
+  const area = document.getElementById('questionArea');
+  area.innerHTML = buildQ(idx);
+}
+
+function updateNav() {
+  const answered = answers[current] !== undefined && (
+    (answers[current] && answers[current].length > 0) ||
+    answers[`${current}_other`] !== undefined
+  );
+  document.getElementById('btnNext').disabled = false; // allow skip
+  const pct = Math.round((current / Qs.length) * 100);
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressPct').textContent = pct + '%';
+  document.getElementById('progressLabel').textContent = BLOCKS[Qs[current].b].name;
+  document.getElementById('qCounter').textContent = `${current+1} / ${Qs.length}`;
+  document.getElementById('headerProgress').textContent = `Вопрос ${current+1} из ${Qs.length}`;
+  document.getElementById('btnBack').disabled = current === 0;
+  document.getElementById('btnNext').textContent = current === Qs.length - 1 ? 'Завершить ✓' : 'Далее →';
+}
+
+function nextQ() {
+  if (current < Qs.length - 1) {
+    current++;
+    document.getElementById('questionArea').innerHTML = buildQ(current);
+    document.getElementById('questionArea').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    updateNav();
+  } else {
+    showResults();
+  }
+}
+
+function prevQ() {
+  if (current > 0) {
+    current--;
+    document.getElementById('questionArea').innerHTML = buildQ(current);
+    updateNav();
+  }
+}
+
+/* ═════════════════════════════ RESULTS ════════════════════════════════════ */
+function showResults() {
+  document.getElementById('questionArea').hidden = true;
+  document.getElementById('navBar').hidden = true;
+  document.getElementById('progressFill').style.width = '100%';
+  document.getElementById('progressPct').textContent = '100%';
+  document.getElementById('headerProgress').textContent = 'Завершено ✓';
+
+  const res = document.getElementById('resultsArea');
+  res.classList.add('show');
+
+  let html = '';
+  let lastBlock = -1;
+
+  Qs.forEach((q, idx) => {
+    if (q.b !== lastBlock) {
+      if (lastBlock !== -1) html += '</div>';
+      html += `<div class="result-block"><h3>${BLOCKS[q.b].name}</h3>`;
+      lastBlock = q.b;
+    }
+    html += `<div class="result-row">
+      <div class="result-q">Q${idx+1}. ${escQ(q.q)}</div>
+      <div class="result-a ${answers[`${idx}_other`] !== undefined ? 'custom' : ''}">
+        ${formatAnswer(idx)}
+      </div>
+    </div>`;
+  });
+  html += '</div>';
+  document.getElementById('resultsContent').innerHTML = html;
+}
+
+function formatAnswer(idx) {
+  const q = Qs[idx];
+  const chosen = answers[idx] || [];
+  if (answers[`${idx}_other`] !== undefined) {
+    return answers[`${idx}_other`] || '— пропущен —';
+  }
+  if (chosen.length === 0) return '— не выбрано —';
+  return chosen.map(i => q.opts[i]).join(' · ');
+}
+
+function copyResults() {
+  let text = 'DSLKit — Требования (ответы)\n' + '='.repeat(40) + '\n\n';
+  let lastBlock = -1;
+  Qs.forEach((q, idx) => {
+    if (q.b !== lastBlock) {
+      text += '\n' + BLOCKS[q.b].name.toUpperCase() + '\n' + '-'.repeat(30) + '\n';
+      lastBlock = q.b;
+    }
+    text += `Q${idx+1}. ${q.q}\n→ ${formatAnswer(idx)}\n\n`;
+  });
+  try {
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.querySelector('.copy-btn');
+      btn.textContent = '✓ Скопировано!';
+      setTimeout(() => btn.textContent = '📋 Скопировать все ответы', 2000);
+    });
+  } catch(e) {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    ta.remove();
+  }
+}
+
+function restart() {
+  Object.keys(answers).forEach(k => delete answers[k]);
+  current = 0;
+  document.getElementById('resultsArea').classList.remove('show');
+  document.getElementById('questionArea').hidden = false;
+  document.getElementById('navBar').hidden = false;
+  document.getElementById('questionArea').innerHTML = buildQ(0);
+  updateNav();
+}
+
+function escQ(s) {
+  return String(s||'')
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/`([^`]+)`/g,'<code>$1</code>');
+}
+
+/* ══ Init ══ */
+document.getElementById('questionArea').innerHTML = buildQ(0);
+updateNav();
+</script>

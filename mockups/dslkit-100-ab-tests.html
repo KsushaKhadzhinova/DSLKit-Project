@@ -1,0 +1,1663 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DSLKit — 100 A/B тестов</title>
+<style>
+  :root {
+    --bg: #1a1b26; --surface: #1f2335; --card: #24283b; --border: #292e42;
+    --border-hi: #3b4261; --tx-1: #c0caf5; --tx-2: #a9b1d6; --tx-3: #565f89;
+    --blue: #7aa2f7; --cyan: #7dcfff; --green: #9ece6a; --yellow: #e0af68;
+    --red: #f7768e; --purple: #bb9af7; --orange: #ff9e64;
+    --f-xs: 11px; --f-sm: 12px; --f-md: 13px; --f-lg: 15px; --f-xl: 18px;
+    --r: 4px; --r-md: 6px; --r-lg: 8px; --r-xl: 12px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--tx-1); font-family: Inter, system-ui, sans-serif;
+    font-size: var(--f-md); line-height: 1.5; }
+
+  /* header */
+  .page-header { background: var(--surface); border-bottom: 1px solid var(--border);
+    padding: 20px 32px; position: sticky; top: 0; z-index: 100; }
+  .page-header h1 { font-size: var(--f-xl); font-weight: 700; color: var(--blue); }
+  .page-header p  { font-size: var(--f-sm); color: var(--tx-3); margin-top: 2px; }
+  .stats { display: flex; gap: 20px; margin-top: 10px; flex-wrap: wrap; }
+  .stat { font-size: var(--f-xs); color: var(--tx-3); }
+  .stat strong { color: var(--tx-2); }
+
+  /* progress */
+  .progress-bar { height: 3px; background: var(--border); margin-top: 12px; border-radius: 2px; }
+  .progress-fill { height: 100%; background: var(--blue); border-radius: 2px;
+    transition: width .3s ease; width: 0%; }
+
+  /* layout */
+  .main { display: grid; grid-template-columns: 220px 1fr; min-height: calc(100vh - 120px); }
+
+  /* sidebar */
+  .sidebar { background: var(--surface); border-right: 1px solid var(--border);
+    padding: 16px 0; position: sticky; top: 120px; height: calc(100vh - 120px); overflow-y: auto; }
+  .sidebar-section { padding: 4px 16px 12px; }
+  .sidebar-label { font-size: var(--f-xs); color: var(--tx-3); text-transform: uppercase;
+    letter-spacing: .08em; margin-bottom: 4px; }
+  .sidebar-link { display: flex; align-items: center; justify-content: space-between;
+    padding: 5px 12px; border-radius: var(--r); cursor: pointer; font-size: var(--f-sm);
+    color: var(--tx-2); text-decoration: none; transition: all .1s; margin: 1px 0; }
+  .sidebar-link:hover { background: var(--border); color: var(--tx-1); }
+  .sidebar-link.active { background: var(--blue)20; color: var(--blue); }
+  .sidebar-link .count { font-size: var(--f-xs); color: var(--tx-3); }
+  .sidebar-link .done-count { font-size: var(--f-xs); color: var(--green); }
+
+  /* content */
+  .content { padding: 24px 32px; }
+
+  /* section */
+  .section { margin-bottom: 48px; }
+  .section-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px;
+    padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+  .section-icon { font-size: 18px; }
+  .section-title { font-size: var(--f-lg); font-weight: 600; }
+  .section-count { font-size: var(--f-xs); color: var(--tx-3); background: var(--border);
+    padding: 2px 8px; border-radius: 20px; }
+
+  /* question card */
+  .q-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--r-lg);
+    padding: 16px 20px; margin-bottom: 12px; transition: border-color .15s; }
+  .q-card:hover { border-color: var(--border-hi); }
+  .q-card.answered { border-color: var(--border); opacity: .7; }
+
+  .q-top { display: flex; align-items: flex-start; gap: 12px; }
+  .q-num { font-size: var(--f-xs); color: var(--tx-3); min-width: 28px; padding-top: 2px;
+    font-variant-numeric: tabular-nums; }
+  .q-body { flex: 1; }
+  .q-text { font-size: var(--f-md); color: var(--tx-1); margin-bottom: 12px; line-height: 1.55; }
+  .q-tag { display: inline-block; font-size: var(--f-xs); padding: 2px 7px; border-radius: 20px;
+    margin-right: 4px; margin-bottom: 8px; }
+  .tag-perf { background: var(--blue)20; color: var(--blue); }
+  .tag-ux  { background: var(--purple)20; color: var(--purple); }
+  .tag-a11y { background: var(--green)20; color: var(--green); }
+  .tag-copy { background: var(--yellow)20; color: var(--yellow); }
+  .tag-nav { background: var(--cyan)20; color: var(--cyan); }
+  .tag-viz { background: var(--orange)20; color: var(--orange); }
+
+  /* options */
+  .options { display: flex; flex-direction: column; gap: 6px; }
+  .opt { display: flex; align-items: flex-start; gap: 10px; padding: 9px 12px;
+    border: 1px solid var(--border); border-radius: var(--r-md); cursor: pointer;
+    transition: all .12s; }
+  .opt:hover { border-color: var(--blue); background: var(--blue)08; }
+  .opt input[type=radio] { margin-top: 2px; accent-color: var(--blue); flex-shrink: 0; }
+  .opt-label { font-size: var(--f-sm); color: var(--tx-2); }
+  .opt-badge { font-size: var(--f-xs); color: var(--tx-3); margin-left: auto; flex-shrink: 0; }
+
+  /* answer selected */
+  .opt.selected { border-color: var(--blue); background: var(--blue)12; }
+  .opt.selected .opt-label { color: var(--tx-1); }
+
+  /* hypothesis */
+  .hypothesis { margin-top: 10px; padding: 8px 12px; background: var(--surface);
+    border-left: 2px solid var(--border-hi); border-radius: 0 var(--r) var(--r) 0;
+    font-size: var(--f-xs); color: var(--tx-3); display: none; }
+  .hypothesis.visible { display: block; }
+  .hypothesis strong { color: var(--tx-2); }
+
+  /* submit area */
+  .submit-area { background: var(--surface); border-top: 1px solid var(--border);
+    padding: 20px 32px; display: flex; align-items: center; gap: 16px; position: sticky; bottom: 0; }
+  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 7px 16px;
+    border: 1px solid transparent; border-radius: var(--r-md); font-size: var(--f-sm);
+    cursor: pointer; font-family: inherit; transition: all .12s; }
+  .btn-primary { background: var(--blue); color: #1a1b26; font-weight: 600; }
+  .btn-primary:hover { background: #90b3f9; }
+  .btn-ghost { background: transparent; color: var(--tx-2); border-color: var(--border-hi); }
+  .btn-ghost:hover { background: var(--border); color: var(--tx-1); }
+  .submit-info { font-size: var(--f-xs); color: var(--tx-3); }
+
+  /* results modal */
+  .modal-overlay { position: fixed; inset: 0; background: #00000080; z-index: 500;
+    display: flex; align-items: center; justify-content: center; }
+  .modal-overlay.hidden { display: none; }
+  .modal { background: var(--card); border: 1px solid var(--border-hi); border-radius: var(--r-xl);
+    padding: 28px 32px; max-width: 480px; width: 90%; }
+  .modal h2 { font-size: var(--f-xl); margin-bottom: 6px; }
+  .modal p { font-size: var(--f-sm); color: var(--tx-2); margin-bottom: 16px; }
+  .result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+  .result-cell { background: var(--surface); border-radius: var(--r-md); padding: 12px;
+    text-align: center; }
+  .result-cell .val { font-size: 24px; font-weight: 700; color: var(--blue); }
+  .result-cell .lbl { font-size: var(--f-xs); color: var(--tx-3); margin-top: 2px; }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border-hi); border-radius: 3px; }
+
+  @media (max-width: 680px) {
+    .main { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+    .content { padding: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="page-header">
+  <h1>DSLKit — A/B тесты интерфейса</h1>
+  <p>100 вопросов · Выберите предпочтительный вариант для каждой ситуации</p>
+  <div class="stats">
+    <div class="stat">Отвечено: <strong id="answered-count">0</strong> / <strong>100</strong></div>
+    <div class="stat">Секций: <strong>9</strong></div>
+    <div class="stat">Тип: <strong>A/B выбор</strong></div>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+</header>
+
+<div class="main">
+<nav class="sidebar">
+  <div class="sidebar-section">
+    <div class="sidebar-label">Секции</div>
+    <a class="sidebar-link active" href="#s1">🔧 Тулбар <span class="count">15</span></a>
+    <a class="sidebar-link" href="#s2">✏️ Редактор <span class="count">15</span></a>
+    <a class="sidebar-link" href="#s3">🗺️ Канвас <span class="count">12</span></a>
+    <a class="sidebar-link" href="#s4">🗂️ Табы <span class="count">10</span></a>
+    <a class="sidebar-link" href="#s5">⚠️ Ошибки <span class="count">10</span></a>
+    <a class="sidebar-link" href="#s6">🚀 Онбординг <span class="count">10</span></a>
+    <a class="sidebar-link" href="#s7">⚙️ Настройки <span class="count">10</span></a>
+    <a class="sidebar-link" href="#s8">📊 Статус-бар <span class="count">8</span></a>
+    <a class="sidebar-link" href="#s9">📱 Мобайл <span class="count">10</span></a>
+  </div>
+</nav>
+
+<div class="content">
+
+<!-- SECTION 1: Toolbar -->
+<section class="section" id="s1">
+  <div class="section-header">
+    <span class="section-icon">🔧</span>
+    <span class="section-title">Тулбар</span>
+    <span class="section-count">1–15</span>
+  </div>
+
+  <div class="q-card" data-q="1">
+    <div class="q-top">
+      <span class="q-num">1</span>
+      <div class="q-body">
+        <div class="q-text">Кнопка «Run» — как лучше обозначить её состояние, когда в коде есть ошибки?</div>
+        <span class="q-tag tag-ux">UX</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q1" value="a"> <span class="opt-label">A. Кнопка серая и заблокирована, tooltip «Исправьте ошибки перед запуском»</span></label>
+          <label class="opt"><input type="radio" name="q1" value="b"> <span class="opt-label">B. Кнопка красная и активна — клик показывает модал со списком ошибок</span></label>
+        </div>
+        <div class="hypothesis">Гипотеза A: не позволяет запустить сломанный код. Гипотеза B: даёт видимость ошибок через Run-действие.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="2">
+    <div class="q-top"><span class="q-num">2</span>
+      <div class="q-body">
+        <div class="q-text">Как показать нотацию текущего файла в тулбаре?</div>
+        <span class="q-tag tag-nav">Навигация</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q2" value="a"> <span class="opt-label">A. Бейдж-тег рядом с именем файла: «IDEF0»</span></label>
+          <label class="opt"><input type="radio" name="q2" value="b"> <span class="opt-label">B. Иконка нотации в левой части тулбара с выпадающим меню смены</span></label>
+        </div>
+        <div class="hypothesis"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="3">
+    <div class="q-top"><span class="q-num">3</span>
+      <div class="q-body">
+        <div class="q-text">Как разместить кнопки сохранения и экспорта?</div>
+        <span class="q-tag tag-ux">UX</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q3" value="a"> <span class="opt-label">A. Отдельные кнопки «Save» (⌘S) и «Export» рядом</span></label>
+          <label class="opt"><input type="radio" name="q3" value="b"> <span class="opt-label">B. Одна кнопка «Save ▾» с выпадающим: «Save», «Save As…», «Export»</span></label>
+        </div>
+        <div class="hypothesis"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="4">
+    <div class="q-top"><span class="q-num">4</span>
+      <div class="q-body">
+        <div class="q-text">Тогл автосохранения — где его разместить?</div>
+        <span class="q-tag tag-ux">UX</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q4" value="a"> <span class="opt-label">A. В тулбаре, тогл с подписью «Autosave»</span></label>
+          <label class="opt"><input type="radio" name="q4" value="b"> <span class="opt-label">B. Только в настройках, в тулбаре убрать</span></label>
+        </div>
+        <div class="hypothesis"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="5">
+    <div class="q-top"><span class="q-num">5</span>
+      <div class="q-body">
+        <div class="q-text">Как обозначить кнопки Undo / Redo в тулбаре?</div>
+        <span class="q-tag tag-a11y">A11y</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q5" value="a"> <span class="opt-label">A. Только иконки ↩ ↪ с aria-label и tooltip</span></label>
+          <label class="opt"><input type="radio" name="q5" value="b"> <span class="opt-label">B. Иконки + текст «Undo» / «Redo» (компактный вид скрывает текст)</span></label>
+        </div>
+        <div class="hypothesis"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="6">
+    <div class="q-top"><span class="q-num">6</span>
+      <div class="q-body">
+        <div class="q-text">Где показывать уведомление о последнем сохранении?</div>
+        <span class="q-tag tag-copy">Копи</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q6" value="a"> <span class="opt-label">A. В статус-баре внизу: «Saved 2s ago»</span></label>
+          <label class="opt"><input type="radio" name="q6" value="b"> <span class="opt-label">B. Тост вверху, исчезает через 2 сек</span></label>
+        </div>
+        <div class="hypothesis"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="7">
+    <div class="q-top"><span class="q-num">7</span>
+      <div class="q-body">
+        <div class="q-text">Как показывать горячие клавиши на кнопках тулбара?</div>
+        <span class="q-tag tag-ux">UX</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q7" value="a"> <span class="opt-label">A. Только в tooltip при наведении</span></label>
+          <label class="opt"><input type="radio" name="q7" value="b"> <span class="opt-label">B. Мелким текстом рядом с кнопкой видно всегда</span></label>
+        </div>
+        <div class="hypothesis"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="8">
+    <div class="q-top"><span class="q-num">8</span>
+      <div class="q-body">
+        <div class="q-text">Как разделять группы кнопок в тулбаре (Run / Edit / Format)?</div>
+        <span class="q-tag tag-viz">Визуал</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q8" value="a"> <span class="opt-label">A. Разделитель-линия между группами</span></label>
+          <label class="opt"><input type="radio" name="q8" value="b"> <span class="opt-label">B. Пустое пространство (gap) без линии</span></label>
+        </div>
+        <div class="hypothesis"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="9">
+    <div class="q-top"><span class="q-num">9</span>
+      <div class="q-body">
+        <div class="q-text">Кнопка «Format code» — иконка или текст?</div>
+        <span class="q-tag tag-copy">Копи</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q9" value="a"> <span class="opt-label">A. Иконка метлы/кисти с tooltip «Format (⇧⌥F)»</span></label>
+          <label class="opt"><input type="radio" name="q9" value="b"> <span class="opt-label">B. Кнопка «Format» с иконкой</span></label>
+        </div>
+        <div class="hypothesis"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="10">
+    <div class="q-top"><span class="q-num">10</span>
+      <div class="q-body">
+        <div class="q-text">Как выглядит кнопка открытия AI-ассистента в тулбаре?</div>
+        <span class="q-tag tag-ux">UX</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q10" value="a"> <span class="opt-label">A. Иконка «✨» или «AI» — открывает боковую панель</span></label>
+          <label class="opt"><input type="radio" name="q10" value="b"> <span class="opt-label">B. Кнопка «Ask AI…» с иконкой — открывает всплывающий чат</span></label>
+        </div>
+        <div class="hypothesis"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="11">
+    <div class="q-top"><span class="q-num">11</span>
+      <div class="q-body">
+        <div class="q-text">Что происходит при нажатии Run, если файл не сохранён?</div>
+        <span class="q-tag tag-ux">UX</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q11" value="a"> <span class="opt-label">A. Автосохранение + запуск без диалога</span></label>
+          <label class="opt"><input type="radio" name="q11" value="b"> <span class="opt-label">B. Модальный диалог «Сохранить перед запуском?»</span></label>
+        </div>
+        <div class="hypothesis"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="12">
+    <div class="q-top"><span class="q-num">12</span>
+      <div class="q-body">
+        <div class="q-text">Цвет кнопки Run в нормальном состоянии?</div>
+        <span class="q-tag tag-viz">Визуал</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q12" value="a"> <span class="opt-label">A. Зелёная (#9ece6a) — ассоциация «выполнить»</span></label>
+          <label class="opt"><input type="radio" name="q12" value="b"> <span class="opt-label">B. Синяя (#7aa2f7) — единый стиль primary-действий</span></label>
+        </div>
+        <div class="hypothesis"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="13">
+    <div class="q-top"><span class="q-num">13</span>
+      <div class="q-body">
+        <div class="q-text">Где показывать имя текущего файла (breadcrumb)?</div>
+        <span class="q-tag tag-nav">Навигация</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q13" value="a"> <span class="opt-label">A. В центре тулбара крупно</span></label>
+          <label class="opt"><input type="radio" name="q13" value="b"> <span class="opt-label">B. Только в активном табе — тулбар не дублирует</span></label>
+        </div>
+        <div class="hypothesis"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="14">
+    <div class="q-top"><span class="q-num">14</span>
+      <div class="q-body">
+        <div class="q-text">Кнопка «Share» / «Export PNG» в тулбаре — нужна?</div>
+        <span class="q-tag tag-ux">UX</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q14" value="a"> <span class="opt-label">A. Да, вынести в тулбар отдельной кнопкой</span></label>
+          <label class="opt"><input type="radio" name="q14" value="b"> <span class="opt-label">B. Нет, убрать в File-меню / контекстное меню</span></label>
+        </div>
+        <div class="hypothesis"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="15">
+    <div class="q-top"><span class="q-num">15</span>
+      <div class="q-body">
+        <div class="q-text">Как показать статус «компилируется» во время выполнения Run?</div>
+        <span class="q-tag tag-perf">Перф</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q15" value="a"> <span class="opt-label">A. Spinner внутри кнопки Run, кнопка остаётся активной (отмена)</span></label>
+          <label class="opt"><input type="radio" name="q15" value="b"> <span class="opt-label">B. Прогресс-бар под тулбаром, кнопка Run меняется на «Stop»</span></label>
+        </div>
+        <div class="hypothesis"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 2: Editor -->
+<section class="section" id="s2">
+  <div class="section-header">
+    <span class="section-icon">✏️</span>
+    <span class="section-title">Редактор кода</span>
+    <span class="section-count">16–30</span>
+  </div>
+
+  <div class="q-card" data-q="16">
+    <div class="q-top"><span class="q-num">16</span>
+      <div class="q-body">
+        <div class="q-text">Как подсвечивать строку с ошибкой в редакторе?</div>
+        <span class="q-tag tag-viz">Визуал</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q16" value="a"> <span class="opt-label">A. Красная волнистая линия под токеном + красный фон строки</span></label>
+          <label class="opt"><input type="radio" name="q16" value="b"> <span class="opt-label">B. Красная волнистая линия только под токеном, без фона строки</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="17">
+    <div class="q-top"><span class="q-num">17</span>
+      <div class="q-body">
+        <div class="q-text">Автодополнение — когда показывать список вариантов?</div>
+        <span class="q-tag tag-perf">Перф</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q17" value="a"> <span class="opt-label">A. После первого введённого символа (delay 200ms)</span></label>
+          <label class="opt"><input type="radio" name="q17" value="b"> <span class="opt-label">B. По явному Ctrl+Space</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="18">
+    <div class="q-top"><span class="q-num">18</span>
+      <div class="q-body">
+        <div class="q-text">Как показать синхронизацию кода и канваса (двунаправленная связь)?</div>
+        <span class="q-tag tag-viz">Визуал</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q18" value="a"> <span class="opt-label">A. Мигающий синий фон строки при наведении соответствующего элемента на канвасе</span></label>
+          <label class="opt"><input type="radio" name="q18" value="b"> <span class="opt-label">B. Синяя вертикальная полоска слева от строки (gutter highlight)</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="19">
+    <div class="q-top"><span class="q-num">19</span>
+      <div class="q-body">
+        <div class="q-text">Размер шрифта кода по умолчанию?</div>
+        <span class="q-tag tag-ux">UX</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q19" value="a"> <span class="opt-label">A. 13px — компактно, больше кода на экране</span></label>
+          <label class="opt"><input type="radio" name="q19" value="b"> <span class="opt-label">B. 14px — легче читать при долгой работе</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="20">
+    <div class="q-top"><span class="q-num">20</span>
+      <div class="q-body">
+        <div class="q-text">Как отображать номера строк (gutter)?</div>
+        <span class="q-tag tag-ux">UX</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q20" value="a"> <span class="opt-label">A. Всегда видны</span></label>
+          <label class="opt"><input type="radio" name="q20" value="b"> <span class="opt-label">B. Скрыты по умолчанию, включаются в настройках</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="21">
+    <div class="q-top"><span class="q-num">21</span>
+      <div class="q-body">
+        <div class="q-text">Как вести себя скобкам / закрывающим тегам при наборе?</div>
+        <span class="q-tag tag-ux">UX</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q21" value="a"> <span class="opt-label">A. Автоматически вставлять парную скобку</span></label>
+          <label class="opt"><input type="radio" name="q21" value="b"> <span class="opt-label">B. Не вставлять автоматически — настройка в опциях</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="22">
+    <div class="q-top"><span class="q-num">22</span>
+      <div class="q-body">
+        <div class="q-text">Как показывать inline-подсказку AI (ghost text) при наборе?</div>
+        <span class="q-tag tag-ux">UX</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q22" value="a"> <span class="opt-label">A. Серый ghost text справа от курсора, Tab принимает</span></label>
+          <label class="opt"><input type="radio" name="q22" value="b"> <span class="opt-label">B. Всплывающий блок ниже курсора, Enter принимает</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="23">
+    <div class="q-top"><span class="q-num">23</span>
+      <div class="q-body">
+        <div class="q-text">Миниатюра кода (minimap) справа от редактора — нужна?</div>
+        <span class="q-tag tag-nav">Навигация</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q23" value="a"> <span class="opt-label">A. Да, включена по умолчанию</span></label>
+          <label class="opt"><input type="radio" name="q23" value="b"> <span class="opt-label">B. Нет — только отнимает место, можно включить в настройках</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="24">
+    <div class="q-top"><span class="q-num">24</span>
+      <div class="q-body">
+        <div class="q-text">Перенос строк (word wrap) в редакторе по умолчанию?</div>
+        <span class="q-tag tag-ux">UX</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q24" value="a"> <span class="opt-label">A. Включён — нет горизонтального скролла</span></label>
+          <label class="opt"><input type="radio" name="q24" value="b"> <span class="opt-label">B. Выключен — видна исходная структура DSL</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="25">
+    <div class="q-top"><span class="q-num">25</span>
+      <div class="q-body">
+        <div class="q-text">Как выглядит контекстное меню правой кнопкой мыши?</div>
+        <span class="q-tag tag-ux">UX</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q25" value="a"> <span class="opt-label">A. Нативное меню браузера (Copy, Paste, …) + custom пункты</span></label>
+          <label class="opt"><input type="radio" name="q25" value="b"> <span class="opt-label">B. Полностью кастомное тёмное меню в стиле IDE</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="26">
+    <div class="q-top"><span class="q-num">26</span>
+      <div class="q-body">
+        <div class="q-text">Как показать «найти и заменить» (Find & Replace)?</div>
+        <span class="q-tag tag-nav">Навигация</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q26" value="a"> <span class="opt-label">A. Панель появляется в верхнем правом углу редактора</span></label>
+          <label class="opt"><input type="radio" name="q26" value="b"> <span class="opt-label">B. Модальный диалог по центру экрана</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="27">
+    <div class="q-top"><span class="q-num">27</span>
+      <div class="q-body">
+        <div class="q-text">Как подсветить пару скобок при позиционировании курсора?</div>
+        <span class="q-tag tag-viz">Визуал</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q27" value="a"> <span class="opt-label">A. Жёлтый фон у обеих скобок</span></label>
+          <label class="opt"><input type="radio" name="q27" value="b"> <span class="opt-label">B. Синяя рамка без изменения фона</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="28">
+    <div class="q-top"><span class="q-num">28</span>
+      <div class="q-body">
+        <div class="q-text">Как показывать информацию о токене при наведении (hover card)?</div>
+        <span class="q-tag tag-ux">UX</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q28" value="a"> <span class="opt-label">A. Тёмная всплывашка с типом, описанием и ссылкой на документацию</span></label>
+          <label class="opt"><input type="radio" name="q28" value="b"> <span class="opt-label">B. Только мини-tooltip с типом (без hover card)</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="29">
+    <div class="q-top"><span class="q-num">29</span>
+      <div class="q-body">
+        <div class="q-text">Вставка фрагментов кода (snippets) — как инициировать?</div>
+        <span class="q-tag tag-perf">Перф</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q29" value="a"> <span class="opt-label">A. Ввести prefix + Tab (как Emmet)</span></label>
+          <label class="opt"><input type="radio" name="q29" value="b"> <span class="opt-label">B. Выбрать из меню снипетов через иконку в тулбаре</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="30">
+    <div class="q-top"><span class="q-num">30</span>
+      <div class="q-body">
+        <div class="q-text">Как обозначить несохранённые изменения в редакторе (кроме точки в табе)?</div>
+        <span class="q-tag tag-viz">Визуал</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q30" value="a"> <span class="opt-label">A. Жёлтая полоска слева (dirty gutter line)</span></label>
+          <label class="opt"><input type="radio" name="q30" value="b"> <span class="opt-label">B. Только точка в табе — больше ничего не нужно</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 3: Canvas -->
+<section class="section" id="s3">
+  <div class="section-header">
+    <span class="section-icon">🗺️</span>
+    <span class="section-title">Канвас диаграмм</span>
+    <span class="section-count">31–42</span>
+  </div>
+
+  <div class="q-card" data-q="31">
+    <div class="q-top"><span class="q-num">31</span>
+      <div class="q-body">
+        <div class="q-text">Как реагировать при клике на элемент диаграммы?</div>
+        <span class="q-tag tag-nav">Навигация</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q31" value="a"> <span class="opt-label">A. Перейти к соответствующей строке в редакторе кода</span></label>
+          <label class="opt"><input type="radio" name="q31" value="b"> <span class="opt-label">B. Показать инспектор свойств элемента в боковой панели</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="32">
+    <div class="q-top"><span class="q-num">32</span>
+      <div class="q-body">
+        <div class="q-text">Как расположить разделитель между кодом и канвасом?</div>
+        <span class="q-tag tag-ux">UX</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q32" value="a"> <span class="opt-label">A. Вертикальный разделитель (код слева, канвас справа)</span></label>
+          <label class="opt"><input type="radio" name="q32" value="b"> <span class="opt-label">B. Горизонтальный (код сверху, канвас снизу)</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="33">
+    <div class="q-top"><span class="q-num">33</span>
+      <div class="q-body">
+        <div class="q-text">Кнопки масштаба канваса (Zoom In/Out/Fit) — где размещать?</div>
+        <span class="q-tag tag-nav">Навигация</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q33" value="a"> <span class="opt-label">A. Плавающие кнопки в правом нижнем углу канваса</span></label>
+          <label class="opt"><input type="radio" name="q33" value="b"> <span class="opt-label">B. В статус-баре внизу экрана</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="34">
+    <div class="q-top"><span class="q-num">34</span>
+      <div class="q-body">
+        <div class="q-text">Что делать при перетаскивании элемента на канвасе?</div>
+        <span class="q-tag tag-ux">UX</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q34" value="a"> <span class="opt-label">A. Обновить позицию в DSL-коде автоматически</span></label>
+          <label class="opt"><input type="radio" name="q34" value="b"> <span class="opt-label">B. Сохранить позицию только в метаданных (layout file), не менять DSL</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="35">
+    <div class="q-top"><span class="q-num">35</span>
+      <div class="q-body">
+        <div class="q-text">Как показывать ошибку прямо на канвасе?</div>
+        <span class="q-tag tag-viz">Визуал</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q35" value="a"> <span class="opt-label">A. Красная рамка у проблемного элемента + иконка ⚠ в углу</span></label>
+          <label class="opt"><input type="radio" name="q35" value="b"> <span class="opt-label">B. Заблюренный элемент + tooltip при наведении</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="36">
+    <div class="q-top"><span class="q-num">36</span>
+      <div class="q-body">
+        <div class="q-text">Как отображать анимацию рендера при компиляции?</div>
+        <span class="q-tag tag-perf">Перф</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q36" value="a"> <span class="opt-label">A. Плавное появление элементов один за другим (staggered fade in)</span></label>
+          <label class="opt"><input type="radio" name="q36" value="b"> <span class="opt-label">B. Без анимации — мгновенная замена (быстрее на слабых машинах)</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="37">
+    <div class="q-top"><span class="q-num">37</span>
+      <div class="q-body">
+        <div class="q-text">Как отображать метки связей на диаграмме?</div>
+        <span class="q-tag tag-viz">Визуал</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q37" value="a"> <span class="opt-label">A. Всегда видны над стрелкой</span></label>
+          <label class="opt"><input type="radio" name="q37" value="b"> <span class="opt-label">B. Появляются только при наведении на связь</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="38">
+    <div class="q-top"><span class="q-num">38</span>
+      <div class="q-body">
+        <div class="q-text">Сетка (grid) на канвасе по умолчанию?</div>
+        <span class="q-tag tag-viz">Визуал</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q38" value="a"> <span class="opt-label">A. Точечная сетка (dots) всегда видна</span></label>
+          <label class="opt"><input type="radio" name="q38" value="b"> <span class="opt-label">B. Сетка скрыта, включается по кнопке</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="39">
+    <div class="q-top"><span class="q-num">39</span>
+      <div class="q-body">
+        <div class="q-text">Экспорт диаграммы — какие форматы в первую очередь?</div>
+        <span class="q-tag tag-ux">UX</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q39" value="a"> <span class="opt-label">A. SVG + PNG (векторный и растровый)</span></label>
+          <label class="opt"><input type="radio" name="q39" value="b"> <span class="opt-label">B. PDF + PNG (для документов и презентаций)</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="40">
+    <div class="q-top"><span class="q-num">40</span>
+      <div class="q-body">
+        <div class="q-text">Навигация по большой диаграмме — как?</div>
+        <span class="q-tag tag-nav">Навигация</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q40" value="a"> <span class="opt-label">A. Мини-карта в углу + колёсо мыши для прокрутки</span></label>
+          <label class="opt"><input type="radio" name="q40" value="b"> <span class="opt-label">B. Только колёсо мыши + drag (без мини-карты)</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="41">
+    <div class="q-top"><span class="q-num">41</span>
+      <div class="q-body">
+        <div class="q-text">Как авто-расставлять элементы (auto-layout)?</div>
+        <span class="q-tag tag-ux">UX</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q41" value="a"> <span class="opt-label">A. Авто-layout при каждой компиляции</span></label>
+          <label class="opt"><input type="radio" name="q41" value="b"> <span class="opt-label">B. Только по кнопке «Auto-layout» — не трогать ручное расположение</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="42">
+    <div class="q-top"><span class="q-num">42</span>
+      <div class="q-body">
+        <div class="q-text">Как выделить несколько элементов на канвасе?</div>
+        <span class="q-tag tag-ux">UX</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q42" value="a"> <span class="opt-label">A. Выделение прямоугольником (lasso drag)</span></label>
+          <label class="opt"><input type="radio" name="q42" value="b"> <span class="opt-label">B. Shift+клик по каждому элементу</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 4: Tabs -->
+<section class="section" id="s4">
+  <div class="section-header">
+    <span class="section-icon">🗂️</span>
+    <span class="section-title">Табы файлов</span>
+    <span class="section-count">43–52</span>
+  </div>
+
+  <div class="q-card" data-q="43">
+    <div class="q-top"><span class="q-num">43</span>
+      <div class="q-body">
+        <div class="q-text">Как обозначить несохранённые изменения в табе?</div>
+        <span class="q-tag tag-viz">Визуал</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q43" value="a"> <span class="opt-label">A. Жёлтая точка перед именем файла</span></label>
+          <label class="opt"><input type="radio" name="q43" value="b"> <span class="opt-label">B. Звёздочка (*) после имени файла</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="44">
+    <div class="q-top"><span class="q-num">44</span>
+      <div class="q-body">
+        <div class="q-text">Что произойдёт при закрытии таба с несохранёнными изменениями?</div>
+        <span class="q-tag tag-ux">UX</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q44" value="a"> <span class="opt-label">A. Модальный диалог: «Сохранить / Не сохранять / Отмена»</span></label>
+          <label class="opt"><input type="radio" name="q44" value="b"> <span class="opt-label">B. Таб не закрывается — сначала нужно сохранить или явно отменить</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="45">
+    <div class="q-top"><span class="q-num">45</span>
+      <div class="q-body">
+        <div class="q-text">Кнопка закрытия таба (×) — когда видна?</div>
+        <span class="q-tag tag-ux">UX</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q45" value="a"> <span class="opt-label">A. Только при наведении и на активном табе</span></label>
+          <label class="opt"><input type="radio" name="q45" value="b"> <span class="opt-label">B. Всегда видна на всех табах</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="46">
+    <div class="q-top"><span class="q-num">46</span>
+      <div class="q-body">
+        <div class="q-text">Сколько табов умещается до появления прокрутки/меню?</div>
+        <span class="q-tag tag-nav">Навигация</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q46" value="a"> <span class="opt-label">A. Горизонтальная прокрутка — табы не сжимаются</span></label>
+          <label class="opt"><input type="radio" name="q46" value="b"> <span class="opt-label">B. Табы сужаются, лишние уходят в «…» меню</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="47">
+    <div class="q-top"><span class="q-num">47</span>
+      <div class="q-body">
+        <div class="q-text">Перетаскивание табов для перестановки — нужно?</div>
+        <span class="q-tag tag-ux">UX</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q47" value="a"> <span class="opt-label">A. Да, drag & drop табов</span></label>
+          <label class="opt"><input type="radio" name="q47" value="b"> <span class="opt-label">B. Нет — порядок не важен, убрать сложность</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="48">
+    <div class="q-top"><span class="q-num">48</span>
+      <div class="q-body">
+        <div class="q-text">Как показать тип нотации прямо в табе?</div>
+        <span class="q-tag tag-viz">Визуал</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q48" value="a"> <span class="opt-label">A. Цветная полоска снизу таба (цвет по нотации)</span></label>
+          <label class="opt"><input type="radio" name="q48" value="b"> <span class="opt-label">B. Иконка нотации перед именем файла</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="49">
+    <div class="q-top"><span class="q-num">49</span>
+      <div class="q-body">
+        <div class="q-text">Восстанавливать ли табы при следующей сессии?</div>
+        <span class="q-tag tag-ux">UX</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q49" value="a"> <span class="opt-label">A. Да, автоматически открывать все вкладки последней сессии</span></label>
+          <label class="opt"><input type="radio" name="q49" value="b"> <span class="opt-label">B. Нет, начинать с пустого — пусть пользователь откроет нужное</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="50">
+    <div class="q-top"><span class="q-num">50</span>
+      <div class="q-body">
+        <div class="q-text">Правая кнопка на табе — что в меню?</div>
+        <span class="q-tag tag-ux">UX</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q50" value="a"> <span class="opt-label">A. Close, Close Others, Close All, Copy Path</span></label>
+          <label class="opt"><input type="radio" name="q50" value="b"> <span class="opt-label">B. Только Close и Copy Path — минимум</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="51">
+    <div class="q-top"><span class="q-num">51</span>
+      <div class="q-body">
+        <div class="q-text">Как показать, что таб «закреплён» (pinned)?</div>
+        <span class="q-tag tag-viz">Визуал</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q51" value="a"> <span class="opt-label">A. Иконка 📌 вместо имени (очень узкий таб)</span></label>
+          <label class="opt"><input type="radio" name="q51" value="b"> <span class="opt-label">B. Полоска отличного цвета снизу таба</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="52">
+    <div class="q-top"><span class="q-num">52</span>
+      <div class="q-body">
+        <div class="q-text">Middle-click на табе?</div>
+        <span class="q-tag tag-ux">UX</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q52" value="a"> <span class="opt-label">A. Закрыть таб (как в браузерах)</span></label>
+          <label class="opt"><input type="radio" name="q52" value="b"> <span class="opt-label">B. Не обрабатывать — нет у всех пользователей колёса</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 5: Errors -->
+<section class="section" id="s5">
+  <div class="section-header">
+    <span class="section-icon">⚠️</span>
+    <span class="section-title">Панель ошибок</span>
+    <span class="section-count">53–62</span>
+  </div>
+
+  <div class="q-card" data-q="53">
+    <div class="q-top"><span class="q-num">53</span>
+      <div class="q-body">
+        <div class="q-text">Где размещать панель ошибок/диагностики?</div>
+        <span class="q-tag tag-nav">Навигация</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q53" value="a"> <span class="opt-label">A. Внизу (как Terminal panel в VS Code)</span></label>
+          <label class="opt"><input type="radio" name="q53" value="b"> <span class="opt-label">B. Справа под канвасом</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="54">
+    <div class="q-top"><span class="q-num">54</span>
+      <div class="q-body">
+        <div class="q-text">Как группировать ошибки в панели?</div>
+        <span class="q-tag tag-ux">UX</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q54" value="a"> <span class="opt-label">A. По файлу</span></label>
+          <label class="opt"><input type="radio" name="q54" value="b"> <span class="opt-label">B. По типу (Error / Warning / Info)</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="55">
+    <div class="q-top"><span class="q-num">55</span>
+      <div class="q-body">
+        <div class="q-text">Как показать количество ошибок в шапке приложения?</div>
+        <span class="q-tag tag-viz">Визуал</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q55" value="a"> <span class="opt-label">A. Красный badge-счётчик рядом с иконкой панели ошибок</span></label>
+          <label class="opt"><input type="radio" name="q55" value="b"> <span class="opt-label">B. В статус-баре: «⊗ 3 Errors»</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="56">
+    <div class="q-top"><span class="q-num">56</span>
+      <div class="q-body">
+        <div class="q-text">Клик на ошибку в панели — куда перейти?</div>
+        <span class="q-tag tag-nav">Навигация</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q56" value="a"> <span class="opt-label">A. Перейти к строке в редакторе + подсветить её</span></label>
+          <label class="opt"><input type="radio" name="q56" value="b"> <span class="opt-label">B. Открыть детальное объяснение ошибки в правой панели</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="57">
+    <div class="q-top"><span class="q-num">57</span>
+      <div class="q-body">
+        <div class="q-text">AI «Quick Fix» для ошибок — где показывать?</div>
+        <span class="q-tag tag-ux">UX</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q57" value="a"> <span class="opt-label">A. Иконка лампочки 💡 рядом с ошибкой в редакторе</span></label>
+          <label class="opt"><input type="radio" name="q57" value="b"> <span class="opt-label">B. Кнопка «Fix with AI» в каждой строке панели ошибок</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="58">
+    <div class="q-top"><span class="q-num">58</span>
+      <div class="q-body">
+        <div class="q-text">Панель ошибок — открывать автоматически при компиляции с ошибками?</div>
+        <span class="q-tag tag-ux">UX</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q58" value="a"> <span class="opt-label">A. Да, раскрывать автоматически</span></label>
+          <label class="opt"><input type="radio" name="q58" value="b"> <span class="opt-label">B. Нет — только badge-счётчик, пользователь открывает сам</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="59">
+    <div class="q-top"><span class="q-num">59</span>
+      <div class="q-body">
+        <div class="q-text">Как отличать Warning от Error визуально?</div>
+        <span class="q-tag tag-viz">Визуал</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q59" value="a"> <span class="opt-label">A. Красный ⊗ для Error, жёлтый ⚠ для Warning</span></label>
+          <label class="opt"><input type="radio" name="q59" value="b"> <span class="opt-label">B. Красный и оранжевый цвет строки без иконки</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="60">
+    <div class="q-top"><span class="q-num">60</span>
+      <div class="q-body">
+        <div class="q-text">Сколько ошибок показывать в панели без прокрутки?</div>
+        <span class="q-tag tag-ux">UX</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q60" value="a"> <span class="opt-label">A. 5 строк — панель маленькая, остальные при скролле</span></label>
+          <label class="opt"><input type="radio" name="q60" value="b"> <span class="opt-label">B. Панель растягивается под количество ошибок (max ~40% экрана)</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="61">
+    <div class="q-top"><span class="q-num">61</span>
+      <div class="q-body">
+        <div class="q-text">Фильтрация ошибок в панели — нужна?</div>
+        <span class="q-tag tag-ux">UX</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q61" value="a"> <span class="opt-label">A. Да, поле поиска + кнопки «Errors» / «Warnings»</span></label>
+          <label class="opt"><input type="radio" name="q61" value="b"> <span class="opt-label">B. Нет — список небольшой, фильтрация лишняя</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="62">
+    <div class="q-top"><span class="q-num">62</span>
+      <div class="q-body">
+        <div class="q-text">Что делать с ошибками при успешной повторной компиляции?</div>
+        <span class="q-tag tag-ux">UX</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q62" value="a"> <span class="opt-label">A. Панель ошибок очищается и схлопывается автоматически</span></label>
+          <label class="opt"><input type="radio" name="q62" value="b"> <span class="opt-label">B. Панель остаётся, показывает «0 errors» зелёным</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 6: Onboarding -->
+<section class="section" id="s6">
+  <div class="section-header">
+    <span class="section-icon">🚀</span>
+    <span class="section-title">Онбординг</span>
+    <span class="section-count">63–72</span>
+  </div>
+
+  <div class="q-card" data-q="63">
+    <div class="q-top"><span class="q-num">63</span>
+      <div class="q-body">
+        <div class="q-text">Как встречать нового пользователя?</div>
+        <span class="q-tag tag-ux">UX</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q63" value="a"> <span class="opt-label">A. Пустой редактор с подсказками-заглушками в панелях</span></label>
+          <label class="opt"><input type="radio" name="q63" value="b"> <span class="opt-label">B. Приветственный экран с выбором шаблона нотации</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="64">
+    <div class="q-top"><span class="q-num">64</span>
+      <div class="q-body">
+        <div class="q-text">Обучающий тур (tour) — когда показывать?</div>
+        <span class="q-tag tag-ux">UX</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q64" value="a"> <span class="opt-label">A. Автоматически при первом входе</span></label>
+          <label class="opt"><input type="radio" name="q64" value="b"> <span class="opt-label">B. Только по кнопке «Start tour» — не навязывать</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="65">
+    <div class="q-top"><span class="q-num">65</span>
+      <div class="q-body">
+        <div class="q-text">Первый шаблон при создании нового файла — откуда брать?</div>
+        <span class="q-tag tag-ux">UX</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q65" value="a"> <span class="opt-label">A. Диалог выбора нотации → вставить готовый boilerplate</span></label>
+          <label class="opt"><input type="radio" name="q65" value="b"> <span class="opt-label">B. Всегда пустой файл — не предполагать нотацию</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="66">
+    <div class="q-top"><span class="q-num">66</span>
+      <div class="q-body">
+        <div class="q-text">Как показывать подсказки при наборе первой диаграммы?</div>
+        <span class="q-tag tag-ux">UX</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q66" value="a"> <span class="opt-label">A. Inline hints в виде ghost text: «Try: → A0 "name"»</span></label>
+          <label class="opt"><input type="radio" name="q66" value="b"> <span class="opt-label">B. Боковая панель «Quick Reference» с синтаксисом</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="67">
+    <div class="q-top"><span class="q-num">67</span>
+      <div class="q-body">
+        <div class="q-text">Встроенные примеры диаграмм — как оформить?</div>
+        <span class="q-tag tag-ux">UX</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q67" value="a"> <span class="opt-label">A. Галерея с превью на экране выбора шаблона</span></label>
+          <label class="opt"><input type="radio" name="q67" value="b"> <span class="opt-label">B. Примеры в боковом проводнике как read-only файлы</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="68">
+    <div class="q-top"><span class="q-num">68</span>
+      <div class="q-body">
+        <div class="q-text">Как знакомить с концепцией «diagram as code» новичка?</div>
+        <span class="q-tag tag-copy">Копи</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q68" value="a"> <span class="opt-label">A. Short animated demo (gif/video) на экране приветствия</span></label>
+          <label class="opt"><input type="radio" name="q68" value="b"> <span class="opt-label">B. Пошаговый интерактивный tutorial прямо в редакторе</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="69">
+    <div class="q-top"><span class="q-num">69</span>
+      <div class="q-body">
+        <div class="q-text">Прогресс онбординга — показывать?</div>
+        <span class="q-tag tag-ux">UX</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q69" value="a"> <span class="opt-label">A. Да, чеклист «Начало работы» в боковой панели</span></label>
+          <label class="opt"><input type="radio" name="q69" value="b"> <span class="opt-label">B. Нет — не надо создавать ощущение «задания»</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="70">
+    <div class="q-top"><span class="q-num">70</span>
+      <div class="q-body">
+        <div class="q-text">Как справочник (Docs) доступен внутри IDE?</div>
+        <span class="q-tag tag-nav">Навигация</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q70" value="a"> <span class="opt-label">A. F1 или кнопка «?» открывает встроенный поиск по документации</span></label>
+          <label class="opt"><input type="radio" name="q70" value="b"> <span class="opt-label">B. Ссылка открывает docs в новой вкладке браузера</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="71">
+    <div class="q-top"><span class="q-num">71</span>
+      <div class="q-body">
+        <div class="q-text">Можно ли пропустить онбординг?</div>
+        <span class="q-tag tag-ux">UX</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q71" value="a"> <span class="opt-label">A. Да, кнопка «Skip» всегда видна</span></label>
+          <label class="opt"><input type="radio" name="q71" value="b"> <span class="opt-label">B. Нет, нужно хотя бы пройти первый шаг</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="72">
+    <div class="q-top"><span class="q-num">72</span>
+      <div class="q-body">
+        <div class="q-text">Как напоминать о возможностях, которые пользователь ещё не пробовал?</div>
+        <span class="q-tag tag-ux">UX</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q72" value="a"> <span class="opt-label">A. Ненавязчивый tip в статус-баре раз в несколько дней</span></label>
+          <label class="opt"><input type="radio" name="q72" value="b"> <span class="opt-label">B. Не напоминать — пользователь найдёт сам</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 7: Settings -->
+<section class="section" id="s7">
+  <div class="section-header">
+    <span class="section-icon">⚙️</span>
+    <span class="section-title">Настройки</span>
+    <span class="section-count">73–82</span>
+  </div>
+
+  <div class="q-card" data-q="73">
+    <div class="q-top"><span class="q-num">73</span>
+      <div class="q-body">
+        <div class="q-text">Как открывать настройки?</div>
+        <span class="q-tag tag-nav">Навигация</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q73" value="a"> <span class="opt-label">A. Отдельный экран настроек (вся страница)</span></label>
+          <label class="opt"><input type="radio" name="q73" value="b"> <span class="opt-label">B. Боковая панель поверх редактора (drawer)</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="74">
+    <div class="q-top"><span class="q-num">74</span>
+      <div class="q-body">
+        <div class="q-text">Применение изменений настроек — когда?</div>
+        <span class="q-tag tag-ux">UX</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q74" value="a"> <span class="opt-label">A. В реальном времени, без кнопки Save</span></label>
+          <label class="opt"><input type="radio" name="q74" value="b"> <span class="opt-label">B. После нажатия «Save changes»</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="75">
+    <div class="q-top"><span class="q-num">75</span>
+      <div class="q-body">
+        <div class="q-text">Тема оформления — как выбирать?</div>
+        <span class="q-tag tag-viz">Визуал</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q75" value="a"> <span class="opt-label">A. Миниатюры с live preview при наведении</span></label>
+          <label class="opt"><input type="radio" name="q75" value="b"> <span class="opt-label">B. Выпадающий список с именами тем</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="76">
+    <div class="q-top"><span class="q-num">76</span>
+      <div class="q-body">
+        <div class="q-text">Настройки AI (модель, BYOK) — где?</div>
+        <span class="q-tag tag-ux">UX</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q76" value="a"> <span class="opt-label">A. Отдельная секция «AI & Integrations» в настройках</span></label>
+          <label class="opt"><input type="radio" name="q76" value="b"> <span class="opt-label">B. В боковой AI-панели кнопка «AI Settings»</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="77">
+    <div class="q-top"><span class="q-num">77</span>
+      <div class="q-body">
+        <div class="q-text">Поиск по настройкам — нужен?</div>
+        <span class="q-tag tag-nav">Навигация</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q77" value="a"> <span class="opt-label">A. Да, поисковая строка как в VS Code Settings</span></label>
+          <label class="opt"><input type="radio" name="q77" value="b"> <span class="opt-label">B. Нет — настроек немного, иерархия секций достаточна</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="78">
+    <div class="q-top"><span class="q-num">78</span>
+      <div class="q-body">
+        <div class="q-text">Экспорт/импорт настроек — нужна ли эта функция?</div>
+        <span class="q-tag tag-ux">UX</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q78" value="a"> <span class="opt-label">A. Да, кнопка «Export settings (JSON)»</span></label>
+          <label class="opt"><input type="radio" name="q78" value="b"> <span class="opt-label">B. Нет — слишком редкий сценарий для MVP</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="79">
+    <div class="q-top"><span class="q-num">79</span>
+      <div class="q-body">
+        <div class="q-text">Как выглядят категории в панели настроек?</div>
+        <span class="q-tag tag-viz">Визуал</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q79" value="a"> <span class="opt-label">A. Вертикальная панель вкладок слева (Editor / Canvas / AI / Keymap)</span></label>
+          <label class="opt"><input type="radio" name="q79" value="b"> <span class="opt-label">B. Аккордеон-секции на одной странице с прокруткой</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="80">
+    <div class="q-top"><span class="q-num">80</span>
+      <div class="q-body">
+        <div class="q-text">Сброс настроек до заводских — как оформить?</div>
+        <span class="q-tag tag-ux">UX</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q80" value="a"> <span class="opt-label">A. Кнопка «Reset to defaults» с диалогом подтверждения</span></label>
+          <label class="opt"><input type="radio" name="q80" value="b"> <span class="opt-label">B. Не показывать в UI — только через команд-палет</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="81">
+    <div class="q-top"><span class="q-num">81</span>
+      <div class="q-body">
+        <div class="q-text">Привязки клавиш (keymap) — можно ли кастомизировать?</div>
+        <span class="q-tag tag-ux">UX</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q81" value="a"> <span class="opt-label">A. Да, полная кастомизация в настройках</span></label>
+          <label class="opt"><input type="radio" name="q81" value="b"> <span class="opt-label">B. Нет, только выбор из пресетов (VS Code / JetBrains / Default)</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="82">
+    <div class="q-top"><span class="q-num">82</span>
+      <div class="q-body">
+        <div class="q-text">Где хранить настройки пользователя?</div>
+        <span class="q-tag tag-ux">UX</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q82" value="a"> <span class="opt-label">A. В облаке (синхронизация между устройствами)</span></label>
+          <label class="opt"><input type="radio" name="q82" value="b"> <span class="opt-label">B. В localStorage браузера (локально, приватно)</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 8: Status bar -->
+<section class="section" id="s8">
+  <div class="section-header">
+    <span class="section-icon">📊</span>
+    <span class="section-title">Статус-бар</span>
+    <span class="section-count">83–90</span>
+  </div>
+
+  <div class="q-card" data-q="83">
+    <div class="q-top"><span class="q-num">83</span>
+      <div class="q-body">
+        <div class="q-text">Что показывать в статус-баре слева?</div>
+        <span class="q-tag tag-nav">Навигация</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q83" value="a"> <span class="opt-label">A. Счётчики ошибок/предупреждений</span></label>
+          <label class="opt"><input type="radio" name="q83" value="b"> <span class="opt-label">B. Имя текущей нотации + версия DSL</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="84">
+    <div class="q-top"><span class="q-num">84</span>
+      <div class="q-body">
+        <div class="q-text">Что показывать в статус-баре справа?</div>
+        <span class="q-tag tag-nav">Навигация</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q84" value="a"> <span class="opt-label">A. Строка:колонка курсора + время последнего сохранения</span></label>
+          <label class="opt"><input type="radio" name="q84" value="b"> <span class="opt-label">B. Только время последнего сохранения</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="85">
+    <div class="q-top"><span class="q-num">85</span>
+      <div class="q-body">
+        <div class="q-text">Высота статус-бара?</div>
+        <span class="q-tag tag-viz">Визуал</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q85" value="a"> <span class="opt-label">A. 22px (компактный как VS Code)</span></label>
+          <label class="opt"><input type="radio" name="q85" value="b"> <span class="opt-label">B. 28px (более кликабельный)</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="86">
+    <div class="q-top"><span class="q-num">86</span>
+      <div class="q-body">
+        <div class="q-text">Показывать ли статус «Autosave ON» в статус-баре?</div>
+        <span class="q-tag tag-ux">UX</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q86" value="a"> <span class="opt-label">A. Да — иконка облака с состоянием</span></label>
+          <label class="opt"><input type="radio" name="q86" value="b"> <span class="opt-label">B. Нет — загромождает, убрать</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="87">
+    <div class="q-top"><span class="q-num">87</span>
+      <div class="q-body">
+        <div class="q-text">Тип кодировки файла (UTF-8) в статус-баре?</div>
+        <span class="q-tag tag-ux">UX</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q87" value="a"> <span class="opt-label">A. Показывать, клик открывает меню смены</span></label>
+          <label class="opt"><input type="radio" name="q87" value="b"> <span class="opt-label">B. Не показывать — DSL всегда UTF-8</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="88">
+    <div class="q-card" data-q="88">
+    <div class="q-top"><span class="q-num">88</span>
+      <div class="q-body">
+        <div class="q-text">Счётчик элементов диаграммы (nodes / edges) в статус-баре?</div>
+        <span class="q-tag tag-viz">Визуал</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q88" value="a"> <span class="opt-label">A. Да — «12 nodes · 8 edges»</span></label>
+          <label class="opt"><input type="radio" name="q88" value="b"> <span class="opt-label">B. Нет — это не нужно в статус-баре</span></label>
+        </div>
+      </div>
+    </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="89">
+    <div class="q-top"><span class="q-num">89</span>
+      <div class="q-body">
+        <div class="q-text">Цвет фона статус-бара?</div>
+        <span class="q-tag tag-viz">Визуал</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q89" value="a"> <span class="opt-label">A. Совпадает с фоном тулбара (--surface)</span></label>
+          <label class="opt"><input type="radio" name="q89" value="b"> <span class="opt-label">B. Чуть темнее фона (--bg) — даёт ощущение «подвала»</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="90">
+    <div class="q-top"><span class="q-num">90</span>
+      <div class="q-body">
+        <div class="q-text">Можно ли скрыть статус-бар (для максимума пространства)?</div>
+        <span class="q-tag tag-ux">UX</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q90" value="a"> <span class="opt-label">A. Да, через меню View → Hide Status Bar</span></label>
+          <label class="opt"><input type="radio" name="q90" value="b"> <span class="opt-label">B. Нет — статус-бар всегда виден</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 9: Mobile -->
+<section class="section" id="s9">
+  <div class="section-header">
+    <span class="section-icon">📱</span>
+    <span class="section-title">Мобайл</span>
+    <span class="section-count">91–100</span>
+  </div>
+
+  <div class="q-card" data-q="91">
+    <div class="q-top"><span class="q-num">91</span>
+      <div class="q-body">
+        <div class="q-text">Что показывать на мобильном по умолчанию?</div>
+        <span class="q-tag tag-ux">UX</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q91" value="a"> <span class="opt-label">A. Канвас диаграммы на весь экран (режим просмотра)</span></label>
+          <label class="opt"><input type="radio" name="q91" value="b"> <span class="opt-label">B. Список файлов / дашборд — редактировать на мобиле не нужно</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="92">
+    <div class="q-top"><span class="q-num">92</span>
+      <div class="q-body">
+        <div class="q-text">Редактирование DSL-кода на мобиле — поддерживать?</div>
+        <span class="q-tag tag-ux">UX</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q92" value="a"> <span class="opt-label">A. Да, простой textarea с подсветкой</span></label>
+          <label class="opt"><input type="radio" name="q92" value="b"> <span class="opt-label">B. Нет — мобиле только просмотр, редактирование только на десктопе</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="93">
+    <div class="q-top"><span class="q-num">93</span>
+      <div class="q-body">
+        <div class="q-text">Navigation bar на мобиле — где?</div>
+        <span class="q-tag tag-nav">Навигация</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q93" value="a"> <span class="opt-label">A. Bottom navigation bar (как в мобильных приложениях)</span></label>
+          <label class="opt"><input type="radio" name="q93" value="b"> <span class="opt-label">B. Hamburger menu сверху</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="94">
+    <div class="q-top"><span class="q-num">94</span>
+      <div class="q-body">
+        <div class="q-text">Как переключаться между кодом и канвасом на мобиле?</div>
+        <span class="q-tag tag-nav">Навигация</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q94" value="a"> <span class="opt-label">A. Свайп влево/вправо</span></label>
+          <label class="opt"><input type="radio" name="q94" value="b"> <span class="opt-label">B. Кнопки «Code» | «Preview» вверху</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="95">
+    <div class="q-top"><span class="q-num">95</span>
+      <div class="q-body">
+        <div class="q-text">Экспорт диаграммы с мобиле — как делиться?</div>
+        <span class="q-tag tag-ux">UX</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q95" value="a"> <span class="opt-label">A. Кнопка «Share» → Native share sheet (png/svg)</span></label>
+          <label class="opt"><input type="radio" name="q95" value="b"> <span class="opt-label">B. Кнопка «Copy link» → ссылка в буфер</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="96">
+    <div class="q-top"><span class="q-num">96</span>
+      <div class="q-body">
+        <div class="q-text">Жест Pinch-to-zoom на канвасе мобиле — поддерживать?</div>
+        <span class="q-tag tag-ux">UX</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q96" value="a"> <span class="opt-label">A. Да, pinch = zoom канваса</span></label>
+          <label class="opt"><input type="radio" name="q96" value="b"> <span class="opt-label">B. Нет, только кнопки +/−</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="97">
+    <div class="q-top"><span class="q-num">97</span>
+      <div class="q-body">
+        <div class="q-text">Как читать сообщение об ошибке на маленьком экране?</div>
+        <span class="q-tag tag-ux">UX</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q97" value="a"> <span class="opt-label">A. Bottom sheet снизу с прокручиваемым списком ошибок</span></label>
+          <label class="opt"><input type="radio" name="q97" value="b"> <span class="opt-label">B. Badge-иконка — клик открывает модал с ошибками</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="98">
+    <div class="q-top"><span class="q-num">98</span>
+      <div class="q-body">
+        <div class="q-text">PWA-установка на устройство — как предложить?</div>
+        <span class="q-tag tag-ux">UX</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q98" value="a"> <span class="opt-label">A. Баннер «Добавить на экран» через 3 визита</span></label>
+          <label class="opt"><input type="radio" name="q98" value="b"> <span class="opt-label">B. Кнопка в меню «Install app» без навязывания</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="99">
+    <div class="q-top"><span class="q-num">99</span>
+      <div class="q-body">
+        <div class="q-text">Оффлайн-режим на мобиле — поддерживать?</div>
+        <span class="q-tag tag-perf">Перф</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q99" value="a"> <span class="opt-label">A. Да, полный оффлайн (Service Worker, локальные файлы)</span></label>
+          <label class="opt"><input type="radio" name="q99" value="b"> <span class="opt-label">B. Только просмотр кэшированных диаграмм — редактирование онлайн</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="q-card" data-q="100">
+    <div class="q-top"><span class="q-num">100</span>
+      <div class="q-body">
+        <div class="q-text">Какую цветовую тему предлагать по умолчанию на мобиле?</div>
+        <span class="q-tag tag-viz">Визуал</span>
+        <div class="options">
+          <label class="opt"><input type="radio" name="q100" value="a"> <span class="opt-label">A. Следовать системной теме (светлая / тёмная)</span></label>
+          <label class="opt"><input type="radio" name="q100" value="b"> <span class="opt-label">B. Всегда тёмная тема — IDE-ощущение</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</div><!-- .content -->
+</div><!-- .main -->
+
+<div class="submit-area">
+  <button class="btn btn-primary" onclick="showResults()">Посмотреть результаты</button>
+  <button class="btn btn-ghost" onclick="resetAll()">Сбросить все ответы</button>
+  <span class="submit-info" id="submit-info">Ответьте на все вопросы</span>
+</div>
+
+<!-- Results modal -->
+<div class="modal-overlay hidden" id="resultsModal">
+  <div class="modal">
+    <h2>Результаты</h2>
+    <p>Ваши предпочтения по вариантам A и B в 100 вопросах.</p>
+    <div class="result-grid">
+      <div class="result-cell"><div class="val" id="res-a">—</div><div class="lbl">Вариант A</div></div>
+      <div class="result-cell"><div class="val" id="res-b">—</div><div class="lbl">Вариант B</div></div>
+      <div class="result-cell"><div class="val" id="res-total">—</div><div class="lbl">Всего отвечено</div></div>
+      <div class="result-cell"><div class="val" id="res-skipped">—</div><div class="lbl">Пропущено</div></div>
+    </div>
+    <button class="btn btn-primary" onclick="document.getElementById('resultsModal').classList.add('hidden')">Закрыть</button>
+  </div>
+</div>
+
+<script>
+const TOTAL = 100;
+
+function updateProgress() {
+  let answered = 0;
+  for (let i = 1; i <= TOTAL; i++) {
+    if (document.querySelector(`input[name="q${i}"]:checked`)) answered++;
+  }
+  document.getElementById('answered-count').textContent = answered;
+  document.getElementById('progress-fill').style.width = (answered / TOTAL * 100) + '%';
+  document.getElementById('submit-info').textContent =
+    answered === TOTAL ? 'Все вопросы отвечены!' : `Отвечено ${answered} из ${TOTAL}`;
+}
+
+// track selections
+document.querySelectorAll('.options input[type=radio]').forEach(radio => {
+  radio.addEventListener('change', function() {
+    const card = this.closest('.q-card');
+    card.classList.add('answered');
+    card.querySelectorAll('.opt').forEach(o => o.classList.remove('selected'));
+    this.closest('.opt').classList.add('selected');
+    updateProgress();
+  });
+});
+
+function showResults() {
+  let a = 0, b = 0, total = 0, skipped = 0;
+  for (let i = 1; i <= TOTAL; i++) {
+    const checked = document.querySelector(`input[name="q${i}"]:checked`);
+    if (checked) { total++; checked.value === 'a' ? a++ : b++; }
+    else skipped++;
+  }
+  document.getElementById('res-a').textContent = a;
+  document.getElementById('res-b').textContent = b;
+  document.getElementById('res-total').textContent = total;
+  document.getElementById('res-skipped').textContent = skipped;
+  document.getElementById('resultsModal').classList.remove('hidden');
+}
+
+function resetAll() {
+  document.querySelectorAll('input[type=radio]').forEach(r => r.checked = false);
+  document.querySelectorAll('.opt').forEach(o => o.classList.remove('selected'));
+  document.querySelectorAll('.q-card').forEach(c => c.classList.remove('answered'));
+  updateProgress();
+}
+
+// close modal on overlay click
+document.getElementById('resultsModal').addEventListener('click', function(e) {
+  if (e.target === this) this.classList.add('hidden');
+});
+
+// sidebar active link on scroll
+const sections = document.querySelectorAll('.section');
+const sideLinks = document.querySelectorAll('.sidebar-link');
+window.addEventListener('scroll', () => {
+  let current = '';
+  sections.forEach(s => {
+    if (s.getBoundingClientRect().top < 160) current = s.id;
+  });
+  sideLinks.forEach(l => {
+    l.classList.toggle('active', l.getAttribute('href') === '#' + current);
+  });
+}, { passive: true });
+
+updateProgress();
+</script>
+</body>
+</html>
