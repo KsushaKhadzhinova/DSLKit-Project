@@ -60,7 +60,11 @@ const a = "b";
 \`\`\`
 `;
 
-const has = (errors, part) => assert.ok(errors.some((e) => e.includes(part)), `${part} in ${JSON.stringify(errors)}`);
+const has = (errors, part) =>
+  assert.ok(
+    errors.some((e) => e.includes(part)),
+    `${part} in ${JSON.stringify(errors)}`,
+  );
 
 test('valid reports pass', () => {
   assert.deepEqual(lintReport(ru, 'ru'), []);

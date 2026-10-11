@@ -353,7 +353,15 @@ The draw.io site uses HTTPS and HTTP/2, serves static resources through the Clou
 import { HEADER_DOCS, T } from './i18n.js';
 
 const SECURITY = ['content-security-policy', 'strict-transport-security', 'x-frame-options', 'x-content-type-options'];
-export const PHASES = { blocked: 'Queued/Stalled', dns: 'DNS Lookup', connect: 'Initial connection', ssl: 'SSL', send: 'Request sent', wait: 'Waiting (TTFB)', receive: 'Content Download' };
+export const PHASES = {
+  blocked: 'Queued/Stalled',
+  dns: 'DNS Lookup',
+  connect: 'Initial connection',
+  ssl: 'SSL',
+  send: 'Request sent',
+  wait: 'Waiting (TTFB)',
+  receive: 'Content Download',
+};
 
 const find = (headers, name) => headers.find((h) => h.name.toLowerCase() === name)?.value;
 const clip = (s) => (s.length > 80 ? `${s.slice(0, 77)}...` : s).replaceAll('|', '\\|');
@@ -384,7 +392,10 @@ export const bytesByType = (entries) => count(entries, bytes);
 export const pick = (entries) => ['document', 'script', 'xhr'].map((t) => entries.find((e) => e._resourceType === t)).filter(Boolean);
 
 export const headerRows = (headers, lang = 'ru', limit = 20) =>
-  headers.filter((h) => !h.name.startsWith(':')).slice(0, limit).map((h) => [`\`${h.name}\``, clip(h.value), HEADER_DOCS[lang][h.name.toLowerCase()] ?? '—']);
+  headers
+    .filter((h) => !h.name.startsWith(':'))
+    .slice(0, limit)
+    .map((h) => [`\`${h.name}\``, clip(h.value), HEADER_DOCS[lang][h.name.toLowerCase()] ?? '—']);
 
 export const cacheInfo = ({ response: { headers } }) => {
   const cacheControl = find(headers, 'cache-control');
@@ -395,7 +406,10 @@ export const cacheInfo = ({ response: { headers } }) => {
 export const securityRows = ({ response: { headers } }, lang = 'ru') => SECURITY.map((n) => [`\`${n}\``, clip(find(headers, n) ?? T[lang].absent)]);
 
 export const cookieRows = (entries) =>
-  entries.flatMap((e) => [...e.request.cookies.map((c) => [c.name, 'Cookie', e.request.url]), ...e.response.cookies.map((c) => [c.name, 'Set-Cookie', e.request.url])]);
+  entries.flatMap((e) => [
+    ...e.request.cookies.map((c) => [c.name, 'Cookie', e.request.url]),
+    ...e.response.cookies.map((c) => [c.name, 'Set-Cookie', e.request.url]),
+  ]);
 
 export const timingRows = ({ timings }, lang = 'ru') =>
   Object.entries(PHASES).map(([k, label]) => [label, timings[k] >= 0 ? `${timings[k].toFixed(0)} ${T[lang].ms}` : '—']);
@@ -424,27 +438,66 @@ export const report = (har, slow, lang = 'ru', prefix = '3.3') => {
   const tbl = (caption, head, rows) => `${t.tableWord} ${++tableNo} – ${caption}\n\n${table(head, rows)}`;
   const section = (title, ...body) => `#### ${prefix}.${++sectionNo} ${title}\n\n${body.join('\n\n')}\n`;
   const parts = [
-    section(t.summary,
-      tbl(t.captions.summary, [t.metric, t.value], [[t.requests, s.requests], [t.transferred, mb(s.bytes)], [t.protocol, s.protocol], [t.dcl, s.domContentLoaded], [t.onload, s.onLoad]]),
-      tbl(t.captions.types, [t.type, t.requests], Object.entries(s.types).sort((p, q) => q[1] - p[1]))),
+    section(
+      t.summary,
+      tbl(
+        t.captions.summary,
+        [t.metric, t.value],
+        [
+          [t.requests, s.requests],
+          [t.transferred, mb(s.bytes)],
+          [t.protocol, s.protocol],
+          [t.dcl, s.domContentLoaded],
+          [t.onload, s.onLoad],
+        ],
+      ),
+      tbl(
+        t.captions.types,
+        [t.type, t.requests],
+        Object.entries(s.types).sort((p, q) => q[1] - p[1]),
+      ),
+    ),
   ];
   for (const e of pick(log.entries)) {
-    parts.push(section(`${t.reqLabel}: ${e._resourceType}, ${e.request.url}`,
-      tbl(t.captions.general, [t.method, t.status], [[e.request.method, `${e.response.status} ${e.response.statusText}`.trim()]]),
-      tbl(t.captions.reqHeaders, [t.header, t.hvalue, t.purpose], headerRows(e.request.headers, lang)),
-      tbl(t.captions.resHeaders, [t.header, t.hvalue, t.purpose], headerRows(e.response.headers, lang)),
-      tbl(t.captions.timing, [t.phase, t.time], timingRows(e, lang)),
-      `${t.slowest}: ${slowestPhase(e)}.`));
+    parts.push(
+      section(
+        `${t.reqLabel}: ${e._resourceType}, ${e.request.url}`,
+        tbl(t.captions.general, [t.method, t.status], [[e.request.method, `${e.response.status} ${e.response.statusText}`.trim()]]),
+        tbl(t.captions.reqHeaders, [t.header, t.hvalue, t.purpose], headerRows(e.request.headers, lang)),
+        tbl(t.captions.resHeaders, [t.header, t.hvalue, t.purpose], headerRows(e.response.headers, lang)),
+        tbl(t.captions.timing, [t.phase, t.time], timingRows(e, lang)),
+        `${t.slowest}: ${slowestPhase(e)}.`,
+      ),
+    );
   }
   const biggest = log.entries.reduce((a, b) => (bytes(b) > bytes(a) ? b : a));
-  parts.push(section(t.cache, tbl(t.captions.cache, [t.resource, 'Cache-Control', 'ETag', 'Last-Modified', 'max-age'], [log.entries[0], biggest].map((e) => {
-    const c = cacheInfo(e);
-    return [clip(e.request.url), c.cacheControl ?? '—', c.etag ?? '—', c.lastModified ?? '—', c.maxAge ?? '—'];
-  }))));
+  parts.push(
+    section(
+      t.cache,
+      tbl(
+        t.captions.cache,
+        [t.resource, 'Cache-Control', 'ETag', 'Last-Modified', 'max-age'],
+        [log.entries[0], biggest].map((e) => {
+          const c = cacheInfo(e);
+          return [clip(e.request.url), c.cacheControl ?? '—', c.etag ?? '—', c.lastModified ?? '—', c.maxAge ?? '—'];
+        }),
+      ),
+    ),
+  );
   parts.push(section(t.security, tbl(t.captions.security, [t.header, t.hvalue], securityRows(log.entries[0], lang))));
   const cookies = cookieRows(log.entries);
   parts.push(section(t.cookie, cookies.length ? tbl(t.captions.cookies, [t.name, t.type, t.reqLabel], cookies) : t.noCookies));
-  if (slow) parts.push(section(t.compare, tbl(t.captions.compare, [t.metric, t.normal, 'Fast 3G'], compareRows(har, slow).map(([k, ...v]) => [t[k], ...v]))));
+  if (slow)
+    parts.push(
+      section(
+        t.compare,
+        tbl(
+          t.captions.compare,
+          [t.metric, t.normal, 'Fast 3G'],
+          compareRows(har, slow).map(([k, ...v]) => [t[k], ...v]),
+        ),
+      ),
+    );
   return parts.join('\n');
 };
 ```
@@ -459,10 +512,12 @@ const esc = (s) => String(s).replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt
 
 export const bars = (rows, unit) => {
   const max = Math.max(...rows.map((r) => r[1])) || 1;
-  const body = rows.map(([label, v], i) => {
-    const w = Math.round((v / max) * 380);
-    return `<text x="190" y="${i * 30 + 20}" text-anchor="end" font-size="13">${esc(label)}</text><rect x="200" y="${i * 30 + 6}" width="${w}" height="20" fill="#2563eb"/><text x="${206 + w}" y="${i * 30 + 21}" font-size="13">${v} ${unit}</text>`;
-  }).join('');
+  const body = rows
+    .map(([label, v], i) => {
+      const w = Math.round((v / max) * 380);
+      return `<text x="190" y="${i * 30 + 20}" text-anchor="end" font-size="13">${esc(label)}</text><rect x="200" y="${i * 30 + 6}" width="${w}" height="20" fill="#2563eb"/><text x="${206 + w}" y="${i * 30 + 21}" font-size="13">${v} ${unit}</text>`;
+    })
+    .join('');
   return `<svg xmlns="http://www.w3.org/2000/svg" width="680" height="${rows.length * 30 + 6}" font-family="Arial, sans-serif" fill="#1c1f2e">${body}</svg>\n`;
 };
 
@@ -476,8 +531,21 @@ export const figures = (har, slow, lang = 'ru') => {
   return {
     'fig-1-types.svg': bars(byValue(Object.entries(s.types)), f.pieces),
     'fig-2-bytes.svg': bars(byValue(Object.entries(bytesByType(har.log.entries)).map(([k, v]) => [k, Number((v / 1048576).toFixed(2))])), f.mb),
-    'fig-3-timing.svg': bars(Object.entries(PHASES).filter(([k]) => first[k] > 0).map(([k, label]) => [label, Math.round(first[k])]), T[lang].ms),
-    'fig-4-load.svg': bars([[f.onload, s.onLoad], [f.onload3g, t.onLoad], [f.ttfb, Math.round(s.ttfb)], [f.ttfb3g, Math.round(t.ttfb)]], T[lang].ms),
+    'fig-3-timing.svg': bars(
+      Object.entries(PHASES)
+        .filter(([k]) => first[k] > 0)
+        .map(([k, label]) => [label, Math.round(first[k])]),
+      T[lang].ms,
+    ),
+    'fig-4-load.svg': bars(
+      [
+        [f.onload, s.onLoad],
+        [f.onload3g, t.onLoad],
+        [f.ttfb, Math.round(s.ttfb)],
+        [f.ttfb3g, Math.round(t.ttfb)],
+      ],
+      T[lang].ms,
+    ),
   };
 };
 ```
@@ -543,8 +611,14 @@ test('summary and bytesByType ignore unknown transfer size', () => {
 });
 
 test('pick returns document, script and xhr only when present', () => {
-  assert.deepEqual(pick(normal.log.entries).map((e) => e._resourceType), ['document', 'script', 'xhr']);
-  assert.deepEqual(pick([entry()]).map((e) => e._resourceType), ['document']);
+  assert.deepEqual(
+    pick(normal.log.entries).map((e) => e._resourceType),
+    ['document', 'script', 'xhr'],
+  );
+  assert.deepEqual(
+    pick([entry()]).map((e) => e._resourceType),
+    ['document'],
+  );
 });
 
 test('headerRows skips pseudo headers, limits rows, clips and escapes values', () => {
@@ -566,7 +640,12 @@ test('cacheInfo reads cache headers and max-age', () => {
 test('securityRows marks absent headers in both languages', () => {
   const e = entry();
   e.response.headers = [h('Strict-Transport-Security', 'max-age=1')];
-  assert.deepEqual(securityRows(e), [['`content-security-policy`', 'отсутствует'], ['`strict-transport-security`', 'max-age=1'], ['`x-frame-options`', 'отсутствует'], ['`x-content-type-options`', 'отсутствует']]);
+  assert.deepEqual(securityRows(e), [
+    ['`content-security-policy`', 'отсутствует'],
+    ['`strict-transport-security`', 'max-age=1'],
+    ['`x-frame-options`', 'отсутствует'],
+    ['`x-content-type-options`', 'отсутствует'],
+  ]);
   assert.equal(securityRows(e, 'en')[0][1], 'absent');
 });
 
@@ -574,13 +653,19 @@ test('cookieRows lists request and response cookies', () => {
   const e = entry();
   e.request.cookies = [{ name: 'a' }];
   e.response.cookies = [{ name: 'b' }];
-  assert.deepEqual(cookieRows([e, entry()]), [['a', 'Cookie', 'https://x.test/'], ['b', 'Set-Cookie', 'https://x.test/']]);
+  assert.deepEqual(cookieRows([e, entry()]), [
+    ['a', 'Cookie', 'https://x.test/'],
+    ['b', 'Set-Cookie', 'https://x.test/'],
+  ]);
   assert.deepEqual(cookieRows(normal.log.entries), []);
 });
 
 test('timingRows and slowestPhase handle missing phases', () => {
   const e = entry();
-  assert.deepEqual(timingRows(e).map((r) => r[1]), ['—', '1 мс', '2 мс', '—', '0 мс', '5 мс', '3 мс']);
+  assert.deepEqual(
+    timingRows(e).map((r) => r[1]),
+    ['—', '1 мс', '2 мс', '—', '0 мс', '5 мс', '3 мс'],
+  );
   assert.equal(timingRows(e, 'en')[1][1], '1 ms');
   assert.equal(slowestPhase(e), 'Waiting (TTFB)');
   assert.equal(slowestPhase(entry({ timings: {} })), '—');
@@ -588,7 +673,10 @@ test('timingRows and slowestPhase handle missing phases', () => {
 
 test('compareRows shows a slower page on Fast 3G', () => {
   const rows = compareRows(normal, fast);
-  assert.deepEqual(rows.map((r) => r[0]), ['requests', 'transferred', 'dcl', 'onload', 'ttfb']);
+  assert.deepEqual(
+    rows.map((r) => r[0]),
+    ['requests', 'transferred', 'dcl', 'onload', 'ttfb'],
+  );
   assert.ok(rows[3][2] > rows[3][1]);
 });
 
@@ -622,7 +710,16 @@ test('report lists cookies and fills missing cache headers', () => {
 });
 
 test('bars scale to the largest value and survive all zeros', () => {
-  assert.match(bars([['a', 10], ['b', 5]], 'шт.'), /width="380".*width="190"/);
+  assert.match(
+    bars(
+      [
+        ['a', 10],
+        ['b', 5],
+      ],
+      'шт.',
+    ),
+    /width="380".*width="190"/,
+  );
   assert.match(bars([['a', 0]], 'x'), /width="0"/);
   assert.match(bars([['<a>', 1]], 'x'), /&lt;a&gt;/);
 });

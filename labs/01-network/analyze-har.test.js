@@ -40,8 +40,14 @@ test('summary and bytesByType ignore unknown transfer size', () => {
 });
 
 test('pick returns document, script and xhr only when present', () => {
-  assert.deepEqual(pick(normal.log.entries).map((e) => e._resourceType), ['document', 'script', 'xhr']);
-  assert.deepEqual(pick([entry()]).map((e) => e._resourceType), ['document']);
+  assert.deepEqual(
+    pick(normal.log.entries).map((e) => e._resourceType),
+    ['document', 'script', 'xhr'],
+  );
+  assert.deepEqual(
+    pick([entry()]).map((e) => e._resourceType),
+    ['document'],
+  );
 });
 
 test('headerRows skips pseudo headers, limits rows, clips and escapes values', () => {
@@ -63,7 +69,12 @@ test('cacheInfo reads cache headers and max-age', () => {
 test('securityRows marks absent headers in both languages', () => {
   const e = entry();
   e.response.headers = [h('Strict-Transport-Security', 'max-age=1')];
-  assert.deepEqual(securityRows(e), [['`content-security-policy`', 'отсутствует'], ['`strict-transport-security`', 'max-age=1'], ['`x-frame-options`', 'отсутствует'], ['`x-content-type-options`', 'отсутствует']]);
+  assert.deepEqual(securityRows(e), [
+    ['`content-security-policy`', 'отсутствует'],
+    ['`strict-transport-security`', 'max-age=1'],
+    ['`x-frame-options`', 'отсутствует'],
+    ['`x-content-type-options`', 'отсутствует'],
+  ]);
   assert.equal(securityRows(e, 'en')[0][1], 'absent');
 });
 
@@ -71,13 +82,19 @@ test('cookieRows lists request and response cookies', () => {
   const e = entry();
   e.request.cookies = [{ name: 'a' }];
   e.response.cookies = [{ name: 'b' }];
-  assert.deepEqual(cookieRows([e, entry()]), [['a', 'Cookie', 'https://x.test/'], ['b', 'Set-Cookie', 'https://x.test/']]);
+  assert.deepEqual(cookieRows([e, entry()]), [
+    ['a', 'Cookie', 'https://x.test/'],
+    ['b', 'Set-Cookie', 'https://x.test/'],
+  ]);
   assert.deepEqual(cookieRows(normal.log.entries), []);
 });
 
 test('timingRows and slowestPhase handle missing phases', () => {
   const e = entry();
-  assert.deepEqual(timingRows(e).map((r) => r[1]), ['—', '1 мс', '2 мс', '—', '0 мс', '5 мс', '3 мс']);
+  assert.deepEqual(
+    timingRows(e).map((r) => r[1]),
+    ['—', '1 мс', '2 мс', '—', '0 мс', '5 мс', '3 мс'],
+  );
   assert.equal(timingRows(e, 'en')[1][1], '1 ms');
   assert.equal(slowestPhase(e), 'Waiting (TTFB)');
   assert.equal(slowestPhase(entry({ timings: {} })), '—');
@@ -85,7 +102,10 @@ test('timingRows and slowestPhase handle missing phases', () => {
 
 test('compareRows shows a slower page on Fast 3G', () => {
   const rows = compareRows(normal, fast);
-  assert.deepEqual(rows.map((r) => r[0]), ['requests', 'transferred', 'dcl', 'onload', 'ttfb']);
+  assert.deepEqual(
+    rows.map((r) => r[0]),
+    ['requests', 'transferred', 'dcl', 'onload', 'ttfb'],
+  );
   assert.ok(rows[3][2] > rows[3][1]);
 });
 
@@ -119,7 +139,16 @@ test('report lists cookies and fills missing cache headers', () => {
 });
 
 test('bars scale to the largest value and survive all zeros', () => {
-  assert.match(bars([['a', 10], ['b', 5]], 'шт.'), /width="380".*width="190"/);
+  assert.match(
+    bars(
+      [
+        ['a', 10],
+        ['b', 5],
+      ],
+      'шт.',
+    ),
+    /width="380".*width="190"/,
+  );
   assert.match(bars([['a', 0]], 'x'), /width="0"/);
   assert.match(bars([['<a>', 1]], 'x'), /&lt;a&gt;/);
 });

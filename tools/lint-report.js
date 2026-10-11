@@ -2,7 +2,7 @@ const L = {
   ru: {
     goal: /^## 1 Цель работы$/m,
     conclusion: /^## Заключение$/m,
-    conclusionWord: /^#{1,6}\s+(?:\d+(?:\.\d+)*\s+)?Выводы(?![а-яё])/mi,
+    conclusionWord: /^#{1,6}\s+(?:\d+(?:\.\d+)*\s+)?Выводы(?![а-яё])/im,
     forbidden: /(?<![а-яё])(также|были)(?![а-яё])/i,
     parens: /\(\s*(см\.?|смотри|рис|табл)/i,
     quotes: /"/,
@@ -11,7 +11,20 @@ const L = {
     ref: 'рисунк\\S*',
     appendix: /^## Приложение [А-Я] – \S/,
     appendixAny: /^## Приложение/m,
-    messages: { goal: 'Раздел «1 Цель работы» отсутствует или не пронумерован', conclusion: 'Раздел «Заключение» отсутствует', conclusionWord: 'Раздел «Выводы» нужно назвать «Заключение»', forbidden: 'Слова-паразиты «также», «были»', parens: 'Ссылка на рисунок или таблицу в скобках', quotes: 'Прямые кавычки вместо «ёлочек»', caption: 'Подпись рисунка', mention: 'Перед рисунком нет описания со ссылкой словами', table: 'Подпись таблицы', code: 'Код в основном тексте, его место в приложении', image: 'Рисунок в приложении', appendix: 'Название приложения' },
+    messages: {
+      goal: 'Раздел «1 Цель работы» отсутствует или не пронумерован',
+      conclusion: 'Раздел «Заключение» отсутствует',
+      conclusionWord: 'Раздел «Выводы» нужно назвать «Заключение»',
+      forbidden: 'Слова-паразиты «также», «были»',
+      parens: 'Ссылка на рисунок или таблицу в скобках',
+      quotes: 'Прямые кавычки вместо «ёлочек»',
+      caption: 'Подпись рисунка',
+      mention: 'Перед рисунком нет описания со ссылкой словами',
+      table: 'Подпись таблицы',
+      code: 'Код в основном тексте, его место в приложении',
+      image: 'Рисунок в приложении',
+      appendix: 'Название приложения',
+    },
   },
   en: {
     goal: /^## 1 Purpose of the Work$/m,
@@ -25,11 +38,27 @@ const L = {
     ref: 'figure',
     appendix: /^## Appendix [A-Z] – \S/,
     appendixAny: /^## Appendix/m,
-    messages: { goal: 'Section "1 Purpose of the Work" is missing', conclusion: 'Section "Conclusion" is missing', conclusionWord: 'Rename "Conclusions" to "Conclusion"', forbidden: 'Filler words "also", "were"', parens: 'Figure or table reference in parentheses', caption: 'Figure caption', mention: 'No description with a worded reference before the figure', table: 'Table caption', code: 'Code in the main text, it belongs to an appendix', image: 'Figure inside an appendix', appendix: 'Appendix title' },
+    messages: {
+      goal: 'Section "1 Purpose of the Work" is missing',
+      conclusion: 'Section "Conclusion" is missing',
+      conclusionWord: 'Rename "Conclusions" to "Conclusion"',
+      forbidden: 'Filler words "also", "were"',
+      parens: 'Figure or table reference in parentheses',
+      caption: 'Figure caption',
+      mention: 'No description with a worded reference before the figure',
+      table: 'Table caption',
+      code: 'Code in the main text, it belongs to an appendix',
+      image: 'Figure inside an appendix',
+      appendix: 'Appendix title',
+    },
   },
 };
 
-const strip = (s) => s.replace(/^```[\s\S]*?^```/gm, '').replace(/^[!|].*$/gm, '').replace(/`[^`\n]*`/g, '');
+const strip = (s) =>
+  s
+    .replace(/^```[\s\S]*?^```/gm, '')
+    .replace(/^[!|].*$/gm, '')
+    .replace(/`[^`\n]*`/g, '');
 
 export const lintReport = (text, lang = 'ru') => {
   const r = L[lang];
@@ -47,7 +76,10 @@ export const lintReport = (text, lang = 'ru') => {
   check(r.quotes?.test(prose), m.quotes);
   check(/^```/m.test(body), m.code);
   check(appendixAt >= 0 && /^!\[/m.test(text.slice(appendixAt)), m.image);
-  check(text.split('\n').some((l) => r.appendixAny.test(l) && !r.appendix.test(l)), m.appendix);
+  check(
+    text.split('\n').some((l) => r.appendixAny.test(l) && !r.appendix.test(l)),
+    m.appendix,
+  );
   const lines = text.split('\n');
   const at = (i, step) => {
     for (let j = i + step; j >= 0 && j < lines.length; j += step) if (lines[j].trim()) return lines[j];

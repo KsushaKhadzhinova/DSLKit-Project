@@ -11,7 +11,10 @@ test('build expands code and include placeholders', () => {
 });
 
 test('build leaves text without placeholders unchanged', () => {
-  assert.equal(build('plain', () => ''), 'plain');
+  assert.equal(
+    build('plain', () => ''),
+    'plain',
+  );
 });
 
 test('build script writes both reports', async () => {

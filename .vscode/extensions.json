@@ -1,0 +1,10 @@
+{
+  "recommendations": [
+    "ritwickdey.liveserver",
+    "formulahendry.auto-rename-tag",
+    "esbenp.prettier-vscode",
+    "eamodio.gitlens",
+    "tobermory.es6-string-html",
+    "figma-to-code.figma-to-code-sync"
+  ]
+}

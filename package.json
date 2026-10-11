@@ -5,6 +5,24 @@
   "scripts": {
     "test": "node --test --experimental-test-coverage --test-coverage-lines=100 --test-coverage-branches=100 --test-coverage-functions=100",
     "lab1:generate": "node labs/01-network/cli.js labs/01-network/data/draw-io-normal.har labs/01-network/data/draw-io-fast3g.har ru labs/01-network/generated/ru && node labs/01-network/cli.js labs/01-network/data/draw-io-normal.har labs/01-network/data/draw-io-fast3g.har en labs/01-network/generated/en",
-    "lab1:report": "npm run lab1:generate && node tools/build.js labs/01-network"
+    "lab1:report": "npm run lab1:generate && node tools/build.js labs/01-network",
+    "dev": "nodemon --watch site --ext html,css,js,svg,json tools/serve.js site 5173",
+    "start": "node tools/serve.js site 5173",
+    "check:env": "node labs/02-environment/check.js ru",
+    "check:env:en": "node labs/02-environment/check.js en",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "design:generate": "node labs/02-environment/design.js site/design/figma"
+  },
+  "dependencies": {
+    "lodash": "^4.18.1"
+  },
+  "devDependencies": {
+    "jsdom": "^29.1.1",
+    "nodemon": "^3.1.14",
+    "prettier": "^3.9.10"
+  },
+  "engines": {
+    "node": ">=20"
   }
 }
