@@ -26,7 +26,7 @@
 
 ## ⬜ Отложено
 
-- [ ] Figma файл (нужен PAT token или Figma MCP): вайрфреймы, мокапы, макеты, мудборд, логотип, шрифты
+- [ ] Перенести `figma/*.svg` в Figma (см. `figma/README.md`); затем компоненты, переменные, мудборд, логотип, шрифты
 - [ ] Mobile / tablet варианты макетов
 - [ ] Collaborative editing
 - [ ] Mermaid export

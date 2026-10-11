@@ -183,7 +183,7 @@
 - [ ] Mobile/tablet варианты макетов.
 
 ### Дизайн и Figma (заблокировано доступом)
-- [ ] Figma-файл `bsuir-diploma` (ключ `HYmcqqGdcszOt7dGnKrvZg`): записать туда ничего нельзя без Personal Access Token или Figma MCP. Нужно вручную нативными объектами: вайрфреймы, мокапы, макеты (десктоп/планшет/мобайл), мудборд, несколько вариантов логотипа, иконка приложения.
+- [ ] Figma-файл `bsuir-diploma` (ключ `HYmcqqGdcszOt7dGnKrvZg`): SVG вайрфреймов, мокапов и макетов (6 экранов, светлая и тёмная темы) готовы в `figma/`, нужно перетащить их в файл (инструкция в `figma/README.md`). Автоматически записать в Figma не удалось: нужен Personal Access Token, Figma MCP или рабочее расширение Chrome. Остаётся собрать компоненты и переменные, мудборд, варианты логотипа, иконку приложения.
 - [ ] Собственные шрифты проекта (подборка и образцы; создание файлов шрифтов требует FontForge/Glyphs).
 - [ ] Финальное утверждение палитры, радиусов, шрифтов, статус-бара.
 
@@ -245,6 +245,11 @@ DSLKit-Project/
     │   ├── app.js                логика страницы (ответы, прогресс, экспорт)
     │   └── build.py              сборка: python mockups/ab-src/build.py
     ├── dslkit-mockup.html, dslkit-layouts.html, dslkit-quiz.html
+└── figma/                    вайрфреймы, мокапы и макеты экранов (SVG для Figma)
+    ├── wireframes/, mockups/, designs-light/, designs-dark/
+    ├── index.html            галерея всех экранов
+    ├── generate.py           генератор SVG
+    └── README.md             как импортировать в Figma
 ```
 
 Как пересобрать A/B страницу после правок: `python mockups/ab-src/build.py`, затем открыть `mockups/dslkit-100-ab-tests.html` в браузере (ответы хранятся в `localStorage`, итог можно скопировать или скачать в Markdown).
