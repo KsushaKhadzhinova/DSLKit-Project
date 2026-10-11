@@ -1,8 +1,12 @@
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
-import { mock, test } from 'node:test';
+import { mkdtempSync, readFileSync, readdirSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { test } from 'node:test';
 import { fileURLToPath } from 'node:url';
-import { HEADER_DOCS, cacheInfo, compareRows, cookieRows, headerRows, pick, report, securityRows, slowestPhase, summary, timingRows } from './analyze-har.js';
+import { bytesByType, cacheInfo, compareRows, cookieRows, headerRows, pick, report, securityRows, slowestPhase, summary, timingRows } from './analyze-har.js';
+import { bars, figures } from './figures.js';
+import { HEADER_DOCS, T } from './i18n.js';
 
 const file = (n) => fileURLToPath(new URL(`./data/${n}`, import.meta.url));
 const load = (n) => JSON.parse(readFileSync(file(n), 'utf8'));
@@ -28,10 +32,11 @@ test('summary of the recorded draw.io load', () => {
   assert.ok(s.bytes > 6e6);
 });
 
-test('summary ignores unknown transfer size', () => {
+test('summary and bytesByType ignore unknown transfer size', () => {
   const e = entry();
   e.response._transferSize = -1;
   assert.equal(summary(har([e])).bytes, 0);
+  assert.deepEqual(bytesByType([e, entry()]), { document: 10 });
 });
 
 test('pick returns document, script and xhr only when present', () => {
@@ -40,11 +45,12 @@ test('pick returns document, script and xhr only when present', () => {
 });
 
 test('headerRows skips pseudo headers, limits rows, clips and escapes values', () => {
-  const rows = headerRows([h(':path', '/'), h('Accept', 'a|b'), h('x-unknown', 'y'.repeat(100)), h('server', 'cf')], 3);
+  const rows = headerRows([h(':path', '/'), h('Accept', 'a|b'), h('x-unknown', 'y'.repeat(100)), h('server', 'cf')], 'ru', 3);
   assert.equal(rows.length, 3);
-  assert.deepEqual(rows[0], ['`Accept`', 'a\\|b', HEADER_DOCS.accept]);
+  assert.deepEqual(rows[0], ['`Accept`', 'a\\|b', HEADER_DOCS.ru.accept]);
   assert.deepEqual(rows[1], ['`x-unknown`', `${'y'.repeat(77)}...`, '—']);
   assert.equal(headerRows([h('a', '1'), h('b', '2')]).length, 2);
+  assert.equal(headerRows([h('Accept', '1')], 'en')[0][2], HEADER_DOCS.en.accept);
 });
 
 test('cacheInfo reads cache headers and max-age', () => {
@@ -54,10 +60,11 @@ test('cacheInfo reads cache headers and max-age', () => {
   assert.deepEqual(cacheInfo(entry()), { cacheControl: undefined, etag: undefined, lastModified: undefined, maxAge: undefined });
 });
 
-test('securityRows marks absent headers', () => {
+test('securityRows marks absent headers in both languages', () => {
   const e = entry();
   e.response.headers = [h('Strict-Transport-Security', 'max-age=1')];
   assert.deepEqual(securityRows(e), [['`content-security-policy`', 'отсутствует'], ['`strict-transport-security`', 'max-age=1'], ['`x-frame-options`', 'отсутствует'], ['`x-content-type-options`', 'отсутствует']]);
+  assert.equal(securityRows(e, 'en')[0][1], 'absent');
 });
 
 test('cookieRows lists request and response cookies', () => {
@@ -71,33 +78,63 @@ test('cookieRows lists request and response cookies', () => {
 test('timingRows and slowestPhase handle missing phases', () => {
   const e = entry();
   assert.deepEqual(timingRows(e).map((r) => r[1]), ['—', '1 мс', '2 мс', '—', '0 мс', '5 мс', '3 мс']);
+  assert.equal(timingRows(e, 'en')[1][1], '1 ms');
   assert.equal(slowestPhase(e), 'Waiting (TTFB)');
   assert.equal(slowestPhase(entry({ timings: {} })), '—');
 });
 
 test('compareRows shows a slower page on Fast 3G', () => {
   const rows = compareRows(normal, fast);
-  assert.equal(rows.length, 5);
+  assert.deepEqual(rows.map((r) => r[0]), ['requests', 'transferred', 'dcl', 'onload', 'ttfb']);
   assert.ok(rows[3][2] > rows[3][1]);
 });
 
-test('report with and without comparison and cookies', () => {
-  const one = report(normal);
-  assert.match(one, /## Сводка/);
-  assert.match(one, /### Request headers/);
-  assert.match(one, /Cookie не передавались/);
-  assert.doesNotMatch(one, /Fast 3G/);
-  const e = entry();
-  e.request.cookies = [{ name: 'sid' }];
-  const two = report(har([e]), fast);
-  assert.match(two, /\| sid \| Cookie \|/);
-  assert.match(two, /Сравнение: обычная сеть и Fast 3G/);
+test('i18n dictionaries have the same keys in both languages', () => {
+  assert.deepEqual(Object.keys(HEADER_DOCS.ru), Object.keys(HEADER_DOCS.en));
+  assert.deepEqual(Object.keys(T.ru), Object.keys(T.en));
+  assert.deepEqual(Object.keys(T.ru.captions), Object.keys(T.en.captions));
+  assert.deepEqual(Object.keys(T.ru.figures), Object.keys(T.en.figures));
 });
 
-test('cli prints the report for two HAR files', async () => {
-  const log = mock.method(console, 'log', () => {});
-  process.argv.push(file('draw-io-normal.har'), file('draw-io-fast3g.har'));
+test('report in both languages with captions and numbering', () => {
+  const ru = report(normal, fast);
+  assert.match(ru, /#### 3\.3\.1 Сводка загрузки/);
+  assert.match(ru, /Таблица 1 – Сводные показатели загрузки страницы/);
+  assert.match(ru, /Таблица 2 – Количество запросов по типам ресурсов/);
+  assert.match(ru, /Cookie не передавались/);
+  assert.match(ru, /Сравнение обычной сети и Fast 3G/);
+  const en = report(normal, undefined, 'en', '3.4');
+  assert.match(en, /#### 3\.4\.1 Load summary/);
+  assert.match(en, /Table 1 – Page load summary/);
+  assert.match(en, /No cookies passed in either direction\./);
+  assert.doesNotMatch(en, /Fast 3G/);
+});
+
+test('report lists cookies and fills missing cache headers', () => {
+  const e = entry();
+  e.request.cookies = [{ name: 'sid' }];
+  const out = report(har([e]), fast);
+  assert.match(out, /\| sid \| Cookie \|/);
+  assert.match(out, /\| https:\/\/x\.test\/ \| — \| — \| — \| — \|/);
+});
+
+test('bars scale to the largest value and survive all zeros', () => {
+  assert.match(bars([['a', 10], ['b', 5]], 'шт.'), /width="380".*width="190"/);
+  assert.match(bars([['a', 0]], 'x'), /width="0"/);
+  assert.match(bars([['<a>', 1]], 'x'), /&lt;a&gt;/);
+});
+
+test('figures build four charts for each language', () => {
+  const ru = figures(normal, fast);
+  assert.deepEqual(Object.keys(ru), ['fig-1-types.svg', 'fig-2-bytes.svg', 'fig-3-timing.svg', 'fig-4-load.svg']);
+  assert.match(ru['fig-4-load.svg'], /onLoad, обычная сеть/);
+  assert.match(figures(normal, fast, 'en')['fig-4-load.svg'], /onLoad, regular network/);
+});
+
+test('cli writes the analysis and the figures', async () => {
+  const dir = join(mkdtempSync(join(tmpdir(), 'figs-')), 'nested');
+  process.argv.splice(2, 4, file('draw-io-normal.har'), file('draw-io-fast3g.har'), 'en', dir);
   await import('./cli.js');
-  assert.match(log.mock.calls[0].arguments[0], /Сравнение/);
-  log.mock.restore();
+  assert.match(readFileSync(join(dir, 'analysis.md'), 'utf8'), /Comparison of the regular network and Fast 3G/);
+  assert.equal(readdirSync(dir).length, 5);
 });

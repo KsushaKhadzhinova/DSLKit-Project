@@ -3,6 +3,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node --test --experimental-test-coverage --test-coverage-lines=100 --test-coverage-branches=100 --test-coverage-functions=100"
+    "test": "node --test --experimental-test-coverage --test-coverage-lines=100 --test-coverage-branches=100 --test-coverage-functions=100",
+    "lab1:generate": "node labs/01-network/cli.js labs/01-network/data/draw-io-normal.har labs/01-network/data/draw-io-fast3g.har ru labs/01-network/generated/ru && node labs/01-network/cli.js labs/01-network/data/draw-io-normal.har labs/01-network/data/draw-io-fast3g.har en labs/01-network/generated/en",
+    "lab1:report": "npm run lab1:generate && node tools/build.js labs/01-network"
   }
 }
