@@ -10,8 +10,8 @@
   --tx2: #4a5068;  /* text secondary — contrast  7.1:1 WCAG AA  */
   --tx3: #6b7285;  /* text tertiary  — contrast  4.7:1 WCAG AA  */
   --ac:  #2563eb;  /* 10% — accent (buttons) — contrast 4.9:1 WCAG AA */
-  --rt:  #16a34a;  /* success / run green */
-  --er:  #dc2626;  /* error red */
+  --rt:  #16a34a;  /* success only; Run button uses --ac (A/B Q12) */
+  --er:  #dc2626;  /* error red; Run with errors, A/B Q1 */
   --wn:  #d97706;  /* warning amber */
 }
 ```
@@ -31,6 +31,13 @@
   --wn:  #fab387;
 }
 ```
+
+## Components (A/B results, docs/ab-results/ab-results.md)
+- Run: primary `--ac`; with errors `--er`, stays clickable and opens an error modal (Q1, Q12)
+- Status bar: height 22px, background `--bg` (Q85, Q89)
+- Editor: code 13px, line numbers on, no minimap, no word wrap (Q19, Q20, Q23, Q24)
+- Canvas: dot grid by default (Q38)
+- Toolbar separators: 1px line (Q8)
 
 ## Layout
 ```
