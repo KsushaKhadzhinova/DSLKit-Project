@@ -75,7 +75,7 @@ test('formatResults lists failures with explanations in both languages', () => {
   const bad = checkEnv(env(without(GOOD_FILES, 'README.md')));
   const ru = formatResults(bad);
   assert.match(ru, /\| Файл README\.md \| не пройдена \|/);
-  assert.match(ru, /### Файл README\.md/);
+  assert.match(ru, /\*\*Файл README\.md\.\*\*/);
   assert.match(ru, /Зачем это нужно: README объясняет/);
   assert.match(ru, /Как исправить: Добавьте описание/);
   const en = formatResults(bad, 'en');
@@ -102,7 +102,7 @@ test('cli prints the check table and exposes the number of failures as exit code
   } finally {
     console.log = log;
   }
-  assert.match(lines[0], /## Environment check/);
+  assert.match(lines[0], /Table 1 – Environment check results/);
   assert.equal(process.exitCode, (lines[0].match(/\| failed \|/g) ?? []).length);
   process.exitCode = 0;
 });

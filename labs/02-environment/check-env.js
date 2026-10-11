@@ -80,7 +80,7 @@ export const formatResults = (results, lang = 'ru') => {
   const table = [`| ${w.check} | ${w.status} | ${w.detail} |`, '|---|---|---|', ...rows].join('\n');
   const help = failed.map((r) => {
     const [title, why, fix] = HELP[lang][r.id];
-    return `### ${title}\n\n${w.why}: ${why}\n\n${w.fix}: ${fix}`;
+    return `**${title}.** ${w.why}: ${why} ${w.fix}: ${fix}`;
   });
-  return [`## ${w.title}`, table, failed.length ? `${w.failed}: ${failed.length}.` : w.done, ...help].join('\n\n');
+  return [`${w.table} 1 – ${w.title}`, table, failed.length ? `${w.failed}: ${failed.length}.` : w.done, ...help].join('\n\n');
 };
