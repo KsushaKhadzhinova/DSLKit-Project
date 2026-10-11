@@ -120,15 +120,18 @@ export const home = (width, theme = 'light') => {
   const t = TOKENS[theme];
   const c = canvas(width, t);
   const wide = width >= 1024;
-  const cols = wide ? 3 : width >= 576 ? 2 : 1;
   const pad = width >= 576 ? 48 : 16;
   const inner = width - pad * 2;
   const chars = (size, w) => Math.floor(w / (size * 0.56));
-  const cardW = (inner - (cols - 1) * 16) / cols;
+  const columns = (n) => (width >= 576 ? n : 1);
   c.rect(0, 0, width, 64, t.surface, { stroke: t.border });
   c.text(pad, 40, 'DSLKit', { size: 20, weight: 700 });
-  if (width >= 768) COPY.nav.forEach((label, i) => c.text(pad + 140 + i * (wide ? 130 : 100), 38, label, { size: wide ? 14 : 12, fill: t['text-light'] }));
   if (width >= 768) {
+    const size = wide ? 14 : 12;
+    COPY.nav.reduce((x, label) => {
+      c.text(x, 38, label, { size, fill: t['text-light'] });
+      return x + label.length * size * 0.56 + 28;
+    }, pad + 140);
     c.rect(width - pad - 120, 16, 120, 32, t.primary, { rx: 8 });
     c.text(width - pad - 60, 37, 'Попробовать', { size: 14, weight: 600, fill: '#ffffff', anchor: 'middle' });
   } else {
@@ -153,48 +156,59 @@ export const home = (width, theme = 'light') => {
   ['diagram idef0 "Order"', 'box A0 "Process" {', '  input: Order', '}'].forEach((line, i) =>
     c.text(previewX + 24, previewY + 48 + i * 28, line, { mono: true, size: 14 }),
   );
-  c.rect(previewX + previewW - 120, previewY + 120, 96, 48, t.secondary, { rx: 6, stroke: t.primary });
+  c.rect(previewX + 24, previewY + 180, 96, 48, t.secondary, { rx: 6, stroke: t.primary });
+  c.text(previewX + 72, previewY + 210, 'A0', { size: 14, weight: 600, anchor: 'middle' });
+  c.rect(previewX + previewW - 120, previewY + 180, 96, 48, t.secondary, { rx: 6, stroke: t.primary });
+  c.text(previewX + previewW - 72, previewY + 210, 'A1', { size: 14, weight: 600, anchor: 'middle' });
+  c.rect(previewX + 120, previewY + 203, previewW - 240, 2, t.primary);
   y = Math.max(y + 152, wide ? 112 + 320 : previewY + 320);
   const section = (title) => {
     y += 64;
     c.text(pad, y, title, { size: wide ? 32 : 24, weight: 700 });
     y += 32;
   };
-  const cards = (items, h) => {
-    items.forEach((item, i) => {
+  const cards = (items, cols) => {
+    const cardW = (inner - (cols - 1) * 16) / cols;
+    const laid = items.map((item) => {
+      const [head, sub] = [].concat(item);
+      const headLines = wrap(head, chars(18, cardW - 40));
+      const subLines = sub ? wrap(sub, chars(14, cardW - 40)) : [];
+      return { headLines, subLines, h: 28 + headLines.length * 24 + (subLines.length ? 8 + subLines.length * 20 : 0) + 16 };
+    });
+    const h = Math.max(...laid.map((l) => l.h));
+    laid.forEach(({ headLines, subLines }, i) => {
       const x = pad + (i % cols) * (cardW + 16);
       const top = y + Math.floor(i / cols) * (h + 16);
       c.rect(x, top, cardW, h, t.surface, { rx: 12, stroke: t.border });
-      const [head, sub] = [].concat(item);
-      c.text(x + 20, top + 36, head, { size: 18, weight: 600 });
-      if (sub) c.block(x + 20, top + 62, sub, chars(14, cardW - 40), { size: 14, fill: t['text-light'], lh: 20 });
+      headLines.forEach((line, j) => c.text(x + 20, top + 36 + j * 24, line, { size: 18, weight: 600 }));
+      subLines.forEach((line, j) => c.text(x + 20, top + 36 + (headLines.length - 1) * 24 + 28 + j * 20, line, { size: 14, fill: t['text-light'] }));
     });
     y += Math.ceil(items.length / cols) * (h + 16);
   };
   section('Нотации');
   cards(
     COPY.notations.map((n) => [n, 'Шаблон с примером']),
-    96,
+    wide ? 3 : columns(2),
   );
   section('Как это работает');
   cards(
     COPY.steps.map(([n, a, b]) => [`${n}. ${a}`, b]),
-    96,
+    columns(3),
   );
   section('Для кого');
-  cards(COPY.audience, 96);
+  cards(COPY.audience, columns(3));
   section('Тарифы');
   cards(
     [
       ['Free', 'До 5 диаграмм в день в бета-версии'],
       ['Pro', 'Без лимитов, история версий, совместная работа'],
     ],
-    128,
+    columns(2),
   );
   section('FAQ');
   cards(
     COPY.faq.map((q) => [q]),
-    64,
+    columns(2),
   );
   section('Записаться в бету');
   ['Имя', 'Эл. почта'].forEach((label, i) => {

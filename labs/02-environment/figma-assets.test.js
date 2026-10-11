@@ -62,3 +62,42 @@ test('design script writes all assets', async () => {
   assert.equal(readdirSync(dir).length, 9);
   assert.equal(readFileSync(join(dir, 'palette.svg'), 'utf8'), palette());
 });
+
+const boxes = (svg) => {
+  const doc = parse(svg).ownerDocument;
+  const num = (el, name) => Number(el.getAttribute(name));
+  const texts = [...doc.querySelectorAll('text')].map((el) => {
+    const size = num(el, 'font-size');
+    const w = el.textContent.length * size * (el.getAttribute('font-family').includes('Mono') ? 0.6 : 0.56);
+    const anchor = el.getAttribute('text-anchor');
+    const x0 = num(el, 'x') - (anchor === 'middle' ? w / 2 : anchor === 'end' ? w : 0);
+    return { text: el.textContent, x0, x1: x0 + w, y0: num(el, 'y') - size, y1: num(el, 'y') };
+  });
+  const rects = [...doc.querySelectorAll('rect')].map((el) => ({
+    x0: num(el, 'x'),
+    y0: num(el, 'y'),
+    x1: num(el, 'x') + num(el, 'width'),
+    y1: num(el, 'y') + num(el, 'height'),
+  }));
+  return { texts, rects, width: num(doc.documentElement, 'width') };
+};
+
+test('home prototypes have no overlapping or overflowing text at any width', () => {
+  for (const width of [390, 768, 1440]) {
+    for (const theme of ['light', 'dark']) {
+      const { texts, rects, width: w } = boxes(home(width, theme));
+      assert.equal(w, width);
+      texts.forEach((a, i) => {
+        assert.ok(a.x0 >= 0 && a.x1 <= width, `${width}: "${a.text}" leaves the page`);
+        texts.slice(i + 1).forEach((b) => {
+          const overlap = a.x0 < b.x1 - 1 && b.x0 < a.x1 - 1 && a.y0 < b.y1 - 1 && b.y0 < a.y1 - 1;
+          assert.ok(!overlap, `${width}: "${a.text}" overlaps "${b.text}"`);
+        });
+        const holder = rects
+          .filter((r) => r.x1 - r.x0 < width && r.x0 <= a.x0 && a.x0 <= r.x1 && r.y0 <= a.y1 && a.y1 <= r.y1)
+          .sort((p, q) => (p.x1 - p.x0) * (p.y1 - p.y0) - (q.x1 - q.x0) * (q.y1 - q.y0))[0];
+        if (holder) assert.ok(a.x1 <= holder.x1 + 1 && a.y0 >= holder.y0 - 1, `${width}: "${a.text}" sticks out of its box`);
+      });
+    }
+  }
+});
