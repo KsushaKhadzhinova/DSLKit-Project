@@ -7,12 +7,12 @@ import { build } from './build-report.js';
 
 test('build expands code and include placeholders', () => {
   const read = (p) => `<${p}>\n`;
-  assert.equal(build('A\n{{code:src/a.js}}\n{{include:gen/x.md}}\n', read), 'A\n```js\n<src/a.js>\n```\n<gen/x.md>\n');
+  assert.equal(build('A\n{{code:src/a.js}}\n{{include:gen/x.md}}\n', read, 1), 'A\n```js\n<src/a.js>\n```\n<gen/x.md>\n');
 });
 
 test('build leaves text without placeholders unchanged', () => {
   assert.equal(
-    build('plain', () => ''),
+    build('plain', () => '', 1),
     'plain',
   );
 });

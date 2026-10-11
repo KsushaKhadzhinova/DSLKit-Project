@@ -88,6 +88,7 @@ Figure 5 – Load time and TTFB on the regular network and on Fast 3G
 
 ## 4 Answers to Control Questions
 
+{{answers}}
 1. **Which protocol does the site use?** HTTPS. The address starts with `https://`, the log shows version `HTTP/2.0` and the `Strict-Transport-Security` header pins HTTPS. It can be checked by the URL scheme, the lock icon and the Protocol column on the Network tab.
 2. **Which methods occurred?** Only GET (17 of 17): fetching HTML, scripts, styles, images and data. POST, PUT, PATCH and DELETE are not needed for a plain page load, they serve to send and change data, for example when saving a file.
 3. **Status codes.** Code 200 OK occurred 16 times, for example for the main document. Code 204 No Content occurred once for the `log.diagrams.net` ping, the response had no body. Code 304 Not Modified appears for a conditional request with `If-None-Match` after the cache expires: the server reports that the copy is fresh. Codes 404 (resource not found) and 500 (internal server error) are absent from the log.
@@ -104,6 +105,7 @@ Figure 5 – Load time and TTFB on the regular network and on Fast 3G
 14. **Why resources come from different domains.** Requests went to three domains: `app.diagrams.net` (14), `apis.google.com` (2, Google API integration) and `log.diagrams.net` (1, statistics collection). Separation gives dedicated servers for different tasks, use of external services, independent scaling and caching.
 15. **How to find slow requests.** Sort by the Time column or look at the Waterfall. On the regular network the slowest are `extensions.min.js` (681 ms) and `stencils.min.js` (613 ms), under Fast 3G the slowest is `stencils.min.js` (23.5 s). Optimisation: compression (`br` is already applied), long caching (already 30 days), splitting and lazy loading of shape libraries, `preload` of critical resources, a CDN.
 16. **What blocking requests are.** Scripts and styles that the browser loads and processes before continuing rendering: scripts without `async` and `defer`, CSS in `<head>`. They delay the first paint. They can be detected with the Initiator column, the Waterfall and tag attributes in HTML, while a single HAR cannot show whether a script blocks.
+{{/answers}}
 
 ## Conclusion
 

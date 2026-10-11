@@ -44,7 +44,7 @@ Table 1 – Environment check results
 | README.md file | passed | — |
 | Figma design link | passed | — |
 | Remote repository | passed | https://github.com/KsushaKhadzhinova/DSLKit-Project.git |
-| Commit history | passed | 5 |
+| Commit history | passed | 6 |
 
 All checks passed.
 
@@ -104,16 +104,9 @@ The `README.md` file in the repository root contains the project description, th
 
 ## 4 Answers to Control Questions
 
-1. **Advantages of VS Code and useful extensions.** The editor combines syntax highlighting, a terminal, debugging and Git in one window, and extensions automate routine work. The most useful ones turned out to be Prettier (one style on save), Live Server (quick page checks) and GitLens (line history).
-2. **Git integration in VS Code.** The Source Control panel shows changed files, stages them, takes a message and creates a commit. The same steps are done by `git add`, `git commit` and `git push` in the terminal. Branches are switched in the status bar.
-3. **Role of Node.js and npm.** Node.js runs build tools, tests and servers, and npm installs dependencies and pins their versions in `package.json`, so the project builds the same way on any computer.
-4. **Figma in the development process.** In Figma the palette, fonts and grid are agreed before layout, and sizes and spacing are handed to the developer. Components, styles and the element properties view are the most useful.
 5. **Important VS Code settings.** Format on save, the default formatter, one line ending, the Live Server root folder and the list of recommended extensions in `.vscode`.
 6. **Why .gitignore is needed.** The file excludes service and generated data from the repository. An example for a web project: `node_modules/`, `.DS_Store`, `*.log`, `coverage/`, `.env`.
 7. **Which data to choose for later growth into a course project.** A project and repository name not tied to a work number (`DSLKit-Project`), separate `site`, `labs` and `tools` folders, and file and branch names that follow one convention.
-8. **Commands for sending changes.** `git add` stages files, `git commit` creates a commit with a message and `git push` sends the commits to the remote repository.
-9. **Checking the Git settings.** `git config user.name` and `git config user.email` print the values. They can be changed with `git config --global user.name "Name"`. The `npm run check:env` script checks both values.
-10. **Which files are not added to Git.** Dependencies (`node_modules`), build and coverage output, logs, environment files with secrets (`.env`) and system files. They can be restored with commands or hold confidential data, and without them the repository stays small.
 
 ## Conclusion
 
