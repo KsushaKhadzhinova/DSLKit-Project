@@ -3,12 +3,333 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>DSLKit</title>
+    <title>DSLKit: диаграммы как код в браузере</title>
+    <meta name="description" content="DSLKit — веб-редактор диаграмм как кода: пишите текст на DSL и получайте IDEF0, DFD, ERD, BPMN, UML и сети Петри." />
+    <meta name="theme-color" content="#2563eb" />
+    <link rel="canonical" href="https://dslkit.example/" />
+    <link rel="alternate" hreflang="ru" href="https://dslkit.example/" />
+    <link rel="alternate" hreflang="en" href="https://dslkit.example/en/" />
+    <link rel="alternate" hreflang="x-default" href="https://dslkit.example/" />
+    <link rel="icon" href="images/favicon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="css/style.css" />
   </head>
-  <body>
-    <h1>DSLKit</h1>
-    <p>Веб-IDE для диаграмм как кода.</p>
+  <body class="page">
+    <a class="skip-link" href="#main">Перейти к основному содержимому</a>
+    <header class="header">
+      <div class="header__inner">
+        <a class="header__logo" href="./">
+          <img class="header__logo-image" src="images/logo.svg" alt="" width="32" height="32" />
+          <span class="header__logo-text">DSLKit</span>
+        </a>
+        <input class="burger__input" type="checkbox" id="burger-toggle" />
+        <label class="burger__button" for="burger-toggle">
+          <span class="burger__label">Меню</span>
+          <span class="burger__icon" aria-hidden="true"></span>
+        </label>
+        <nav class="nav" aria-label="Основная навигация">
+          <ul class="nav__list">
+            <li class="nav__item"><a class="nav__link" href="#notations">Нотации</a></li>
+            <li class="nav__item"><a class="nav__link" href="#how">Как это работает</a></li>
+            <li class="nav__item"><a class="nav__link" href="#audience">Для кого</a></li>
+            <li class="nav__item"><a class="nav__link" href="#pricing">Тарифы</a></li>
+            <li class="nav__item"><a class="nav__link" href="#faq">FAQ</a></li>
+          </ul>
+        </nav>
+        <div class="header__tools">
+          <a class="header__lang" href="en/" hreflang="en" lang="en">English</a>
+          <input class="theme__input" type="checkbox" id="theme-toggle" />
+          <label class="theme__button" for="theme-toggle">Тёмная тема</label>
+          <a class="button button--primary header__cta" href="#waitlist">В бету</a>
+        </div>
+      </div>
+    </header>
+    <main class="main" id="main">
+      <section class="hero" aria-labelledby="hero-title" itemscope itemtype="https://schema.org/SoftwareApplication">
+        <meta itemprop="name" content="DSLKit" />
+        <meta itemprop="applicationCategory" content="DeveloperApplication" />
+        <meta itemprop="operatingSystem" content="Web" />
+        <meta itemprop="url" content="https://dslkit.example/" />
+        <div class="hero__content">
+          <h1 class="hero__title" id="hero-title">Пишите код — получайте диаграмму</h1>
+          <p class="hero__lead" itemprop="description">
+            Веб-редактор диаграмм как кода: опишите схему текстом на DSL, а DSLKit проверит её по правилам нотации и нарисует.
+          </p>
+          <p class="hero__actions">
+            <a class="button button--primary" href="#waitlist">Записаться в бету</a>
+            <a class="button" href="#how">Как это работает</a>
+          </p>
+          <p class="hero__note" itemprop="offers" itemscope itemtype="https://schema.org/Offer">
+            <meta itemprop="price" content="0" />
+            <meta itemprop="priceCurrency" content="USD" />
+            <link itemprop="availability" href="https://schema.org/PreOrder" />
+            Бесплатно в бета-версии: до 5 диаграмм в день.
+          </p>
+        </div>
+        <figure class="hero__figure">
+          <img
+            class="hero__image"
+            src="images/hero-diagram.svg"
+            alt="Редактор DSLKit: слева код на DSL, справа диаграмма IDEF0 с блоками A0 и A1"
+            width="640"
+            height="400"
+            itemprop="image"
+          />
+          <figcaption class="hero__caption">Код слева превращается в диаграмму справа</figcaption>
+        </figure>
+      </section>
+
+      <section class="section" id="notations" aria-labelledby="notations-title">
+        <h2 class="section__title" id="notations-title">Нотации</h2>
+        <p class="section__lead">Шесть нотаций в одном редакторе. Первыми в бета-версии появятся IDEF0, DFD и ERD.</p>
+        <ul class="cards">
+          <li class="cards__item">
+            <article class="card">
+              <img class="card__icon" src="images/notations/idef0.svg" alt="" width="48" height="48" />
+              <h3 class="card__title">IDEF0</h3>
+              <p class="card__text">Функциональное моделирование: блоки, входы, управление, выходы и механизмы.</p>
+              <a class="card__link" href="#waitlist">Получить шаблон IDEF0</a>
+            </article>
+          </li>
+          <li class="cards__item">
+            <article class="card">
+              <img class="card__icon" src="images/notations/dfd.svg" alt="" width="48" height="48" />
+              <h3 class="card__title">DFD</h3>
+              <p class="card__text">Диаграммы потоков данных: процессы, хранилища и связи между ними.</p>
+              <a class="card__link" href="#waitlist">Получить шаблон DFD</a>
+            </article>
+          </li>
+          <li class="cards__item">
+            <article class="card">
+              <img class="card__icon" src="images/notations/erd.svg" alt="" width="48" height="48" />
+              <h3 class="card__title">ERD</h3>
+              <p class="card__text">Сущности и связи для проектирования баз данных.</p>
+              <a class="card__link" href="#waitlist">Получить шаблон ERD</a>
+            </article>
+          </li>
+          <li class="cards__item">
+            <article class="card">
+              <img class="card__icon" src="images/notations/bpmn.svg" alt="" width="48" height="48" />
+              <h3 class="card__title">BPMN</h3>
+              <p class="card__text">Бизнес-процессы: события, задачи и шлюзы.</p>
+              <a class="card__link" href="#waitlist">Получить шаблон BPMN</a>
+            </article>
+          </li>
+          <li class="cards__item">
+            <article class="card">
+              <img class="card__icon" src="images/notations/uml.svg" alt="" width="48" height="48" />
+              <h3 class="card__title">UML</h3>
+              <p class="card__text">Классы, последовательности и другие диаграммы объектной модели.</p>
+              <a class="card__link" href="#waitlist">Получить шаблон UML</a>
+            </article>
+          </li>
+          <li class="cards__item">
+            <article class="card">
+              <img class="card__icon" src="images/notations/petri.svg" alt="" width="48" height="48" />
+              <h3 class="card__title">Сети Петри</h3>
+              <p class="card__text">Параллельные процессы: позиции, переходы и фишки.</p>
+              <a class="card__link" href="#waitlist">Получить шаблон сетей Петри</a>
+            </article>
+          </li>
+        </ul>
+      </section>
+
+      <section class="section" id="how" aria-labelledby="how-title">
+        <h2 class="section__title" id="how-title">Как это работает</h2>
+        <ol class="steps">
+          <li class="steps__item">
+            <h3 class="steps__title">Пишете код</h3>
+            <p class="steps__text">Описываете диаграмму на DSL, подсказки и шаблоны помогают начать.</p>
+          </li>
+          <li class="steps__item">
+            <h3 class="steps__title">Видите схему</h3>
+            <p class="steps__text">Холст обновляется сразу, а ошибки подсвечиваются с пояснением.</p>
+          </li>
+          <li class="steps__item">
+            <h3 class="steps__title">Экспортируете</h3>
+            <p class="steps__text">Сохраняете результат в SVG, PNG, PlantUML или Mermaid.</p>
+          </li>
+        </ol>
+      </section>
+
+      <section class="section" id="audience" aria-labelledby="audience-title">
+        <h2 class="section__title" id="audience-title">Для кого</h2>
+        <ul class="cards">
+          <li class="cards__item">
+            <article class="card">
+              <h3 class="card__title">Студентам</h3>
+              <p class="card__text">Лабораторные работы, курсовые и дипломы с диаграммами, которые легко править.</p>
+            </article>
+          </li>
+          <li class="cards__item">
+            <article class="card">
+              <h3 class="card__title">Разработчикам</h3>
+              <p class="card__text">Схемы лежат рядом с кодом и попадают в историю Git.</p>
+            </article>
+          </li>
+          <li class="cards__item">
+            <article class="card">
+              <h3 class="card__title">Аналитикам</h3>
+              <p class="card__text">Процессы и данные описываются текстом без ручного рисования.</p>
+            </article>
+          </li>
+        </ul>
+      </section>
+
+      <section class="section" id="pricing" aria-labelledby="pricing-title">
+        <h2 class="section__title" id="pricing-title">Тарифы</h2>
+        <div class="plans">
+          <article class="plan">
+            <h3 class="plan__title">Free</h3>
+            <ul class="plan__list">
+              <li>До 5 диаграмм в день в бета-версии</li>
+              <li>Все доступные нотации</li>
+              <li>Экспорт в SVG и PNG</li>
+            </ul>
+          </article>
+          <article class="plan">
+            <h3 class="plan__title">Pro</h3>
+            <ul class="plan__list">
+              <li>Без дневного лимита</li>
+              <li>История версий</li>
+              <li>Совместная работа и API</li>
+            </ul>
+          </article>
+        </div>
+        <aside class="note">
+          <p class="note__text">Условия тарифов могут измениться после бета-версии. Обновлено <time datetime="2026-10-11">11 октября 2026</time>.</p>
+        </aside>
+      </section>
+
+      <section class="section" id="faq" aria-labelledby="faq-title" itemscope itemtype="https://schema.org/FAQPage">
+        <h2 class="section__title" id="faq-title">Вопросы и ответы</h2>
+        <details class="faq__item" itemprop="mainEntity" itemscope itemtype="https://schema.org/Question">
+          <summary class="faq__question" itemprop="name">Что такое DSLKit?</summary>
+          <div class="faq__answer" itemprop="acceptedAnswer" itemscope itemtype="https://schema.org/Answer">
+            <p itemprop="text">
+              DSLKit — веб-редактор диаграмм как кода. Вы описываете схему текстом на DSL, а редактор проверяет её по правилам нотации и рисует диаграмму.
+            </p>
+          </div>
+        </details>
+        <details class="faq__item" itemprop="mainEntity" itemscope itemtype="https://schema.org/Question">
+          <summary class="faq__question" itemprop="name">Нужно ли уметь программировать?</summary>
+          <div class="faq__answer" itemprop="acceptedAnswer" itemscope itemtype="https://schema.org/Answer">
+            <p itemprop="text">
+              Нет. Синтаксис короткий, а шаблоны нотаций и подсказки помогают написать первую диаграмму. Для тех, кто не пишет код, планируется режим
+              редактирования кликами.
+            </p>
+          </div>
+        </details>
+        <details class="faq__item" itemprop="mainEntity" itemscope itemtype="https://schema.org/Question">
+          <summary class="faq__question" itemprop="name">Какие нотации будут поддерживаться?</summary>
+          <div class="faq__answer" itemprop="acceptedAnswer" itemscope itemtype="https://schema.org/Answer">
+            <p itemprop="text">В планах шесть нотаций: IDEF0, DFD, ERD, BPMN, UML и сети Петри. Первыми в бета-версии появятся IDEF0, DFD и ERD.</p>
+          </div>
+        </details>
+        <details class="faq__item" itemprop="mainEntity" itemscope itemtype="https://schema.org/Question">
+          <summary class="faq__question" itemprop="name">Сколько это стоит?</summary>
+          <div class="faq__answer" itemprop="acceptedAnswer" itemscope itemtype="https://schema.org/Answer">
+            <p itemprop="text">В бета-версии бесплатно, до пяти диаграмм в день. Платный тариф Pro с расширенными возможностями появится позже.</p>
+          </div>
+        </details>
+      </section>
+
+      <section class="section" id="waitlist" aria-labelledby="waitlist-title">
+        <h2 class="section__title" id="waitlist-title">Записаться в бету</h2>
+        <p class="section__lead">Оставьте контакты, и мы сообщим, когда откроется доступ. Все поля, кроме комментария, обязательны.</p>
+        <form class="form" action="#waitlist" method="get">
+          <fieldset class="form__group">
+            <legend class="form__legend">Контакты</legend>
+            <div class="form__field">
+              <label class="form__label" for="name">Имя</label>
+              <input
+                class="form__input"
+                id="name"
+                name="name"
+                type="text"
+                required
+                minlength="2"
+                maxlength="60"
+                pattern="[A-Za-zА-Яа-яЁё' \-]{2,60}"
+                autocomplete="name"
+                aria-describedby="name-hint"
+              />
+              <p class="form__hint" id="name-hint">От 2 до 60 букв. Допустимы пробел, дефис и апостроф.</p>
+              <p class="form__error" id="name-error" hidden>
+                Имя не принято: поле пустое, короче двух символов или содержит цифры и знаки. Введите от 2 до 60 букв, например «Ксения».
+              </p>
+            </div>
+            <div class="form__field">
+              <label class="form__label" for="email">Электронная почта</label>
+              <input class="form__input" id="email" name="email" type="email" required maxlength="120" autocomplete="email" aria-describedby="email-hint" />
+              <p class="form__hint" id="email-hint">Адрес вида name@example.com. На него придёт приглашение.</p>
+              <p class="form__error" id="email-error" hidden>
+                Адрес не принят: он пустой или не похож на электронную почту. Проверьте, что есть символ «@» и домен после него.
+              </p>
+            </div>
+          </fieldset>
+          <fieldset class="form__group">
+            <legend class="form__legend">Ваш проект</legend>
+            <div class="form__field">
+              <label class="form__label" for="notation">Нотация</label>
+              <select class="form__input" id="notation" name="notation" required>
+                <option value="" selected disabled>Выберите нотацию</option>
+                <option value="idef0">IDEF0</option>
+                <option value="dfd">DFD</option>
+                <option value="erd">ERD</option>
+                <option value="bpmn">BPMN</option>
+                <option value="uml">UML</option>
+                <option value="petri">Сети Петри</option>
+              </select>
+              <p class="form__error" id="notation-error" hidden>Нотация не выбрана. Выберите одну из шести нотаций в списке.</p>
+            </div>
+            <div class="form__field">
+              <label class="form__label" for="team">Размер команды</label>
+              <input
+                class="form__input"
+                id="team"
+                name="team"
+                type="number"
+                required
+                min="0"
+                max="500"
+                step="1"
+                inputmode="numeric"
+                value="0"
+                aria-describedby="team-hint"
+              />
+              <p class="form__hint" id="team-hint">Целое число от 0 до 500. Укажите 0, если работаете один.</p>
+              <p class="form__error" id="team-error" hidden>Число не принято: допустимы целые значения от 0 до 500, отрицательные числа и дроби запрещены.</p>
+            </div>
+            <div class="form__field">
+              <label class="form__label" for="comment">Комментарий (по желанию)</label>
+              <textarea class="form__input" id="comment" name="comment" rows="4" maxlength="500" aria-describedby="comment-hint"></textarea>
+              <p class="form__hint" id="comment-hint">До 500 символов.</p>
+            </div>
+          </fieldset>
+          <div class="form__field form__field--checkbox">
+            <input class="form__checkbox" id="consent" name="consent" type="checkbox" required />
+            <label class="form__label" for="consent">Согласен получать письма о запуске беты</label>
+            <p class="form__error" id="consent-error" hidden>Без согласия мы не можем отправить приглашение. Поставьте галочку, чтобы продолжить.</p>
+          </div>
+          <button class="button button--primary form__submit" type="submit">Отправить</button>
+        </form>
+      </section>
+    </main>
+    <footer class="footer">
+      <div class="footer__inner">
+        <nav class="footer__nav" aria-label="Нижняя навигация">
+          <ul class="footer__list">
+            <li class="footer__item"><a class="footer__link" href="#notations">Нотации</a></li>
+            <li class="footer__item"><a class="footer__link" href="#pricing">Тарифы</a></li>
+            <li class="footer__item"><a class="footer__link" href="#faq">Вопросы и ответы</a></li>
+            <li class="footer__item"><a class="footer__link" href="errors/500.html">Пример страницы ошибки 500</a></li>
+            <li class="footer__item"><a class="footer__link" href="en/" hreflang="en" lang="en">English version</a></li>
+          </ul>
+        </nav>
+        <address class="footer__address">Контакты: <a class="footer__link" href="mailto:hello@dslkit.example">hello@dslkit.example</a></address>
+        <p class="footer__copy"><small>© 2026 DSLKit. Дипломный проект БГУИР.</small></p>
+      </div>
+    </footer>
     <script src="js/script.js"></script>
   </body>
 </html>

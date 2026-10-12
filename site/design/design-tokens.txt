@@ -1,0 +1,37 @@
+Макет: https://www.figma.com/design/HYmcqqGdcszOt7dGnKrvZg/bsuir-diploma
+
+Шрифты
+Интерфейс: Inter, 400 / 500 / 600 / 700
+Код: JetBrains Mono, 400
+Размеры: H1 48/56, H2 32/40, H3 20/28, основной текст 16/24, малый 14/20
+
+Цвета светлой темы
+primary #2563eb
+secondary #e8efff
+accent #16a34a
+background #f8f9fc
+surface #ffffff
+border #dde1e9
+text #1c1f2e
+text-light #4a5068
+muted #6b7285
+link #1d4ed8
+error #dc2626
+warning #d97706
+
+Цвета тёмной темы
+primary #2563eb
+secondary #27304d
+accent #16a34a
+background #1e1e2e
+surface #181825
+border #313244
+text #cdd6f4
+text-light #a6adc8
+muted #8a8fa8
+link #8bb0ff
+error #f38ba8
+warning #fab387
+
+Сетка и отступы: базовая единица 8 px, отступы 8 / 16 / 24 / 48 px, максимальная ширина контейнера 1200 px
+Точки перелома: 576 px, 768 px, 1024 px
