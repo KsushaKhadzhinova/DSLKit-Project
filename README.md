@@ -1,3 +1,5 @@
+> Эта ветка устарела. Актуальное состояние проекта, handover и условия работ в ветке `main`: `docs/CONTEXT.md`, `docs/HANDOVER-LABS.md`, `materials/`.
+
 # DSLKit Project Files
 
 Дипломный проект БГУИР — Ксения Хаджинова
