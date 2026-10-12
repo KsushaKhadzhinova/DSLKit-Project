@@ -1,0 +1,22 @@
+ПО и инструкции для выполнения
+практических работ
+Аппаратное обеспечение:
+ЭВМ (процессор Intel Core i3 или аналогичный, ОЗУ 4 ГБ и более) с ОС Microsoft
+Windows 10/11 (или macOS/Linux).
+Почему Windows? - Ответ на
+https://survey.stackoverflow.co/2025/technology :
+Программное обеспечение (обязательное):
+Visual Studio Code
+Node.js (версия LTS, включает npm)
+Git
+Google Chrome (или Mozilla Firefox)
+Docker Desktop
+PostgreSQL
+MongoDB Community Edition
+Дополнительно (рекомендовано):
+MongoDB Compass (графический клиент)
+Postman / Insomnia (тестирование API)
+WSL 2 (для Windows при работе с Docker)
+Все задания сдаются в виде ссылок на репозиторий GitHub(с README и инструкцией
+по запуску) и отчёта в формате PDF, загруженного в СЭО.
+Студент выполняет свой вариант в соответствии c Генератором вариантов.

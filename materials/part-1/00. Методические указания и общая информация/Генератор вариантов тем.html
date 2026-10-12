@@ -1,0 +1,474 @@
+<!doctype html>
+<html lang="ru">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Генератор вариантов тем</title>
+		<style>
+			* {
+				box-sizing: border-box;
+				margin: 0;
+				padding: 0;
+				font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+			}
+			body {
+				background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+				min-height: 100vh;
+				padding: 20px;
+			}
+			.container {
+				max-width: 1000px;
+				margin: 0 auto;
+				background: white;
+				border-radius: 15px;
+				box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+				overflow: hidden;
+			}
+			header {
+				background: #2c3e50;
+				color: white;
+				padding: 20px;
+				text-align: center;
+			}
+			h1 {
+				font-size: 24px;
+				margin-bottom: 10px;
+			}
+			.subtitle {
+				font-size: 16px;
+				opacity: 0.8;
+			}
+			.content {
+				padding: 30px;
+			}
+			.form-group {
+				margin-bottom: 20px;
+			}
+			label {
+				display: block;
+				margin-bottom: 8px;
+				font-weight: 600;
+				color: #2c3e50;
+			}
+			input,
+			select {
+				width: 100%;
+				padding: 12px 15px;
+				border: 2px solid #e0e0e0;
+				border-radius: 8px;
+				font-size: 16px;
+			}
+			.btn {
+				background: #3498db;
+				color: white;
+				border: none;
+				padding: 14px 20px;
+				border-radius: 8px;
+				font-size: 16px;
+				font-weight: 600;
+				cursor: pointer;
+				width: 100%;
+				margin-top: 10px;
+				transition: background 0.3s;
+			}
+			.btn:hover {
+				background: #2980b9;
+			}
+			.btn-success {
+				background: #27ae60;
+			}
+			.btn-success:hover {
+				background: #229954;
+			}
+			.btn-warning {
+				background: #f39c12;
+			}
+			.btn-warning:hover {
+				background: #d68910;
+			}
+			.result {
+				margin-top: 30px;
+				padding: 20px;
+				background: #f8f9fa;
+				border-radius: 8px;
+				display: none;
+			}
+			.result h2 {
+				text-align: center;
+				margin-bottom: 15px;
+			}
+			.variant-number {
+				font-size: 48px;
+				font-weight: 700;
+				text-align: center;
+				margin: 20px 0;
+				color: #2c3e50;
+			}
+			.info-box {
+				background: #e8f4fd;
+				border-left: 4px solid #3498db;
+				padding: 12px 15px;
+				margin-bottom: 20px;
+				border-radius: 4px;
+				font-size: 14px;
+			}
+			.info-box.success {
+				border-left-color: #27ae60;
+				background: #eafaf1;
+			}
+			.info-box.warning {
+				border-left-color: #f39c12;
+				background: #fef9e7;
+			}
+			.two-columns {
+				display: flex;
+				gap: 20px;
+			}
+			.full-width {
+				width: 100%;
+			}
+			.table-container {
+				margin-top: 20px;
+				overflow-x: auto;
+			}
+			table {
+				width: 100%;
+				border-collapse: collapse;
+				background: white;
+				border-radius: 8px;
+				overflow: hidden;
+				box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+			}
+			th {
+				background: #2c3e50;
+				color: white;
+				padding: 12px;
+				text-align: center;
+				font-weight: 600;
+			}
+			td {
+				padding: 10px 12px;
+				text-align: center;
+				border-bottom: 1px solid #ecf0f1;
+			}
+			tr:hover {
+				background: #f8f9fa;
+			}
+			tr:nth-child(even) {
+				background: #f8f9fa;
+			}
+			tr:nth-child(even):hover {
+				background: #e8f4fd;
+			}
+			.topic-cell {
+				font-weight: 700;
+				color: #2c3e50;
+				font-size: 18px;
+			}
+			.student-cell {
+				font-weight: 600;
+				color: #7f8c8d;
+			}
+			.unique-badge {
+				background: #27ae60;
+				color: white;
+				padding: 2px 10px;
+				border-radius: 12px;
+				font-size: 12px;
+				font-weight: 600;
+			}
+			@media (max-width: 768px) {
+				.two-columns {
+					flex-direction: column;
+				}
+				.variant-number {
+					font-size: 36px;
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<div class="container">
+			<header>
+				<h1>🎓 Генератор вариантов тем</h1>
+				<div class="subtitle">
+					Детерминированный выбор темы с гарантией уникальности
+				</div>
+			</header>
+			<div class="content">
+				<div class="info-box">
+					<strong>📌 Как работает алгоритм</strong><br />
+					Номер темы (1–150) выбирается детерминированно на основе хеша от
+					параметров студента.<br />
+					➤ Очная форма обучения:<br />
+					&nbsp;&nbsp;1-я группа → темы 1–30<br />
+					&nbsp;&nbsp;2-я группа → темы 31–60<br />
+					&nbsp;&nbsp;3-я группа → темы 61–90<br />
+					&nbsp;&nbsp;4-я группа → темы 91–120<br />
+					➤ Дистанционная форма обучения → темы 121–150<br />
+					<strong>✅ Гарантия:</strong> Все 30 студентов получают уникальные
+					номера тем!
+				</div>
+
+				<div class="two-columns">
+					<div>
+						<div class="form-group">
+							<label>Год поступления</label>
+							<input
+								type="number"
+								id="courseYear"
+								min="2020"
+								max="2030"
+								value="2023"
+							/>
+						</div>
+						<div class="form-group">
+							<label>Номер группы (очное отделение)</label>
+							<select id="courseGroup">
+								<option value="1">1</option>
+								<option value="2">2</option>
+								<option value="3">3</option>
+								<option value="4">4</option>
+							</select>
+						</div>
+						<div class="form-group">
+							<label>Номер студента в журнале (1–30)</label>
+							<input
+								type="number"
+								id="courseStudentNumber"
+								min="1"
+								max="30"
+								value="1"
+							/>
+						</div>
+					</div>
+					<div>
+						<div class="form-group">
+							<label>Форма обучения</label>
+							<select id="courseForm">
+								<option value="fulltime">Очная</option>
+								<option value="distance">Дистанционная</option>
+							</select>
+						</div>
+						<button class="btn" onclick="generateSingle()">
+							🎯 Сгенерировать для одного студента
+						</button>
+						<button class="btn btn-success" onclick="generateAll()">
+							📊 Показать всех студентов группы
+						</button>
+						<button class="btn btn-warning" onclick="clearResults()">
+							🗑️ Очистить результаты
+						</button>
+					</div>
+				</div>
+
+				<!-- Результат для одного студента -->
+				<div id="singleResult" class="result">
+					<h2>Номер темы курсовой работы</h2>
+					<div id="singleNumberDisplay" class="variant-number">-</div>
+					<div
+						style="
+							background: white;
+							padding: 15px;
+							border-radius: 8px;
+							margin-top: 15px;
+						"
+					>
+						<p><strong>Параметры студента:</strong></p>
+						<p>👨‍🎓 Группа: <span id="singleGroupInfo"></span></p>
+						<p>📅 Год поступления: <span id="singleYearInfo"></span></p>
+						<p>📌 Номер в журнале: <span id="singleStudentInfo"></span></p>
+						<p>🎓 Форма обучения: <span id="singleFormInfo"></span></p>
+					</div>
+				</div>
+
+				<!-- Результаты для всей группы -->
+				<div id="allResult" class="result">
+					<h2>📋 Распределение тем по группе</h2>
+					<div id="allStats" class="info-box success"></div>
+					<div class="table-container">
+						<table>
+							<thead>
+								<tr>
+									<th>№ студента</th>
+									<th>Номер темы</th>
+								</tr>
+							</thead>
+							<tbody id="allTableBody"></tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<script>
+			/**
+			 * Улучшенная хеш-функция FNV-1a
+			 */
+			function improvedHash(str) {
+				let hash = 0x811c9dc5;
+				for (let i = 0; i < str.length; i++) {
+					hash ^= str.charCodeAt(i);
+					hash = (hash * 0x01000193) >>> 0;
+				}
+				return hash;
+			}
+
+			/**
+			 * Получить базовое смещение для группы
+			 */
+			function getBaseOffset(form, group) {
+				if (form === 'distance') return 120;
+				if (group === 1) return 0;
+				if (group === 2) return 30;
+				if (group === 3) return 60;
+				if (group === 4) return 90;
+				return 0;
+			}
+
+			/**
+			 * Генерирует уникальные номера для всех студентов группы
+			 */
+			function generateAllTopics() {
+				const year = parseInt(document.getElementById('courseYear').value);
+				const group = parseInt(document.getElementById('courseGroup').value);
+				const form = document.getElementById('courseForm').value;
+				const baseOffset = getBaseOffset(form, group);
+				const rangeSize = 30;
+
+				// Сначала генерируем хеши для всех студентов
+				const studentHashes = [];
+				for (let studentNum = 1; studentNum <= 30; studentNum++) {
+					const seed = `${year}|${form}|${group}|${studentNum}|${baseOffset}`;
+					let hash = improvedHash(seed);
+					// Добавляем дополнительное перемешивание
+					hash = (hash + studentNum * 9973 + group * 7919 + year * 6301) >>> 0;
+					studentHashes.push({
+						student: studentNum,
+						hash: hash,
+					});
+				}
+
+				// Сортируем по хешу для детерминированного распределения
+				studentHashes.sort((a, b) => a.hash - b.hash);
+
+				// Назначаем темы по порядку после сортировки
+				const assignments = new Array(31);
+				for (let i = 0; i < studentHashes.length; i++) {
+					const studentNum = studentHashes[i].student;
+					const topicIndex = i; // 0-29
+					const topicNumber = baseOffset + topicIndex + 1;
+					assignments[studentNum] = {
+						student: studentNum,
+						topic: topicNumber,
+						hash: studentHashes[i].hash,
+					};
+				}
+
+				return assignments;
+			}
+
+			/**
+			 * Генерация для одного студента
+			 */
+			function generateSingle() {
+				const year = parseInt(document.getElementById('courseYear').value);
+				const group = parseInt(document.getElementById('courseGroup').value);
+				let studentNumber = parseInt(
+					document.getElementById('courseStudentNumber').value,
+				);
+				const form = document.getElementById('courseForm').value;
+
+				// Нормализация
+				if (isNaN(studentNumber) || studentNumber < 1) studentNumber = 1;
+				if (studentNumber > 30) studentNumber = 30;
+
+				// Получаем все назначения
+				const assignments = generateAllTopics();
+				const result = assignments[studentNumber];
+
+				// Определяем отображение группы
+				let groupDisplay = form === 'fulltime' ? group : 'Дистанционная';
+
+				// Обновляем отображение
+				document.getElementById('singleNumberDisplay').innerHTML = result.topic;
+				document.getElementById('singleGroupInfo').innerHTML = groupDisplay;
+				document.getElementById('singleYearInfo').innerHTML = year;
+				document.getElementById('singleStudentInfo').innerHTML = studentNumber;
+				document.getElementById('singleFormInfo').innerHTML =
+					form === 'fulltime' ? 'Очная' : 'Дистанционная';
+				document.getElementById('singleResult').style.display = 'block';
+				document.getElementById('allResult').style.display = 'none';
+
+				// Прокручиваем к результату
+				document.getElementById('singleResult').scrollIntoView({
+					behavior: 'smooth',
+					block: 'center',
+				});
+			}
+
+			/**
+			 * Показать всех студентов группы
+			 */
+			function generateAll() {
+				const year = parseInt(document.getElementById('courseYear').value);
+				const group = parseInt(document.getElementById('courseGroup').value);
+				const form = document.getElementById('courseForm').value;
+
+				// Получаем все назначения
+				const assignments = generateAllTopics();
+
+				// Статистика
+				const topics = [];
+				for (let i = 1; i <= 30; i++) {
+					topics.push(assignments[i].topic);
+				}
+				const uniqueTopics = new Set(topics);
+				const isUnique = uniqueTopics.size === 30;
+
+				// Обновляем статистику
+				const statsDiv = document.getElementById('allStats');
+				let groupDisplay = form === 'fulltime' ? group : 'Дистанционная';
+				statsDiv.innerHTML = `
+					<strong>📊 Группа ${groupDisplay}, ${year} год</strong><br />
+					👨‍🎓 Студентов: 30<br />
+					📚 Уникальных тем: ${uniqueTopics.size} из 30
+					${isUnique ? ' ✅ <span class="unique-badge">ВСЕ УНИКАЛЬНЫ!</span>' : ' ⚠️ Есть повторения!'}
+				`;
+
+				// Заполняем таблицу
+				const tbody = document.getElementById('allTableBody');
+				tbody.innerHTML = '';
+				for (let i = 1; i <= 30; i++) {
+					const row = document.createElement('tr');
+					const studentNum = i;
+					const topic = assignments[i].topic;
+
+					row.innerHTML = `
+						<td class="student-cell">${studentNum}</td>
+						<td class="topic-cell">${topic}</td>
+					`;
+					tbody.appendChild(row);
+				}
+
+				document.getElementById('allResult').style.display = 'block';
+				document.getElementById('singleResult').style.display = 'none';
+
+				// Прокручиваем к результату
+				document.getElementById('allResult').scrollIntoView({
+					behavior: 'smooth',
+					block: 'start',
+				});
+			}
+
+			/**
+			 * Очистить результаты
+			 */
+			function clearResults() {
+				document.getElementById('singleResult').style.display = 'none';
+				document.getElementById('allResult').style.display = 'none';
+				window.scrollTo({ top: 0, behavior: 'smooth' });
+			}
+		</script>
+	</body>
+</html>
