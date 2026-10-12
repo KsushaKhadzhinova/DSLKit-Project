@@ -6,3 +6,5 @@ package-lock.json
 labs/*/report*.md
 labs/*/generated/
 .vscode/
+docs/project/
+materials/

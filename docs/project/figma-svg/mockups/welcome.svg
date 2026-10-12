@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="900" viewBox="0 0 1440 900">
+<rect id="Background" width="1440" height="900" fill="#efefef"/>
+<g id="Topbar">
+<rect x="0" y="0" width="1440" height="56" rx="0" fill="#ffffff" stroke="none" stroke-width="1"/>
+<line x1="0" y1="56" x2="1440" y2="56" stroke="#cccccc" stroke-width="1"/>
+<text x="24" y="35" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="16" font-weight="700" fill="#333333" text-anchor="start">DSLKit</text>
+<rect x="500" y="12" width="440" height="32" rx="8" fill="#efefef" stroke="#cccccc" stroke-width="1"/>
+<g transform="translate(514 20) scale(0.8)" fill="none" stroke="#555555" stroke-width="1.5625" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="9" r="5"/><path d="M13 13l4 4"/></g>
+<text x="540" y="33" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="12" font-weight="400" fill="#888888" text-anchor="start">Поиск диаграмм…  Ctrl+K</text>
+<rect x="1210" y="14" width="150" height="30" rx="6" fill="#666666" stroke="none" stroke-width="1"/>
+<g transform="translate(1218 22) scale(0.7)" fill="none" stroke="#ffffff" stroke-width="1.78571" stroke-linecap="round" stroke-linejoin="round"><path d="M10 4v12M4 10h12"/></g>
+<text x="1240" y="33" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="12" font-weight="500" fill="#ffffff" text-anchor="start">Новая диаграмма</text>
+<circle cx="1400" cy="28" r="14" fill="#e4e4e4" stroke="none" stroke-width="1"/>
+<text x="1400" y="32" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="10" font-weight="700" fill="#444444" text-anchor="middle">KX</text>
+</g>
+<text x="720" y="150" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="30" font-weight="700" fill="#333333" text-anchor="middle">Добро пожаловать в DSLKit</text>
+<text x="720" y="182" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="14" font-weight="400" fill="#555555" text-anchor="middle">Пишите код — получайте диаграмму. Выберите нотацию, чтобы начать за 30 секунд.</text>
+<g id="Templates">
+<rect x="355" y="226" width="230" height="150" rx="12" fill="#ffffff" stroke="#cccccc" stroke-width="1"/>
+<rect x="365" y="236" width="210" height="84" rx="8" fill="#efefef" stroke="#cccccc" stroke-width="1"/>
+<rect x="389" y="256" width="50" height="28" rx="3" fill="#ffffff" stroke="#555555" stroke-width="1.2"/>
+<rect x="501" y="274" width="50" height="28" rx="3" fill="#ffffff" stroke="#555555" stroke-width="1.2"/>
+<line x1="439" y1="270" x2="501" y2="288" stroke="#555555" stroke-width="1.2"/>
+<text x="369" y="346" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="14" font-weight="600" fill="#333333" text-anchor="start">IDEF0</text>
+<text x="369" y="364" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="11" font-weight="400" fill="#888888" text-anchor="start">Шаблон с примером</text>
+<rect x="605" y="226" width="230" height="150" rx="12" fill="#ffffff" stroke="#cccccc" stroke-width="1"/>
+<rect x="615" y="236" width="210" height="84" rx="8" fill="#efefef" stroke="#cccccc" stroke-width="1"/>
+<rect x="639" y="256" width="50" height="28" rx="3" fill="#ffffff" stroke="#555555" stroke-width="1.2"/>
+<rect x="751" y="274" width="50" height="28" rx="3" fill="#ffffff" stroke="#555555" stroke-width="1.2"/>
+<line x1="689" y1="270" x2="751" y2="288" stroke="#555555" stroke-width="1.2"/>
+<text x="619" y="346" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="14" font-weight="600" fill="#333333" text-anchor="start">DFD</text>
+<text x="619" y="364" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="11" font-weight="400" fill="#888888" text-anchor="start">Шаблон с примером</text>
+<rect x="855" y="226" width="230" height="150" rx="12" fill="#ffffff" stroke="#cccccc" stroke-width="1"/>
+<rect x="865" y="236" width="210" height="84" rx="8" fill="#efefef" stroke="#cccccc" stroke-width="1"/>
+<rect x="889" y="256" width="50" height="28" rx="3" fill="#ffffff" stroke="#555555" stroke-width="1.2"/>
+<rect x="1001" y="274" width="50" height="28" rx="3" fill="#ffffff" stroke="#555555" stroke-width="1.2"/>
+<line x1="939" y1="270" x2="1001" y2="288" stroke="#555555" stroke-width="1.2"/>
+<text x="869" y="346" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="14" font-weight="600" fill="#333333" text-anchor="start">ERD</text>
+<text x="869" y="364" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="11" font-weight="400" fill="#888888" text-anchor="start">Шаблон с примером</text>
+<rect x="355" y="396" width="230" height="150" rx="12" fill="#ffffff" stroke="#cccccc" stroke-width="1"/>
+<rect x="365" y="406" width="210" height="84" rx="8" fill="#efefef" stroke="#cccccc" stroke-width="1"/>
+<rect x="389" y="426" width="50" height="28" rx="3" fill="#ffffff" stroke="#555555" stroke-width="1.2"/>
+<rect x="501" y="444" width="50" height="28" rx="3" fill="#ffffff" stroke="#555555" stroke-width="1.2"/>
+<line x1="439" y1="440" x2="501" y2="458" stroke="#555555" stroke-width="1.2"/>
+<text x="369" y="516" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="14" font-weight="600" fill="#333333" text-anchor="start">BPMN</text>
+<text x="369" y="534" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="11" font-weight="400" fill="#888888" text-anchor="start">Шаблон с примером</text>
+<rect x="605" y="396" width="230" height="150" rx="12" fill="#ffffff" stroke="#cccccc" stroke-width="1"/>
+<rect x="615" y="406" width="210" height="84" rx="8" fill="#efefef" stroke="#cccccc" stroke-width="1"/>
+<rect x="639" y="426" width="50" height="28" rx="3" fill="#ffffff" stroke="#555555" stroke-width="1.2"/>
+<rect x="751" y="444" width="50" height="28" rx="3" fill="#ffffff" stroke="#555555" stroke-width="1.2"/>
+<line x1="689" y1="440" x2="751" y2="458" stroke="#555555" stroke-width="1.2"/>
+<text x="619" y="516" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="14" font-weight="600" fill="#333333" text-anchor="start">UML</text>
+<text x="619" y="534" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="11" font-weight="400" fill="#888888" text-anchor="start">Шаблон с примером</text>
+<rect x="855" y="396" width="230" height="150" rx="12" fill="#ffffff" stroke="#cccccc" stroke-width="1"/>
+<rect x="865" y="406" width="210" height="84" rx="8" fill="#efefef" stroke="#cccccc" stroke-width="1"/>
+<rect x="889" y="426" width="50" height="28" rx="3" fill="#ffffff" stroke="#555555" stroke-width="1.2"/>
+<rect x="1001" y="444" width="50" height="28" rx="3" fill="#ffffff" stroke="#555555" stroke-width="1.2"/>
+<line x1="939" y1="440" x2="1001" y2="458" stroke="#555555" stroke-width="1.2"/>
+<text x="869" y="516" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="14" font-weight="600" fill="#333333" text-anchor="start">Сети Петри</text>
+<text x="869" y="534" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="11" font-weight="400" fill="#888888" text-anchor="start">Шаблон с примером</text>
+</g>
+<rect x="490" y="576" width="140" height="36" rx="6" fill="none" stroke="#cccccc" stroke-width="1"/>
+<g transform="translate(498 587) scale(0.7)" fill="none" stroke="#333333" stroke-width="1.78571" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h7l3 3v11H5z"/><path d="M12 3v3h3"/></g>
+<text x="520" y="598" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="12" font-weight="500" fill="#333333" text-anchor="start">Пустой файл</text>
+<rect x="642" y="576" width="230" height="36" rx="6" fill="none" stroke="#cccccc" stroke-width="1"/>
+<g transform="translate(650 587) scale(0.7)" fill="none" stroke="#333333" stroke-width="1.78571" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15a4 4 0 010-8 5 5 0 019.5 1.5A3.2 3.2 0 0115 15z"/></g>
+<text x="672" y="598" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="12" font-weight="500" fill="#333333" text-anchor="start">Импорт PlantUML / Mermaid</text>
+<rect x="888" y="576" width="120" height="36" rx="6" fill="#666666" stroke="none" stroke-width="1"/>
+<text x="898" y="598" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="12" font-weight="500" fill="#ffffff" text-anchor="start">Тур · 5 шагов</text>
+<text x="720" y="646" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="12" font-weight="400" fill="#888888" text-anchor="middle">Пропустить</text>
+</svg>
