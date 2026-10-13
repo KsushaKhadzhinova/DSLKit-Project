@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 Disallow: /errors/
 
-Sitemap: https://dslkit.example/sitemap.xml
+Sitemap: https://dslkit.io/sitemap.xml
