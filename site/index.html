@@ -3,8 +3,11 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>DSLKit: диаграммы как код в браузере</title>
-    <meta name="description" content="DSLKit — веб-редактор диаграмм как кода: пишите текст на DSL и получайте IDEF0, DFD, ERD, BPMN, UML и сети Петри." />
+    <title>DSLKit: диаграммы как код. UML, BPMN, ERD, DFD, IDEF0</title>
+    <meta
+      name="description"
+      content="DSLKit — веб-редактор диаграмм как кода. Опишите схему текстом на DSL и получите UML, BPMN, ERD, DFD, IDEF0 и сети Петри. Запишитесь в закрытую бета-версию."
+    />
     <meta name="theme-color" content="#2563eb" />
     <link rel="canonical" href="https://dslkit.io/" />
     <link rel="alternate" hreflang="ru" href="https://dslkit.io/" />
@@ -62,6 +65,7 @@
             <meta itemprop="price" content="0" />
             <meta itemprop="priceCurrency" content="USD" />
             <link itemprop="availability" href="https://schema.org/PreOrder" />
+            <link itemprop="url" href="https://dslkit.io/#waitlist" />
             Бесплатно в бета-версии: до 5 диаграмм в день.
           </p>
         </div>
@@ -87,7 +91,7 @@
               <img class="card__icon" src="images/notations/idef0.svg" alt="" width="48" height="48" />
               <h3 class="card__title">IDEF0</h3>
               <p class="card__text">Функциональное моделирование: блоки, входы, управление, выходы и механизмы.</p>
-              <a class="card__link" href="#waitlist">Получить шаблон IDEF0</a>
+              <a class="card__link" href="#waitlist">Записаться в бету: IDEF0</a>
             </article>
           </li>
           <li class="cards__item">
@@ -95,7 +99,7 @@
               <img class="card__icon" src="images/notations/dfd.svg" alt="" width="48" height="48" />
               <h3 class="card__title">DFD</h3>
               <p class="card__text">Диаграммы потоков данных: процессы, хранилища и связи между ними.</p>
-              <a class="card__link" href="#waitlist">Получить шаблон DFD</a>
+              <a class="card__link" href="#waitlist">Записаться в бету: DFD</a>
             </article>
           </li>
           <li class="cards__item">
@@ -103,7 +107,7 @@
               <img class="card__icon" src="images/notations/erd.svg" alt="" width="48" height="48" />
               <h3 class="card__title">ERD</h3>
               <p class="card__text">Сущности и связи для проектирования баз данных.</p>
-              <a class="card__link" href="#waitlist">Получить шаблон ERD</a>
+              <a class="card__link" href="#waitlist">Записаться в бету: ERD</a>
             </article>
           </li>
           <li class="cards__item">
@@ -111,7 +115,7 @@
               <img class="card__icon" src="images/notations/bpmn.svg" alt="" width="48" height="48" />
               <h3 class="card__title">BPMN</h3>
               <p class="card__text">Бизнес-процессы: события, задачи и шлюзы.</p>
-              <a class="card__link" href="#waitlist">Получить шаблон BPMN</a>
+              <a class="card__link" href="#waitlist">Записаться в бету: BPMN</a>
             </article>
           </li>
           <li class="cards__item">
@@ -119,7 +123,7 @@
               <img class="card__icon" src="images/notations/uml.svg" alt="" width="48" height="48" />
               <h3 class="card__title">UML</h3>
               <p class="card__text">Классы, последовательности и другие диаграммы объектной модели.</p>
-              <a class="card__link" href="#waitlist">Получить шаблон UML</a>
+              <a class="card__link" href="#waitlist">Записаться в бету: UML</a>
             </article>
           </li>
           <li class="cards__item">
@@ -127,7 +131,7 @@
               <img class="card__icon" src="images/notations/petri.svg" alt="" width="48" height="48" />
               <h3 class="card__title">Сети Петри</h3>
               <p class="card__text">Параллельные процессы: позиции, переходы и фишки.</p>
-              <a class="card__link" href="#waitlist">Получить шаблон сетей Петри</a>
+              <a class="card__link" href="#waitlist">Записаться в бету: сети Петри</a>
             </article>
           </li>
         </ul>
@@ -195,7 +199,7 @@
             </ul>
           </article>
         </div>
-        <aside class="note">
+        <aside class="note" aria-label="Примечание к тарифам">
           <p class="note__text">Условия тарифов могут измениться после бета-версии. Обновлено <time datetime="2026-10-11">11 октября 2026</time>.</p>
         </aside>
       </section>
@@ -249,7 +253,7 @@
                 required
                 minlength="2"
                 maxlength="60"
-                pattern="[A-Za-zА-Яа-яЁё' \-]{2,60}"
+                pattern="\p{L}[\p{L}' ’\-]{1,59}"
                 autocomplete="name"
                 aria-describedby="name-hint"
               />
@@ -324,7 +328,6 @@
             <li class="footer__item"><a class="footer__link" href="#notations">Нотации</a></li>
             <li class="footer__item"><a class="footer__link" href="#pricing">Тарифы</a></li>
             <li class="footer__item"><a class="footer__link" href="#faq">Вопросы и ответы</a></li>
-            <li class="footer__item"><a class="footer__link" href="errors/500.html">Пример страницы ошибки 500</a></li>
             <li class="footer__item"><a class="footer__link" href="privacy.html">Политика конфиденциальности</a></li>
             <li class="footer__item"><a class="footer__link" href="en/" hreflang="en" lang="en">English version</a></li>
           </ul>

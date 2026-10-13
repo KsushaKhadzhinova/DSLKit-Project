@@ -63,6 +63,15 @@ test('the main pages use the tags the assignment lists', () => {
       assert.ok(usedSemanticTags(pages[name]).includes(tag), `${name}: ${tag}`);
 });
 
+test('the landing title and description keep the lengths recommended by the course', () => {
+  for (const name of landing) {
+    const title = pages[name].querySelector('title').textContent.length;
+    const description = pages[name].querySelector('meta[name="description"]').getAttribute('content').length;
+    assert.ok(title >= 50 && title <= 60, `${name} title ${title}`);
+    assert.ok(description >= 150 && description <= 160, `${name} description ${description}`);
+  }
+});
+
 test('the landing pages declare canonical and ru, en, x-default alternates', () => {
   for (const name of landing) assert.deepEqual(alternateProblems(pages[name]), [], name);
 });

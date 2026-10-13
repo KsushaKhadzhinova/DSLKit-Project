@@ -3,8 +3,11 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>DSLKit: diagrams as code in your browser</title>
-    <meta name="description" content="DSLKit is a web editor for diagrams as code: write DSL text and get IDEF0, DFD, ERD, BPMN, UML and Petri net diagrams." />
+    <title>DSLKit: diagrams as code in your browser. UML, BPMN, ERD</title>
+    <meta
+      name="description"
+      content="DSLKit is a web editor for diagrams as code. Describe a scheme in DSL text and get UML, BPMN, ERD, DFD, IDEF0 and Petri net diagrams. Join the closed beta."
+    />
     <meta name="theme-color" content="#2563eb" />
     <link rel="canonical" href="https://dslkit.io/en/" />
     <link rel="alternate" hreflang="ru" href="https://dslkit.io/" />
@@ -62,6 +65,7 @@
             <meta itemprop="price" content="0" />
             <meta itemprop="priceCurrency" content="USD" />
             <link itemprop="availability" href="https://schema.org/PreOrder" />
+            <link itemprop="url" href="https://dslkit.io/en/#waitlist" />
             Free in the beta: up to 5 diagrams per day.
           </p>
         </div>
@@ -87,7 +91,7 @@
               <img class="card__icon" src="../images/notations/idef0.svg" alt="" width="48" height="48" />
               <h3 class="card__title">IDEF0</h3>
               <p class="card__text">Functional modelling: blocks, inputs, controls, outputs and mechanisms.</p>
-              <a class="card__link" href="#waitlist">Get the IDEF0 template</a>
+              <a class="card__link" href="#waitlist">Join the beta: IDEF0</a>
             </article>
           </li>
           <li class="cards__item">
@@ -95,7 +99,7 @@
               <img class="card__icon" src="../images/notations/dfd.svg" alt="" width="48" height="48" />
               <h3 class="card__title">DFD</h3>
               <p class="card__text">Data flow diagrams: processes, data stores and the links between them.</p>
-              <a class="card__link" href="#waitlist">Get the DFD template</a>
+              <a class="card__link" href="#waitlist">Join the beta: DFD</a>
             </article>
           </li>
           <li class="cards__item">
@@ -103,7 +107,7 @@
               <img class="card__icon" src="../images/notations/erd.svg" alt="" width="48" height="48" />
               <h3 class="card__title">ERD</h3>
               <p class="card__text">Entities and relationships for database design.</p>
-              <a class="card__link" href="#waitlist">Get the ERD template</a>
+              <a class="card__link" href="#waitlist">Join the beta: ERD</a>
             </article>
           </li>
           <li class="cards__item">
@@ -111,7 +115,7 @@
               <img class="card__icon" src="../images/notations/bpmn.svg" alt="" width="48" height="48" />
               <h3 class="card__title">BPMN</h3>
               <p class="card__text">Business processes: events, tasks and gateways.</p>
-              <a class="card__link" href="#waitlist">Get the BPMN template</a>
+              <a class="card__link" href="#waitlist">Join the beta: BPMN</a>
             </article>
           </li>
           <li class="cards__item">
@@ -119,7 +123,7 @@
               <img class="card__icon" src="../images/notations/uml.svg" alt="" width="48" height="48" />
               <h3 class="card__title">UML</h3>
               <p class="card__text">Classes, sequences and other diagrams of the object model.</p>
-              <a class="card__link" href="#waitlist">Get the UML template</a>
+              <a class="card__link" href="#waitlist">Join the beta: UML</a>
             </article>
           </li>
           <li class="cards__item">
@@ -127,7 +131,7 @@
               <img class="card__icon" src="../images/notations/petri.svg" alt="" width="48" height="48" />
               <h3 class="card__title">Petri nets</h3>
               <p class="card__text">Concurrent processes: places, transitions and tokens.</p>
-              <a class="card__link" href="#waitlist">Get the Petri net template</a>
+              <a class="card__link" href="#waitlist">Join the beta: Petri nets</a>
             </article>
           </li>
         </ul>
@@ -195,7 +199,7 @@
             </ul>
           </article>
         </div>
-        <aside class="note">
+        <aside class="note" aria-label="Pricing note">
           <p class="note__text">Pricing terms may change after the beta. Updated <time datetime="2026-10-11">October 11, 2026</time>.</p>
         </aside>
       </section>
@@ -250,7 +254,7 @@
                 required
                 minlength="2"
                 maxlength="60"
-                pattern="[A-Za-zА-Яа-яЁё' \-]{2,60}"
+                pattern="\p{L}[\p{L}' ’\-]{1,59}"
                 autocomplete="name"
                 aria-describedby="name-hint"
               />
@@ -328,7 +332,6 @@
             <li class="footer__item"><a class="footer__link" href="#notations">Notations</a></li>
             <li class="footer__item"><a class="footer__link" href="#pricing">Pricing</a></li>
             <li class="footer__item"><a class="footer__link" href="#faq">Questions and answers</a></li>
-            <li class="footer__item"><a class="footer__link" href="../errors/500.html">Example of the 500 error page</a></li>
             <li class="footer__item"><a class="footer__link" href="privacy.html">Privacy policy</a></li>
             <li class="footer__item"><a class="footer__link" href="../" hreflang="ru" lang="ru">Русская версия</a></li>
           </ul>
