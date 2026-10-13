@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <meta name="theme-color" content="#2563eb" />
+    <title>Ошибка 405: метод не поддерживается — DSLKit</title>
+    <link rel="icon" href="/images/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/css/style.css" />
+  </head>
+  <body class="page">
+    <a class="skip-link" href="#main">Перейти к основному содержимому</a>
+    <header class="header">
+      <div class="header__inner">
+        <a class="header__logo" href="/">
+          <img class="header__logo-image" src="/images/logo.svg" alt="" width="32" height="32" />
+          <span class="header__logo-text">DSLKit</span>
+        </a>
+      </div>
+    </header>
+    <main class="main" id="main">
+      <section class="error" lang="ru" aria-labelledby="error-title-ru">
+        <p class="error__code">Код ошибки: 405</p>
+        <h1 class="error__title" id="error-title-ru">Ошибка 405: метод не поддерживается</h1>
+        <p class="error__text">
+          Сервер получил запрос с HTTP-методом, который для этого адреса не разрешён. DSLKit поддерживает только методы GET и HEAD: страницы открываются обычной
+          ссылкой или вводом адреса в строку браузера. Методы POST, PUT, PATCH и DELETE для статических страниц не выполняются.
+        </p>
+        <p class="error__text">Что можно сделать:</p>
+        <ul class="error__list">
+          <li>Откройте страницу обычной ссылкой или введите адрес в строку браузера, это запрос методом GET.</li>
+          <li>Если вы отправляли запрос через API-клиент или сторонний инструмент, выберите метод GET или HEAD.</li>
+          <li>
+            Если страница открывается обычной ссылкой, но ошибка всё равно появляется, напишите на
+            <a class="error__link" href="mailto:hello@dslkit.io">hello@dslkit.io</a> с адресом страницы.
+          </li>
+        </ul>
+        <a class="button button--primary" href="/">На главную</a>
+      </section>
+
+      <section class="error" lang="en" aria-labelledby="error-title-en">
+        <p class="error__code">Error code: 405</p>
+        <h2 class="error__title" id="error-title-en">Error 405: method not allowed</h2>
+        <p class="error__text">
+          The server received a request with an HTTP method that is not allowed for this address. DSLKit supports only GET and HEAD: pages open through a normal
+          link or by typing the address in the browser bar. POST, PUT, PATCH and DELETE requests are not processed for static pages.
+        </p>
+        <p class="error__text">What you can do:</p>
+        <ul class="error__list">
+          <li>Open the page through a normal link or type the address in the browser bar, which sends a GET request.</li>
+          <li>If you sent the request with an API client or another tool, switch the method to GET or HEAD.</li>
+          <li>
+            If the page opens through a normal link but the error still appears, email
+            <a class="error__link" href="mailto:hello@dslkit.io">hello@dslkit.io</a> with the page address.
+          </li>
+        </ul>
+        <a class="button button--primary" href="/en/">Back to home</a>
+      </section>
+    </main>
+    <footer class="footer">
+      <div class="footer__inner">
+        <nav class="footer__nav" aria-label="Нижняя навигация">
+          <ul class="footer__list">
+            <li class="footer__item"><a class="footer__link" href="/#notations">Нотации</a></li>
+            <li class="footer__item"><a class="footer__link" href="/#pricing">Тарифы</a></li>
+            <li class="footer__item"><a class="footer__link" href="/#faq">Вопросы и ответы</a></li>
+            <li class="footer__item"><a class="footer__link" href="/en/" hreflang="en" lang="en">English version</a></li>
+          </ul>
+        </nav>
+        <address class="footer__address">Контакты: <a class="footer__link" href="mailto:hello@dslkit.io">hello@dslkit.io</a></address>
+        <p class="footer__copy"><small>© 2026 DSLKit. Дипломный проект БГУИР.</small></p>
+      </div>
+    </footer>
+  </body>
+</html>
