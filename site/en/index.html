@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>DSLKit: diagrams as code in your browser</title>
+    <meta name="description" content="DSLKit is a web editor for diagrams as code: write DSL text and get IDEF0, DFD, ERD, BPMN, UML and Petri net diagrams." />
+    <meta name="theme-color" content="#2563eb" />
+    <link rel="canonical" href="https://dslkit.io/en/" />
+    <link rel="alternate" hreflang="ru" href="https://dslkit.io/" />
+    <link rel="alternate" hreflang="en" href="https://dslkit.io/en/" />
+    <link rel="alternate" hreflang="x-default" href="https://dslkit.io/" />
+    <link rel="icon" href="../images/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="../css/style.css" />
+  </head>
+  <body class="page">
+    <a class="skip-link" href="#main">Skip to main content</a>
+    <header class="header">
+      <div class="header__inner">
+        <a class="header__logo" href="./">
+          <img class="header__logo-image" src="../images/logo.svg" alt="" width="32" height="32" />
+          <span class="header__logo-text">DSLKit</span>
+        </a>
+        <input class="burger__input" type="checkbox" id="burger-toggle" />
+        <label class="burger__button" for="burger-toggle">
+          <span class="burger__label">Menu</span>
+          <span class="burger__icon" aria-hidden="true"></span>
+        </label>
+        <nav class="nav" aria-label="Main navigation">
+          <ul class="nav__list">
+            <li class="nav__item"><a class="nav__link" href="#notations">Notations</a></li>
+            <li class="nav__item"><a class="nav__link" href="#how">How it works</a></li>
+            <li class="nav__item"><a class="nav__link" href="#audience">Who it is for</a></li>
+            <li class="nav__item"><a class="nav__link" href="#pricing">Pricing</a></li>
+            <li class="nav__item"><a class="nav__link" href="#faq">FAQ</a></li>
+          </ul>
+        </nav>
+        <div class="header__tools">
+          <a class="header__lang" href="../" hreflang="ru" lang="ru">Русский</a>
+          <input class="theme__input" type="checkbox" id="theme-toggle" />
+          <label class="theme__button" for="theme-toggle">Dark theme</label>
+          <a class="button button--primary header__cta" href="#waitlist">Join the beta</a>
+        </div>
+      </div>
+    </header>
+    <main class="main" id="main">
+      <section class="hero" aria-labelledby="hero-title" itemscope itemtype="https://schema.org/SoftwareApplication">
+        <meta itemprop="name" content="DSLKit" />
+        <meta itemprop="applicationCategory" content="DeveloperApplication" />
+        <meta itemprop="operatingSystem" content="Web" />
+        <meta itemprop="url" content="https://dslkit.io/en/" />
+        <div class="hero__content">
+          <h1 class="hero__title" id="hero-title">Write code, get a diagram</h1>
+          <p class="hero__lead" itemprop="description">
+            A web editor for diagrams as code: describe a scheme in DSL text, and DSLKit checks it against the notation rules and draws it.
+          </p>
+          <p class="hero__actions">
+            <a class="button button--primary" href="#waitlist">Join the beta</a>
+            <a class="button" href="#how">How it works</a>
+          </p>
+          <p class="hero__note" itemprop="offers" itemscope itemtype="https://schema.org/Offer">
+            <meta itemprop="price" content="0" />
+            <meta itemprop="priceCurrency" content="USD" />
+            <link itemprop="availability" href="https://schema.org/PreOrder" />
+            Free in the beta: up to 5 diagrams per day.
+          </p>
+        </div>
+        <figure class="hero__figure">
+          <img
+            class="hero__image"
+            src="../images/hero-diagram.svg"
+            alt="The DSLKit editor: DSL code on the left, an IDEF0 diagram with blocks A0 and A1 on the right"
+            width="640"
+            height="400"
+            itemprop="image"
+          />
+          <figcaption class="hero__caption">The code on the left turns into the diagram on the right</figcaption>
+        </figure>
+      </section>
+
+      <section class="section" id="notations" aria-labelledby="notations-title">
+        <h2 class="section__title" id="notations-title">Notations</h2>
+        <p class="section__lead">Six notations in one editor. IDEF0, DFD and ERD arrive first in the beta.</p>
+        <ul class="cards">
+          <li class="cards__item">
+            <article class="card">
+              <img class="card__icon" src="../images/notations/idef0.svg" alt="" width="48" height="48" />
+              <h3 class="card__title">IDEF0</h3>
+              <p class="card__text">Functional modelling: blocks, inputs, controls, outputs and mechanisms.</p>
+              <a class="card__link" href="#waitlist">Get the IDEF0 template</a>
+            </article>
+          </li>
+          <li class="cards__item">
+            <article class="card">
+              <img class="card__icon" src="../images/notations/dfd.svg" alt="" width="48" height="48" />
+              <h3 class="card__title">DFD</h3>
+              <p class="card__text">Data flow diagrams: processes, data stores and the links between them.</p>
+              <a class="card__link" href="#waitlist">Get the DFD template</a>
+            </article>
+          </li>
+          <li class="cards__item">
+            <article class="card">
+              <img class="card__icon" src="../images/notations/erd.svg" alt="" width="48" height="48" />
+              <h3 class="card__title">ERD</h3>
+              <p class="card__text">Entities and relationships for database design.</p>
+              <a class="card__link" href="#waitlist">Get the ERD template</a>
+            </article>
+          </li>
+          <li class="cards__item">
+            <article class="card">
+              <img class="card__icon" src="../images/notations/bpmn.svg" alt="" width="48" height="48" />
+              <h3 class="card__title">BPMN</h3>
+              <p class="card__text">Business processes: events, tasks and gateways.</p>
+              <a class="card__link" href="#waitlist">Get the BPMN template</a>
+            </article>
+          </li>
+          <li class="cards__item">
+            <article class="card">
+              <img class="card__icon" src="../images/notations/uml.svg" alt="" width="48" height="48" />
+              <h3 class="card__title">UML</h3>
+              <p class="card__text">Classes, sequences and other diagrams of the object model.</p>
+              <a class="card__link" href="#waitlist">Get the UML template</a>
+            </article>
+          </li>
+          <li class="cards__item">
+            <article class="card">
+              <img class="card__icon" src="../images/notations/petri.svg" alt="" width="48" height="48" />
+              <h3 class="card__title">Petri nets</h3>
+              <p class="card__text">Concurrent processes: places, transitions and tokens.</p>
+              <a class="card__link" href="#waitlist">Get the Petri net template</a>
+            </article>
+          </li>
+        </ul>
+      </section>
+
+      <section class="section" id="how" aria-labelledby="how-title">
+        <h2 class="section__title" id="how-title">How it works</h2>
+        <ol class="steps">
+          <li class="steps__item">
+            <h3 class="steps__title">Write code</h3>
+            <p class="steps__text">Describe the diagram in DSL; hints and templates help you start.</p>
+          </li>
+          <li class="steps__item">
+            <h3 class="steps__title">See the scheme</h3>
+            <p class="steps__text">The canvas updates at once, and errors are highlighted with an explanation.</p>
+          </li>
+          <li class="steps__item">
+            <h3 class="steps__title">Export</h3>
+            <p class="steps__text">Save the result as SVG, PNG, PlantUML or Mermaid.</p>
+          </li>
+        </ol>
+      </section>
+
+      <section class="section" id="audience" aria-labelledby="audience-title">
+        <h2 class="section__title" id="audience-title">Who it is for</h2>
+        <ul class="cards">
+          <li class="cards__item">
+            <article class="card">
+              <h3 class="card__title">Students</h3>
+              <p class="card__text">Lab works, term papers and theses with diagrams that are easy to edit.</p>
+            </article>
+          </li>
+          <li class="cards__item">
+            <article class="card">
+              <h3 class="card__title">Developers</h3>
+              <p class="card__text">Schemes live next to the code and enter the Git history.</p>
+            </article>
+          </li>
+          <li class="cards__item">
+            <article class="card">
+              <h3 class="card__title">Analysts</h3>
+              <p class="card__text">Processes and data are described in text without manual drawing.</p>
+            </article>
+          </li>
+        </ul>
+      </section>
+
+      <section class="section" id="pricing" aria-labelledby="pricing-title">
+        <h2 class="section__title" id="pricing-title">Pricing</h2>
+        <div class="plans">
+          <article class="plan">
+            <h3 class="plan__title">Free</h3>
+            <ul class="plan__list">
+              <li>Up to 5 diagrams per day in the beta</li>
+              <li>All available notations</li>
+              <li>Export to SVG and PNG</li>
+            </ul>
+          </article>
+          <article class="plan">
+            <h3 class="plan__title">Pro</h3>
+            <ul class="plan__list">
+              <li>No daily limit</li>
+              <li>Version history</li>
+              <li>Collaboration and API</li>
+            </ul>
+          </article>
+        </div>
+        <aside class="note">
+          <p class="note__text">Pricing terms may change after the beta. Updated <time datetime="2026-10-11">October 11, 2026</time>.</p>
+        </aside>
+      </section>
+
+      <section class="section" id="faq" aria-labelledby="faq-title" itemscope itemtype="https://schema.org/FAQPage">
+        <h2 class="section__title" id="faq-title">Questions and answers</h2>
+        <details class="faq__item" itemprop="mainEntity" itemscope itemtype="https://schema.org/Question">
+          <summary class="faq__question" itemprop="name">What is DSLKit?</summary>
+          <div class="faq__answer" itemprop="acceptedAnswer" itemscope itemtype="https://schema.org/Answer">
+            <p itemprop="text">
+              DSLKit is a web editor for diagrams as code. You describe a scheme in DSL text, and the editor checks it against the notation rules and draws the
+              diagram.
+            </p>
+          </div>
+        </details>
+        <details class="faq__item" itemprop="mainEntity" itemscope itemtype="https://schema.org/Question">
+          <summary class="faq__question" itemprop="name">Do I need to know how to program?</summary>
+          <div class="faq__answer" itemprop="acceptedAnswer" itemscope itemtype="https://schema.org/Answer">
+            <p itemprop="text">
+              No. The syntax is short, and notation templates and hints help you write your first diagram. A click-based editing mode is planned for those who
+              do not write code.
+            </p>
+          </div>
+        </details>
+        <details class="faq__item" itemprop="mainEntity" itemscope itemtype="https://schema.org/Question">
+          <summary class="faq__question" itemprop="name">Which notations will be supported?</summary>
+          <div class="faq__answer" itemprop="acceptedAnswer" itemscope itemtype="https://schema.org/Answer">
+            <p itemprop="text">Six notations are planned: IDEF0, DFD, ERD, BPMN, UML and Petri nets. IDEF0, DFD and ERD arrive first in the beta.</p>
+          </div>
+        </details>
+        <details class="faq__item" itemprop="mainEntity" itemscope itemtype="https://schema.org/Question">
+          <summary class="faq__question" itemprop="name">How much does it cost?</summary>
+          <div class="faq__answer" itemprop="acceptedAnswer" itemscope itemtype="https://schema.org/Answer">
+            <p itemprop="text">The beta is free, with up to five diagrams per day. The paid Pro plan with extended features will appear later.</p>
+          </div>
+        </details>
+      </section>
+
+      <section class="section" id="waitlist" aria-labelledby="waitlist-title">
+        <h2 class="section__title" id="waitlist-title">Join the beta</h2>
+        <p class="section__lead">Leave your contacts and we will tell you when access opens. All fields except the comment are required.</p>
+        <form class="form" action="#waitlist" method="get">
+          <fieldset class="form__group">
+            <legend class="form__legend">Contacts</legend>
+            <div class="form__field">
+              <label class="form__label" for="name">Name</label>
+              <input
+                class="form__input"
+                id="name"
+                name="name"
+                type="text"
+                required
+                minlength="2"
+                maxlength="60"
+                pattern="[A-Za-zА-Яа-яЁё' \-]{2,60}"
+                autocomplete="name"
+                aria-describedby="name-hint"
+              />
+              <p class="form__hint" id="name-hint">2 to 60 letters. A space, a hyphen and an apostrophe are allowed.</p>
+              <p class="form__error" id="name-error" hidden>
+                The name was not accepted: the field is empty, shorter than two characters or contains digits and symbols. Enter 2 to 60 letters, for example
+                “Ksenia”.
+              </p>
+            </div>
+            <div class="form__field">
+              <label class="form__label" for="email">Email</label>
+              <input class="form__input" id="email" name="email" type="email" required maxlength="120" autocomplete="email" aria-describedby="email-hint" />
+              <p class="form__hint" id="email-hint">An address like name@example.com. The invitation will be sent there.</p>
+              <p class="form__error" id="email-error" hidden>
+                The address was not accepted: it is empty or does not look like an email. Check that it has an “@” sign and a domain after it.
+              </p>
+            </div>
+          </fieldset>
+          <fieldset class="form__group">
+            <legend class="form__legend">Your project</legend>
+            <div class="form__field">
+              <label class="form__label" for="notation">Notation</label>
+              <select class="form__input" id="notation" name="notation" required>
+                <option value="" selected disabled>Choose a notation</option>
+                <option value="idef0">IDEF0</option>
+                <option value="dfd">DFD</option>
+                <option value="erd">ERD</option>
+                <option value="bpmn">BPMN</option>
+                <option value="uml">UML</option>
+                <option value="petri">Petri nets</option>
+              </select>
+              <p class="form__error" id="notation-error" hidden>No notation chosen. Pick one of the six notations in the list.</p>
+            </div>
+            <div class="form__field">
+              <label class="form__label" for="team">Team size</label>
+              <input
+                class="form__input"
+                id="team"
+                name="team"
+                type="number"
+                required
+                min="0"
+                max="500"
+                step="1"
+                inputmode="numeric"
+                value="0"
+                aria-describedby="team-hint"
+              />
+              <p class="form__hint" id="team-hint">A whole number from 0 to 500. Enter 0 if you work alone.</p>
+              <p class="form__error" id="team-error" hidden>
+                The number was not accepted: only whole values from 0 to 500 are allowed, negative numbers and fractions are not.
+              </p>
+            </div>
+            <div class="form__field">
+              <label class="form__label" for="comment">Comment (optional)</label>
+              <textarea class="form__input" id="comment" name="comment" rows="4" maxlength="500" aria-describedby="comment-hint"></textarea>
+              <p class="form__hint" id="comment-hint">Up to 500 characters.</p>
+            </div>
+          </fieldset>
+          <div class="form__field form__field--checkbox">
+            <input class="form__checkbox" id="consent" name="consent" type="checkbox" required />
+            <label class="form__label" for="consent">I agree to receive emails about the beta launch</label>
+            <p class="form__error" id="consent-error" hidden>Without consent we cannot send the invitation. Tick the box to continue.</p>
+          </div>
+          <button class="button button--primary form__submit" type="submit">Submit</button>
+        </form>
+      </section>
+    </main>
+    <footer class="footer">
+      <div class="footer__inner">
+        <nav class="footer__nav" aria-label="Footer navigation">
+          <ul class="footer__list">
+            <li class="footer__item"><a class="footer__link" href="#notations">Notations</a></li>
+            <li class="footer__item"><a class="footer__link" href="#pricing">Pricing</a></li>
+            <li class="footer__item"><a class="footer__link" href="#faq">Questions and answers</a></li>
+            <li class="footer__item"><a class="footer__link" href="../errors/500.html">Example of the 500 error page</a></li>
+            <li class="footer__item"><a class="footer__link" href="../" hreflang="ru" lang="ru">Русская версия</a></li>
+          </ul>
+        </nav>
+        <address class="footer__address">Contacts: <a class="footer__link" href="mailto:hello@dslkit.io">hello@dslkit.io</a></address>
+        <p class="footer__copy"><small>© 2026 DSLKit. BSUIR diploma project.</small></p>
+      </div>
+    </footer>
+    <script src="../js/script.js"></script>
+  </body>
+</html>
