@@ -80,23 +80,40 @@ const analysis = `
 `;
 
 const jobs = [];
-for (const dir of ['wireframes','mockups','designs-light','designs-dark'])
-  for (const f of readdirSync(`${ROOT}/${dir}`).filter(f=>f.endsWith('.svg'))) jobs.push({dir, f});
+for (const dir of ['wireframes', 'mockups', 'designs-light', 'designs-dark'])
+  for (const f of readdirSync(`${ROOT}/${dir}`).filter((f) => f.endsWith('.svg'))) jobs.push({ dir, f });
 
 const all = {};
-for (const {dir,f} of jobs) {
-  const svg = readFileSync(`${ROOT}/${dir}/${f}`,'utf8');
+for (const { dir, f } of jobs) {
+  const svg = readFileSync(`${ROOT}/${dir}/${f}`, 'utf8');
   const html = `<!doctype html><html><head><meta charset="utf-8"><style>html,body{margin:0;padding:0}svg{display:block}</style></head><body>${svg}<pre id="out"></pre><script>document.getElementById('out').textContent=JSON.stringify(${analysis});</script></body></html>`;
   const page = `${OUT}/${dir}__${f}.html`;
   writeFileSync(page, html);
   let dom = '';
   try {
-    dom = execFileSync(CHROME, ['--headless=new','--disable-gpu','--hide-scrollbars','--virtual-time-budget=4000','--window-size=1600,1200','--dump-dom','file:///'+page], { encoding:'utf8', maxBuffer: 64*1024*1024 });
-  } catch (e) { dom = e.stdout || ''; }
+    dom = execFileSync(
+      CHROME,
+      ['--headless=new', '--disable-gpu', '--hide-scrollbars', '--virtual-time-budget=4000', '--window-size=1600,1200', '--dump-dom', 'file:///' + page],
+      { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 },
+    );
+  } catch (e) {
+    dom = e.stdout || '';
+  }
   const m = dom.match(/<pre id="out">([\s\S]*?)<\/pre>/);
-  if (!m || !m[1].trim()) { all[`${dir}/${f}`] = { error: 'no output' }; continue; }
-  const txt = m[1].replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&').replace(/&quot;/g,'"');
-  try { all[`${dir}/${f}`] = JSON.parse(txt); } catch (e) { all[`${dir}/${f}`] = { error: 'parse', head: txt.slice(0,120) }; }
+  if (!m || !m[1].trim()) {
+    all[`${dir}/${f}`] = { error: 'no output' };
+    continue;
+  }
+  const txt = m[1]
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&amp;/g, '&')
+    .replace(/&quot;/g, '"');
+  try {
+    all[`${dir}/${f}`] = JSON.parse(txt);
+  } catch (e) {
+    all[`${dir}/${f}`] = { error: 'parse', head: txt.slice(0, 120) };
+  }
 }
 writeFileSync(`${OUT}/results.json`, JSON.stringify(all, null, 1));
-console.log(Object.keys(all).length, 'files;', Object.values(all).filter(v=>v.error).length, 'errors');
+console.log(Object.keys(all).length, 'files;', Object.values(all).filter((v) => v.error).length, 'errors');

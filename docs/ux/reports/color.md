@@ -5,38 +5,40 @@
 ## 1. Контраст (таблица)
 
 Светлая тема (текст 4.5, крупный/UI 3):
-| Пара | Коэф. | Итог |
-|---|---|---|
-| text/bg 15.5; text/surface 16.3 | | ок |
-| text-light/bg 7.6; /surface 8.0; /secondary 6.9 | | ок |
-| muted/bg 4.56; /surface 4.80 | | ок (впритык) |
-| muted/secondary | 4.17 | FAIL |
-| link/bg 6.4; /surface 6.7 | | ок |
-| error/bg 4.59; /surface 4.83 | | ок (впритык) |
-| error/secondary | 4.19 | FAIL |
-| warning/bg 3.03; /surface 3.19 | | FAIL как текст, ок как иконка/крупный |
-| accent/bg 3.13; /surface 3.30 | | FAIL как текст |
-| белый на accent (кнопка/бейдж) | 3.30 | FAIL |
-| primary как текст/bg 4.91; /surface 5.17 | | ок |
-| primary на secondary | 4.48 | FAIL на 0.02 |
-| белый на primary (кнопка) | 5.17 | ок |
-| border/bg 1.25; border/surface 1.31 | | FAIL UI 3:1 (если граница — единственный признак поля/кнопки "Демо") |
-| primary, muted, error, warning, accent как UI-граф. vs bg | 3.0 – 4.9 | ок |
+
+| Пара                                                      | Коэф.     | Итог                                                                 |
+| --------------------------------------------------------- | --------- | -------------------------------------------------------------------- |
+| text/bg 15.5; text/surface 16.3                           |           | ок                                                                   |
+| text-light/bg 7.6; /surface 8.0; /secondary 6.9           |           | ок                                                                   |
+| muted/bg 4.56; /surface 4.80                              |           | ок (впритык)                                                         |
+| muted/secondary                                           | 4.17      | FAIL                                                                 |
+| link/bg 6.4; /surface 6.7                                 |           | ок                                                                   |
+| error/bg 4.59; /surface 4.83                              |           | ок (впритык)                                                         |
+| error/secondary                                           | 4.19      | FAIL                                                                 |
+| warning/bg 3.03; /surface 3.19                            |           | FAIL как текст, ок как иконка/крупный                                |
+| accent/bg 3.13; /surface 3.30                             |           | FAIL как текст                                                       |
+| белый на accent (кнопка/бейдж)                            | 3.30      | FAIL                                                                 |
+| primary как текст/bg 4.91; /surface 5.17                  |           | ок                                                                   |
+| primary на secondary                                      | 4.48      | FAIL на 0.02                                                         |
+| белый на primary (кнопка)                                 | 5.17      | ок                                                                   |
+| border/bg 1.25; border/surface 1.31                       |           | FAIL UI 3:1 (если граница — единственный признак поля/кнопки "Демо") |
+| primary, muted, error, warning, accent как UI-граф. vs bg | 3.0 – 4.9 | ок                                                                   |
 
 Тёмная тема:
-| Пара | Коэф. | Итог |
-|---|---|---|
-| text/bg 11.3; /surface 12.1; /secondary 9.0 | | ок |
-| text-light/bg 7.4; /surface 7.9; /secondary 5.8 | | ок |
-| muted/bg 5.14; /surface 5.50 | | ок |
-| muted/secondary | 4.07 | FAIL |
-| link 7.6–8.2; error 7.1–7.6; warning 9.3–9.9 | | ок |
-| accent/bg 5.0; /surface 5.3 | | ок; accent/secondary 3.94 FAIL |
-| primary как текст/ссылка на bg 3.17, surface 3.40 | | FAIL текст, ок как UI (>=3) |
-| белый на primary (кнопка) | 5.17 | ок |
-| белый на accent | 3.30 | FAIL |
-| border/bg 1.30; border/surface 1.40 | | FAIL UI 3:1 |
-| рамка primary на secondary (узлы диаграммы) | 2.51 | FAIL UI |
+
+| Пара                                              | Коэф. | Итог                           |
+| ------------------------------------------------- | ----- | ------------------------------ |
+| text/bg 11.3; /surface 12.1; /secondary 9.0       |       | ок                             |
+| text-light/bg 7.4; /surface 7.9; /secondary 5.8   |       | ок                             |
+| muted/bg 5.14; /surface 5.50                      |       | ок                             |
+| muted/secondary                                   | 4.07  | FAIL                           |
+| link 7.6–8.2; error 7.1–7.6; warning 9.3–9.9      |       | ок                             |
+| accent/bg 5.0; /surface 5.3                       |       | ок; accent/secondary 3.94 FAIL |
+| primary как текст/ссылка на bg 3.17, surface 3.40 |       | FAIL текст, ок как UI (>=3)    |
+| белый на primary (кнопка)                         | 5.17  | ок                             |
+| белый на accent                                   | 3.30  | FAIL                           |
+| border/bg 1.30; border/surface 1.40               |       | FAIL UI 3:1                    |
+| рамка primary на secondary (узлы диаграммы)       | 2.51  | FAIL UI                        |
 
 Итого: провалов текста 8 пар светлая/тёмная (muted-на-secondary x2, error-на-secondary, warning, accent, белый-на-accent x2, primary-как-текст в тёмной); UI-границ ниже 3:1: border в обеих темах (по WCAG 1.4.11 обязательно только если граница единственно идентифицирует компонент, у карточек не критично, у кнопки "Демо" и полей ввода критично). Основной контент (text, text-light, link) проходит с запасом.
 
