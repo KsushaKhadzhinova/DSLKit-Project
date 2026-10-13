@@ -4,7 +4,7 @@
 
 ## Для продолжения работы
 
-Начните с [`docs/CONTEXT.md`](docs/CONTEXT.md) (правила, договорённости, ловушки среды), затем [`docs/HANDOVER-LABS.md`](docs/HANDOVER-LABS.md) (статус всех лабораторных и практических, что осталось, следующий шаг). Условия работ лежат в [`materials/`](materials/README.md), архив по дизайну в [`docs/project/`](docs/project/). Актуальная ветка `main`; незавершённая работа в ветках `feature/*`.
+Новому ИИ-ассистенту: сначала [`docs/AI-INSTRUCTIONS.md`](docs/AI-INSTRUCTIONS.md) и [`docs/SESSION-LOG.md`](docs/SESSION-LOG.md). Затем [`docs/CONTEXT.md`](docs/CONTEXT.md) (правила, договорённости, ловушки среды), затем [`docs/HANDOVER-LABS.md`](docs/HANDOVER-LABS.md) (статус всех лабораторных и практических, что осталось, следующий шаг). Условия работ лежат в [`materials/`](materials/README.md), архив по дизайну в [`docs/project/`](docs/project/). Актуальная ветка `main`; незавершённая работа в ветках `feature/*`.
 
 ## Технологии
 
