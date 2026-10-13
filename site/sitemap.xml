@@ -12,4 +12,16 @@
     <xhtml:link rel="alternate" hreflang="en" href="https://dslkit.io/en/" />
     <lastmod>2026-10-11</lastmod>
   </url>
+  <url>
+    <loc>https://dslkit.io/privacy.html</loc>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://dslkit.io/privacy.html" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://dslkit.io/en/privacy.html" />
+    <lastmod>2026-10-13</lastmod>
+  </url>
+  <url>
+    <loc>https://dslkit.io/en/privacy.html</loc>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://dslkit.io/privacy.html" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://dslkit.io/en/privacy.html" />
+    <lastmod>2026-10-13</lastmod>
+  </url>
 </urlset>
