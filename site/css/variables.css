@@ -71,7 +71,7 @@
 /* Dark theme: the checkbox in the header switches it without JavaScript. */
 :root:has(.theme__input:checked),
 :root:has(.settings-theme__input[value='dark']:checked) {
-  --color-primary: #3b73ee;
+  --color-primary: #2563eb;
   --color-secondary: #27304d;
   --color-accent: #22c55e;
   --color-accent-text: #4ade80;

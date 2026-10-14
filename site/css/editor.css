@@ -512,7 +512,7 @@
 
 .canvas__label {
   fill: var(--color-text-light);
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .canvas__block {
@@ -837,4 +837,16 @@
   .editor-activity__button {
     min-width: var(--target-size);
   }
+}
+
+.problems__icon {
+  width: 20px;
+  height: 20px;
+}
+
+.editor-status__problems,
+.editor-status__branch {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
