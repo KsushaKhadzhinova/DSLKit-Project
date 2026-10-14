@@ -30,7 +30,8 @@ Table 1 – Structure of the API integration code in the DSLKit project
 | `js/api/apiService.js` | Requests `fetchData`, `postData`, `checkHealth`, `renderDiagram` and the `ApiError` class |
 | `js/storage/localStorage.js` | Read and write wrappers, a cache with a lifetime, the run history |
 | `js/utils/dataParser.js` | DSL parsing, DOT building, cache key, SVG cleaning |
-| `js/components/diagram-runner.js` | Buttons, loading indicator, error messages, offline mode |
+| `js/engines/engines.js`, `js/engines/local-engine.js` | The list of generation engines and the own engine that draws in the browser |
+| `js/components/diagram-runner.js` | Engine choice, buttons, loading indicator, error messages, offline mode |
 | `js/script.js` | Entry point that starts the component together with the others |
 
 ### 3.2 Request Service
@@ -45,11 +46,13 @@ The diagram cache keeps the save time together with the data, so the lifetime of
 
 ### 3.4 Data Conversion
 
-The module `dataParser.js` reads the code from the editor: the `diagram` header, `box` blocks with the ports `input`, `control`, `output`, `mechanism`, and `arrow` lines. Unknown lines do not stop a run and go to a list of skipped lines. The model is turned into Graphviz DOT text with quotes, backslashes and line breaks escaped. The server response is treated as untrusted, so before showing it the `script` and `foreignObject` tags, the `on*` attributes and the `javascript:` links are removed from the SVG.
+The module `dataParser.js` reads the code from the editor: the `diagram` header, `box` blocks with the ports `input`, `control`, `output`, `mechanism`, and `arrow` lines. Unknown lines do not stop a run and go to a list of skipped lines. The model is turned into Graphviz DOT text with quotes, backslashes and line breaks escaped. The server response is treated as untrusted, so before showing it the tags `script`, `foreignObject`, `style`, `use`, `image` and animations, the `on*` attributes, unsafe styles and every `href` link except internal and `http(s)` ones are removed from the SVG. Before a link is checked, control characters are stripped from it because browsers ignore them.
+
+Generation is not limited to a picture from a server. The list of engines is shown in table 1: three engines work through Kroki (Graphviz, Mermaid, PlantUML), and the own engine `local-engine.js` places the boxes in columns itself, draws arrows, labels and tooltips, and returns live SVG with separate `g`, `rect` and `text` elements. It sends no requests, so it works without the internet. For the other engines the same model is turned into DOT, Mermaid and PlantUML text, and the chosen engine is saved in LocalStorage.
 
 ### 3.5 Interface Integration
 
-The editor canvas gets the buttons "Draw with Kroki" and "Refresh from server", a status line with `aria-live`, a line about service availability and a list of the last runs. While a request runs, the buttons are disabled, the canvas has `aria-busy` and the status line shows the loading text. A successful result is shown in figure 1.
+The editor canvas gets the buttons "Draw with Kroki" and "Refresh from server", a status line with `aria-live`, a line about service availability and a list of the last runs. While a request runs, the canvas has `aria-busy` and the status line shows the loading text; the buttons stay available so keyboard focus is not lost, and a new run cancels the previous request. The page starts a diagram by itself when it opens, and the engine list redraws it when the value changes. A successful result is shown in figure 1.
 
 ![Diagram received from Kroki](figures/kroki-diagram.jpg)
 
@@ -340,16 +343,57 @@ export const toDot = (model) => {
   return lines.join('\n');
 };
 
-// A short stable key for the cache: the same source always gives the same string.
-export const sourceKey = (source) => {
-  let hash = 5381;
-  for (const char of String(source)) hash = ((hash * 33) ^ char.codePointAt(0)) >>> 0;
-  return `dot-${hash.toString(16)}`;
+const detailLines = (box) => PORTS.filter((port) => box.ports[port].length > 0).map((port) => `${port}: ${box.ports[port].join(', ')}`);
+
+const edgeLabel = (arrow) => [portLabel(arrow.fromPort, 'from'), portLabel(arrow.toPort, 'to')].filter(Boolean).join(' ');
+
+// Arrows that point at boxes missing from the model are left out of formats that need every node declared.
+const knownArrows = (model) => model.arrows.filter(({ from, to }) => model.boxes.some((box) => box.id === from) && model.boxes.some((box) => box.id === to));
+
+// Mermaid flowchart text for the Kroki mermaid endpoint. Node names are numbered because Mermaid ids cannot hold arbitrary characters.
+export const toMermaid = (model) => {
+  const name = (id) => `n${model.boxes.findIndex((box) => box.id === id)}`;
+  const text = (value) => String(value).replace(/"/g, '#quot;');
+  const lines = ['flowchart LR'];
+  model.boxes.forEach((box) => lines.push(`  ${name(box.id)}["${[text(`${box.id} ${box.name}`), ...detailLines(box).map(text)].join('<br/>')}"]`));
+  knownArrows(model).forEach((arrow) => {
+    const label = edgeLabel(arrow);
+    lines.push(`  ${name(arrow.from)} -->${label ? `|"${text(label)}"|` : ''} ${name(arrow.to)}`);
+  });
+  return lines.join('\n');
 };
 
-const BLOCKED_TAGS = ['script', 'foreignObject', 'iframe', 'object', 'embed'];
+// PlantUML text for the Kroki plantuml endpoint.
+export const toPlantUml = (model) => {
+  const name = (id) => `n${model.boxes.findIndex((box) => box.id === id)}`;
+  const text = (value) => String(value).replace(/"/g, "'").replace(/\r?\n/g, ' ');
+  const lines = ['@startuml', 'left to right direction'];
+  if (model.title) lines.push(`title ${text(model.title)}`);
+  model.boxes.forEach((box) => lines.push(`rectangle "${[text(`${box.id} ${box.name}`), ...detailLines(box).map(text)].join('\\n')}" as ${name(box.id)}`));
+  knownArrows(model).forEach((arrow) => {
+    const label = edgeLabel(arrow);
+    lines.push(`${name(arrow.from)} --> ${name(arrow.to)}${label ? ` : ${text(label)}` : ''}`);
+  });
+  lines.push('@enduml');
+  return lines.join('\n');
+};
 
-// The SVG comes from another server, so scripts, event handlers and javascript: links are removed before it enters the page.
+// A stable key for the cache: two independent 32-bit hashes make an accidental collision very unlikely.
+export const sourceKey = (source) => {
+  let first = 5381;
+  let second = 2166136261;
+  for (const char of String(source)) {
+    const code = char.codePointAt(0);
+    first = ((first * 33) ^ code) >>> 0;
+    second = Math.imul(second ^ code, 16777619) >>> 0;
+  }
+  return `dot-${first.toString(16)}${second.toString(16)}`;
+};
+
+const BLOCKED_TAGS = ['script', 'foreignObject', 'iframe', 'object', 'embed', 'style', 'use', 'image', 'set', 'animate', 'animateTransform', 'animateMotion'];
+const SAFE_LINK = /^(?:#|https?:\/\/)/i;
+
+// The SVG comes from another server, so scripts, animations, external loads, event handlers and unsafe links are removed before it enters the page.
 export const sanitizeSvg = (svgText, parser) => {
   const doc = parser.parseFromString(svgText, 'image/svg+xml');
   const svg = doc.documentElement;
@@ -357,7 +401,11 @@ export const sanitizeSvg = (svgText, parser) => {
   BLOCKED_TAGS.forEach((tag) => svg.querySelectorAll(tag).forEach((node) => node.remove()));
   [svg, ...svg.querySelectorAll('*')].forEach((node) => {
     [...node.attributes].forEach(({ name, value }) => {
-      if (/^on/i.test(name) || (/^(?:xlink:)?href$/i.test(name) && /^\s*javascript:/i.test(value))) node.removeAttribute(name);
+      // Control characters inside a scheme are ignored by browsers, so they are removed before the link is judged.
+      const link = value.replace(new RegExp('[\u0000-\u0020\u007f-\u009f]', 'g'), '');
+      const unsafeLink = /(?:^|:)href$/i.test(name) && !SAFE_LINK.test(link);
+      const unsafeStyle = name === 'style' && /url\(|expression\(|javascript:/i.test(value);
+      if (/^on/i.test(name) || unsafeLink || unsafeStyle) node.removeAttribute(name);
     });
   });
   return svg;
@@ -370,7 +418,8 @@ export const sanitizeSvg = (svgText, parser) => {
 import { renderDiagram, checkHealth } from '../api/apiService.js';
 import { API_CONFIG } from '../api/config.js';
 import { createCache, createHistory } from '../storage/localStorage.js';
-import { parseDsl, sanitizeSvg, sourceKey, toDot } from '../utils/dataParser.js';
+import { ENGINES, findEngine } from '../engines/engines.js';
+import { parseDsl, sanitizeSvg, sourceKey } from '../utils/dataParser.js';
 
 const MESSAGES = {
   empty: 'В редакторе нет кода диаграммы.',
@@ -401,6 +450,7 @@ export const initDiagramRunner = ({
   now = () => Date.now(),
   logger = console,
   isOnline = () => root.defaultView.navigator.onLine,
+  autoRun = true,
 } = {}) => {
   const page = root.querySelector('.app-page--editor');
   const renderButton = page?.querySelector('.canvas__render');
@@ -412,6 +462,7 @@ export const initDiagramRunner = ({
   const local = page.querySelector('.canvas__diagram');
   const service = page.querySelector('.canvas__service');
   const historyList = page.querySelector('.canvas__history');
+  const engineSelect = page.querySelector('.canvas__engine');
   const canvas = page.querySelector('.canvas');
   const parser = new root.defaultView.DOMParser();
   const cache = createCache({ storage, ttlMs: API_CONFIG.cacheTtlMs, now });
@@ -423,17 +474,17 @@ export const initDiagramRunner = ({
   };
   const setBusy = (busy) => {
     canvas.setAttribute('aria-busy', String(busy));
-    renderButton.disabled = busy;
-    if (refreshButton) refreshButton.disabled = busy;
   };
 
   const source = () => [...page.querySelectorAll('.code__line code')].map((line) => line.textContent).join('\n');
+
+  const currentEngine = () => findEngine(engineSelect?.value);
 
   const show = (svgText, note) => {
     const svg = sanitizeSvg(svgText, parser);
     if (!svg) return false;
     svg.setAttribute('role', 'img');
-    svg.setAttribute('aria-label', 'Диаграмма, полученная от сервиса Kroki');
+    svg.setAttribute('aria-label', `Диаграмма: ${currentEngine().label}`);
     remote.replaceChildren(root.importNode(svg, true));
     remote.hidden = false;
     local?.setAttribute('hidden', '');
@@ -461,17 +512,27 @@ export const initDiagramRunner = ({
 
   const run = async ({ refresh = false } = {}) => {
     const model = parseDsl(source());
-    const dot = toDot(model);
     if (model.boxes.length === 0) {
       setStatus(MESSAGES.empty);
       return false;
     }
-    const key = sourceKey(dot);
+    const engine = currentEngine();
+    const input = engine.build(model);
+    controller?.abort();
+    // The own engine draws in the browser: no request, no cache, and it works offline.
+    if (!engine.type) {
+      setBusy(false);
+      return show(input, 'Диаграмма построена собственным движком в браузере.');
+    }
+    const key = sourceKey(`${engine.id}
+${input}`);
     const cached = cache.get(key);
 
-    if (cached && !cached.expired && !refresh && show(cached.data, `Показана сохранённая копия от ${formatTime(cached.savedAt)}.`)) return true;
+    if (cached && !cached.expired && !refresh && show(cached.data, `Показана сохранённая копия от ${formatTime(cached.savedAt)}.`)) {
+      setBusy(false);
+      return true;
+    }
 
-    controller?.abort();
     controller = new AbortController();
     const { signal } = controller;
     setBusy(true);
@@ -479,8 +540,9 @@ export const initDiagramRunner = ({
     let succeeded = false;
     try {
       if (!isOnline()) throw Object.assign(new Error('offline'), { kind: 'offline' });
-      const svgText = await api.renderDiagram(dot, { signal });
-      if (!show(svgText, 'Диаграмма получена от сервиса Kroki.')) throw Object.assign(new Error('invalid'), { kind: 'invalid' });
+      const svgText = await api.renderDiagram(input, { signal, type: engine.type });
+      if (signal.aborted) throw Object.assign(new Error('cancelled'), { kind: 'aborted' });
+      if (!show(svgText, `Диаграмма получена от сервиса Kroki (${engine.type}).`)) throw Object.assign(new Error('invalid'), { kind: 'invalid' });
       cache.set(key, svgText);
       history.add({ key, title: model.title, at: now() });
       renderHistory();
@@ -500,10 +562,22 @@ export const initDiagramRunner = ({
   renderButton.addEventListener('click', () => run());
   refreshButton?.addEventListener('click', () => run({ refresh: true }));
   page.addEventListener('dslkit:run', () => run());
+  if (engineSelect) {
+    const saved = storage.get('diagram_engine', null);
+    if (ENGINES.some((engine) => engine.id === saved)) engineSelect.value = saved;
+    engineSelect.addEventListener('change', () => {
+      storage.set('diagram_engine', engineSelect.value);
+      run();
+    });
+  }
   historyList?.addEventListener('click', (event) => {
     const button = event.target.closest('.canvas__history-item');
-    const cached = button && cache.get(button.dataset.key);
+    if (!button) return;
+    const cached = cache.get(button.dataset.key);
+    controller?.abort();
+    setBusy(false);
     if (cached) show(cached.data, `Показана сохранённая копия от ${formatTime(cached.savedAt)}.`);
+    else setStatus('Сохранённая копия этой диаграммы уже удалена из кэша.');
   });
 
   if (service) {
@@ -518,6 +592,7 @@ export const initDiagramRunner = ({
   }
 
   renderHistory();
+  if (autoRun) run();
   return { run, cache, history };
 };
 ```

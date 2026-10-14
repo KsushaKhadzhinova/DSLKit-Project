@@ -133,6 +133,7 @@ The styles of the DSLKit project are split into files following the BEM methodol
 
   --color-primary: #2563eb;
   --color-on-primary: #ffffff;
+  --color-diagram-paper: #ffffff;
   --color-secondary: #e8efff;
   --color-accent: #16a34a;
   --color-accent-text: #15803d;

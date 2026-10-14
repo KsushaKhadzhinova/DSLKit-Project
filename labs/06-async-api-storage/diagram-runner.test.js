@@ -12,7 +12,7 @@ const memory = () => createStorage(createMemoryBackend());
 const flush = () => new Promise((resolve) => setTimeout(resolve, 0));
 const click = (window, element) => element.dispatchEvent(new window.MouseEvent('click', { bubbles: true }));
 
-const setup = ({ api = {}, storage = memory(), online = true, time = 1_700_000_000_000 } = {}) => {
+const setup = ({ api = {}, storage = memory(), online = true, time = 1_700_000_000_000, autoRun = false } = {}) => {
   const window = new JSDOM(html, { url: 'http://localhost/' }).window;
   const logger = { error: mock.fn() };
   const fullApi = {
@@ -21,7 +21,7 @@ const setup = ({ api = {}, storage = memory(), online = true, time = 1_700_000_0
     ...api,
   };
   const clock = { time };
-  const runner = initDiagramRunner({ root: window.document, storage, api: fullApi, logger, now: () => clock.time, isOnline: () => online });
+  const runner = initDiagramRunner({ root: window.document, storage, api: fullApi, logger, now: () => clock.time, isOnline: () => online, autoRun });
   const $ = (selector) => window.document.querySelector(selector);
   return { window, document: window.document, runner, api: fullApi, logger, storage, clock, $ };
 };
@@ -60,7 +60,6 @@ test('the render button sends DOT built from the editor code and shows a sanitiz
   assert.equal($('.canvas__diagram').hasAttribute('hidden'), true);
   assert.match($('.canvas__status').textContent, /получена от сервиса Kroki/);
   assert.equal($('.canvas').getAttribute('aria-busy'), 'false');
-  assert.equal($('.canvas__render').disabled, false);
   assert.equal(document.querySelectorAll('.canvas__history-item').length, 1);
   assert.match($('.canvas__history-item').textContent, /Order process · 2023-11-14 22:13/);
 });
@@ -70,8 +69,6 @@ test('the loader is shown while the request is running', async () => {
   const { window, $ } = setup({ api: { renderDiagram: () => new Promise((resolve) => (release = resolve)) } });
   click(window, $('.canvas__render'));
   assert.equal($('.canvas').getAttribute('aria-busy'), 'true');
-  assert.equal($('.canvas__render').disabled, true);
-  assert.equal($('.canvas__refresh').disabled, true);
   assert.match($('.canvas__status').textContent, /Загрузка/);
   release(SVG);
   await flush();
@@ -131,7 +128,6 @@ test('without a saved copy each failure shows its own message and is logged', as
     assert.match($('.canvas__status').textContent, pattern);
     assert.equal(logger.error.mock.callCount(), 1);
     assert.equal($('.canvas__remote').hidden, true);
-    assert.equal($('.canvas__render').disabled, false);
   }
 });
 
@@ -254,7 +250,7 @@ test('a history item shows its saved copy and an unknown item does nothing', asy
   $('.canvas__history-item').dataset.key = 'missing';
   click(window, $('.canvas__history-item'));
   assert.equal($('.canvas__remote svg'), null);
-  click(window, document.body);
+  click(window, $('.canvas__history'));
   assert.equal(clock.time > 0, true);
 });
 
@@ -273,20 +269,28 @@ test('the runner works on a page without the optional elements', async () => {
     { url: 'http://localhost/' },
   ).window;
   const api = { renderDiagram: async () => SVG, checkHealth: async () => ({}) };
-  const runner = initDiagramRunner({ root: window.document, storage: memory(), api, isOnline: () => true });
+  const runner = initDiagramRunner({ root: window.document, storage: memory(), api, isOnline: () => true, autoRun: false });
   assert.equal(await runner.run(), true);
   assert.equal(window.document.querySelector('.canvas__remote').hidden, false);
 });
 
 test('the default api and clock are used when none are passed', async () => {
+  const fetchMock = mock.method(globalThis, 'fetch', async () => ({ ok: true, status: 200, json: async () => ({}), text: async () => '' }));
   const window = new JSDOM(html, { url: 'http://localhost/' }).window;
-  const runner = initDiagramRunner({ root: window.document, storage: memory(), isOnline: () => false });
+  const runner = initDiagramRunner({ root: window.document, storage: memory(), isOnline: () => false, autoRun: false });
   assert.equal(await runner.run(), false);
+  await flush();
+  fetchMock.mock.restore();
 });
 
 test('the default online check reads navigator.onLine', async () => {
   const window = new JSDOM(html, { url: 'http://localhost/' }).window;
-  const runner = initDiagramRunner({ root: window.document, storage: memory(), api: { renderDiagram: async () => SVG, checkHealth: async () => ({}) } });
+  const runner = initDiagramRunner({
+    root: window.document,
+    storage: memory(),
+    api: { renderDiagram: async () => SVG, checkHealth: async () => ({}) },
+    autoRun: false,
+  });
   assert.equal(await runner.run(), true);
 });
 
@@ -298,8 +302,109 @@ test('the default logger is console', async () => {
     storage: memory(),
     isOnline: () => false,
     api: { renderDiagram: async () => SVG, checkHealth: async () => ({}) },
+    autoRun: false,
   });
   await runner.run();
   assert.equal(error.mock.callCount(), 1);
   error.mock.restore();
+});
+
+test('the page starts a run on its own when it opens', async () => {
+  const { api, $ } = setup({ autoRun: true });
+  await flush();
+  assert.equal(api.renderDiagram.mock.callCount(), 1);
+  assert.equal($('.canvas__remote').hidden, false);
+});
+
+test('the engine list offers three Kroki engines and the own engine', () => {
+  const { document } = setup();
+  assert.deepEqual(
+    [...document.querySelectorAll('.canvas__engine option')].map((option) => option.value),
+    ['graphviz', 'mermaid', 'plantuml', 'local'],
+  );
+});
+
+test('each Kroki engine sends its own text type to its own endpoint', async () => {
+  for (const [engine, pattern] of [
+    ['graphviz', /^digraph/],
+    ['mermaid', /^flowchart LR/],
+    ['plantuml', /^@startuml/],
+  ]) {
+    const { window, api, $ } = setup();
+    $('.canvas__engine').value = engine;
+    click(window, $('.canvas__render'));
+    await flush();
+    const [source, options] = api.renderDiagram.mock.calls[0].arguments;
+    assert.match(source, pattern);
+    assert.equal(options.type, engine);
+  }
+});
+
+test('the own engine draws live SVG in the browser without any request, even offline', async () => {
+  const { window, api, $, document } = setup({ online: false });
+  $('.canvas__engine').value = 'local';
+  click(window, $('.canvas__render'));
+  await flush();
+  assert.equal(api.renderDiagram.mock.callCount(), 0);
+  assert.match($('.canvas__status').textContent, /собственным движком/);
+  assert.equal($('.canvas__remote').hidden, false);
+  assert.equal(document.querySelectorAll('.canvas__remote .local-engine__box').length, 2);
+  assert.match($('.canvas__remote svg').getAttribute('aria-label'), /Собственный движок/);
+  assert.equal($('.canvas').getAttribute('aria-busy'), 'false');
+});
+
+test('changing the engine saves the choice and redraws', async () => {
+  const { window, api, $, storage } = setup();
+  $('.canvas__engine').value = 'mermaid';
+  $('.canvas__engine').dispatchEvent(new window.Event('change', { bubbles: true }));
+  await flush();
+  assert.equal(storage.get('diagram_engine'), 'mermaid');
+  assert.equal(api.renderDiagram.mock.callCount(), 1);
+});
+
+test('the saved engine is restored and an unknown saved value is ignored', () => {
+  const storage = memory();
+  storage.set('diagram_engine', 'plantuml');
+  assert.equal(setup({ storage }).$('.canvas__engine').value, 'plantuml');
+  const other = memory();
+  other.set('diagram_engine', 'nonsense');
+  assert.equal(setup({ storage: other }).$('.canvas__engine').value, 'graphviz');
+});
+
+test('the same code is cached separately for every engine', async () => {
+  const { window, api, $ } = setup();
+  click(window, $('.canvas__render'));
+  await flush();
+  $('.canvas__engine').value = 'mermaid';
+  click(window, $('.canvas__render'));
+  await flush();
+  assert.equal(api.renderDiagram.mock.callCount(), 2);
+});
+
+test('a history item whose cached copy is gone says so', async () => {
+  const { window, $, storage } = setup();
+  click(window, $('.canvas__render'));
+  await flush();
+  storage.remove('diagram_cache');
+  click(window, $('.canvas__history-item'));
+  assert.match($('.canvas__status').textContent, /удалена из кэша/);
+});
+
+test('a response that arrives after a newer cached view is dropped', async () => {
+  const storage = memory();
+  const first = setup({ storage });
+  click(first.window, first.$('.canvas__render'));
+  await flush();
+  let release;
+  const second = setup({
+    storage,
+    api: { renderDiagram: () => new Promise((resolve) => (release = resolve)) },
+  });
+  second.$('.canvas__engine').value = 'mermaid';
+  click(second.window, second.$('.canvas__render'));
+  second.$('.canvas__engine').value = 'graphviz';
+  click(second.window, second.$('.canvas__render'));
+  release(SVG);
+  await flush();
+  assert.match(second.$('.canvas__status').textContent, /сохранённая копия/);
 });

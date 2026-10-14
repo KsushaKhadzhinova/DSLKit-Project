@@ -30,7 +30,8 @@ Table 1 – Structure of the API integration code in the DSLKit project
 | `js/api/apiService.js` | Requests `fetchData`, `postData`, `checkHealth`, `renderDiagram` and the `ApiError` class |
 | `js/storage/localStorage.js` | Read and write wrappers, a cache with a lifetime, the run history |
 | `js/utils/dataParser.js` | DSL parsing, DOT building, cache key, SVG cleaning |
-| `js/components/diagram-runner.js` | Buttons, loading indicator, error messages, offline mode |
+| `js/engines/engines.js`, `js/engines/local-engine.js` | The list of generation engines and the own engine that draws in the browser |
+| `js/components/diagram-runner.js` | Engine choice, buttons, loading indicator, error messages, offline mode |
 | `js/script.js` | Entry point that starts the component together with the others |
 
 ### 3.2 Request Service
@@ -45,11 +46,13 @@ The diagram cache keeps the save time together with the data, so the lifetime of
 
 ### 3.4 Data Conversion
 
-The module `dataParser.js` reads the code from the editor: the `diagram` header, `box` blocks with the ports `input`, `control`, `output`, `mechanism`, and `arrow` lines. Unknown lines do not stop a run and go to a list of skipped lines. The model is turned into Graphviz DOT text with quotes, backslashes and line breaks escaped. The server response is treated as untrusted, so before showing it the `script` and `foreignObject` tags, the `on*` attributes and the `javascript:` links are removed from the SVG.
+The module `dataParser.js` reads the code from the editor: the `diagram` header, `box` blocks with the ports `input`, `control`, `output`, `mechanism`, and `arrow` lines. Unknown lines do not stop a run and go to a list of skipped lines. The model is turned into Graphviz DOT text with quotes, backslashes and line breaks escaped. The server response is treated as untrusted, so before showing it the tags `script`, `foreignObject`, `style`, `use`, `image` and animations, the `on*` attributes, unsafe styles and every `href` link except internal and `http(s)` ones are removed from the SVG. Before a link is checked, control characters are stripped from it because browsers ignore them.
+
+Generation is not limited to a picture from a server. The list of engines is shown in table 1: three engines work through Kroki (Graphviz, Mermaid, PlantUML), and the own engine `local-engine.js` places the boxes in columns itself, draws arrows, labels and tooltips, and returns live SVG with separate `g`, `rect` and `text` elements. It sends no requests, so it works without the internet. For the other engines the same model is turned into DOT, Mermaid and PlantUML text, and the chosen engine is saved in LocalStorage.
 
 ### 3.5 Interface Integration
 
-The editor canvas gets the buttons "Draw with Kroki" and "Refresh from server", a status line with `aria-live`, a line about service availability and a list of the last runs. While a request runs, the buttons are disabled, the canvas has `aria-busy` and the status line shows the loading text. A successful result is shown in figure 1.
+The editor canvas gets the buttons "Draw with Kroki" and "Refresh from server", a status line with `aria-live`, a line about service availability and a list of the last runs. While a request runs, the canvas has `aria-busy` and the status line shows the loading text; the buttons stay available so keyboard focus is not lost, and a new run cancels the previous request. The page starts a diagram by itself when it opens, and the engine list redraws it when the value changes. A successful result is shown in figure 1.
 
 ![Diagram received from Kroki](figures/kroki-diagram.jpg)
 
@@ -105,7 +108,7 @@ The commit with the implementation: https://github.com/KsushaKhadzhinova/DSLKit-
 25. **Rate limiting.** It is a limit on the number of requests per unit of time on the server side. The client accounts for it with a cache, cancelling extra requests, retrying with a pause and showing a message on code 429.
 26. **Protection from duplicates.** Active requests are kept in a `Map` under a key made of the method, the address and the body, and a repeated call gets the same Promise. After completion the entry is removed, and requests with an abort signal are not merged.
 27. **Parameters in the query string.** Parameters are assembled by `URLSearchParams`, for example `/items?q=order&sort=name&page=2&limit=20`. In `fetchData` they are passed as a `params` object and encoded automatically.
-28. **Loading indicator.** The user sees that a request is running and does not press the button again. In the project the buttons are disabled, the canvas gets `aria-busy`, and the status line announces loading.
+28. **Loading indicator.** The user sees that a request is running and does not press the button again. In the project the canvas gets `aria-busy`, and the status line announces loading.
 29. **Promise.all.** The method waits for all requests at once and returns an array of results, for example loading several diagrams in parallel. When one fails, the whole result is rejected, so `Promise.allSettled` suits independent requests.
 30. **Client error log.** Errors go to `console.error` with the kind and the code, and personal data does not reach the log. When needed, the last errors can be stored in LocalStorage.
 {{/answers}}

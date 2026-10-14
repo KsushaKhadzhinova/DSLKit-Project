@@ -1,7 +1,8 @@
 import { renderDiagram, checkHealth } from '../api/apiService.js';
 import { API_CONFIG } from '../api/config.js';
 import { createCache, createHistory } from '../storage/localStorage.js';
-import { parseDsl, sanitizeSvg, sourceKey, toDot } from '../utils/dataParser.js';
+import { ENGINES, findEngine } from '../engines/engines.js';
+import { parseDsl, sanitizeSvg, sourceKey } from '../utils/dataParser.js';
 
 const MESSAGES = {
   empty: 'В редакторе нет кода диаграммы.',
@@ -32,6 +33,7 @@ export const initDiagramRunner = ({
   now = () => Date.now(),
   logger = console,
   isOnline = () => root.defaultView.navigator.onLine,
+  autoRun = true,
 } = {}) => {
   const page = root.querySelector('.app-page--editor');
   const renderButton = page?.querySelector('.canvas__render');
@@ -43,6 +45,7 @@ export const initDiagramRunner = ({
   const local = page.querySelector('.canvas__diagram');
   const service = page.querySelector('.canvas__service');
   const historyList = page.querySelector('.canvas__history');
+  const engineSelect = page.querySelector('.canvas__engine');
   const canvas = page.querySelector('.canvas');
   const parser = new root.defaultView.DOMParser();
   const cache = createCache({ storage, ttlMs: API_CONFIG.cacheTtlMs, now });
@@ -54,17 +57,17 @@ export const initDiagramRunner = ({
   };
   const setBusy = (busy) => {
     canvas.setAttribute('aria-busy', String(busy));
-    renderButton.disabled = busy;
-    if (refreshButton) refreshButton.disabled = busy;
   };
 
   const source = () => [...page.querySelectorAll('.code__line code')].map((line) => line.textContent).join('\n');
+
+  const currentEngine = () => findEngine(engineSelect?.value);
 
   const show = (svgText, note) => {
     const svg = sanitizeSvg(svgText, parser);
     if (!svg) return false;
     svg.setAttribute('role', 'img');
-    svg.setAttribute('aria-label', 'Диаграмма, полученная от сервиса Kroki');
+    svg.setAttribute('aria-label', `Диаграмма: ${currentEngine().label}`);
     remote.replaceChildren(root.importNode(svg, true));
     remote.hidden = false;
     local?.setAttribute('hidden', '');
@@ -92,17 +95,27 @@ export const initDiagramRunner = ({
 
   const run = async ({ refresh = false } = {}) => {
     const model = parseDsl(source());
-    const dot = toDot(model);
     if (model.boxes.length === 0) {
       setStatus(MESSAGES.empty);
       return false;
     }
-    const key = sourceKey(dot);
+    const engine = currentEngine();
+    const input = engine.build(model);
+    controller?.abort();
+    // The own engine draws in the browser: no request, no cache, and it works offline.
+    if (!engine.type) {
+      setBusy(false);
+      return show(input, 'Диаграмма построена собственным движком в браузере.');
+    }
+    const key = sourceKey(`${engine.id}
+${input}`);
     const cached = cache.get(key);
 
-    if (cached && !cached.expired && !refresh && show(cached.data, `Показана сохранённая копия от ${formatTime(cached.savedAt)}.`)) return true;
+    if (cached && !cached.expired && !refresh && show(cached.data, `Показана сохранённая копия от ${formatTime(cached.savedAt)}.`)) {
+      setBusy(false);
+      return true;
+    }
 
-    controller?.abort();
     controller = new AbortController();
     const { signal } = controller;
     setBusy(true);
@@ -110,8 +123,9 @@ export const initDiagramRunner = ({
     let succeeded = false;
     try {
       if (!isOnline()) throw Object.assign(new Error('offline'), { kind: 'offline' });
-      const svgText = await api.renderDiagram(dot, { signal });
-      if (!show(svgText, 'Диаграмма получена от сервиса Kroki.')) throw Object.assign(new Error('invalid'), { kind: 'invalid' });
+      const svgText = await api.renderDiagram(input, { signal, type: engine.type });
+      if (signal.aborted) throw Object.assign(new Error('cancelled'), { kind: 'aborted' });
+      if (!show(svgText, `Диаграмма получена от сервиса Kroki (${engine.type}).`)) throw Object.assign(new Error('invalid'), { kind: 'invalid' });
       cache.set(key, svgText);
       history.add({ key, title: model.title, at: now() });
       renderHistory();
@@ -131,10 +145,22 @@ export const initDiagramRunner = ({
   renderButton.addEventListener('click', () => run());
   refreshButton?.addEventListener('click', () => run({ refresh: true }));
   page.addEventListener('dslkit:run', () => run());
+  if (engineSelect) {
+    const saved = storage.get('diagram_engine', null);
+    if (ENGINES.some((engine) => engine.id === saved)) engineSelect.value = saved;
+    engineSelect.addEventListener('change', () => {
+      storage.set('diagram_engine', engineSelect.value);
+      run();
+    });
+  }
   historyList?.addEventListener('click', (event) => {
     const button = event.target.closest('.canvas__history-item');
-    const cached = button && cache.get(button.dataset.key);
+    if (!button) return;
+    const cached = cache.get(button.dataset.key);
+    controller?.abort();
+    setBusy(false);
     if (cached) show(cached.data, `Показана сохранённая копия от ${formatTime(cached.savedAt)}.`);
+    else setStatus('Сохранённая копия этой диаграммы уже удалена из кэша.');
   });
 
   if (service) {
@@ -149,5 +175,6 @@ export const initDiagramRunner = ({
   }
 
   renderHistory();
+  if (autoRun) run();
   return { run, cache, history };
 };

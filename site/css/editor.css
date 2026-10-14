@@ -491,6 +491,17 @@
   display: none;
 }
 
+.canvas__engine-label {
+  color: var(--color-text-light);
+  font-size: var(--step--1);
+}
+
+.canvas__engine {
+  width: auto;
+  min-height: var(--target-size-small);
+  font-size: var(--step--1);
+}
+
 .canvas__render,
 .canvas__refresh {
   flex: 0 0 auto;
@@ -531,7 +542,7 @@
 .canvas__remote svg {
   max-width: 100%;
   height: auto;
-  background: var(--color-surface);
+  background: var(--color-diagram-paper);
 }
 
 .canvas__breadcrumb {

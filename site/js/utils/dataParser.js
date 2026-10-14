@@ -56,16 +56,57 @@ export const toDot = (model) => {
   return lines.join('\n');
 };
 
-// A short stable key for the cache: the same source always gives the same string.
-export const sourceKey = (source) => {
-  let hash = 5381;
-  for (const char of String(source)) hash = ((hash * 33) ^ char.codePointAt(0)) >>> 0;
-  return `dot-${hash.toString(16)}`;
+const detailLines = (box) => PORTS.filter((port) => box.ports[port].length > 0).map((port) => `${port}: ${box.ports[port].join(', ')}`);
+
+const edgeLabel = (arrow) => [portLabel(arrow.fromPort, 'from'), portLabel(arrow.toPort, 'to')].filter(Boolean).join(' ');
+
+// Arrows that point at boxes missing from the model are left out of formats that need every node declared.
+const knownArrows = (model) => model.arrows.filter(({ from, to }) => model.boxes.some((box) => box.id === from) && model.boxes.some((box) => box.id === to));
+
+// Mermaid flowchart text for the Kroki mermaid endpoint. Node names are numbered because Mermaid ids cannot hold arbitrary characters.
+export const toMermaid = (model) => {
+  const name = (id) => `n${model.boxes.findIndex((box) => box.id === id)}`;
+  const text = (value) => String(value).replace(/"/g, '#quot;');
+  const lines = ['flowchart LR'];
+  model.boxes.forEach((box) => lines.push(`  ${name(box.id)}["${[text(`${box.id} ${box.name}`), ...detailLines(box).map(text)].join('<br/>')}"]`));
+  knownArrows(model).forEach((arrow) => {
+    const label = edgeLabel(arrow);
+    lines.push(`  ${name(arrow.from)} -->${label ? `|"${text(label)}"|` : ''} ${name(arrow.to)}`);
+  });
+  return lines.join('\n');
 };
 
-const BLOCKED_TAGS = ['script', 'foreignObject', 'iframe', 'object', 'embed'];
+// PlantUML text for the Kroki plantuml endpoint.
+export const toPlantUml = (model) => {
+  const name = (id) => `n${model.boxes.findIndex((box) => box.id === id)}`;
+  const text = (value) => String(value).replace(/"/g, "'").replace(/\r?\n/g, ' ');
+  const lines = ['@startuml', 'left to right direction'];
+  if (model.title) lines.push(`title ${text(model.title)}`);
+  model.boxes.forEach((box) => lines.push(`rectangle "${[text(`${box.id} ${box.name}`), ...detailLines(box).map(text)].join('\\n')}" as ${name(box.id)}`));
+  knownArrows(model).forEach((arrow) => {
+    const label = edgeLabel(arrow);
+    lines.push(`${name(arrow.from)} --> ${name(arrow.to)}${label ? ` : ${text(label)}` : ''}`);
+  });
+  lines.push('@enduml');
+  return lines.join('\n');
+};
 
-// The SVG comes from another server, so scripts, event handlers and javascript: links are removed before it enters the page.
+// A stable key for the cache: two independent 32-bit hashes make an accidental collision very unlikely.
+export const sourceKey = (source) => {
+  let first = 5381;
+  let second = 2166136261;
+  for (const char of String(source)) {
+    const code = char.codePointAt(0);
+    first = ((first * 33) ^ code) >>> 0;
+    second = Math.imul(second ^ code, 16777619) >>> 0;
+  }
+  return `dot-${first.toString(16)}${second.toString(16)}`;
+};
+
+const BLOCKED_TAGS = ['script', 'foreignObject', 'iframe', 'object', 'embed', 'style', 'use', 'image', 'set', 'animate', 'animateTransform', 'animateMotion'];
+const SAFE_LINK = /^(?:#|https?:\/\/)/i;
+
+// The SVG comes from another server, so scripts, animations, external loads, event handlers and unsafe links are removed before it enters the page.
 export const sanitizeSvg = (svgText, parser) => {
   const doc = parser.parseFromString(svgText, 'image/svg+xml');
   const svg = doc.documentElement;
@@ -73,7 +114,11 @@ export const sanitizeSvg = (svgText, parser) => {
   BLOCKED_TAGS.forEach((tag) => svg.querySelectorAll(tag).forEach((node) => node.remove()));
   [svg, ...svg.querySelectorAll('*')].forEach((node) => {
     [...node.attributes].forEach(({ name, value }) => {
-      if (/^on/i.test(name) || (/^(?:xlink:)?href$/i.test(name) && /^\s*javascript:/i.test(value))) node.removeAttribute(name);
+      // Control characters inside a scheme are ignored by browsers, so they are removed before the link is judged.
+      const link = value.replace(new RegExp('[\u0000-\u0020\u007f-\u009f]', 'g'), '');
+      const unsafeLink = /(?:^|:)href$/i.test(name) && !SAFE_LINK.test(link);
+      const unsafeStyle = name === 'style' && /url\(|expression\(|javascript:/i.test(value);
+      if (/^on/i.test(name) || unsafeLink || unsafeStyle) node.removeAttribute(name);
     });
   });
   return svg;
