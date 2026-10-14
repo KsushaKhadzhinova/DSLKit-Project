@@ -26,7 +26,7 @@ Gain practical skills in analysing web application network traffic: study the st
 
 ### 3.1 Site Selection and Justification
 
-The selected site is https://app.diagrams.net/ (draw.io). It is a web diagram editor with scenarios close to DSLKit: an editor, a canvas, notation templates and export. The network behaviour of such a site is representative for the future project: a heavy client application, shape libraries, API calls and a content delivery network.
+The project topic belongs to the SaaS direction, so a service of that type is chosen: https://app.diagrams.net/ (draw.io). It is a cloud web diagram editor with scenarios close to DSLKit: an editor, a canvas, notation templates and export. The network behaviour of such a site is representative for the future project: a heavy client application, shape libraries, API calls and a content delivery network.
 
 ### 3.2 Method
 
