@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DSLKit: вариант 3, тёплый редакторский</title>
+<style>
+/* Вариант 3. Референсы: Notion, Anthropic, D2, PlantUML. Кремовый фон, serif-заголовки, спокойный ритм, списки вместо карточек, документация как часть сайта. */
+:root{--bg:#faf6ee;--paper:#fffdf8;--ink:#2a2622;--muted:#6f675d;--line:#e6dfd2;--accent:#c2562d;--accent-soft:#f6e3d8;--green:#4a7c59;--serif:'Source Serif 4',Georgia,'Times New Roman',serif;--sans:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;--mono:'JetBrains Mono',ui-monospace,Consolas,monospace}
+*{box-sizing:border-box;margin:0}
+body{background:var(--bg);color:var(--ink);font:17px/1.7 var(--sans)}
+a{color:inherit}
+.wrap{max-width:1040px;margin:0 auto;padding:0 28px}
+header{border-bottom:1px solid var(--line)}
+header .wrap{display:flex;align-items:center;gap:28px;height:68px}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none;font:700 21px var(--serif)}.logo img{width:26px}
+nav{display:flex;gap:24px;flex:1;font-size:15px}nav a{color:var(--muted);text-decoration:none}nav a:hover{color:var(--ink);text-decoration:underline;text-underline-offset:4px}
+.btn{display:inline-block;padding:11px 22px;border-radius:8px;border:1px solid var(--ink);text-decoration:none;font-weight:600;font-size:15px;transition:.15s}
+.btn:hover{background:var(--ink);color:var(--bg)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}.btn.primary:hover{background:#a9461f;border-color:#a9461f}
+.btn.lg{padding:14px 28px;font-size:16px}
+@media(max-width:760px){nav{display:none}}
+/* hero: слева текст, справа «документ» */
+.hero{padding:96px 0 72px}
+.hero .wrap{display:grid;grid-template-columns:1.1fr 1fr;gap:64px;align-items:start}
+.kicker{font:600 13px var(--mono);color:var(--accent);letter-spacing:.1em;text-transform:uppercase}
+h1{font:600 clamp(40px,5.6vw,66px)/1.05 var(--serif);letter-spacing:-.025em;margin:18px 0 22px}
+h1 i{color:var(--accent)}
+.lead{color:var(--muted);font-size:20px;max-width:44ch;margin-bottom:30px}
+.cta{display:flex;gap:12px;flex-wrap:wrap}
+.note{margin-top:16px;color:var(--muted);font-size:14px}
+.doc{background:var(--paper);border:1px solid var(--line);border-radius:12px;box-shadow:0 2px 0 var(--line),0 24px 50px rgb(42 38 34/.08);overflow:hidden}
+.doc .cap{display:flex;justify-content:space-between;padding:10px 16px;border-bottom:1px solid var(--line);font:12px var(--mono);color:var(--muted)}
+.doc pre{padding:18px 20px;font:13px/1.8 var(--mono);color:#3a342e;border-bottom:1px solid var(--line);overflow:auto}
+.k{color:var(--accent)}.s{color:var(--green)}.c{color:#a39a8c}
+.doc .out{padding:16px;background:var(--bg)}
+.doc svg{width:100%}
+.ok{padding:8px 16px;font:12px var(--mono);color:var(--green);border-top:1px solid var(--line)}
+@media(max-width:860px){.hero .wrap{grid-template-columns:1fr;gap:40px}}
+section{padding:80px 0;border-top:1px solid var(--line)}
+h2{font:600 clamp(30px,4vw,44px)/1.1 var(--serif);letter-spacing:-.02em;margin-bottom:14px}
+.sec-lead{color:var(--muted);max-width:52ch;font-size:19px;margin-bottom:40px}
+.two{display:grid;grid-template-columns:1fr 2fr;gap:56px}
+@media(max-width:800px){.two{grid-template-columns:1fr;gap:20px}}
+/* нотации списком */
+.rows{list-style:none;padding:0}
+.rows li{display:grid;grid-template-columns:48px 130px 1fr auto;gap:18px;align-items:center;padding:20px 0;border-bottom:1px solid var(--line)}
+.rows img{width:36px}
+.rows h3{font:600 22px var(--serif)}
+.rows p{color:var(--muted);font-size:16px}
+.st{font:600 12px var(--mono);padding:4px 10px;border-radius:6px;background:var(--accent-soft);color:var(--accent)}
+.st.plan{background:#eee8dc;color:var(--muted)}
+@media(max-width:700px){.rows li{grid-template-columns:40px 1fr;gap:4px 14px}.rows p{grid-column:2}.st{grid-column:2;justify-self:start}}
+/* шаги */
+.steps{list-style:none;padding:0;counter-reset:s}
+.steps li{display:grid;grid-template-columns:72px 1fr;gap:20px;padding:22px 0;border-bottom:1px solid var(--line)}
+.steps li::before{counter-increment:s;content:"0" counter(s);font:600 40px var(--serif);color:var(--accent);line-height:1}
+.steps h3{font:600 22px var(--serif)}.steps p{color:var(--muted)}
+/* тарифы */
+.price-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:0;border:1px solid var(--line);border-radius:12px;background:var(--paper);overflow:hidden}
+.pr{padding:32px}.pr+.pr{border-left:1px solid var(--line)}
+.pr h3{font:600 26px var(--serif)}.pr .p{font:600 34px var(--serif);margin:6px 0 14px;color:var(--accent)}
+.pr li{list-style:none;padding:4px 0;color:var(--muted)}.pr li::before{content:"— "}
+@media(max-width:640px){.pr+.pr{border-left:0;border-top:1px solid var(--line)}}
+details{border-bottom:1px solid var(--line);padding:20px 0}
+summary{cursor:pointer;font:600 21px var(--serif);list-style:none;display:flex;justify-content:space-between}
+summary::after{content:"+";color:var(--accent)}details[open] summary::after{content:"−"}
+details p{color:var(--muted);margin-top:10px;max-width:64ch}
+.join{background:var(--accent-soft);border-radius:16px;padding:56px 40px;display:grid;grid-template-columns:1.2fr 1fr;gap:32px;align-items:center}
+.join form{display:grid;gap:10px}
+.join input{padding:14px 16px;border:1px solid #dcc3b4;border-radius:8px;font:inherit;background:#fff}
+@media(max-width:760px){.join{grid-template-columns:1fr;padding:32px 24px}}
+footer{padding:36px 0;color:var(--muted);font-size:14px;border-top:1px solid var(--line)}
+footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:16px}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <a class="logo" href="#"><img src="../../../site/images/logo.svg" alt="">DSLKit</a>
+  <nav><a href="#notations">Нотации</a><a href="#how">Как это работает</a><a href="#pricing">Тарифы</a><a href="#faq">FAQ</a></nav>
+  <a class="btn" href="#waitlist">В бету</a>
+</div></header>
+<main>
+<div class="hero"><div class="wrap">
+  <div>
+    <span class="kicker">Закрытая бета · скоро</span>
+    <h1>Пишите код — <i>получайте диаграмму</i></h1>
+    <p class="lead">Редактор диаграмм как кода. Вы описываете схему текстом, DSLKit проверяет её по правилам нотации и рисует.</p>
+    <div class="cta"><a class="btn primary lg" href="#">Создать диаграмму</a><a class="btn lg" href="#how">Как это работает</a></div>
+    <p class="note">Бесплатно в бете: до 5 диаграмм в день.</p>
+  </div>
+  <div class="doc" aria-label="Пример документа">
+    <div class="cap"><span>order.dsl</span><span>IDEF0</span></div>
+<pre><span class="k">idef0</span> <span class="s">"Order process"</span> {
+  A0 <span class="s">"Process order"</span> {
+    <span class="k">input</span> Order
+    <span class="k">control</span> Rules
+    <span class="k">output</span> Invoice
+  }
+  <span class="c">// A1 появится ниже</span>
+}</pre>
+    <div class="out"><svg viewBox="0 0 300 130" fill="none" stroke="#c2562d" stroke-width="1.4"><rect x="80" y="30" width="140" height="60" rx="4" fill="#fffdf8"/><text x="150" y="65" text-anchor="middle" stroke="none" fill="#2a2622" font-size="12">A0  Process order</text><path d="M10 60h70M150 4v26M150 90v30M220 60h70"/></svg></div>
+    <div class="ok">✓ ошибок нет · автосохранение включено</div>
+  </div>
+</div></div>
+
+<section id="notations"><div class="wrap two">
+  <div><h2>Нотации</h2><p class="sec-lead" style="margin:0">Шесть нотаций в одном редакторе. В бете — три.</p></div>
+  <ul class="rows">
+    <li><img src="../../../site/images/notations/idef0.svg" alt=""><h3>IDEF0</h3><p>Блоки, входы, управление, выходы и механизмы.</p><span class="st">в бете</span></li>
+    <li><img src="../../../site/images/notations/dfd.svg" alt=""><h3>DFD</h3><p>Процессы, хранилища и потоки данных.</p><span class="st">в бете</span></li>
+    <li><img src="../../../site/images/notations/erd.svg" alt=""><h3>ERD</h3><p>Сущности и связи для баз данных.</p><span class="st">в бете</span></li>
+    <li><img src="../../../site/images/notations/uml.svg" alt=""><h3>UML</h3><p>Классы, последовательности и другое.</p><span class="st plan">в планах</span></li>
+    <li><img src="../../../site/images/notations/bpmn.svg" alt=""><h3>BPMN</h3><p>События, задачи и шлюзы.</p><span class="st plan">в планах</span></li>
+    <li><img src="../../../site/images/notations/petri.svg" alt=""><h3>Сети Петри</h3><p>Позиции, переходы и фишки.</p><span class="st plan">в планах</span></li>
+  </ul>
+</div></section>
+
+<section id="how"><div class="wrap two">
+  <div><h2>Как это работает</h2><p class="sec-lead" style="margin:0">От идеи до схемы за три шага.</p></div>
+  <ol class="steps">
+    <li><div><h3>Пишете код</h3><p>Описываете диаграмму на DSL, шаблоны и подсказки помогают начать.</p></div></li>
+    <li><div><h3>Видите схему</h3><p>Холст обновляется сразу, ошибки подсвечиваются с пояснением.</p></div></li>
+    <li><div><h3>Экспортируете</h3><p>SVG, PNG, PlantUML или Mermaid.</p></div></li>
+  </ol>
+</div></section>
+
+<section><div class="wrap two">
+  <div><h2>Для кого</h2></div>
+  <ul class="rows">
+    <li style="grid-template-columns:130px 1fr"><h3>Студентам</h3><p>Лабораторные, курсовые и дипломы с диаграммами, которые легко править.</p></li>
+    <li style="grid-template-columns:130px 1fr"><h3>Разработчикам</h3><p>Схемы лежат рядом с кодом и попадают в историю Git.</p></li>
+    <li style="grid-template-columns:130px 1fr"><h3>Аналитикам</h3><p>Процессы и данные описываются текстом без ручного рисования.</p></li>
+  </ul>
+</div></section>
+
+<section id="pricing"><div class="wrap">
+  <h2>Тарифы</h2><p class="sec-lead">Условия могут измениться после беты.</p>
+  <div class="price-row">
+    <div class="pr"><h3>Free</h3><div class="p">0 $</div><ul><li>До 5 диаграмм в день</li><li>Все доступные нотации</li><li>Экспорт в SVG и PNG</li></ul></div>
+    <div class="pr"><h3>Pro</h3><div class="p">скоро</div><ul><li>Без дневного лимита</li><li>История версий</li><li>Совместная работа и API</li></ul></div>
+  </div>
+</div></section>
+
+<section id="faq"><div class="wrap two">
+  <div><h2>Вопросы</h2></div>
+  <div>
+    <details><summary>Что такое DSLKit?</summary><p>Веб-редактор диаграмм как кода: схема описывается текстом, редактор проверяет и рисует её.</p></details>
+    <details><summary>Нужно ли уметь программировать?</summary><p>Нет. Синтаксис короткий, а шаблоны помогают написать первую диаграмму.</p></details>
+    <details><summary>Какие нотации будут?</summary><p>UML, BPMN, ERD, DFD, IDEF0 и сети Петри. Первыми — IDEF0, DFD и ERD.</p></details>
+    <details><summary>Сколько это стоит?</summary><p>В бете бесплатно, до пяти диаграмм в день. Pro позже.</p></details>
+  </div>
+</div></section>
+
+<section id="waitlist"><div class="wrap"><div class="join">
+  <div><h2>Запишитесь в бету</h2><p style="color:var(--muted)">Оставьте почту, и мы сообщим, когда откроется доступ.</p></div>
+  <form onsubmit="return false"><input type="email" placeholder="name@example.com" aria-label="Электронная почта"><button class="btn primary lg">Записаться</button></form>
+</div></div></section>
+</main>
+<footer><div class="wrap"><span>© 2026 DSLKit. Дипломный проект БГУИР.</span><span><a href="#">Конфиденциальность</a> · <a href="#">English</a> · hello@dslkit.io</span></div></footer>
+</body>
+</html>

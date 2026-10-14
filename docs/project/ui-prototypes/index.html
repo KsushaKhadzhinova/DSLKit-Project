@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DSLKit: прототипы UI, сравнение</title>
+<style>
+:root{--bg:#f4f5f9;--surface:#fff;--border:#dde1ec;--text:#161a2b;--muted:#5b627a;--primary:#2563eb;--font:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif}
+*{box-sizing:border-box;margin:0}
+body{background:var(--bg);color:var(--text);font:16px/1.6 var(--font)}
+.wrap{max-width:1360px;margin:0 auto;padding:0 24px}
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:28px 0 0}
+h1{font-size:28px;letter-spacing:-.02em}
+.sub{color:var(--muted);margin:6px 0 20px;max-width:80ch}
+.tabs{display:flex;gap:4px;flex-wrap:wrap}
+.tab{padding:12px 18px;border:1px solid var(--border);border-bottom:0;border-radius:10px 10px 0 0;background:var(--bg);font-weight:600;font-size:15px;cursor:pointer;color:var(--muted)}
+.tab[aria-selected=true]{background:var(--bg);color:var(--text);border-color:var(--border);box-shadow:inset 0 3px 0 var(--primary)}
+.tab small{display:block;font-weight:400;font-size:12px}
+main{padding:24px 0 64px}
+.panel{display:none}.panel.on{display:block}
+.info{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px 24px;margin-bottom:16px;display:grid;gap:6px}
+.info h2{font-size:20px}
+.info p{color:var(--muted)}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chips span{font-size:13px;padding:3px 10px;border-radius:999px;background:#e8efff;color:#1d4ed8}
+.bar{display:flex;gap:8px;margin-bottom:12px}
+.bar button{padding:6px 14px;border:1px solid var(--border);background:var(--surface);border-radius:8px;cursor:pointer;font:inherit;font-size:14px}
+.bar button[aria-pressed=true]{background:var(--primary);color:#fff;border-color:var(--primary)}
+.frame{border:1px solid var(--border);border-radius:12px;overflow:hidden;background:#fff;box-shadow:0 8px 30px rgb(22 26 43/.08)}
+.frame iframe{display:block;width:100%;height:78vh;border:0;margin:0 auto;background:#fff}
+.frame.mobile iframe{width:390px}
+/* рядом */
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px}
+.cell h3{font-size:16px;margin-bottom:8px}
+.cell .box{position:relative;height:520px;overflow:hidden;border:1px solid var(--border);border-radius:12px;background:#fff}
+.cell iframe{position:absolute;top:0;left:0;width:1280px;height:2600px;border:0;transform-origin:0 0}
+@media(max-width:900px){.grid{grid-template-columns:1fr}}
+/* таблица */
+.tbl{overflow-x:auto;background:var(--surface);border:1px solid var(--border);border-radius:12px}
+table{border-collapse:collapse;width:100%;min-width:900px;font-size:14.5px}
+th,td{padding:12px 16px;text-align:left;vertical-align:top;border-bottom:1px solid var(--border)}
+thead th{background:#f0f2f8;position:sticky;top:0}
+tbody th{width:150px;color:var(--text)}
+td.was{background:#fff7ed}
+tr:last-child th,tr:last-child td{border-bottom:0}
+.tag{display:inline-block;font-size:12px;padding:1px 8px;border-radius:6px;background:#e8efff;color:#1d4ed8;margin-right:4px}
+.pal{display:inline-flex;gap:3px;vertical-align:middle;margin-left:6px}.pal i{width:14px;height:14px;border-radius:4px;border:1px solid rgb(0 0 0/.15)}
+.pick{margin-top:24px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px 24px}
+.pick ul{margin:8px 0 0 20px;color:var(--muted)}
+h2.t{font-size:22px;margin:32px 0 12px}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <h1>DSLKit: прототипы UI после анализа конкурентов</h1>
+  <p class="sub">Три варианта новой главной страницы рядом с текущей. Код текущего сайта не менялся: слева «Было» открывает настоящий <code>site/index.html</code>. Контент везде тот же, меняются макет, стили и подача.</p>
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" aria-selected="true" data-p="was">Было<small>текущий сайт</small></button>
+    <button class="tab" role="tab" aria-selected="false" data-p="v1">Вариант 1<small>тёмный product-first</small></button>
+    <button class="tab" role="tab" aria-selected="false" data-p="v2">Вариант 2<small>светлый градиентный</small></button>
+    <button class="tab" role="tab" aria-selected="false" data-p="v3">Вариант 3<small>тёплый редакторский</small></button>
+    <button class="tab" role="tab" aria-selected="false" data-p="all">Рядом<small>все четыре</small></button>
+    <button class="tab" role="tab" aria-selected="false" data-p="cmp">Таблица<small>что изменилось</small></button>
+  </div>
+</div></header>
+
+<main><div class="wrap">
+
+<div class="panel on" id="was">
+  <div class="info"><h2>Было: текущий лендинг</h2><p>Светлая тема со сеткой в точку, hero из двух колонок по золотому сечению (текст и картинка редактора), шесть одинаковых карточек нотаций, тарифы двумя карточками, форма в бету внизу.</p><div class="chips"><span>золотое сечение 1:1.618</span><span>синий #2563eb</span><span>тёмная тема через переключатель</span></div></div>
+  <div class="frame"><iframe src="../../../site/index.html" title="Текущий сайт"></iframe></div>
+</div>
+
+<div class="panel" id="v1">
+  <div class="info"><h2>Вариант 1: тёмный product-first</h2><p>Референсы: Linear, Supabase, Vercel. Продукт показан сразу: окно редактора с кодом и диаграммой по центру hero. Нотации в bento-сетке, шаги подписаны «Fig 0.1».</p><div class="chips"><span>тёмная тема</span><span>один акцент</span><span>bento</span><span>редактор в hero</span></div></div>
+  <div class="bar"><button aria-pressed="true" data-w="desktop">Десктоп</button><button aria-pressed="false" data-w="mobile">Телефон</button><a href="variant-1-dark-product.html" target="_blank" style="margin-left:auto;font-size:14px">Открыть отдельно ↗</a></div>
+  <div class="frame"><iframe data-src="variant-1-dark-product.html" title="Вариант 1"></iframe></div>
+</div>
+
+<div class="panel" id="v2">
+  <div class="info"><h2>Вариант 2: светлый градиентный</h2><p>Референсы: Stripe, Resend, Mermaid. Вкладки кода IDEF0 / DFD / ERD в hero (переключаются без JS), полоса с цифрами, таблица сравнения с Mermaid, PlantUML и D2, градиентный финальный CTA.</p><div class="chips"><span>светлая тема</span><span>вкладки кода</span><span>цифры</span><span>сравнение</span></div></div>
+  <div class="bar"><button aria-pressed="true" data-w="desktop">Десктоп</button><button aria-pressed="false" data-w="mobile">Телефон</button><a href="variant-2-light-gradient.html" target="_blank" style="margin-left:auto;font-size:14px">Открыть отдельно ↗</a></div>
+  <div class="frame"><iframe data-src="variant-2-light-gradient.html" title="Вариант 2"></iframe></div>
+</div>
+
+<div class="panel" id="v3">
+  <div class="info"><h2>Вариант 3: тёплый редакторский</h2><p>Референсы: Notion, Anthropic, D2. Кремовая бумага, serif-заголовки, два столбца «заголовок слева, содержимое справа», нотации списком, документ с кодом в hero. Спокойнее и ближе к документации.</p><div class="chips"><span>serif-заголовки</span><span>без карточек</span><span>списки</span><span>терракотовый акцент</span></div></div>
+  <div class="bar"><button aria-pressed="true" data-w="desktop">Десктоп</button><button aria-pressed="false" data-w="mobile">Телефон</button><a href="variant-3-warm-editorial.html" target="_blank" style="margin-left:auto;font-size:14px">Открыть отдельно ↗</a></div>
+  <div class="frame"><iframe data-src="variant-3-warm-editorial.html" title="Вариант 3"></iframe></div>
+</div>
+
+<div class="panel" id="all">
+  <div class="grid">
+    <div class="cell"><h3>Было</h3><div class="box"><iframe data-src="../../../site/index.html" title="Было"></iframe></div></div>
+    <div class="cell"><h3>Вариант 1: тёмный</h3><div class="box"><iframe data-src="variant-1-dark-product.html" title="1"></iframe></div></div>
+    <div class="cell"><h3>Вариант 2: светлый градиентный</h3><div class="box"><iframe data-src="variant-2-light-gradient.html" title="2"></iframe></div></div>
+    <div class="cell"><h3>Вариант 3: тёплый</h3><div class="box"><iframe data-src="variant-3-warm-editorial.html" title="3"></iframe></div></div>
+  </div>
+</div>
+
+<div class="panel" id="cmp">
+  <div class="tbl"><table>
+    <thead><tr><th></th><th>Было</th><th>Вариант 1: тёмный</th><th>Вариант 2: светлый градиентный</th><th>Вариант 3: тёплый</th></tr></thead>
+    <tbody>
+      <tr><th>Общее настроение</th><td class="was">Нейтральный синий лендинг, аккуратный, но без выраженного характера</td><td>Технический, «инструмент разработчика» (Linear, Supabase)</td><td>Современный SaaS, дружелюбный (Stripe, Resend)</td><td>Спокойный, бумажный, «документация» (Notion, Anthropic)</td></tr>
+      <tr><th>Палитра</th><td class="was">Белый и светло-серый, синий #2563eb<span class="pal"><i style="background:#f8f9fc"></i><i style="background:#2563eb"></i><i style="background:#16a34a"></i></span></td><td>Почти чёрный #0b0c10, акцент #5b8cff, зелёный для статусов<span class="pal"><i style="background:#0b0c10"></i><i style="background:#5b8cff"></i><i style="background:#3ddc97"></i></span></td><td>Белый, градиент синий → фиолетовый → бирюзовый<span class="pal"><i style="background:#fff"></i><i style="background:#2563eb"></i><i style="background:#7c3aed"></i><i style="background:#14b8a6"></i></span></td><td>Кремовый #faf6ee, терракота #c2562d, мягкий зелёный<span class="pal"><i style="background:#faf6ee"></i><i style="background:#c2562d"></i><i style="background:#4a7c59"></i></span></td></tr>
+      <tr><th>Типографика</th><td class="was">Inter везде, шаги по золотому сечению, заголовок 800</td><td>Inter, градиентный белый заголовок, моно-подписи «Fig»</td><td>Inter, слово в заголовке с градиентом, моно-код</td><td>Serif в заголовках (Source Serif / Georgia), Inter в тексте</td></tr>
+      <tr><th>Hero</th><td class="was">Две колонки: текст слева, картинка редактора справа, три цифры под кнопками</td><td>Центр: заголовок, две кнопки, ниже большое окно редактора «код + диаграмма»</td><td>Текст слева, справа тёмная карточка с вкладками IDEF0 / DFD / ERD</td><td>Текст слева, справа «документ» с кодом, диаграммой и статусом проверки</td></tr>
+      <tr><th>Нотации</th><td class="was">Шесть одинаковых карточек в сетке</td><td>Bento: две крупные (IDEF0, DFD) и три средних, значки статуса</td><td>Шесть карточек с цветными чипами «в бете» и «в планах»</td><td>Список строк: иконка, название, описание, статус</td></tr>
+      <tr><th>Доказательства</th><td class="was">Три факта в hero</td><td>Строка форматов экспорта SVG / PNG / PlantUML / Mermaid</td><td>Полоса цифр и таблица сравнения с конкурентами</td><td>Нет отдельного блока, ставка на текст и чистоту</td></tr>
+      <tr><th>Шаги</th><td class="was">Три колонки с заголовками</td><td>Три колонки с подписями «Fig 0.1–0.3» и линией сверху</td><td>Три карточки с круглыми номерами-градиентами</td><td>Строки с крупными serif-номерами 01–03</td></tr>
+      <tr><th>Тарифы</th><td class="was">Две одинаковые карточки Free и Pro</td><td>Pro выделен акцентной рамкой и свечением</td><td>Pro выделен синей рамкой, крупные цены</td><td>Одна таблица-полоса из двух ячеек</td></tr>
+      <tr><th>Форма в бету</th><td class="was">Длинная форма из шести полей</td><td>Одно поле e-mail в светящемся блоке</td><td>Одно поле e-mail в градиентном блоке</td><td>Одно поле e-mail в тёплом блоке</td></tr>
+      <tr><th>Тема</th><td class="was">Светлая и тёмная, переключатель</td><td>Только тёмная (светлую можно добавить токенами)</td><td>Только светлая</td><td>Только светлая</td></tr>
+      <tr><th>Лучше всего для</th><td class="was">Лабораторных работ по ТЗ: все требования соблюдены</td><td>Разработчиков и «технарей»</td><td>Широкой аудитории и продажи платного тарифа</td><td>Студентов, аналитиков, акцента на документации</td></tr>
+      <tr><th>Риски</th><td class="was">Не выделяется среди конкурентов</td><td>Тёмный фон хуже читается днём, нужен контроль контраста</td><td>Градиенты легко «перегрузить», таблица сравнения требует честных данных</td><td>Меньше «вау», не про технологичность</td></tr>
+    </tbody>
+  </table></div>
+  <div class="pick"><b>Что можно взять из каждого</b>
+    <ul>
+      <li>Из варианта 1: окно редактора в hero и bento-сетка нотаций.</li>
+      <li>Из варианта 2: вкладки кода, таблица сравнения, полоса цифр.</li>
+      <li>Из варианта 3: список нотаций строками и один e-mail вместо длинной формы.</li>
+    </ul>
+    <p style="margin-top:10px;color:var(--muted);font-size:14px">В прототипах упрощены: форма (одно поле), SEO-разметка, переключатель темы, переходы на другие страницы. Это макеты для выбора направления, а не замена текущего сайта.</p>
+  </div>
+</div>
+
+</div></main>
+
+<script>
+(function(){
+  var tabs=document.querySelectorAll('.tab'),panels=document.querySelectorAll('.panel');
+  function load(p){p.querySelectorAll('iframe[data-src]').forEach(function(f){f.src=f.dataset.src;f.removeAttribute('data-src')})}
+  function scale(){document.querySelectorAll('.cell .box').forEach(function(b){var f=b.querySelector('iframe');f.style.transform='scale('+(b.clientWidth/1280)+')'})}
+  function show(id){
+    tabs.forEach(function(t){t.setAttribute('aria-selected',String(t.dataset.p===id))});
+    panels.forEach(function(p){var on=p.id===id;p.classList.toggle('on',on);if(on)load(p)});
+    if(id==='all')scale();
+    try{history.replaceState(null,'','#'+id)}catch(e){}
+  }
+  tabs.forEach(function(t){t.addEventListener('click',function(){show(t.dataset.p)})});
+  document.querySelectorAll('.bar button').forEach(function(b){b.addEventListener('click',function(){
+    var bar=b.parentNode;bar.querySelectorAll('button').forEach(function(x){x.setAttribute('aria-pressed',String(x===b))});
+    bar.nextElementSibling.classList.toggle('mobile',b.dataset.w==='mobile');
+  })});
+  window.addEventListener('resize',scale);
+  var h=location.hash.slice(1);show(document.getElementById(h)?h:'was');
+})();
+</script>
+</body>
+</html>
