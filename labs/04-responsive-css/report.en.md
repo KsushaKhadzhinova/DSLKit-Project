@@ -230,6 +230,31 @@ The styles of the DSLKit project are split into files following the BEM methodol
   --shadow-large: 0 8px 24px rgb(0 0 0 / 0.35), 0 24px 64px rgb(0 0 0 / 0.4);
   color-scheme: dark;
 }
+
+/* Without JavaScript the system preference decides, unless the page was told to stay light. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --color-primary: #2563eb;
+    --color-secondary: #27304d;
+    --color-accent: #22c55e;
+    --color-accent-text: #4ade80;
+    --color-background: #1e1e2e;
+    --color-surface: #181825;
+    --color-border: #313244;
+    --color-border-strong: #6c7086;
+    --color-text: #cdd6f4;
+    --color-text-light: #a6adc8;
+    --color-muted: #9399b2;
+    --color-link: #8bb0ff;
+    --color-error: #f38ba8;
+    --color-warning: #fab387;
+    --color-code-background: #11111b;
+    --color-glow: rgb(139 176 255 / 0.14);
+    --shadow-small: 0 1px 2px rgb(0 0 0 / 0.3);
+    --shadow-large: 0 8px 24px rgb(0 0 0 / 0.35), 0 24px 64px rgb(0 0 0 / 0.4);
+    color-scheme: dark;
+  }
+}
 ```
 
 ## Appendix B – Listing of base.css
@@ -530,6 +555,7 @@ time {
 }
 
 .burger__input:focus-visible + .burger__button {
+  outline: 2px solid transparent;
   box-shadow: var(--focus-ring);
 }
 
@@ -644,6 +670,7 @@ time {
 }
 
 .theme__input {
+  display: none;
   position: absolute;
   width: 1px;
   height: 1px;
@@ -675,6 +702,7 @@ time {
 }
 
 .theme__input:focus-visible + .theme__button {
+  outline: 2px solid transparent;
   box-shadow: var(--focus-ring);
 }
 
@@ -931,6 +959,7 @@ time {
     grid-template-columns: auto 1fr auto;
   }
 
+  .burger__input,
   .burger__button {
     display: none;
   }
@@ -978,6 +1007,10 @@ time {
 }
 
 @media (min-width: 1024px) {
+  .theme__input {
+    display: block;
+  }
+
   .theme__button {
     display: inline-flex;
   }

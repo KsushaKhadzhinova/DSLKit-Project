@@ -376,7 +376,8 @@ textarea.form__input {
   border-color: var(--color-primary);
 }
 
-.form__input:user-invalid {
+.form__input:user-invalid,
+.form__input[aria-invalid='true'] {
   border-color: var(--color-error);
 }
 
@@ -414,4 +415,16 @@ textarea.form__input {
 
 .form__submit {
   justify-self: stretch;
+}
+
+/* Windows high contrast removes colors, so the active state needs a border and the focus ring an outline. */
+@media (forced-colors: active) {
+  .filter__chip[aria-pressed='true'],
+  .editor-segmented__button[aria-pressed='true'],
+  .problems__tab[aria-pressed='true'],
+  .editor-activity__button[aria-pressed='true'],
+  .editor-bottom-nav__item[aria-pressed='true'],
+  .editor-tabs__tab--active {
+    border: 2px solid Highlight;
+  }
 }

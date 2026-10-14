@@ -66,6 +66,7 @@
 }
 
 .burger__input:focus-visible + .burger__button {
+  outline: 2px solid transparent;
   box-shadow: var(--focus-ring);
 }
 
@@ -180,6 +181,7 @@
 }
 
 .theme__input {
+  display: none;
   position: absolute;
   width: 1px;
   height: 1px;
@@ -211,6 +213,7 @@
 }
 
 .theme__input:focus-visible + .theme__button {
+  outline: 2px solid transparent;
   box-shadow: var(--focus-ring);
 }
 

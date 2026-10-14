@@ -20,6 +20,7 @@
     grid-template-columns: auto 1fr auto;
   }
 
+  .burger__input,
   .burger__button {
     display: none;
   }
@@ -67,6 +68,10 @@
 }
 
 @media (min-width: 1024px) {
+  .theme__input {
+    display: block;
+  }
+
   .theme__button {
     display: inline-flex;
   }
