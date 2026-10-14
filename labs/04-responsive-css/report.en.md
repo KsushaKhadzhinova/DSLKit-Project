@@ -1009,7 +1009,7 @@ label > span {
   }
 }
 
-@media (min-width: 400px) {
+@media (min-width: 576px) {
   .burger__label {
     position: static;
     width: auto;
@@ -1017,9 +1017,7 @@ label > span {
     overflow: visible;
     clip-path: none;
   }
-}
 
-@media (min-width: 576px) {
   .theme__button {
     padding: 0 var(--space-2);
     font-size: var(--step--1);
