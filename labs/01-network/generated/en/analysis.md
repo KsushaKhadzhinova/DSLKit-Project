@@ -5,10 +5,10 @@ Table 1 – Page load summary
 | Metric | Value |
 |---|---|
 | Requests | 17 |
-| Transferred, MB | 6.37 |
+| Transferred, MiB | 6.40 |
 | Document protocol | HTTP/2.0 |
-| DOMContentLoaded, ms | 3408 |
-| onLoad, ms | 4393 |
+| DOMContentLoaded, ms | 337 |
+| onLoad, ms | 1423 |
 
 Table 2 – Number of requests by resource type
 
@@ -34,8 +34,11 @@ Table 4 – Request headers
 |---|---|---|
 | `accept` | text/html,application/xhtml+xml,application/xml;q=0.9,image/jxl,image/avif,im... | Content types the client is ready to accept |
 | `accept-encoding` | gzip, deflate, br, zstd | Supported response compression algorithms |
+| `accept-language` | en-US,en;q=0.9 | — |
+| `cache-control` | no-cache | Resource caching rules |
+| `pragma` | no-cache | — |
 | `priority` | u=0, i | Resource loading priority (HTTP/2, HTTP/3) |
-| `sec-ch-ua` | "Not:A-Brand";v="8", "Chromium";v="156", "HeadlessChrome";v="156" | Browser name and version (Client Hints) |
+| `sec-ch-ua` | "Google Chrome";v="155", "Chromium";v="155", "Not(A:Brand";v="24" | Browser name and version (Client Hints) |
 | `sec-ch-ua-mobile` | ?0 | Mobile device flag |
 | `sec-ch-ua-platform` | "Windows" | Client operating system |
 | `sec-fetch-dest` | document | Request destination (document, script, image) |
@@ -50,21 +53,20 @@ Table 5 – Response headers
 | Header | Value | Purpose |
 |---|---|---|
 | `access-control-allow-origin` | * | Origins allowed for cross-origin access (CORS) |
-| `age` | 340 | Seconds the response stayed in a CDN or proxy cache |
+| `age` | 1 | Seconds the response stayed in a CDN or proxy cache |
 | `cache-control` | public, max-age=600 | Resource caching rules |
 | `cf-cache-status` | DYNAMIC | Cloudflare cache status (HIT, MISS) |
-| `cf-ray` | a4909c8d8b81508e-WAW | Request identifier inside the Cloudflare network |
+| `cf-ray` | a4a9cecadfee2d19-WAW | Request identifier inside the Cloudflare network |
 | `content-encoding` | br | Compression applied to the response body |
 | `content-security-policy` | default-src 'self'; script-src https://www.dropbox.com https://api.trello.com... | Allowed sources of page resources (XSS protection) |
 | `content-type` | text/html | Content type and encoding |
-| `date` | Sun, 11 Oct 2026 20:28:29 GMT | Time the server produced the response |
-| `expires` | Sun, 11 Oct 2026 20:32:49 GMT | Date after which the response is considered stale |
+| `date` | Wed, 14 Oct 2026 21:51:51 GMT | Time the server produced the response |
+| `expires` | Wed, 14 Oct 2026 22:01:50 GMT | Date after which the response is considered stale |
 | `permissions-policy` | microphone=() | Page access to browser features (camera, geolocation) |
 | `referrer-policy` | strict-origin | Which part of the address to send in Referer |
 | `server` | cloudflare | Server or CDN software |
 | `strict-transport-security` | max-age=31536000; includeSubDomains | Requires opening the site over HTTPS only (HSTS) |
-| `vary` | accept-encoding | Request headers the cached response depends on |
-| `x-cloud-trace-context` | 5ef89efa3007bd5c0781a36430c141df | Request trace identifier in Google Cloud |
+| `x-cloud-trace-context` | f8b2f570d45c3d950f603df4bd6b39d9 | Request trace identifier in Google Cloud |
 | `x-content-type-options` | nosniff | Forbids content type sniffing (nosniff) |
 | `x-xss-protection` | 1; mode=block | Legacy browser XSS filter |
 
@@ -73,14 +75,14 @@ Table 6 – Request phases from the Timing tab
 | Phase | Time |
 |---|---|
 | Queued/Stalled | — |
-| DNS Lookup | 511 ms |
-| Initial connection | 48 ms |
-| SSL | 32 ms |
+| DNS Lookup | 38 ms |
+| Initial connection | 39 ms |
+| SSL | 25 ms |
 | Request sent | 0 ms |
-| Waiting (TTFB) | 48 ms |
-| Content Download | 4 ms |
+| Waiting (TTFB) | 81 ms |
+| Content Download | 2 ms |
 
-Longest phase: DNS Lookup.
+Longest phase: Waiting (TTFB).
 
 #### 3.3.3 Request: script, https://app.diagrams.net/js/bootstrap.js
 
@@ -96,9 +98,12 @@ Table 8 – Request headers
 |---|---|---|
 | `accept` | */* | Content types the client is ready to accept |
 | `accept-encoding` | gzip, deflate, br, zstd | Supported response compression algorithms |
+| `accept-language` | en-US,en;q=0.9 | — |
+| `cache-control` | no-cache | Resource caching rules |
+| `pragma` | no-cache | — |
 | `priority` | u=1 | Resource loading priority (HTTP/2, HTTP/3) |
 | `referer` | https://app.diagrams.net/ | Address of the page that issued the request |
-| `sec-ch-ua` | "Not:A-Brand";v="8", "Chromium";v="156", "HeadlessChrome";v="156" | Browser name and version (Client Hints) |
+| `sec-ch-ua` | "Google Chrome";v="155", "Chromium";v="155", "Not(A:Brand";v="24" | Browser name and version (Client Hints) |
 | `sec-ch-ua-mobile` | ?0 | Mobile device flag |
 | `sec-ch-ua-platform` | "Windows" | Client operating system |
 | `sec-fetch-dest` | script | Request destination (document, script, image) |
@@ -111,20 +116,20 @@ Table 9 – Response headers
 | Header | Value | Purpose |
 |---|---|---|
 | `access-control-allow-origin` | * | Origins allowed for cross-origin access (CORS) |
-| `age` | 0 | Seconds the response stayed in a CDN or proxy cache |
+| `age` | 268 | Seconds the response stayed in a CDN or proxy cache |
 | `cache-control` | public, max-age=86400 | Resource caching rules |
 | `cf-cache-status` | HIT | Cloudflare cache status (HIT, MISS) |
-| `cf-ray` | a4909c8dfce2508e-WAW | Request identifier inside the Cloudflare network |
+| `cf-ray` | a4a9cecb894f2d19-WAW | Request identifier inside the Cloudflare network |
 | `content-encoding` | br | Compression applied to the response body |
 | `content-type` | text/javascript | Content type and encoding |
-| `date` | Sun, 11 Oct 2026 20:28:29 GMT | Time the server produced the response |
-| `etag` | W/"SyJN0w" | Resource version identifier for conditional requests |
-| `expires` | Mon, 12 Oct 2026 20:28:29 GMT | Date after which the response is considered stale |
+| `date` | Wed, 14 Oct 2026 21:51:51 GMT | Time the server produced the response |
+| `etag` | W/"sWt9Ig" | Resource version identifier for conditional requests |
+| `expires` | Thu, 15 Oct 2026 21:51:51 GMT | Date after which the response is considered stale |
 | `referrer-policy` | strict-origin | Which part of the address to send in Referer |
 | `server` | cloudflare | Server or CDN software |
 | `strict-transport-security` | max-age=31536000; includeSubDomains | Requires opening the site over HTTPS only (HSTS) |
 | `vary` | accept-encoding | Request headers the cached response depends on |
-| `x-cloud-trace-context` | e456fac535de7f926bc773a79dd11a37 | Request trace identifier in Google Cloud |
+| `x-cloud-trace-context` | 4ce5a37ac1ec327aeb976b774fbdd4b2 | Request trace identifier in Google Cloud |
 | `x-content-type-options` | nosniff | Forbids content type sniffing (nosniff) |
 | `x-xss-protection` | 1; mode=block | Legacy browser XSS filter |
 
@@ -137,8 +142,8 @@ Table 10 – Request phases from the Timing tab
 | Initial connection | — |
 | SSL | — |
 | Request sent | 0 ms |
-| Waiting (TTFB) | 26 ms |
-| Content Download | 8 ms |
+| Waiting (TTFB) | 28 ms |
+| Content Download | 10 ms |
 
 Longest phase: Waiting (TTFB).
 
@@ -156,9 +161,12 @@ Table 12 – Request headers
 |---|---|---|
 | `accept` | */* | Content types the client is ready to accept |
 | `accept-encoding` | gzip, deflate, br, zstd | Supported response compression algorithms |
+| `accept-language` | en-US,en;q=0.9 | — |
+| `cache-control` | no-cache | Resource caching rules |
+| `pragma` | no-cache | — |
 | `priority` | u=1, i | Resource loading priority (HTTP/2, HTTP/3) |
 | `referer` | https://app.diagrams.net/ | Address of the page that issued the request |
-| `sec-ch-ua` | "Not:A-Brand";v="8", "Chromium";v="156", "HeadlessChrome";v="156" | Browser name and version (Client Hints) |
+| `sec-ch-ua` | "Google Chrome";v="155", "Chromium";v="155", "Not(A:Brand";v="24" | Browser name and version (Client Hints) |
 | `sec-ch-ua-mobile` | ?0 | Mobile device flag |
 | `sec-ch-ua-platform` | "Windows" | Client operating system |
 | `sec-fetch-dest` | empty | Request destination (document, script, image) |
@@ -171,20 +179,20 @@ Table 13 – Response headers
 | Header | Value | Purpose |
 |---|---|---|
 | `access-control-allow-origin` | * | Origins allowed for cross-origin access (CORS) |
-| `age` | 119 | Seconds the response stayed in a CDN or proxy cache |
+| `age` | 285 | Seconds the response stayed in a CDN or proxy cache |
 | `cache-control` | public, max-age=2592000 | Resource caching rules |
 | `cf-cache-status` | HIT | Cloudflare cache status (HIT, MISS) |
-| `cf-ray` | a4909c946a69508e-WAW | Request identifier inside the Cloudflare network |
+| `cf-ray` | a4a9ced29c112d19-WAW | Request identifier inside the Cloudflare network |
 | `content-encoding` | br | Compression applied to the response body |
 | `content-type` | text/plain | Content type and encoding |
-| `date` | Sun, 11 Oct 2026 20:28:30 GMT | Time the server produced the response |
-| `etag` | W/"SyJN0w" | Resource version identifier for conditional requests |
-| `expires` | Wed, 11 Nov 2026 20:28:30 GMT | Date after which the response is considered stale |
+| `date` | Wed, 14 Oct 2026 21:51:52 GMT | Time the server produced the response |
+| `etag` | W/"sWt9Ig" | Resource version identifier for conditional requests |
+| `expires` | Sat, 14 Nov 2026 21:51:52 GMT | Date after which the response is considered stale |
 | `referrer-policy` | strict-origin | Which part of the address to send in Referer |
 | `server` | cloudflare | Server or CDN software |
 | `strict-transport-security` | max-age=31536000; includeSubDomains | Requires opening the site over HTTPS only (HSTS) |
 | `vary` | accept-encoding | Request headers the cached response depends on |
-| `x-cloud-trace-context` | 5b8b613ae9d740fe8c756a3058aeecb6 | Request trace identifier in Google Cloud |
+| `x-cloud-trace-context` | ee94d72a0d25ec88c0f012c96fff1718 | Request trace identifier in Google Cloud |
 | `x-content-type-options` | nosniff | Forbids content type sniffing (nosniff) |
 | `x-xss-protection` | 1; mode=block | Legacy browser XSS filter |
 
@@ -198,7 +206,7 @@ Table 14 – Request phases from the Timing tab
 | SSL | — |
 | Request sent | 0 ms |
 | Waiting (TTFB) | 24 ms |
-| Content Download | 7 ms |
+| Content Download | 14 ms |
 
 Longest phase: Waiting (TTFB).
 
@@ -209,7 +217,7 @@ Table 15 – Caching parameters
 | Resource | Cache-Control | ETag | Last-Modified | max-age |
 |---|---|---|---|---|
 | https://app.diagrams.net/ | public, max-age=600 | — | — | 600 |
-| https://app.diagrams.net/js/stencils.min.js | public, max-age=2592000 | W/"SyJN0w" | — | 2592000 |
+| https://app.diagrams.net/js/stencils.min.js | public, max-age=2592000 | W/"sWt9Ig" | — | 2592000 |
 
 #### 3.3.6 Document security
 
@@ -233,7 +241,7 @@ Table 17 – Comparison of load metrics
 | Metric | Regular network | Fast 3G |
 |---|---|---|
 | Requests | 17 | 17 |
-| Transferred, MB | 6.37 | 6.37 |
-| DOMContentLoaded, ms | 3408 | 1412 |
-| onLoad, ms | 4393 | 14565 |
-| Document TTFB, ms | 48 | 584 |
+| Transferred, MiB | 6.40 | 6.40 |
+| DOMContentLoaded, ms | 337 | 1508 |
+| onLoad, ms | 1423 | 15168 |
+| Document TTFB, ms | 81 | 582 |

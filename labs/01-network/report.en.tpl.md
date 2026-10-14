@@ -30,7 +30,7 @@ The project topic belongs to the SaaS direction, so a service of that type is ch
 
 ### 3.2 Method
 
-The page was loaded in Chromium 156 on Windows with an empty cache and without cookies. The log was recorded in the HAR format, as with the Export HAR item on the Network tab. Two runs covered the regular network and Fast 3G emulation (562.5 ms latency, 1.6 Mbit/s download, 750 Kbit/s upload, as in the Chrome DevTools preset). Fast 3G was chosen instead of Slow 3G because the assignment allows both and the load size is 6.37 MB.
+The page was loaded in Google Chrome 155 on Windows with an empty cache and without cookies. The log was recorded in the HAR format, as with the Export HAR item on the Network tab. Two runs covered the regular network and Fast 3G emulation (562.5 ms latency, 1.6 Mbit/s download, 750 Kbit/s upload, as in the Chrome DevTools preset). Fast 3G was chosen instead of Slow 3G because the assignment allows both and the load size is 6.40 MiB.
 
 The log files are attached to the work: `labs/01-network/data/draw-io-normal.har` for the regular network and `labs/01-network/data/draw-io-fast3g.har` for Fast 3G. The analysis was made by the program from appendices A, B and C, its tests are described in appendix D. The page after loading is shown in Figure 1.
 
@@ -72,7 +72,7 @@ Figure 5 – Load time and TTFB on the regular network and on Fast 3G
 
 ### 3.5 Interpretation of Results
 
-**Overview.** The page needed 17 requests with a total size of 6.37 MB over HTTP/2 and finished loading in 4.4 s (onLoad). Scripts account for 8 requests and 6.31 MB, the heaviest being `stencils.min.js` (2.78 MiB), `app.min.js` (2.08 MiB) and `extensions.min.js` (1.13 MiB). All requests used the GET method, 16 of them finished with code 200 and one (the `log.diagrams.net` ping) with code 204.
+**Overview.** The page needed 17 requests with a total size of 6.40 MiB over HTTP/2 and finished loading in 1.4 s (onLoad). Scripts account for 8 requests and 6.34 MiB, the heaviest being `stencils.min.js` (2.78 MiB), `app.min.js` (2.11 MiB) and `extensions.min.js` (1.14 MiB). All requests used the GET method, 16 of them finished with code 200 and one (the `log.diagrams.net` ping) with code 204.
 
 **Caching.** The HTML document is cached for 10 minutes (`max-age=600`) and has no ETag or Last-Modified, so after expiry the browser downloads the whole page again. Static resources such as `stencils.min.js` are cached for 30 days (`max-age=2592000`) and have the weak ETag `W/"SyJN0w"`. The same ETag on different files shows that it is bound to the build version. There is no 304 response in the log because the browser cache was empty.
 
@@ -80,11 +80,69 @@ Figure 5 – Load time and TTFB on the regular network and on Fast 3G
 
 **Security.** The document has `Content-Security-Policy`, `Strict-Transport-Security: max-age=31536000; includeSubDomains`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin` and `Permissions-Policy`. The `X-Frame-Options` header is absent. Protection against embedding in foreign frames can be set with the CSP directive `frame-ancestors`, but it is not visible in the clipped header value.
 
-**Document timing.** The longest phase is DNS Lookup (511 ms, a cold name lookup), followed by Initial connection 48 ms, SSL 32 ms, TTFB 48 ms and Content Download 4 ms. The server answered quickly and most of the time went to name resolution and the secure connection setup.
+**Document timing.** The longest phase is TTFB (81 ms), followed by Initial connection 39 ms (it includes SSL 25 ms), DNS Lookup 38 ms and Content Download 2 ms. The server answered quickly and a noticeable part of the time went to name resolution and the secure connection setup.
 
-**Network emulation.** Under Fast 3G the full load time grew from 4393 to 14565 ms (3.3 times) and the document TTFB from 48 to 584 ms (12 times) because of the 562.5 ms channel latency. The slowest requests turned out to be `stencils.min.js` (23.5 s), `extensions.min.js` (14.2 s) and `app.min.js` (12.4 s). The data volume did not change, so the slowdown comes from bandwidth and latency rather than server load. DOMContentLoaded in the regular run (3408 ms) turned out higher than under Fast 3G (1412 ms). These are single measurements with a different DNS cache state, so repeated runs are needed for conclusions.
+**Network emulation.** Under Fast 3G the full load time grew from 1423 to 15168 ms (10.7 times) and the document TTFB from 81 to 582 ms (7.2 times) because of the 562.5 ms channel latency. The slowest requests turned out to be `stencils.min.js` (24.4 s), `extensions.min.js` (14.9 s) and `app.min.js` (12.9 s). The data volume did not change, so the slowdown comes from bandwidth and latency rather than server load. DOMContentLoaded grew from 337 to 1508 ms. These are single measurements, so repeated runs are needed for conclusions.
 
 **Filtering by type.** `script` has the most requests (8), followed by `stylesheet` (3), `xhr` (3), `image` (2) and `document` (1). Scripts lead by volume. The log is saved in the HAR format.
+
+### 3.6 Working with the DevTools Panels
+
+The page was opened in Chrome 155 and the Network tab recorded requests with the cache disabled. In Chrome 155 the former Fast 3G profile is called Slow 4G: 562.5 ms latency, 1.6 Mbit/s download and 750 Kbit/s upload. It was used for the second measurement.
+
+The overall view of the Network tab is shown in Figure 6: a list of 68 requests, the time scale and the summary line with 6.7 MB and a load time of 1.10 s.
+
+![DevTools screenshot](figures/devtools-01-network.png)
+
+Figure 6 – The Network tab after the page loaded with the cache disabled
+
+Filtering by the JS type is shown in Figure 7: only scripts remain in the list.
+
+![DevTools screenshot](figures/devtools-02-filter-js.png)
+
+Figure 7 – Filtering requests by the JS type
+
+The headers of the main document are shown in Figure 8: general information and response headers, among them Cache-Control, Content-Security-Policy, Strict-Transport-Security and X-Content-Type-Options.
+
+![DevTools screenshot](figures/devtools-03-headers-response.png)
+
+Figure 8 – Document request headers: general information and response headers
+
+The request headers are shown in Figure 9: User-Agent, Sec-CH-UA, Sec-CH-UA-Platform and Accept-Language.
+
+![DevTools screenshot](figures/devtools-04-headers-request.png)
+
+Figure 9 – Request headers of the document
+
+The request phases are shown in Figure 10 on the Timing tab.
+
+![DevTools screenshot](figures/devtools-05-timing.png)
+
+Figure 10 – The Timing tab of a single request
+
+The security state is shown in Figure 11: a valid certificate, TLS 1.3 and all resources served securely.
+
+![DevTools screenshot](figures/devtools-06-security.png)
+
+Figure 11 – The Security panel
+
+The cookie storage is shown in Figure 12: no cookies are set on the first visit.
+
+![DevTools screenshot](figures/devtools-07-cookies.png)
+
+Figure 12 – The Application panel, Cookies section
+
+The list of network emulation profiles is shown in Figure 13.
+
+![DevTools screenshot](figures/devtools-08-throttling-menu.png)
+
+Figure 13 – Network emulation profiles in DevTools
+
+The load with the Slow 4G profile is shown in Figure 14: the full load took 15.16 s and the slowest request was stencils.min.js (24.48 s).
+
+![DevTools screenshot](figures/devtools-09-slow-4g-load.png)
+
+Figure 14 – Page load with the Slow 4G profile
 
 ## 4 Answers to Control Questions
 
@@ -92,12 +150,12 @@ Figure 5 – Load time and TTFB on the regular network and on Fast 3G
 1. **Which protocol does the site use?** HTTPS. The address starts with `https://`, the log shows version `HTTP/2.0` and the `Strict-Transport-Security` header pins HTTPS. It can be checked by the URL scheme, the lock icon and the Protocol column on the Network tab.
 2. **Which methods occurred?** Only GET (17 of 17): fetching HTML, scripts, styles, images and data. POST, PUT, PATCH and DELETE are not needed for a plain page load, they serve to send and change data, for example when saving a file.
 3. **Status codes.** Code 200 OK occurred 16 times, for example for the main document. Code 204 No Content occurred once for the `log.diagrams.net` ping, the response had no body. Code 304 Not Modified appears for a conditional request with `If-None-Match` after the cache expires: the server reports that the copy is fresh. Codes 404 (resource not found) and 500 (internal server error) are absent from the log.
-4. **Request headers about the client.** `User-Agent` holds the browser and the operating system, `sec-ch-ua` holds the browser brand and version (`HeadlessChrome` in the log, because an automated Chromium made the recording), `sec-ch-ua-platform` holds the operating system (`"Windows"`).
+4. **Request headers about the client.** `User-Agent` holds the browser and the operating system, `sec-ch-ua` holds the browser brand and version (`Google Chrome` version 155 in the log, recorded in a regular Chrome with a visible window), `sec-ch-ua-platform` holds the operating system (`"Windows"`).
 5. **Response headers controlling caching.** `Cache-Control` (`public, max-age=600` for the document and `public, max-age=2592000` for `stencils.min.js`), `Expires` (the staleness date of the document) and `ETag` (`W/"SyJN0w"` for static files). The `Age` header (340 s for the document) shows the age of the response in the CDN cache.
 6. **What are cookies.** Name and value pairs that the server sets with `Set-Cookie` and the browser returns with `Cookie`. They store sessions, preferences and analytics data. On draw.io no cookies passed in either direction on the first visit.
 7. **Security headers.** `Content-Security-Policy` limits resource sources and protects against XSS. `Strict-Transport-Security` with `max-age=31536000` enforces HTTPS. `X-Content-Type-Options: nosniff` forbids guessing the content type. The `X-Frame-Options` header is absent, it protects against embedding the page into frames and clickjacking.
-8. **The Timing chart.** It shows the request phases from the queue to receiving the body. TTFB (Waiting) is the time from sending the request to the first response byte, that is server work and network latency. Content Download is the transfer time of the body itself. For the document TTFB was 48 ms and the download 4 ms. For the large `stencils.min.js` the download phase is much longer (574 ms) because of its 2.78 MiB size.
-9. **Effect of a slow connection.** The document TTFB grew from 48 to 584 ms and the page load time from 4.4 to 14.6 s. Channel latency increases TTFB of every request and low bandwidth increases Content Download of large files: `stencils.min.js` loaded for 23.5 s.
+8. **The Timing chart.** It shows the request phases from the queue to receiving the body. TTFB (Waiting) is the time from sending the request to the first response byte, that is server work and network latency. Content Download is the transfer time of the body itself. For the document TTFB was 81 ms and the download 2 ms. For the large `stencils.min.js` the download phase is much longer (462 ms) because of its 2.78 MiB size.
+9. **Effect of a slow connection.** The document TTFB grew from 81 to 582 ms and the page load time from 1.4 to 15.2 s. Channel latency increases TTFB of every request and low bandwidth increases Content Download of large files: `stencils.min.js` loaded for 24.4 s.
 10. **Why a filter is needed.** It keeps only the selected types on the panel (Doc, CSS, JS, XHR, Img, Font), which simplifies finding heavy and redundant resources. The work used the types document (1), stylesheet (3), script (8), xhr (3) and image (2).
 11. **What a CDN is and how to detect it.** A content delivery network keeps copies of resources on servers near the user. Signs: `server: cloudflare`, `cf-ray`, `cf-cache-status: HIT` for static files (served from the CDN cache) and `DYNAMIC` for the HTML document, which is not cached at the edge.
 12. **How to save the log in the HAR format.** With the Export HAR button on the Network tab. HAR describes requests, responses and timings in JSON. It is needed to reproduce problems, hand them to developers and analyse automatically, as in this work.
@@ -109,7 +167,7 @@ Figure 5 – Load time and TTFB on the regular network and on Fast 3G
 
 ## Conclusion
 
-The draw.io site uses HTTPS and HTTP/2, serves static resources through the Cloudflare CDN with a 30 day cache, sets no cookies on the first visit and builds its protection on CSP, HSTS and `nosniff`. Most of the page weight, 6.37 MB, comes from scripts (99 percent), so on a slow connection the load time grows 3.3 times, from 4.4 to 14.6 s. For DSLKit this means that heavy libraries (shapes, a WebAssembly core) must be cached for a long time, loaded lazily and compressed, while the HTML document should stay light.
+The draw.io site uses HTTPS and HTTP/2, serves static resources through the Cloudflare CDN with a 30 day cache, sets no cookies on the first visit and builds its protection on CSP, HSTS and `nosniff`. Most of the page weight, 6.40 MiB, comes from scripts (99 percent), so on a slow connection the load time grows 10.7 times, from 1.4 to 15.2 s. For DSLKit this means that heavy libraries (shapes, a WebAssembly core) must be cached for a long time, loaded lazily and compressed, while the HTML document should stay light.
 
 ## Appendix A – Listing of analyze-har.js
 
