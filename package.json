@@ -14,7 +14,8 @@
     "format:check": "prettier --check .",
     "design:generate": "node labs/02-environment/design.js site/design/figma",
     "lab2:generate": "npm run design:generate && node labs/02-environment/check.js ru > labs/02-environment/generated/check.ru.md && node labs/02-environment/check.js en > labs/02-environment/generated/check.en.md",
-    "lab2:report": "npm run lab2:generate && node tools/build.js labs/02-environment"
+    "lab2:report": "npm run lab2:generate && node tools/build.js labs/02-environment",
+    "lab4:report": "node tools/build.js labs/04-responsive-css"
   },
   "dependencies": {
     "lodash": "^4.18.1"
