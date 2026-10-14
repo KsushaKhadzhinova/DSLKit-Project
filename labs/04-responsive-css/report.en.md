@@ -209,7 +209,7 @@ The styles of the DSLKit project are split into files following the BEM methodol
 
 /* Dark theme: the checkbox in the header switches it without JavaScript. */
 :root:has(.theme__input:checked),
-:root:has(.settings-theme__input[value='dark']:checked) {
+:root[data-theme='dark'] {
   --color-primary: #2563eb;
   --color-secondary: #27304d;
   --color-accent: #22c55e;

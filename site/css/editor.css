@@ -750,7 +750,24 @@
   gap: var(--space-1);
 }
 
+/* Phone: the Code and Canvas switch shows one view at a time (the data-view attribute is set by JavaScript) */
+.editor-main[data-view='code'] .canvas {
+  display: none;
+}
+
+.editor-main[data-view='canvas'] .editor-panel {
+  display: none;
+}
+
 @media (min-width: 768px) {
+  .editor-main[data-view='code'] .canvas {
+    display: grid;
+  }
+
+  .editor-main[data-view='canvas'] .editor-panel {
+    display: block;
+  }
+
   .app-page--editor {
     display: grid;
     height: 100dvh;

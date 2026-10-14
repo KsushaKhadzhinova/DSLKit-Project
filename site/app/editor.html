@@ -207,8 +207,8 @@
 
     <fieldset class="editor-segmented">
       <legend class="visually-hidden">Режим просмотра</legend>
-      <button type="button" class="editor-segmented__button" aria-pressed="false" aria-controls="editor-panel">Код</button>
-      <button type="button" class="editor-segmented__button" aria-pressed="true" aria-controls="canvas-figure">Холст</button>
+      <button type="button" data-view="code" class="editor-segmented__button" aria-pressed="false" aria-controls="editor-panel">Код</button>
+      <button type="button" data-view="canvas" class="editor-segmented__button" aria-pressed="true" aria-controls="canvas-figure">Холст</button>
     </fieldset>
 
     <main id="main" class="editor-main">
@@ -403,13 +403,13 @@
     </div>
 
     <nav class="editor-bottom-nav" aria-label="Нижняя навигация">
-      <button type="button" class="editor-bottom-nav__item" aria-pressed="false">
+      <button type="button" data-view="code" class="editor-bottom-nav__item" aria-pressed="false">
         <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
           <path d="M7 6l-4 4 4 4M13 6l4 4-4 4" />
         </svg>
         <span>Код</span>
       </button>
-      <button type="button" class="editor-bottom-nav__item" aria-pressed="true">
+      <button type="button" data-view="canvas" class="editor-bottom-nav__item" aria-pressed="true">
         <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
           <path d="M3 4h14v12H3zM3 8h14M8 8v8" />
         </svg>
