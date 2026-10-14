@@ -270,6 +270,7 @@ The styles of the DSLKit project are split into files following the BEM methodol
 }
 
 html {
+  overflow-x: clip;
   scroll-padding-top: calc(var(--header-height) + var(--space-2));
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
