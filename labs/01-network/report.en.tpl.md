@@ -86,6 +86,64 @@ Figure 5 – Load time and TTFB on the regular network and on Fast 3G
 
 **Filtering by type.** `script` has the most requests (8), followed by `stylesheet` (3), `xhr` (3), `image` (2) and `document` (1). Scripts lead by volume. The log is saved in the HAR format.
 
+### 3.6 Working with the DevTools Panels
+
+The page was opened in Chrome 155 and the Network tab recorded requests with the cache disabled. In Chrome 155 the former Fast 3G profile is called Slow 4G: 562.5 ms latency, 1.6 Mbit/s download and 750 Kbit/s upload. It was used for the second measurement.
+
+The overall view of the Network tab is shown in Figure 6: a list of 68 requests, the time scale and the summary line with 6.7 MB and a load time of 1.10 s.
+
+![DevTools screenshot](figures/devtools-01-network.png)
+
+Figure 6 – The Network tab after the page loaded with the cache disabled
+
+Filtering by the JS type is shown in Figure 7: only scripts remain in the list.
+
+![DevTools screenshot](figures/devtools-02-filter-js.png)
+
+Figure 7 – Filtering requests by the JS type
+
+The headers of the main document are shown in Figure 8: general information and response headers, among them Cache-Control, Content-Security-Policy, Strict-Transport-Security and X-Content-Type-Options.
+
+![DevTools screenshot](figures/devtools-03-headers-response.png)
+
+Figure 8 – Document request headers: general information and response headers
+
+The request headers are shown in Figure 9: User-Agent, Sec-CH-UA, Sec-CH-UA-Platform and Accept-Language.
+
+![DevTools screenshot](figures/devtools-04-headers-request.png)
+
+Figure 9 – Request headers of the document
+
+The request phases are shown in Figure 10 on the Timing tab.
+
+![DevTools screenshot](figures/devtools-05-timing.png)
+
+Figure 10 – The Timing tab of a single request
+
+The security state is shown in Figure 11: a valid certificate, TLS 1.3 and all resources served securely.
+
+![DevTools screenshot](figures/devtools-06-security.png)
+
+Figure 11 – The Security panel
+
+The cookie storage is shown in Figure 12: no cookies are set on the first visit.
+
+![DevTools screenshot](figures/devtools-07-cookies.png)
+
+Figure 12 – The Application panel, Cookies section
+
+The list of network emulation profiles is shown in Figure 13.
+
+![DevTools screenshot](figures/devtools-08-throttling-menu.png)
+
+Figure 13 – Network emulation profiles in DevTools
+
+The load with the Slow 4G profile is shown in Figure 14: the full load took 15.16 s and the slowest request was stencils.min.js (24.48 s).
+
+![DevTools screenshot](figures/devtools-09-slow-4g-load.png)
+
+Figure 14 – Page load with the Slow 4G profile
+
 ## 4 Answers to Control Questions
 
 {{answers}}
