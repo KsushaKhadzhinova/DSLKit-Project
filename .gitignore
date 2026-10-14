@@ -5,3 +5,4 @@ coverage/
 .env
 .env.local
 site/js/api/config.local.js
+dist/

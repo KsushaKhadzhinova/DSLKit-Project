@@ -1,0 +1,11 @@
+.code {
+  display: block;
+  justify-self: stretch;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius);
+  background: #11111b;
+  color: #cdd6f4;
+  font-family: 'JetBrains Mono', Consolas, monospace;
+  font-size: 0.85rem;
+  overflow-x: auto;
+}
