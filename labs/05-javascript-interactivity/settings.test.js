@@ -70,3 +70,18 @@ test('an unknown option and a corrupted saved value are ignored', () => {
   storage.set('settings', ['broken']);
   assert.deepEqual(initSettings({ root: load().document, storage }).values(), {});
 });
+
+test('a value written by another component between two changes is kept', () => {
+  const window = load();
+  const { document } = window;
+  const storage = memory();
+  initSettings({ root: document, storage });
+  const wrap = document.querySelector('#line-wrap');
+  wrap.checked = true;
+  wrap.dispatchEvent(new window.Event('change', { bubbles: true }));
+  storage.set('settings', { ...storage.get('settings'), autosave: true });
+  wrap.checked = false;
+  wrap.dispatchEvent(new window.Event('change', { bubbles: true }));
+  assert.equal(storage.get('settings').autosave, true);
+  assert.equal(storage.get('settings')['line-wrap'], false);
+});

@@ -103,7 +103,22 @@ export const sourceKey = (source) => {
   return `dot-${first.toString(16)}${second.toString(16)}`;
 };
 
-const BLOCKED_TAGS = ['script', 'foreignObject', 'iframe', 'object', 'embed', 'style', 'use', 'image', 'set', 'animate', 'animateTransform', 'animateMotion'];
+const SVG_NAMESPACE = 'http://www.w3.org/2000/svg';
+const BLOCKED_TAGS = [
+  'script',
+  'foreignObject',
+  'iframe',
+  'object',
+  'embed',
+  'style',
+  'use',
+  'image',
+  'feImage',
+  'set',
+  'animate',
+  'animateTransform',
+  'animateMotion',
+];
 const SAFE_LINK = /^(?:#|https?:\/\/)/i;
 
 // The SVG comes from another server, so scripts, animations, external loads, event handlers and unsafe links are removed before it enters the page.
@@ -112,12 +127,15 @@ export const sanitizeSvg = (svgText, parser) => {
   const svg = doc.documentElement;
   if (!svg || svg.localName !== 'svg' || doc.querySelector('parsererror')) return null;
   BLOCKED_TAGS.forEach((tag) => svg.querySelectorAll(tag).forEach((node) => node.remove()));
+  // Elements from other namespaces (for example XHTML meta, base or form) have no place in a drawing.
+  [...svg.querySelectorAll('*')].filter((node) => node.namespaceURI !== SVG_NAMESPACE).forEach((node) => node.remove());
   [svg, ...svg.querySelectorAll('*')].forEach((node) => {
     [...node.attributes].forEach(({ name, value }) => {
       // Control characters inside a scheme are ignored by browsers, so they are removed before the link is judged.
       const link = value.replace(new RegExp('[\u0000-\u0020\u007f-\u009f]', 'g'), '');
       const unsafeLink = /(?:^|:)href$/i.test(name) && !SAFE_LINK.test(link);
-      const unsafeStyle = name === 'style' && /url\(|expression\(|javascript:/i.test(value);
+      // CSS escapes hide a function name from a text check, so a style that contains a backslash is dropped as well.
+      const unsafeStyle = name === 'style' && (/url\(|expression\(|javascript:/i.test(value) || value.includes(String.fromCharCode(92)));
       if (/^on/i.test(name) || unsafeLink || unsafeStyle) node.removeAttribute(name);
     });
   });

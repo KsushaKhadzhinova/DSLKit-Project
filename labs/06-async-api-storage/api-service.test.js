@@ -174,3 +174,12 @@ test('the real sleep function is used when none is passed', async () => {
   const api = createApi({ config: { ...config, retryDelayMs: 1 }, fetchImpl });
   assert.equal(await api.fetchData('/x'), 'ok');
 });
+
+test('identical requests that read the answer differently are not merged', async () => {
+  const fetchImpl = mock.fn(async () => reply('{"status":"pass"}'));
+  const { api } = setup(fetchImpl);
+  const [text, json] = await Promise.all([api.fetchData('/health'), api.checkHealth()]);
+  assert.equal(text, '{"status":"pass"}');
+  assert.deepEqual(json, { status: 'pass' });
+  assert.equal(fetchImpl.mock.callCount(), 2);
+});

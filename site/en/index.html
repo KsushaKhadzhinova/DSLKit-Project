@@ -271,7 +271,7 @@
                 aria-describedby="name-hint"
               />
               <p class="form__hint" id="name-hint">2 to 60 letters. A space, a hyphen and an apostrophe are allowed.</p>
-              <p class="form__error" id="name-error" hidden>
+              <p class="form__error" role="alert" id="name-error" hidden>
                 The name was not accepted: the field is empty, shorter than two characters or contains digits and symbols. Enter 2 to 60 letters, for example
                 “Ksenia”.
               </p>
@@ -280,7 +280,7 @@
               <label class="form__label" for="email">Email</label>
               <input class="form__input" id="email" name="email" type="email" required maxlength="120" autocomplete="email" aria-describedby="email-hint" />
               <p class="form__hint" id="email-hint">An address like name@example.com. The invitation will be sent there.</p>
-              <p class="form__error" id="email-error" hidden>
+              <p class="form__error" role="alert" id="email-error" hidden>
                 The address was not accepted: it is empty or does not look like an email. Check that it has an “@” sign and a domain after it.
               </p>
             </div>
@@ -298,7 +298,7 @@
                 <option value="uml">UML</option>
                 <option value="petri">Petri nets</option>
               </select>
-              <p class="form__error" id="notation-error" hidden>No notation chosen. Pick one of the six notations in the list.</p>
+              <p class="form__error" role="alert" id="notation-error" hidden>No notation chosen. Pick one of the six notations in the list.</p>
             </div>
             <div class="form__field">
               <label class="form__label" for="team">Team size</label>
@@ -316,7 +316,7 @@
                 aria-describedby="team-hint"
               />
               <p class="form__hint" id="team-hint">A whole number from 0 to 500. Enter 0 if you work alone.</p>
-              <p class="form__error" id="team-error" hidden>
+              <p class="form__error" role="alert" id="team-error" hidden>
                 The number was not accepted: only whole values from 0 to 500 are allowed, negative numbers and fractions are not.
               </p>
             </div>
@@ -331,7 +331,7 @@
             <label class="form__label" for="consent"
               >I agree to receive emails about the beta launch and with the <a class="form__link" href="privacy.html">privacy policy</a></label
             >
-            <p class="form__error" id="consent-error" hidden>Without consent we cannot send the invitation. Tick the box to continue.</p>
+            <p class="form__error" role="alert" id="consent-error" hidden>Without consent we cannot send the invitation. Tick the box to continue.</p>
           </div>
           <button class="button button--primary form__submit" type="submit">Submit</button>
         </form>

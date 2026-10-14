@@ -47,3 +47,12 @@ describe('App (integration of the components)', () => {
     expect(log).toHaveBeenCalledWith('Выбран тариф:', 'Команда');
   });
 });
+
+describe('App accessibility landmarks', () => {
+  test('has a skip link to the main content and a named projects region', () => {
+    render(<App />);
+    expect(screen.getByRole('link', { name: 'К основному содержимому' })).toHaveAttribute('href', '#main');
+    expect(screen.getByRole('main')).toHaveAttribute('id', 'main');
+    expect(screen.getByRole('region', { name: 'Проекты' })).toBeInTheDocument();
+  });
+});

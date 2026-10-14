@@ -151,3 +151,19 @@ test('sanitizeSvg removes namespaced and obfuscated script links, animations, st
   assert.equal(rects[0].hasAttribute('style'), false);
   assert.equal(rects[1].getAttribute('style'), 'fill:red');
 });
+
+test('sanitizeSvg removes elements from other namespaces, feImage and styles with CSS escapes', () => {
+  const slash = String.fromCharCode(92);
+  const hostile = [
+    '<svg xmlns="http://www.w3.org/2000/svg" xmlns:h="http://www.w3.org/1999/xhtml">',
+    '<h:meta http-equiv="refresh" content="0;url=https://evil.test"/>',
+    '<h:base href="https://evil.test/"/>',
+    '<filter id="f"><feImage href="https://evil.test/p.png"/></filter>',
+    `<rect style="background:${slash}75rl(https://evil.test)" width="1" height="1"/>`,
+    '</svg>',
+  ].join('');
+  const svg = sanitizeSvg(hostile, parser);
+  assert.equal(svg.querySelectorAll('*').length, 2);
+  assert.equal(svg.querySelector('feImage'), null);
+  assert.equal(svg.querySelector('rect').hasAttribute('style'), false);
+});

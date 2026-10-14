@@ -28,8 +28,11 @@ const handleChoose = (plan) => console.log('Выбран тариф:', plan.name
 function App() {
   return (
     <>
+      <a className="skip-link" href="#main">
+        К основному содержимому
+      </a>
       <Header title="DSLKit" links={LINKS} onSignup={handleSignup} />
-      <main className="page">
+      <main className="page" id="main">
         <section id="notations" aria-labelledby="notations-title">
           <div className="section__head">
             <h1 id="notations-title">Диаграммы как код</h1>

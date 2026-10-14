@@ -7,8 +7,12 @@ export const initSettings = ({ root = document, storage } = {}) => {
   const controls = container ? [...container.querySelectorAll(CONTROLS)] : [];
   if (controls.length === 0) return null;
 
-  const saved = storage.get('settings', {});
-  const state = isPlainObject(saved) ? saved : {};
+  // Other components (the editor keeps autosave here) write to the same key, so the stored value is read again before every write.
+  const readState = () => {
+    const saved = storage.get('settings', {});
+    return isPlainObject(saved) ? saved : {};
+  };
+  const state = readState();
 
   controls.forEach((control) => {
     if (!(control.id in state)) return;
@@ -22,6 +26,7 @@ export const initSettings = ({ root = document, storage } = {}) => {
   container.addEventListener('change', (event) => {
     const control = event.target.closest(CONTROLS);
     if (!control) return;
+    Object.assign(state, readState());
     state[control.id] = control.type === 'checkbox' ? control.checked : control.value;
     storage.set('settings', state);
   });

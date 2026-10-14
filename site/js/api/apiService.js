@@ -78,7 +78,7 @@ export const createApi = ({ config = API_CONFIG, fetchImpl = globalThis.fetch?.b
   // Identical parallel requests without a signal share one promise; requests with a signal stay separate so cancelling one cannot break another.
   const request = (path, options = {}) => {
     if (options.signal) return send(path, options);
-    const key = `${options.method ?? 'GET'} ${path} ${options.body ?? ''}`;
+    const key = `${options.method ?? 'GET'} ${options.parse ?? 'text'} ${path} ${options.body ?? ''}`;
     if (!inflight.has(key)) {
       const promise = send(path, options).finally(() => inflight.delete(key));
       inflight.set(key, promise);

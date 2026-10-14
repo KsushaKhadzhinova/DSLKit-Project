@@ -392,7 +392,7 @@ Semantic markup is created for the DSLKit home page and the related pages: Russi
                 aria-describedby="name-hint"
               />
               <p class="form__hint" id="name-hint">От 2 до 60 букв. Допустимы пробел, дефис и апостроф.</p>
-              <p class="form__error" id="name-error" hidden>
+              <p class="form__error" role="alert" id="name-error" hidden>
                 Имя не принято: поле пустое, короче двух символов или содержит цифры и знаки. Введите от 2 до 60 букв, например «Ксения».
               </p>
             </div>
@@ -400,7 +400,7 @@ Semantic markup is created for the DSLKit home page and the related pages: Russi
               <label class="form__label" for="email">Электронная почта</label>
               <input class="form__input" id="email" name="email" type="email" required maxlength="120" autocomplete="email" aria-describedby="email-hint" />
               <p class="form__hint" id="email-hint">Адрес вида name@example.com. На него придёт приглашение.</p>
-              <p class="form__error" id="email-error" hidden>
+              <p class="form__error" role="alert" id="email-error" hidden>
                 Адрес не принят: он пустой или не похож на электронную почту. Проверьте, что есть символ «@» и домен после него.
               </p>
             </div>
@@ -418,7 +418,7 @@ Semantic markup is created for the DSLKit home page and the related pages: Russi
                 <option value="uml">UML</option>
                 <option value="petri">Сети Петри</option>
               </select>
-              <p class="form__error" id="notation-error" hidden>Нотация не выбрана. Выберите одну из шести нотаций в списке.</p>
+              <p class="form__error" role="alert" id="notation-error" hidden>Нотация не выбрана. Выберите одну из шести нотаций в списке.</p>
             </div>
             <div class="form__field">
               <label class="form__label" for="team">Размер команды</label>
@@ -436,7 +436,9 @@ Semantic markup is created for the DSLKit home page and the related pages: Russi
                 aria-describedby="team-hint"
               />
               <p class="form__hint" id="team-hint">Целое число от 0 до 500. Укажите 0, если работаете один.</p>
-              <p class="form__error" id="team-error" hidden>Число не принято: допустимы целые значения от 0 до 500, отрицательные числа и дроби запрещены.</p>
+              <p class="form__error" role="alert" id="team-error" hidden>
+                Число не принято: допустимы целые значения от 0 до 500, отрицательные числа и дроби запрещены.
+              </p>
             </div>
             <div class="form__field">
               <label class="form__label" for="comment">Комментарий (по желанию)</label>
@@ -449,7 +451,9 @@ Semantic markup is created for the DSLKit home page and the related pages: Russi
             <label class="form__label" for="consent"
               >Согласен получать письма о запуске беты и с <a class="form__link" href="privacy.html">политикой конфиденциальности</a></label
             >
-            <p class="form__error" id="consent-error" hidden>Без согласия мы не можем отправить приглашение. Поставьте галочку, чтобы продолжить.</p>
+            <p class="form__error" role="alert" id="consent-error" hidden>
+              Без согласия мы не можем отправить приглашение. Поставьте галочку, чтобы продолжить.
+            </p>
           </div>
           <button class="button button--primary form__submit" type="submit">Отправить</button>
         </form>

@@ -400,7 +400,7 @@ time {
 }
 
 :focus-visible {
-  outline: none;
+  outline: 2px solid transparent;
   box-shadow: var(--focus-ring);
   border-radius: var(--radius-small);
 }

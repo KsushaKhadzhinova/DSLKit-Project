@@ -9,3 +9,6 @@ labs/*/generated/
 docs/project/
 materials/
 .claude/
+labs/08-frontend-testing/lighthouse-*/
+react-app/coverage/
+react-app/dist/
