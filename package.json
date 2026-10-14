@@ -16,7 +16,8 @@
     "lab2:generate": "npm run design:generate && node labs/02-environment/check.js ru > labs/02-environment/generated/check.ru.md && node labs/02-environment/check.js en > labs/02-environment/generated/check.en.md",
     "lab2:report": "npm run lab2:generate && node tools/build.js labs/02-environment",
     "lab3:report": "node tools/build.js labs/03-semantic-markup",
-    "lab4:report": "node tools/build.js labs/04-responsive-css"
+    "lab4:report": "node tools/build.js labs/04-responsive-css",
+    "lab5:report": "node tools/build.js labs/05-javascript-interactivity"
   },
   "dependencies": {
     "lodash": "^4.18.1"
