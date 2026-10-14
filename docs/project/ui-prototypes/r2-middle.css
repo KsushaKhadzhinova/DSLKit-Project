@@ -1,0 +1,110 @@
+/* Раунд 2, «средний» вариант: текущий сайт + мягкие приёмы из тёмного варианта 1.
+   Структура страницы не меняется. Добавляется поверх r2-landing.css.
+   Тёмная и светлая версии включаются атрибутом data-theme на <html>. */
+
+/* прозрачная липкая шапка с размытием */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: color-mix(in srgb, var(--color-background) 82%, transparent);
+  backdrop-filter: blur(12px);
+}
+
+/* заголовок hero: градиент как в варианте 1 */
+.hero__title {
+  background: linear-gradient(180deg, var(--color-text) 30%, var(--color-text-light));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* моно-подписи и заголовки секций */
+.hero__badge,
+.badge {
+  font-family: var(--font-mono);
+  letter-spacing: 0.02em;
+}
+
+.section__title::before {
+  content: '';
+  display: block;
+  width: 32px;
+  height: 3px;
+  margin-bottom: var(--space-2);
+  border-radius: 3px;
+  background: var(--color-primary);
+}
+
+/* окно продукта вокруг картинки hero */
+.hero__image {
+  border: 1px solid var(--color-border);
+}
+
+/* карточки: рамка подсвечивается при наведении */
+.card {
+  transition:
+    border-color 0.2s,
+    transform 0.2s,
+    box-shadow 0.2s;
+}
+
+.card:hover {
+  border-color: var(--color-primary);
+  transform: translateY(-2px);
+}
+
+/* шаги с подписью Fig, как у Linear */
+.steps {
+  counter-reset: fig;
+}
+
+.steps__item {
+  border-top: 1px solid var(--color-border);
+  padding-top: var(--space-2);
+}
+
+.steps__item::before {
+  counter-increment: fig;
+  content: 'Fig 0.' counter(fig);
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  color: var(--color-link);
+}
+
+/* второй тариф выделен */
+.plan:last-child {
+  border-color: var(--color-primary);
+  box-shadow:
+    0 0 0 1px var(--color-primary),
+    0 16px 48px var(--color-glow);
+}
+
+/* Тёмная версия: ближе к варианту 1, цвета интерфейса холоднее и темнее. */
+html[data-theme='dark'] {
+  --color-background: #0b0c10;
+  --color-surface: #12141a;
+  --color-border: #262a35;
+  --color-border-strong: #5b6173;
+  --color-text: #e8eaf0;
+  --color-text-light: #a3a9bb;
+  --color-muted: #8d93a5;
+  --color-glow: rgb(91 140 255 / 0.2);
+}
+
+/* Светлая версия: чище и контрастнее, лёгкие тени. */
+html[data-theme='light'] {
+  --color-background: #fbfcff;
+  --color-border: #e1e6f0;
+  --color-glow: rgb(37 99 235 / 0.13);
+}
+
+html[data-theme='light'] .card,
+html[data-theme='light'] .plan {
+  box-shadow: 0 1px 2px rgb(28 31 46 / 0.04);
+}
+
+/* В прототипе тема зафиксирована атрибутом data-theme, поэтому переключатель скрыт. */
+.theme__button {
+  display: none;
+}
