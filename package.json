@@ -18,7 +18,8 @@
     "lab3:report": "node tools/build.js labs/03-semantic-markup",
     "lab4:report": "node tools/build.js labs/04-responsive-css",
     "lab5:report": "node tools/build.js labs/05-javascript-interactivity",
-    "lab6:report": "node tools/build.js labs/06-async-api-storage"
+    "lab6:report": "node tools/build.js labs/06-async-api-storage",
+    "lab7:report": "node tools/build.js labs/07-react-components"
   },
   "dependencies": {
     "lodash": "^4.18.1"
