@@ -75,6 +75,28 @@
 
 Коммит с реализацией: https://github.com/KsushaKhadzhinova/DSLKit-Project/commit/f4a22b1. Сообщение коммита: `feat(react): add the DSLKit component library with mock data, props and CSS modules on Vite`.
 
+### 3.8 Проверка в DevTools
+
+Приложение открыто в Chrome 155, дерево компонентов показано интерфейсом React DevTools версии 6.1.5.
+
+Дерево компонентов показано на рисунке 4: App содержит Header, NotationList и ProjectList, а у выбранной карточки нотации видны свойства, родитель и файл с номером строки.
+
+![Снимок DevTools](figures/devtools-01-components.png)
+
+Рисунок 4 – React DevTools: дерево компонентов и свойства NotationCard
+
+Свойства карточки проекта показаны на рисунке 5: функция onOpen и объект project передаются сверху вниз от ProjectList.
+
+![Снимок DevTools](figures/devtools-02-project-card.png)
+
+Рисунок 5 – React DevTools: свойства ProjectCard
+
+Заглушки обработчиков показаны на рисунке 6: нажатия на кнопки выводят в консоль таблицу проекта, выбранный тариф и выбранную нотацию.
+
+![Снимок DevTools](figures/devtools-03-console.png)
+
+Рисунок 6 – Консоль: вывод заглушек обработчиков
+
 ## 4 Ответы на контрольные вопросы
 
 {{answers}}

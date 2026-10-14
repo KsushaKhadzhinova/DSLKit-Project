@@ -54,7 +54,7 @@ Table 2 – Resources loaded by the built application
 | `assets/index.js` | 227 KB | 72 KB |
 | `assets/index.css` | 4.2 KB | 1.4 KB |
 
-Screenshots of the Sources panel with a breakpoint and of React DevTools remain a task for the owner: they need manual work in a browser.
+Screenshots of the Sources panel with a breakpoint are given in section 3.8.
 
 ### 3.5 Performance Analysis with Lighthouse
 
@@ -93,6 +93,40 @@ Figure 3 – Istanbul report: 100 percent coverage in all folders
 ### 3.7 Committing the Changes
 
 The commit with the implementation: https://github.com/KsushaKhadzhinova/DSLKit-Project/commit/d8a95d7. The commit message: `feat: add unit tests, component tests, and performance audit with Lighthouse`.
+
+### 3.8 Debugging in DevTools
+
+Debugging was done in Chrome 155 on the development server.
+
+The breakpoint is shown in Figure 4: in helpers.js it stands on the first line of the pluralizeFiles function.
+
+![DevTools screenshot](figures/devtools-01-sources-breakpoint.png)
+
+Figure 4 – The Sources panel: a breakpoint in helpers.js
+
+The pause is shown in Figure 5: the Scope area holds the count parameter with the value 4 and the call stack lists the chain from main.jsx to ProjectCard.
+
+![DevTools screenshot](figures/devtools-02-sources-paused.png)
+
+Figure 5 – The Sources panel: a pause on the breakpoint, the Scope and Call Stack areas
+
+The Step Over action is shown in Figure 6: line 22 is executed and the Scope area gets the variable lastTwo with the value 4.
+
+![DevTools screenshot](figures/devtools-03-sources-step-over.png)
+
+Figure 6 – The Sources panel: the Step Over action
+
+The Step Into action is shown in Figure 7: the debugger moves to the next line of the function and shows the new variable values.
+
+![DevTools screenshot](figures/devtools-04-sources-step-into.png)
+
+Figure 7 – The Sources panel: the Step Into action
+
+The console is shown in Figure 8: the handler output is marked with the file name and the line, for example App.jsx:21.
+
+![DevTools screenshot](figures/devtools-05-console.png)
+
+Figure 8 – The application console
 
 ## 4 Answers to Control Questions
 

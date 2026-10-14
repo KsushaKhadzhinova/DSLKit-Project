@@ -75,6 +75,28 @@ An automated test reads the source files and checks the folder structure, the nu
 
 The commit with the implementation: https://github.com/KsushaKhadzhinova/DSLKit-Project/commit/f4a22b1. The commit message: `feat(react): add the DSLKit component library with mock data, props and CSS modules on Vite`.
 
+### 3.8 Checking in DevTools
+
+The application was opened in Chrome 155 and the component tree is shown by the React DevTools interface version 6.1.5.
+
+The component tree is shown in Figure 4: App holds Header, NotationList and ProjectList, and the selected notation card shows its props, its parent and the file with the line number.
+
+![DevTools screenshot](figures/devtools-01-components.png)
+
+Figure 4 – React DevTools: the component tree and the props of NotationCard
+
+The props of a project card are shown in Figure 5: the onOpen function and the project object come down from ProjectList.
+
+![DevTools screenshot](figures/devtools-02-project-card.png)
+
+Figure 5 – React DevTools: the props of ProjectCard
+
+The handler stubs are shown in Figure 6: clicking the buttons prints the project table, the chosen plan and the chosen notation to the console.
+
+![DevTools screenshot](figures/devtools-03-console.png)
+
+Figure 6 – Console: the output of the handler stubs
+
 ## 4 Answers to Control Questions
 
 5. **React, Vue and Angular.** By learning curve Vue is the easiest, then React, and Angular is harder because of TypeScript and many concepts. By performance all three use efficient updates, and the differences show only in large interfaces. By ecosystem React has the widest one, Angular has much built in, and Vue sits in the middle.

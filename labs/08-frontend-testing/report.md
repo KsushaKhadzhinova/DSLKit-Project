@@ -54,7 +54,7 @@
 | `assets/index.js` | 227 КБ | 72 КБ |
 | `assets/index.css` | 4,2 КБ | 1,4 КБ |
 
-Снимки панелей Sources с точкой останова и React DevTools остаются задачей владельца: они требуют ручной работы в браузере.
+Снимки панели Sources с точкой останова приведены в подразделе 3.8.
 
 ### 3.5 Анализ производительности с Lighthouse
 
@@ -93,6 +93,40 @@
 ### 3.7 Фиксация изменений
 
 Коммит с реализацией: https://github.com/KsushaKhadzhinova/DSLKit-Project/commit/d8a95d7. Сообщение коммита: `feat: add unit tests, component tests, and performance audit with Lighthouse`.
+
+### 3.8 Отладка в DevTools
+
+Отладка выполнена в Chrome 155 на сервере разработки.
+
+Точка останова показана на рисунке 4: в файле helpers.js она стоит на первой строке функции pluralizeFiles.
+
+![Снимок DevTools](figures/devtools-01-sources-breakpoint.png)
+
+Рисунок 4 – Панель Sources: точка останова в helpers.js
+
+Остановка показана на рисунке 5: в области Scope виден параметр count со значением 4, а в стеке вызовов цепочка от main.jsx до ProjectCard.
+
+![Снимок DevTools](figures/devtools-02-sources-paused.png)
+
+Рисунок 5 – Панель Sources: остановка на точке останова, области Scope и Call Stack
+
+Шаг Step Over показан на рисунке 6: выполнена строка 22, в области Scope появилась переменная lastTwo со значением 4.
+
+![Снимок DevTools](figures/devtools-03-sources-step-over.png)
+
+Рисунок 6 – Панель Sources: шаг Step Over
+
+Шаг Step Into показан на рисунке 7: отладчик переходит к следующей строке функции и показывает новые значения переменных.
+
+![Снимок DevTools](figures/devtools-04-sources-step-into.png)
+
+Рисунок 7 – Панель Sources: шаг Step Into
+
+Консоль показана на рисунке 8: вывод обработчиков помечен именем файла и строкой, например App.jsx:21.
+
+![Снимок DevTools](figures/devtools-05-console.png)
+
+Рисунок 8 – Консоль приложения
 
 ## 4 Ответы на контрольные вопросы
 
