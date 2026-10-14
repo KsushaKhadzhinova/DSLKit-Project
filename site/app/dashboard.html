@@ -85,23 +85,27 @@
 
       <div class="dashboard__toolbar">
         <div class="filter" role="group" aria-label="Фильтр по нотации">
-          <button type="button" class="filter__chip filter__chip--active" aria-pressed="true">Все</button>
-          <button type="button" class="filter__chip" aria-pressed="false">BPMN</button>
-          <button type="button" class="filter__chip" aria-pressed="false">ERD <span class="badge">в бете</span></button>
-          <button type="button" class="filter__chip" aria-pressed="false">DFD <span class="badge">в бете</span></button>
-          <button type="button" class="filter__chip" aria-pressed="false">IDEF0 <span class="badge">в бете</span></button>
+          <button type="button" class="filter__chip filter__chip--active" data-filter="all" aria-pressed="true">Все</button>
+          <button type="button" class="filter__chip" data-filter="bpmn" aria-pressed="false">BPMN</button>
+          <button type="button" class="filter__chip" data-filter="erd" aria-pressed="false">ERD <span class="badge">в бете</span></button>
+          <button type="button" class="filter__chip" data-filter="dfd" aria-pressed="false">DFD <span class="badge">в бете</span></button>
+          <button type="button" class="filter__chip" data-filter="idef0" aria-pressed="false">IDEF0 <span class="badge">в бете</span></button>
         </div>
 
         <div class="sort">
           <label class="visually-hidden" for="project-sort">Сортировка</label>
           <select id="project-sort" class="sort__select" name="sort">
             <option value="newest" selected>Сначала новые</option>
+            <option value="oldest">Сначала старые</option>
+            <option value="name">По названию</option>
           </select>
         </div>
       </div>
 
-      <ul class="project-list">
-        <li class="project-list__item">
+      <p class="visually-hidden" id="project-count" role="status" aria-live="polite"></p>
+
+      <ul class="project-list" id="project-list">
+        <li class="project-list__item" data-notation="idef0">
           <article class="project-card">
             <div class="project-card__preview" aria-hidden="true"></div>
             <h2 class="project-card__title"><a class="project-card__link" href="editor.html">Order process</a></h2>
@@ -116,7 +120,7 @@
             </button>
           </article>
         </li>
-        <li class="project-list__item">
+        <li class="project-list__item" data-notation="erd">
           <article class="project-card">
             <div class="project-card__preview" aria-hidden="true"></div>
             <h2 class="project-card__title"><a class="project-card__link" href="editor.html">Shop schema</a></h2>
@@ -131,7 +135,7 @@
             </button>
           </article>
         </li>
-        <li class="project-list__item">
+        <li class="project-list__item" data-notation="bpmn">
           <article class="project-card">
             <div class="project-card__preview" aria-hidden="true"></div>
             <h2 class="project-card__title"><a class="project-card__link" href="editor.html">Hiring flow</a></h2>
@@ -146,7 +150,7 @@
             </button>
           </article>
         </li>
-        <li class="project-list__item">
+        <li class="project-list__item" data-notation="dfd">
           <article class="project-card">
             <div class="project-card__preview" aria-hidden="true"></div>
             <h2 class="project-card__title"><a class="project-card__link" href="editor.html">Data pipeline</a></h2>
@@ -161,7 +165,7 @@
             </button>
           </article>
         </li>
-        <li class="project-list__item">
+        <li class="project-list__item" data-notation="idef0">
           <article class="project-card">
             <div class="project-card__preview" aria-hidden="true"></div>
             <h2 class="project-card__title"><a class="project-card__link" href="editor.html">Warehouse</a></h2>
@@ -176,7 +180,7 @@
             </button>
           </article>
         </li>
-        <li class="project-list__item">
+        <li class="project-list__item" data-notation="erd">
           <article class="project-card">
             <div class="project-card__preview" aria-hidden="true"></div>
             <h2 class="project-card__title"><a class="project-card__link" href="editor.html">Users &amp; roles</a></h2>
@@ -191,7 +195,7 @@
             </button>
           </article>
         </li>
-        <li class="project-list__item">
+        <li class="project-list__item" data-notation="bpmn">
           <article class="project-card">
             <div class="project-card__preview" aria-hidden="true"></div>
             <h2 class="project-card__title"><a class="project-card__link" href="editor.html">Release process</a></h2>
@@ -206,7 +210,7 @@
             </button>
           </article>
         </li>
-        <li class="project-list__item">
+        <li class="project-list__item" data-notation="dfd">
           <article class="project-card">
             <div class="project-card__preview" aria-hidden="true"></div>
             <h2 class="project-card__title"><a class="project-card__link" href="editor.html">Billing</a></h2>
@@ -223,5 +227,6 @@
         </li>
       </ul>
     </main>
+    <script type="module" src="../js/script.js"></script>
   </body>
 </html>

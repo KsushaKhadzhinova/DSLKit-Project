@@ -91,8 +91,8 @@
       <section class="section" id="notations" aria-labelledby="notations-title">
         <h2 class="section__title" id="notations-title">Notations</h2>
         <p class="section__lead">Six notations in one editor. IDEF0, DFD and ERD arrive first in the beta.</p>
-        <ul class="cards">
-          <li class="cards__item">
+        <ul class="cards" id="notations-list">
+          <li class="cards__item" data-status="planned">
             <article class="card">
               <img class="card__icon" src="../images/notations/uml.svg" alt="" width="48" height="48" />
               <h3 class="card__title">UML</h3>
@@ -101,7 +101,7 @@
               <a class="card__link" href="#waitlist">Join the beta: UML</a>
             </article>
           </li>
-          <li class="cards__item">
+          <li class="cards__item" data-status="planned">
             <article class="card">
               <img class="card__icon" src="../images/notations/bpmn.svg" alt="" width="48" height="48" />
               <h3 class="card__title">BPMN</h3>
@@ -110,7 +110,7 @@
               <a class="card__link" href="#waitlist">Join the beta: BPMN</a>
             </article>
           </li>
-          <li class="cards__item">
+          <li class="cards__item" data-status="beta">
             <article class="card">
               <img class="card__icon" src="../images/notations/erd.svg" alt="" width="48" height="48" />
               <h3 class="card__title">ERD</h3>
@@ -119,7 +119,7 @@
               <a class="card__link" href="#waitlist">Join the beta: ERD</a>
             </article>
           </li>
-          <li class="cards__item">
+          <li class="cards__item" data-status="beta">
             <article class="card">
               <img class="card__icon" src="../images/notations/dfd.svg" alt="" width="48" height="48" />
               <h3 class="card__title">DFD</h3>
@@ -128,7 +128,7 @@
               <a class="card__link" href="#waitlist">Join the beta: DFD</a>
             </article>
           </li>
-          <li class="cards__item">
+          <li class="cards__item" data-status="beta">
             <article class="card">
               <img class="card__icon" src="../images/notations/idef0.svg" alt="" width="48" height="48" />
               <h3 class="card__title">IDEF0</h3>
@@ -137,7 +137,7 @@
               <a class="card__link" href="#waitlist">Join the beta: IDEF0</a>
             </article>
           </li>
-          <li class="cards__item">
+          <li class="cards__item" data-status="planned">
             <article class="card">
               <img class="card__icon" src="../images/notations/petri.svg" alt="" width="48" height="48" />
               <h3 class="card__title">Petri nets</h3>
@@ -253,7 +253,7 @@
       <section class="section" id="waitlist" aria-labelledby="waitlist-title">
         <h2 class="section__title" id="waitlist-title">Join the beta</h2>
         <p class="section__lead">Leave your contacts and we will tell you when access opens. All fields except the comment are required.</p>
-        <form class="form" action="#waitlist" method="get">
+        <form class="form" id="waitlist-form" action="#waitlist" method="get" novalidate>
           <fieldset class="form__group">
             <legend class="form__legend">Contacts</legend>
             <div class="form__field">
@@ -352,6 +352,6 @@
         <p class="footer__copy"><small>© 2026 DSLKit. BSUIR diploma project.</small></p>
       </div>
     </footer>
-    <script src="../js/script.js"></script>
+    <script type="module" src="../js/script.js"></script>
   </body>
 </html>

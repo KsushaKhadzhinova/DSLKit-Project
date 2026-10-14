@@ -213,8 +213,8 @@ Semantic markup is created for the DSLKit home page and the related pages: Russi
       <section class="section" id="notations" aria-labelledby="notations-title">
         <h2 class="section__title" id="notations-title">Нотации</h2>
         <p class="section__lead">Шесть нотаций в одном редакторе. Первыми в бета-версии появятся IDEF0, DFD и ERD.</p>
-        <ul class="cards">
-          <li class="cards__item">
+        <ul class="cards" id="notations-list">
+          <li class="cards__item" data-status="planned">
             <article class="card">
               <img class="card__icon" src="images/notations/uml.svg" alt="" width="48" height="48" />
               <h3 class="card__title">UML</h3>
@@ -223,7 +223,7 @@ Semantic markup is created for the DSLKit home page and the related pages: Russi
               <a class="card__link" href="#waitlist">Записаться в бету: UML</a>
             </article>
           </li>
-          <li class="cards__item">
+          <li class="cards__item" data-status="planned">
             <article class="card">
               <img class="card__icon" src="images/notations/bpmn.svg" alt="" width="48" height="48" />
               <h3 class="card__title">BPMN</h3>
@@ -232,7 +232,7 @@ Semantic markup is created for the DSLKit home page and the related pages: Russi
               <a class="card__link" href="#waitlist">Записаться в бету: BPMN</a>
             </article>
           </li>
-          <li class="cards__item">
+          <li class="cards__item" data-status="beta">
             <article class="card">
               <img class="card__icon" src="images/notations/erd.svg" alt="" width="48" height="48" />
               <h3 class="card__title">ERD</h3>
@@ -241,7 +241,7 @@ Semantic markup is created for the DSLKit home page and the related pages: Russi
               <a class="card__link" href="#waitlist">Записаться в бету: ERD</a>
             </article>
           </li>
-          <li class="cards__item">
+          <li class="cards__item" data-status="beta">
             <article class="card">
               <img class="card__icon" src="images/notations/dfd.svg" alt="" width="48" height="48" />
               <h3 class="card__title">DFD</h3>
@@ -250,7 +250,7 @@ Semantic markup is created for the DSLKit home page and the related pages: Russi
               <a class="card__link" href="#waitlist">Записаться в бету: DFD</a>
             </article>
           </li>
-          <li class="cards__item">
+          <li class="cards__item" data-status="beta">
             <article class="card">
               <img class="card__icon" src="images/notations/idef0.svg" alt="" width="48" height="48" />
               <h3 class="card__title">IDEF0</h3>
@@ -259,7 +259,7 @@ Semantic markup is created for the DSLKit home page and the related pages: Russi
               <a class="card__link" href="#waitlist">Записаться в бету: IDEF0</a>
             </article>
           </li>
-          <li class="cards__item">
+          <li class="cards__item" data-status="planned">
             <article class="card">
               <img class="card__icon" src="images/notations/petri.svg" alt="" width="48" height="48" />
               <h3 class="card__title">Сети Петри</h3>
@@ -374,7 +374,7 @@ Semantic markup is created for the DSLKit home page and the related pages: Russi
       <section class="section" id="waitlist" aria-labelledby="waitlist-title">
         <h2 class="section__title" id="waitlist-title">Записаться в бету</h2>
         <p class="section__lead">Оставьте контакты, и мы сообщим, когда откроется доступ. Все поля, кроме комментария, обязательны.</p>
-        <form class="form" action="#waitlist" method="get">
+        <form class="form" id="waitlist-form" action="#waitlist" method="get" novalidate>
           <fieldset class="form__group">
             <legend class="form__legend">Контакты</legend>
             <div class="form__field">
@@ -470,7 +470,7 @@ Semantic markup is created for the DSLKit home page and the related pages: Russi
         <p class="footer__copy"><small>© 2026 DSLKit. Дипломный проект БГУИР.</small></p>
       </div>
     </footer>
-    <script src="js/script.js"></script>
+    <script type="module" src="js/script.js"></script>
   </body>
 </html>
 ```
