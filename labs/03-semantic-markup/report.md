@@ -374,7 +374,7 @@
       <section class="section" id="waitlist" aria-labelledby="waitlist-title">
         <h2 class="section__title" id="waitlist-title">Записаться в бету</h2>
         <p class="section__lead">Оставьте контакты, и мы сообщим, когда откроется доступ. Все поля, кроме комментария, обязательны.</p>
-        <form class="form" id="waitlist-form" action="#waitlist" method="get" novalidate>
+        <form class="form" id="waitlist-form" action="#waitlist" method="get">
           <fieldset class="form__group">
             <legend class="form__legend">Контакты</legend>
             <div class="form__field">

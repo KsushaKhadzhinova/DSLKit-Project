@@ -58,6 +58,12 @@ describe('isValidName', () => {
 });
 
 describe('isValidEmail', () => {
+  it('rejects empty domain labels and accepts subdomains', () => {
+    assert.equal(isValidEmail('a@.com'), false);
+    assert.equal(isValidEmail('a@b..com'), false);
+    assert.equal(isValidEmail('a@mail.example.com'), true);
+  });
+
   it('accepts a normal address and trims whitespace', () => {
     assert.equal(isValidEmail('ksenia@example.com'), true);
     assert.equal(isValidEmail('  ksenia@example.com  '), true);

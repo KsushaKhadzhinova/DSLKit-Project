@@ -11,6 +11,7 @@ export const initEditor = ({ root = document, storage } = {}) => {
   const panels = tabs.map((tab) => root.getElementById(tab.getAttribute('aria-controls')));
   const closeButton = page.querySelector('.editor-tabs__close');
   const dialog = root.querySelector('#close-tab-modal');
+  const dialogText = dialog?.querySelector('.modal__text');
   const autosave = page.querySelector('.editor-toolbar__switch');
   const status = page.querySelector('.editor-status__cursor');
   const main = page.querySelector('.editor-main');
@@ -23,6 +24,7 @@ export const initEditor = ({ root = document, storage } = {}) => {
   };
   const saveSetting = (key, value) => storage.set('settings', { ...readSettings(), [key]: value });
 
+  const tabName = (index) => tabs[index].querySelector('span').textContent.trim();
   const current = () => tabs.findIndex((tab) => tab.getAttribute('aria-selected') === 'true');
 
   const select = (index, { focus = false } = {}) => {
@@ -34,7 +36,7 @@ export const initEditor = ({ root = document, storage } = {}) => {
       panels[position].hidden = !active;
     });
     if (focus) tabs[index].focus();
-    closeButton?.setAttribute('aria-label', `Закрыть файл ${tabs[index].querySelector('span').textContent.trim()}`);
+    closeButton?.setAttribute('aria-label', `Закрыть файл ${tabName(index)}`);
     storage.set('editor-tab', index);
   };
 
@@ -69,16 +71,20 @@ export const initEditor = ({ root = document, storage } = {}) => {
     panels[index].hidden = true;
     const next = tabs.findIndex((tab) => !tab.hidden);
     if (next >= 0) select(next);
+    else if (closeButton) closeButton.hidden = true;
   };
 
   closeButton?.addEventListener('click', () => {
     if (!dialog) return;
+    dialog.returnValue = '';
+    if (dialogText) dialogText.textContent = `В файле ${tabName(current())} есть несохранённые изменения.`;
     if (typeof dialog.showModal === 'function') dialog.showModal();
     else dialog.setAttribute('open', '');
   });
   dialog?.addEventListener('close', () => {
     if (dialog.returnValue === 'save') markSaved();
     else if (dialog.returnValue === 'discard') discard();
+    dialog.returnValue = '';
   });
 
   if (autosave) {

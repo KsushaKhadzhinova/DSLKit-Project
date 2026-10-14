@@ -1,7 +1,7 @@
 export const NOTATIONS = ['idef0', 'dfd', 'erd', 'bpmn', 'uml', 'petri'];
 
 const NAME_PATTERN = /^\p{L}[\p{L}' ’-]{1,59}$/u;
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)*\.[^\s@.]{2,}$/;
 const MAX_EMAIL_LENGTH = 120;
 const MAX_COMMENT_LENGTH = 500;
 const MAX_TEAM_SIZE = 500;

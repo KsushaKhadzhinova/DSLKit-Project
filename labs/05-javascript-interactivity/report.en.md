@@ -209,7 +209,7 @@ export function getStorage(win = globalThis) {
 export const NOTATIONS = ['idef0', 'dfd', 'erd', 'bpmn', 'uml', 'petri'];
 
 const NAME_PATTERN = /^\p{L}[\p{L}' ’-]{1,59}$/u;
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)*\.[^\s@.]{2,}$/;
 const MAX_EMAIL_LENGTH = 120;
 const MAX_COMMENT_LENGTH = 500;
 const MAX_TEAM_SIZE = 500;
@@ -390,7 +390,10 @@ export const initWaitlistForm = ({
 
   const validateField = (id) => showState(form, id, validateWaitlist(readValues(form)).includes(id));
 
+  let submitting = false;
+
   const submit = () => {
+    if (submitting) return false;
     const values = readValues(form);
     const invalid = validateWaitlist(values);
     FIELDS.forEach((id) => showState(form, id, invalid.includes(id)));
@@ -411,7 +414,8 @@ export const initWaitlistForm = ({
     const records = Array.isArray(saved) ? saved : [];
     records.push(record);
     storage.set('waitlist', records);
-    logger.info('DSLKit: заявка сохранена в LocalStorage', record.email);
+    submitting = true;
+    logger.info('DSLKit: заявка сохранена в LocalStorage', record.notation);
     navigate('thanks.html');
     return true;
   };
@@ -421,8 +425,13 @@ export const initWaitlistForm = ({
     submit();
   });
 
+  form.noValidate = true;
+
+  // While typing only fields already marked invalid are rechecked, so the first error appears on leaving the field.
   const revalidate = (event) => {
-    if (FIELDS.includes(event.target.id)) validateField(event.target.id);
+    const { id } = event.target;
+    if (!FIELDS.includes(id)) return;
+    if (event.type === 'change' || event.target.getAttribute('aria-invalid') === 'true') validateField(id);
   };
   form.addEventListener('input', revalidate);
   form.addEventListener('change', revalidate);
@@ -522,6 +531,7 @@ export const initEditor = ({ root = document, storage } = {}) => {
   const panels = tabs.map((tab) => root.getElementById(tab.getAttribute('aria-controls')));
   const closeButton = page.querySelector('.editor-tabs__close');
   const dialog = root.querySelector('#close-tab-modal');
+  const dialogText = dialog?.querySelector('.modal__text');
   const autosave = page.querySelector('.editor-toolbar__switch');
   const status = page.querySelector('.editor-status__cursor');
   const main = page.querySelector('.editor-main');
@@ -534,6 +544,7 @@ export const initEditor = ({ root = document, storage } = {}) => {
   };
   const saveSetting = (key, value) => storage.set('settings', { ...readSettings(), [key]: value });
 
+  const tabName = (index) => tabs[index].querySelector('span').textContent.trim();
   const current = () => tabs.findIndex((tab) => tab.getAttribute('aria-selected') === 'true');
 
   const select = (index, { focus = false } = {}) => {
@@ -545,7 +556,7 @@ export const initEditor = ({ root = document, storage } = {}) => {
       panels[position].hidden = !active;
     });
     if (focus) tabs[index].focus();
-    closeButton?.setAttribute('aria-label', `Закрыть файл ${tabs[index].querySelector('span').textContent.trim()}`);
+    closeButton?.setAttribute('aria-label', `Закрыть файл ${tabName(index)}`);
     storage.set('editor-tab', index);
   };
 
@@ -580,16 +591,20 @@ export const initEditor = ({ root = document, storage } = {}) => {
     panels[index].hidden = true;
     const next = tabs.findIndex((tab) => !tab.hidden);
     if (next >= 0) select(next);
+    else if (closeButton) closeButton.hidden = true;
   };
 
   closeButton?.addEventListener('click', () => {
     if (!dialog) return;
+    dialog.returnValue = '';
+    if (dialogText) dialogText.textContent = `В файле ${tabName(current())} есть несохранённые изменения.`;
     if (typeof dialog.showModal === 'function') dialog.showModal();
     else dialog.setAttribute('open', '');
   });
   dialog?.addEventListener('close', () => {
     if (dialog.returnValue === 'save') markSaved();
     else if (dialog.returnValue === 'discard') discard();
+    dialog.returnValue = '';
   });
 
   if (autosave) {

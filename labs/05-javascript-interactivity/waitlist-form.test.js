@@ -120,13 +120,33 @@ test('an error disappears as soon as the changed field becomes valid, untouched 
   assert.equal(field(document, 'consent-error').hidden, true);
 });
 
-test('typing in an untouched field does not show an error early and unrelated targets are ignored', () => {
+test('typing in an untouched field stays quiet, leaving it shows the error and unrelated targets are ignored', () => {
   const { window, document } = setup();
   field(document, 'name').value = '1';
   field(document, 'name').dispatchEvent(new window.Event('input', { bubbles: true }));
+  assert.equal(field(document, 'name-error').hidden, true);
+  field(document, 'name').dispatchEvent(new window.Event('change', { bubbles: true }));
   assert.equal(field(document, 'name-error').hidden, false);
   document.querySelector('.form__legend').dispatchEvent(new window.Event('input', { bubbles: true }));
   assert.equal(field(document, 'email-error').hidden, true);
+});
+
+test('the form disables the browser bubbles and a second submit after success is ignored', () => {
+  const { window, document, navigate, storage, api } = setup();
+  assert.equal(document.querySelector('#waitlist-form').noValidate, true);
+  fill(document);
+  submit(window);
+  assert.equal(api.submit(), false);
+  submit(window);
+  assert.equal(storage.get('waitlist').length, 1);
+  assert.equal(navigate.mock.callCount(), 1);
+});
+
+test('the log line carries the notation and not the email address', () => {
+  const { window, document, logger } = setup();
+  fill(document);
+  submit(window);
+  assert.deepEqual(logger.info.mock.calls[0].arguments, ['DSLKit: заявка сохранена в LocalStorage', 'idef0']);
 });
 
 test('the default logger and navigation work on a real window', () => {

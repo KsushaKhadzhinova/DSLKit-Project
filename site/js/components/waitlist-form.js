@@ -39,7 +39,10 @@ export const initWaitlistForm = ({
 
   const validateField = (id) => showState(form, id, validateWaitlist(readValues(form)).includes(id));
 
+  let submitting = false;
+
   const submit = () => {
+    if (submitting) return false;
     const values = readValues(form);
     const invalid = validateWaitlist(values);
     FIELDS.forEach((id) => showState(form, id, invalid.includes(id)));
@@ -60,7 +63,8 @@ export const initWaitlistForm = ({
     const records = Array.isArray(saved) ? saved : [];
     records.push(record);
     storage.set('waitlist', records);
-    logger.info('DSLKit: заявка сохранена в LocalStorage', record.email);
+    submitting = true;
+    logger.info('DSLKit: заявка сохранена в LocalStorage', record.notation);
     navigate('thanks.html');
     return true;
   };
@@ -70,8 +74,13 @@ export const initWaitlistForm = ({
     submit();
   });
 
+  form.noValidate = true;
+
+  // While typing only fields already marked invalid are rechecked, so the first error appears on leaving the field.
   const revalidate = (event) => {
-    if (FIELDS.includes(event.target.id)) validateField(event.target.id);
+    const { id } = event.target;
+    if (!FIELDS.includes(id)) return;
+    if (event.type === 'change' || event.target.getAttribute('aria-invalid') === 'true') validateField(id);
   };
   form.addEventListener('input', revalidate);
   form.addEventListener('change', revalidate);

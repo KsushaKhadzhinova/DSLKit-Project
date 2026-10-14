@@ -218,3 +218,20 @@ test('a close button without a dialog does nothing', () => {
   window.document.querySelector('.editor-tabs__close').dispatchEvent(new window.MouseEvent('click', { bubbles: true }));
   assert.equal(window.document.querySelector('#t1').getAttribute('aria-selected'), 'true');
 });
+
+test('the dialog names the active file, resets its result and the close button disappears with the last tab', () => {
+  const { window, document } = setup();
+  const dialog = document.querySelector('#close-tab-modal');
+  const closeButton = document.querySelector('.editor-tabs__close');
+  click(window, tab(document, 'tab-rules'));
+  dialog.returnValue = 'discard';
+  click(window, closeButton);
+  assert.equal(dialog.returnValue, '');
+  assert.match(document.querySelector('.modal__text').textContent, /rules\.dsl/);
+  dialog.returnValue = 'discard';
+  dialog.dispatchEvent(new window.Event('close'));
+  assert.equal(dialog.returnValue, '');
+  dialog.returnValue = 'discard';
+  dialog.dispatchEvent(new window.Event('close'));
+  assert.equal(closeButton.hidden, true);
+});
