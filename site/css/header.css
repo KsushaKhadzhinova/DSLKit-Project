@@ -13,7 +13,9 @@
   grid-template-columns: auto 1fr auto;
   align-items: center;
   gap: var(--space-3);
-  width: min(100% - var(--space-4), var(--container));
+  width: 100%;
+  max-width: calc(var(--container) + var(--space-3) * 2);
+  padding-inline: var(--space-3);
   min-height: var(--header-height);
   margin-inline: auto;
 }
