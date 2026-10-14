@@ -110,31 +110,6 @@ All style files passed the W3C CSS validator without errors, and the HTML pages 
 
 The work is done in the branch `feature/responsive-layout`. The commit with the implementation: https://github.com/KsushaKhadzhinova/DSLKit-Project/commit/eb70a59. The commit message: `feat: implement responsive layout according to Figma design`.
 
-## 4 Answers to Control Questions
-
-{{answers}}
-1. **Matching the Figma layout.** Colours, fonts and spacing are moved to variables taken from the layout tokens, and sizes came from a check against the palette and typography in `site/design/figma`. Browser developer tools and automated tests of contrast and scale served as the check.
-2. **Flexbox and Grid.** Flexbox aligns the header, footer and rows of buttons because the layout is one-dimensional. Grid builds the two-dimensional layouts: cards, the hero block, pricing and the application shell.
-3. **The role of BEM.** Blocks, elements and modifiers (`card__title`, `button--primary`) gave predictable names, removed selector conflicts and allowed the styles to be split across files.
-4. **Responsive features.** A burger menu on narrow screens, one, two and three columns of cards, hero columns in the golden ratio and larger tap targets on touch screens. It is implemented with `min-width` and Grid.
-5. **Difficulties when moving the design.** Figma layouts are static and carry no states, so hover, focus and error states had to be designed independently. The Fibonacci spacing scale resolved the differences from the 8 pixel grid.
-6. **Media queries.** The rule `@media (min-width: 768px) { .nav { display: block; } }` shows the menu on wide screens. Queries switch styles on by a condition, so one markup works on different devices.
-7. **Fluid grids.** Percentages are computed from the parent width, while the `fr` unit divides the remaining free space between columns. The value `1fr 1.618fr` sets the hero columns without computing percentages.
-8. **The advantage of Flexbox.** Items distribute space by themselves, wrap onto a new line and align on both axes without fixed sizes.
-9. **CSS Grid and a sidebar.** The rule `grid-template-columns: 224px minmax(0, 1fr)` creates a sidebar and a content area, and `grid-template-areas` places the blocks. The dashboard and the settings of the application are built this way.
-10. **Problems in old browsers.** Old versions do not support Grid, `gap` in Flexbox, `clamp()`, `:has()` and `color-mix()`. The result is a broken layout or lost colours.
-11. **Cross-browser compatibility.** It means the same behaviour of a page in different browsers and on different devices. It matters because the audience uses different browsers.
-12. **Choosing breakpoints.** Breakpoints follow the content: at 576 pixels there is room for two cards, at 768 the horizontal menu fits, and at 1024 the two-column hero block and three columns of cards switch on.
-13. **Autoprefixers.** Autoprefixer adds vendor prefixes from a list of target browsers. In the project the `-webkit-` prefix for `backdrop-filter` is added by hand.
-14. **Relative units.** The units `rem`, `em`, `%` and `vw` scale with user settings and the screen width, so text stays readable when enlarged.
-15. **Checking responsiveness.** The device mode of the developer tools, emulation of 375, 768 and 1280 pixels, comparing element geometry before and after edits, and viewing in the browser. Real devices are required for the final acceptance.
-16. **Responsiveness without media queries.** The value `grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr))` picks the number of columns itself. The project grids of projects and templates in the application work this way.
-17. **Fallbacks.** A fallback declaration before a new property (`color: red; color: color-mix(...)`) leaves a browser without support a working value. The `@supports` rule enables styles only when a feature is supported.
-18. **High-density screens.** Vector SVG graphics stay sharp at any pixel density, while raster images need `@2x` versions or the `srcset` attribute. All illustrations on the site are vector.
-19. **Mobile first.** Base styles describe a phone, and wide screens get additions through `min-width`. The approach reduces overrides and speeds up loading on weak devices.
-20. **A burger menu in CSS and JavaScript.** A hidden checkbox and the rule `.burger__input:checked ~ .nav` open the menu without scripts. In laboratory work No. 5 a script adds closing with the Escape key and updating the `aria-expanded` attribute.
-{{/answers}}
-
 ## Conclusion
 
 The styles of the DSLKit project are split into files following the BEM methodology and built mobile first. Three page states, a burger menu without JavaScript, Flexbox and Grid layouts, CSS variables and a dark theme are implemented. The golden ratio is built into the size scale, the spacing and the columns, and automated tests prevent any drift from it. What remains is to check the page in Firefox, Edge and Safari on real devices.

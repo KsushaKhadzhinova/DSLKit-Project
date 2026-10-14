@@ -75,31 +75,6 @@ An automated test reads the source files and checks the folder structure, the nu
 
 The commit with the implementation: https://github.com/KsushaKhadzhinova/DSLKit-Project/commit/f4a22b1. The commit message: `feat(react): add the DSLKit component library with mock data, props and CSS modules on Vite`.
 
-## 4 Answers to Control Questions
-
-{{answers}}
-1. **JSX and HTML.** JSX is written inside JavaScript and turns into function calls. Three differences: `className` instead of `class`, `htmlFor` instead of `for`, and expressions in curly braces such as `{project.name}`.
-2. **Passing through props.** The parent passes data as attributes, and the child component receives them as an object. In the project `ProjectList` passes `ProjectCard` a project and a handler: `<ProjectCard project={project} onOpen={onOpen} />`.
-3. **Advantages of components.** Reuse, isolation of styles and logic, easy testing and a clear hierarchy. In plain JavaScript markup, handlers and state are tangled, and they are harder to change.
-4. **Virtual DOM.** React builds a light tree in memory, compares it with the previous one and applies only the differing changes to the real DOM. This reduces the number of expensive DOM operations.
-5. **React, Vue and Angular.** By learning curve Vue is the easiest, then React, and Angular is harder because of TypeScript and many concepts. By performance all three use efficient updates, and the differences show only in large interfaces. By ecosystem React has the widest one, Angular has much built in, and Vue sits in the middle.
-6. **Pure components.** A component as a pure function always returns the same result for the same `props` and changes no outside data. This lets React safely skip needless renders and makes tests simpler.
-7. **JavaScript in JSX.** An expression is written in curly braces: `Updated {formatDate(project.updated)}`. Function calls, conditions with `&&` and the ternary operator are allowed inside, but not the statements `if` and `for`.
-8. **Props and state.** Props come from the parent and do not change inside the component, state belongs to the component and changes the interface. In this work all data is static and the assignment forbids `useState`, so there is no state.
-9. **Conditional rendering.** `&&` and the ternary operator are used: `{title && <h3>{title}</h3>}` in `Card` and `{visible.length === 0 ? <p>…</p> : <ul>…</ul>}` in `ProjectList`.
-10. **Lists and key.** An array becomes elements with `map`. The `key` attribute with a unique `id` helps React match elements between renders and not recreate extra ones.
-11. **Lifting state up.** When several components must share data, the state is moved to the nearest common parent and passed down through `props`. In the project the notation filter will appear in `App` and will control `ProjectList`.
-12. **Types of props.** Strings, numbers, booleans, objects, arrays and functions can be passed. In the project these are the string `title`, the number `year`, the object `project`, the array `notations` and the function `onOpen`.
-13. **Composition and children.** A component outputs `{children}` where the nested content should be. `Card` wraps any content, and `NotationCard` puts a `Badge`, a paragraph and code into it.
-14. **Fragments.** The form `<>…</>` groups several elements without an extra node in the DOM. In `App` the fragment joins the header, the main content and the footer.
-15. **Events without state.** A handler is passed through `onClick` or `onChange` and calls a stub function such as `console.log`. In `App` such stubs are passed down as `props`.
-16. **CSS modules in Vite.** It is enough to name the file `Name.module.css` and import it: `import styles from './Button.module.css'`. Vite makes class names unique, and no setup is needed.
-17. **Vite and Create React App.** Vite starts the development server almost instantly thanks to native browser modules, updates the page quickly and builds the project with a modern bundler, while Create React App is no longer developed.
-18. **Mock data.** Arrays are imported into the root `App` from the folder `data` and passed to child components through `props`, so components do not depend on the data source.
-19. **UI and subject components.** `Button`, `Card` and `Badge` know nothing about the subject area and fit any project. `NotationCard`, `ProjectCard` and `PlanCard` know the DSLKit data, so they live in `features`.
-20. **Project development.** The next works add state with `useState` and `useEffect`, routing with React Router, loading data from an API as in laboratory work 6, and component tests.
-{{/answers}}
-
 ## Conclusion
 
 An application on Vite and React with ten components is created for the DSLKit project: base, layout and subject ones. Data is passed through `props`, lists are rendered with `key`, conditional rendering and composition are used in several places, and handlers are stubs. The rule about the absence of `useState` and `useEffect` is checked by an automated test, and the layout is confirmed on three screen widths. What remains is to attach a React DevTools screenshot and to check the application in Firefox and Edge.

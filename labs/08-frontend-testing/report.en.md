@@ -94,12 +94,6 @@ Figure 3 – Istanbul report: 100 percent coverage in all folders
 
 The commit with the implementation: https://github.com/KsushaKhadzhinova/DSLKit-Project/commit/d8a95d7. The commit message: `feat: add unit tests, component tests, and performance audit with Lighthouse`.
 
-## 4 Answers to Control Questions
-
-10. **Uncovered places.** The `lcov-report` report highlights unexecuted lines and branches. For conditional branches, tests are added for an empty list, a missing title, a private project and a free plan.
-11. **getBy and queryBy.** `getBy` throws an error if the element is missing and suits checking presence. `queryBy` returns `null`, so it is used to check absence: `expect(screen.queryByRole('heading')).not.toBeInTheDocument()`.
-12. **A list through props.** A mock array is passed, then the number of elements and their content are checked: `expect(screen.getAllByRole('listitem')).toHaveLength(mockNotations.length)`, and the headings are compared with the array.
-
 ## Conclusion
 
 Jest and React Testing Library are set up for the React application of the DSLKit project, unit tests of five pure functions and tests of all components are written. Coverage is 100 percent with thresholds of 70 and 60. The Lighthouse audit found three remarks, and after fixing them accessibility rose to 100 and SEO to 100. What remains is to attach screenshots of the Sources panel and React DevTools and to check the application in Firefox and Edge.

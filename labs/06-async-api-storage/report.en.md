@@ -78,12 +78,6 @@ Automated tests are written for the request service, the storage, the data parsi
 
 The commit with the implementation: https://github.com/KsushaKhadzhinova/DSLKit-Project/commit/2102742. The commit message: `feat: integrate external API, caching and localStorage for SaaS diagram editor`.
 
-## 4 Answers to Control Questions
-
-25. **Rate limiting.** It is a limit on the number of requests per unit of time on the server side. The client accounts for it with a cache, cancelling extra requests, retrying with a pause and showing a message on code 429.
-26. **Protection from duplicates.** Active requests are kept in a `Map` under a key made of the method, the address and the body, and a repeated call gets the same Promise. After completion the entry is removed, and requests with an abort signal are not merged.
-27. **Parameters in the query string.** Parameters are assembled by `URLSearchParams`, for example `/items?q=order&sort=name&page=2&limit=20`. In `fetchData` they are passed as a `params` object and encoded automatically.
-
 ## Conclusion
 
 The open Kroki API is connected to the DSLKit project: the diagram code from the editor becomes Graphviz DOT, is sent with a `POST` request, and the received SVG is cleaned and drawn on the canvas. Requests run with a timeout, retries and cancellation, results are saved in LocalStorage for 24 hours, and without a connection a saved copy is shown with a label. Automated tests cover all the code, and the integration is confirmed in a browser with the real service. What remains is to attach screenshots of the developer tools and to check the pages in Firefox and Edge.

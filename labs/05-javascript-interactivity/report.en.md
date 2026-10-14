@@ -94,12 +94,6 @@ Automated jsdom tests are written for every module and parse the real pages of t
 
 The commit with the implementation: https://github.com/KsushaKhadzhinova/DSLKit-Project/commit/39efd4f. The commit message: `feat: add JavaScript interactivity for a SaaS diagram editor`.
 
-## 4 Answers to Control Questions
-
-25. **Filtering.** A condition is computed for every element and `item.hidden = !matches` is set. The notation filter compares `item.dataset.status` with the chosen value.
-26. **Animation.** CSS provides the smoothness, and a script toggles a class or an attribute. In the project animations are turned off by the `prefers-reduced-motion` rule for users who are bothered by them.
-27. **A slider.** An array of slides, the index of the current one and handlers of the back and forward buttons that change the index and show the needed slide. The index is saved in LocalStorage.
-
 ## Conclusion
 
 Modular JavaScript is written for the DSLKit project: an entry point, storage and validation utilities and eight interactive components. Five event types and delegation are used, the form is validated with clear messages, and state is saved in LocalStorage and restored after a reload. Automated tests cover all the code, and the components are confirmed in a browser. What remains is to check the pages in Firefox and Edge.

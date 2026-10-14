@@ -78,41 +78,6 @@ Automated tests are written for the request service, the storage, the data parsi
 
 The commit with the implementation: https://github.com/KsushaKhadzhinova/DSLKit-Project/commit/2102742. The commit message: `feat: integrate external API, caching and localStorage for SaaS diagram editor`.
 
-## 4 Answers to Control Questions
-
-{{answers}}
-1. **LocalStorage and SessionStorage.** LocalStorage survives closing a tab and is shared by all tabs of one site, SessionStorage lives until the tab is closed. In the project the diagram cache and the history live in LocalStorage, and temporary state of one session can be kept in SessionStorage when needed.
-2. **Promise and callbacks.** A Promise removes nested callbacks and gives one path for errors. In the project `fetch` returns a Promise, and `renderDiagram` is built from it as a flat chain.
-3. **async/await and then/catch.** The code reads from top to bottom, and errors are caught by an ordinary `try/catch`. The retry loop in `apiService.js` with `await` inside `try` would be much harder to write with `then` chains.
-4. **Error strategies.** The status is checked through `response.ok`, errors become `ApiError` with a kind, network failures are retried, and on failure a saved copy or a clear message is shown.
-5. **Caching.** A LocalStorage cache is used with a key from the hash of the source text and a lifetime of 24 hours. Freshness is kept by checking the lifetime on reading, and the refresh button ignores the cache.
-6. **Offline mode.** `navigator.onLine` is checked, and without a network or on an error a saved copy is shown with a label. For the editor the most critical data are the last drawn diagrams and the code.
-7. **CORS.** The browser forbids reading a response from another domain unless the server allows it with the `Access-Control-Allow-Origin` header. It is worked around by a proxy on your own server or by configuring the API server, and Kroki allows requests from the browser.
-8. **Keys on the client.** A key in the browser is visible to everyone, so it is restricted by domain and rights and is not committed. Kroki needs no key, and local settings files are added to `.gitignore`.
-9. **Pagination.** The request gets the parameters `page` and `limit`, and a "More" button increases the page number and appends the result to the list, for example `fetchData('/items', { params: { page: 2, limit: 20 } })`.
-10. **HTTP statuses.** Important ones are 200 and 201 for success, 400 for a bad request, 401 and 403 for access, 404 for absence, 429 for a limit and 5xx for server errors. In the project 4xx are not retried, and 429 and 5xx are retried.
-11. **Frequent requests.** Cancelling previous requests, input delay and a cache help. In the project a new run cancels the old request, and the cache saves repeated calls.
-12. **AbortController.** The object creates a signal that is passed to `fetch`, and calling `abort()` rejects the request. In `diagram-runner.js` `controller.abort()` is called before a new run.
-13. **Retry.** In `apiService.js` a recursive function repeats the attempt up to three times: `await sleep(delay * 2 ** attempt)`. Only network errors, timeouts, 429 and 5xx are retried.
-14. **Headers.** For `POST` the header `Content-Type: text/plain` is sent so that the service understands the body type. For an API with authorization `Authorization: Bearer <token>` or `X-API-Key` is added.
-15. **GET, POST, PUT, DELETE.** GET reads data, POST creates data or sends it for processing, PUT replaces a resource, DELETE removes it. In the project GET checks availability, and POST sends the diagram code.
-16. **Checking the response.** The status, the ability to read the body and the presence of `svg` markup are checked, and the received SVG is parsed as XML and cleaned. Any failure turns into an error of the kind `invalid`.
-17. **Offline in DevTools.** In Chrome the Network tab is opened and the Offline or Slow 3G mode is turned on, then the page is reloaded and the messages are checked.
-18. **LocalStorage limits.** The size is about 5 megabytes, only strings are stored, and operations are synchronous and block the thread. That is why the cache is limited to 20 entries, and large volumes are better kept in IndexedDB.
-19. **TTL.** The write time is saved together with the data: `{ data, savedAt }`. On reading, `now() - savedAt` is compared with the lifetime.
-20. **JSON, dates and functions.** `JSON.stringify` turns a date into a string and skips functions, so dates are stored as the number `Date.now()` or as an ISO string and restored by hand.
-21. **Infinite scroll.** `IntersectionObserver` watches the last list item and when it appears requests the next page until the server returns an empty answer.
-22. **Optimistic update.** The interface changes at once, and the request goes in the background. On an error the change is rolled back, for example a comment appears in the list before the server answers.
-23. **API testing tools.** Requests to Kroki were checked with the `curl` command and the browser Network tab, and Postman and Insomnia suit complex scenarios.
-24. **Error 429.** One must wait and repeat the request. In the project the `Retry-After` header is respected, and without it the pause doubles after each attempt.
-25. **Rate limiting.** It is a limit on the number of requests per unit of time on the server side. The client accounts for it with a cache, cancelling extra requests, retrying with a pause and showing a message on code 429.
-26. **Protection from duplicates.** Active requests are kept in a `Map` under a key made of the method, the address and the body, and a repeated call gets the same Promise. After completion the entry is removed, and requests with an abort signal are not merged.
-27. **Parameters in the query string.** Parameters are assembled by `URLSearchParams`, for example `/items?q=order&sort=name&page=2&limit=20`. In `fetchData` they are passed as a `params` object and encoded automatically.
-28. **Loading indicator.** The user sees that a request is running and does not press the button again. In the project the canvas gets `aria-busy`, and the status line announces loading.
-29. **Promise.all.** The method waits for all requests at once and returns an array of results, for example loading several diagrams in parallel. When one fails, the whole result is rejected, so `Promise.allSettled` suits independent requests.
-30. **Client error log.** Errors go to `console.error` with the kind and the code, and personal data does not reach the log. When needed, the last errors can be stored in LocalStorage.
-{{/answers}}
-
 ## Conclusion
 
 The open Kroki API is connected to the DSLKit project: the diagram code from the editor becomes Graphviz DOT, is sent with a `POST` request, and the received SVG is cleaned and drawn on the canvas. Requests run with a timeout, retries and cancellation, results are saved in LocalStorage for 24 hours, and without a connection a saved copy is shown with a label. Automated tests cover all the code, and the integration is confirmed in a browser with the real service. What remains is to attach screenshots of the developer tools and to check the pages in Firefox and Edge.
