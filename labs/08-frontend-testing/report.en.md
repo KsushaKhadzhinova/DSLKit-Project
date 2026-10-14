@@ -58,29 +58,32 @@ Screenshots of the Sources panel with a breakpoint are given in section 3.8.
 
 ### 3.5 Performance Analysis with Lighthouse
 
-The audit is run on the built application for desktop. Before the improvements Lighthouse found a broken heading order (notation cards came right after the level-one heading), an invalid `robots.txt` file and a missing `llms.txt`. The result before the improvements is shown in figure 1.
+The audit is run on the built application for desktop. Before the improvements Lighthouse found a broken heading order (notation cards came right after the level-one heading), an invalid `robots.txt` file, a missing `llms.txt` and a 404 error for the `favicon.ico` icon. The result before the improvements is shown in figure 1.
 
 ![Lighthouse report before the improvements](figures/lighthouse-before.jpg)
 
-Figure 1 – Lighthouse before the improvements: accessibility 98, SEO 91
+Figure 1 – Lighthouse before the improvements: performance 100, accessibility 98, best practices 96, SEO 91
 
-Three improvements are made. Notation cards get the heading level `h2` through a new prop `headingLevel`, and a correct `robots.txt` and a file `llms.txt` are added to the folder `public`. The result after the improvements is shown in figure 2, and the comparison of metrics is given in table 3.
+Four improvements are made. Notation cards get the heading level `h2` through a new prop `headingLevel`, and a correct `robots.txt`, a file `llms.txt` and an icon `favicon.svg` linked in `index.html` are added to the folder `public`. The result after the improvements is shown in figure 2, and the comparison of metrics is given in table 3.
 
 ![Lighthouse report after the improvements](figures/lighthouse-after.jpg)
 
-Figure 2 – Lighthouse after the improvements: accessibility 100, best practices 100, SEO 100
+Figure 2 – Lighthouse after the improvements: all four categories 100
 
 Table 3 – Metrics before and after the improvements
 
 | Metric | Before | After |
 |---|---|---|
+| Performance | 100 | 100 |
 | Accessibility | 98 | 100 |
-| Best practices | 100 | 100 |
+| Best practices | 96 | 100 |
 | SEO | 91 | 100 |
-| LCP, ms | 186 | 165 |
+| FCP, ms | 347 | 352 |
+| LCP, ms | 347 | 352 |
 | CLS | 0.00 | 0.00 |
+| TBT, ms | 0 | 0 |
 
-LCP and CLS are measured by a performance trace on a local server without network throttling, so the absolute values are small, and the LCP difference is within the measurement error.
+FCP, LCP, CLS and TBT are taken from the same Lighthouse 13.5.0 reports (desktop profile, local server without network throttling), so the absolute values are small, and the FCP and LCP difference is within the measurement error.
 
 ### 3.6 Code Coverage
 

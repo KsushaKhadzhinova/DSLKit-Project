@@ -55,7 +55,8 @@ test('the components keep the lab 7 rule and use test ids where text is not enou
 test('Lighthouse reports exist and the audit improved after the changes', () => {
   const before = scores('lighthouse-before');
   const after = scores('lighthouse-after');
-  for (const name of ['accessibility', 'best-practices', 'seo']) assert.ok(after[name] >= before[name], name);
+  for (const name of ['performance', 'accessibility', 'best-practices', 'seo']) assert.ok(after[name] >= before[name], name);
+  assert.equal(after.performance, 100);
   assert.ok(after.accessibility > before.accessibility || after.seo > before.seo);
   assert.equal(existsSync('labs/08-frontend-testing/lighthouse-after/report.html'), true);
 });
@@ -63,6 +64,7 @@ test('Lighthouse reports exist and the audit improved after the changes', () => 
 test('the improvements recommended by Lighthouse are in the project', () => {
   assert.match(read('react-app/public/robots.txt'), /User-agent: \*/);
   assert.match(read('react-app/public/llms.txt'), /DSLKit/);
+  assert.match(read('react-app/index.html'), /rel="icon"/);
   assert.match(read('react-app/src/components/features/NotationCard.jsx'), /headingLevel="h2"/);
 });
 
