@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DSLKit: вариант 2, светлый градиентный</title>
+<style>
+/* Вариант 2. Референсы: Stripe, Resend, Mermaid. Светлая тема, мягкий градиент, вкладки кода, цифры, сравнение с конкурентами. */
+:root{--bg:#fff;--soft:#f6f8fd;--border:#e3e8f2;--text:#0f1530;--muted:#58607a;--primary:#2563eb;--violet:#7c3aed;--teal:#14b8a6;--code:#0f1530;--radius:18px;--font:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;--mono:'JetBrains Mono',ui-monospace,Consolas,monospace}
+*{box-sizing:border-box;margin:0}
+body{background:var(--bg);color:var(--text);font:16px/1.65 var(--font)}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:1160px;margin:0 auto;padding:0 24px}
+header{position:sticky;top:0;z-index:5;background:rgb(255 255 255/.85);backdrop-filter:blur(10px);border-bottom:1px solid var(--border)}
+header .wrap{display:flex;align-items:center;gap:32px;height:64px}
+.logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:18px}.logo img{width:28px}
+nav{display:flex;gap:26px;flex:1;font-size:15px;color:var(--muted)}nav a:hover{color:var(--text)}
+.btn{display:inline-flex;align-items:center;padding:11px 20px;border-radius:999px;font-weight:600;font-size:15px;border:1px solid var(--border);background:#fff;transition:.2s}
+.btn:hover{box-shadow:0 6px 20px rgb(15 21 48/.1)}
+.btn.primary{color:#fff;border:0;background:linear-gradient(135deg,var(--primary),var(--violet))}
+.btn.lg{padding:15px 28px;font-size:16px}
+/* hero */
+.hero{position:relative;overflow:hidden;padding:88px 0 72px}
+.hero::before{content:"";position:absolute;inset:-20% -10% auto auto;width:70%;height:120%;background:radial-gradient(40% 40% at 70% 30%,rgb(124 58 237/.22),transparent 70%),radial-gradient(40% 40% at 40% 60%,rgb(37 99 235/.2),transparent 70%),radial-gradient(30% 30% at 85% 70%,rgb(20 184 166/.2),transparent 70%);z-index:-1}
+.hero .wrap{display:grid;grid-template-columns:1fr 1.15fr;gap:56px;align-items:center}
+.badge{display:inline-block;font-size:13px;font-weight:600;color:var(--primary);background:#e8efff;border-radius:999px;padding:5px 14px;margin-bottom:20px}
+h1{font-size:clamp(38px,5vw,60px);line-height:1.06;letter-spacing:-.04em;font-weight:800}
+h1 em{font-style:normal;background:linear-gradient(135deg,var(--primary),var(--violet));-webkit-background-clip:text;background-clip:text;color:transparent}
+.lead{margin:20px 0 28px;color:var(--muted);font-size:19px;max-width:48ch}
+.cta{display:flex;gap:12px;flex-wrap:wrap}
+.note{margin-top:14px;font-size:14px;color:var(--muted)}
+@media(max-width:900px){.hero .wrap{grid-template-columns:1fr}nav{display:none}}
+/* вкладки кода: CSS-only */
+.tabs{background:var(--code);border-radius:var(--radius);box-shadow:0 30px 80px rgb(37 99 235/.25);overflow:hidden;color:#cdd6f4}
+.tabs input{position:absolute;opacity:0;pointer-events:none}
+.tabs .bar{display:flex;gap:4px;padding:10px 12px;background:#0a0e24}
+.tabs label{padding:7px 14px;border-radius:8px;font:13px var(--mono);color:#8d93b8;cursor:pointer}
+.tabs input:checked+label{background:#1c2250;color:#fff}
+.tabs input:focus-visible+label{outline:2px solid #8bb0ff}
+.pane{display:none;grid-template-columns:1fr 1fr}
+#t1:checked~.p1,#t2:checked~.p2,#t3:checked~.p3{display:grid}
+.pane pre{padding:20px;font:13px/1.8 var(--mono);overflow:auto}
+.pane .out{background:#fff;display:grid;place-items:center;padding:16px}
+.pane .out svg{width:100%}
+.k{color:#c792ea}.s{color:#a5e075}.n{color:#82aaff}
+@media(max-width:560px){.pane{grid-template-columns:1fr}}
+/* цифры */
+.stats{border-block:1px solid var(--border);background:var(--soft)}
+.stats .wrap{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:24px;padding-block:40px}
+.stat b{display:block;font-size:44px;font-weight:800;letter-spacing:-.04em;background:linear-gradient(135deg,var(--primary),var(--violet));-webkit-background-clip:text;background-clip:text;color:transparent;line-height:1.1}
+.stat span{color:var(--muted);font-size:15px}
+section{padding:88px 0}
+h2{font-size:clamp(28px,4vw,42px);letter-spacing:-.035em;line-height:1.12;margin-bottom:12px}
+.sec-lead{color:var(--muted);font-size:18px;max-width:56ch;margin-bottom:44px}
+/* bento */
+.bento{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px}
+.card{background:var(--soft);border:1px solid var(--border);border-radius:var(--radius);padding:28px;position:relative;transition:.25s}
+.card:hover{transform:translateY(-4px);box-shadow:0 20px 50px rgb(15 21 48/.1);background:#fff}
+.card img{width:44px;height:44px;margin-bottom:16px}
+.card h3{font-size:21px;margin-bottom:6px}.card p{color:var(--muted);font-size:15px}
+.chip{position:absolute;top:22px;right:22px;font-size:12px;font-weight:700;padding:3px 10px;border-radius:999px;background:#dcfce7;color:#15803d}
+.chip.plan{background:#eef0f6;color:var(--muted)}
+/* сравнение */
+.compare{width:100%;border-collapse:separate;border-spacing:0;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;font-size:15px}
+.compare th,.compare td{padding:14px 18px;text-align:left;border-bottom:1px solid var(--border)}
+.compare thead th{background:var(--soft);font-size:14px}
+.compare th.us{color:var(--primary)}
+.compare tr:last-child td{border-bottom:0}
+.compare .yes{color:#15803d;font-weight:700}.compare .no{color:#b91c1c}.compare .mid{color:#b45309}
+.scroll{overflow-x:auto}
+/* шаги */
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px;counter-reset:s}
+.step{padding:28px;border-radius:var(--radius);border:1px solid var(--border)}
+.step::before{counter-increment:s;content:counter(s);display:grid;place-items:center;width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--violet));color:#fff;font-weight:700;margin-bottom:14px}
+.step h3{margin-bottom:6px}.step p{color:var(--muted)}
+/* тарифы */
+.plans{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;max-width:820px}
+.pl{border:1px solid var(--border);border-radius:var(--radius);padding:32px}
+.pl.pro{border:2px solid var(--primary);box-shadow:0 20px 60px rgb(37 99 235/.15)}
+.price{font-size:40px;font-weight:800;letter-spacing:-.04em;margin:6px 0 14px}
+.pl li{list-style:none;padding:5px 0;color:var(--muted)}.pl li::before{content:"✓ ";color:var(--teal);font-weight:700}
+details{border-bottom:1px solid var(--border);padding:20px 0}
+summary{cursor:pointer;font-weight:600;font-size:18px;list-style:none;display:flex;justify-content:space-between}
+summary::after{content:"+";color:var(--primary);font-size:22px}details[open] summary::after{content:"–"}
+details p{margin-top:10px;color:var(--muted);max-width:70ch}
+.final{border-radius:28px;padding:72px 24px;text-align:center;color:#fff;background:linear-gradient(135deg,#2563eb,#7c3aed)}
+.final p{opacity:.9;margin:8px auto 28px;max-width:50ch}
+.final form{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.final input{padding:14px 18px;border-radius:999px;border:0;min-width:270px;font:inherit}
+.final .btn{background:#0f1530;color:#fff;border:0}
+footer{padding:40px 0;color:var(--muted);font-size:14px;border-top:1px solid var(--border)}
+footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:16px}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <a class="logo" href="#"><img src="../../../site/images/logo.svg" alt="">DSLKit</a>
+  <nav><a href="#notations">Нотации</a><a href="#compare">Сравнение</a><a href="#how">Как это работает</a><a href="#pricing">Тарифы</a><a href="#faq">FAQ</a></nav>
+  <a class="btn" href="#">Войти</a><a class="btn primary" href="#waitlist">В бету</a>
+</div></header>
+<main>
+<div class="hero"><div class="wrap">
+  <div>
+    <span class="badge">Скоро: закрытая бета</span>
+    <h1>Пишите код — <em>получайте диаграмму</em></h1>
+    <p class="lead">Веб-редактор диаграмм как кода. Опишите схему на DSL, DSLKit проверит её по правилам нотации и нарисует.</p>
+    <div class="cta"><a class="btn primary lg" href="#">Создать диаграмму</a><a class="btn lg" href="#waitlist">Записаться в бету</a></div>
+    <p class="note">Бесплатно в бете: до 5 диаграмм в день. Карта не нужна.</p>
+  </div>
+  <div class="tabs">
+    <input type="radio" name="t" id="t1" checked><label for="t1">IDEF0</label>
+    <input type="radio" name="t" id="t2"><label for="t2">DFD</label>
+    <input type="radio" name="t" id="t3"><label for="t3">ERD</label>
+    <div class="bar" style="display:none"></div>
+    <div class="pane p1">
+<pre><span class="k">idef0</span> <span class="s">"Order"</span> {
+  <span class="n">A0</span> <span class="s">"Process order"</span> {
+    <span class="k">input</span>   Order
+    <span class="k">control</span> Rules
+    <span class="k">output</span>  Invoice
+  }
+}</pre>
+      <div class="out"><svg viewBox="0 0 220 150" fill="none" stroke="#2563eb" stroke-width="1.5"><rect x="50" y="45" width="120" height="60" rx="6" fill="#e8efff"/><text x="110" y="80" text-anchor="middle" stroke="none" fill="#0f1530" font-size="12">A0 Process order</text><path d="M5 75h45M110 8v37M110 105v37M170 75h45" stroke="#7c3aed"/></svg></div>
+    </div>
+    <div class="pane p2">
+<pre><span class="k">dfd</span> <span class="s">"Shop"</span> {
+  <span class="k">entity</span>  Customer
+  <span class="k">process</span> Checkout
+  <span class="k">store</span>   Orders
+  Customer <span class="n">-></span> Checkout
+  Checkout <span class="n">-></span> Orders
+}</pre>
+      <div class="out"><svg viewBox="0 0 220 150" fill="none" stroke="#2563eb" stroke-width="1.5"><rect x="5" y="55" width="55" height="40" fill="#e8efff"/><circle cx="110" cy="75" r="28" fill="#e8efff"/><path d="M150 55h60M150 95h60" /><path d="M60 75h22M138 75h8"/><text x="32" y="79" font-size="9" text-anchor="middle" stroke="none" fill="#0f1530">Customer</text><text x="110" y="78" font-size="9" text-anchor="middle" stroke="none" fill="#0f1530">Checkout</text><text x="180" y="79" font-size="9" text-anchor="middle" stroke="none" fill="#0f1530">Orders</text></svg></div>
+    </div>
+    <div class="pane p3">
+<pre><span class="k">erd</span> <span class="s">"Shop"</span> {
+  <span class="k">entity</span> User { id, email }
+  <span class="k">entity</span> Order { id, total }
+  User <span class="n">1..*</span> Order
+}</pre>
+      <div class="out"><svg viewBox="0 0 220 150" fill="none" stroke="#2563eb" stroke-width="1.5"><rect x="10" y="40" width="80" height="60" fill="#e8efff"/><rect x="130" y="40" width="80" height="60" fill="#e8efff"/><path d="M90 70h40"/><text x="50" y="75" font-size="11" text-anchor="middle" stroke="none" fill="#0f1530">User</text><text x="170" y="75" font-size="11" text-anchor="middle" stroke="none" fill="#0f1530">Order</text></svg></div>
+    </div>
+  </div>
+</div></div>
+
+<div class="stats"><div class="wrap">
+  <div class="stat"><b>6</b><span>нотаций в одном редакторе</span></div>
+  <div class="stat"><b>3</b><span>нотации уже в первой бете</span></div>
+  <div class="stat"><b>4</b><span>формата экспорта: SVG, PNG, PlantUML, Mermaid</span></div>
+  <div class="stat"><b>5</b><span>диаграмм в день бесплатно</span></div>
+</div></div>
+
+<section id="notations"><div class="wrap">
+  <h2>Шесть нотаций в одном редакторе</h2><p class="sec-lead">Первыми в бете появятся IDEF0, DFD и ERD.</p>
+  <div class="bento">
+    <article class="card"><span class="chip">в бете</span><img src="../../../site/images/notations/idef0.svg" alt=""><h3>IDEF0</h3><p>Блоки, входы, управление, выходы и механизмы.</p></article>
+    <article class="card"><span class="chip">в бете</span><img src="../../../site/images/notations/dfd.svg" alt=""><h3>DFD</h3><p>Процессы, хранилища и потоки данных.</p></article>
+    <article class="card"><span class="chip">в бете</span><img src="../../../site/images/notations/erd.svg" alt=""><h3>ERD</h3><p>Сущности и связи для баз данных.</p></article>
+    <article class="card"><span class="chip plan">в планах</span><img src="../../../site/images/notations/uml.svg" alt=""><h3>UML</h3><p>Классы, последовательности и другое.</p></article>
+    <article class="card"><span class="chip plan">в планах</span><img src="../../../site/images/notations/bpmn.svg" alt=""><h3>BPMN</h3><p>События, задачи и шлюзы.</p></article>
+    <article class="card"><span class="chip plan">в планах</span><img src="../../../site/images/notations/petri.svg" alt=""><h3>Сети Петри</h3><p>Позиции, переходы и фишки.</p></article>
+  </div>
+</div></section>
+
+<section id="compare" style="background:var(--soft)"><div class="wrap">
+  <h2>DSLKit рядом с другими</h2><p class="sec-lead">Чем отличается от Mermaid, PlantUML и D2. Данные ориентировочные: по открытым описаниям продуктов.</p>
+  <div class="scroll"><table class="compare">
+    <thead><tr><th>Возможность</th><th class="us">DSLKit</th><th>Mermaid</th><th>PlantUML</th><th>D2</th></tr></thead>
+    <tbody>
+      <tr><td>IDEF0, DFD (деловые нотации)</td><td class="yes">Да</td><td class="no">Нет</td><td class="mid">Частично</td><td class="no">Нет</td></tr>
+      <tr><td>Проверка по правилам нотации</td><td class="yes">Да</td><td class="no">Нет</td><td class="no">Нет</td><td class="no">Нет</td></tr>
+      <tr><td>Редактор в браузере</td><td class="yes">Да</td><td class="yes">Да</td><td class="yes">Да</td><td class="yes">Да</td></tr>
+      <tr><td>Экспорт в Mermaid и PlantUML</td><td class="yes">Да</td><td class="mid">Свой формат</td><td class="mid">Свой формат</td><td class="no">Нет</td></tr>
+      <tr><td>Русскоязычный интерфейс</td><td class="yes">Да</td><td class="no">Нет</td><td class="no">Нет</td><td class="no">Нет</td></tr>
+    </tbody>
+  </table></div>
+</div></section>
+
+<section id="how"><div class="wrap">
+  <h2>Как это работает</h2><p class="sec-lead">Три шага от идеи до готовой схемы.</p>
+  <div class="steps">
+    <div class="step"><h3>Пишете код</h3><p>Описываете диаграмму на DSL, подсказки и шаблоны помогают начать.</p></div>
+    <div class="step"><h3>Видите схему</h3><p>Холст обновляется сразу, ошибки подсвечиваются с пояснением.</p></div>
+    <div class="step"><h3>Экспортируете</h3><p>Сохраняете в SVG, PNG, PlantUML или Mermaid.</p></div>
+  </div>
+</div></section>
+
+<section id="pricing" style="background:var(--soft)"><div class="wrap">
+  <h2>Тарифы</h2><p class="sec-lead">Условия могут измениться после беты.</p>
+  <div class="plans">
+    <article class="pl"><h3>Free</h3><div class="price">0 $</div><ul><li>До 5 диаграмм в день</li><li>Все доступные нотации</li><li>Экспорт в SVG и PNG</li></ul></article>
+    <article class="pl pro"><h3>Pro</h3><div class="price">скоро</div><ul><li>Без дневного лимита</li><li>История версий</li><li>Совместная работа и API</li></ul></article>
+  </div>
+</div></section>
+
+<section id="faq"><div class="wrap" style="max-width:820px">
+  <h2>Вопросы и ответы</h2>
+  <details><summary>Что такое DSLKit?</summary><p>Веб-редактор диаграмм как кода: схема описывается текстом, а редактор проверяет её и рисует.</p></details>
+  <details><summary>Нужно ли уметь программировать?</summary><p>Нет. Синтаксис короткий, шаблоны и подсказки помогают написать первую диаграмму.</p></details>
+  <details><summary>Какие нотации поддерживаются?</summary><p>UML, BPMN, ERD, DFD, IDEF0 и сети Петри. Первыми в бете — IDEF0, DFD и ERD.</p></details>
+  <details><summary>Сколько это стоит?</summary><p>В бете бесплатно, до пяти диаграмм в день. Pro появится позже.</p></details>
+</div></section>
+
+<section id="waitlist" style="padding-top:0"><div class="wrap"><div class="final">
+  <h2>Попробуйте раньше всех</h2><p>Оставьте почту, мы пришлём приглашение в закрытую бету.</p>
+  <form onsubmit="return false"><input type="email" placeholder="name@example.com" aria-label="Электронная почта"><button class="btn lg">Записаться</button></form>
+</div></div></section>
+</main>
+<footer><div class="wrap"><span>© 2026 DSLKit. Дипломный проект БГУИР.</span><span><a href="#">Конфиденциальность</a> · <a href="#">English</a> · hello@dslkit.io</span></div></footer>
+</body>
+</html>
