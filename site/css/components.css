@@ -429,22 +429,15 @@ textarea.form__input {
   }
 }
 
-/* Large call-to-action on the first screen: height 40 x phi, light button on the coloured panel. */
+/* Large call-to-action on the first screen: height 40 x phi, the primary button without a panel. */
 .button--hero {
   min-height: calc(var(--space-4) * var(--phi));
   padding: 0 var(--space-4);
-  border-color: transparent;
-  border-radius: var(--radius-large);
-  background: var(--color-on-primary);
-  box-shadow: var(--shadow-small);
-  color: var(--color-primary-text);
   font-size: var(--step-1);
   font-weight: 700;
 }
 
 .button--hero:hover {
-  background: var(--color-on-primary);
-  filter: brightness(0.94);
   transform: translateY(-2px);
 }
 

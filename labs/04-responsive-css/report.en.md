@@ -795,7 +795,11 @@ label > span {
   z-index: -1;
   background:
     radial-gradient(ellipse 55% 70% at 78% 18%, var(--color-glow), transparent 70%),
-    radial-gradient(ellipse 40% 50% at 8% 0%, var(--color-glow), transparent 70%);
+    radial-gradient(ellipse 40% 50% at 8% 0%, var(--color-glow), transparent 70%), radial-gradient(circle, var(--color-border) 1.4px, transparent 1.6px);
+  background-size:
+    auto,
+    auto,
+    24px 24px;
 }
 
 .hero__content {
@@ -841,20 +845,13 @@ label > span {
 .hero__cta {
   display: grid;
   gap: var(--space-2);
-  justify-items: stretch;
-  width: 100%;
-  padding: var(--space-3);
-  border-radius: var(--radius-large);
-  background: var(--color-primary);
-  box-shadow: var(--shadow-large);
-  color: var(--color-on-primary);
+  justify-items: start;
 }
 
 .hero__cta-note {
   margin: 0;
-  color: var(--color-on-primary);
+  color: var(--color-text-light);
   font-size: var(--step--1);
-  text-align: center;
 }
 
 .hero__actions {
