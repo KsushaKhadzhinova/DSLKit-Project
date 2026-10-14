@@ -1,0 +1,112 @@
+/* Shared navigation items and footer navigation */
+.nav__item,
+.footer__item {
+  display: flex;
+  align-items: center;
+}
+
+.footer__nav {
+  display: block;
+}
+
+/* Error pages: one card per language, the Russian block first */
+.error {
+  display: grid;
+  gap: var(--space-2);
+  max-width: calc(var(--measure) + var(--space-5));
+  margin: var(--space-5) auto 0;
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-large);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-small);
+}
+
+.error + .error {
+  margin-top: var(--space-3);
+  margin-bottom: var(--space-5);
+  background: transparent;
+  box-shadow: none;
+}
+
+.error__code {
+  justify-self: start;
+  padding: 2px var(--space-2);
+  border-radius: 999px;
+  background: var(--color-secondary);
+  color: var(--color-link);
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  font-weight: 600;
+}
+
+.error__title {
+  font-size: var(--step-4);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.error__text {
+  color: var(--color-text-light);
+}
+
+.error__list {
+  display: grid;
+  gap: var(--space-1);
+  padding-left: var(--space-3);
+  color: var(--color-text-light);
+  list-style: disc;
+}
+
+.error__list li::marker {
+  color: var(--color-primary);
+}
+
+.error__link {
+  color: var(--color-link);
+  font-weight: 600;
+}
+
+.error .button {
+  justify-self: start;
+  margin-top: var(--space-1);
+}
+
+/* Privacy policy: a readable column of text */
+.policy {
+  display: grid;
+  gap: var(--space-3);
+  max-width: var(--measure);
+  margin: var(--space-5) auto 0;
+}
+
+.policy__title {
+  font-size: var(--step-5);
+  font-weight: 800;
+  letter-spacing: -0.035em;
+}
+
+.policy__updated {
+  color: var(--color-muted);
+  font-size: var(--step--1);
+}
+
+.policy__section {
+  display: grid;
+  gap: var(--space-1);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-border);
+}
+
+.policy__heading {
+  font-size: var(--step-2);
+}
+
+.policy__text {
+  color: var(--color-text-light);
+}
+
+.policy__link {
+  color: var(--color-link);
+  font-weight: 600;
+}

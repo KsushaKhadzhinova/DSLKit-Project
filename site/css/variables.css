@@ -39,6 +39,9 @@
   --step-5: calc(1rem * var(--phi) * var(--phi) * var(--phi-root));
   --step-6: calc(1rem * var(--phi) * var(--phi) * var(--phi));
 
+  --columns-golden: 1fr 1.618fr;
+  --columns-golden-reverse: 1.618fr 1fr;
+
   --line-body: var(--phi);
   --line-heading: 1.15;
 

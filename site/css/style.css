@@ -1,4 +1,10 @@
-body {
-  margin: 0;
-  font-family: system-ui, sans-serif;
-}
+@import url('variables.css');
+@import url('base.css');
+@import url('components.css');
+@import url('header.css');
+@import url('main.css');
+@import url('footer.css');
+@import url('pages.css');
+@import url('app.css');
+@import url('editor.css');
+@import url('adaptive.css');

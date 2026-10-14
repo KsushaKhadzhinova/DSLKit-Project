@@ -1,0 +1,208 @@
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  border-bottom: 1px solid var(--color-border);
+  background: color-mix(in srgb, var(--color-surface) 82%, transparent);
+  -webkit-backdrop-filter: saturate(1.4) blur(14px);
+  backdrop-filter: saturate(1.4) blur(14px);
+}
+
+.header__inner {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: var(--space-3);
+  width: min(100% - var(--space-4), var(--container));
+  min-height: var(--header-height);
+  margin-inline: auto;
+}
+
+.header__logo {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  color: var(--color-text);
+  font-size: var(--step-1);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  text-decoration: none;
+}
+
+.header__logo-image {
+  width: 32px;
+  height: 32px;
+}
+
+.header__logo-text {
+  line-height: 1;
+}
+
+/* Burger: a visually hidden checkbox keeps keyboard access */
+.burger__input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  opacity: 0;
+  clip-path: inset(50%);
+}
+
+.burger__button {
+  display: none;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: var(--target-size);
+  padding: 0 var(--space-2);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-small);
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.burger__input:focus-visible + .burger__button {
+  box-shadow: var(--focus-ring);
+}
+
+.burger__icon,
+.burger__icon::before,
+.burger__icon::after {
+  display: block;
+  width: 18px;
+  height: 2px;
+  border-radius: 2px;
+  background: currentColor;
+  transition: transform 200ms ease;
+}
+
+.burger__icon {
+  position: relative;
+}
+
+.burger__icon::before,
+.burger__icon::after {
+  content: '';
+  position: absolute;
+  left: 0;
+}
+
+.burger__icon::before {
+  top: -6px;
+}
+
+.burger__icon::after {
+  top: 6px;
+}
+
+.burger__input:checked + .burger__button .burger__icon {
+  background: transparent;
+}
+
+.burger__input:checked + .burger__button .burger__icon::before {
+  top: 0;
+  transform: rotate(45deg);
+}
+
+.burger__input:checked + .burger__button .burger__icon::after {
+  top: 0;
+  transform: rotate(-45deg);
+}
+
+.burger__label {
+  line-height: 1;
+}
+
+/* Navigation */
+.nav__list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-1);
+}
+
+.nav__link {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--target-size-small);
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-small);
+  color: var(--color-text-light);
+  font-size: var(--step--1);
+  font-weight: 600;
+  text-decoration: none;
+  transition:
+    background-color 160ms ease,
+    color 160ms ease;
+}
+
+.nav__link:hover {
+  background: var(--color-secondary);
+  color: var(--color-text);
+}
+
+.header__tools {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.header__lang {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--target-size-small);
+  padding: 0 var(--space-1);
+  color: var(--color-text-light);
+  font-size: var(--step--1);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.header__lang:hover {
+  color: var(--color-text);
+}
+
+.theme__input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  opacity: 0;
+  clip-path: inset(50%);
+}
+
+.theme__button {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--target-size-small);
+  padding: 0 var(--space-2);
+  border: 1px solid var(--color-border-strong);
+  border-radius: 999px;
+  color: var(--color-text-light);
+  cursor: pointer;
+  font-size: var(--step--1);
+  font-weight: 600;
+  white-space: nowrap;
+  transition:
+    background-color 160ms ease,
+    color 160ms ease;
+}
+
+.theme__button:hover {
+  background: var(--color-secondary);
+  color: var(--color-text);
+}
+
+.theme__input:focus-visible + .theme__button {
+  box-shadow: var(--focus-ring);
+}
+
+.theme__input:checked + .theme__button {
+  background: var(--color-secondary);
+  color: var(--color-text);
+}
+
+.header__cta {
+  min-height: var(--target-size-small);
+  padding: 0 var(--space-2);
+  font-size: var(--step--1);
+}
