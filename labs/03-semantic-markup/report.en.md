@@ -107,12 +107,6 @@ Project files live in `site` (pages, styles, scripts, images, layouts), `labs` (
 
 The work is done in the branch `feature/semantic-markup`. The commit: https://github.com/KsushaKhadzhinova/DSLKit-Project/commit/a2b85e0. The commit message: `feat: add semantic HTML markup with Schema.org for a SaaS diagram editor`.
 
-## 4 Answers to Control Questions
-
-5. **Validation errors.** The validator reported a section without a heading on the settings page, and local checks found links to non-existent identifiers. The section became a `div` and the links got correct targets. Valid markup is processed identically by browsers and is easier to maintain.
-6. **Section and article.** The `section` element groups a thematic part and needs a heading, for example Pricing. The `article` element is self-contained and can live outside the page, for example a notation card or a plan.
-7. **Figure.** The `figure` element ties an illustration to its `figcaption`, and screen readers treat them as one unit. A plain `div` with an image creates no such link.
-
 ## Conclusion
 
 Semantic markup is created for the DSLKit home page and the related pages: Russian and English versions, error pages, the privacy policy and the signup confirmation. The pages use 15 semantic tags, keep the heading hierarchy and accessibility requirements, and carry SoftwareApplication, Offer and FAQPage microdata. The W3C and Schema.org validators found no errors, and automated tests check the markup on every page. The Rich Results Test is postponed until the site is published.

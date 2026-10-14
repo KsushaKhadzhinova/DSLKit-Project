@@ -131,26 +131,6 @@ The console is shown in Figure 8: the handler output is marked with the file nam
 
 Figure 8 – The application console
 
-## 4 Answers to Control Questions
-
-{{answers}}
-1. **Kinds of testing.** Unit tests of pure functions and components in isolation and an integration test of the root component are used. A unit test checks one part in isolation, an integration test checks several parts working together.
-2. **Jest.** Grouping through `describe`, separate checks through `test` and `test.each`, assertions through `expect`, fake functions `jest.fn()`, watching with `jest.spyOn` and clearing with `jest.clearAllMocks()`.
-3. **Mocks.** A mock replaces a real dependency with a controlled one. In the project `jest.fn()` replaces the `onOpen` handler, and `jest.spyOn(console, 'log')` intercepts console output.
-4. **render and queries.** The function `render` mounts a component in jsdom. `getByRole`, `getByText`, `getByLabelText`, `getAllByRole` and `queryByRole` are used for searching.
-5. **A click test.** `render(<Button onClick={fn}>Click</Button>); fireEvent.click(screen.getByText('Click')); expect(fn).toHaveBeenCalledTimes(1);`.
-6. **Useful tools.** The Console tab showed the order of stub calls, Network confirmed the small size of resources, and Sources with a breakpoint in the project opening handler lets one see the value of `project` in the Scope panel.
-7. **Lighthouse metrics.** LCP shows the time the largest element appears, CLS measures unexpected layout shifts, and INP replaced FID and measures the response to user actions.
-8. **Improvements.** The heading order is fixed, and a correct `robots.txt` and `llms.txt` are added, so accessibility rose from 98 to 100 and SEO from 91 to 100.
-9. **Coverage.** It is the share of code executed by tests. It shows unchecked places. 100 percent is reached, but a high percentage does not guarantee the absence of errors.
-10. **Uncovered places.** The `lcov-report` report highlights unexecuted lines and branches. For conditional branches, tests are added for an empty list, a missing title, a private project and a free plan.
-11. **getBy and queryBy.** `getBy` throws an error if the element is missing and suits checking presence. `queryBy` returns `null`, so it is used to check absence: `expect(screen.queryByRole('heading')).not.toBeInTheDocument()`.
-12. **A list through props.** A mock array is passed, then the number of elements and their content are checked: `expect(screen.getAllByRole('listitem')).toHaveLength(mockNotations.length)`, and the headings are compared with the array.
-13. **data-testid.** It is needed when an element has no role or stable text, for example a list container. Text and roles are preferable because they are closer to what a user sees, so `data-testid` is used only for list containers.
-14. **Handler call.** `const onOpen = jest.fn(); render(<ProjectCard project={p} onOpen={onOpen} />); fireEvent.click(screen.getByRole('button', { name: 'Open' })); expect(onOpen).toHaveBeenCalledWith(p);`.
-15. **Accessibility.** Lighthouse pointed at a broken heading order: `h3` came right after `h1`. It is fixed by adding the prop `headingLevel` and the level `h2` for notation cards.
-{{/answers}}
-
 ## Conclusion
 
 Jest and React Testing Library are set up for the React application of the DSLKit project, unit tests of five pure functions and tests of all components are written. Coverage is 100 percent with thresholds of 70 and 60. The Lighthouse audit found three remarks, and after fixing them accessibility rose to 100 and SEO to 100. What remains is to attach screenshots of the Sources panel and React DevTools and to check the application in Firefox and Edge.
