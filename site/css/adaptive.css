@@ -10,6 +10,23 @@
   }
 }
 
+@media (min-width: 400px) {
+  .burger__label {
+    position: static;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    clip-path: none;
+  }
+}
+
+@media (min-width: 576px) {
+  .theme__button {
+    padding: 0 var(--space-2);
+    font-size: var(--step--1);
+  }
+}
+
 @media (min-width: 768px) {
   .header__lang,
   .header__cta {
@@ -68,14 +85,6 @@
 }
 
 @media (min-width: 1024px) {
-  .theme__input {
-    display: block;
-  }
-
-  .theme__button {
-    display: inline-flex;
-  }
-
   .header__inner {
     gap: var(--space-3);
   }
