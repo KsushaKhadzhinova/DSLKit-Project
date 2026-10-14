@@ -961,3 +961,17 @@
   align-items: center;
   gap: 4px;
 }
+
+/* Drawings from the engines are SVG elements of their own: they share the interface font and crisp geometry. */
+.canvas__remote svg text {
+  font-family: var(--font-sans);
+}
+
+.canvas__remote svg :is(g, path, rect, circle, defs, marker) {
+  shape-rendering: geometricPrecision;
+}
+
+.canvas__diagram marker,
+.canvas__diagram defs {
+  overflow: visible;
+}
