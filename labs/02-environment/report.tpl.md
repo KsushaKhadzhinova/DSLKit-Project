@@ -82,6 +82,12 @@
 
 Файл `README.md` в корне репозитория содержит описание проекта, перечень технологий, ссылки на репозиторий и макет Figma, команды запуска и структуру папок.
 
+Репозиторий проекта: https://github.com/KsushaKhadzhinova/DSLKit-Project. Файл Figma: https://www.figma.com/design/HYmcqqGdcszOt7dGnKrvZg/bsuir-diploma. История коммитов ветки `main` на GitHub показана на рисунке 6.
+
+![История коммитов ветки main на GitHub](figures/github-commits.jpg)
+
+Рисунок 6 – История коммитов ветки main в репозитории DSLKit-Project на GitHub
+
 ## 4 Ответы на контрольные вопросы
 
 {{answers}}

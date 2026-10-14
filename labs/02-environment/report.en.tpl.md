@@ -82,6 +82,12 @@ The Figma file link is stored in `site/design/figma-link.txt`.
 
 The `README.md` file in the repository root contains the project description, the list of technologies, links to the repository and the Figma design, run commands and the folder structure.
 
+The project repository: https://github.com/KsushaKhadzhinova/DSLKit-Project. The Figma file: https://www.figma.com/design/HYmcqqGdcszOt7dGnKrvZg/bsuir-diploma. The commit history of the `main` branch on GitHub is shown in figure 6.
+
+![Commit history of the main branch on GitHub](figures/github-commits.jpg)
+
+Figure 6 – Commit history of the main branch in the DSLKit-Project repository on GitHub
+
 ## 4 Answers to Control Questions
 
 {{answers}}

@@ -44,7 +44,7 @@
 | Файл README.md | пройдена | — |
 | Ссылка на макет Figma | пройдена | — |
 | Удалённый репозиторий | пройдена | https://github.com/KsushaKhadzhinova/DSLKit-Project.git |
-| История коммитов | пройдена | 6 |
+| История коммитов | пройдена | 41 |
 
 Все проверки пройдены.
 
@@ -101,6 +101,12 @@
 ### 3.8 Документирование проекта
 
 Файл `README.md` в корне репозитория содержит описание проекта, перечень технологий, ссылки на репозиторий и макет Figma, команды запуска и структуру папок.
+
+Репозиторий проекта: https://github.com/KsushaKhadzhinova/DSLKit-Project. Файл Figma: https://www.figma.com/design/HYmcqqGdcszOt7dGnKrvZg/bsuir-diploma. История коммитов ветки `main` на GitHub показана на рисунке 6.
+
+![История коммитов ветки main на GitHub](figures/github-commits.jpg)
+
+Рисунок 6 – История коммитов ветки main в репозитории DSLKit-Project на GitHub
 
 ## 4 Ответы на контрольные вопросы
 
