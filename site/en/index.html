@@ -53,6 +53,7 @@
         <meta itemprop="operatingSystem" content="Web" />
         <meta itemprop="url" content="https://dslkit.io/en/" />
         <div class="hero__content">
+          <p class="hero__badge">Coming soon: closed beta</p>
           <h1 class="hero__title" id="hero-title">Write code, get a diagram</h1>
           <p class="hero__lead" itemprop="description">
             A web editor for diagrams as code: describe a scheme in DSL text, and DSLKit checks it against the notation rules and draws it.
@@ -68,14 +69,19 @@
             <link itemprop="url" href="https://dslkit.io/en/#waitlist" />
             Free in the beta: up to 5 diagrams per day.
           </p>
+          <ul class="hero__facts">
+            <li class="hero__fact"><strong class="hero__fact-value">6</strong> <span class="hero__fact-label">notations in one editor</span></li>
+            <li class="hero__fact"><strong class="hero__fact-value">3</strong> <span class="hero__fact-label">notations in the first beta</span></li>
+            <li class="hero__fact"><strong class="hero__fact-value">5</strong> <span class="hero__fact-label">free diagrams per day in the beta</span></li>
+          </ul>
         </div>
         <figure class="hero__figure">
           <img
             class="hero__image"
             src="../images/hero-diagram.svg"
             alt="The DSLKit editor: DSL code on the left, an IDEF0 diagram with blocks A0 and A1 on the right"
-            width="640"
-            height="400"
+            width="809"
+            height="500"
             itemprop="image"
           />
           <figcaption class="hero__caption">The code on the left turns into the diagram on the right</figcaption>
@@ -88,48 +94,54 @@
         <ul class="cards">
           <li class="cards__item">
             <article class="card">
-              <img class="card__icon" src="../images/notations/idef0.svg" alt="" width="48" height="48" />
-              <h3 class="card__title">IDEF0</h3>
-              <p class="card__text">Functional modelling: blocks, inputs, controls, outputs and mechanisms.</p>
-              <a class="card__link" href="#waitlist">Join the beta: IDEF0</a>
-            </article>
-          </li>
-          <li class="cards__item">
-            <article class="card">
-              <img class="card__icon" src="../images/notations/dfd.svg" alt="" width="48" height="48" />
-              <h3 class="card__title">DFD</h3>
-              <p class="card__text">Data flow diagrams: processes, data stores and the links between them.</p>
-              <a class="card__link" href="#waitlist">Join the beta: DFD</a>
-            </article>
-          </li>
-          <li class="cards__item">
-            <article class="card">
-              <img class="card__icon" src="../images/notations/erd.svg" alt="" width="48" height="48" />
-              <h3 class="card__title">ERD</h3>
-              <p class="card__text">Entities and relationships for database design.</p>
-              <a class="card__link" href="#waitlist">Join the beta: ERD</a>
-            </article>
-          </li>
-          <li class="cards__item">
-            <article class="card">
-              <img class="card__icon" src="../images/notations/bpmn.svg" alt="" width="48" height="48" />
-              <h3 class="card__title">BPMN</h3>
-              <p class="card__text">Business processes: events, tasks and gateways.</p>
-              <a class="card__link" href="#waitlist">Join the beta: BPMN</a>
-            </article>
-          </li>
-          <li class="cards__item">
-            <article class="card">
               <img class="card__icon" src="../images/notations/uml.svg" alt="" width="48" height="48" />
               <h3 class="card__title">UML</h3>
+              <p class="card__meta"><span class="badge badge--planned">planned</span></p>
               <p class="card__text">Classes, sequences and other diagrams of the object model.</p>
               <a class="card__link" href="#waitlist">Join the beta: UML</a>
             </article>
           </li>
           <li class="cards__item">
             <article class="card">
+              <img class="card__icon" src="../images/notations/bpmn.svg" alt="" width="48" height="48" />
+              <h3 class="card__title">BPMN</h3>
+              <p class="card__meta"><span class="badge badge--planned">planned</span></p>
+              <p class="card__text">Business processes: events, tasks and gateways.</p>
+              <a class="card__link" href="#waitlist">Join the beta: BPMN</a>
+            </article>
+          </li>
+          <li class="cards__item">
+            <article class="card">
+              <img class="card__icon" src="../images/notations/erd.svg" alt="" width="48" height="48" />
+              <h3 class="card__title">ERD</h3>
+              <p class="card__meta"><span class="badge">in beta</span></p>
+              <p class="card__text">Entities and relationships for database design.</p>
+              <a class="card__link" href="#waitlist">Join the beta: ERD</a>
+            </article>
+          </li>
+          <li class="cards__item">
+            <article class="card">
+              <img class="card__icon" src="../images/notations/dfd.svg" alt="" width="48" height="48" />
+              <h3 class="card__title">DFD</h3>
+              <p class="card__meta"><span class="badge">in beta</span></p>
+              <p class="card__text">Data flow diagrams: processes, data stores and the links between them.</p>
+              <a class="card__link" href="#waitlist">Join the beta: DFD</a>
+            </article>
+          </li>
+          <li class="cards__item">
+            <article class="card">
+              <img class="card__icon" src="../images/notations/idef0.svg" alt="" width="48" height="48" />
+              <h3 class="card__title">IDEF0</h3>
+              <p class="card__meta"><span class="badge">in beta</span></p>
+              <p class="card__text">Functional modelling: blocks, inputs, controls, outputs and mechanisms.</p>
+              <a class="card__link" href="#waitlist">Join the beta: IDEF0</a>
+            </article>
+          </li>
+          <li class="cards__item">
+            <article class="card">
               <img class="card__icon" src="../images/notations/petri.svg" alt="" width="48" height="48" />
               <h3 class="card__title">Petri nets</h3>
+              <p class="card__meta"><span class="badge badge--planned">planned</span></p>
               <p class="card__text">Concurrent processes: places, transitions and tokens.</p>
               <a class="card__link" href="#waitlist">Join the beta: Petri nets</a>
             </article>

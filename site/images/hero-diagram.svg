@@ -1,1 +1,67 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="640" height="400" viewBox="0 0 640 400" font-family="Inter, Arial, sans-serif"><rect width="640" height="400" rx="16" fill="#fff" stroke="#dde1e9"/><line x1="320" y1="0" x2="320" y2="400" stroke="#dde1e9"/><g font-family="'JetBrains Mono', Consolas, monospace" font-size="14" fill="#1c1f2e"><text x="24" y="48">diagram idef0 "Order"</text><text x="24" y="76">box A0 "Process" {</text><text x="24" y="104">  input: Order</text><text x="24" y="132">}</text><text x="24" y="160">box A1 "Ship" {</text><text x="24" y="188">  input: Invoice</text><text x="24" y="216">}</text></g><rect x="352" y="96" width="112" height="56" rx="6" fill="#e8efff" stroke="#2563eb"/><text x="408" y="130" font-size="16" font-weight="600" text-anchor="middle" fill="#1c1f2e">A0</text><rect x="496" y="248" width="112" height="56" rx="6" fill="#e8efff" stroke="#2563eb"/><text x="552" y="282" font-size="16" font-weight="600" text-anchor="middle" fill="#1c1f2e">A1</text><path d="M464 124h32v152h0" fill="none" stroke="#4a5068" stroke-width="2"/><path d="M552 248l-6-8h12z" fill="#4a5068" transform="rotate(0)"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="809" height="500" viewBox="0 0 809 500" role="img" aria-labelledby="hero-title hero-desc">
+  <title id="hero-title">Редактор DSLKit</title>
+  <desc id="hero-desc">Слева код на DSL, справа диаграмма IDEF0 с блоками A0 и A1, строка состояния без ошибок</desc>
+  <rect width="809" height="500" rx="16" fill="#14151f"/>
+  <rect x="0.5" y="0.5" width="808" height="499" rx="15.5" fill="none" stroke="#2a2c3d"/>
+  <path d="M0 40h809" stroke="#2a2c3d"/>
+  <circle cx="24" cy="20" r="6" fill="#f87171"/>
+  <circle cx="44" cy="20" r="6" fill="#fbbf24"/>
+  <circle cx="64" cy="20" r="6" fill="#4ade80"/>
+  <text x="96" y="25" fill="#a6adc8" font-family="JetBrains Mono, Consolas, monospace" font-size="12">order.dsl</text>
+  <rect x="693" y="8" width="96" height="24" rx="6" fill="#15803d"/>
+  <text x="741" y="24" fill="#ffffff" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="600" text-anchor="middle">Запустить</text>
+  <path d="M400 40v436" stroke="#2a2c3d"/>
+  <g font-family="JetBrains Mono, Consolas, monospace" font-size="13">
+    <g fill="#585b70" text-anchor="end">
+      <text x="40" y="72">1</text>
+      <text x="40" y="98">2</text>
+      <text x="40" y="124">3</text>
+      <text x="40" y="150">4</text>
+      <text x="40" y="176">5</text>
+      <text x="40" y="202">6</text>
+      <text x="40" y="228">7</text>
+      <text x="40" y="254">8</text>
+      <text x="40" y="280">9</text>
+      <text x="40" y="306">10</text>
+    </g>
+    <g fill="#cdd6f4" xml:space="preserve">
+      <text x="56" y="72"><tspan fill="#c4a5ff">diagram</tspan> idef0 <tspan fill="#86efac">"Order process"</tspan></text>
+      <text x="56" y="98"><tspan fill="#c4a5ff">box</tspan> A0 <tspan fill="#86efac">"Process order"</tspan> {</text>
+      <text x="56" y="124">  <tspan fill="#c4a5ff">input</tspan>: Order</text>
+      <text x="56" y="150">  <tspan fill="#c4a5ff">control</tspan>: Rules</text>
+      <text x="56" y="176">  <tspan fill="#c4a5ff">output</tspan>: Invoice</text>
+      <text x="56" y="202">}</text>
+      <text x="56" y="228"><tspan fill="#c4a5ff">box</tspan> A1 <tspan fill="#86efac">"Ship goods"</tspan> {</text>
+      <text x="56" y="254">  <tspan fill="#c4a5ff">input</tspan>: Invoice</text>
+      <text x="56" y="280">}</text>
+      <text x="56" y="306"><tspan fill="#c4a5ff">arrow</tspan> A0.output -&gt; A1.input</text>
+    </g>
+  </g>
+  <g font-family="Inter, Arial, sans-serif">
+    <rect x="430" y="90" width="150" height="80" rx="8" fill="#1b2336" stroke="#8bb0ff" stroke-width="1.5"/>
+    <text x="505" y="124" fill="#8bb0ff" font-size="15" font-weight="700" text-anchor="middle">A0</text>
+    <text x="505" y="146" fill="#cdd6f4" font-size="13" text-anchor="middle">Process order</text>
+    <rect x="629" y="250" width="150" height="80" rx="8" fill="#1b2336" stroke="#8bb0ff" stroke-width="1.5"/>
+    <text x="704" y="284" fill="#8bb0ff" font-size="15" font-weight="700" text-anchor="middle">A1</text>
+    <text x="704" y="306" fill="#cdd6f4" font-size="13" text-anchor="middle">Ship goods</text>
+    <g stroke="#a6adc8" stroke-width="1.5" fill="none">
+      <path d="M410 130h12"/>
+      <path d="M505 66v16"/>
+      <path d="M580 130h24v160h17"/>
+    </g>
+    <g fill="#a6adc8">
+      <path d="M430 130l-8-5v10z"/>
+      <path d="M505 90l-5-8h10z"/>
+      <path d="M629 290l-8-5v10z"/>
+    </g>
+    <g fill="#a6adc8" font-size="11">
+      <text x="408" y="119">Order</text>
+      <text x="514" y="80">Rules</text>
+      <text x="614" y="210">Invoice</text>
+    </g>
+  </g>
+  <rect x="1" y="476" width="807" height="23" rx="15" fill="#1c1d2b"/>
+  <path d="M1 476h807" stroke="#2a2c3d"/>
+  <circle cx="24" cy="488" r="4" fill="#4ade80"/>
+  <text x="38" y="492" fill="#a6adc8" font-family="Inter, Arial, sans-serif" font-size="11">IDEF0 · ошибок нет · автосохранение включено</text>
+</svg>

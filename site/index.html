@@ -53,6 +53,7 @@
         <meta itemprop="operatingSystem" content="Web" />
         <meta itemprop="url" content="https://dslkit.io/" />
         <div class="hero__content">
+          <p class="hero__badge">Скоро: закрытая бета</p>
           <h1 class="hero__title" id="hero-title">Пишите код — получайте диаграмму</h1>
           <p class="hero__lead" itemprop="description">
             Веб-редактор диаграмм как кода: опишите схему текстом на DSL, а DSLKit проверит её по правилам нотации и нарисует.
@@ -68,14 +69,19 @@
             <link itemprop="url" href="https://dslkit.io/#waitlist" />
             Бесплатно в бета-версии: до 5 диаграмм в день.
           </p>
+          <ul class="hero__facts">
+            <li class="hero__fact"><strong class="hero__fact-value">6</strong> <span class="hero__fact-label">нотаций в одном редакторе</span></li>
+            <li class="hero__fact"><strong class="hero__fact-value">3</strong> <span class="hero__fact-label">нотации в первой бете</span></li>
+            <li class="hero__fact"><strong class="hero__fact-value">5</strong> <span class="hero__fact-label">диаграмм в день бесплатно в бете</span></li>
+          </ul>
         </div>
         <figure class="hero__figure">
           <img
             class="hero__image"
             src="images/hero-diagram.svg"
             alt="Редактор DSLKit: слева код на DSL, справа диаграмма IDEF0 с блоками A0 и A1"
-            width="640"
-            height="400"
+            width="809"
+            height="500"
             itemprop="image"
           />
           <figcaption class="hero__caption">Код слева превращается в диаграмму справа</figcaption>
@@ -88,48 +94,54 @@
         <ul class="cards">
           <li class="cards__item">
             <article class="card">
-              <img class="card__icon" src="images/notations/idef0.svg" alt="" width="48" height="48" />
-              <h3 class="card__title">IDEF0</h3>
-              <p class="card__text">Функциональное моделирование: блоки, входы, управление, выходы и механизмы.</p>
-              <a class="card__link" href="#waitlist">Записаться в бету: IDEF0</a>
-            </article>
-          </li>
-          <li class="cards__item">
-            <article class="card">
-              <img class="card__icon" src="images/notations/dfd.svg" alt="" width="48" height="48" />
-              <h3 class="card__title">DFD</h3>
-              <p class="card__text">Диаграммы потоков данных: процессы, хранилища и связи между ними.</p>
-              <a class="card__link" href="#waitlist">Записаться в бету: DFD</a>
-            </article>
-          </li>
-          <li class="cards__item">
-            <article class="card">
-              <img class="card__icon" src="images/notations/erd.svg" alt="" width="48" height="48" />
-              <h3 class="card__title">ERD</h3>
-              <p class="card__text">Сущности и связи для проектирования баз данных.</p>
-              <a class="card__link" href="#waitlist">Записаться в бету: ERD</a>
-            </article>
-          </li>
-          <li class="cards__item">
-            <article class="card">
-              <img class="card__icon" src="images/notations/bpmn.svg" alt="" width="48" height="48" />
-              <h3 class="card__title">BPMN</h3>
-              <p class="card__text">Бизнес-процессы: события, задачи и шлюзы.</p>
-              <a class="card__link" href="#waitlist">Записаться в бету: BPMN</a>
-            </article>
-          </li>
-          <li class="cards__item">
-            <article class="card">
               <img class="card__icon" src="images/notations/uml.svg" alt="" width="48" height="48" />
               <h3 class="card__title">UML</h3>
+              <p class="card__meta"><span class="badge badge--planned">в планах</span></p>
               <p class="card__text">Классы, последовательности и другие диаграммы объектной модели.</p>
               <a class="card__link" href="#waitlist">Записаться в бету: UML</a>
             </article>
           </li>
           <li class="cards__item">
             <article class="card">
+              <img class="card__icon" src="images/notations/bpmn.svg" alt="" width="48" height="48" />
+              <h3 class="card__title">BPMN</h3>
+              <p class="card__meta"><span class="badge badge--planned">в планах</span></p>
+              <p class="card__text">Бизнес-процессы: события, задачи и шлюзы.</p>
+              <a class="card__link" href="#waitlist">Записаться в бету: BPMN</a>
+            </article>
+          </li>
+          <li class="cards__item">
+            <article class="card">
+              <img class="card__icon" src="images/notations/erd.svg" alt="" width="48" height="48" />
+              <h3 class="card__title">ERD</h3>
+              <p class="card__meta"><span class="badge">в бете</span></p>
+              <p class="card__text">Сущности и связи для проектирования баз данных.</p>
+              <a class="card__link" href="#waitlist">Записаться в бету: ERD</a>
+            </article>
+          </li>
+          <li class="cards__item">
+            <article class="card">
+              <img class="card__icon" src="images/notations/dfd.svg" alt="" width="48" height="48" />
+              <h3 class="card__title">DFD</h3>
+              <p class="card__meta"><span class="badge">в бете</span></p>
+              <p class="card__text">Диаграммы потоков данных: процессы, хранилища и связи между ними.</p>
+              <a class="card__link" href="#waitlist">Записаться в бету: DFD</a>
+            </article>
+          </li>
+          <li class="cards__item">
+            <article class="card">
+              <img class="card__icon" src="images/notations/idef0.svg" alt="" width="48" height="48" />
+              <h3 class="card__title">IDEF0</h3>
+              <p class="card__meta"><span class="badge">в бете</span></p>
+              <p class="card__text">Функциональное моделирование: блоки, входы, управление, выходы и механизмы.</p>
+              <a class="card__link" href="#waitlist">Записаться в бету: IDEF0</a>
+            </article>
+          </li>
+          <li class="cards__item">
+            <article class="card">
               <img class="card__icon" src="images/notations/petri.svg" alt="" width="48" height="48" />
               <h3 class="card__title">Сети Петри</h3>
+              <p class="card__meta"><span class="badge badge--planned">в планах</span></p>
               <p class="card__text">Параллельные процессы: позиции, переходы и фишки.</p>
               <a class="card__link" href="#waitlist">Записаться в бету: сети Петри</a>
             </article>
