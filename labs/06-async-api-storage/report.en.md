@@ -436,7 +436,7 @@ export const sanitizeSvg = (svgText, parser) => {
 import { renderDiagram, checkHealth } from '../api/apiService.js';
 import { API_CONFIG } from '../api/config.js';
 import { createCache, createHistory } from '../storage/localStorage.js';
-import { ENGINES, findEngine } from '../engines/engines.js';
+import { findEngine } from '../engines/engines.js';
 import { parseDsl, sanitizeSvg, sourceKey } from '../utils/dataParser.js';
 
 const MESSAGES = {
@@ -480,7 +480,6 @@ export const initDiagramRunner = ({
   const local = page.querySelector('.canvas__diagram');
   const service = page.querySelector('.canvas__service');
   const historyList = page.querySelector('.canvas__history');
-  const engineSelect = page.querySelector('.canvas__engine');
   const canvas = page.querySelector('.canvas');
   const parser = new root.defaultView.DOMParser();
   const cache = createCache({ storage, ttlMs: API_CONFIG.cacheTtlMs, now });
@@ -496,7 +495,11 @@ export const initDiagramRunner = ({
 
   const source = () => [...page.querySelectorAll('.code__line code')].map((line) => line.textContent).join('\n');
 
-  const currentEngine = () => findEngine(engineSelect?.value);
+  // The engine is chosen on the settings page and read again on every run.
+  const currentEngine = () => {
+    const saved = storage.get('settings', {});
+    return findEngine(saved !== null && typeof saved === 'object' ? saved['diagram-engine'] : undefined);
+  };
 
   const show = (svgText, note) => {
     const svg = sanitizeSvg(svgText, parser);
@@ -580,14 +583,6 @@ ${input}`);
   renderButton.addEventListener('click', () => run());
   refreshButton?.addEventListener('click', () => run({ refresh: true }));
   page.addEventListener('dslkit:run', () => run());
-  if (engineSelect) {
-    const saved = storage.get('diagram_engine', null);
-    if (ENGINES.some((engine) => engine.id === saved)) engineSelect.value = saved;
-    engineSelect.addEventListener('change', () => {
-      storage.set('diagram_engine', engineSelect.value);
-      run();
-    });
-  }
   historyList?.addEventListener('click', (event) => {
     const button = event.target.closest('.canvas__history-item');
     if (!button) return;

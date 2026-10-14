@@ -281,13 +281,7 @@
         <div class="canvas__toolbar">
           <nav class="canvas__breadcrumb" aria-label="Путь диаграммы">A-0 › A0</nav>
           <button type="button" class="button button--quiet">Автораскладка</button>
-          <label class="canvas__engine-label" for="engine-select">Движок</label>
-          <select class="form__input canvas__engine" id="engine-select">
-            <option value="graphviz">Kroki · Graphviz</option>
-            <option value="mermaid">Kroki · Mermaid</option>
-            <option value="plantuml">Kroki · PlantUML</option>
-            <option value="local">Собственный движок (в браузере)</option>
-          </select>
+          <a class="canvas__engine-link" href="settings.html#diagram-engine">Движок: в настройках</a>
           <button type="button" class="button button--primary canvas__render">Нарисовать через Kroki</button>
           <button type="button" class="button button--quiet canvas__refresh">Обновить с сервера</button>
         </div>

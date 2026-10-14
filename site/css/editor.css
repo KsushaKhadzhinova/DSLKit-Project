@@ -491,14 +491,8 @@
   display: none;
 }
 
-.canvas__engine-label {
-  color: var(--color-text-light);
-  font-size: var(--step--1);
-}
-
-.canvas__engine {
-  width: auto;
-  min-height: var(--target-size-small);
+.canvas__engine-link {
+  color: var(--color-link);
   font-size: var(--step--1);
 }
 
