@@ -18,10 +18,10 @@
   position: relative;
   isolation: isolate;
   display: grid;
-  grid-template-columns: var(--columns-golden);
+  grid-template-columns: 1fr;
   align-items: center;
-  gap: var(--space-5);
-  padding-block: var(--space-6) var(--space-5);
+  gap: var(--space-4);
+  padding-block: var(--space-5) var(--space-4);
 }
 
 .hero::before {
@@ -80,6 +80,10 @@
   gap: var(--space-2);
 }
 
+.hero__actions .button {
+  flex: 1 1 100%;
+}
+
 .hero__note {
   color: var(--color-muted);
   font-size: var(--step--1);
@@ -87,7 +91,7 @@
 
 .hero__facts {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: 1fr;
   gap: var(--space-3);
   width: 100%;
   padding-top: var(--space-3);
@@ -133,7 +137,7 @@
 
 /* Sections */
 .section {
-  padding-block: var(--space-5);
+  padding-block: var(--space-4);
 }
 
 .section__title {

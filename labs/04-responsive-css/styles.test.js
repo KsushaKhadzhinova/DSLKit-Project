@@ -56,8 +56,8 @@ test('the golden ratio is the base of the scales', () => {
 });
 
 test('the hero, the pricing and the work area are split by the golden columns', () => {
-  assert.match(sheets['main.css'], /\.hero\s*\{[^}]*grid-template-columns:\s*var\(--columns-golden\)/);
-  assert.match(sheets['components.css'], /\.plans\s*\{[^}]*grid-template-columns:\s*var\(--columns-golden\)/);
+  assert.match(sheets['adaptive.css'], /\.hero\s*\{[^}]*grid-template-columns:\s*var\(--columns-golden\)/);
+  assert.match(sheets['adaptive.css'], /\.plans\s*\{[^}]*grid-template-columns:\s*var\(--columns-golden\)/);
   assert.match(sheets['editor.css'], /\.editor-main\s*\{[^}]*grid-template-columns:\s*var\(--columns-golden\)/);
   assert.match(sheets['main.css'], /\.hero__image\s*\{[^}]*aspect-ratio:\s*1\.618/);
 });
