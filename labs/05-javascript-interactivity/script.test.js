@@ -17,7 +17,7 @@ test('the English landing page starts the same components', () => {
 test('the dashboard, the settings and the editor start their own components', () => {
   assert.deepEqual(boot(load('app/dashboard.html')), ['initTheme', 'initDashboard']);
   assert.deepEqual(boot(load('app/settings.html')), ['initTheme', 'initSettings']);
-  assert.deepEqual(boot(load('app/editor.html')), ['initTheme', 'initEditor']);
+  assert.deepEqual(boot(load('app/editor.html')), ['initTheme', 'initEditor', 'initDiagramRunner']);
 });
 
 test('a page without interactive markup starts only the theme', () => {
