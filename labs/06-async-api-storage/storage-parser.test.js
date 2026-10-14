@@ -168,3 +168,30 @@ test('sanitizeSvg rejects broken XML and documents that are not SVG', () => {
   assert.equal(sanitizeSvg('<svg><g></svg>', parser), null);
   assert.equal(sanitizeSvg('<html xmlns="http://www.w3.org/1999/xhtml"></html>', parser), null);
 });
+
+test('cache lifetime boundary: an entry is fresh at exactly the lifetime and expired one millisecond later', () => {
+  let time = 0;
+  const cache = createCache({ storage: memory(), ttlMs: 1000, now: () => time });
+  cache.set('a', 1);
+  time = 999;
+  assert.equal(cache.get('a').expired, false);
+  time = 1000;
+  assert.equal(cache.get('a').expired, false);
+  time = 1001;
+  assert.equal(cache.get('a').expired, true);
+});
+
+test('cache size boundary: exactly the maximum keeps every entry, one more drops the oldest', () => {
+  let time = 0;
+  const cache = createCache({ storage: memory(), ttlMs: 1000, now: () => (time += 1), maxEntries: 3 });
+  for (const key of ['a', 'b', 'c']) cache.set(key, key);
+  assert.deepEqual(
+    ['a', 'b', 'c'].map((key) => cache.get(key) !== null),
+    [true, true, true],
+  );
+  cache.set('d', 'd');
+  assert.deepEqual(
+    ['a', 'b', 'c', 'd'].map((key) => cache.get(key) !== null),
+    [false, true, true, true],
+  );
+});
