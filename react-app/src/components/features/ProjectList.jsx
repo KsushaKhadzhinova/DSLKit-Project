@@ -5,7 +5,7 @@ import ProjectCard from './ProjectCard';
 function ProjectList({ projects, notation = 'all', notations = [], onOpen, onFilterChange }) {
   const visible = filterByNotation(projects, notation);
   return (
-    <div>
+    <div className="project-list">
       <div className="section__head">
         <h2>Проекты</h2>
         <div className="toolbar">

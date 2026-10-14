@@ -61,6 +61,49 @@ a {
   color: var(--color-primary);
 }
 
+#root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+#root > main {
+  flex: 1;
+  width: 100%;
+}
+
+section {
+  scroll-margin-top: var(--space-4);
+}
+
+nav {
+  display: block;
+}
+
+ul {
+  margin: 0;
+  padding-left: var(--space-3);
+}
+
+li {
+  margin-bottom: var(--space-1);
+}
+
+label {
+  color: var(--color-text);
+  font-weight: 500;
+}
+
+option {
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+strong {
+  color: var(--color-text);
+  font-weight: 700;
+}
+
 :focus-visible {
   outline: 3px solid var(--color-primary);
   outline-offset: 2px;
@@ -105,6 +148,21 @@ a {
   margin: 0;
   padding: 0;
   list-style: none;
+}
+
+.grid > li {
+  display: flex;
+  min-width: 0;
+  margin: 0;
+}
+
+.grid > li > * {
+  flex: 1;
+}
+
+.project-list {
+  display: grid;
+  gap: var(--space-2);
 }
 
 @media (min-width: 576px) {
