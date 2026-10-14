@@ -82,7 +82,6 @@
   padding: var(--space-3);
   border-radius: var(--radius-large);
   background: var(--color-primary);
-  background: linear-gradient(135deg, var(--color-primary), var(--color-cta-end));
   box-shadow: var(--shadow-large);
   color: var(--color-on-primary);
 }

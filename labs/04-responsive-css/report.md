@@ -134,7 +134,6 @@ Flexbox и Grid поддерживаются всеми современными
   --color-primary: #2563eb;
   --color-on-primary: #ffffff;
   --color-primary-text: #1d4ed8;
-  --color-cta-end: #7c3aed;
   --color-diagram-paper: #ffffff;
   --color-secondary: #e8efff;
   --color-accent: #16a34a;
@@ -847,7 +846,6 @@ label > span {
   padding: var(--space-3);
   border-radius: var(--radius-large);
   background: var(--color-primary);
-  background: linear-gradient(135deg, var(--color-primary), var(--color-cta-end));
   box-shadow: var(--shadow-large);
   color: var(--color-on-primary);
 }
