@@ -4,7 +4,7 @@ import NotationCard from './NotationCard';
 function NotationList({ notations }) {
   if (notations.length === 0) return <p>Нотации пока не добавлены.</p>;
   return (
-    <ul className="grid">
+    <ul className="grid" data-testid="notation-list">
       {notations.map((notation) => (
         <li key={notation.id}>
           <NotationCard notation={notation} />

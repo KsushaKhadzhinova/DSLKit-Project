@@ -17,7 +17,11 @@ const PROJECT_NOTATIONS = [...new Set(mockProjects.map((project) => project.nota
 
 // Handlers are stubs for this lab: they only write to the console because the state arrives in the next lab.
 const handleSignup = () => console.log('Запись в бету');
-const handleOpen = (project) => console.log('Открыт проект:', project.name);
+const handleOpen = (project) => {
+  console.group(`Открыт проект: ${project.name}`);
+  console.table(project);
+  console.groupEnd();
+};
 const handleFilter = (notation) => console.log('Выбрана нотация:', notation);
 const handleChoose = (plan) => console.log('Выбран тариф:', plan.name);
 

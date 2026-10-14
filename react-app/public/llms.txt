@@ -1,0 +1,5 @@
+# DSLKit
+
+> DSLKit is a SaaS service that draws diagrams from text: UML, BPMN, ERD, DFD, IDEF0 and Petri nets.
+
+This page is the React component demo of the DSLKit diploma project (BSUIR).

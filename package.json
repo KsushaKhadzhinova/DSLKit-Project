@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node --test --experimental-test-coverage --test-coverage-lines=100 --test-coverage-branches=100 --test-coverage-functions=100",
+    "test": "node --test --experimental-test-coverage --test-coverage-lines=100 --test-coverage-branches=100 --test-coverage-functions=100 \"labs/**/*.test.js\" \"tools/**/*.test.js\"",
     "lab1:generate": "node labs/01-network/cli.js labs/01-network/data/draw-io-normal.har labs/01-network/data/draw-io-fast3g.har ru labs/01-network/generated/ru && node labs/01-network/cli.js labs/01-network/data/draw-io-normal.har labs/01-network/data/draw-io-fast3g.har en labs/01-network/generated/en",
     "lab1:report": "npm run lab1:generate && node tools/build.js labs/01-network",
     "dev": "nodemon --watch site --ext html,css,js,svg,json tools/serve.js site 5173",
@@ -19,7 +19,9 @@
     "lab4:report": "node tools/build.js labs/04-responsive-css",
     "lab5:report": "node tools/build.js labs/05-javascript-interactivity",
     "lab6:report": "node tools/build.js labs/06-async-api-storage",
-    "lab7:report": "node tools/build.js labs/07-react-components"
+    "lab7:report": "node tools/build.js labs/07-react-components",
+    "lab8:report": "node tools/build.js labs/08-frontend-testing",
+    "react:test": "npm --prefix react-app test"
   },
   "dependencies": {
     "lodash": "^4.18.1"

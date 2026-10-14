@@ -7,7 +7,7 @@ import styles from './features.module.css';
 function NotationCard({ notation }) {
   const isBeta = notation.status === 'beta';
   return (
-    <Card title={notation.code}>
+    <Card title={notation.code} headingLevel="h2">
       <Badge tone={isBeta ? 'success' : 'warning'}>{NOTATION_STATUSES[notation.status]}</Badge>
       <p>{notation.title}</p>
       <code className={styles.code}>{notation.example}</code>

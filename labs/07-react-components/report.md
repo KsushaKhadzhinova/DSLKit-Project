@@ -108,10 +108,11 @@ export default Button;
 import styles from './Card.module.css';
 
 // Container with an optional title; the content arrives through `children`.
-function Card({ children, title, className = '' }) {
+// `headingLevel` keeps the heading order of the page correct (h2 under h1, h3 under h2).
+function Card({ children, title, className = '', headingLevel: Heading = 'h3' }) {
   return (
     <article className={`${styles.card} ${className}`.trim()}>
-      {title && <h3 className={styles.title}>{title}</h3>}
+      {title && <Heading className={styles.title}>{title}</Heading>}
       <div className={styles.content}>{children}</div>
     </article>
   );
@@ -132,7 +133,7 @@ import styles from './features.module.css';
 function NotationCard({ notation }) {
   const isBeta = notation.status === 'beta';
   return (
-    <Card title={notation.code}>
+    <Card title={notation.code} headingLevel="h2">
       <Badge tone={isBeta ? 'success' : 'warning'}>{NOTATION_STATUSES[notation.status]}</Badge>
       <p>{notation.title}</p>
       <code className={styles.code}>{notation.example}</code>
@@ -171,7 +172,7 @@ function ProjectList({ projects, notation = 'all', notations = [], onOpen, onFil
       {visible.length === 0 ? (
         <p>Проектов не найдено.</p>
       ) : (
-        <ul className="grid">
+        <ul className="grid" data-testid="project-list">
           {visible.map((project) => (
             <li key={project.id}>
               <ProjectCard project={project} onOpen={onOpen} />
@@ -208,7 +209,11 @@ const PROJECT_NOTATIONS = [...new Set(mockProjects.map((project) => project.nota
 
 // Handlers are stubs for this lab: they only write to the console because the state arrives in the next lab.
 const handleSignup = () => console.log('Запись в бету');
-const handleOpen = (project) => console.log('Открыт проект:', project.name);
+const handleOpen = (project) => {
+  console.group(`Открыт проект: ${project.name}`);
+  console.table(project);
+  console.groupEnd();
+};
 const handleFilter = (notation) => console.log('Выбрана нотация:', notation);
 const handleChoose = (plan) => console.log('Выбран тариф:', plan.name);
 

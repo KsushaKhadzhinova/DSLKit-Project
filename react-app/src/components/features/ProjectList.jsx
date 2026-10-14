@@ -23,7 +23,7 @@ function ProjectList({ projects, notation = 'all', notations = [], onOpen, onFil
       {visible.length === 0 ? (
         <p>Проектов не найдено.</p>
       ) : (
-        <ul className="grid">
+        <ul className="grid" data-testid="project-list">
           {visible.map((project) => (
             <li key={project.id}>
               <ProjectCard project={project} onOpen={onOpen} />
