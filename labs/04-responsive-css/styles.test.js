@@ -7,6 +7,7 @@ import { TOKENS } from '../../tools/tokens.js';
 import {
   contrastPairs,
   darkTokens,
+  desktopFirstQueries,
   fibonacciProblems,
   goldenProblems,
   hardcodedColors,
@@ -130,4 +131,8 @@ test('the header is sticky, focus is visible, reduced motion is respected and a 
   assert.match(sheets['base.css'], /:focus-visible/);
   assert.match(sheets['base.css'], /prefers-reduced-motion:\s*reduce/);
   assert.ok(Object.keys(darkTokens(sheets['variables.css'])).length >= 10);
+});
+
+test('the styles are mobile first: only min-width media queries are used for layout', () => {
+  assert.deepEqual(desktopFirstQueries(allCss), []);
 });

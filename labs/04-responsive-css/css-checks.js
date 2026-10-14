@@ -87,3 +87,5 @@ export const contrastPairs = (tokens, pairs, minimum = 4.5) =>
     .map(([foreground, background, required = minimum]) => ({ foreground, background, ratio: contrast(tokens[foreground], tokens[background]), required }))
     .filter(({ ratio, required }) => ratio < required)
     .map(({ foreground, background, ratio, required }) => `${foreground} on ${background}: ${ratio.toFixed(2)} < ${required}`);
+
+export const desktopFirstQueries = (css) => [...stripComments(css).matchAll(/@media[^{]*\(max-width:[^)]*\)/g)].map((match) => match[0].trim());

@@ -4,6 +4,7 @@ import {
   classesInHtml,
   contrastPairs,
   darkTokens,
+  desktopFirstQueries,
   fibonacciProblems,
   goldenProblems,
   hardcodedColors,
@@ -137,4 +138,11 @@ test('contrastPairs reports pairs below the required ratio', () => {
   assert.deepEqual(contrastPairs(tokens, [['--grey', '--color-background']]), ['--grey on --color-background: 4.48 < 4.5']);
   assert.deepEqual(contrastPairs(tokens, [['--grey', '--color-background', 3]]), []);
   assert.deepEqual(contrastPairs(tokens, [['--grey', '--color-background']], 3), []);
+});
+
+test('desktopFirstQueries finds max-width media queries only', () => {
+  assert.deepEqual(desktopFirstQueries('@media (max-width: 600px) { a {} } @media (min-width: 600px) { a {} } /* @media (max-width: 1px) */'), [
+    '@media (max-width: 600px)',
+  ]);
+  assert.deepEqual(desktopFirstQueries('a {}'), []);
 });
