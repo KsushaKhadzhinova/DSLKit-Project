@@ -133,6 +133,8 @@ The styles of the DSLKit project are split into files following the BEM methodol
 
   --color-primary: #2563eb;
   --color-on-primary: #ffffff;
+  --color-primary-text: #1d4ed8;
+  --color-cta-end: #7c3aed;
   --color-diagram-paper: #ffffff;
   --color-secondary: #e8efff;
   --color-accent: #16a34a;
@@ -829,6 +831,26 @@ label > span {
   max-width: var(--measure);
   color: var(--color-text-light);
   font-size: var(--step-1);
+}
+
+.hero__cta {
+  display: grid;
+  gap: var(--space-2);
+  justify-items: stretch;
+  width: 100%;
+  padding: var(--space-3);
+  border-radius: var(--radius-large);
+  background: var(--color-primary);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-cta-end));
+  box-shadow: var(--shadow-large);
+  color: var(--color-on-primary);
+}
+
+.hero__cta-note {
+  margin: 0;
+  color: var(--color-on-primary);
+  font-size: var(--step--1);
+  text-align: center;
 }
 
 .hero__actions {
