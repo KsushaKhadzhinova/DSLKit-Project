@@ -46,6 +46,8 @@ h1,
 h2,
 h3,
 h4 {
+  overflow-wrap: break-word;
+  hyphens: auto;
   line-height: var(--line-heading);
   letter-spacing: -0.02em;
   text-wrap: balance;

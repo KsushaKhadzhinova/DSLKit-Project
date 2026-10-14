@@ -7,6 +7,7 @@ import { TOKENS } from '../../tools/tokens.js';
 import {
   contrastPairs,
   darkTokens,
+  colorMixWithoutFallback,
   desktopFirstQueries,
   fibonacciProblems,
   goldenProblems,
@@ -14,6 +15,7 @@ import {
   importedFiles,
   lightTokens,
   mediaBreakpoints,
+  missingVariables,
   smallFonts,
   spacingProblems,
   typeScaleProblems,
@@ -135,4 +137,48 @@ test('the header is sticky, focus is visible, reduced motion is respected and a 
 
 test('the styles are mobile first: only min-width media queries are used for layout', () => {
   assert.deepEqual(desktopFirstQueries(allCss), []);
+});
+
+test('the variables named in the assignment exist', () => {
+  const required = [
+    '--color-primary',
+    '--color-secondary',
+    '--color-accent',
+    '--color-background',
+    '--color-text',
+    '--color-text-light',
+    '--font-family-main',
+    '--font-size-base',
+    '--font-size-h1',
+    '--font-size-h2',
+    '--spacing-small',
+    '--spacing-medium',
+    '--spacing-large',
+    '--spacing-xlarge',
+    '--container-max-width',
+    '--breakpoint-mobile',
+    '--breakpoint-tablet',
+    '--breakpoint-desktop',
+  ];
+  assert.deepEqual(missingVariables(light, required), []);
+});
+
+test('the navigation is a horizontal menu from 768 px and a burger below it', () => {
+  assert.match(sheets['header.css'], /\.burger__button\s*\{[^}]*display:\s*inline-flex/);
+  assert.match(sheets['header.css'], /\.nav\s*\{[^}]*display:\s*none/);
+  assert.match(sheets['adaptive.css'], /@media \(min-width: 768px\)\s*\{[\s\S]*?\.burger__button\s*\{[^}]*display:\s*none/);
+  assert.match(sheets['adaptive.css'], /@media \(min-width: 768px\)\s*\{[\s\S]*?\.nav\s*\{[^}]*display:\s*block/);
+});
+
+test('the cards use one column on a phone, two on a tablet and three on a desktop', () => {
+  assert.match(sheets['components.css'], /\.cards\s*\{[^}]*grid-template-columns:\s*1fr/);
+  assert.match(sheets['adaptive.css'], /@media \(min-width: 576px\)\s*\{[\s\S]*?\.cards\s*\{[^}]*repeat\(2,/);
+  assert.match(sheets['adaptive.css'], /@media \(min-width: 1024px\)\s*\{[\s\S]*?\.cards\s*\{[^}]*repeat\(3,/);
+});
+
+test('every colour mix has a fallback for browsers without color-mix', () => {
+  const offenders = Object.entries(sheets)
+    .map(([name, css]) => [name, colorMixWithoutFallback(css)])
+    .filter(([, lines]) => lines.length);
+  assert.deepEqual(offenders, []);
 });

@@ -89,3 +89,17 @@ export const contrastPairs = (tokens, pairs, minimum = 4.5) =>
     .map(({ foreground, background, ratio, required }) => `${foreground} on ${background}: ${ratio.toFixed(2)} < ${required}`);
 
 export const desktopFirstQueries = (css) => [...stripComments(css).matchAll(/@media[^{]*\(max-width:[^)]*\)/g)].map((match) => match[0].trim());
+
+export const colorMixWithoutFallback = (css) => {
+  const lines = stripComments(css)
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+  return lines
+    .map((line, index) => ({ line, previous: lines[index - 1] ?? '' }))
+    .filter(({ line }) => /^[a-z-]+:\s*color-mix\(/.test(line))
+    .filter(({ line, previous }) => !previous.startsWith(`${line.split(':')[0]}:`))
+    .map(({ line }) => line);
+};
+
+export const missingVariables = (tokens, names) => names.filter((name) => !(name in tokens));

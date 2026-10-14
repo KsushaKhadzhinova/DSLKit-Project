@@ -66,6 +66,20 @@
   --breakpoint-small: 576px;
   --breakpoint-medium: 768px;
   --breakpoint-large: 1024px;
+
+  /* Names required by the lab assignment; they alias the golden-ratio scales above. */
+  --font-family-main: var(--font-sans);
+  --font-size-base: 16px;
+  --font-size-h1: var(--step-5);
+  --font-size-h2: var(--step-4);
+  --spacing-small: var(--space-1);
+  --spacing-medium: var(--space-2);
+  --spacing-large: var(--space-3);
+  --spacing-xlarge: var(--space-4);
+  --container-max-width: var(--container);
+  --breakpoint-mobile: 576px;
+  --breakpoint-tablet: 768px;
+  --breakpoint-desktop: 1024px;
 }
 
 /* Dark theme: the checkbox in the header switches it without JavaScript. */

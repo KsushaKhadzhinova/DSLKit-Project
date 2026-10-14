@@ -433,22 +433,26 @@
   width: 3.5ch;
   margin-right: var(--space-2);
   margin-left: var(--space-1);
+  color: var(--color-code-text);
   color: color-mix(in srgb, var(--color-code-text) 55%, var(--color-code-background));
   text-align: right;
   user-select: none;
 }
 
 .code__line--error {
+  background: var(--color-secondary);
   background: color-mix(in srgb, var(--color-error) 24%, transparent);
   box-shadow: inset 3px 0 var(--color-error);
 }
 
 .code__keyword {
+  color: var(--color-code-text);
   color: color-mix(in srgb, var(--color-primary) 45%, var(--color-code-text));
   font-weight: 600;
 }
 
 .code__string {
+  color: var(--color-code-text);
   color: color-mix(in srgb, var(--color-accent) 55%, var(--color-code-text));
 }
 
@@ -725,6 +729,7 @@
 }
 
 .modal::backdrop {
+  background: rgb(0 0 0 / 0.45);
   background: color-mix(in srgb, var(--color-text) 45%, transparent);
 }
 

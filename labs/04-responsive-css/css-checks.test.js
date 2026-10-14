@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import {
   classesInHtml,
+  colorMixWithoutFallback,
   contrastPairs,
   darkTokens,
   desktopFirstQueries,
@@ -11,6 +12,7 @@ import {
   importedFiles,
   lightTokens,
   mediaBreakpoints,
+  missingVariables,
   pixels,
   selectorClasses,
   smallFonts,
@@ -145,4 +147,18 @@ test('desktopFirstQueries finds max-width media queries only', () => {
     '@media (max-width: 600px)',
   ]);
   assert.deepEqual(desktopFirstQueries('a {}'), []);
+});
+
+test('colorMixWithoutFallback wants an earlier declaration of the same property', () => {
+  const mixed = 'color: color-mix(in srgb, red, blue);';
+  assert.deepEqual(colorMixWithoutFallback(`a {\n  color: red;\n  ${mixed}\n}`), []);
+  assert.deepEqual(colorMixWithoutFallback(`a {\r\n  color: red;\r\n  ${mixed}\r\n}`), []);
+  assert.deepEqual(colorMixWithoutFallback(`a {\n  ${mixed}\n}`), [mixed]);
+  assert.deepEqual(colorMixWithoutFallback(`a {\n  background: red;\n  ${mixed}\n}`), [mixed]);
+  assert.deepEqual(colorMixWithoutFallback('a {\n  background-image: linear-gradient(color-mix(in srgb, red, blue) 1px, red);\n}'), []);
+});
+
+test('missingVariables lists names that are not defined', () => {
+  assert.deepEqual(missingVariables({ '--a': '1', '--b': '2' }, ['--a', '--c']), ['--c']);
+  assert.deepEqual(missingVariables({ '--a': '1' }, ['--a']), []);
 });

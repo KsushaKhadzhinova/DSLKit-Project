@@ -75,13 +75,14 @@
 /* Privacy policy: a readable column of text */
 .policy {
   display: grid;
+  min-width: 0;
   gap: var(--space-3);
   max-width: var(--measure);
   margin: var(--space-5) auto 0;
 }
 
 .policy__title {
-  font-size: var(--step-5);
+  font-size: clamp(var(--step-2), 1rem + 4vw, var(--step-5));
   font-weight: 800;
   letter-spacing: -0.035em;
 }
