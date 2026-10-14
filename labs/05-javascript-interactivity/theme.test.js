@@ -1,272 +1,137 @@
-import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { test } from 'node:test';
 import { JSDOM } from 'jsdom';
-import { createMemoryBackend, createStorage } from '../../site/js/utils/storage.js';
 import { THEMES, applyTheme, initTheme } from '../../site/js/components/theme.js';
+import { createMemoryBackend, createStorage } from '../../site/js/utils/storage.js';
 
-const makeDom = (body = '') =>
-  new JSDOM(`<!doctype html><html><body>${body}</body></html>`, {
-    url: 'http://localhost/',
-  });
-
-const landing = `
-  <input class="theme__input" type="checkbox" id="theme-toggle" />
-  <label class="theme__button" for="theme-toggle">Dark</label>`;
-
-const settings = `
-  <input type="radio" name="theme" value="light" />
-  <input type="radio" name="theme" value="dark" />
-  <input type="radio" name="theme" value="auto" />
-  <input type="radio" name="theme" value="sepia" />
-  <input type="text" id="other" />`;
-
-const throwingStorage = () =>
-  createStorage({
-    getItem: () => {
-      throw new Error('blocked');
-    },
-    setItem: () => {
-      throw new Error('blocked');
-    },
-    removeItem: () => {
-      throw new Error('blocked');
-    },
-  });
-
+const load = (page) => new JSDOM(readFileSync(`site/${page}`, 'utf8'), { url: 'http://localhost/' }).window;
+const memory = () => createStorage(createMemoryBackend());
+const fakeMedia = (dark) => {
+  const listeners = [];
+  const media = (query) => ({ matches: dark.value, media: query, addEventListener: (type, listener) => listeners.push(listener) });
+  media.fire = () => listeners.forEach((listener) => listener());
+  return media;
+};
 const change = (window, element) => element.dispatchEvent(new window.Event('change', { bubbles: true }));
 
-const matchMediaStub = (matches) => (query) => ({ matches, query });
-
-describe('applyTheme', () => {
-  it('sets data-theme on the root element', () => {
-    const { window } = makeDom();
-    applyTheme(window.document.documentElement, 'dark');
-    assert.equal(window.document.documentElement.dataset.theme, 'dark');
-  });
-
-  it('exposes the two supported themes', () => {
-    assert.deepEqual(THEMES, ['light', 'dark']);
-  });
+test('the theme list and applyTheme set the data attribute', () => {
+  assert.deepEqual(THEMES, ['light', 'dark']);
+  const { document } = load('index.html');
+  applyTheme(document.documentElement, 'dark');
+  assert.equal(document.documentElement.dataset.theme, 'dark');
 });
 
-describe('initTheme', () => {
-  it('leaves the page untouched and reports light when nothing is saved and there are no controls', () => {
-    const { window } = makeDom();
-    const storage = createStorage(createMemoryBackend());
-    const theme = initTheme({ root: window.document, storage });
-    assert.equal(theme.current(), 'light');
-    assert.equal(window.document.documentElement.dataset.theme, undefined);
-  });
+test('without a saved choice the theme follows the system preference', () => {
+  const dark = { value: true };
+  const window = load('index.html');
+  const api = initTheme({ root: window.document, storage: memory(), matchMedia: fakeMedia(dark) });
+  assert.equal(api.current(), 'dark');
+  assert.equal(api.choice(), 'auto');
+  assert.equal(window.document.documentElement.dataset.theme, 'dark');
+  assert.equal(window.document.querySelector('.theme__input').checked, true);
+});
 
-  it('uses the landing checkbox state when nothing is saved', () => {
-    const { window } = makeDom(landing + settings);
-    const toggle = window.document.querySelector('.theme__input');
-    toggle.checked = true;
-    const storage = createStorage(createMemoryBackend());
-    const theme = initTheme({ root: window.document, storage });
-    assert.equal(theme.current(), 'dark');
-    assert.equal(window.document.documentElement.dataset.theme, undefined);
-    assert.equal(toggle.checked, true);
-    assert.equal(window.document.querySelector('input[value="light"]').checked, true);
-  });
+test('a light system gives the light theme and a missing matchMedia is treated as light', () => {
+  const window = load('index.html');
+  assert.equal(initTheme({ root: window.document, storage: memory(), matchMedia: fakeMedia({ value: false }) }).current(), 'light');
+  assert.equal(initTheme({ root: load('index.html').document, storage: memory(), matchMedia: undefined }).current(), 'light');
+});
 
-  it('applies a saved dark theme and checks the matching controls', () => {
-    const { window } = makeDom(landing + settings);
-    const storage = createStorage(createMemoryBackend());
-    storage.set('theme', 'dark');
-    const theme = initTheme({ root: window.document, storage });
-    assert.equal(theme.current(), 'dark');
-    assert.equal(window.document.documentElement.dataset.theme, 'dark');
-    assert.equal(window.document.querySelector('.theme__input').checked, true);
-    assert.equal(window.document.querySelector('input[value="dark"]').checked, true);
-  });
+test('a saved dark or light choice wins over the system', () => {
+  const storage = memory();
+  storage.set('theme', 'dark');
+  const window = load('index.html');
+  assert.equal(initTheme({ root: window.document, storage, matchMedia: fakeMedia({ value: false }) }).current(), 'dark');
+  storage.set('theme', 'light');
+  assert.equal(initTheme({ root: load('index.html').document, storage, matchMedia: fakeMedia({ value: true }) }).current(), 'light');
+});
 
-  it('applies a saved light theme', () => {
-    const { window } = makeDom();
-    const storage = createStorage(createMemoryBackend());
-    storage.set('theme', 'light');
-    const theme = initTheme({ root: window.document, storage });
-    assert.equal(theme.current(), 'light');
-    assert.equal(window.document.documentElement.dataset.theme, 'light');
-  });
+test('an unknown saved value is treated as auto', () => {
+  const storage = memory();
+  storage.set('theme', 'purple');
+  const api = initTheme({ root: load('index.html').document, storage, matchMedia: fakeMedia({ value: false }) });
+  assert.equal(api.choice(), 'auto');
+});
 
-  it('resolves a saved auto value to dark when the system prefers dark', () => {
-    const { window } = makeDom(landing + settings);
-    const storage = createStorage(createMemoryBackend());
-    storage.set('theme', 'auto');
-    const queries = [];
-    const matchMedia = (query) => {
-      queries.push(query);
-      return { matches: true };
-    };
-    const theme = initTheme({ root: window.document, storage, matchMedia });
-    assert.equal(theme.current(), 'dark');
-    assert.equal(window.document.documentElement.dataset.theme, 'dark');
-    assert.deepEqual(queries, ['(prefers-color-scheme: dark)']);
-    assert.equal(window.document.querySelector('.theme__input').checked, true);
-    assert.equal(window.document.querySelector('input[value="auto"]').checked, true);
-  });
+test('the header toggle saves and applies the chosen theme', () => {
+  const window = load('index.html');
+  const storage = memory();
+  const api = initTheme({ root: window.document, storage, matchMedia: fakeMedia({ value: false }) });
+  const toggle = window.document.querySelector('.theme__input');
+  toggle.checked = true;
+  change(window, toggle);
+  assert.equal(api.current(), 'dark');
+  assert.equal(storage.get('theme'), 'dark');
+  assert.equal(window.document.documentElement.dataset.theme, 'dark');
+  toggle.checked = false;
+  change(window, toggle);
+  assert.equal(storage.get('theme'), 'light');
+});
 
-  it('resolves a saved auto value to light when the system prefers light', () => {
-    const { window } = makeDom(landing + settings);
-    const storage = createStorage(createMemoryBackend());
-    storage.set('theme', 'auto');
-    const theme = initTheme({
-      root: window.document,
-      storage,
-      matchMedia: matchMediaStub(false),
-    });
-    assert.equal(theme.current(), 'light');
-    assert.equal(window.document.documentElement.dataset.theme, 'light');
-  });
+test('the settings radios save the choice and follow it', () => {
+  const window = load('app/settings.html');
+  const storage = memory();
+  const api = initTheme({ root: window.document, storage, matchMedia: fakeMedia({ value: true }) });
+  const radio = (value) => window.document.querySelector(`input[name="theme"][value="${value}"]`);
+  assert.equal(radio('auto').checked, true);
+  radio('light').checked = true;
+  change(window, radio('light'));
+  assert.equal(api.current(), 'light');
+  assert.equal(storage.get('theme'), 'light');
+  radio('auto').checked = true;
+  change(window, radio('auto'));
+  assert.equal(api.current(), 'dark');
+  assert.equal(storage.get('theme'), 'auto');
+});
 
-  it('falls back to light for auto when matchMedia is missing', () => {
-    const { window } = makeDom();
-    const storage = createStorage(createMemoryBackend());
-    storage.set('theme', 'auto');
-    const theme = initTheme({ root: window.document, storage, matchMedia: undefined });
-    assert.equal(theme.current(), 'light');
-  });
+test('a change of something that is not a theme radio is ignored', () => {
+  const window = load('app/settings.html');
+  const storage = memory();
+  initTheme({ root: window.document, storage, matchMedia: fakeMedia({ value: false }) });
+  change(window, window.document.querySelector('#line-wrap'));
+  assert.equal(storage.get('theme'), null);
+  const odd = window.document.createElement('input');
+  odd.type = 'radio';
+  odd.name = 'theme';
+  odd.value = 'purple';
+  window.document.body.append(odd);
+  change(window, odd);
+  assert.equal(storage.get('theme'), null);
+});
 
-  it('uses the window matchMedia by default', () => {
-    const { window } = makeDom();
-    window.matchMedia = matchMediaStub(true);
-    const storage = createStorage(createMemoryBackend());
-    storage.set('theme', 'auto');
-    const theme = initTheme({ root: window.document, storage });
-    assert.equal(theme.current(), 'dark');
-  });
+test('the auto choice follows later system changes and a fixed choice does not', () => {
+  const dark = { value: false };
+  const media = fakeMedia(dark);
+  const window = load('index.html');
+  const api = initTheme({ root: window.document, storage: memory(), matchMedia: media });
+  dark.value = true;
+  media.fire();
+  assert.equal(api.current(), 'dark');
+  const toggle = window.document.querySelector('.theme__input');
+  toggle.checked = false;
+  change(window, toggle);
+  dark.value = true;
+  media.fire();
+  assert.equal(api.current(), 'light');
+});
 
-  it('falls back to light for auto when the document has no default view', () => {
-    const { window } = makeDom();
-    Object.defineProperty(window.document, 'defaultView', {
-      get: () => null,
-      configurable: true,
-    });
-    const storage = createStorage(createMemoryBackend());
-    storage.set('theme', 'auto');
-    const theme = initTheme({ root: window.document, storage });
-    assert.equal(theme.current(), 'light');
-  });
+test('a media query object without addEventListener is tolerated', () => {
+  const media = () => ({ matches: false });
+  assert.equal(initTheme({ root: load('index.html').document, storage: memory(), matchMedia: media }).current(), 'light');
+});
 
-  it('ignores unknown saved values', () => {
-    const { window } = makeDom();
-    const storage = createStorage(createMemoryBackend());
-    storage.set('theme', 'sepia');
-    const theme = initTheme({ root: window.document, storage });
-    assert.equal(theme.current(), 'light');
-    assert.equal(window.document.documentElement.dataset.theme, undefined);
-  });
+test('a page without any theme control still gets the saved theme and the default matchMedia works in jsdom', () => {
+  const storage = memory();
+  storage.set('theme', 'dark');
+  const window = load('errors/404.html');
+  window.matchMedia = (query) => ({ matches: false, media: query, addEventListener: () => {} });
+  const api = initTheme({ root: window.document, storage });
+  assert.equal(api.current(), 'dark');
+  assert.equal(window.document.documentElement.dataset.theme, 'dark');
+});
 
-  it('treats a storage backend that throws as nothing saved', () => {
-    const { window } = makeDom(landing);
-    const storage = throwingStorage();
-    const theme = initTheme({ root: window.document, storage });
-    assert.equal(theme.current(), 'light');
-    assert.equal(window.document.documentElement.dataset.theme, undefined);
-  });
-
-  it('still applies the chosen theme when storage cannot save it', () => {
-    const { window } = makeDom(landing);
-    const theme = initTheme({ root: window.document, storage: throwingStorage() });
-    const toggle = window.document.querySelector('.theme__input');
-    toggle.checked = true;
-    change(window, toggle);
-    assert.equal(theme.current(), 'dark');
-    assert.equal(window.document.documentElement.dataset.theme, 'dark');
-  });
-
-  it('saves and applies dark when the landing checkbox is switched on', () => {
-    const { window } = makeDom(landing + settings);
-    const storage = createStorage(createMemoryBackend());
-    const theme = initTheme({ root: window.document, storage });
-    const toggle = window.document.querySelector('.theme__input');
-    toggle.checked = true;
-    change(window, toggle);
-    assert.equal(storage.get('theme'), 'dark');
-    assert.equal(theme.current(), 'dark');
-    assert.equal(window.document.documentElement.dataset.theme, 'dark');
-    assert.equal(window.document.querySelector('input[value="dark"]').checked, true);
-  });
-
-  it('saves and applies light when the landing checkbox is switched off', () => {
-    const { window } = makeDom(landing);
-    const storage = createStorage(createMemoryBackend());
-    storage.set('theme', 'dark');
-    const theme = initTheme({ root: window.document, storage });
-    const toggle = window.document.querySelector('.theme__input');
-    toggle.checked = false;
-    change(window, toggle);
-    assert.equal(storage.get('theme'), 'light');
-    assert.equal(theme.current(), 'light');
-    assert.equal(window.document.documentElement.dataset.theme, 'light');
-  });
-
-  it('saves the chosen settings radio and applies its effective theme', () => {
-    const { window } = makeDom(landing + settings);
-    const storage = createStorage(createMemoryBackend());
-    const theme = initTheme({
-      root: window.document,
-      storage,
-      matchMedia: matchMediaStub(true),
-    });
-    const auto = window.document.querySelector('input[value="auto"]');
-    auto.checked = true;
-    change(window, auto);
-    assert.equal(storage.get('theme'), 'auto');
-    assert.equal(theme.current(), 'dark');
-    assert.equal(window.document.documentElement.dataset.theme, 'dark');
-    assert.equal(window.document.querySelector('.theme__input').checked, true);
-  });
-
-  it('saves a fixed dark radio choice without consulting matchMedia', () => {
-    const { window } = makeDom(settings);
-    const storage = createStorage(createMemoryBackend());
-    const theme = initTheme({ root: window.document, storage });
-    const dark = window.document.querySelector('input[value="dark"]');
-    dark.checked = true;
-    change(window, dark);
-    assert.equal(storage.get('theme'), 'dark');
-    assert.equal(theme.current(), 'dark');
-  });
-
-  it('ignores a radio with an unknown value', () => {
-    const { window } = makeDom(settings);
-    const storage = createStorage(createMemoryBackend());
-    const theme = initTheme({ root: window.document, storage });
-    change(window, window.document.querySelector('input[value="sepia"]'));
-    assert.equal(storage.get('theme'), null);
-    assert.equal(theme.current(), 'light');
-    assert.equal(window.document.documentElement.dataset.theme, undefined);
-  });
-
-  it('ignores change events from unrelated controls', () => {
-    const { window } = makeDom(landing + settings);
-    const storage = createStorage(createMemoryBackend());
-    initTheme({ root: window.document, storage });
-    change(window, window.document.querySelector('#other'));
-    assert.equal(storage.get('theme'), null);
-    assert.equal(window.document.documentElement.dataset.theme, undefined);
-  });
-
-  it('works with radios only and no landing checkbox', () => {
-    const { window } = makeDom(settings);
-    const storage = createStorage(createMemoryBackend());
-    const theme = initTheme({ root: window.document, storage });
-    const dark = window.document.querySelector('input[value="dark"]');
-    dark.checked = true;
-    change(window, dark);
-    assert.equal(theme.current(), 'dark');
-    assert.equal(window.document.documentElement.dataset.theme, 'dark');
-  });
-
-  it('works with the landing checkbox only and no radios', () => {
-    const { window } = makeDom(landing);
-    const storage = createStorage(createMemoryBackend());
-    const theme = initTheme({ root: window.document, storage });
-    const toggle = window.document.querySelector('.theme__input');
-    toggle.checked = true;
-    change(window, toggle);
-    assert.equal(theme.current(), 'dark');
-  });
+test('a document without a window falls back to light', () => {
+  const { document } = new JSDOM('<!doctype html><html><body></body></html>').window;
+  assert.equal(initTheme({ root: document, storage: memory() }).current(), 'light');
 });

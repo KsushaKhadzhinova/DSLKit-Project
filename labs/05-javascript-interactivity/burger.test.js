@@ -98,4 +98,26 @@ describe('initBurger', () => {
     pressKey(window, window.document, 'Escape');
     assert.equal(burger.isOpen(), false);
   });
+
+  it('moves focus to the burger button when Escape closes the menu while focus is inside it', () => {
+    const { window } = makeDom(header);
+    const input = window.document.querySelector('.burger__input');
+    initBurger({ root: window.document });
+    input.checked = true;
+    window.document.querySelector('a.nav__link').focus();
+    pressKey(window, window.document, 'Escape');
+    assert.equal(input.checked, false);
+    assert.equal(window.document.activeElement, input);
+  });
+
+  it('leaves focus alone when it is outside the navigation', () => {
+    const { window } = makeDom(`${header}<button id="other">other</button>`);
+    const input = window.document.querySelector('.burger__input');
+    const other = window.document.querySelector('#other');
+    const burger = initBurger({ root: window.document });
+    input.checked = true;
+    other.focus();
+    burger.close();
+    assert.equal(window.document.activeElement, other);
+  });
 });

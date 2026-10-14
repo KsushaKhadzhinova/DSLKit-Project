@@ -10,69 +10,58 @@ export const applyTheme = (documentElement, theme) => {
 
 const readSaved = (storage) => {
   const value = storage.get(STORAGE_KEY, null);
-  return SAVED_VALUES.includes(value) ? value : null;
+  return SAVED_VALUES.includes(value) ? value : 'auto';
 };
 
 const systemPrefersDark = (matchMedia) => typeof matchMedia === 'function' && matchMedia(DARK_QUERY).matches;
 
 const resolveTheme = (choice, matchMedia) => {
-  if (choice !== 'auto') {
-    return choice;
-  }
+  if (choice !== 'auto') return choice;
   return systemPrefersDark(matchMedia) ? 'dark' : 'light';
 };
-
-const pageChoice = (toggle) => (toggle && toggle.checked ? 'dark' : 'light');
 
 const defaultMatchMedia = (root) => {
   const view = root.defaultView;
   return view && typeof view.matchMedia === 'function' ? view.matchMedia.bind(view) : undefined;
 };
 
+// Without a saved choice the theme follows the system; the choice 'auto' also follows later system changes.
 export const initTheme = ({ root = document, storage, matchMedia = defaultMatchMedia(root) } = {}) => {
   const html = root.documentElement;
   const toggle = root.querySelector('.theme__input');
-  const saved = readSaved(storage);
-  let current = saved === null ? pageChoice(toggle) : resolveTheme(saved, matchMedia);
+  let choice = readSaved(storage);
+  let current = resolveTheme(choice, matchMedia);
 
-  const sync = (choice) => {
-    if (toggle) {
-      toggle.checked = current === 'dark';
-    }
+  const apply = (nextChoice) => {
+    choice = nextChoice;
+    current = resolveTheme(choice, matchMedia);
+    applyTheme(html, current);
+    if (toggle) toggle.checked = current === 'dark';
     root.querySelectorAll('input[name="theme"]').forEach((radio) => {
       radio.checked = radio.value === choice;
     });
   };
 
-  const apply = (theme, choice) => {
-    current = theme;
-    applyTheme(html, current);
-    sync(choice);
-  };
+  apply(choice);
 
-  if (saved !== null) {
-    applyTheme(html, current);
-  }
-  sync(saved ?? 'light');
-
-  if (toggle) {
-    toggle.addEventListener('change', () => {
-      const value = toggle.checked ? 'dark' : 'light';
-      storage.set(STORAGE_KEY, value);
-      apply(value, value);
-    });
-  }
+  toggle?.addEventListener('change', () => {
+    const value = toggle.checked ? 'dark' : 'light';
+    storage.set(STORAGE_KEY, value);
+    apply(value);
+  });
 
   root.addEventListener('change', (event) => {
     const radio = event.target.closest('input[name="theme"]');
-    if (!radio || !SAVED_VALUES.includes(radio.value)) {
-      return;
-    }
+    if (!radio || !SAVED_VALUES.includes(radio.value)) return;
     storage.set(STORAGE_KEY, radio.value);
-    apply(resolveTheme(radio.value, matchMedia), radio.value);
+    apply(radio.value);
   });
 
-  return {
-    current: () => current,
-  };
+  if (typeof matchMedia === 'function') {
+    matchMedia(DARK_QUERY).addEventListener?.('change', () => {
+      if (choice === 'auto') apply('auto');
+    });
+  }
+
+  return { current: () => current, choice: () => choice };
 };
