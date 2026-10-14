@@ -639,6 +639,12 @@ label > span {
 }
 
 .burger__label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
   line-height: 1;
 }
 
@@ -705,7 +711,6 @@ label > span {
 }
 
 .theme__input {
-  display: none;
   position: absolute;
   width: 1px;
   height: 1px;
@@ -715,15 +720,15 @@ label > span {
 }
 
 .theme__button {
-  display: none;
+  display: inline-flex;
   align-items: center;
   min-height: var(--target-size-small);
-  padding: 0 var(--space-2);
+  padding: 0 var(--space-1);
   border: 1px solid var(--color-border-strong);
   border-radius: 999px;
   color: var(--color-text-light);
   cursor: pointer;
-  font-size: var(--step--1);
+  font-size: 0.75rem;
   font-weight: 600;
   white-space: nowrap;
   transition:
@@ -1004,6 +1009,23 @@ label > span {
   }
 }
 
+@media (min-width: 400px) {
+  .burger__label {
+    position: static;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    clip-path: none;
+  }
+}
+
+@media (min-width: 576px) {
+  .theme__button {
+    padding: 0 var(--space-2);
+    font-size: var(--step--1);
+  }
+}
+
 @media (min-width: 768px) {
   .header__lang,
   .header__cta {
@@ -1062,14 +1084,6 @@ label > span {
 }
 
 @media (min-width: 1024px) {
-  .theme__input {
-    display: block;
-  }
-
-  .theme__button {
-    display: inline-flex;
-  }
-
   .header__inner {
     gap: var(--space-3);
   }

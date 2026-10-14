@@ -115,6 +115,12 @@
 }
 
 .burger__label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
   line-height: 1;
 }
 
@@ -181,7 +187,6 @@
 }
 
 .theme__input {
-  display: none;
   position: absolute;
   width: 1px;
   height: 1px;
@@ -191,15 +196,15 @@
 }
 
 .theme__button {
-  display: none;
+  display: inline-flex;
   align-items: center;
   min-height: var(--target-size-small);
-  padding: 0 var(--space-2);
+  padding: 0 var(--space-1);
   border: 1px solid var(--color-border-strong);
   border-radius: 999px;
   color: var(--color-text-light);
   cursor: pointer;
-  font-size: var(--step--1);
+  font-size: 0.75rem;
   font-weight: 600;
   white-space: nowrap;
   transition:
