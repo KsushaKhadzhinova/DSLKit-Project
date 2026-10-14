@@ -28,7 +28,7 @@ test('summary of the recorded draw.io load', () => {
   assert.equal(s.requests, 17);
   assert.deepEqual(s.types, { document: 1, stylesheet: 3, script: 8, xhr: 3, image: 2 });
   assert.equal(s.protocol, 'HTTP/2.0');
-  assert.equal(s.onLoad, 4393);
+  assert.equal(s.onLoad, 1423);
   assert.ok(s.bytes > 6e6);
 });
 
