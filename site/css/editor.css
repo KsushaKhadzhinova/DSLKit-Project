@@ -481,9 +481,14 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: var(--space-2);
   padding: var(--space-1) var(--space-3);
+}
+
+.canvas__diagram[hidden],
+.canvas__remote[hidden] {
+  display: none;
 }
 
 .canvas__render,
@@ -530,6 +535,7 @@
 }
 
 .canvas__breadcrumb {
+  margin-inline-end: auto;
   color: var(--color-text-light);
   font-family: var(--font-mono);
   font-size: var(--step--1);

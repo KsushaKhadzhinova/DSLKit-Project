@@ -57,7 +57,7 @@ test('the render button sends DOT built from the editor code and shows a sanitiz
   assert.equal($('.canvas__remote').hidden, false);
   assert.equal($('.canvas__remote svg').getAttribute('role'), 'img');
   assert.equal($('.canvas__remote script'), null);
-  assert.equal($('.canvas__diagram').hidden, true);
+  assert.equal($('.canvas__diagram').hasAttribute('hidden'), true);
   assert.match($('.canvas__status').textContent, /получена от сервиса Kroki/);
   assert.equal($('.canvas').getAttribute('aria-busy'), 'false');
   assert.equal($('.canvas__render').disabled, false);
@@ -152,7 +152,7 @@ test('offline without a saved copy shows the offline message and sends nothing',
   const { window, api, $ } = setup({ online: false });
   click(window, $('.canvas__render'));
   await flush();
-  assert.match($('.canvas__status').textContent, /Нет соединения/);
+  assert.match($('.canvas__status').textContent, /Нет соединения с интернетом\. Сохранённой копии/);
   assert.equal(api.renderDiagram.mock.callCount(), 0);
 });
 

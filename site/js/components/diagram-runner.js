@@ -5,7 +5,7 @@ import { parseDsl, sanitizeSvg, sourceKey, toDot } from '../utils/dataParser.js'
 
 const MESSAGES = {
   empty: 'В редакторе нет кода диаграммы.',
-  offline: 'Нет соединения с интернетом, а сохранённой копии этой диаграммы нет.',
+  offline: 'Нет соединения с интернетом.',
   timeout: 'Сервер не ответил вовремя. Попробуйте ещё раз.',
   network: 'Сервер временно недоступен. Проверьте соединение.',
   invalid: 'Сервис вернул неожиданный ответ.',
@@ -67,7 +67,7 @@ export const initDiagramRunner = ({
     svg.setAttribute('aria-label', 'Диаграмма, полученная от сервиса Kroki');
     remote.replaceChildren(root.importNode(svg, true));
     remote.hidden = false;
-    if (local) local.hidden = true;
+    local?.setAttribute('hidden', '');
     setStatus(note);
     return true;
   };
@@ -120,7 +120,7 @@ export const initDiagramRunner = ({
       if (error.kind !== 'aborted') {
         logger.error('DSLKit: не удалось получить диаграмму', error.kind, error.status ?? '');
         const shown = cached && show(cached.data, `Кэшированные данные от ${formatTime(cached.savedAt)}. ${errorMessage(error)}`);
-        if (!shown) setStatus(errorMessage(error));
+        if (!shown) setStatus(error.kind === 'offline' ? `${errorMessage(error)} Сохранённой копии этой диаграммы нет.` : errorMessage(error));
       }
     }
     // A cancelled run belongs to an older request, so only the newest one may release the buttons.
