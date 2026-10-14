@@ -24,7 +24,10 @@ import {
 
 const SITE = join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'site');
 const CSS_DIR = join(SITE, 'css');
-const walk = (dir) => readdirSync(dir).flatMap((name) => (statSync(join(dir, name)).isDirectory() ? walk(join(dir, name)) : [join(dir, name)]));
+const walk = (dir) =>
+  readdirSync(dir)
+    .filter((name) => name !== 'design')
+    .flatMap((name) => (statSync(join(dir, name)).isDirectory() ? walk(join(dir, name)) : [join(dir, name)]));
 const read = (file) => readFileSync(file, 'utf8');
 const sheets = Object.fromEntries(readdirSync(CSS_DIR).map((name) => [name, read(join(CSS_DIR, name))]));
 const allCss = Object.values(sheets).join('\n');

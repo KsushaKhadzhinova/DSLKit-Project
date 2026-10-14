@@ -1,109 +1,581 @@
 <!doctype html>
 <html lang="ru">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta name="robots" content="noindex" />
-<title>Макеты DSLKit на согласование</title>
-<style>
-body{margin:0;padding:24px;background:#f1f3f9;color:#1c1f2e;font-family:Inter,system-ui,sans-serif}
-h1{margin:0 0 8px}h2{margin:40px 0 16px}small{color:#6b7285;font-weight:400}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
-figure{margin:0;padding:12px;background:#fff;border:1px solid #dde1e9;border-radius:12px}
-img{display:block;width:100%;height:auto;max-height:420px;object-fit:contain;object-position:top;border-radius:6px;background:#eee}
-figcaption{margin-top:8px;font-size:13px;color:#4a5068;overflow-wrap:anywhere}
-</style>
-</head>
-<body>
-<h1>Макеты DSLKit на согласование</h1>
-<p>Русский и английский варианты, светлая и тёмная темы. Нажмите на картинку, чтобы открыть макет целиком.</p>
-<section><h2>Мудборд и образцы <small>2</small></h2><div class="grid">
-<figure><a href="moodboard/moodboard-en.svg"><img src="moodboard/moodboard-en.svg" alt="moodboard-en.svg" loading="lazy" /></a><figcaption>moodboard-en</figcaption></figure>
-<figure><a href="moodboard/moodboard-ru.svg"><img src="moodboard/moodboard-ru.svg" alt="moodboard-ru.svg" loading="lazy" /></a><figcaption>moodboard-ru</figcaption></figure>
-</div></section>
-<section><h2>Палитра и типографика <small>4</small></h2><div class="grid">
-<figure><a href="foundations/palette-en.svg"><img src="foundations/palette-en.svg" alt="palette-en.svg" loading="lazy" /></a><figcaption>palette-en</figcaption></figure>
-<figure><a href="foundations/palette-ru.svg"><img src="foundations/palette-ru.svg" alt="palette-ru.svg" loading="lazy" /></a><figcaption>palette-ru</figcaption></figure>
-<figure><a href="foundations/typography-en.svg"><img src="foundations/typography-en.svg" alt="typography-en.svg" loading="lazy" /></a><figcaption>typography-en</figcaption></figure>
-<figure><a href="foundations/typography-ru.svg"><img src="foundations/typography-ru.svg" alt="typography-ru.svg" loading="lazy" /></a><figcaption>typography-ru</figcaption></figure>
-</div></section>
-<section><h2>Макеты сайта <small>24</small></h2><div class="grid">
-<figure><a href="mockups-site/error404-desktop-en-dark.svg"><img src="mockups-site/error404-desktop-en-dark.svg" alt="error404-desktop-en-dark.svg" loading="lazy" /></a><figcaption>error404-desktop-en-dark</figcaption></figure>
-<figure><a href="mockups-site/error404-desktop-en-light.svg"><img src="mockups-site/error404-desktop-en-light.svg" alt="error404-desktop-en-light.svg" loading="lazy" /></a><figcaption>error404-desktop-en-light</figcaption></figure>
-<figure><a href="mockups-site/error404-desktop-ru-dark.svg"><img src="mockups-site/error404-desktop-ru-dark.svg" alt="error404-desktop-ru-dark.svg" loading="lazy" /></a><figcaption>error404-desktop-ru-dark</figcaption></figure>
-<figure><a href="mockups-site/error404-desktop-ru-light.svg"><img src="mockups-site/error404-desktop-ru-light.svg" alt="error404-desktop-ru-light.svg" loading="lazy" /></a><figcaption>error404-desktop-ru-light</figcaption></figure>
-<figure><a href="mockups-site/landing-desktop-en-dark.svg"><img src="mockups-site/landing-desktop-en-dark.svg" alt="landing-desktop-en-dark.svg" loading="lazy" /></a><figcaption>landing-desktop-en-dark</figcaption></figure>
-<figure><a href="mockups-site/landing-desktop-en-light.svg"><img src="mockups-site/landing-desktop-en-light.svg" alt="landing-desktop-en-light.svg" loading="lazy" /></a><figcaption>landing-desktop-en-light</figcaption></figure>
-<figure><a href="mockups-site/landing-desktop-ru-dark.svg"><img src="mockups-site/landing-desktop-ru-dark.svg" alt="landing-desktop-ru-dark.svg" loading="lazy" /></a><figcaption>landing-desktop-ru-dark</figcaption></figure>
-<figure><a href="mockups-site/landing-desktop-ru-light.svg"><img src="mockups-site/landing-desktop-ru-light.svg" alt="landing-desktop-ru-light.svg" loading="lazy" /></a><figcaption>landing-desktop-ru-light</figcaption></figure>
-<figure><a href="mockups-site/landing-mobile-en-dark.svg"><img src="mockups-site/landing-mobile-en-dark.svg" alt="landing-mobile-en-dark.svg" loading="lazy" /></a><figcaption>landing-mobile-en-dark</figcaption></figure>
-<figure><a href="mockups-site/landing-mobile-en-light.svg"><img src="mockups-site/landing-mobile-en-light.svg" alt="landing-mobile-en-light.svg" loading="lazy" /></a><figcaption>landing-mobile-en-light</figcaption></figure>
-<figure><a href="mockups-site/landing-mobile-ru-dark.svg"><img src="mockups-site/landing-mobile-ru-dark.svg" alt="landing-mobile-ru-dark.svg" loading="lazy" /></a><figcaption>landing-mobile-ru-dark</figcaption></figure>
-<figure><a href="mockups-site/landing-mobile-ru-light.svg"><img src="mockups-site/landing-mobile-ru-light.svg" alt="landing-mobile-ru-light.svg" loading="lazy" /></a><figcaption>landing-mobile-ru-light</figcaption></figure>
-<figure><a href="mockups-site/landing-tablet-en-dark.svg"><img src="mockups-site/landing-tablet-en-dark.svg" alt="landing-tablet-en-dark.svg" loading="lazy" /></a><figcaption>landing-tablet-en-dark</figcaption></figure>
-<figure><a href="mockups-site/landing-tablet-en-light.svg"><img src="mockups-site/landing-tablet-en-light.svg" alt="landing-tablet-en-light.svg" loading="lazy" /></a><figcaption>landing-tablet-en-light</figcaption></figure>
-<figure><a href="mockups-site/landing-tablet-ru-dark.svg"><img src="mockups-site/landing-tablet-ru-dark.svg" alt="landing-tablet-ru-dark.svg" loading="lazy" /></a><figcaption>landing-tablet-ru-dark</figcaption></figure>
-<figure><a href="mockups-site/landing-tablet-ru-light.svg"><img src="mockups-site/landing-tablet-ru-light.svg" alt="landing-tablet-ru-light.svg" loading="lazy" /></a><figcaption>landing-tablet-ru-light</figcaption></figure>
-<figure><a href="mockups-site/privacy-desktop-en-dark.svg"><img src="mockups-site/privacy-desktop-en-dark.svg" alt="privacy-desktop-en-dark.svg" loading="lazy" /></a><figcaption>privacy-desktop-en-dark</figcaption></figure>
-<figure><a href="mockups-site/privacy-desktop-en-light.svg"><img src="mockups-site/privacy-desktop-en-light.svg" alt="privacy-desktop-en-light.svg" loading="lazy" /></a><figcaption>privacy-desktop-en-light</figcaption></figure>
-<figure><a href="mockups-site/privacy-desktop-ru-dark.svg"><img src="mockups-site/privacy-desktop-ru-dark.svg" alt="privacy-desktop-ru-dark.svg" loading="lazy" /></a><figcaption>privacy-desktop-ru-dark</figcaption></figure>
-<figure><a href="mockups-site/privacy-desktop-ru-light.svg"><img src="mockups-site/privacy-desktop-ru-light.svg" alt="privacy-desktop-ru-light.svg" loading="lazy" /></a><figcaption>privacy-desktop-ru-light</figcaption></figure>
-<figure><a href="mockups-site/thanks-desktop-en-dark.svg"><img src="mockups-site/thanks-desktop-en-dark.svg" alt="thanks-desktop-en-dark.svg" loading="lazy" /></a><figcaption>thanks-desktop-en-dark</figcaption></figure>
-<figure><a href="mockups-site/thanks-desktop-en-light.svg"><img src="mockups-site/thanks-desktop-en-light.svg" alt="thanks-desktop-en-light.svg" loading="lazy" /></a><figcaption>thanks-desktop-en-light</figcaption></figure>
-<figure><a href="mockups-site/thanks-desktop-ru-dark.svg"><img src="mockups-site/thanks-desktop-ru-dark.svg" alt="thanks-desktop-ru-dark.svg" loading="lazy" /></a><figcaption>thanks-desktop-ru-dark</figcaption></figure>
-<figure><a href="mockups-site/thanks-desktop-ru-light.svg"><img src="mockups-site/thanks-desktop-ru-light.svg" alt="thanks-desktop-ru-light.svg" loading="lazy" /></a><figcaption>thanks-desktop-ru-light</figcaption></figure>
-</div></section>
-<section><h2>Макеты приложения <small>16</small></h2><div class="grid">
-<figure><a href="mockups-app/dashboard-desktop-en-dark.svg"><img src="mockups-app/dashboard-desktop-en-dark.svg" alt="dashboard-desktop-en-dark.svg" loading="lazy" /></a><figcaption>dashboard-desktop-en-dark</figcaption></figure>
-<figure><a href="mockups-app/dashboard-desktop-en-light.svg"><img src="mockups-app/dashboard-desktop-en-light.svg" alt="dashboard-desktop-en-light.svg" loading="lazy" /></a><figcaption>dashboard-desktop-en-light</figcaption></figure>
-<figure><a href="mockups-app/dashboard-desktop-ru-dark.svg"><img src="mockups-app/dashboard-desktop-ru-dark.svg" alt="dashboard-desktop-ru-dark.svg" loading="lazy" /></a><figcaption>dashboard-desktop-ru-dark</figcaption></figure>
-<figure><a href="mockups-app/dashboard-desktop-ru-light.svg"><img src="mockups-app/dashboard-desktop-ru-light.svg" alt="dashboard-desktop-ru-light.svg" loading="lazy" /></a><figcaption>dashboard-desktop-ru-light</figcaption></figure>
-<figure><a href="mockups-app/editor-desktop-en-dark.svg"><img src="mockups-app/editor-desktop-en-dark.svg" alt="editor-desktop-en-dark.svg" loading="lazy" /></a><figcaption>editor-desktop-en-dark</figcaption></figure>
-<figure><a href="mockups-app/editor-desktop-en-light.svg"><img src="mockups-app/editor-desktop-en-light.svg" alt="editor-desktop-en-light.svg" loading="lazy" /></a><figcaption>editor-desktop-en-light</figcaption></figure>
-<figure><a href="mockups-app/editor-desktop-ru-dark.svg"><img src="mockups-app/editor-desktop-ru-dark.svg" alt="editor-desktop-ru-dark.svg" loading="lazy" /></a><figcaption>editor-desktop-ru-dark</figcaption></figure>
-<figure><a href="mockups-app/editor-desktop-ru-light.svg"><img src="mockups-app/editor-desktop-ru-light.svg" alt="editor-desktop-ru-light.svg" loading="lazy" /></a><figcaption>editor-desktop-ru-light</figcaption></figure>
-<figure><a href="mockups-app/settings-desktop-en-dark.svg"><img src="mockups-app/settings-desktop-en-dark.svg" alt="settings-desktop-en-dark.svg" loading="lazy" /></a><figcaption>settings-desktop-en-dark</figcaption></figure>
-<figure><a href="mockups-app/settings-desktop-en-light.svg"><img src="mockups-app/settings-desktop-en-light.svg" alt="settings-desktop-en-light.svg" loading="lazy" /></a><figcaption>settings-desktop-en-light</figcaption></figure>
-<figure><a href="mockups-app/settings-desktop-ru-dark.svg"><img src="mockups-app/settings-desktop-ru-dark.svg" alt="settings-desktop-ru-dark.svg" loading="lazy" /></a><figcaption>settings-desktop-ru-dark</figcaption></figure>
-<figure><a href="mockups-app/settings-desktop-ru-light.svg"><img src="mockups-app/settings-desktop-ru-light.svg" alt="settings-desktop-ru-light.svg" loading="lazy" /></a><figcaption>settings-desktop-ru-light</figcaption></figure>
-<figure><a href="mockups-app/welcome-desktop-en-dark.svg"><img src="mockups-app/welcome-desktop-en-dark.svg" alt="welcome-desktop-en-dark.svg" loading="lazy" /></a><figcaption>welcome-desktop-en-dark</figcaption></figure>
-<figure><a href="mockups-app/welcome-desktop-en-light.svg"><img src="mockups-app/welcome-desktop-en-light.svg" alt="welcome-desktop-en-light.svg" loading="lazy" /></a><figcaption>welcome-desktop-en-light</figcaption></figure>
-<figure><a href="mockups-app/welcome-desktop-ru-dark.svg"><img src="mockups-app/welcome-desktop-ru-dark.svg" alt="welcome-desktop-ru-dark.svg" loading="lazy" /></a><figcaption>welcome-desktop-ru-dark</figcaption></figure>
-<figure><a href="mockups-app/welcome-desktop-ru-light.svg"><img src="mockups-app/welcome-desktop-ru-light.svg" alt="welcome-desktop-ru-light.svg" loading="lazy" /></a><figcaption>welcome-desktop-ru-light</figcaption></figure>
-</div></section>
-<section><h2>Компоненты и элементы интерфейса <small>4</small></h2><div class="grid">
-<figure><a href="components/components-en-dark.svg"><img src="components/components-en-dark.svg" alt="components-en-dark.svg" loading="lazy" /></a><figcaption>components-en-dark</figcaption></figure>
-<figure><a href="components/components-en-light.svg"><img src="components/components-en-light.svg" alt="components-en-light.svg" loading="lazy" /></a><figcaption>components-en-light</figcaption></figure>
-<figure><a href="components/components-ru-dark.svg"><img src="components/components-ru-dark.svg" alt="components-ru-dark.svg" loading="lazy" /></a><figcaption>components-ru-dark</figcaption></figure>
-<figure><a href="components/components-ru-light.svg"><img src="components/components-ru-light.svg" alt="components-ru-light.svg" loading="lazy" /></a><figcaption>components-ru-light</figcaption></figure>
-</div></section>
-<section><h2>Каркасы (wireframes) <small>20</small></h2><div class="grid">
-<figure><a href="wireframes/wire-dashboard-desktop-en.svg"><img src="wireframes/wire-dashboard-desktop-en.svg" alt="wire-dashboard-desktop-en.svg" loading="lazy" /></a><figcaption>wire-dashboard-desktop-en</figcaption></figure>
-<figure><a href="wireframes/wire-dashboard-desktop-ru.svg"><img src="wireframes/wire-dashboard-desktop-ru.svg" alt="wire-dashboard-desktop-ru.svg" loading="lazy" /></a><figcaption>wire-dashboard-desktop-ru</figcaption></figure>
-<figure><a href="wireframes/wire-editor-desktop-en.svg"><img src="wireframes/wire-editor-desktop-en.svg" alt="wire-editor-desktop-en.svg" loading="lazy" /></a><figcaption>wire-editor-desktop-en</figcaption></figure>
-<figure><a href="wireframes/wire-editor-desktop-ru.svg"><img src="wireframes/wire-editor-desktop-ru.svg" alt="wire-editor-desktop-ru.svg" loading="lazy" /></a><figcaption>wire-editor-desktop-ru</figcaption></figure>
-<figure><a href="wireframes/wire-error404-desktop-en.svg"><img src="wireframes/wire-error404-desktop-en.svg" alt="wire-error404-desktop-en.svg" loading="lazy" /></a><figcaption>wire-error404-desktop-en</figcaption></figure>
-<figure><a href="wireframes/wire-error404-desktop-ru.svg"><img src="wireframes/wire-error404-desktop-ru.svg" alt="wire-error404-desktop-ru.svg" loading="lazy" /></a><figcaption>wire-error404-desktop-ru</figcaption></figure>
-<figure><a href="wireframes/wire-landing-desktop-en.svg"><img src="wireframes/wire-landing-desktop-en.svg" alt="wire-landing-desktop-en.svg" loading="lazy" /></a><figcaption>wire-landing-desktop-en</figcaption></figure>
-<figure><a href="wireframes/wire-landing-desktop-ru.svg"><img src="wireframes/wire-landing-desktop-ru.svg" alt="wire-landing-desktop-ru.svg" loading="lazy" /></a><figcaption>wire-landing-desktop-ru</figcaption></figure>
-<figure><a href="wireframes/wire-landing-mobile-en.svg"><img src="wireframes/wire-landing-mobile-en.svg" alt="wire-landing-mobile-en.svg" loading="lazy" /></a><figcaption>wire-landing-mobile-en</figcaption></figure>
-<figure><a href="wireframes/wire-landing-mobile-ru.svg"><img src="wireframes/wire-landing-mobile-ru.svg" alt="wire-landing-mobile-ru.svg" loading="lazy" /></a><figcaption>wire-landing-mobile-ru</figcaption></figure>
-<figure><a href="wireframes/wire-landing-tablet-en.svg"><img src="wireframes/wire-landing-tablet-en.svg" alt="wire-landing-tablet-en.svg" loading="lazy" /></a><figcaption>wire-landing-tablet-en</figcaption></figure>
-<figure><a href="wireframes/wire-landing-tablet-ru.svg"><img src="wireframes/wire-landing-tablet-ru.svg" alt="wire-landing-tablet-ru.svg" loading="lazy" /></a><figcaption>wire-landing-tablet-ru</figcaption></figure>
-<figure><a href="wireframes/wire-privacy-desktop-en.svg"><img src="wireframes/wire-privacy-desktop-en.svg" alt="wire-privacy-desktop-en.svg" loading="lazy" /></a><figcaption>wire-privacy-desktop-en</figcaption></figure>
-<figure><a href="wireframes/wire-privacy-desktop-ru.svg"><img src="wireframes/wire-privacy-desktop-ru.svg" alt="wire-privacy-desktop-ru.svg" loading="lazy" /></a><figcaption>wire-privacy-desktop-ru</figcaption></figure>
-<figure><a href="wireframes/wire-settings-desktop-en.svg"><img src="wireframes/wire-settings-desktop-en.svg" alt="wire-settings-desktop-en.svg" loading="lazy" /></a><figcaption>wire-settings-desktop-en</figcaption></figure>
-<figure><a href="wireframes/wire-settings-desktop-ru.svg"><img src="wireframes/wire-settings-desktop-ru.svg" alt="wire-settings-desktop-ru.svg" loading="lazy" /></a><figcaption>wire-settings-desktop-ru</figcaption></figure>
-<figure><a href="wireframes/wire-thanks-desktop-en.svg"><img src="wireframes/wire-thanks-desktop-en.svg" alt="wire-thanks-desktop-en.svg" loading="lazy" /></a><figcaption>wire-thanks-desktop-en</figcaption></figure>
-<figure><a href="wireframes/wire-thanks-desktop-ru.svg"><img src="wireframes/wire-thanks-desktop-ru.svg" alt="wire-thanks-desktop-ru.svg" loading="lazy" /></a><figcaption>wire-thanks-desktop-ru</figcaption></figure>
-<figure><a href="wireframes/wire-welcome-desktop-en.svg"><img src="wireframes/wire-welcome-desktop-en.svg" alt="wire-welcome-desktop-en.svg" loading="lazy" /></a><figcaption>wire-welcome-desktop-en</figcaption></figure>
-<figure><a href="wireframes/wire-welcome-desktop-ru.svg"><img src="wireframes/wire-welcome-desktop-ru.svg" alt="wire-welcome-desktop-ru.svg" loading="lazy" /></a><figcaption>wire-welcome-desktop-ru</figcaption></figure>
-</div></section>
-<section><h2>Мокапы на устройствах <small>4</small></h2><div class="grid">
-<figure><a href="device-mockups/device-landing-desktop-en-light.svg"><img src="device-mockups/device-landing-desktop-en-light.svg" alt="device-landing-desktop-en-light.svg" loading="lazy" /></a><figcaption>device-landing-desktop-en-light</figcaption></figure>
-<figure><a href="device-mockups/device-landing-desktop-ru-light.svg"><img src="device-mockups/device-landing-desktop-ru-light.svg" alt="device-landing-desktop-ru-light.svg" loading="lazy" /></a><figcaption>device-landing-desktop-ru-light</figcaption></figure>
-<figure><a href="device-mockups/device-landing-mobile-en-light.svg"><img src="device-mockups/device-landing-mobile-en-light.svg" alt="device-landing-mobile-en-light.svg" loading="lazy" /></a><figcaption>device-landing-mobile-en-light</figcaption></figure>
-<figure><a href="device-mockups/device-landing-mobile-ru-light.svg"><img src="device-mockups/device-landing-mobile-ru-light.svg" alt="device-landing-mobile-ru-light.svg" loading="lazy" /></a><figcaption>device-landing-mobile-ru-light</figcaption></figure>
-</div></section>
-</body>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>Макеты DSLKit на согласование</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 24px;
+        background: #f1f3f9;
+        color: #1c1f2e;
+        font-family: Inter, system-ui, sans-serif;
+      }
+      h1 {
+        margin: 0 0 8px;
+      }
+      h2 {
+        margin: 40px 0 16px;
+      }
+      small {
+        color: #6b7285;
+        font-weight: 400;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 16px;
+      }
+      figure {
+        margin: 0;
+        padding: 12px;
+        background: #fff;
+        border: 1px solid #dde1e9;
+        border-radius: 12px;
+      }
+      img {
+        display: block;
+        width: 100%;
+        height: auto;
+        max-height: 420px;
+        object-fit: contain;
+        object-position: top;
+        border-radius: 6px;
+        background: #eee;
+      }
+      .pair {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 24px;
+      }
+      .pair figure {
+        position: relative;
+      }
+      .tag {
+        position: absolute;
+        top: 8px;
+        left: 8px;
+        z-index: 1;
+        padding: 2px 12px;
+        border-radius: 12px;
+        background: #2563eb;
+        color: #fff;
+        font-weight: 700;
+      }
+      .pair img {
+        max-height: 760px;
+      }
+      figcaption {
+        margin-top: 8px;
+        font-size: 13px;
+        color: #4a5068;
+        overflow-wrap: anywhere;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Макеты DSLKit на согласование</h1>
+    <p>Русский и английский варианты, светлая и тёмная темы. Нажмите на картинку, чтобы открыть макет целиком.</p>
+    <section class="ab">
+      <h2>A/B: первый экран, Десктоп 1440 px</h2>
+      <div class="pair">
+        <figure>
+          <span class="tag">A</span
+          ><a href="ab-tests/ab-landing-desktop-ru-a.svg"><img src="ab-tests/ab-landing-desktop-ru-a.svg" alt="Вариант A" loading="lazy" /></a>
+          <figcaption>
+            <b>A, как сейчас на сайте.</b> Плоская синяя панель, на ней светлая кнопка «Создать диаграмму», заголовок обычного интервала, фон без рисунка.
+          </figcaption>
+        </figure>
+        <figure>
+          <span class="tag">B</span
+          ><a href="ab-tests/ab-landing-desktop-ru-b.svg"><img src="ab-tests/ab-landing-desktop-ru-b.svg" alt="Вариант B" loading="lazy" /></a>
+          <figcaption>
+            <b>B, ближе к SaaS-референсам.</b> Основная синяя кнопка без панели, точечная сетка на фоне первого экрана, плотный заголовок, вторичные кнопки
+            рядом.
+          </figcaption>
+        </figure>
+      </div>
+    </section>
+    <section class="ab">
+      <h2>A/B: первый экран, Телефон 390 px</h2>
+      <div class="pair">
+        <figure>
+          <span class="tag">A</span
+          ><a href="ab-tests/ab-landing-mobile-ru-a.svg"><img src="ab-tests/ab-landing-mobile-ru-a.svg" alt="Вариант A" loading="lazy" /></a>
+          <figcaption>
+            <b>A, как сейчас на сайте.</b> Плоская синяя панель, на ней светлая кнопка «Создать диаграмму», заголовок обычного интервала, фон без рисунка.
+          </figcaption>
+        </figure>
+        <figure>
+          <span class="tag">B</span
+          ><a href="ab-tests/ab-landing-mobile-ru-b.svg"><img src="ab-tests/ab-landing-mobile-ru-b.svg" alt="Вариант B" loading="lazy" /></a>
+          <figcaption>
+            <b>B, ближе к SaaS-референсам.</b> Основная синяя кнопка без панели, точечная сетка на фоне первого экрана, плотный заголовок, вторичные кнопки
+            рядом.
+          </figcaption>
+        </figure>
+      </div>
+    </section>
+    <section>
+      <h2>Мудборд и образцы <small>2</small></h2>
+      <div class="grid">
+        <figure>
+          <a href="moodboard/moodboard-en.svg"><img src="moodboard/moodboard-en.svg" alt="moodboard-en.svg" loading="lazy" /></a>
+          <figcaption>moodboard-en</figcaption>
+        </figure>
+        <figure>
+          <a href="moodboard/moodboard-ru.svg"><img src="moodboard/moodboard-ru.svg" alt="moodboard-ru.svg" loading="lazy" /></a>
+          <figcaption>moodboard-ru</figcaption>
+        </figure>
+      </div>
+    </section>
+    <section>
+      <h2>Палитра и типографика <small>4</small></h2>
+      <div class="grid">
+        <figure>
+          <a href="foundations/palette-en.svg"><img src="foundations/palette-en.svg" alt="palette-en.svg" loading="lazy" /></a>
+          <figcaption>palette-en</figcaption>
+        </figure>
+        <figure>
+          <a href="foundations/palette-ru.svg"><img src="foundations/palette-ru.svg" alt="palette-ru.svg" loading="lazy" /></a>
+          <figcaption>palette-ru</figcaption>
+        </figure>
+        <figure>
+          <a href="foundations/typography-en.svg"><img src="foundations/typography-en.svg" alt="typography-en.svg" loading="lazy" /></a>
+          <figcaption>typography-en</figcaption>
+        </figure>
+        <figure>
+          <a href="foundations/typography-ru.svg"><img src="foundations/typography-ru.svg" alt="typography-ru.svg" loading="lazy" /></a>
+          <figcaption>typography-ru</figcaption>
+        </figure>
+      </div>
+    </section>
+    <section>
+      <h2>Макеты сайта <small>24</small></h2>
+      <div class="grid">
+        <figure>
+          <a href="mockups-site/error404-desktop-en-dark.svg"
+            ><img src="mockups-site/error404-desktop-en-dark.svg" alt="error404-desktop-en-dark.svg" loading="lazy"
+          /></a>
+          <figcaption>error404-desktop-en-dark</figcaption>
+        </figure>
+        <figure>
+          <a href="mockups-site/error404-desktop-en-light.svg"
+            ><img src="mockups-site/error404-desktop-en-light.svg" alt="error404-desktop-en-light.svg" loading="lazy"
+          /></a>
+          <figcaption>error404-desktop-en-light</figcaption>
+        </figure>
+        <figure>
+          <a href="mockups-site/error404-desktop-ru-dark.svg"
+            ><img src="mockups-site/error404-desktop-ru-dark.svg" alt="error404-desktop-ru-dark.svg" loading="lazy"
+          /></a>
+          <figcaption>error404-desktop-ru-dark</figcaption>
+        </figure>
+        <figure>
+          <a href="mockups-site/error404-desktop-ru-light.svg"
+            ><img src="mockups-site/error404-desktop-ru-light.svg" alt="error404-desktop-ru-light.svg" loading="lazy"
+          /></a>
+          <figcaption>error404-desktop-ru-light</figcaption>
+        </figure>
+        <figure>
+          <a href="mockups-site/landing-desktop-en-dark.svg"
+            ><img src="mockups-site/landing-desktop-en-dark.svg" alt="landing-desktop-en-dark.svg" loading="lazy"
+          /></a>
+          <figcaption>landing-desktop-en-dark</figcaption>
+        </figure>
+        <figure>
+          <a href="mockups-site/landing-desktop-en-light.svg"
+            ><img src="mockups-site/landing-desktop-en-light.svg" alt="landing-desktop-en-light.svg" loading="lazy"
+          /></a>
+          <figcaption>landing-desktop-en-light</figcaption>
+        </figure>
+        <figure>
+          <a href="mockups-site/landing-desktop-ru-dark.svg"
+            ><img src="mockups-site/landing-desktop-ru-dark.svg" alt="landing-desktop-ru-dark.svg" loading="lazy"
+          /></a>
+          <figcaption>landing-desktop-ru-dark</figcaption>
+        </figure>
+        <figure>
+          <a href="mockups-site/landing-desktop-ru-light.svg"
+            ><img src="mockups-site/landing-desktop-ru-light.svg" alt="landing-desktop-ru-light.svg" loading="lazy"
+          /></a>
+          <figcaption>landing-desktop-ru-light</figcaption>
+        </figure>
+        <figure>
+          <a href="mockups-site/landing-mobile-en-dark.svg"
+            ><img src="mockups-site/landing-mobile-en-dark.svg" alt="landing-mobile-en-dark.svg" loading="lazy"
+          /></a>
+          <figcaption>landing-mobile-en-dark</figcaption>
+        </figure>
+        <figure>
+          <a href="mockups-site/landing-mobile-en-light.svg"
+            ><img src="mockups-site/landing-mobile-en-light.svg" alt="landing-mobile-en-light.svg" loading="lazy"
+          /></a>
+          <figcaption>landing-mobile-en-light</figcaption>
+        </figure>
+        <figure>
+          <a href="mockups-site/landing-mobile-ru-dark.svg"
+            ><img src="mockups-site/landing-mobile-ru-dark.svg" alt="landing-mobile-ru-dark.svg" loading="lazy"
+          /></a>
+          <figcaption>landing-mobile-ru-dark</figcaption>
+        </figure>
+        <figure>
+          <a href="mockups-site/landing-mobile-ru-light.svg"
+            ><img src="mockups-site/landing-mobile-ru-light.svg" alt="landing-mobile-ru-light.svg" loading="lazy"
+          /></a>
+          <figcaption>landing-mobile-ru-light</figcaption>
+        </figure>
+        <figure>
+          <a href="mockups-site/landing-tablet-en-dark.svg"
+            ><img src="mockups-site/landing-tablet-en-dark.svg" alt="landing-tablet-en-dark.svg" loading="lazy"
+          /></a>
+          <figcaption>landing-tablet-en-dark</figcaption>
+        </figure>
+        <figure>
+          <a href="mockups-site/landing-tablet-en-light.svg"
+            ><img src="mockups-site/landing-tablet-en-light.svg" alt="landing-tablet-en-light.svg" loading="lazy"
+          /></a>
+          <figcaption>landing-tablet-en-light</figcaption>
+        </figure>
+        <figure>
+          <a href="mockups-site/landing-tablet-ru-dark.svg"
+            ><img src="mockups-site/landing-tablet-ru-dark.svg" alt="landing-tablet-ru-dark.svg" loading="lazy"
+          /></a>
+          <figcaption>landing-tablet-ru-dark</figcaption>
+        </figure>
+        <figure>
+          <a href="mockups-site/landing-tablet-ru-light.svg"
+            ><img src="mockups-site/landing-tablet-ru-light.svg" alt="landing-tablet-ru-light.svg" loading="lazy"
+          /></a>
+          <figcaption>landing-tablet-ru-light</figcaption>
+        </figure>
+        <figure>
+          <a href="mockups-site/privacy-desktop-en-dark.svg"
+            ><img src="mockups-site/privacy-desktop-en-dark.svg" alt="privacy-desktop-en-dark.svg" loading="lazy"
+          /></a>
+          <figcaption>privacy-desktop-en-dark</figcaption>
+        </figure>
+        <figure>
+          <a href="mockups-site/privacy-desktop-en-light.svg"
+            ><img src="mockups-site/privacy-desktop-en-light.svg" alt="privacy-desktop-en-light.svg" loading="lazy"
+          /></a>
+          <figcaption>privacy-desktop-en-light</figcaption>
+        </figure>
+        <figure>
+          <a href="mockups-site/privacy-desktop-ru-dark.svg"
+            ><img src="mockups-site/privacy-desktop-ru-dark.svg" alt="privacy-desktop-ru-dark.svg" loading="lazy"
+          /></a>
+          <figcaption>privacy-desktop-ru-dark</figcaption>
+        </figure>
+        <figure>
+          <a href="mockups-site/privacy-desktop-ru-light.svg"
+            ><img src="mockups-site/privacy-desktop-ru-light.svg" alt="privacy-desktop-ru-light.svg" loading="lazy"
+          /></a>
+          <figcaption>privacy-desktop-ru-light</figcaption>
+        </figure>
+        <figure>
+          <a href="mockups-site/thanks-desktop-en-dark.svg"
+            ><img src="mockups-site/thanks-desktop-en-dark.svg" alt="thanks-desktop-en-dark.svg" loading="lazy"
+          /></a>
+          <figcaption>thanks-desktop-en-dark</figcaption>
+        </figure>
+        <figure>
+          <a href="mockups-site/thanks-desktop-en-light.svg"
+            ><img src="mockups-site/thanks-desktop-en-light.svg" alt="thanks-desktop-en-light.svg" loading="lazy"
+          /></a>
+          <figcaption>thanks-desktop-en-light</figcaption>
+        </figure>
+        <figure>
+          <a href="mockups-site/thanks-desktop-ru-dark.svg"
+            ><img src="mockups-site/thanks-desktop-ru-dark.svg" alt="thanks-desktop-ru-dark.svg" loading="lazy"
+          /></a>
+          <figcaption>thanks-desktop-ru-dark</figcaption>
+        </figure>
+        <figure>
+          <a href="mockups-site/thanks-desktop-ru-light.svg"
+            ><img src="mockups-site/thanks-desktop-ru-light.svg" alt="thanks-desktop-ru-light.svg" loading="lazy"
+          /></a>
+          <figcaption>thanks-desktop-ru-light</figcaption>
+        </figure>
+      </div>
+    </section>
+    <section>
+      <h2>Макеты приложения <small>16</small></h2>
+      <div class="grid">
+        <figure>
+          <a href="mockups-app/dashboard-desktop-en-dark.svg"
+            ><img src="mockups-app/dashboard-desktop-en-dark.svg" alt="dashboard-desktop-en-dark.svg" loading="lazy"
+          /></a>
+          <figcaption>dashboard-desktop-en-dark</figcaption>
+        </figure>
+        <figure>
+          <a href="mockups-app/dashboard-desktop-en-light.svg"
+            ><img src="mockups-app/dashboard-desktop-en-light.svg" alt="dashboard-desktop-en-light.svg" loading="lazy"
+          /></a>
+          <figcaption>dashboard-desktop-en-light</figcaption>
+        </figure>
+        <figure>
+          <a href="mockups-app/dashboard-desktop-ru-dark.svg"
+            ><img src="mockups-app/dashboard-desktop-ru-dark.svg" alt="dashboard-desktop-ru-dark.svg" loading="lazy"
+          /></a>
+          <figcaption>dashboard-desktop-ru-dark</figcaption>
+        </figure>
+        <figure>
+          <a href="mockups-app/dashboard-desktop-ru-light.svg"
+            ><img src="mockups-app/dashboard-desktop-ru-light.svg" alt="dashboard-desktop-ru-light.svg" loading="lazy"
+          /></a>
+          <figcaption>dashboard-desktop-ru-light</figcaption>
+        </figure>
+        <figure>
+          <a href="mockups-app/editor-desktop-en-dark.svg"
+            ><img src="mockups-app/editor-desktop-en-dark.svg" alt="editor-desktop-en-dark.svg" loading="lazy"
+          /></a>
+          <figcaption>editor-desktop-en-dark</figcaption>
+        </figure>
+        <figure>
+          <a href="mockups-app/editor-desktop-en-light.svg"
+            ><img src="mockups-app/editor-desktop-en-light.svg" alt="editor-desktop-en-light.svg" loading="lazy"
+          /></a>
+          <figcaption>editor-desktop-en-light</figcaption>
+        </figure>
+        <figure>
+          <a href="mockups-app/editor-desktop-ru-dark.svg"
+            ><img src="mockups-app/editor-desktop-ru-dark.svg" alt="editor-desktop-ru-dark.svg" loading="lazy"
+          /></a>
+          <figcaption>editor-desktop-ru-dark</figcaption>
+        </figure>
+        <figure>
+          <a href="mockups-app/editor-desktop-ru-light.svg"
+            ><img src="mockups-app/editor-desktop-ru-light.svg" alt="editor-desktop-ru-light.svg" loading="lazy"
+          /></a>
+          <figcaption>editor-desktop-ru-light</figcaption>
+        </figure>
+        <figure>
+          <a href="mockups-app/settings-desktop-en-dark.svg"
+            ><img src="mockups-app/settings-desktop-en-dark.svg" alt="settings-desktop-en-dark.svg" loading="lazy"
+          /></a>
+          <figcaption>settings-desktop-en-dark</figcaption>
+        </figure>
+        <figure>
+          <a href="mockups-app/settings-desktop-en-light.svg"
+            ><img src="mockups-app/settings-desktop-en-light.svg" alt="settings-desktop-en-light.svg" loading="lazy"
+          /></a>
+          <figcaption>settings-desktop-en-light</figcaption>
+        </figure>
+        <figure>
+          <a href="mockups-app/settings-desktop-ru-dark.svg"
+            ><img src="mockups-app/settings-desktop-ru-dark.svg" alt="settings-desktop-ru-dark.svg" loading="lazy"
+          /></a>
+          <figcaption>settings-desktop-ru-dark</figcaption>
+        </figure>
+        <figure>
+          <a href="mockups-app/settings-desktop-ru-light.svg"
+            ><img src="mockups-app/settings-desktop-ru-light.svg" alt="settings-desktop-ru-light.svg" loading="lazy"
+          /></a>
+          <figcaption>settings-desktop-ru-light</figcaption>
+        </figure>
+        <figure>
+          <a href="mockups-app/welcome-desktop-en-dark.svg"
+            ><img src="mockups-app/welcome-desktop-en-dark.svg" alt="welcome-desktop-en-dark.svg" loading="lazy"
+          /></a>
+          <figcaption>welcome-desktop-en-dark</figcaption>
+        </figure>
+        <figure>
+          <a href="mockups-app/welcome-desktop-en-light.svg"
+            ><img src="mockups-app/welcome-desktop-en-light.svg" alt="welcome-desktop-en-light.svg" loading="lazy"
+          /></a>
+          <figcaption>welcome-desktop-en-light</figcaption>
+        </figure>
+        <figure>
+          <a href="mockups-app/welcome-desktop-ru-dark.svg"
+            ><img src="mockups-app/welcome-desktop-ru-dark.svg" alt="welcome-desktop-ru-dark.svg" loading="lazy"
+          /></a>
+          <figcaption>welcome-desktop-ru-dark</figcaption>
+        </figure>
+        <figure>
+          <a href="mockups-app/welcome-desktop-ru-light.svg"
+            ><img src="mockups-app/welcome-desktop-ru-light.svg" alt="welcome-desktop-ru-light.svg" loading="lazy"
+          /></a>
+          <figcaption>welcome-desktop-ru-light</figcaption>
+        </figure>
+      </div>
+    </section>
+    <section>
+      <h2>Компоненты и элементы интерфейса <small>4</small></h2>
+      <div class="grid">
+        <figure>
+          <a href="components/components-en-dark.svg"><img src="components/components-en-dark.svg" alt="components-en-dark.svg" loading="lazy" /></a>
+          <figcaption>components-en-dark</figcaption>
+        </figure>
+        <figure>
+          <a href="components/components-en-light.svg"><img src="components/components-en-light.svg" alt="components-en-light.svg" loading="lazy" /></a>
+          <figcaption>components-en-light</figcaption>
+        </figure>
+        <figure>
+          <a href="components/components-ru-dark.svg"><img src="components/components-ru-dark.svg" alt="components-ru-dark.svg" loading="lazy" /></a>
+          <figcaption>components-ru-dark</figcaption>
+        </figure>
+        <figure>
+          <a href="components/components-ru-light.svg"><img src="components/components-ru-light.svg" alt="components-ru-light.svg" loading="lazy" /></a>
+          <figcaption>components-ru-light</figcaption>
+        </figure>
+      </div>
+    </section>
+    <section>
+      <h2>Каркасы (wireframes) <small>20</small></h2>
+      <div class="grid">
+        <figure>
+          <a href="wireframes/wire-dashboard-desktop-en.svg"
+            ><img src="wireframes/wire-dashboard-desktop-en.svg" alt="wire-dashboard-desktop-en.svg" loading="lazy"
+          /></a>
+          <figcaption>wire-dashboard-desktop-en</figcaption>
+        </figure>
+        <figure>
+          <a href="wireframes/wire-dashboard-desktop-ru.svg"
+            ><img src="wireframes/wire-dashboard-desktop-ru.svg" alt="wire-dashboard-desktop-ru.svg" loading="lazy"
+          /></a>
+          <figcaption>wire-dashboard-desktop-ru</figcaption>
+        </figure>
+        <figure>
+          <a href="wireframes/wire-editor-desktop-en.svg"
+            ><img src="wireframes/wire-editor-desktop-en.svg" alt="wire-editor-desktop-en.svg" loading="lazy"
+          /></a>
+          <figcaption>wire-editor-desktop-en</figcaption>
+        </figure>
+        <figure>
+          <a href="wireframes/wire-editor-desktop-ru.svg"
+            ><img src="wireframes/wire-editor-desktop-ru.svg" alt="wire-editor-desktop-ru.svg" loading="lazy"
+          /></a>
+          <figcaption>wire-editor-desktop-ru</figcaption>
+        </figure>
+        <figure>
+          <a href="wireframes/wire-error404-desktop-en.svg"
+            ><img src="wireframes/wire-error404-desktop-en.svg" alt="wire-error404-desktop-en.svg" loading="lazy"
+          /></a>
+          <figcaption>wire-error404-desktop-en</figcaption>
+        </figure>
+        <figure>
+          <a href="wireframes/wire-error404-desktop-ru.svg"
+            ><img src="wireframes/wire-error404-desktop-ru.svg" alt="wire-error404-desktop-ru.svg" loading="lazy"
+          /></a>
+          <figcaption>wire-error404-desktop-ru</figcaption>
+        </figure>
+        <figure>
+          <a href="wireframes/wire-landing-desktop-en.svg"
+            ><img src="wireframes/wire-landing-desktop-en.svg" alt="wire-landing-desktop-en.svg" loading="lazy"
+          /></a>
+          <figcaption>wire-landing-desktop-en</figcaption>
+        </figure>
+        <figure>
+          <a href="wireframes/wire-landing-desktop-ru.svg"
+            ><img src="wireframes/wire-landing-desktop-ru.svg" alt="wire-landing-desktop-ru.svg" loading="lazy"
+          /></a>
+          <figcaption>wire-landing-desktop-ru</figcaption>
+        </figure>
+        <figure>
+          <a href="wireframes/wire-landing-mobile-en.svg"
+            ><img src="wireframes/wire-landing-mobile-en.svg" alt="wire-landing-mobile-en.svg" loading="lazy"
+          /></a>
+          <figcaption>wire-landing-mobile-en</figcaption>
+        </figure>
+        <figure>
+          <a href="wireframes/wire-landing-mobile-ru.svg"
+            ><img src="wireframes/wire-landing-mobile-ru.svg" alt="wire-landing-mobile-ru.svg" loading="lazy"
+          /></a>
+          <figcaption>wire-landing-mobile-ru</figcaption>
+        </figure>
+        <figure>
+          <a href="wireframes/wire-landing-tablet-en.svg"
+            ><img src="wireframes/wire-landing-tablet-en.svg" alt="wire-landing-tablet-en.svg" loading="lazy"
+          /></a>
+          <figcaption>wire-landing-tablet-en</figcaption>
+        </figure>
+        <figure>
+          <a href="wireframes/wire-landing-tablet-ru.svg"
+            ><img src="wireframes/wire-landing-tablet-ru.svg" alt="wire-landing-tablet-ru.svg" loading="lazy"
+          /></a>
+          <figcaption>wire-landing-tablet-ru</figcaption>
+        </figure>
+        <figure>
+          <a href="wireframes/wire-privacy-desktop-en.svg"
+            ><img src="wireframes/wire-privacy-desktop-en.svg" alt="wire-privacy-desktop-en.svg" loading="lazy"
+          /></a>
+          <figcaption>wire-privacy-desktop-en</figcaption>
+        </figure>
+        <figure>
+          <a href="wireframes/wire-privacy-desktop-ru.svg"
+            ><img src="wireframes/wire-privacy-desktop-ru.svg" alt="wire-privacy-desktop-ru.svg" loading="lazy"
+          /></a>
+          <figcaption>wire-privacy-desktop-ru</figcaption>
+        </figure>
+        <figure>
+          <a href="wireframes/wire-settings-desktop-en.svg"
+            ><img src="wireframes/wire-settings-desktop-en.svg" alt="wire-settings-desktop-en.svg" loading="lazy"
+          /></a>
+          <figcaption>wire-settings-desktop-en</figcaption>
+        </figure>
+        <figure>
+          <a href="wireframes/wire-settings-desktop-ru.svg"
+            ><img src="wireframes/wire-settings-desktop-ru.svg" alt="wire-settings-desktop-ru.svg" loading="lazy"
+          /></a>
+          <figcaption>wire-settings-desktop-ru</figcaption>
+        </figure>
+        <figure>
+          <a href="wireframes/wire-thanks-desktop-en.svg"
+            ><img src="wireframes/wire-thanks-desktop-en.svg" alt="wire-thanks-desktop-en.svg" loading="lazy"
+          /></a>
+          <figcaption>wire-thanks-desktop-en</figcaption>
+        </figure>
+        <figure>
+          <a href="wireframes/wire-thanks-desktop-ru.svg"
+            ><img src="wireframes/wire-thanks-desktop-ru.svg" alt="wire-thanks-desktop-ru.svg" loading="lazy"
+          /></a>
+          <figcaption>wire-thanks-desktop-ru</figcaption>
+        </figure>
+        <figure>
+          <a href="wireframes/wire-welcome-desktop-en.svg"
+            ><img src="wireframes/wire-welcome-desktop-en.svg" alt="wire-welcome-desktop-en.svg" loading="lazy"
+          /></a>
+          <figcaption>wire-welcome-desktop-en</figcaption>
+        </figure>
+        <figure>
+          <a href="wireframes/wire-welcome-desktop-ru.svg"
+            ><img src="wireframes/wire-welcome-desktop-ru.svg" alt="wire-welcome-desktop-ru.svg" loading="lazy"
+          /></a>
+          <figcaption>wire-welcome-desktop-ru</figcaption>
+        </figure>
+      </div>
+    </section>
+    <section>
+      <h2>Мокапы на устройствах <small>4</small></h2>
+      <div class="grid">
+        <figure>
+          <a href="device-mockups/device-landing-desktop-en-light.svg"
+            ><img src="device-mockups/device-landing-desktop-en-light.svg" alt="device-landing-desktop-en-light.svg" loading="lazy"
+          /></a>
+          <figcaption>device-landing-desktop-en-light</figcaption>
+        </figure>
+        <figure>
+          <a href="device-mockups/device-landing-desktop-ru-light.svg"
+            ><img src="device-mockups/device-landing-desktop-ru-light.svg" alt="device-landing-desktop-ru-light.svg" loading="lazy"
+          /></a>
+          <figcaption>device-landing-desktop-ru-light</figcaption>
+        </figure>
+        <figure>
+          <a href="device-mockups/device-landing-mobile-en-light.svg"
+            ><img src="device-mockups/device-landing-mobile-en-light.svg" alt="device-landing-mobile-en-light.svg" loading="lazy"
+          /></a>
+          <figcaption>device-landing-mobile-en-light</figcaption>
+        </figure>
+        <figure>
+          <a href="device-mockups/device-landing-mobile-ru-light.svg"
+            ><img src="device-mockups/device-landing-mobile-ru-light.svg" alt="device-landing-mobile-ru-light.svg" loading="lazy"
+          /></a>
+          <figcaption>device-landing-mobile-ru-light</figcaption>
+        </figure>
+      </div>
+    </section>
+  </body>
 </html>

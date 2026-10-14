@@ -9,10 +9,20 @@ const { DOMParser } = new JSDOM('').window;
 
 test('the generator produces every asset group in both languages and themes', () => {
   const groups = Object.groupBy(assets, (asset) => asset.group);
-  assert.deepEqual(Object.keys(groups).sort(), ['components', 'device-mockups', 'foundations', 'mockups-app', 'mockups-site', 'moodboard', 'wireframes']);
+  assert.deepEqual(Object.keys(groups).sort(), [
+    'ab-tests',
+    'components',
+    'device-mockups',
+    'foundations',
+    'mockups-app',
+    'mockups-site',
+    'moodboard',
+    'wireframes',
+  ]);
   assert.equal(groups['mockups-site'].length, 24);
   assert.equal(groups['mockups-app'].length, 16);
   assert.equal(groups.components.length, 4);
+  assert.equal(groups['ab-tests'].length, 8);
   for (const lang of ['ru', 'en']) for (const theme of ['light', 'dark']) assert.ok(assets.some((asset) => asset.name === `landing-desktop-${lang}-${theme}`));
 });
 
@@ -42,4 +52,12 @@ test('wireframes use only grays and moodboards name the reference sites', () => 
   assert.doesNotMatch(wire, /#2563eb|#7c3aed/);
   const board = assets.find((asset) => asset.name === 'moodboard-ru').svg;
   for (const site of ['mermaid.js.org', 'drawio.com', 'plantuml.com', 'attio.com', 'minimal.gallery']) assert.match(board, new RegExp(site));
+});
+
+test('the A and B landing variants differ and no variant uses a violet gradient', () => {
+  const a = screen('landing', { lang: 'ru', theme: 'light', device: 'desktop', variant: 'a' }, TOKENS);
+  const b = screen('landing', { lang: 'ru', theme: 'light', device: 'desktop', variant: 'b' }, TOKENS);
+  assert.notEqual(a, b);
+  assert.match(b, /url\(#dots\)/);
+  assert.doesNotMatch(a + b, /7c3aed|linearGradient/i);
 });

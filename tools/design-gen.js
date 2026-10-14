@@ -18,7 +18,6 @@ const GRAY = {
   error: '#6b7280',
   warning: '#6b7280',
 };
-const VIOLET = '#7c3aed';
 const esc = (s) => String(s).replace(/[&<>"]/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[ch]);
 
 export const STRINGS = {
@@ -248,7 +247,7 @@ const CODE = [
 const makeCanvas = (width, theme, wire) => {
   const t = wire ? GRAY : theme;
   const out = [];
-  const defs = `<defs><linearGradient id="cta" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${t.primary}"/><stop offset="1" stop-color="${wire ? '#6b7280' : VIOLET}"/></linearGradient></defs>`;
+  const defs = `<defs><pattern id="dots" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1.4" fill="${t.border}"/></pattern></defs>`;
   const textWidth = (s, size) => Math.round(String(s).length * size * 0.56);
   const c = {
     t,
@@ -266,7 +265,7 @@ const makeCanvas = (width, theme, wire) => {
         return;
       }
       out.push(
-        `<text x="${x}" y="${y}" font-family="${o.mono ? MONO : SANS}" font-size="${size}" font-weight="${o.weight ?? 400}" fill="${o.fill ?? t.text}" text-anchor="${o.anchor ?? 'start'}">${esc(s)}</text>`,
+        `<text x="${x}" y="${y}" font-family="${o.mono ? MONO : SANS}" font-size="${size}" font-weight="${o.weight ?? 400}" fill="${o.fill ?? t.text}" text-anchor="${o.anchor ?? 'start'}"${o.ls ? ` letter-spacing="${o.ls}"` : ''}>${esc(s)}</text>`,
       );
     },
     card: (x, y, w, h, o = {}) => c.rect(x, y, w, h, o.fill ?? t.surface, { rx: o.rx ?? 12, stroke: o.stroke ?? t.border }),
@@ -312,7 +311,8 @@ const makeCanvas = (width, theme, wire) => {
       c.text(x + 38, y + 21, label, { size: 18, weight: 700 });
     },
     line: (x1, y1, x2, y2, stroke, wd = 1) => out.push(`<path d="M${x1} ${y1}L${x2} ${y2}" stroke="${stroke}" stroke-width="${wd}" fill="none"/>`),
-    gradPanel: (x, y, w, h) => out.push(`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="24" fill="url(#cta)"/>`),
+    dots: (x, y, w, h) => out.push(`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="url(#dots)"/>`),
+    gradPanel: (x, y, w, h) => out.push(`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="24" fill="${t.primary}"/>`),
     raw: (s) => out.push(s),
     done: (h) =>
       `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${h}" viewBox="0 0 ${width} ${h}">${defs}<rect width="${width}" height="${h}" fill="${t.background}"/>${out.join('')}</svg>\n`,
@@ -384,19 +384,21 @@ const cols = (c, x, y, W, n, gap, count, h, draw) => {
   return y + Math.ceil(count / n) * (h + gap) - gap;
 };
 
-const landing = (c, s, device, themeName) => {
+const landing = (c, s, device, themeName, variant = 'a') => {
   const t = c.t;
   const W = c.width;
   const pad = device === 'mobile' ? 16 : 48;
   const inner = W - pad * 2;
   header(c, s, W, device, themeName);
+  const b = variant === 'b';
+  if (b) c.dots(0, 64, W, device === 'desktop' ? 520 : 460);
   let y = 112;
   const badgeW = c.textWidth(s.badge, 13) + 36;
   c.rect(pad, y - 22, badgeW, 30, t.surface, { rx: 15, stroke: t.border });
   c.text(pad + badgeW / 2, y - 2, s.badge, { size: 13, weight: 600, fill: t['text-light'], anchor: 'middle' });
   y += 68;
   const big = device === 'desktop' ? 56 : device === 'tablet' ? 40 : 32;
-  s.h1.forEach((line, i) => c.text(pad, y + i * (big + 8), line, { size: big, weight: 700 }));
+  s.h1.forEach((line, i) => c.text(pad, y + i * (big + 8), line, { size: big, weight: 700, ls: b ? -big * 0.02 : 0 }));
   y += s.h1.length * (big + 8) + 8;
   const leadW = device === 'desktop' ? 640 : inner;
   const maxChars = Math.floor(leadW / 9.6);
@@ -409,14 +411,24 @@ const landing = (c, s, device, themeName) => {
   lines.forEach((line, i) => c.text(pad, y + i * 28, line, { size: 18, fill: t['text-light'] }));
   y += lines.length * 28 + 24;
   const panelW = device === 'desktop' ? 420 : inner;
-  c.gradPanel(pad, y, panelW, 136);
-  c.button(pad + 24, y + 24, s.hero, { variant: 'hero', w: panelW - 48, h: 65, size: 20 });
-  c.text(pad + panelW / 2, y + 112, s.heroNote.slice(0, device === 'mobile' ? 38 : 60), { size: 12, fill: '#ffffff', anchor: 'middle' });
-  if (device === 'desktop') codeCard(c, 720, 140, W - 720 - pad, 320, true);
-  y += 160;
-  const bw = c.button(pad, y, s.join, { h: 48 });
-  c.button(pad + bw + 16, y, s.how, { variant: 'secondary', h: 48 });
-  y += 88;
+  if (b) {
+    c.button(pad, y, s.hero, { w: Math.min(panelW, 320), h: 56, size: 18 });
+    c.text(pad, y + 84, s.heroNote.slice(0, device === 'mobile' ? 38 : 60), { size: 12, fill: t['text-light'] });
+    if (device === 'desktop') codeCard(c, 720, 140, W - 720 - pad, 320, true);
+    y += 112;
+    const bw = c.button(pad, y, s.join, { variant: 'secondary', h: 48 });
+    c.button(pad + bw + 16, y, s.how, { variant: 'secondary', h: 48 });
+    y += 88;
+  } else {
+    c.gradPanel(pad, y, panelW, 136);
+    c.button(pad + 24, y + 24, s.hero, { variant: 'hero', w: panelW - 48, h: 65, size: 20 });
+    c.text(pad + panelW / 2, y + 112, s.heroNote.slice(0, device === 'mobile' ? 38 : 60), { size: 12, fill: '#ffffff', anchor: 'middle' });
+    if (device === 'desktop') codeCard(c, 720, 140, W - 720 - pad, 320, true);
+    y += 160;
+    const bw = c.button(pad, y, s.join, { h: 48 });
+    c.button(pad + bw + 16, y, s.how, { variant: 'secondary', h: 48 });
+    y += 88;
+  }
   if (device !== 'desktop') {
     codeCard(c, pad, y, inner, 260, true);
     y += 308;
@@ -658,12 +670,12 @@ const SCREENS = {
 };
 const WIDTH = { desktop: 1440, tablet: 768, mobile: 390 };
 
-export const screen = (name, { lang, theme, device, wire }, tokens) => {
+export const screen = (name, { lang, theme, device, wire, variant }, tokens) => {
   const spec = SCREENS[name];
   const s = STRINGS[lang];
   const c = makeCanvas(WIDTH[device], tokens[theme], wire);
   const themeName = theme === 'light' ? s.themeToDark : s.themeToLight;
-  const h = spec.draw(c, s, device, themeName);
+  const h = spec.draw(c, s, device, themeName, variant);
   return c.done(h);
 };
 
@@ -873,6 +885,10 @@ export const buildAll = (tokens) => {
       }
     }
   }
+  for (const lang of ['ru', 'en'])
+    for (const device of ['desktop', 'mobile'])
+      for (const variant of ['a', 'b'])
+        push('ab-tests', `ab-landing-${device}-${lang}-${variant}`, screen('landing', { lang, theme: 'light', device, variant }, tokens));
   for (const lang of ['ru', 'en']) {
     for (const theme of ['light', 'dark']) push('components', `components-${lang}-${theme}`, sheet(lang, theme, tokens));
     push('foundations', `palette-${lang}`, palette(tokens, lang));

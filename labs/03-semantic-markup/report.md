@@ -681,7 +681,10 @@ import {
 } from './site-checks.js';
 
 const SITE = join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'site');
-const walk = (dir) => readdirSync(dir).flatMap((name) => (statSync(join(dir, name)).isDirectory() ? walk(join(dir, name)) : [join(dir, name)]));
+const walk = (dir) =>
+  readdirSync(dir)
+    .filter((name) => name !== 'design')
+    .flatMap((name) => (statSync(join(dir, name)).isDirectory() ? walk(join(dir, name)) : [join(dir, name)]));
 const files = walk(SITE);
 const pages = Object.fromEntries(
   files.filter((file) => file.endsWith('.html')).map((file) => [relative(SITE, file).replaceAll('\\', '/'), parse(readFileSync(file, 'utf8'))]),
