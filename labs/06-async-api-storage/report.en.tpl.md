@@ -31,7 +31,7 @@ Table 1 – Structure of the API integration code in the DSLKit project
 | `js/storage/localStorage.js` | Read and write wrappers, a cache with a lifetime, the run history |
 | `js/utils/dataParser.js` | DSL parsing, DOT building, cache key, SVG cleaning |
 | `js/engines/engines.js`, `js/engines/local-engine.js` | The list of generation engines and the own engine that draws in the browser |
-| `js/components/diagram-runner.js` | Engine choice, buttons, loading indicator, error messages, offline mode |
+| `js/components/diagram-runner.js` | Engine choice from the settings, buttons, loading indicator, error messages, offline mode |
 | `js/script.js` | Entry point that starts the component together with the others |
 
 ### 3.2 Request Service
@@ -48,11 +48,11 @@ The diagram cache keeps the save time together with the data, so the lifetime of
 
 The module `dataParser.js` reads the code from the editor: the `diagram` header, `box` blocks with the ports `input`, `control`, `output`, `mechanism`, and `arrow` lines. Unknown lines do not stop a run and go to a list of skipped lines. The model is turned into Graphviz DOT text with quotes, backslashes and line breaks escaped. The server response is treated as untrusted, so before showing it the tags `script`, `foreignObject`, `style`, `use`, `image` and animations, the `on*` attributes, unsafe styles and every `href` link except internal and `http(s)` ones are removed from the SVG. Before a link is checked, control characters are stripped from it because browsers ignore them.
 
-Generation is not limited to a picture from a server. The list of engines is shown in table 1: three engines work through Kroki (Graphviz, Mermaid, PlantUML), and the own engine `local-engine.js` places the boxes in columns itself, draws arrows, labels and tooltips, and returns live SVG with separate `g`, `rect` and `text` elements. It sends no requests, so it works without the internet. For the other engines the same model is turned into DOT, Mermaid and PlantUML text, and the chosen engine is saved in LocalStorage.
+Generation is not limited to a picture from a server. The engine is chosen on the settings page (the field "Diagram generation engine") and read again on every run. Three engines work through Kroki (Graphviz, Mermaid, PlantUML), and the own engine `local-engine.js` places the boxes in columns itself, draws arrows, labels and tooltips, and returns live SVG with separate `g`, `rect` and `text` elements. It sends no requests, so it works without the internet. For the other engines the same model is turned into DOT, Mermaid and PlantUML text, and the choice is kept in the site settings in LocalStorage.
 
 ### 3.5 Interface Integration
 
-The editor canvas gets the buttons "Draw with Kroki" and "Refresh from server", a status line with `aria-live`, a line about service availability and a list of the last runs. While a request runs, the canvas has `aria-busy` and the status line shows the loading text; the buttons stay available so keyboard focus is not lost, and a new run cancels the previous request. The page starts a diagram by itself when it opens, and the engine list redraws it when the value changes. A successful result is shown in figure 1.
+The editor canvas gets the buttons "Draw with Kroki" and "Refresh from server", a status line with `aria-live`, a line about service availability and a list of the last runs. While a request runs, the canvas has `aria-busy` and the status line shows the loading text; the buttons stay available so keyboard focus is not lost, and a new run cancels the previous request. The page starts a diagram by itself when it opens, and a new engine chosen in the settings is applied from the next run. A successful result is shown in figure 1.
 
 ![Diagram received from Kroki](figures/kroki-diagram.jpg)
 
@@ -77,6 +77,34 @@ Automated tests are written for the request service, the storage, the data parsi
 ### 3.8 Committing the Changes
 
 The commit with the implementation: https://github.com/KsushaKhadzhinova/DSLKit-Project/commit/2102742. The commit message: `feat: integrate external API, caching and localStorage for SaaS diagram editor`.
+
+### 3.9 Checking in DevTools
+
+The work was checked in Chrome 155: requests in the Network tab and storage in the Application panel. The storage keys are named after the data (`diagram_cache`, `run_history`) instead of `cached_products` and `search_history` from the assignment example, because the project stores diagrams, not products.
+
+The request to the service is shown in Figure 3: the POST method to kroki.io/graphviz/svg, status 200 and the response type image/svg+xml.
+
+![DevTools screenshot](figures/devtools-01-kroki-request.png)
+
+Figure 3 – The Network tab: the request to Kroki
+
+The sent request body is shown in Figure 4: it is the DOT text built from the DSL.
+
+![DevTools screenshot](figures/devtools-02-kroki-payload.png)
+
+Figure 4 – The Payload tab: the DOT text sent to Kroki
+
+The storage is shown in Figure 5: the diagram cache dslkit.diagram_cache and the run log dslkit.run_history, as well as the editor tab and view.
+
+![DevTools screenshot](figures/devtools-03-local-storage.png)
+
+Figure 5 – The Application panel: the editor LocalStorage
+
+The error state is shown in Figure 6: with the service unavailable and an empty cache the editor reports the problem and keeps the work area.
+
+![DevTools screenshot](figures/error-no-cache.png)
+
+Figure 6 – The editor with the service unavailable and an empty cache
 
 ## 4 Answers to Control Questions
 

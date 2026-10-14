@@ -94,6 +94,28 @@
 
 Коммит с реализацией: https://github.com/KsushaKhadzhinova/DSLKit-Project/commit/39efd4f. Сообщение коммита: `feat: add JavaScript interactivity for a SaaS diagram editor`.
 
+### 3.9 Проверка в DevTools
+
+Страница проверена в Chrome 155: обработчики событий просмотрены на панели Elements, а сохранённые данные на панели Application.
+
+Обработчики событий показаны на рисунке 5: у кнопки фильтра нотаций слушатели click, change и keydown навешены на общий контейнер, то есть используется делегирование.
+
+![Снимок DevTools](figures/devtools-01-event-listeners.png)
+
+Рисунок 5 – Панель Elements, вкладка Event Listeners для кнопки фильтра
+
+Проверка в консоли показана на рисунке 6: метод getEventListeners возвращает слушатели контейнера, а в списке нотаций шесть карточек.
+
+![Снимок DevTools](figures/devtools-02-console.png)
+
+Рисунок 6 – Консоль: слушатели контейнера фильтра и число карточек
+
+Сохранённое состояние показано на рисунке 7: после отправки формы в LocalStorage появились ключи с префиксом dslkit, среди них dslkit.notation-filter и dslkit.waitlist.
+
+![Снимок DevTools](figures/devtools-03-local-storage.png)
+
+Рисунок 7 – Панель Application: LocalStorage сайта
+
 ## 4 Ответы на контрольные вопросы
 
 {{answers}}
