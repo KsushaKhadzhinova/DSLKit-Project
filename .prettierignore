@@ -12,3 +12,4 @@ materials/
 labs/08-frontend-testing/lighthouse-*/
 react-app/coverage/
 react-app/dist/
+docs/metrics/
