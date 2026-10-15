@@ -28,6 +28,23 @@ describe('useLocalStorage', () => {
   });
 });
 
+describe('useLocalStorage validation and errors', () => {
+  it('uses the initial value when validate rejects the stored data', () => {
+    localStorage.setItem('k', JSON.stringify({ a: 1 }));
+    const { result } = renderHook(() => useLocalStorage('k', [], Array.isArray));
+    expect(result.current[0]).toEqual([]);
+  });
+
+  it('does not throw when setItem fails', () => {
+    const spy = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+      throw new Error('QuotaExceededError');
+    });
+    const { result } = renderHook(() => useLocalStorage('k', 1));
+    expect(result.current[0]).toBe(1);
+    spy.mockRestore();
+  });
+});
+
 describe('useAutosaveStatus', () => {
   beforeEach(() => vi.useFakeTimers());
   afterEach(() => vi.useRealTimers());
