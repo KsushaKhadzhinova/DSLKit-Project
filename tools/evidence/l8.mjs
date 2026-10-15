@@ -4,7 +4,7 @@ const { b, app, open } = await start();
 await app.emulateMediaFeatures([{ name: 'prefers-color-scheme', value: 'light' }]);
 const dt = await open('sources');
 const shot = (n) => dt.screenshot({ path: `${OUT}/devtools-${n}.png` });
-await app.goto('http://localhost:5174/', { waitUntil: 'load' });
+await app.goto('http://localhost:5173/', { waitUntil: 'load' });
 await sleep(2500);
 await dt.bringToFront();
 await dt.mouse.click(700, 400);

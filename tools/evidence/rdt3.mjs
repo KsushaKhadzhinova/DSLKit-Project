@@ -6,7 +6,7 @@ const OUT = 'E:/DSLKit-Project/labs/07-react-components/figures';
 const b = await puppeteer.launch({ executablePath: 'C:/Program Files (x86)/Google/Chrome/Application/chrome.exe', headless: true, defaultViewport: { width: 1600, height: 900 } });
 const page = await b.newPage();
 await page.evaluateOnNewDocument(inject);
-await page.goto('http://localhost:5190/?src=http://localhost:5174/', { waitUntil: 'load' });
+await page.goto('http://localhost:5190/?src=http://localhost:5173/', { waitUntil: 'load' });
 await sleep(4000);
 await page.mouse.click(76, 170); await sleep(600);
 await page.mouse.click(1052, 126); await sleep(600);

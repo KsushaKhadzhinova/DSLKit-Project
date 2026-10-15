@@ -4,7 +4,7 @@ const { b, app, open } = await start();
 await app.emulateMediaFeatures([{ name: 'prefers-color-scheme', value: 'light' }]);
 const dt = await open('console');
 await app.bringToFront();
-await app.goto('http://localhost:5174/', { waitUntil: 'load' });
+await app.goto('http://localhost:5173/', { waitUntil: 'load' });
 await sleep(2000);
 await app.evaluate(() => { document.querySelectorAll('button').forEach((x, i) => { if (/Открыть|Выбрать|Записаться/.test(x.textContent) && i < 12) x.click(); }); });
 await app.select('select', 'IDEF0');
