@@ -9,6 +9,7 @@ import {
   darkTokens,
   colorMixWithoutFallback,
   desktopFirstQueries,
+  duplicateMediaQueries,
   fibonacciProblems,
   goldenProblems,
   hardcodedColors,
@@ -140,6 +141,12 @@ test('the header is sticky, focus is visible, reduced motion is respected and a 
 
 test('the styles are mobile first: only min-width media queries are used for layout', () => {
   assert.deepEqual(desktopFirstQueries(allCss), []);
+});
+
+test('no stylesheet repeats a media query, one query is one block', () => {
+  for (const [name, css] of Object.entries(sheets)) {
+    assert.deepEqual(duplicateMediaQueries(css), [], name);
+  }
 });
 
 test('the variables named in the assignment exist', () => {
