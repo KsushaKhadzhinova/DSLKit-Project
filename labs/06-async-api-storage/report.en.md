@@ -142,7 +142,7 @@ export class ApiError extends Error {
 
 const defaultSleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-const isRetryable = (error) => error.kind === 'network' || error.kind === 'timeout' || error.status === 429 || (error.status !== null && error.status >= 500);
+const isRetryable = (error) => error.kind === 'network' || error.status === 429 || (error.status !== null && error.status >= 500);
 
 const retryAfterMs = (response, fallback, max) => {
   const seconds = Number(response?.headers?.get?.('Retry-After'));
@@ -185,7 +185,7 @@ export const createApi = ({ config = API_CONFIG, fetchImpl = globalThis.fetch?.b
     return response;
   };
 
-  // Retries network failures, timeouts, 429 and 5xx up to `retries` times with exponential backoff.
+  // Retries network failures, 429 and 5xx (a timeout is final, it already took the whole time limit) up to `retries` times with exponential backoff.
   const send = async (path, { method = 'GET', body, headers = {}, signal, timeoutMs = config.timeoutMs, retries = config.retries, parse = 'text' } = {}) => {
     const url = `${config.baseUrl}${path}`;
     const tryOnce = async (attemptNumber) => {
@@ -247,7 +247,6 @@ import { createMemoryBackend, createStorage, getStorage } from '../utils/storage
 export const STORAGE_KEYS = {
   diagramCache: 'diagram_cache',
   history: 'run_history',
-  favorites: 'favorites',
 };
 
 const MAX_CACHE_ENTRIES = 20;
@@ -523,6 +522,10 @@ export const initDiagramRunner = ({
     return findEngine(saved !== null && typeof saved === 'object' ? saved['diagram-engine'] : undefined);
   };
 
+  const showAction = () => {
+    renderButton.textContent = currentEngine().action;
+  };
+
   const show = (svgText, note) => {
     const svg = sanitizeSvg(svgText, parser);
     if (!svg) return false;
@@ -554,6 +557,7 @@ export const initDiagramRunner = ({
   };
 
   const run = async ({ refresh = false } = {}) => {
+    showAction();
     const model = parseDsl(source());
     if (model.boxes.length === 0) {
       setStatus(MESSAGES.empty);
@@ -626,6 +630,7 @@ ${input}`);
       });
   }
 
+  showAction();
   renderHistory();
   if (autoRun) run();
   return { run, cache, history };

@@ -335,6 +335,16 @@ test('each Kroki engine sends its own text type to its own endpoint', async () =
   }
 });
 
+test('the render button names the engine that will draw the diagram', async () => {
+  const storage = memory();
+  const { window, $ } = setup({ storage });
+  assert.equal($('.canvas__render').textContent, 'Нарисовать через Kroki');
+  useEngine(storage, 'local');
+  click(window, $('.canvas__render'));
+  await flush();
+  assert.equal($('.canvas__render').textContent, 'Нарисовать в браузере');
+});
+
 test('the own engine draws live SVG in the browser without any request, even offline', async () => {
   const storage = memory();
   useEngine(storage, 'local');
