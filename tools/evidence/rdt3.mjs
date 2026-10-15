@@ -1,0 +1,18 @@
+import puppeteer from 'puppeteer-core';
+import { readFileSync } from 'node:fs';
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const inject = readFileSync('../rdi/dist/inject.js', 'utf8');
+const OUT = 'E:/DSLKit-Project/labs/07-react-components/figures';
+const b = await puppeteer.launch({ executablePath: 'C:/Program Files (x86)/Google/Chrome/Application/chrome.exe', headless: true, defaultViewport: { width: 1600, height: 900 } });
+const page = await b.newPage();
+await page.evaluateOnNewDocument(inject);
+await page.goto('http://localhost:5190/?src=http://localhost:5174/', { waitUntil: 'load' });
+await sleep(4000);
+await page.mouse.click(76, 170); await sleep(600);
+await page.mouse.click(1052, 126); await sleep(600);
+await page.screenshot({ path: `${OUT}/devtools-01-components.png` });
+await page.mouse.click(73, 512); await sleep(800);
+await page.screenshot({ path: `${OUT}/devtools-02-project-card.png` });
+await page.mouse.click(1540, 25); await sleep(1000);
+await page.screenshot({ path: 'out/rdt-prof.png' });
+await b.close();

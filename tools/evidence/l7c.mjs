@@ -1,0 +1,14 @@
+import { start, sleep } from './dtf.mjs';
+const OUT = 'E:/DSLKit-Project/labs/07-react-components/figures';
+const { b, app, open } = await start();
+await app.emulateMediaFeatures([{ name: 'prefers-color-scheme', value: 'light' }]);
+const dt = await open('console');
+await app.bringToFront();
+await app.goto('http://localhost:5174/', { waitUntil: 'load' });
+await sleep(2000);
+await app.evaluate(() => { document.querySelectorAll('button').forEach((x, i) => { if (/Открыть|Выбрать|Записаться/.test(x.textContent) && i < 12) x.click(); }); });
+await app.select('select', 'IDEF0');
+await sleep(800);
+await dt.bringToFront(); await sleep(500);
+await dt.screenshot({ path: `${OUT}/devtools-03-console.png` });
+await b.close();
