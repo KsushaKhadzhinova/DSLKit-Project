@@ -62,7 +62,7 @@ test('GET /diagrams/:id answers 404 for a missing diagram', async () => {
 });
 
 test('GET /diagrams/:id answers 400 for a non-numeric id', async () => {
-  for (const id of ['abc', '0', '-3', '1.5']) {
+  for (const id of ['abc', '0', '-3', '1.5', '0x1', '1e0', '%201', '01', '99999999999999999999']) {
     const { res, body } = await call('GET', `/diagrams/${id}`);
     assert.equal(res.status, 400, id);
     assert.match(body.error, /positive integer/);
@@ -151,4 +151,40 @@ test('an unexpected failure answers 500 without leaking the message', async (t) 
   const { res, body } = await call('GET', '/diagrams');
   assert.equal(res.status, 500);
   assert.deepEqual(body, { error: 'Internal server error' });
+});
+
+test('an id in the body is ignored on POST and PUT', async () => {
+  const created = await call('POST', '/diagrams', { ...valid, id: 500 });
+  assert.notEqual(created.body.id, 500);
+  const id = await firstId();
+  const replaced = await call('PUT', `/diagrams/${id}`, { ...valid, id: 500 });
+  assert.equal(replaced.body.id, id);
+  assert.equal(await models.Diagram.findByPk(500), null);
+});
+
+test('PUT stores the new state, which GET then returns', async () => {
+  const id = await firstId();
+  await call('PUT', `/diagrams/${id}`, valid);
+  const { body } = await call('GET', `/diagrams/${id}`);
+  assert.deepEqual({ ...body, createdAt: undefined, updatedAt: undefined }, { id, ...valid, createdAt: undefined, updatedAt: undefined });
+});
+
+test('a body over the size limit answers 413', async () => {
+  const { res, body } = await call('POST', '/diagrams', { ...valid, sourceCode: 'x'.repeat(200 * 1024) });
+  assert.equal(res.status, 413);
+  assert.ok(body.error);
+});
+
+test('unsupported methods answer 405 with an Allow header', async () => {
+  for (const [method, path, allow] of [
+    ['PATCH', '/diagrams/1', 'GET, PUT, DELETE'],
+    ['POST', '/diagrams/1', 'GET, PUT, DELETE'],
+    ['DELETE', '/diagrams', 'GET, POST'],
+    ['PUT', '/diagrams', 'GET, POST'],
+  ]) {
+    const { res, body } = await call(method, path, valid);
+    assert.equal(res.status, 405, `${method} ${path}`);
+    assert.equal(res.headers.get('allow'), allow);
+    assert.match(body.error, /not allowed/);
+  }
 });
