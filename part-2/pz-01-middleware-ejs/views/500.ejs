@@ -1,5 +1,5 @@
 <%- include('partials/header') %>
-<h1>500 – server error</h1>
-<p>Something went wrong on our side. The error was logged.</p>
+<h1><%= status %> – <%= status >= 500 ? 'server error' : 'bad request' %></h1>
+<p><%= status >= 500 ? 'Something went wrong on our side. The error was logged.' : 'The server could not accept this request.' %></p>
 <a href="/<%= authQuery %>">Back to the list</a>
 <%- include('partials/footer') %>
