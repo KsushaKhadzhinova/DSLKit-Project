@@ -66,6 +66,10 @@ export const initDiagramRunner = ({
     return findEngine(saved !== null && typeof saved === 'object' ? saved['diagram-engine'] : undefined);
   };
 
+  const showAction = () => {
+    renderButton.textContent = currentEngine().action;
+  };
+
   const show = (svgText, note) => {
     const svg = sanitizeSvg(svgText, parser);
     if (!svg) return false;
@@ -97,6 +101,7 @@ export const initDiagramRunner = ({
   };
 
   const run = async ({ refresh = false } = {}) => {
+    showAction();
     const model = parseDsl(source());
     if (model.boxes.length === 0) {
       setStatus(MESSAGES.empty);
@@ -169,6 +174,7 @@ ${input}`);
       });
   }
 
+  showAction();
   renderHistory();
   if (autoRun) run();
   return { run, cache, history };
