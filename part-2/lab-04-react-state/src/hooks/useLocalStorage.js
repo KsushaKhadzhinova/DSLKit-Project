@@ -1,20 +1,27 @@
 import { useEffect, useState } from 'react';
 
-function readStorage(key, fallback) {
+function readStorage(key, fallback, validate) {
   try {
     const raw = localStorage.getItem(key);
-    return raw === null ? fallback : JSON.parse(raw);
+    if (raw === null) return fallback;
+    const parsed = JSON.parse(raw);
+    return validate(parsed) ? parsed : fallback;
   } catch {
     return fallback;
   }
 }
 
 // State that is loaded once from localStorage (lazy initializer) and saved on every change.
-export function useLocalStorage(key, initialValue) {
-  const [value, setValue] = useState(() => readStorage(key, initialValue));
+// `validate` rejects stored data of a wrong shape, then the initial value is used.
+export function useLocalStorage(key, initialValue, validate = () => true) {
+  const [value, setValue] = useState(() => readStorage(key, initialValue, validate));
 
   useEffect(() => {
-    localStorage.setItem(key, JSON.stringify(value));
+    try {
+      localStorage.setItem(key, JSON.stringify(value));
+    } catch {
+      // Storage is full or blocked: keep working in memory.
+    }
   }, [key, value]);
 
   return [value, setValue];
