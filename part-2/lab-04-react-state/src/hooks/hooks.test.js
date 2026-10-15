@@ -1,0 +1,54 @@
+import { act, renderHook } from '@testing-library/react';
+import { AUTOSAVE_DELAY, useAutosaveStatus } from './useAutosaveStatus';
+import { useLocalStorage } from './useLocalStorage';
+
+describe('useLocalStorage', () => {
+  it('returns the initial value when storage is empty and saves it', () => {
+    const { result } = renderHook(() => useLocalStorage('k', [1]));
+    expect(result.current[0]).toEqual([1]);
+    expect(JSON.parse(localStorage.getItem('k'))).toEqual([1]);
+  });
+
+  it('loads a stored value on mount', () => {
+    localStorage.setItem('k', JSON.stringify({ a: 2 }));
+    const { result } = renderHook(() => useLocalStorage('k', {}));
+    expect(result.current[0]).toEqual({ a: 2 });
+  });
+
+  it('writes every change to storage', () => {
+    const { result } = renderHook(() => useLocalStorage('k', 0));
+    act(() => result.current[1](5));
+    expect(localStorage.getItem('k')).toBe('5');
+  });
+
+  it('falls back to the initial value when the stored JSON is broken', () => {
+    localStorage.setItem('k', '{broken');
+    const { result } = renderHook(() => useLocalStorage('k', 'fallback'));
+    expect(result.current[0]).toBe('fallback');
+  });
+});
+
+describe('useAutosaveStatus', () => {
+  beforeEach(() => vi.useFakeTimers());
+  afterEach(() => vi.useRealTimers());
+
+  it('is saving right after a change and saved after the debounce delay', () => {
+    const { result, rerender } = renderHook(({ v }) => useAutosaveStatus(v), { initialProps: { v: 1 } });
+    expect(result.current).toBe('saving');
+    act(() => vi.advanceTimersByTime(AUTOSAVE_DELAY));
+    expect(result.current).toBe('saved');
+
+    rerender({ v: 2 });
+    expect(result.current).toBe('saving');
+  });
+
+  it('restarts the delay when the value changes again', () => {
+    const { result, rerender } = renderHook(({ v }) => useAutosaveStatus(v), { initialProps: { v: 1 } });
+    act(() => vi.advanceTimersByTime(AUTOSAVE_DELAY - 100));
+    rerender({ v: 2 });
+    act(() => vi.advanceTimersByTime(AUTOSAVE_DELAY - 100));
+    expect(result.current).toBe('saving');
+    act(() => vi.advanceTimersByTime(100));
+    expect(result.current).toBe('saved');
+  });
+});
