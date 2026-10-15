@@ -1,0 +1,15 @@
+<%- include('partials/header') %>
+<h1>Request log</h1>
+<table class="table">
+  <thead>
+    <tr><th>Time</th><th>Method</th><th>URL</th><th>Status</th><th>ms</th></tr>
+  </thead>
+  <tbody>
+    <% rows.forEach((row) => { %>
+      <tr>
+        <td><%= row.time %></td><td><%= row.method %></td><td><%= row.url %></td><td><%= row.status %></td><td><%= row.ms %></td>
+      </tr>
+    <% }) %>
+  </tbody>
+</table>
+<%- include('partials/footer') %>

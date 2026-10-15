@@ -1,0 +1,22 @@
+<%- include('partials/header') %>
+<h1>Diagrams</h1>
+<% if (items.length === 0) { %>
+  <p>No diagrams yet.</p>
+<% } else { %>
+  <table class="table">
+    <thead>
+      <tr><th>#</th><th>Title</th><th>Notation</th></tr>
+    </thead>
+    <tbody>
+      <% items.forEach((item) => { %>
+        <tr>
+          <td><%= item.id %></td>
+          <td><a href="/item/<%= item.id %><%= authQuery %>"><%= item.title %></a></td>
+          <td><%= item.notation %></td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+<% } %>
+<a class="button" href="/add<%= authQuery %>">Add diagram</a>
+<%- include('partials/footer') %>

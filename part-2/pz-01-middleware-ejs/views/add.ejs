@@ -1,0 +1,26 @@
+<%- include('partials/header') %>
+<h1>Add diagram</h1>
+<form method="post" action="/add<%= authQuery %>" class="form" novalidate>
+  <label>Title
+    <input name="title" value="<%= values.title || '' %>" required maxlength="80" />
+  </label>
+  <% if (errors.title) { %><p class="form__error"><%= errors.title %></p><% } %>
+
+  <label>Notation
+    <select name="notation">
+      <% notations.forEach((notation) => { %>
+        <option value="<%= notation %>" <%= values.notation === notation ? 'selected' : '' %>><%= notation %></option>
+      <% }) %>
+    </select>
+  </label>
+  <% if (errors.notation) { %><p class="form__error"><%= errors.notation %></p><% } %>
+
+  <label>Description
+    <textarea name="description" rows="3"><%= values.description || '' %></textarea>
+  </label>
+  <label>Diagram code
+    <textarea name="code" rows="6"><%= values.code || '' %></textarea>
+  </label>
+  <button class="button" type="submit">Save</button>
+</form>
+<%- include('partials/footer') %>

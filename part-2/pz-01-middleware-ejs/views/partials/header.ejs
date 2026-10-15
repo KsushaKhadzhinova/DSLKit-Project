@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title><%= title %> – DSLKit</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="site-header__logo" href="/<%= authQuery %>">DSLKit</a>
+      <nav class="site-header__nav">
+        <a href="/<%= authQuery %>">Diagrams</a>
+        <a href="/add<%= authQuery %>">Add</a>
+        <a href="/log<%= authQuery %>">Log</a>
+      </nav>
+      <span class="site-header__user">
+        <%= user.name %>
+        <% if (user.guest) { %><a href="/login">Sign in</a><% } %>
+      </span>
+    </header>
+    <main class="page">
