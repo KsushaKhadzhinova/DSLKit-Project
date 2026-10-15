@@ -1,0 +1,1905 @@
+{
+  "cssvalidation" : {
+     "uri"       : "app.css",
+     "checkedby" : "http://www.w3.org/2005/07/css-validator",
+     "csslevel"  : "css3",
+     "date"      : "2026-10-15T10:10:25Z",
+     "timestamp" : "1792102225959",
+     "validity"  : true,
+     "result"    : {
+		"errorcount"   : 0,
+		"warningcount" : 236
+                   }
+       ,
+     "warnings"   : [
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 8,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 27,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 28,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 29,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 30,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 31,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 38,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 40,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 46,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 47,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 60,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 66,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 67,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 68,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 69,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 70,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 72,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 87,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 90,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 91,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 94,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 101,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 109,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 110,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 111,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 112,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 113,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 114,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 116,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 120,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 139,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 140,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 144,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 146,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 153,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 158,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 160,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 162,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 168,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 180,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 182,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 183,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 185,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 189,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 200,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 206,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 219,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 228,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 229,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 230,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 232,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 237,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 243,
+         "message" :  "\u201C-webkit-appearance\u201D is a vendor extension",
+         "type"    :  "vendor-extension",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 245,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 248,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 251,
+         "message" :  "\u201C::-webkit-progress-bar\u201D is a vendor extended pseudo-element",
+         "type"    :  "vendor-ext-pseudo-element",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 253,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 256,
+         "message" :  "\u201C::-webkit-progress-value\u201D is a vendor extended pseudo-element",
+         "type"    :  "vendor-ext-pseudo-element",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 258,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 261,
+         "message" :  "\u201C::-moz-progress-bar\u201D is a vendor extended pseudo-element",
+         "type"    :  "vendor-ext-pseudo-element",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 263,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 268,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 279,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 281,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 287,
+       "context" :  ".button--ghost", 
+         "message" :  "Same color for \u201Cbackground-color\u201D and \u201Cborder-color\u201D",
+         "type"    :  "same-colors",
+         "level"   : 1
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 293,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 299,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 300,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 301,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 306,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 311,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 317,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 329,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 331,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 332,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 333,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 334,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 335,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 346,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 350,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 351,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 356,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 363,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 364,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 385,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 392,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 393,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 397,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 398,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 404,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 406,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 410,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 411,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 419,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 420,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 427,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 434,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 435,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 436,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 437,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 439,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 441,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 453,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 460,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 467,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 472,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 473,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 474,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 475,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 476,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 478,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 490,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 502,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 504,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 505,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 506,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 507,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 508,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 519,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 523,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 524,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 525,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 530,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 534,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 558,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 564,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 565,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 566,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 567,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 569,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 570,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 577,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 582,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 583,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 587,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 588,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 590,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 591,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 592,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 594,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 599,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 609,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 611,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 615,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 620,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 628,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 640,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 642,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 643,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 645,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 649,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 660,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 666,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 679,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 688,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 689,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 693,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 694,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 695,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 696,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 697,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 698,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 703,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 704,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 716,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 717,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 718,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 722,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 734,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 735,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 736,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 737,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 738,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 740,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 752,
+         "message" :  "\u201C-webkit-appearance\u201D is a vendor extension",
+         "type"    :  "vendor-extension",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 754,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 755,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 758,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 766,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 767,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 768,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 769,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 771,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 776,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 780,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 785,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 796,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 803,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 824,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 825,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 826,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 827,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 828,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 842,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 843,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 846,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 847,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 848,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 850,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 852,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 859,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 865,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 869,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 874,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 875,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 876,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 880,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 884,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 892,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 899,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 905,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 914,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 924,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 928,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 932,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 940,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 969,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 970,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 983,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 989,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 990,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 996,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 997,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 1013,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 1022,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 1028,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 1034,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 1040,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 1041,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 1042,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 1060,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 1069,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 1070,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 1082,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 1087,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+     ,
+      {
+         "source"  : "file://localhost/app.css",
+         "line"    : 1088,
+         "message" :  "Due to their dynamic nature, CSS variables are currently not statically checked",
+         "type"    :  "css-variable",
+         "level"   : 0
+      }
+                     ]
+    }
+}
