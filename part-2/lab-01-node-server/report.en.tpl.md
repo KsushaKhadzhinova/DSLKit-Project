@@ -56,11 +56,11 @@ Handlers do not validate data themselves. Parsing the address and the body is mo
 
 ### 3.4 Error handling
 
-Every error is returned in one shape, `{ "error": "message" }`, and invalid data adds a `details` array with the field name and the reason. Handlers report an error by calling `next(error)` with an `HttpError`, and the global handler in `error-handler.js` turns it into a response. The same handler maps a JSON parse failure to 400 with a clear message, and any unexpected failure to 500 with a generic text: the details go to the server log and never reach the client. A request to an unknown path gets a JSON 404 instead of the default page. Deleting an already deleted diagram gives 404, because the resource no longer exists.
+Every error is returned in one shape, `{ "error": "message" }`, and invalid data adds a `details` array with the field name and the reason. Handlers report an error by calling `next(error)` with an `HttpError`, and the global handler in `error-handler.js` turns it into a response. The same handler maps a JSON parse failure to 400 with a clear message, and any unexpected failure to 500 with a generic text: the details go to the server log and never reach the client. A request to an unknown path gets a JSON 404 instead of the default page. A method the route does not have, such as `PATCH`, gets 405 with an `Allow` header. The id is accepted only as plain decimal digits without a leading zero, so values such as `0x1`, `1e0` and `01` give 400. Deleting an already deleted diagram gives 404, because the resource no longer exists.
 
 ### 3.5 Verification
 
-I checked the requests with `curl` and the `requests.http` file for the REST Client extension of VS Code, and then locked them in with automated tests. The tests use the built-in `node:test` module and real HTTP requests to a server on a free port. There are 14 tests: reading the list and one diagram, creation with the `Location` header check, the default priority, dropping unknown fields, data errors, bad and malformed JSON, replacement, deletion with a repeated deletion, an unknown route and a failure with status 500. Results of real requests are in table 3.
+I checked the requests with `curl` and the `requests.http` file for the REST Client extension of VS Code, and then locked them in with automated tests. The tests use the built-in `node:test` module and real HTTP requests to a server on a free port. There are 18 tests: reading the list and one diagram, creation with the `Location` header check, the default priority, dropping unknown fields, data errors, bad and malformed JSON, replacement, deletion with a repeated deletion, rejecting odd id values, ignoring an id in the body, an oversized body with status 413, unsupported methods with status 405, an unknown route and a failure with status 500. Results of real requests are in table 3.
 
 Table 3 – Results of requests to the running server
 
@@ -78,7 +78,7 @@ Table 3 – Results of requests to the running server
 
 ## Conclusion
 
-For DSLKit, a REST API for the `diagrams` resource was built on Express: five routes read the list and a single record, create, replace and delete, and the data temporarily lives in an in-memory array. Errors are unified into one JSON shape with the codes 400, 404 and 500 through a global handler, development mode runs on `nodemon`, and 14 automated tests confirm the behavior of every route. The split into routes, controllers and a model lets the next lab swap the array for a database without rewriting the rest of the code. Screenshots of the requests from Postman or a browser are still to be attached.
+For DSLKit, a REST API for the `diagrams` resource was built on Express: five routes read the list and a single record, create, replace and delete, and the data temporarily lives in an in-memory array. Errors are unified into one JSON shape with the codes 400, 404 and 500 through a global handler, development mode runs on `nodemon`, and 18 automated tests confirm the behavior of every route. The split into routes, controllers and a model lets the next lab swap the array for a database without rewriting the rest of the code. Screenshots of the requests from Postman or a browser are still to be attached.
 
 ## Appendix A – Listing of server.js
 
