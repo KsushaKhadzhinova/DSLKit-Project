@@ -27,12 +27,10 @@ export const createApp = ({ store = createDiagramStore(), log = createRequestLog
   app.get('/add', requireAuth, (req, res) => res.render('add', { title: 'Add diagram', notations: NOTATIONS, errors: {}, values: {} }));
 
   app.post('/add', requireAuth, (req, res) => {
-    const values = {
-      title: (req.body.title ?? '').trim(),
-      notation: req.body.notation,
-      description: (req.body.description ?? '').trim(),
-      code: (req.body.code ?? '').trim(),
-    };
+    const body = req.body ?? {};
+    // Missing body or repeated keys (arrays) must not crash: only plain strings count.
+    const text = (value) => (typeof value === 'string' ? value.trim() : '');
+    const values = { title: text(body.title), notation: text(body.notation), description: text(body.description), code: text(body.code) };
     const errors = validateDiagram(values);
     if (Object.keys(errors).length) {
       return res.status(400).render('add', { title: 'Add diagram', notations: NOTATIONS, errors, values });

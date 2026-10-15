@@ -7,12 +7,21 @@ import { serverError } from '../src/middleware/errorHandlers.js';
 
 const start = async () => {
   const lines = [];
+  const waiters = [];
   const errors = [];
   const log = createRequestLog(3);
-  const server = createApp({ log, write: (l) => lines.push(l), writeError: (...a) => errors.push(a) }).listen(0);
+  const server = createApp({
+    log,
+    write: (l) => {
+      lines.push(l);
+      waiters.splice(0).forEach((resolve) => resolve());
+    },
+    writeError: (...a) => errors.push(a),
+  }).listen(0);
   await new Promise((resolve) => server.once('listening', resolve));
   const base = `http://127.0.0.1:${server.address().port}`;
-  return { base, lines, errors, log, close: () => server.close() };
+  const nextLine = () => new Promise((resolve) => waiters.push(resolve));
+  return { base, lines, nextLine, errors, log, close: () => server.close() };
 };
 
 const withServer = (name, fn) =>
@@ -79,9 +88,10 @@ withServer('invalid input re-renders the form with 400 and keeps values', async 
   assert.equal((await post(`${base}/add?auth=1`, {})).status, 400);
 });
 
-withServer('logger writes to console and to the in-memory table', async ({ base, lines, log }) => {
+withServer('logger writes to console and to the in-memory table', async ({ base, lines, log, nextLine }) => {
+  const logged = nextLine();
   await fetch(`${base}/item/1`);
-  await new Promise((resolve) => setTimeout(resolve, 20));
+  await logged;
   assert.match(lines.at(-1), /GET \/item\/1 200 \d+ms/);
   assert.equal(log.all()[0].url, '/item/1');
   assert.match(await (await fetch(`${base}/log`)).text(), /\/item\/1/);
@@ -113,4 +123,28 @@ test('store and validation helpers', () => {
   assert.equal(store.find(4).title, 't');
   assert.deepEqual(validateDiagram({ title: 'ok', notation: 'ERD' }), {});
   assert.match(validateDiagram({ title: 'x'.repeat(81), notation: 'ERD' }).title, /80/);
+});
+
+withServer('missing body, repeated keys and bad JSON-like input give 400, not 500', async ({ base }) => {
+  const noBody = await fetch(`${base}/add?auth=1`, { method: 'POST' });
+  assert.equal(noBody.status, 400);
+  const repeated = await post(
+    `${base}/add?auth=1`,
+    new URLSearchParams([
+      ['title', 'a'],
+      ['title', 'b'],
+      ['notation', 'UML'],
+    ]),
+  );
+  assert.equal(repeated.status, 400);
+});
+
+withServer('errors that carry a 4xx status keep it', async ({ base }) => {
+  const res = await fetch(`${base}/add?auth=1`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/x-www-form-urlencoded' },
+    body: 'title=' + 'x'.repeat(200000),
+  });
+  assert.equal(res.status, 413);
+  assert.match(await res.text(), /Bad request/);
 });
