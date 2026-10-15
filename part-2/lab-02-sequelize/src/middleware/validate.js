@@ -12,8 +12,9 @@ const checks = {
 };
 
 const parseId = (req, _res, next) => {
+  // Number() would accept '0x1', '1e0' and ' 1', so the raw text is checked first.
   const id = Number(req.params.id);
-  if (!Number.isInteger(id) || id < 1) return next(badRequest('Diagram id must be a positive integer'));
+  if (!/^[1-9]\d*$/.test(req.params.id) || !Number.isSafeInteger(id)) return next(badRequest('Diagram id must be a positive integer'));
   req.diagramId = id;
   return next();
 };
