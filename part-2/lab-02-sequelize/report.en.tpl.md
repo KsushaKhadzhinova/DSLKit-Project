@@ -56,11 +56,11 @@ Table 2 – Routes and the matching Sequelize calls
 
 The run order is: `npm run db:migrate` creates the table and adds the `priority` column, `npm run db:seed` fills the database, and `npm run dev` starts the server. The check on SQLite showed that the list returns three records with `createdAt` and `updatedAt`, a replacement changes `updatedAt`, the first deletion gives 204, and the repeated one gives 404.
 
-There are 18 automated tests. Fourteen check the HTTP routes on a temporary SQLite database with the real migrations applied. Four check the migrations themselves: the set of columns after both migrations, rolling back the second migration to drop `priority` and applying it again, inserting and reverting the seed, and the model refusing values outside the lists. The tests run the real `sequelize-cli`, so a mistake in a migration file is caught.
+There are 22 automated tests. Eighteen check the HTTP routes on a temporary SQLite database with the real migrations applied. Four check the migrations themselves: the set of columns after both migrations, rolling back the second migration to drop `priority` and applying it again, inserting and reverting the seed, and the model refusing values outside the lists. The tests run the real `sequelize-cli`, so a mistake in a migration file is caught.
 
 ## Conclusion
 
-For DSLKit, the `diagrams` collection from lab 1 is moved from an array to a database through Sequelize: the `Diagram` model, two migrations (creating the table and adding the `priority` field), a seed with three diagrams, and controllers built on ORM methods. Locally the work uses SQLite, and the `DATABASE_URL` variable switches it to PostgreSQL or cloud Neon without code changes. 18 automated tests confirm the routes, the migrations with rollback, and the seed. Running on a real PostgreSQL and attaching screenshots of the database structure and of Postman requests are still to be done.
+For DSLKit, the `diagrams` collection from lab 1 is moved from an array to a database through Sequelize: the `Diagram` model, two migrations (creating the table and adding the `priority` field), a seed with three diagrams, and controllers built on ORM methods. Locally the work uses SQLite, and the `DATABASE_URL` variable switches it to PostgreSQL or cloud Neon without code changes. 22 automated tests confirm the routes, the migrations with rollback, and the seed. Running on a real PostgreSQL and attaching screenshots of the database structure and of Postman requests are still to be done.
 
 ## Appendix A – Listing of config.js
 
