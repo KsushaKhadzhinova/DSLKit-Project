@@ -244,3 +244,15 @@ withApi('string fields are trimmed before validation and storage', async ({ call
   assert.equal((await call('PUT', '/projects/1', { name: ' Put ', ownerId: 1, description: ' d ' })).json.description, 'd');
   assert.equal((await call('POST', '/projects', { name: '   ', ownerId: 1 })).status, 400);
 });
+
+withApi('email is unique ignoring case, on create, PUT and PATCH', async ({ call }) => {
+  const dup = await call('POST', '/users', { name: 'Copy', email: 'ADA@example.com' });
+  assert.equal(dup.status, 409);
+  assert.equal(dup.json.error.code, 'conflict');
+  assert.equal((await call('PUT', '/users/2', { name: 'Alan', email: 'Ada@Example.com' })).status, 409);
+  assert.equal((await call('PATCH', '/users/2', { email: 'ada@example.com' })).status, 409);
+  assert.equal((await call('PATCH', '/users/1', { email: 'ADA@EXAMPLE.COM' })).status, 200);
+  assert.equal((await call('PATCH', '/users/1', { name: 'Ada L.' })).status, 200);
+  assert.equal((await call('PUT', '/users/2', { name: 'Alan', email: 'alan@example.com' })).status, 200);
+  assert.equal((await call('POST', '/users', { name: 'New', email: 'new@example.com' })).status, 201);
+});

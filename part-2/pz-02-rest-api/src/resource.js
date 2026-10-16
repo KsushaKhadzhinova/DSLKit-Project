@@ -52,15 +52,17 @@ export const listItems = (items, schema, query) => {
 };
 
 // Builds the six standard routes for one resource.
-// hooks.check(data) returns extra validation details for the fields present (references),
+// hooks.check(data, current) returns extra validation details for the fields present (references)
+// and may throw a conflict; current is the record being changed, undefined on create.
+//
 // hooks.beforeRemove(item) may throw.
 export const createResourceRouter = ({ label, collection, schema, hooks = {} }) => {
   const router = Router();
-  const body = (req, partial) => {
+  const body = (req, partial, current) => {
     const input = trimStrings(schema, req.body);
     const errors = validate(schema, input, { partial });
     const data = partial ? input : applyDefaults(schema, input);
-    const details = errors.length ? errors : (hooks.check?.(data) ?? []);
+    const details = errors.length ? errors : (hooks.check?.(data, current) ?? []);
     if (details.length) throw validationFailed(details);
     return data;
   };
@@ -78,11 +80,11 @@ export const createResourceRouter = ({ label, collection, schema, hooks = {} }) 
   });
   router.put('/:id', (req, res) => {
     const item = load(req);
-    res.json(collection.replace(item, body(req, false)));
+    res.json(collection.replace(item, body(req, false, item)));
   });
   router.patch('/:id', (req, res) => {
     const item = load(req);
-    res.json(collection.update(item, body(req, true)));
+    res.json(collection.update(item, body(req, true, item)));
   });
   router.delete('/:id', (req, res) => {
     const item = load(req);

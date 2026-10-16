@@ -45,6 +45,11 @@ export const createApp = ({ stores = createStores(), writeError = console.error 
       collection: users,
       schema: schemas.users,
       hooks: {
+        check: (data, current) => {
+          const taken = data.email !== undefined && users.all().some((user) => user !== current && user.email.toLowerCase() === data.email.toLowerCase());
+          if (taken) throw conflict('A user with this email already exists');
+          return [];
+        },
         beforeRemove: (user) => {
           if (projects.all().some((project) => project.ownerId === user.id)) throw conflict('User still owns projects');
         },
