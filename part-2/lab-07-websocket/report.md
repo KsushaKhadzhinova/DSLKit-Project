@@ -26,6 +26,12 @@
 4. Клиент отправляет `chat:message`, сервер сохраняет сообщение в историю и рассылает его всем в комнате. Событие `typing` уходит остальным участникам, `editing` обновляет список.
 5. При закрытии вкладки сервер получает `disconnect`, убирает пользователя из комнат и рассылает `room:left` и `user:offline`.
 
+Последовательность обмена показана на рисунке 1: вверху три участника, ниже по стрелкам идут события в порядке выполнения, слева направо отправляет клиент А, справа налево приходит ответ сервера.
+
+![Схема обмена событиями между двумя клиентами и сервером](figures/event-flow.svg)
+
+Рисунок 1 – Схема обмена событиями при подключении, входе в комнату, сообщении и отключении
+
 ### 3.2 Выбор клиента и структура проекта
 
 Для клиента выбраны чистые HTML и JavaScript. Страница с чатом небольшая, сборщик ей не нужен. Express раздаёт её из папки `public` с того же адреса, что и сервер, поэтому настройка CORS не требуется, а для проверки достаточно открыть один адрес в двух окнах. Протокол событий не зависит от клиента, и React-компонент для основного проекта сможет использовать его без изменений. Структура проекта показана в таблице 1.
@@ -78,7 +84,7 @@
 
 **Уведомления о наборе текста.** Событие `typing` отправляется остальным участникам комнаты и не сохраняется. Клиент отправляет `true` при вводе и `false` через секунду после последней клавиши.
 
-**Подтверждения и ограничения.** Все события с ответом возвращают `{ ok, error }`. Длина текста ограничена 500 символами, частота 5 сообщениями за 2 секунды на сокет, размер пакета ограничен настройкой `maxHttpBufferSize`. Клиент показывает текст через `textContent`, поэтому сообщение не может внедрить разметку.
+**Подтверждения и ограничения.** Все события с ответом возвращают `{ ok, error }`. Длина текста, частота сообщений и размер пакета заданы в файле `limits.json` (подробнее в разделе 3.6). Клиент показывает текст через `textContent`, поэтому сообщение не может внедрить разметку.
 
 ### 3.5 Проверка
 
@@ -102,9 +108,32 @@
 | Личное сообщение                               | получает только адресат, неизвестный адресат даёт отказ     |
 | Раздача клиента и `/health`                    | страница и ответ `ok` отдаются                              |
 
+### 3.6 Проверка вводимых значений и ограничения
+
+Все ограничения вынесены в отдельный файл `limits.json`: длина имени пользователя (24), название комнаты (40), длина сообщения (500), размер истории (50), частота сообщений (5 за 2 секунды) и размер пакета. Сервер читает файл при запуске и отдаёт его клиенту по адресу `/limits.json`, поэтому клиент и сервер используют одни и те же числа.
+
+Проверяются три случая. Пустое сообщение отклоняется. Сообщение из одних пробелов после удаления крайних пробелов становится пустым и отклоняется так же. Сообщение длиннее предела отклоняется, а ровно предельной длины принимается. Клиент проверяет пробельный текст до отправки и ограничивает поле атрибутом `maxLength`, сервер повторяет проверку, потому что клиенту доверять нельзя. Ошибка возвращается в acknowledgement и показывается под формой.
+
+Каждое сообщение получает метку времени `at` в момент получения сервером. Клиент показывает дату и время с секундами рядом с автором, поэтому два сообщения не выглядят одинаково, а новый участник видит время и в сообщениях из истории.
+
+### 3.7 Ответы на контрольные вопросы
+
+9. Как отправить приватное сообщение конкретному пользователю по его socket.id?
+
+   У каждого соединения есть уникальный `socket.id`. Сервер находит сокет в `io.sockets.sockets.get(id)` и вызывает у него `emit`, тогда текст получает только адресат. Короткая запись `io.to(id).emit(...)` работает потому, что каждый сокет автоматически входит в комнату со своим id. В работе событие `private:message` принимает `to` и текст, а отправителю возвращает acknowledgement с копией сообщения. Если сокета с таким id нет, отправитель получает ошибку «User not found».
+
+10. Как в Socket.IO реализовать подтверждение получения сообщения (acknowledgement)?
+
+    Последним аргументом `emit` передаётся функция: `socket.emit('chat:message', data, (reply) => {...})`. На другой стороне обработчик события принимает эту функцию третьим параметром и вызывает её с ответом. Так клиент узнаёт, что сервер принял сообщение или отклонил его, и получает данные, например историю при входе в комнату. В работе все события с ответом возвращают объект `{ ok, error }`.
+
+11. Как масштабировать Socket.IO-приложение на несколько серверов (например, с использованием Redis)? (теоретически)
+
+    Каждый процесс знает только о своих соединениях, поэтому рассылка в комнату не дойдёт до клиентов на другом сервере. Адаптер Redis (`@socket.io/redis-adapter`) пересылает события между процессами через Redis Pub/Sub, и `io.to(room).emit` доходит до всех. Нужен и «липкий» балансировщик, который закрепляет клиента за сервером на время handshake при long polling. Данные вроде истории и списка людей придётся перенести из памяти процесса в общее хранилище.
+
+
 ## Заключение
 
-Для DSLKit реализован сервер на Express и Socket.IO с клиентом на HTML и JavaScript. Пользователи обмениваются сообщениями в реальном времени, получают уведомления о подключении, отключении, входе в комнату и выходе, а для каждой диаграммы видят список людей и тех, кто её редактирует. Дополнительно сделаны история в памяти, личные сообщения, индикатор набора текста, подтверждения и ограничение частоты. 19 автоматических тестов подтверждают поведение каждого события. Хранение истории в MongoDB и скриншоты двух окон в работу не включены.
+Для DSLKit реализован сервер на Express и Socket.IO с клиентом на HTML и JavaScript. Пользователи обмениваются сообщениями в реальном времени, получают уведомления о подключении, отключении, входе в комнату и выходе, а для каждой диаграммы видят список людей и тех, кто её редактирует. Дополнительно сделаны история в памяти, личные сообщения, индикатор набора текста, подтверждения и ограничение частоты. 19 автоматических тестов подтверждают поведение каждого события. Ограничения вынесены в `limits.json`, у каждого сообщения есть метка времени. Хранение истории в MongoDB и скриншоты двух окон в работу не включены.
 
 ## Приложение А – Листинг server.js
 
@@ -130,16 +159,18 @@ const path = require('node:path');
 const express = require('express');
 const { Server } = require('socket.io');
 const { attachSocket } = require('./socket');
+const { limits } = require('./validate');
 
 // Builds the HTTP server with the static client and Socket.IO on top of it.
 // The server is returned unstarted so tests can listen on a free port.
 const createServer = (options = {}) => {
   const app = express();
   app.use(express.static(path.join(__dirname, '..', 'public')));
+  app.get('/limits.json', (req, res) => res.json(limits));
   app.get('/health', (req, res) => res.json({ status: 'ok' }));
 
   const httpServer = http.createServer(app);
-  const io = new Server(httpServer, { cors: { origin: '*' }, maxHttpBufferSize: 10_000 });
+  const io = new Server(httpServer, { cors: { origin: '*' }, maxHttpBufferSize: limits.maxPacketBytes });
   attachSocket(io, options);
   return { app, httpServer, io };
 };
@@ -150,7 +181,7 @@ module.exports = { createServer };
 ## Приложение В – Листинг socket.js
 
 ```js
-const { cleanName, cleanRoom, cleanText } = require('./validate');
+const { cleanName, cleanRoom, cleanText, limits } = require('./validate');
 const { createHistory } = require('./history');
 const { createLimiter } = require('./rate-limit');
 
@@ -163,7 +194,7 @@ const succeed = (ack, data = {}) => {
 
 // Wires all Socket.IO events. `rooms` maps a diagram room to the users inside it,
 // so the "who is editing" list needs no extra queries.
-const attachSocket = (io, { historyLimit = 50, rateMax = 5, rateWindowMs = 2000 } = {}) => {
+const attachSocket = (io, { historyLimit = limits.historyLimit, rateMax = limits.rateMax, rateWindowMs = limits.rateWindowMs } = {}) => {
   const history = createHistory(historyLimit);
   const rooms = new Map();
   const online = new Map();
@@ -176,7 +207,7 @@ const attachSocket = (io, { historyLimit = 50, rateMax = 5, rateWindowMs = 2000 
   // Handshake: the username travels in `auth`, so every later event knows who sent it.
   io.use((socket, next) => {
     const username = cleanName(socket.handshake.auth?.username);
-    if (!username) return next(new Error('A username of 1-24 letters, digits, dots, dashes or underscores is required'));
+    if (!username) return next(new Error(`A username of 1-${limits.nameMaxLength} letters, digits, dots, dashes or underscores is required`));
     if ([...online.values()].includes(username)) return next(new Error('This username is already taken'));
     socket.data.username = username;
     next();
@@ -224,7 +255,7 @@ const attachSocket = (io, { historyLimit = 50, rateMax = 5, rateWindowMs = 2000 
       const room = cleanRoom(payload?.room);
       const text = cleanText(payload?.text);
       if (!room || !joined.has(room)) return fail(ack, 'Join the room first');
-      if (!text) return fail(ack, 'Message must be 1-500 characters');
+      if (!text) return fail(ack, `Message must be 1-${limits.textMaxLength} characters`);
       if (!allowed()) return fail(ack, 'Too many messages, slow down');
       const message = makeMessage(user, text, { room });
       history.add(room, message);
@@ -237,7 +268,7 @@ const attachSocket = (io, { historyLimit = 50, rateMax = 5, rateWindowMs = 2000 
       const text = cleanText(payload?.text);
       const target = typeof payload?.to === 'string' ? io.sockets.sockets.get(payload.to) : undefined;
       if (!target) return fail(ack, 'User not found');
-      if (!text) return fail(ack, 'Message must be 1-500 characters');
+      if (!text) return fail(ack, `Message must be 1-${limits.textMaxLength} characters`);
       if (!allowed()) return fail(ack, 'Too many messages, slow down');
       const message = makeMessage(user, text, { to: target.id, toName: target.data.username });
       target.emit('private:message', message);
@@ -272,21 +303,23 @@ module.exports = { attachSocket };
 ## Приложение Г – Листинг validate.js
 
 ```js
-const NAME_RE = /^[\p{L}\p{N}_.-]{1,24}$/u;
-const ROOM_RE = /^[a-z0-9][a-z0-9_-]{0,39}$/i;
-const MAX_TEXT = 500;
+const limits = require('../limits.json');
+
+const NAME_RE = new RegExp(String.raw`^[\p{L}\p{N}_.-]{1,${limits.nameMaxLength}}$`, 'u');
+const ROOM_RE = new RegExp(`^[a-z0-9][a-z0-9_-]{0,${limits.roomMaxLength - 1}}$`, 'i');
 
 const cleanName = (value) => (typeof value === 'string' && NAME_RE.test(value.trim()) ? value.trim() : null);
 
 const cleanRoom = (value) => (typeof value === 'string' && ROOM_RE.test(value) ? value : null);
 
+// A whitespace-only text trims to an empty string and is rejected like an empty one.
 const cleanText = (value) => {
   if (typeof value !== 'string') return null;
   const text = value.trim();
-  return text.length > 0 && text.length <= MAX_TEXT ? text : null;
+  return text.length > 0 && text.length <= limits.textMaxLength ? text : null;
 };
 
-module.exports = { cleanName, cleanRoom, cleanText, MAX_TEXT };
+module.exports = { cleanName, cleanRoom, cleanText, limits };
 ```
 
 ## Приложение Д – Листинг history.js
@@ -348,7 +381,8 @@ const addLine = (text, className = '') => {
   li.scrollIntoView({ block: 'end' });
 };
 
-const time = (at) => new Date(at).toLocaleTimeString();
+// Full date and time, so two messages never look the same.
+const time = (at) => new Date(at).toLocaleString();
 const showError = (message) => ($('status').textContent = message || '');
 const check = (reply) => showError(reply.ok ? '' : reply.error);
 
@@ -417,9 +451,19 @@ $('text').addEventListener('input', () => {
   typingTimer = setTimeout(() => socket.emit('typing', { room: currentRoom, typing: false }), 1000);
 });
 
+// Same rules as the server: limits.json is served at /limits.json.
+fetch('/limits.json')
+  .then((r) => r.json())
+  .then((limits) => {
+    $('text').maxLength = limits.textMaxLength;
+    $('username').maxLength = limits.nameMaxLength;
+    $('room').maxLength = limits.roomMaxLength;
+  });
+
 $('chat-form').addEventListener('submit', (event) => {
   event.preventDefault();
   const text = $('text').value;
+  if (!text.trim()) return showError('Message must not be empty or only spaces');
   const to = $('to').value.trim();
   const reply = (r) => {
     check(r);

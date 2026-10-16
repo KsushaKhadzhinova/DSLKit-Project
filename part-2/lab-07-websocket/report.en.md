@@ -26,6 +26,12 @@ The client and server interact in these steps.
 4. The client sends `chat:message`, the server saves it to the history and delivers it to everyone in the room. The `typing` event goes to the other members, and `editing` updates the list.
 5. When the tab is closed the server receives `disconnect`, removes the user from the rooms and sends `room:left` and `user:offline`.
 
+The exchange sequence is shown in figure 1: the three participants are at the top, and the arrows below show the events in the order they happen, with client A sending to the right and the server answering to the left.
+
+![Event exchange between two clients and the server](figures/event-flow.svg)
+
+Figure 1 – Event exchange on connect, room join, message and disconnect
+
 ### 3.2 Client choice and project structure
 
 The client is plain HTML and JavaScript. The chat page is small and needs no bundler. Express serves it from the `public` folder at the same address as the server, so no CORS setup is needed, and checking the app takes one address opened in two windows. The event protocol does not depend on the client, so a React component for the main project can reuse it unchanged. The project structure is shown in table 1.
@@ -78,7 +84,7 @@ The work includes extras from the assignment and a few of its own.
 
 **Typing notifications.** The `typing` event goes to the other members of the room and is not stored. The client sends `true` on input and `false` one second after the last key.
 
-**Acknowledgements and limits.** Every event with a reply returns `{ ok, error }`. Text is limited to 500 characters, the rate to 5 messages per 2 seconds per socket, and the packet size by the `maxHttpBufferSize` option. The client renders text with `textContent`, so a message cannot inject markup.
+**Acknowledgements and limits.** Every event with a reply returns `{ ok, error }`. Text length, message rate and packet size are set in `limits.json`, described in section 3.6. The client renders text with `textContent`, so a message cannot inject markup.
 
 ### 3.5 Verification
 
@@ -102,9 +108,32 @@ Table 3 – Automated test scenarios
 | Private message                                 | only the target gets it, an unknown target is refused    |
 | Client files and `/health`                      | the page and an `ok` answer are served                   |
 
+### 3.6 Input validation and limits
+
+All limits live in a separate `limits.json` file: user name length (24), room name (40), message length (500), history size (50), message rate (5 per 2 seconds) and packet size. The server reads the file at start and serves it to the client at `/limits.json`, so the client and the server use the same numbers.
+
+Three cases are checked. An empty message is rejected. A message of only spaces becomes empty after trimming and is rejected the same way. A message over the limit is rejected, and one of exactly the maximum length is accepted. The client checks whitespace-only text before sending and caps the field with the `maxLength` attribute, and the server repeats the check because a client cannot be trusted. The error comes back in the acknowledgement and shows under the form.
+
+Each message gets an `at` timestamp when the server receives it. The client shows the date and time with seconds next to the author, so two messages never look the same, and a newcomer sees the time on messages from the history too.
+
+#### 3.7 Answers to the control questions
+
+9. How do you send a private message to a specific user by socket.id?
+
+   Every connection has a unique `socket.id`. The server finds the socket with `io.sockets.sockets.get(id)` and calls `emit` on it, so only the recipient gets the text. The short form `io.to(id).emit(...)` works because each socket automatically joins a room named after its id. In this work the `private:message` event takes `to` and the text and returns an acknowledgement with a copy to the sender. If no socket has that id, the sender gets the error "User not found".
+
+10. How do you implement a message acknowledgement in Socket.IO?
+
+    The last argument of `emit` is a function: `socket.emit('chat:message', data, (reply) => {...})`. On the other side the event handler receives this function as its last parameter and calls it with the answer. The client learns that the server accepted or refused the message and can receive data, for example the history on joining a room. In this work every event with a reply returns an object `{ ok, error }`.
+
+11. How do you scale a Socket.IO application to several servers, for example with Redis? (theoretically)
+
+    Each process knows only its own connections, so a room broadcast does not reach clients on another server. The Redis adapter (`@socket.io/redis-adapter`) forwards events between processes through Redis Pub/Sub, and `io.to(room).emit` reaches everyone. A sticky load balancer is needed too to keep a client on one server during the long polling handshake. Data such as the history and the user list must move from process memory to a shared store.
+
+
 ## Conclusion
 
-For DSLKit, a server on Express and Socket.IO with an HTML and JavaScript client was built. Users exchange messages in real time, get notifications about connecting, disconnecting, joining a room and leaving it, and for each diagram see the list of people and those who are editing it. On top of that the work adds an in-memory history, private messages, a typing indicator, acknowledgements and a rate limit. 19 automated tests confirm the behavior of every event. MongoDB history storage and screenshots of two windows are not included.
+For DSLKit, a server on Express and Socket.IO with an HTML and JavaScript client was built. Users exchange messages in real time, get notifications about connecting, disconnecting, joining a room and leaving it, and for each diagram see the list of people and those who are editing it. On top of that the work adds an in-memory history, private messages, a typing indicator, acknowledgements and a rate limit. 19 automated tests confirm the behavior of every event. Limits are kept in `limits.json`, and every message carries a timestamp. MongoDB history storage and screenshots of two windows are not included.
 
 ## Appendix A – Listing of server.js
 
@@ -130,16 +159,18 @@ const path = require('node:path');
 const express = require('express');
 const { Server } = require('socket.io');
 const { attachSocket } = require('./socket');
+const { limits } = require('./validate');
 
 // Builds the HTTP server with the static client and Socket.IO on top of it.
 // The server is returned unstarted so tests can listen on a free port.
 const createServer = (options = {}) => {
   const app = express();
   app.use(express.static(path.join(__dirname, '..', 'public')));
+  app.get('/limits.json', (req, res) => res.json(limits));
   app.get('/health', (req, res) => res.json({ status: 'ok' }));
 
   const httpServer = http.createServer(app);
-  const io = new Server(httpServer, { cors: { origin: '*' }, maxHttpBufferSize: 10_000 });
+  const io = new Server(httpServer, { cors: { origin: '*' }, maxHttpBufferSize: limits.maxPacketBytes });
   attachSocket(io, options);
   return { app, httpServer, io };
 };
@@ -150,7 +181,7 @@ module.exports = { createServer };
 ## Appendix C – Listing of socket.js
 
 ```js
-const { cleanName, cleanRoom, cleanText } = require('./validate');
+const { cleanName, cleanRoom, cleanText, limits } = require('./validate');
 const { createHistory } = require('./history');
 const { createLimiter } = require('./rate-limit');
 
@@ -163,7 +194,7 @@ const succeed = (ack, data = {}) => {
 
 // Wires all Socket.IO events. `rooms` maps a diagram room to the users inside it,
 // so the "who is editing" list needs no extra queries.
-const attachSocket = (io, { historyLimit = 50, rateMax = 5, rateWindowMs = 2000 } = {}) => {
+const attachSocket = (io, { historyLimit = limits.historyLimit, rateMax = limits.rateMax, rateWindowMs = limits.rateWindowMs } = {}) => {
   const history = createHistory(historyLimit);
   const rooms = new Map();
   const online = new Map();
@@ -176,7 +207,7 @@ const attachSocket = (io, { historyLimit = 50, rateMax = 5, rateWindowMs = 2000 
   // Handshake: the username travels in `auth`, so every later event knows who sent it.
   io.use((socket, next) => {
     const username = cleanName(socket.handshake.auth?.username);
-    if (!username) return next(new Error('A username of 1-24 letters, digits, dots, dashes or underscores is required'));
+    if (!username) return next(new Error(`A username of 1-${limits.nameMaxLength} letters, digits, dots, dashes or underscores is required`));
     if ([...online.values()].includes(username)) return next(new Error('This username is already taken'));
     socket.data.username = username;
     next();
@@ -224,7 +255,7 @@ const attachSocket = (io, { historyLimit = 50, rateMax = 5, rateWindowMs = 2000 
       const room = cleanRoom(payload?.room);
       const text = cleanText(payload?.text);
       if (!room || !joined.has(room)) return fail(ack, 'Join the room first');
-      if (!text) return fail(ack, 'Message must be 1-500 characters');
+      if (!text) return fail(ack, `Message must be 1-${limits.textMaxLength} characters`);
       if (!allowed()) return fail(ack, 'Too many messages, slow down');
       const message = makeMessage(user, text, { room });
       history.add(room, message);
@@ -237,7 +268,7 @@ const attachSocket = (io, { historyLimit = 50, rateMax = 5, rateWindowMs = 2000 
       const text = cleanText(payload?.text);
       const target = typeof payload?.to === 'string' ? io.sockets.sockets.get(payload.to) : undefined;
       if (!target) return fail(ack, 'User not found');
-      if (!text) return fail(ack, 'Message must be 1-500 characters');
+      if (!text) return fail(ack, `Message must be 1-${limits.textMaxLength} characters`);
       if (!allowed()) return fail(ack, 'Too many messages, slow down');
       const message = makeMessage(user, text, { to: target.id, toName: target.data.username });
       target.emit('private:message', message);
@@ -272,21 +303,23 @@ module.exports = { attachSocket };
 ## Appendix D – Listing of validate.js
 
 ```js
-const NAME_RE = /^[\p{L}\p{N}_.-]{1,24}$/u;
-const ROOM_RE = /^[a-z0-9][a-z0-9_-]{0,39}$/i;
-const MAX_TEXT = 500;
+const limits = require('../limits.json');
+
+const NAME_RE = new RegExp(String.raw`^[\p{L}\p{N}_.-]{1,${limits.nameMaxLength}}$`, 'u');
+const ROOM_RE = new RegExp(`^[a-z0-9][a-z0-9_-]{0,${limits.roomMaxLength - 1}}$`, 'i');
 
 const cleanName = (value) => (typeof value === 'string' && NAME_RE.test(value.trim()) ? value.trim() : null);
 
 const cleanRoom = (value) => (typeof value === 'string' && ROOM_RE.test(value) ? value : null);
 
+// A whitespace-only text trims to an empty string and is rejected like an empty one.
 const cleanText = (value) => {
   if (typeof value !== 'string') return null;
   const text = value.trim();
-  return text.length > 0 && text.length <= MAX_TEXT ? text : null;
+  return text.length > 0 && text.length <= limits.textMaxLength ? text : null;
 };
 
-module.exports = { cleanName, cleanRoom, cleanText, MAX_TEXT };
+module.exports = { cleanName, cleanRoom, cleanText, limits };
 ```
 
 ## Appendix E – Listing of history.js
@@ -348,7 +381,8 @@ const addLine = (text, className = '') => {
   li.scrollIntoView({ block: 'end' });
 };
 
-const time = (at) => new Date(at).toLocaleTimeString();
+// Full date and time, so two messages never look the same.
+const time = (at) => new Date(at).toLocaleString();
 const showError = (message) => ($('status').textContent = message || '');
 const check = (reply) => showError(reply.ok ? '' : reply.error);
 
@@ -417,9 +451,19 @@ $('text').addEventListener('input', () => {
   typingTimer = setTimeout(() => socket.emit('typing', { room: currentRoom, typing: false }), 1000);
 });
 
+// Same rules as the server: limits.json is served at /limits.json.
+fetch('/limits.json')
+  .then((r) => r.json())
+  .then((limits) => {
+    $('text').maxLength = limits.textMaxLength;
+    $('username').maxLength = limits.nameMaxLength;
+    $('room').maxLength = limits.roomMaxLength;
+  });
+
 $('chat-form').addEventListener('submit', (event) => {
   event.preventDefault();
   const text = $('text').value;
+  if (!text.trim()) return showError('Message must not be empty or only spaces');
   const to = $('to').value.trim();
   const reply = (r) => {
     check(r);

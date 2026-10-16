@@ -26,6 +26,12 @@ The client and server interact in these steps.
 4. The client sends `chat:message`, the server saves it to the history and delivers it to everyone in the room. The `typing` event goes to the other members, and `editing` updates the list.
 5. When the tab is closed the server receives `disconnect`, removes the user from the rooms and sends `room:left` and `user:offline`.
 
+The exchange sequence is shown in figure 1: the three participants are at the top, and the arrows below show the events in the order they happen, with client A sending to the right and the server answering to the left.
+
+![Event exchange between two clients and the server](figures/event-flow.svg)
+
+Figure 1 – Event exchange on connect, room join, message and disconnect
+
 ### 3.2 Client choice and project structure
 
 The client is plain HTML and JavaScript. The chat page is small and needs no bundler. Express serves it from the `public` folder at the same address as the server, so no CORS setup is needed, and checking the app takes one address opened in two windows. The event protocol does not depend on the client, so a React component for the main project can reuse it unchanged. The project structure is shown in table 1.
@@ -78,7 +84,7 @@ The work includes extras from the assignment and a few of its own.
 
 **Typing notifications.** The `typing` event goes to the other members of the room and is not stored. The client sends `true` on input and `false` one second after the last key.
 
-**Acknowledgements and limits.** Every event with a reply returns `{ ok, error }`. Text is limited to 500 characters, the rate to 5 messages per 2 seconds per socket, and the packet size by the `maxHttpBufferSize` option. The client renders text with `textContent`, so a message cannot inject markup.
+**Acknowledgements and limits.** Every event with a reply returns `{ ok, error }`. Text length, message rate and packet size are set in `limits.json`, described in section 3.6. The client renders text with `textContent`, so a message cannot inject markup.
 
 ### 3.5 Verification
 
@@ -102,9 +108,85 @@ Table 3 – Automated test scenarios
 | Private message                                 | only the target gets it, an unknown target is refused    |
 | Client files and `/health`                      | the page and an `ok` answer are served                   |
 
+### 3.6 Input validation and limits
+
+All limits live in a separate `limits.json` file: user name length (24), room name (40), message length (500), history size (50), message rate (5 per 2 seconds) and packet size. The server reads the file at start and serves it to the client at `/limits.json`, so the client and the server use the same numbers.
+
+Three cases are checked. An empty message is rejected. A message of only spaces becomes empty after trimming and is rejected the same way. A message over the limit is rejected, and one of exactly the maximum length is accepted. The client checks whitespace-only text before sending and caps the field with the `maxLength` attribute, and the server repeats the check because a client cannot be trusted. The error comes back in the acknowledgement and shows under the form.
+
+Each message gets an `at` timestamp when the server receives it. The client shows the date and time with seconds next to the author, so two messages never look the same, and a newcomer sees the time on messages from the history too.
+
+#### 3.7 Answers to the control questions
+
+{{answers}}
+1. How does WebSocket differ from HTTP?
+
+   HTTP is request-response, while WebSocket keeps one open connection for data in both directions at any time.
+
+2. Which library did you use and why?
+
+   Socket.IO: events, rooms, acknowledgements and reconnection come ready.
+
+3. What are rooms in Socket.IO?
+
+   Named groups of sockets: `socket.join(room)` and `io.to(room).emit(...)`.
+
+4. How do you send a message to everyone except the sender?
+
+   `socket.broadcast.emit(...)` or `socket.to(room).emit(...)`.
+
+5. How do you handle a disconnect?
+
+   The `disconnect` event on the server and on the client.
+
+6. How do you implement a typing event?
+
+   A separate `typing` event without storing a message.
+
+7. How do you pass a user name at connection time?
+
+   Through the client `auth` option, available as `socket.handshake.auth` on the server.
+
+8. How do you save the message history in MongoDB?
+
+   A Mongoose schema with room, author, text and time; in this work the history lives in memory.
+
+9. How do you send a private message to a specific user by socket.id?
+
+   Every connection has a unique `socket.id`. The server finds the socket with `io.sockets.sockets.get(id)` and calls `emit` on it, so only the recipient gets the text. The short form `io.to(id).emit(...)` works because each socket automatically joins a room named after its id. In this work the `private:message` event takes `to` and the text and returns an acknowledgement with a copy to the sender. If no socket has that id, the sender gets the error "User not found".
+
+10. How do you implement a message acknowledgement in Socket.IO?
+
+    The last argument of `emit` is a function: `socket.emit('chat:message', data, (reply) => {...})`. On the other side the event handler receives this function as its last parameter and calls it with the answer. The client learns that the server accepted or refused the message and can receive data, for example the history on joining a room. In this work every event with a reply returns an object `{ ok, error }`.
+
+11. How do you scale a Socket.IO application to several servers, for example with Redis? (theoretically)
+
+    Each process knows only its own connections, so a room broadcast does not reach clients on another server. The Redis adapter (`@socket.io/redis-adapter`) forwards events between processes through Redis Pub/Sub, and `io.to(room).emit` reaches everyone. A sticky load balancer is needed too to keep a client on one server during the long polling handshake. Data such as the history and the user list must move from process memory to a shared store.
+
+12. Which events fire on connection loss and reconnection?
+
+`disconnect`, then `reconnect_attempt`, `reconnect` and `connect`.
+
+13. How do you limit message size and rate?
+
+The `maxHttpBufferSize` option and an event counter per socket.
+
+14. How do you protect the server from unauthorized connections?
+
+A token check in `io.use` during the handshake.
+
+15. How do you pause sending on a slow connection?
+
+Acknowledgements and `socket.volatile`.
+
+16. What is the difference between socket.emit, io.emit and socket.broadcast.emit?
+
+One client, everyone, everyone except the sender.
+{{/answers}}
+
 ## Conclusion
 
-For DSLKit, a server on Express and Socket.IO with an HTML and JavaScript client was built. Users exchange messages in real time, get notifications about connecting, disconnecting, joining a room and leaving it, and for each diagram see the list of people and those who are editing it. On top of that the work adds an in-memory history, private messages, a typing indicator, acknowledgements and a rate limit. 19 automated tests confirm the behavior of every event. MongoDB history storage and screenshots of two windows are not included.
+For DSLKit, a server on Express and Socket.IO with an HTML and JavaScript client was built. Users exchange messages in real time, get notifications about connecting, disconnecting, joining a room and leaving it, and for each diagram see the list of people and those who are editing it. On top of that the work adds an in-memory history, private messages, a typing indicator, acknowledgements and a rate limit. 19 automated tests confirm the behavior of every event. Limits are kept in `limits.json`, and every message carries a timestamp. MongoDB history storage and screenshots of two windows are not included.
 
 ## Appendix A – Listing of server.js
 
