@@ -37,13 +37,13 @@ export function Catalog() {
   );
 }
 
-// Dynamic route /catalog/:id. An unknown id redirects to the 404 page.
+// Dynamic route /catalog/:id. An unknown id renders the 404 page in place, the URL stays as typed.
 export function CatalogItem() {
   const { id } = useParams();
   const navigate = useNavigate();
   const template = findTemplate(id);
 
-  if (!template) return <Navigate to="/not-found" replace />;
+  if (!template) return <NotFound />;
 
   return (
     <>

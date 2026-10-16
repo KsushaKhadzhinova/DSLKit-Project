@@ -49,9 +49,10 @@ describe('dynamic route /catalog/:id', () => {
     expect(screen.getByRole('heading', { name: 'Каталог шаблонов' })).toBeInTheDocument();
   });
 
-  it('redirects an unknown id to the 404 page', () => {
+  it('renders the 404 page in place for an unknown id', () => {
     renderAt('/catalog/999');
     expect(screen.getByRole('heading', { name: '404' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Каталог' })).toBeInTheDocument();
   });
 });
 
