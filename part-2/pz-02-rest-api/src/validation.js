@@ -1,7 +1,10 @@
 // A schema maps a field name to { type, required, max, enum, pattern, default }.
 // Types: 'string', 'integer'. Returns a list of { field, message }.
 const checkField = (name, rule, value) => {
-  if (rule.type === 'integer' && !Number.isInteger(value)) return `${name} must be an integer`;
+  if (rule.type === 'integer') {
+    if (!Number.isInteger(value)) return `${name} must be an integer`;
+    if (value < rule.min || value > rule.max) return `${name} must be between ${rule.min} and ${rule.max}`;
+  }
   if (rule.type === 'string') {
     if (typeof value !== 'string') return `${name} must be a string`;
     if (rule.required && value.trim() === '') return `${name} must not be empty`;

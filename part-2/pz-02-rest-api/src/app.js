@@ -5,6 +5,8 @@ import { createStores } from './store.js';
 
 export const NOTATIONS = ['UML', 'BPMN', 'ERD', 'DFD', 'IDEF0', 'Petri'];
 
+const ID = { type: 'integer', required: true, min: 1, max: 2147483647 };
+
 export const schemas = {
   users: {
     name: { type: 'string', required: true, max: 60 },
@@ -14,13 +16,13 @@ export const schemas = {
   projects: {
     name: { type: 'string', required: true, max: 80 },
     description: { type: 'string', max: 500, default: '' },
-    ownerId: { type: 'integer', required: true },
+    ownerId: ID,
   },
   diagrams: {
     title: { type: 'string', required: true, max: 80 },
     notation: { type: 'string', enum: NOTATIONS, required: true },
     code: { type: 'string', max: 10000, default: '' },
-    projectId: { type: 'integer', required: true },
+    projectId: ID,
     status: { type: 'string', enum: ['draft', 'published'], default: 'draft' },
   },
 };

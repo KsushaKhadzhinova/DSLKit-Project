@@ -223,3 +223,15 @@ withApi('PATCH with an empty object is rejected', async ({ call }) => {
   assert.equal(res.status, 400);
   assert.equal(res.json.error.details[0].field, 'body');
 });
+
+withApi('reference ids must be within 1 and 2147483647', async ({ call }) => {
+  for (const projectId of [0, -1, 2147483648, 1.5]) {
+    const res = await call('POST', '/diagrams', { title: 't', notation: 'UML', projectId });
+    assert.equal(res.status, 400, String(projectId));
+  }
+  assert.match((await call('POST', '/projects', { name: 'p', ownerId: 0 })).json.error.details[0].message, /between 1 and 2147483647/);
+  assert.equal(
+    (await call('POST', '/diagrams', { title: 't', notation: 'UML', projectId: 2147483647 })).json.error.details[0].message.includes('does not exist'),
+    true,
+  );
+});
