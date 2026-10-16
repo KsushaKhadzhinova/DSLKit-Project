@@ -15,7 +15,7 @@ export const reportSuite = (dir) => {
     test(`${dir}: ${lang} report is built from the template and follows the formatting rules`, () => {
       const text = read(`${dir}/${out}`);
       assert.equal(text, build(read(`${dir}/${tpl}`), read, variantOf(read)));
-      assert.deepEqual(lintReport(text, lang), []);
+      assert.deepEqual(lintReport(text, lang, { strict: true }), []);
     });
   }
 };

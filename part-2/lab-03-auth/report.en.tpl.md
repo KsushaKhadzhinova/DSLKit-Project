@@ -62,40 +62,42 @@ An administrator cannot change their own role or delete themselves, so the syste
 
 ### 3.5 Verification
 
-The work is verified by automated tests on a temporary SQLite database with the real migrations and real HTTP requests. The tests start the server on a free port, and bcrypt uses four rounds for speed. They cover: registration with email normalization, no hash in the response and a check that the database holds a bcrypt hash rather than the password; duplicate emails in any letter case; data validation errors; login and the token contents; the same response for a wrong password and an unknown email; tampered, unsigned, expired and foreign-signed tokens; user deletion and a role change with an old token; the rights of an administrator, an owner and an outsider; migrations with rollback and the admin seed. There are 39 tests. A run on a real PostgreSQL has not been done yet.
+The work is verified by automated tests on a temporary SQLite database with the real migrations and real HTTP requests. The tests start the server on a free port, and bcrypt uses four rounds for speed. They cover: registration with email normalization, no hash in the response and a check that the database holds a bcrypt hash rather than the password, duplicate emails in any letter case, data validation errors, login and the token contents, the same response for a wrong password and an unknown email, tampered, unsigned, expired and foreign-signed tokens, user deletion and a role change with an old token, the rights of an administrator, an owner and an outsider, migrations with rollback and the admin seed. There are 39 tests. A run on a real PostgreSQL has not been done yet.
 
 ### 3.6 Limitations
 
-Logout does not revoke a token: it stays valid until it expires, which is why the lifetime is short. There is no limit on login attempts; in practice it is added at the proxy level or as a separate lockout mechanism. The token is kept on the client side, and the choice between localStorage and an httpOnly cookie is made in the client lab.
+Logout does not revoke a token: it stays valid until it expires, which is why the lifetime is short. There is no limit on login attempts. In practice it is added at the proxy level or as a separate lockout mechanism. The token is kept on the client side, and the choice between localStorage and an httpOnly cookie is made in the client lab.
+
+Listing of user.js is given in appendix A. Listing of the Users table migration is given in appendix B. Listing of auth.js is given in appendix C. Listing of auth.controller.js is given in appendix D. Listing of validate-auth.js is given in appendix E. Listing of users.routes.js is given in appendix F. Listing of diagrams.controller.js is given in appendix G.
 
 ## Conclusion
 
 DSLKit now has users with bcrypt password hashes, registration, login with a JWT token, a token-checking middleware and protected routes, including the profile of the current user. The additional role-based mechanism separates the rights of an administrator, a diagram owner and an outsider. The tests confirm both the successful scenarios and the rejections of tampered, expired and foreign tokens. A run on a real PostgreSQL, screenshots of Postman requests and answers to the control questions, if the teacher requires them, are still to be done.
 
-## Appendix A – Listing of user.js
+## Appendix A (mandatory) Listing of user.js
 
 {{code:part-2/lab-03-auth/src/models/user.js}}
 
-## Appendix B – Listing of the Users table migration
+## Appendix B (mandatory) Listing of the Users table migration
 
 {{code:part-2/lab-03-auth/migrations/20261016000001-create-users.js}}
 
-## Appendix C – Listing of auth.js
+## Appendix C (mandatory) Listing of auth.js
 
 {{code:part-2/lab-03-auth/src/middleware/auth.js}}
 
-## Appendix D – Listing of auth.controller.js
+## Appendix D (mandatory) Listing of auth.controller.js
 
 {{code:part-2/lab-03-auth/src/controllers/auth.controller.js}}
 
-## Appendix E – Listing of validate-auth.js
+## Appendix E (mandatory) Listing of validate-auth.js
 
 {{code:part-2/lab-03-auth/src/middleware/validate-auth.js}}
 
-## Appendix F – Listing of users.routes.js
+## Appendix F (mandatory) Listing of users.routes.js
 
 {{code:part-2/lab-03-auth/src/routes/users.routes.js}}
 
-## Appendix G – Listing of diagrams.controller.js
+## Appendix G (mandatory) Listing of diagrams.controller.js
 
 {{code:part-2/lab-03-auth/src/controllers/diagrams.controller.js}}

@@ -7,17 +7,15 @@ const { createAuthRouter } = require('./routes/auth.routes');
 const { createUsersRouter } = require('./routes/users.routes');
 const { createDiagramsRouter } = require('./routes/diagrams.routes');
 const { routeNotFound, errorHandler } = require('./middleware/error-handler');
-const { createCors } = require('./middleware/cors');
 
-const DEFAULTS = { jwtExpiresIn: '1h', bcryptRounds: 10, corsOrigin: 'http://localhost:5176' };
+const DEFAULTS = { jwtExpiresIn: '1h', bcryptRounds: 10 };
 
-// settings: { jwtSecret, jwtExpiresIn?, bcryptRounds?, corsOrigin? }
+// settings: { jwtSecret, jwtExpiresIn?, bcryptRounds? }
 const createApp = (models, settings) => {
   const config = { ...DEFAULTS, ...settings };
   if (!config.jwtSecret) throw new Error('jwtSecret is required');
   const authenticate = createAuthenticate(models, config);
   const app = express();
-  app.use(createCors(config.corsOrigin));
   // The limit is set explicitly so it does not change with the library default.
   app.use(express.json({ limit: '100kb' }));
   app.use('/auth', createAuthRouter(createAuthController(models, config)));

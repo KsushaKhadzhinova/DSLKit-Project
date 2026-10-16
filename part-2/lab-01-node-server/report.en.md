@@ -52,7 +52,7 @@ Table 2 – Project structure
 
 Data lives in an array inside the `createDiagramStore` function, which returns the methods `findAll`, `findById`, `create`, `replace` and `remove`. The id counter only grows and never reuses the numbers of deleted records. The store is passed to `createApp` as a parameter, so tests get clean data, and when a database arrives only the model changes, not the routes. On start the store holds two sample diagrams.
 
-Handlers do not validate data themselves. Parsing the address and the body is moved to `validate.js`: `parseId` accepts only a positive integer, and `validateDiagram` checks that the body is an object, that `title`, `sourceCode` and `owner` are non-empty strings, and that `notation` and `priority` belong to the allowed lists. The `priority` field is optional and defaults to `normal`. Unknown fields are dropped, so a client cannot store arbitrary keys or set the `id`. The `PUT` method replaces a diagram as a whole and requires the same fields as `POST`; partial update with `PATCH` is not implemented because the assignment does not ask for it.
+Handlers do not validate data themselves. Parsing the address and the body is moved to `validate.js`: `parseId` accepts only a positive integer, and `validateDiagram` checks that the body is an object, that `title`, `sourceCode` and `owner` are non-empty strings, and that `notation` and `priority` belong to the allowed lists. The `priority` field is optional and defaults to `normal`. Unknown fields are dropped, so a client cannot store arbitrary keys or set the `id`. The `PUT` method replaces a diagram as a whole and requires the same fields as `POST`. Partial update with `PATCH` is not implemented because the assignment does not ask for it.
 
 ### 3.4 Error handling
 
@@ -76,11 +76,13 @@ Table 3 – Results of requests to the running server
 | `DELETE /diagrams/2` again                               | 404    | `{"error":"Diagram 2 not found"}`                           |
 | `GET /diagrams/abc`                                      | 400    | `{"error":"Diagram id must be a positive integer"}`         |
 
+Listing of server.js is given in appendix A. Listing of app.js is given in appendix B. Listing of diagrams.routes.js is given in appendix C. Listing of diagrams.controller.js is given in appendix D. Listing of diagram.model.js is given in appendix E. Listing of validate.js is given in appendix F. Listing of error-handler.js is given in appendix G.
+
 ## Conclusion
 
 For DSLKit, a REST API for the `diagrams` resource was built on Express: five routes read the list and a single record, create, replace and delete, and the data temporarily lives in an in-memory array. Errors are unified into one JSON shape with the codes 400, 404 and 500 through a global handler, development mode runs on `nodemon`, and 18 automated tests confirm the behavior of every route. The split into routes, controllers and a model lets the next lab swap the array for a database without rewriting the rest of the code. Screenshots of the requests from Postman or a browser are still to be attached.
 
-## Appendix A – Listing of server.js
+## Appendix A (mandatory) Listing of server.js
 
 ```js
 const { createApp } = require('./src/app');
@@ -96,7 +98,7 @@ const port = Number(process.env.PORT) || 3000;
 createApp().listen(port, () => console.log(`Server running on http://localhost:${port}`));
 ```
 
-## Appendix B – Listing of app.js
+## Appendix B (mandatory) Listing of app.js
 
 ```js
 const express = require('express');
@@ -117,7 +119,7 @@ const createApp = (store = createDiagramStore()) => {
 module.exports = { createApp };
 ```
 
-## Appendix C – Listing of diagrams.routes.js
+## Appendix C (mandatory) Listing of diagrams.routes.js
 
 ```js
 const { Router } = require('express');
@@ -144,7 +146,7 @@ const createDiagramsRouter = (controller) => {
 module.exports = { createDiagramsRouter };
 ```
 
-## Appendix D – Listing of diagrams.controller.js
+## Appendix D (mandatory) Listing of diagrams.controller.js
 
 ```js
 const { notFound } = require('../errors');
@@ -175,7 +177,7 @@ const createDiagramsController = (store) => ({
 module.exports = { createDiagramsController };
 ```
 
-## Appendix E – Listing of diagram.model.js
+## Appendix E (mandatory) Listing of diagram.model.js
 
 ```js
 const NOTATIONS = ['UML', 'BPMN', 'ERD', 'DFD', 'IDEF0', 'Petri'];
@@ -221,7 +223,7 @@ const createDiagramStore = (initial = SEED) => {
 module.exports = { NOTATIONS, PRIORITIES, DEFAULT_PRIORITY, createDiagramStore };
 ```
 
-## Appendix F – Listing of validate.js
+## Appendix F (mandatory) Listing of validate.js
 
 ```js
 const { badRequest } = require('../errors');
@@ -265,7 +267,7 @@ const validateDiagram = (req, _res, next) => {
 module.exports = { parseId, validateDiagram };
 ```
 
-## Appendix G – Listing of error-handler.js
+## Appendix G (mandatory) Listing of error-handler.js
 
 ```js
 const { notFound } = require('../errors');
