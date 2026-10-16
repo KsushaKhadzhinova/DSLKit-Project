@@ -13,7 +13,8 @@ const addLine = (text, className = '') => {
   li.scrollIntoView({ block: 'end' });
 };
 
-const time = (at) => new Date(at).toLocaleTimeString();
+// Full date and time, so two messages never look the same.
+const time = (at) => new Date(at).toLocaleString();
 const showError = (message) => ($('status').textContent = message || '');
 const check = (reply) => showError(reply.ok ? '' : reply.error);
 
@@ -82,9 +83,19 @@ $('text').addEventListener('input', () => {
   typingTimer = setTimeout(() => socket.emit('typing', { room: currentRoom, typing: false }), 1000);
 });
 
+// Same rules as the server: limits.json is served at /limits.json.
+fetch('/limits.json')
+  .then((r) => r.json())
+  .then((limits) => {
+    $('text').maxLength = limits.textMaxLength;
+    $('username').maxLength = limits.nameMaxLength;
+    $('room').maxLength = limits.roomMaxLength;
+  });
+
 $('chat-form').addEventListener('submit', (event) => {
   event.preventDefault();
   const text = $('text').value;
+  if (!text.trim()) return showError('Message must not be empty or only spaces');
   const to = $('to').value.trim();
   const reply = (r) => {
     check(r);

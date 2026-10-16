@@ -244,3 +244,21 @@ test('the limiter forgets old events and history copies its list', () => {
   assert.deepEqual(history.list('r'), [1]);
   assert.deepEqual(history.list('none'), []);
 });
+
+test('limits come from limits.json: exact maximum is accepted and the client can read them', async () => {
+  const { limits } = require('../src/validate');
+  const { socket } = await join('alice');
+  await ask(socket, 'room:join', { room: 'd1' });
+  assert.equal((await ask(socket, 'chat:message', { room: 'd1', text: 'x'.repeat(limits.textMaxLength) })).ok, true);
+  assert.deepEqual(await (await fetch(`${url}/limits.json`)).json(), limits);
+});
+
+test('every chat message carries a timestamp close to the send time', async () => {
+  const { socket } = await join('alice');
+  await ask(socket, 'room:join', { room: 'd1' });
+  const before = Date.now();
+  const received = once(socket, 'chat:message');
+  await ask(socket, 'chat:message', { room: 'd1', text: 'tick' });
+  const { at } = await received;
+  assert.ok(at >= before && at <= Date.now());
+});

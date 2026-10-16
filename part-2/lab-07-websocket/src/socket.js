@@ -1,4 +1,4 @@
-const { cleanName, cleanRoom, cleanText } = require('./validate');
+const { cleanName, cleanRoom, cleanText, limits } = require('./validate');
 const { createHistory } = require('./history');
 const { createLimiter } = require('./rate-limit');
 
@@ -11,7 +11,7 @@ const succeed = (ack, data = {}) => {
 
 // Wires all Socket.IO events. `rooms` maps a diagram room to the users inside it,
 // so the "who is editing" list needs no extra queries.
-const attachSocket = (io, { historyLimit = 50, rateMax = 5, rateWindowMs = 2000 } = {}) => {
+const attachSocket = (io, { historyLimit = limits.historyLimit, rateMax = limits.rateMax, rateWindowMs = limits.rateWindowMs } = {}) => {
   const history = createHistory(historyLimit);
   const rooms = new Map();
   const online = new Map();
@@ -24,7 +24,7 @@ const attachSocket = (io, { historyLimit = 50, rateMax = 5, rateWindowMs = 2000 
   // Handshake: the username travels in `auth`, so every later event knows who sent it.
   io.use((socket, next) => {
     const username = cleanName(socket.handshake.auth?.username);
-    if (!username) return next(new Error('A username of 1-24 letters, digits, dots, dashes or underscores is required'));
+    if (!username) return next(new Error(`A username of 1-${limits.nameMaxLength} letters, digits, dots, dashes or underscores is required`));
     if ([...online.values()].includes(username)) return next(new Error('This username is already taken'));
     socket.data.username = username;
     next();
@@ -72,7 +72,7 @@ const attachSocket = (io, { historyLimit = 50, rateMax = 5, rateWindowMs = 2000 
       const room = cleanRoom(payload?.room);
       const text = cleanText(payload?.text);
       if (!room || !joined.has(room)) return fail(ack, 'Join the room first');
-      if (!text) return fail(ack, 'Message must be 1-500 characters');
+      if (!text) return fail(ack, `Message must be 1-${limits.textMaxLength} characters`);
       if (!allowed()) return fail(ack, 'Too many messages, slow down');
       const message = makeMessage(user, text, { room });
       history.add(room, message);
@@ -85,7 +85,7 @@ const attachSocket = (io, { historyLimit = 50, rateMax = 5, rateWindowMs = 2000 
       const text = cleanText(payload?.text);
       const target = typeof payload?.to === 'string' ? io.sockets.sockets.get(payload.to) : undefined;
       if (!target) return fail(ack, 'User not found');
-      if (!text) return fail(ack, 'Message must be 1-500 characters');
+      if (!text) return fail(ack, `Message must be 1-${limits.textMaxLength} characters`);
       if (!allowed()) return fail(ack, 'Too many messages, slow down');
       const message = makeMessage(user, text, { to: target.id, toName: target.data.username });
       target.emit('private:message', message);

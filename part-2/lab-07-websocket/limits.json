@@ -1,0 +1,9 @@
+{
+  "nameMaxLength": 24,
+  "roomMaxLength": 40,
+  "textMaxLength": 500,
+  "historyLimit": 50,
+  "rateMax": 5,
+  "rateWindowMs": 2000,
+  "maxPacketBytes": 10000
+}
