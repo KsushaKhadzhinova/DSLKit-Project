@@ -969,3 +969,55 @@
 .canvas__diagram defs {
   overflow: visible;
 }
+
+/* Rarely used actions live in drop-down menus */
+.editor-toolbar__spacer {
+  flex: 1;
+}
+
+.editor-menu {
+  position: relative;
+}
+
+.editor-menu__summary {
+  list-style: none;
+  cursor: pointer;
+}
+
+.editor-menu__summary::-webkit-details-marker {
+  display: none;
+}
+
+.editor-menu__panel {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  z-index: 20;
+  display: grid;
+  gap: 0.25rem;
+  min-width: 15rem;
+  padding: var(--space-1);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-medium);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-large);
+}
+
+.editor-menu__panel .button,
+.editor-menu__panel .editor-toolbar__switch,
+.editor-menu__panel .canvas__engine-link {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  min-height: var(--target-size-small);
+  padding: 0 var(--space-2);
+}
+
+.canvas__render {
+  margin-left: auto;
+}
+
+.canvas__menu {
+  margin-left: 0;
+}
