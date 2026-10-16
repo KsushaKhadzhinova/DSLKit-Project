@@ -188,3 +188,24 @@ test('unsupported methods answer 405 with an Allow header', async () => {
     assert.match(body.error, /not allowed/);
   }
 });
+
+test('title and owner are trimmed before saving', async () => {
+  const { res, body } = await call('POST', '/diagrams', { ...valid, title: '  Spaced  ', owner: ' carol ' });
+  assert.equal(res.status, 201);
+  assert.equal(body.title, 'Spaced');
+  assert.equal(body.owner, 'carol');
+});
+
+test('text fields at the limit are accepted, one character more is rejected with 400', async () => {
+  const limits = { title: 80, owner: 60, sourceCode: 10000 };
+  for (const [field, max] of Object.entries(limits)) {
+    assert.equal((await call('POST', '/diagrams', { ...valid, [field]: 'x'.repeat(max) })).res.status, 201, field);
+    const { res, body } = await call('POST', '/diagrams', { ...valid, [field]: 'x'.repeat(max + 1) });
+    assert.equal(res.status, 400, field);
+    assert.deepEqual(body.details, [{ field, message: `must be at most ${max} characters` }]);
+  }
+});
+
+test('a value that is only longer because of surrounding spaces is accepted', async () => {
+  assert.equal((await call('POST', '/diagrams', { ...valid, title: ` ${'x'.repeat(80)} ` })).res.status, 201);
+});

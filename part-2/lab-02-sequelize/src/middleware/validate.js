@@ -1,14 +1,19 @@
 const { badRequest } = require('../errors');
-const { NOTATIONS, PRIORITIES, DEFAULT_PRIORITY } = require('../models/diagram.constants');
+const { NOTATIONS, PRIORITIES, DEFAULT_PRIORITY, LIMITS } = require('../models/diagram.constants');
 
-const isText = (value) => typeof value === 'string' && value.trim() !== '';
+// Text is checked after trimming, so the stored value is what was measured.
+const text = (name) => (v) => {
+  if (typeof v !== 'string' || v.trim() === '') return 'must be a non-empty string';
+  return v.trim().length <= LIMITS[name] || `must be at most ${LIMITS[name]} characters`;
+};
+const TRIMMED = ['title', 'owner'];
 
 const checks = {
-  title: (v) => isText(v) || 'must be a non-empty string',
+  title: text('title'),
   notation: (v) => NOTATIONS.includes(v) || `must be one of ${NOTATIONS.join(', ')}`,
-  sourceCode: (v) => isText(v) || 'must be a non-empty string',
+  sourceCode: text('sourceCode'),
   priority: (v) => PRIORITIES.includes(v) || `must be one of ${PRIORITIES.join(', ')}`,
-  owner: (v) => isText(v) || 'must be a non-empty string',
+  owner: text('owner'),
 };
 
 const parseId = (req, _res, next) => {
@@ -20,7 +25,7 @@ const parseId = (req, _res, next) => {
 };
 
 // POST and PUT both carry the whole diagram, so one validator serves both.
-// Priority is optional and falls back to the default; unknown fields are dropped.
+// Title and owner are trimmed before saving. Priority is optional and falls back to the default; unknown fields are dropped.
 const validateDiagram = (req, _res, next) => {
   const body = req.body;
   if (typeof body !== 'object' || Array.isArray(body)) {
@@ -32,7 +37,7 @@ const validateDiagram = (req, _res, next) => {
     .filter(({ result }) => result !== true)
     .map(({ field, result }) => ({ field, message: result }));
   if (details.length > 0) return next(badRequest('Invalid diagram data', details));
-  req.diagramFields = Object.fromEntries(Object.keys(checks).map((name) => [name, fields[name]]));
+  req.diagramFields = Object.fromEntries(Object.keys(checks).map((name) => [name, TRIMMED.includes(name) ? fields[name].trim() : fields[name]]));
   return next();
 };
 
