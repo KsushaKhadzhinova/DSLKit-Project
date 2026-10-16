@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { ApiError, notFound, validationFailed } from './errors.js';
-import { applyDefaults, validate } from './validation.js';
+import { applyDefaults, trimStrings, validate } from './validation.js';
 
 // Answers 405 with an Allow header for methods a known path does not support; OPTIONS lists them.
 export const methodsOnly = (...methods) => {
@@ -57,8 +57,9 @@ export const listItems = (items, schema, query) => {
 export const createResourceRouter = ({ label, collection, schema, hooks = {} }) => {
   const router = Router();
   const body = (req, partial) => {
-    const errors = validate(schema, req.body, { partial });
-    const data = partial ? req.body : applyDefaults(schema, req.body);
+    const input = trimStrings(schema, req.body);
+    const errors = validate(schema, input, { partial });
+    const data = partial ? input : applyDefaults(schema, input);
     const details = errors.length ? errors : (hooks.check?.(data) ?? []);
     if (details.length) throw validationFailed(details);
     return data;

@@ -42,3 +42,13 @@ export const applyDefaults = (schema, body) => {
   }
   return result;
 };
+
+// Trims surrounding whitespace of known string fields, so " Ada " is stored as "Ada".
+export const trimStrings = (schema, body) => {
+  if (body === null || typeof body !== 'object' || Array.isArray(body)) return body;
+  const result = { ...body };
+  for (const field of Object.keys(result)) {
+    if (Object.hasOwn(schema, field) && typeof result[field] === 'string') result[field] = result[field].trim();
+  }
+  return result;
+};

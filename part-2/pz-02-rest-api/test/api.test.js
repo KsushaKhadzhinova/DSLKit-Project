@@ -235,3 +235,12 @@ withApi('reference ids must be within 1 and 2147483647', async ({ call }) => {
     true,
   );
 });
+
+withApi('string fields are trimmed before validation and storage', async ({ call }) => {
+  const res = await call('POST', '/projects', { name: '  Docs  ', description: '  spaced  ', ownerId: 1 });
+  assert.equal(res.json.name, 'Docs');
+  assert.equal(res.json.description, 'spaced');
+  assert.equal((await call('PATCH', '/projects/1', { name: ' Renamed ' })).json.name, 'Renamed');
+  assert.equal((await call('PUT', '/projects/1', { name: ' Put ', ownerId: 1, description: ' d ' })).json.description, 'd');
+  assert.equal((await call('POST', '/projects', { name: '   ', ownerId: 1 })).status, 400);
+});
