@@ -26,7 +26,7 @@ Ten automated tests cover the reducer as a pure function, theme and language swi
 
 Prop drilling is shown on a chain of five components and removed with the theme, language and favorites contexts. The business logic lives in a pure reducer, the state and `dispatch` are available in any component through the `useTheme`, `useLanguage` and `useFavorites` hooks, and favorites persist between sessions.
 
-## Appendix A – Key Code Fragments
+## Appendix A (mandatory) Key Code Fragments
 
 ```jsx
 // PropDrilling.jsx: userName passes through components that do not need it

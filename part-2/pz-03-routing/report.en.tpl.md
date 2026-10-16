@@ -43,7 +43,7 @@ Fifteen automated tests on `MemoryRouter` cover all pages, the `NavLink` highlig
 
 The Vite application contains seven routes, a menu with the active item highlighted, a dynamic route handling an unknown parameter, a 404 page and a protected dashboard with simulated sign-in and programmatic navigation. `react-router-dom` 7 is chosen, its API for the tasks of this work matches v6.
 
-## Appendix A – Key Code Fragments
+## Appendix A (mandatory) Key Code Fragments
 
 ```jsx
 // App.jsx: route map, Layout provides the menu and Outlet
