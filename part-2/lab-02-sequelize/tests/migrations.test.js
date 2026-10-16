@@ -51,3 +51,23 @@ test('the model rejects values outside the allowed lists', async () => {
   await assert.rejects(Diagram.create({ title: 't', notation: 'UML', sourceCode: 's', owner: 'o', priority: 'urgent' }), /Validation error/);
   await sequelize.close();
 });
+
+// Sequelize wraps the SQLite error, the original message still names the CHECK.
+const isCheckViolation = (error) => /CHECK constraint/i.test(error.original?.message ?? '');
+
+test('CHECK constraints reject a notation or priority outside the lists even when the model is bypassed', async () => {
+  const { sequelize } = open();
+  // bulkInsert on SQLite is INSERT OR IGNORE and would hide a violation, so the test uses a plain INSERT.
+  const insert = (notation, priority) =>
+    sequelize.query(
+      "INSERT INTO Diagrams (title, notation, sourceCode, priority, owner, createdAt, updatedAt) VALUES ('t', ?, 's', ?, 'o', datetime('now'), datetime('now'))",
+      {
+        replacements: [notation, priority],
+      },
+    );
+  await assert.rejects(insert('XYZ', 'low'), isCheckViolation);
+  await assert.rejects(insert('UML', 'urgent'), isCheckViolation);
+  await insert('UML', 'low');
+  await sequelize.getQueryInterface().bulkDelete('Diagrams', { title: 't' });
+  await sequelize.close();
+});

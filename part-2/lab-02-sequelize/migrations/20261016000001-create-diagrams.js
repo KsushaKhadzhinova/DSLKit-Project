@@ -1,3 +1,6 @@
+// A migration is a snapshot, so the allowed values are copied here instead of imported.
+const NOTATIONS = ['UML', 'BPMN', 'ERD', 'DFD', 'IDEF0', 'Petri'];
+
 module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.createTable('Diagrams', {
@@ -8,6 +11,12 @@ module.exports = {
       owner: { allowNull: false, type: Sequelize.STRING(60) },
       createdAt: { allowNull: false, type: Sequelize.DATE },
       updatedAt: { allowNull: false, type: Sequelize.DATE },
+    });
+    await queryInterface.addConstraint('Diagrams', {
+      type: 'check',
+      fields: ['notation'],
+      name: 'diagrams_notation_check',
+      where: { notation: { [Sequelize.Op.in]: NOTATIONS } },
     });
   },
 
