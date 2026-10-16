@@ -1,6 +1,6 @@
 import express from 'express';
 import { ApiError, errorBody, notFound } from './errors.js';
-import { createResourceRouter, listItems, parseId } from './resource.js';
+import { createResourceRouter, listItems, methodsOnly, parseId } from './resource.js';
 import { createStores } from './store.js';
 
 export const NOTATIONS = ['UML', 'BPMN', 'ERD', 'DFD', 'IDEF0', 'Petri'];
@@ -62,6 +62,7 @@ export const createApp = ({ stores = createStores(), writeError = console.error 
       ),
     );
   });
+  api.all('/projects/:id/diagrams', methodsOnly('GET'));
   api.use(
     '/projects',
     createResourceRouter({
@@ -87,6 +88,8 @@ export const createApp = ({ stores = createStores(), writeError = console.error 
     const { id, createdAt, ...rest } = diagram(req);
     res.status(201).json(diagrams.create({ ...rest, title: `${rest.title} (copy)`.slice(0, 80), status: 'draft' }));
   });
+  api.all('/diagrams/:id/publish', methodsOnly('POST'));
+  api.all('/diagrams/:id/duplicate', methodsOnly('POST'));
   api.use(
     '/diagrams',
     createResourceRouter({

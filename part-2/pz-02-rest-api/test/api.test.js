@@ -201,3 +201,18 @@ withApi('ids, page and limit accept only plain positive integers', async ({ call
   }
   assert.equal((await call('GET', '/users?page=1&limit=100')).status, 200);
 });
+
+withApi('unsupported methods on known routes give 405 with Allow, OPTIONS lists them', async ({ call, base }) => {
+  const list = await call('DELETE', '/users');
+  assert.equal(list.status, 405);
+  assert.equal(list.headers.get('allow'), 'GET, POST, HEAD, OPTIONS');
+  assert.equal(list.json.error.code, 'method_not_allowed');
+  assert.equal((await call('POST', '/users/1', {})).headers.get('allow'), 'GET, PUT, PATCH, DELETE, HEAD, OPTIONS');
+  assert.equal((await call('GET', '/diagrams/1/publish')).headers.get('allow'), 'POST, OPTIONS');
+  assert.equal((await call('PUT', '/diagrams/1/duplicate', {})).status, 405);
+  assert.equal((await call('POST', '/projects/1/diagrams', {})).headers.get('allow'), 'GET, HEAD, OPTIONS');
+  const options = await fetch(`${base}/users`, { method: 'OPTIONS' });
+  assert.equal(options.status, 204);
+  assert.equal(options.headers.get('allow'), 'GET, POST, HEAD, OPTIONS');
+  assert.equal((await fetch(`${base}/users/1`, { method: 'HEAD' })).status, 200);
+});

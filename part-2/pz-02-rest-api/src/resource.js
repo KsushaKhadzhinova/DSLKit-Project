@@ -2,6 +2,16 @@ import { Router } from 'express';
 import { ApiError, notFound, validationFailed } from './errors.js';
 import { applyDefaults, validate } from './validation.js';
 
+// Answers 405 with an Allow header for methods a known path does not support; OPTIONS lists them.
+export const methodsOnly = (...methods) => {
+  const allow = [...methods, ...(methods.includes('GET') ? ['HEAD'] : []), 'OPTIONS'].join(', ');
+  return (req, res, next) => {
+    res.set('Allow', allow);
+    if (req.method === 'OPTIONS') return res.status(204).end();
+    return next(new ApiError(405, 'method_not_allowed', `${req.method} is not allowed here, use: ${allow}`));
+  };
+};
+
 const DIGITS = /^[1-9]\d{0,14}$/;
 
 export const parseId = (raw) => {
@@ -79,5 +89,7 @@ export const createResourceRouter = ({ label, collection, schema, hooks = {} }) 
     collection.remove(item);
     res.status(204).end();
   });
+  router.all('/', methodsOnly('GET', 'POST'));
+  router.all('/:id', methodsOnly('GET', 'PUT', 'PATCH', 'DELETE'));
   return router;
 };
