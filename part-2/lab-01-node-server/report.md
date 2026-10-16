@@ -52,7 +52,7 @@
 
 Данные хранятся в массиве внутри функции `createDiagramStore`, которая возвращает методы `findAll`, `findById`, `create`, `replace` и `remove`. Счётчик идентификаторов растёт и не использует номера удалённых записей повторно. Хранилище передаётся в `createApp` параметром, поэтому тесты получают чистые данные, а при подключении базы данных меняется только модель, но не маршруты. При запуске в хранилище лежат две учебные диаграммы.
 
-Обработчики не проверяют данные сами. Разбор адреса и тела вынесен в `validate.js`: `parseId` принимает только положительное целое число, а `validateDiagram` проверяет, что тело это объект, что `title`, `sourceCode` и `owner` непустые строки, а `notation` и `priority` входят в допустимые списки. Поле `priority` необязательно и по умолчанию равно `normal`. Лишние поля отбрасываются, поэтому клиент не может записать произвольные ключи или задать `id`. Метод `PUT` заменяет диаграмму целиком и требует те же поля, что и `POST`; частичное обновление `PATCH` не реализовано, потому что условие его не требует.
+Обработчики не проверяют данные сами. Разбор адреса и тела вынесен в `validate.js`: `parseId` принимает только положительное целое число, а `validateDiagram` проверяет, что тело это объект, что `title`, `sourceCode` и `owner` непустые строки, а `notation` и `priority` входят в допустимые списки. Поле `priority` необязательно и по умолчанию равно `normal`. Лишние поля отбрасываются, поэтому клиент не может записать произвольные ключи или задать `id`. Метод `PUT` заменяет диаграмму целиком и требует те же поля, что и `POST`. Частичное обновление `PATCH` не реализовано, потому что условие его не требует.
 
 ### 3.4 Обработка ошибок
 
@@ -76,11 +76,13 @@
 | `DELETE /diagrams/2` повторно                                | 404 | `{"error":"Diagram 2 not found"}`                           |
 | `GET /diagrams/abc`                                          | 400 | `{"error":"Diagram id must be a positive integer"}`         |
 
+Листинг файла server.js приведён в приложении А. Листинг файла app.js приведён в приложении Б. Листинг файла diagrams.routes.js приведён в приложении В. Листинг файла diagrams.controller.js приведён в приложении Г. Листинг файла diagram.model.js приведён в приложении Д. Листинг файла validate.js приведён в приложении Е. Листинг файла error-handler.js приведён в приложении Ж.
+
 ## Заключение
 
 Для проекта DSLKit создан REST API ресурса `diagrams` на Express: пять маршрутов выполняют чтение списка и одной записи, создание, полную замену и удаление, данные временно лежат в массиве в памяти. Ошибки приводятся к единому формату JSON с кодами 400, 404 и 500 через глобальный обработчик, запуск в режиме разработки идёт через `nodemon`, а 18 автоматических тестов подтверждают поведение каждого маршрута. Структура с маршрутами, контроллерами и моделью позволит в следующей работе заменить массив базой данных без переписывания остального кода. Остаётся приложить скриншоты запросов из Postman или браузера.
 
-## Приложение А – Листинг файла server.js
+## Приложение А (обязательное) Листинг файла server.js
 
 ```js
 const { createApp } = require('./src/app');
@@ -96,7 +98,7 @@ const port = Number(process.env.PORT) || 3000;
 createApp().listen(port, () => console.log(`Server running on http://localhost:${port}`));
 ```
 
-## Приложение Б – Листинг файла app.js
+## Приложение Б (обязательное) Листинг файла app.js
 
 ```js
 const express = require('express');
@@ -117,7 +119,7 @@ const createApp = (store = createDiagramStore()) => {
 module.exports = { createApp };
 ```
 
-## Приложение В – Листинг файла diagrams.routes.js
+## Приложение В (обязательное) Листинг файла diagrams.routes.js
 
 ```js
 const { Router } = require('express');
@@ -144,7 +146,7 @@ const createDiagramsRouter = (controller) => {
 module.exports = { createDiagramsRouter };
 ```
 
-## Приложение Г – Листинг файла diagrams.controller.js
+## Приложение Г (обязательное) Листинг файла diagrams.controller.js
 
 ```js
 const { notFound } = require('../errors');
@@ -175,7 +177,7 @@ const createDiagramsController = (store) => ({
 module.exports = { createDiagramsController };
 ```
 
-## Приложение Д – Листинг файла diagram.model.js
+## Приложение Д (обязательное) Листинг файла diagram.model.js
 
 ```js
 const NOTATIONS = ['UML', 'BPMN', 'ERD', 'DFD', 'IDEF0', 'Petri'];
@@ -221,7 +223,7 @@ const createDiagramStore = (initial = SEED) => {
 module.exports = { NOTATIONS, PRIORITIES, DEFAULT_PRIORITY, createDiagramStore };
 ```
 
-## Приложение Е – Листинг файла validate.js
+## Приложение Е (обязательное) Листинг файла validate.js
 
 ```js
 const { badRequest } = require('../errors');
@@ -265,7 +267,7 @@ const validateDiagram = (req, _res, next) => {
 module.exports = { parseId, validateDiagram };
 ```
 
-## Приложение Ж – Листинг файла error-handler.js
+## Приложение Ж (обязательное) Листинг файла error-handler.js
 
 ```js
 const { notFound } = require('../errors');

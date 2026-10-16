@@ -62,7 +62,7 @@ test('GET /diagrams/:id answers 404 for a missing diagram', async () => {
 });
 
 test('GET /diagrams/:id answers 400 for a non-numeric id', async () => {
-  for (const id of ['abc', '0', '-3', '1.5', '0x1', '1e0', '%201', '01', '99999999999999999999']) {
+  for (const id of ['abc', '0', '-3', '1.5', '0x1', '1e0', '%201', '01', '2147483648', '99999999999999999999']) {
     const { res, body } = await call('GET', `/diagrams/${id}`);
     assert.equal(res.status, 400, id);
     assert.match(body.error, /positive integer/);
@@ -187,4 +187,37 @@ test('unsupported methods answer 405 with an Allow header', async () => {
     assert.equal(res.headers.get('allow'), allow);
     assert.match(body.error, /not allowed/);
   }
+});
+
+test('title and owner are trimmed before saving', async () => {
+  const { res, body } = await call('POST', '/diagrams', { ...valid, title: '  Spaced  ', owner: ' carol ' });
+  assert.equal(res.status, 201);
+  assert.equal(body.title, 'Spaced');
+  assert.equal(body.owner, 'carol');
+});
+
+test('text fields at the limit are accepted, one character more is rejected with 400', async () => {
+  const limits = { title: 80, owner: 60, sourceCode: 10000 };
+  for (const [field, max] of Object.entries(limits)) {
+    assert.equal((await call('POST', '/diagrams', { ...valid, [field]: 'x'.repeat(max) })).res.status, 201, field);
+    const { res, body } = await call('POST', '/diagrams', { ...valid, [field]: 'x'.repeat(max + 1) });
+    assert.equal(res.status, 400, field);
+    assert.deepEqual(body.details, [{ field, message: `must be at most ${max} characters` }]);
+  }
+});
+
+test('a value that is only longer because of surrounding spaces is accepted', async () => {
+  assert.equal((await call('POST', '/diagrams', { ...valid, title: ` ${'x'.repeat(80)} ` })).res.status, 201);
+});
+
+test('the largest INTEGER id is accepted and simply not found', async () => {
+  assert.equal((await call('GET', '/diagrams/2147483647')).res.status, 404);
+});
+
+test('a body just under 100 kb passes the parser, so the explicit limit is the 413 boundary', async () => {
+  const room = 'x'.repeat(9999);
+  const { res } = await call('POST', '/diagrams', { ...valid, sourceCode: room, title: 'ok' });
+  assert.equal(res.status, 201);
+  const raw = JSON.stringify({ ...valid, sourceCode: 'y'.repeat(101 * 1024) });
+  assert.equal((await call('POST', '/diagrams', {}, raw)).res.status, 413);
 });

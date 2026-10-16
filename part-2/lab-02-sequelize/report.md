@@ -16,7 +16,7 @@
 
 ### 3.1 База данных
 
-PostgreSQL на компьютере разработчика не установлен, а ставить системное программное обеспечение для учебной работы не требуется, поэтому для локального запуска выбран SQLite: файл базы создаётся сам. Выбор делает файл `config/config.js`. Если задана переменная `DATABASE_URL`, используется PostgreSQL (при `DATABASE_SSL=true` добавляется TLS для Neon и Supabase), иначе SQLite с файлом из `SQLITE_STORAGE`. Миграции, модель и контроллеры от диалекта не зависят. Подключение к настоящему PostgreSQL в этой работе пока не проверено, это остаётся сделать перед сдачей. Образец переменных лежит в `.env.example`, сам `.env` в репозиторий не попадает.
+PostgreSQL на компьютере разработчика не установлен, а ставить системное программное обеспечение для учебной работы не требуется, поэтому для локального запуска выбран SQLite: файл базы создаётся сам. Выбор делает файл `config/config.js`. Если задана переменная `DATABASE_URL`, используется PostgreSQL (при `DATABASE_SSL=true` включается TLS для Neon и Supabase с проверкой сертификата сервера, отключить проверку можно только переменной `DATABASE_SSL_REJECT_UNAUTHORIZED=false`), иначе SQLite с файлом из `SQLITE_STORAGE`. Миграции, модель и контроллеры от диалекта не зависят. Работа с настоящим PostgreSQL не проверялась: проверены SQLite и сборка настроек для PostgreSQL, а остальное опирается на то, что Sequelize скрывает различия диалектов. Образец переменных лежит в `.env.example`, сам `.env` в репозиторий не попадает.
 
 ### 3.2 Установка и настройка
 
@@ -24,7 +24,7 @@ PostgreSQL на компьютере разработчика не устано�
 
 ### 3.3 Модель и миграции
 
-Модель `Diagram` описана в `src/models/diagram.js`: поля `title`, `notation`, `sourceCode`, `priority` и `owner`, а Sequelize сам добавляет `id`, `createdAt` и `updatedAt`. Допустимые значения `notation` и `priority` заданы проверкой `isIn`, поэтому база не примет значение вне списка, даже если обойти проверку запроса. Имя таблицы Sequelize получает из имени модели во множественном числе, то есть `Diagrams`.
+Модель `Diagram` описана в `src/models/diagram.js`: поля `title`, `notation`, `sourceCode`, `priority` и `owner`, а Sequelize сам добавляет `id`, `createdAt` и `updatedAt`. Допустимые значения `notation` и `priority` заданы проверкой `isIn` в модели и ограничениями `CHECK` в миграциях, поэтому база не примет значение вне списка, даже если обойти и запрос, и модель. Длины совпадают с типами колонок: `title` до 80 символов, `owner` до 60, `sourceCode` до 10000, а перед сохранением `title` и `owner` обрезаются по краям. Идентификатор в адресе не может превышать 2147483647, иначе PostgreSQL ответил бы ошибкой 500. Размер тела запроса ограничен значением 100kb. Имя таблицы Sequelize получает из имени модели во множественном числе, то есть `Diagrams`.
 
 Схема создаётся только миграциями, метод `sync()` не используется. Первая миграция создаёт таблицу без поля `priority`, вторая добавляет его вызовом `addColumn` со значением по умолчанию `normal`, а её функция `down` удаляет колонку. Так показано изменение схемы существующей таблицы, как требует условие. Файлы миграций перечислены в таблице 1.
 
@@ -56,13 +56,15 @@ PostgreSQL на компьютере разработчика не устано�
 
 Порядок запуска: `npm run db:migrate` создаёт таблицу и добавляет колонку `priority`, `npm run db:seed` наполняет базу, `npm run dev` запускает сервер. Проверка на SQLite показала, что список возвращает три записи с полями `createdAt` и `updatedAt`, замена меняет `updatedAt`, первое удаление даёт 204, а повторное 404.
 
-Всего 22 автоматических теста. Восемнадцать проверяют HTTP-маршруты на временной базе SQLite, к которой применены настоящие миграции. Четыре проверяют сами миграции: набор колонок после обеих миграций, откат второй миграции с удалением `priority` и повторное применение, вставку и откат сида, отказ модели от значений вне списков. Тесты запускают настоящий `sequelize-cli`, поэтому ошибка в файле миграции будет обнаружена.
+Всего 32 автоматических теста. Двадцать три проверяют HTTP-маршруты на временной базе SQLite, к которой применены настоящие миграции. Пять проверяют сами миграции: набор колонок после обеих миграций, откат второй миграции с удалением `priority` и повторное применение, повторный запуск сида и откат только своих строк, отказ модели от значений вне списков, отказ базы от значения вне списка при обходе модели. Четыре проверяют настройки подключения, в том числе проверку сертификата по умолчанию. Тесты запускают настоящий `sequelize-cli`, поэтому ошибка в файле миграции будет обнаружена.
+
+Листинг файла config.js приведён в приложении А. Листинг файла index.js модели приведён в приложении Б. Листинг миграции создания таблицы приведён в приложении Г. Листинг миграции добавления поля priority приведён в приложении Д. Листинг сида demo-diagrams.js приведён в приложении Е. Листинг файла diagrams.controller.js приведён в приложении Ж.
 
 ## Заключение
 
-Для проекта DSLKit коллекция `diagrams` из лабораторной работы 1 переведена с массива на базу данных через Sequelize: модель `Diagram`, две миграции (создание таблицы и добавление поля `priority`), сид с тремя диаграммами и контроллеры на методах ORM. Локально работа использует SQLite, а переменная `DATABASE_URL` переключает её на PostgreSQL или облачный Neon без изменения кода. 22 автоматических теста подтверждают маршруты, миграции с откатом и сид. Остаётся проверить запуск на настоящем PostgreSQL и приложить скриншоты структуры базы и запросов из Postman.
+Для проекта DSLKit коллекция `diagrams` из лабораторной работы 1 переведена с массива на базу данных через Sequelize: модель `Diagram`, две миграции (создание таблицы и добавление поля `priority`), сид с тремя диаграммами и контроллеры на методах ORM. Локально работа использует SQLite, а переменная `DATABASE_URL` переключает её на PostgreSQL или облачный Neon без изменения кода. 32 автоматических теста подтверждают маршруты, ограничения, миграции с откатом и сид. Запуск на настоящем PostgreSQL не проверялся, скриншоты структуры базы и запросов из Postman остаётся приложить.
 
-## Приложение А – Листинг файла config.js
+## Приложение А (обязательное) Листинг файла config.js
 
 ```js
 try {
@@ -72,14 +74,15 @@ try {
 }
 
 // DATABASE_URL selects PostgreSQL, otherwise a local SQLite file is used.
+// With DATABASE_SSL=true the server certificate is verified; only DATABASE_SSL_REJECT_UNAUTHORIZED=false turns that off.
 const fromEnv = () => {
-  const { DATABASE_URL, DATABASE_SSL, SQLITE_STORAGE } = process.env;
+  const { DATABASE_URL, DATABASE_SSL, DATABASE_SSL_REJECT_UNAUTHORIZED, SQLITE_STORAGE } = process.env;
   if (!DATABASE_URL) return { dialect: 'sqlite', storage: SQLITE_STORAGE || './dev.sqlite', logging: false };
   return {
     use_env_variable: 'DATABASE_URL',
     dialect: 'postgres',
     logging: false,
-    ...(DATABASE_SSL === 'true' && { dialectOptions: { ssl: { require: true, rejectUnauthorized: false } } }),
+    ...(DATABASE_SSL === 'true' && { dialectOptions: { ssl: { require: true, rejectUnauthorized: DATABASE_SSL_REJECT_UNAUTHORIZED !== 'false' } } }),
   };
 };
 
@@ -87,7 +90,7 @@ const fromEnv = () => {
 module.exports = { development: fromEnv(), test: fromEnv(), production: fromEnv() };
 ```
 
-## Приложение Б – Листинг файла index.js модели
+## Приложение Б (обязательное) Листинг файла index.js модели
 
 ```js
 const { Sequelize } = require('sequelize');
@@ -104,38 +107,47 @@ const createModels = (config = allConfigs[process.env.NODE_ENV || 'development']
 module.exports = { createModels };
 ```
 
-## Приложение В – Листинг файла diagram.js
+## Приложение В (обязательное) Листинг файла diagram.js
 
 ```js
 const { DataTypes } = require('sequelize');
-const { NOTATIONS, PRIORITIES, DEFAULT_PRIORITY } = require('./diagram.constants');
+const { NOTATIONS, PRIORITIES, DEFAULT_PRIORITY, LIMITS } = require('./diagram.constants');
 
 // The table is created by migrations, never by sequelize.sync().
 const defineDiagram = (sequelize) =>
   sequelize.define('Diagram', {
-    title: { type: DataTypes.STRING, allowNull: false },
+    title: { type: DataTypes.STRING(LIMITS.title), allowNull: false, validate: { len: [1, LIMITS.title] } },
     notation: { type: DataTypes.STRING, allowNull: false, validate: { isIn: [NOTATIONS] } },
-    sourceCode: { type: DataTypes.TEXT, allowNull: false },
+    sourceCode: { type: DataTypes.TEXT, allowNull: false, validate: { len: [1, LIMITS.sourceCode] } },
     priority: { type: DataTypes.STRING, allowNull: false, defaultValue: DEFAULT_PRIORITY, validate: { isIn: [PRIORITIES] } },
-    owner: { type: DataTypes.STRING, allowNull: false },
+    owner: { type: DataTypes.STRING(LIMITS.owner), allowNull: false, validate: { len: [1, LIMITS.owner] } },
   });
 
 module.exports = { defineDiagram };
 ```
 
-## Приложение Г – Листинг миграции создания таблицы
+## Приложение Г (обязательное) Листинг миграции создания таблицы
 
 ```js
+// A migration is a snapshot, so the allowed values are copied here instead of imported.
+const NOTATIONS = ['UML', 'BPMN', 'ERD', 'DFD', 'IDEF0', 'Petri'];
+
 module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.createTable('Diagrams', {
       id: { allowNull: false, autoIncrement: true, primaryKey: true, type: Sequelize.INTEGER },
-      title: { allowNull: false, type: Sequelize.STRING },
+      title: { allowNull: false, type: Sequelize.STRING(80) },
       notation: { allowNull: false, type: Sequelize.STRING },
       sourceCode: { allowNull: false, type: Sequelize.TEXT },
-      owner: { allowNull: false, type: Sequelize.STRING },
+      owner: { allowNull: false, type: Sequelize.STRING(60) },
       createdAt: { allowNull: false, type: Sequelize.DATE },
       updatedAt: { allowNull: false, type: Sequelize.DATE },
+    });
+    await queryInterface.addConstraint('Diagrams', {
+      type: 'check',
+      fields: ['notation'],
+      name: 'diagrams_notation_check',
+      where: { notation: { [Sequelize.Op.in]: NOTATIONS } },
     });
   },
 
@@ -145,9 +157,12 @@ module.exports = {
 };
 ```
 
-## Приложение Д – Листинг миграции добавления поля priority
+## Приложение Д (обязательное) Листинг миграции добавления поля priority
 
 ```js
+const PRIORITIES = ['low', 'normal', 'high'];
+const NOTATIONS = ['UML', 'BPMN', 'ERD', 'DFD', 'IDEF0', 'Petri'];
+
 module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.addColumn('Diagrams', 'priority', {
@@ -155,36 +170,71 @@ module.exports = {
       type: Sequelize.STRING,
       defaultValue: 'normal',
     });
-  },
-
-  async down(queryInterface) {
-    await queryInterface.removeColumn('Diagrams', 'priority');
-  },
-};
-```
-
-## Приложение Е – Листинг сида demo-diagrams.js
-
-```js
-const titles = ['Order processing', 'Billing schema', 'Login flow'];
-
-module.exports = {
-  async up(queryInterface) {
-    const now = new Date();
-    await queryInterface.bulkInsert('Diagrams', [
-      { title: titles[0], notation: 'BPMN', sourceCode: 'start -> check -> pay -> ship', priority: 'high', owner: 'anna', createdAt: now, updatedAt: now },
-      { title: titles[1], notation: 'ERD', sourceCode: 'entity Invoice { id; total }', priority: 'normal', owner: 'boris', createdAt: now, updatedAt: now },
-      { title: titles[2], notation: 'UML', sourceCode: 'user -> server: login', priority: 'low', owner: 'anna', createdAt: now, updatedAt: now },
-    ]);
+    await queryInterface.addConstraint('Diagrams', {
+      type: 'check',
+      fields: ['priority'],
+      name: 'diagrams_priority_check',
+      where: { priority: { [Sequelize.Op.in]: PRIORITIES } },
+    });
   },
 
   async down(queryInterface, Sequelize) {
-    await queryInterface.bulkDelete('Diagrams', { title: { [Sequelize.Op.in]: titles } });
+    await queryInterface.removeConstraint('Diagrams', 'diagrams_priority_check');
+    await queryInterface.removeColumn('Diagrams', 'priority');
+    // SQLite drops a column by rebuilding the table from its columns only, which loses the CHECK from the first migration.
+    if (queryInterface.sequelize.getDialect() === 'sqlite') {
+      await queryInterface.addConstraint('Diagrams', {
+        type: 'check',
+        fields: ['notation'],
+        name: 'diagrams_notation_check',
+        where: { notation: { [Sequelize.Op.in]: NOTATIONS } },
+      });
+    }
   },
 };
 ```
 
-## Приложение Ж – Листинг файла diagrams.controller.js
+## Приложение Е (обязательное) Листинг сида demo-diagrams.js
+
+```js
+// Every seeded row has this owner, so the seed can tell its rows from the ones users created.
+const MARKER = 'demo';
+
+module.exports = {
+  async up(queryInterface) {
+    const existing = await queryInterface.rawSelect('Diagrams', { where: { owner: MARKER } }, ['id']);
+    if (existing) return;
+    const now = new Date();
+    await queryInterface.bulkInsert('Diagrams', [
+      {
+        title: 'Order processing',
+        notation: 'BPMN',
+        sourceCode: 'start -> check -> pay -> ship',
+        priority: 'high',
+        owner: MARKER,
+        createdAt: now,
+        updatedAt: now,
+      },
+      {
+        title: 'Billing schema',
+        notation: 'ERD',
+        sourceCode: 'entity Invoice { id; total }',
+        priority: 'normal',
+        owner: MARKER,
+        createdAt: now,
+        updatedAt: now,
+      },
+      { title: 'Login flow', notation: 'UML', sourceCode: 'user -> server: login', priority: 'low', owner: MARKER, createdAt: now, updatedAt: now },
+    ]);
+  },
+
+  async down(queryInterface) {
+    await queryInterface.bulkDelete('Diagrams', { owner: MARKER });
+  },
+};
+```
+
+## Приложение Ж (обязательное) Листинг файла diagrams.controller.js
 
 ```js
 const { notFound } = require('../errors');
