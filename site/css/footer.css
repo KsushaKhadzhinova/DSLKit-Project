@@ -23,7 +23,7 @@
 .footer__link {
   display: inline-flex;
   align-items: center;
-  min-height: 24px;
+  min-height: 1.5rem;
   color: var(--color-text-light);
   text-decoration: none;
 }

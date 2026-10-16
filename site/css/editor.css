@@ -76,7 +76,7 @@
 
 .editor-toolbar__group {
   display: flex;
-  gap: 4px;
+  gap: 0.25rem;
 }
 
 .editor-toolbar__row .button {
@@ -118,9 +118,9 @@
 
 .editor-toolbar__switch-track {
   position: relative;
-  width: 32px;
-  height: 18px;
-  border-radius: 999px;
+  width: 2rem;
+  height: 1.125rem;
+  border-radius: 62.4375rem;
   background: var(--color-border-strong);
   transition: background-color 160ms ease;
 }
@@ -128,10 +128,10 @@
 .editor-toolbar__switch-track::after {
   content: '';
   position: absolute;
-  top: 2px;
-  left: 2px;
-  width: 14px;
-  height: 14px;
+  top: 0.125rem;
+  left: 0.125rem;
+  width: 0.875rem;
+  height: 0.875rem;
   border-radius: 50%;
   background: var(--color-surface);
   transition: transform 160ms ease;
@@ -166,8 +166,8 @@
 .editor-topbar__dot,
 .editor-tabs__dot {
   flex: none;
-  width: 8px;
-  height: 8px;
+  width: 0.5rem;
+  height: 0.5rem;
   border-radius: 50%;
   background: var(--color-warning);
 }
@@ -178,7 +178,7 @@
   display: none;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: 0.25rem;
   padding: var(--space-1);
   border-right: 1px solid var(--color-border);
   background: var(--color-surface);
@@ -187,8 +187,8 @@
 .editor-activity__button {
   display: grid;
   place-items: center;
-  width: 40px;
-  height: 40px;
+  width: 2.5rem;
+  height: 2.5rem;
   border: 0;
   border-radius: var(--radius-small);
   background: transparent;
@@ -238,7 +238,7 @@
 .file-tree,
 .templates {
   display: grid;
-  gap: 2px;
+  gap: 0.125rem;
 }
 
 .file-tree__item,
@@ -285,25 +285,25 @@
 
 .editor-sidebar__beta progress {
   width: 100%;
-  height: 8px;
+  height: 0.5rem;
 }
 
 /* Mobile view switch (decorative until JavaScript, hidden on larger screens) */
 .editor-segmented {
   display: flex;
-  gap: 4px;
+  gap: 0.25rem;
   margin: var(--space-2);
-  padding: 4px;
+  padding: 0.25rem;
   border: 1px solid var(--color-border);
-  border-radius: 999px;
+  border-radius: 62.4375rem;
   background: var(--color-surface);
 }
 
 .editor-segmented__button {
   flex: 1;
-  min-height: 36px;
+  min-height: 2.25rem;
   border: 0;
-  border-radius: 999px;
+  border-radius: 62.4375rem;
   background: transparent;
   color: var(--color-text-light);
   font-weight: 600;
@@ -338,14 +338,14 @@
 
 .editor-tabs__list {
   display: flex;
-  gap: 2px;
+  gap: 0.125rem;
 }
 
 .editor-tabs__tab {
   display: inline-flex;
   align-items: center;
   gap: var(--space-1);
-  min-height: 40px;
+  min-height: 2.5rem;
   padding: 0 var(--space-2);
   border: 0;
   border-bottom: 2px solid transparent;
@@ -371,12 +371,12 @@
 .editor-tabs__close {
   display: grid;
   place-items: center;
-  width: 24px;
-  height: 24px;
-  margin: 0 0 8px var(--space-1);
+  width: 1.5rem;
+  height: 1.5rem;
+  margin: 0 0 0.5rem var(--space-1);
   padding: 0;
   border: 0;
-  border-radius: 4px;
+  border-radius: 0.25rem;
   background: transparent;
   color: var(--color-text-light);
 }
@@ -387,8 +387,8 @@
 }
 
 .editor-tabs__close .icon {
-  width: 14px;
-  height: 14px;
+  width: 0.875rem;
+  height: 0.875rem;
 }
 
 .editor-panel {
@@ -564,13 +564,13 @@
 
 .canvas__code {
   fill: var(--color-link);
-  font-size: 15px;
+  font-size: 0.9375rem;
   font-weight: 700;
 }
 
 .canvas__name {
   fill: var(--color-text);
-  font-size: 13px;
+  font-size: 0.8125rem;
 }
 
 .canvas__arrow {
@@ -585,7 +585,7 @@
 
 .canvas__label {
   fill: var(--color-text-light);
-  font-size: 12px;
+  font-size: 0.75rem;
 }
 
 .canvas__block {
@@ -597,8 +597,8 @@
   right: var(--space-3);
   bottom: var(--space-2);
   display: grid;
-  gap: 4px;
-  padding: 4px;
+  gap: 0.25rem;
+  padding: 0.25rem;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-medium);
   background: var(--color-surface);
@@ -621,14 +621,14 @@
 .problems__tabs {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px;
+  gap: 0.25rem;
 }
 
 .problems__tab {
   min-height: var(--target-size-small);
   padding: 0 var(--space-2);
   border: 1px solid transparent;
-  border-radius: 999px;
+  border-radius: 62.4375rem;
   background: transparent;
   color: var(--color-text-light);
   font-size: var(--step--1);
@@ -659,7 +659,7 @@
 
 .problems__item {
   display: grid;
-  grid-template-columns: 20px minmax(0, 1fr);
+  grid-template-columns: 1.25rem minmax(0, 1fr);
   align-items: center;
   gap: var(--space-2);
   padding: var(--space-1) var(--space-2);
@@ -734,7 +734,7 @@
   display: grid;
   place-items: center;
   align-content: center;
-  gap: 2px;
+  gap: 0.125rem;
   min-height: var(--target-size);
   padding: var(--space-1) 0;
   border: 0;
@@ -881,7 +881,7 @@
   }
 
   .problems__item {
-    grid-template-columns: 20px auto minmax(0, 1fr) auto auto;
+    grid-template-columns: 1.25rem auto minmax(0, 1fr) auto auto;
   }
 
   .editor-banner {
@@ -945,15 +945,15 @@
 }
 
 .problems__icon {
-  width: 20px;
-  height: 20px;
+  width: 1.25rem;
+  height: 1.25rem;
 }
 
 .editor-status__problems,
 .editor-status__branch {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 0.25rem;
 }
 
 /* Drawings from the engines are SVG elements of their own: they share the interface font and crisp geometry. */

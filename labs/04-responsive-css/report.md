@@ -166,22 +166,22 @@ Flexbox и Grid поддерживаются всеми современными
   --line-body: var(--phi);
   --line-heading: 1.15;
 
-  --space-1: 8px;
-  --space-2: 16px;
-  --space-3: 24px;
-  --space-4: 40px;
-  --space-5: 64px;
-  --space-6: 104px;
+  --space-1: 0.5rem;
+  --space-2: 1rem;
+  --space-3: 1.5rem;
+  --space-4: 2.5rem;
+  --space-5: 4rem;
+  --space-6: 6.5rem;
 
-  --radius-small: 8px;
-  --radius-medium: 16px;
-  --radius-large: 24px;
+  --radius-small: 0.5rem;
+  --radius-medium: 1rem;
+  --radius-large: 1.5rem;
 
   --container: 1200px;
   --measure: 62ch;
-  --header-height: 64px;
-  --target-size: 48px;
-  --target-size-small: 32px;
+  --header-height: 4rem;
+  --target-size: 3rem;
+  --target-size-small: 2rem;
   --focus-ring: 0 0 0 3px var(--color-background), 0 0 0 5px var(--color-primary);
 
   --breakpoint-small: 576px;
@@ -190,7 +190,7 @@ Flexbox и Grid поддерживаются всеми современными
 
   /* Names required by the lab assignment; they alias the golden-ratio scales above. */
   --font-family-main: var(--font-sans);
-  --font-size-base: 16px;
+  --font-size-base: 1rem;
   --font-size-h1: var(--step-5);
   --font-size-h2: var(--step-4);
   --spacing-small: var(--space-1);
@@ -263,6 +263,8 @@ Flexbox и Grid поддерживаются всеми современными
 }
 
 html {
+  /* Fluid root size: 15 px on a phone, about 17 px at 1280 px, 18 px at the largest screens. Every rem value follows it, so type, spacing and controls grow together. */
+  font-size: clamp(0.9375rem, 0.875rem + 0.25vw, 1.125rem);
   overflow-x: clip;
   scroll-padding-top: calc(var(--header-height) + var(--space-2));
   -webkit-text-size-adjust: 100%;
@@ -361,9 +363,9 @@ pre {
 }
 
 kbd {
-  padding: 2px 6px;
+  padding: 0.125rem 0.375rem;
   border: 1px solid var(--color-border-strong);
-  border-radius: 4px;
+  border-radius: 0.25rem;
   background: var(--color-surface);
   color: var(--color-text-light);
   font-size: var(--step--1);
@@ -434,15 +436,15 @@ time {
 
 .icon {
   flex: none;
-  width: 20px;
-  height: 20px;
+  width: 1.25rem;
+  height: 1.25rem;
 }
 
 .badge {
   display: inline-flex;
   align-items: center;
-  padding: 2px var(--space-1);
-  border-radius: 999px;
+  padding: 0.125rem var(--space-1);
+  border-radius: 62.4375rem;
   background: var(--color-secondary);
   color: var(--color-link);
   font-size: var(--step--1);
@@ -551,8 +553,8 @@ label > span {
 }
 
 .header__logo-image {
-  width: 32px;
-  height: 32px;
+  width: 2rem;
+  height: 2rem;
 }
 
 .header__logo-text {
@@ -592,9 +594,9 @@ label > span {
 .burger__icon::before,
 .burger__icon::after {
   display: block;
-  width: 18px;
-  height: 2px;
-  border-radius: 2px;
+  width: 1.125rem;
+  height: 0.125rem;
+  border-radius: 0.125rem;
   background: currentColor;
   transition: transform 200ms ease;
 }
@@ -615,7 +617,7 @@ label > span {
 }
 
 .burger__icon::after {
-  top: 6px;
+  top: 0.375rem;
 }
 
 .burger__input:checked + .burger__button .burger__icon {
@@ -716,10 +718,12 @@ label > span {
 .theme__button {
   display: inline-flex;
   align-items: center;
-  min-height: var(--target-size-small);
-  padding: 0 var(--space-1);
+  justify-content: center;
+  width: var(--target-size);
+  height: var(--target-size);
+  padding: 0;
   border: 1px solid var(--color-border-strong);
-  border-radius: 999px;
+  border-radius: 62.4375rem;
   color: var(--color-text-light);
   cursor: pointer;
   font-size: 0.75rem;
@@ -743,6 +747,28 @@ label > span {
 .theme__input:checked + .theme__button {
   background: var(--color-secondary);
   color: var(--color-text);
+}
+
+.theme__icon {
+  flex: none;
+}
+
+.theme__label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.theme__icon--sun,
+.theme__input:checked + .theme__button .theme__icon--moon {
+  display: none;
+}
+
+.theme__input:checked + .theme__button .theme__icon--sun {
+  display: block;
 }
 
 .header__cta {
@@ -806,9 +832,9 @@ label > span {
   display: inline-flex;
   align-items: center;
   gap: var(--space-1);
-  padding: 4px var(--space-2);
+  padding: 0.25rem var(--space-2);
   border: 1px solid var(--color-border);
-  border-radius: 999px;
+  border-radius: 62.4375rem;
   background: var(--color-surface);
   color: var(--color-text-light);
   font-size: var(--step--1);
@@ -817,8 +843,8 @@ label > span {
 
 .hero__badge::before {
   content: '';
-  width: 8px;
-  height: 8px;
+  width: 0.5rem;
+  height: 0.5rem;
   border-radius: 50%;
   background: var(--color-accent);
   box-shadow: 0 0 0 4px var(--color-glow);
@@ -874,7 +900,7 @@ label > span {
 
 .hero__fact {
   display: grid;
-  gap: 4px;
+  gap: 0.25rem;
 }
 
 .hero__fact-value {
@@ -967,7 +993,7 @@ label > span {
 .footer__link {
   display: inline-flex;
   align-items: center;
-  min-height: 24px;
+  min-height: 1.5rem;
   color: var(--color-text-light);
   text-decoration: none;
 }
@@ -1006,11 +1032,6 @@ label > span {
     height: auto;
     overflow: visible;
     clip-path: none;
-  }
-
-  .theme__button {
-    padding: 0 var(--space-2);
-    font-size: var(--step--1);
   }
 }
 
