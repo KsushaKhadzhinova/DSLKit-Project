@@ -22,7 +22,8 @@ const withApi = (name, fn) =>
     try {
       await fn({ call, errors, base });
     } finally {
-      server.close();
+      server.closeAllConnections();
+      await new Promise((resolve) => server.close(resolve));
     }
   });
 
@@ -181,4 +182,77 @@ test('default stores stamp real ISO dates and sorting keeps equal values stable'
   assert.match(users.all()[0].createdAt, /^\d{4}-\d{2}-\d{2}T/);
   const [item] = users.all();
   assert.equal(listItems([item, { ...item, id: 9 }], schemas.users, { sort: 'role' }).data.length, 2);
+});
+
+withApi('prototype keys are not treated as schema fields', async ({ call }) => {
+  const body = '{"name":"x","email":"a@b.co","constructor":1,"__proto__":{"role":"owner"}}';
+  const res = await call('POST', '/users', undefined, body);
+  assert.equal(res.status, 400);
+  assert.deepEqual(res.json.error.details.map((d) => d.field).sort(), ['__proto__', 'constructor']);
+  assert.equal((await call('GET', '/diagrams?sort=constructor')).status, 400);
+  assert.equal((await call('GET', '/diagrams?sort=toString')).status, 400);
+});
+
+withApi('ids, page and limit accept only plain positive integers', async ({ call }) => {
+  for (const id of ['1e0', '1.0', '01', '0x1', '-1', '%201', '1%20', '99999999999999999999']) {
+    assert.equal((await call('GET', `/users/${id}`)).json.error.code, 'invalid_id', id);
+  }
+  for (const query of ['page=1.0', 'page=1e0', 'limit=1e1', 'limit=010', 'page=-1', 'limit=%205']) {
+    assert.equal((await call('GET', `/users?${query}`)).json.error.code, 'invalid_query', query);
+  }
+  assert.equal((await call('GET', '/users?page=1&limit=100')).status, 200);
+});
+
+withApi('unsupported methods on known routes give 405 with Allow, OPTIONS lists them', async ({ call, base }) => {
+  const list = await call('DELETE', '/users');
+  assert.equal(list.status, 405);
+  assert.equal(list.headers.get('allow'), 'GET, POST, HEAD, OPTIONS');
+  assert.equal(list.json.error.code, 'method_not_allowed');
+  assert.equal((await call('POST', '/users/1', {})).headers.get('allow'), 'GET, PUT, PATCH, DELETE, HEAD, OPTIONS');
+  assert.equal((await call('GET', '/diagrams/1/publish')).headers.get('allow'), 'POST, OPTIONS');
+  assert.equal((await call('PUT', '/diagrams/1/duplicate', {})).status, 405);
+  assert.equal((await call('POST', '/projects/1/diagrams', {})).headers.get('allow'), 'GET, HEAD, OPTIONS');
+  const options = await fetch(`${base}/users`, { method: 'OPTIONS' });
+  assert.equal(options.status, 204);
+  assert.equal(options.headers.get('allow'), 'GET, POST, HEAD, OPTIONS');
+  assert.equal((await fetch(`${base}/users/1`, { method: 'HEAD' })).status, 200);
+});
+
+withApi('PATCH with an empty object is rejected', async ({ call }) => {
+  const res = await call('PATCH', '/users/1', {});
+  assert.equal(res.status, 400);
+  assert.equal(res.json.error.details[0].field, 'body');
+});
+
+withApi('reference ids must be within 1 and 2147483647', async ({ call }) => {
+  for (const projectId of [0, -1, 2147483648, 1.5]) {
+    const res = await call('POST', '/diagrams', { title: 't', notation: 'UML', projectId });
+    assert.equal(res.status, 400, String(projectId));
+  }
+  assert.match((await call('POST', '/projects', { name: 'p', ownerId: 0 })).json.error.details[0].message, /between 1 and 2147483647/);
+  assert.equal(
+    (await call('POST', '/diagrams', { title: 't', notation: 'UML', projectId: 2147483647 })).json.error.details[0].message.includes('does not exist'),
+    true,
+  );
+});
+
+withApi('string fields are trimmed before validation and storage', async ({ call }) => {
+  const res = await call('POST', '/projects', { name: '  Docs  ', description: '  spaced  ', ownerId: 1 });
+  assert.equal(res.json.name, 'Docs');
+  assert.equal(res.json.description, 'spaced');
+  assert.equal((await call('PATCH', '/projects/1', { name: ' Renamed ' })).json.name, 'Renamed');
+  assert.equal((await call('PUT', '/projects/1', { name: ' Put ', ownerId: 1, description: ' d ' })).json.description, 'd');
+  assert.equal((await call('POST', '/projects', { name: '   ', ownerId: 1 })).status, 400);
+});
+
+withApi('email is unique ignoring case, on create, PUT and PATCH', async ({ call }) => {
+  const dup = await call('POST', '/users', { name: 'Copy', email: 'ADA@example.com' });
+  assert.equal(dup.status, 409);
+  assert.equal(dup.json.error.code, 'conflict');
+  assert.equal((await call('PUT', '/users/2', { name: 'Alan', email: 'Ada@Example.com' })).status, 409);
+  assert.equal((await call('PATCH', '/users/2', { email: 'ada@example.com' })).status, 409);
+  assert.equal((await call('PATCH', '/users/1', { email: 'ADA@EXAMPLE.COM' })).status, 200);
+  assert.equal((await call('PATCH', '/users/1', { name: 'Ada L.' })).status, 200);
+  assert.equal((await call('PUT', '/users/2', { name: 'Alan', email: 'alan@example.com' })).status, 200);
+  assert.equal((await call('POST', '/users', { name: 'New', email: 'new@example.com' })).status, 201);
 });

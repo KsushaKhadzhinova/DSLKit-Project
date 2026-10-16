@@ -1,9 +1,11 @@
 import express from 'express';
 import { ApiError, errorBody, notFound } from './errors.js';
-import { createResourceRouter, listItems, parseId } from './resource.js';
+import { createResourceRouter, listItems, methodsOnly, parseId } from './resource.js';
 import { createStores } from './store.js';
 
 export const NOTATIONS = ['UML', 'BPMN', 'ERD', 'DFD', 'IDEF0', 'Petri'];
+
+const ID = { type: 'integer', required: true, min: 1, max: 2147483647 };
 
 export const schemas = {
   users: {
@@ -14,13 +16,13 @@ export const schemas = {
   projects: {
     name: { type: 'string', required: true, max: 80 },
     description: { type: 'string', max: 500, default: '' },
-    ownerId: { type: 'integer', required: true },
+    ownerId: ID,
   },
   diagrams: {
     title: { type: 'string', required: true, max: 80 },
     notation: { type: 'string', enum: NOTATIONS, required: true },
     code: { type: 'string', max: 10000, default: '' },
-    projectId: { type: 'integer', required: true },
+    projectId: ID,
     status: { type: 'string', enum: ['draft', 'published'], default: 'draft' },
   },
 };
@@ -43,6 +45,11 @@ export const createApp = ({ stores = createStores(), writeError = console.error 
       collection: users,
       schema: schemas.users,
       hooks: {
+        check: (data, current) => {
+          const taken = data.email !== undefined && users.all().some((user) => user !== current && user.email.toLowerCase() === data.email.toLowerCase());
+          if (taken) throw conflict('A user with this email already exists');
+          return [];
+        },
         beforeRemove: (user) => {
           if (projects.all().some((project) => project.ownerId === user.id)) throw conflict('User still owns projects');
         },
@@ -62,6 +69,7 @@ export const createApp = ({ stores = createStores(), writeError = console.error 
       ),
     );
   });
+  api.all('/projects/:id/diagrams', methodsOnly('GET'));
   api.use(
     '/projects',
     createResourceRouter({
@@ -87,6 +95,8 @@ export const createApp = ({ stores = createStores(), writeError = console.error 
     const { id, createdAt, ...rest } = diagram(req);
     res.status(201).json(diagrams.create({ ...rest, title: `${rest.title} (copy)`.slice(0, 80), status: 'draft' }));
   });
+  api.all('/diagrams/:id/publish', methodsOnly('POST'));
+  api.all('/diagrams/:id/duplicate', methodsOnly('POST'));
   api.use(
     '/diagrams',
     createResourceRouter({

@@ -58,14 +58,15 @@ Every error has one shape. `details` appears for validation errors.
 }
 ```
 
-| Status | `code`                                        | When                                                                     |
-| ------ | --------------------------------------------- | ------------------------------------------------------------------------ |
-| 400    | `validation_failed`                           | Missing or wrong field, unknown field, reference to a missing record     |
-| 400    | `invalid_json`, `invalid_id`, `invalid_query` | Broken JSON, id is not a positive integer, bad `page`, `limit` or `sort` |
-| 404    | `not_found`                                   | Unknown record or route                                                  |
-| 409    | `conflict`                                    | Deleting a user who owns projects or a project that has diagrams         |
-| 413    | `payload_too_large`                           | Body over 100 KB                                                         |
-| 500    | `internal_error`                              | Unexpected failure, logged on the server                                 |
+| Status | `code`                                        | When                                                                                                                                |
+| ------ | --------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| 400    | `validation_failed`                           | Missing or wrong field, unknown field, empty `PATCH` body, reference to a missing record                                            |
+| 400    | `invalid_json`, `invalid_id`, `invalid_query` | Broken JSON, id is not a positive integer, bad `page`, `limit` or `sort`                                                            |
+| 404    | `not_found`                                   | Unknown record or route                                                                                                             |
+| 405    | `method_not_allowed`                          | Method not supported on a known path; the `Allow` header lists the right ones                                                       |
+| 409    | `conflict`                                    | Deleting a user who owns projects or a project that has diagrams, or an email already used by another user (compared ignoring case) |
+| 413    | `payload_too_large`                           | Body over 100 KB                                                                                                                    |
+| 500    | `internal_error`                              | Unexpected failure, logged on the server                                                                                            |
 
 ## Examples (curl)
 

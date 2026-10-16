@@ -16,7 +16,7 @@ To learn the principles of designing a RESTful API, to implement endpoints for C
 
 ### 3.1 API design
 
-Three related resources are chosen: users `users`, projects `projects` and diagrams `diagrams`. A user owns projects and a project holds diagrams. Table 1 lists the fields.
+Three related resources are chosen: users `users`, projects `projects` and diagrams `diagrams`. A user owns projects and a project holds diagrams. The fields are listed in table 1.
 
 Table 1 – API resources and fields
 
@@ -30,7 +30,7 @@ Every record has the service fields `id` and `createdAt`, which the client canno
 
 ### 3.2 Endpoints
 
-Each resource has six standard operations, and diagrams and projects have three extra ones. Table 2 lists all addresses.
+Each resource has six standard operations, and diagrams and projects have three extra ones. All addresses are listed in table 2. The application assembly is shown in appendix A, the shared resource logic in appendix B and the field checks in appendix C.
 
 Table 2 – API endpoints
 
@@ -54,20 +54,20 @@ The schema of every resource sets the type, whether the field is required, the m
 
 ### 3.4 Verification
 
-Automatic tests start the server on a free port and check every method, the status codes, filters, sorting, paging, validation errors, the links between resources, the extra operations and the 500 response. Line and function coverage is 100 percent and branch coverage is above 99 percent. The command is `npm test` in the project folder. Manual checks in Postman or Insomnia can use the requests from `API.md`.
+Automatic tests start the server on a free port and check every method, the status codes, filters, sorting, paging, validation errors, the links between resources, the extra operations and the 500 response. Line and function coverage is 100 percent and branch coverage is above 98 percent. The command is `npm test` in the project folder. Manual checks in Postman or Insomnia can use the requests from `API.md`.
 
 ## Conclusion
 
 For the DSLKit project a REST API with three related resources was designed and implemented. It supports CRUD operations, filtering, search, sorting, paging, publishing and copying of diagrams, validates input and the links between records, and answers with errors in one format. `API.md` holds the API description and request examples, and automatic tests cover all the code. Postman screenshots and documentation excerpts remain to be attached.
 
-## Appendix A – Listing of the file app.js
+## Appendix A (mandatory) Listing of the file app.js
 
 {{code:part-2/pz-02-rest-api/src/app.js}}
 
-## Appendix B – Listing of the file resource.js
+## Appendix B (mandatory) Listing of the file resource.js
 
 {{code:part-2/pz-02-rest-api/src/resource.js}}
 
-## Appendix C – Listing of the file validation.js
+## Appendix C (mandatory) Listing of the file validation.js
 
 {{code:part-2/pz-02-rest-api/src/validation.js}}
