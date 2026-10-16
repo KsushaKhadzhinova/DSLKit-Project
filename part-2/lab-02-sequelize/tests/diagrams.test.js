@@ -213,3 +213,11 @@ test('a value that is only longer because of surrounding spaces is accepted', as
 test('the largest INTEGER id is accepted and simply not found', async () => {
   assert.equal((await call('GET', '/diagrams/2147483647')).res.status, 404);
 });
+
+test('a body just under 100 kb passes the parser, so the explicit limit is the 413 boundary', async () => {
+  const room = 'x'.repeat(9999);
+  const { res } = await call('POST', '/diagrams', { ...valid, sourceCode: room, title: 'ok' });
+  assert.equal(res.status, 201);
+  const raw = JSON.stringify({ ...valid, sourceCode: 'y'.repeat(101 * 1024) });
+  assert.equal((await call('POST', '/diagrams', {}, raw)).res.status, 413);
+});
