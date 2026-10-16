@@ -1,0 +1,6 @@
+{
+  "title": { "minLength": 1, "maxLength": 80 },
+  "sourceCode": { "minLength": 1, "maxLength": 10000 },
+  "password": { "minLength": 8, "maxLength": 72 },
+  "searchDebounceMs": 400
+}
