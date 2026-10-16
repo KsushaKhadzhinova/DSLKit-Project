@@ -96,3 +96,16 @@ body {
   color: #52606d;
   border-top: 1px solid var(--line);
 }
+.notice {
+  padding: 0.75rem 1rem;
+  border-left: 4px solid #b42318;
+  background: #fef3f2;
+}
+.facts {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.25rem 1rem;
+}
+.facts dd {
+  margin: 0;
+}
