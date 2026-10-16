@@ -21,6 +21,7 @@
   },
   "devDependencies": {
     "mongodb-memory-server": "^10.2.3",
-    "nodemon": "^3.1.14"
+    "nodemon": "^3.1.14",
+    "puppeteer-core": "^25.14.0"
   }
 }
