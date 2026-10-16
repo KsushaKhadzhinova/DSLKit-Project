@@ -77,3 +77,12 @@ DELETE {{base}}/diagrams/{{id}}
 
 ### Unknown route -> 404
 GET {{base}}/projects
+
+### Aggregation: count, average priority and comments per notation -> 200
+GET {{base}}/diagrams/stats
+
+### Search inside the nested comments array -> 200
+GET {{base}}/diagrams?commentAuthor=boris
+
+### Paging -> 200
+GET {{base}}/diagrams?limit=2&skip=1

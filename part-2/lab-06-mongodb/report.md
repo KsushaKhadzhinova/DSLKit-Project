@@ -97,7 +97,8 @@
 const mongoose = require('mongoose');
 
 // The connection string comes from MONGODB_URI (see .env.example).
-const connect = async (uri = process.env.MONGODB_URI) => {
+// MONGO_URI, the name used in the task text, is accepted as an alias.
+const connect = async (uri = process.env.MONGODB_URI || process.env.MONGO_URI) => {
   if (!uri) throw new Error('MONGODB_URI is not set, copy .env.example to .env');
   return mongoose.connect(uri, { serverSelectionTimeoutMS: 5000 });
 };
@@ -114,16 +115,22 @@ const models = require('./src/models');
 const { connect } = require('./src/db');
 
 const port = Number(process.env.PORT) || 3000;
+const RETRY_MS = 5000;
 
-connect()
-  .then(() => {
+// The server starts even when MongoDB is down: requests then get a clear 503 answer
+// while the connection is retried in the background, and the process does not exit.
+const connectWithRetry = async () => {
+  try {
+    await connect();
     console.log('MongoDB connected');
-    createApp(models).listen(port, () => console.log(`Server running on http://localhost:${port}`));
-  })
-  .catch((error) => {
-    console.error('Cannot connect to MongoDB:', error.message);
-    process.exit(1);
-  });
+  } catch (error) {
+    console.error(`Cannot connect to MongoDB (${error.message}), retrying in ${RETRY_MS / 1000} s`);
+    setTimeout(connectWithRetry, RETRY_MS).unref?.();
+  }
+};
+
+createApp(models).listen(port, () => console.log(`Server running on http://localhost:${port}`));
+connectWithRetry();
 ```
 
 ## Приложение В (обязательное) Листинг файла diagram.js
@@ -178,6 +185,9 @@ const diagramSchema = new mongoose.Schema(
   { timestamps: true, toJSON, strict: true },
 );
 
+// Multikey index on the nested field, used by ?commentAuthor=.
+diagramSchema.index({ 'comments.author': 1 });
+
 const Diagram = mongoose.models.Diagram || mongoose.model('Diagram', diagramSchema);
 
 module.exports = { Diagram };
@@ -187,21 +197,38 @@ module.exports = { Diagram };
 
 ```js
 const { notFound } = require('../errors');
+const { LIMITS } = require('../models/diagram.constants');
 
 const missing = (id) => notFound(`Diagram ${id} not found`);
 const missingComment = (id) => notFound(`Comment ${id} not found`);
 
 // ?owner=anna&tag=shop narrows the list; tag matches when the tags array contains the value.
-const listFilter = ({ owner, tag }) => ({
+// commentAuthor looks inside the nested comments array with the dotted path comments.author.
+const listFilter = ({ owner, tag, commentAuthor }) => ({
   ...(typeof owner === 'string' && { owner }),
   ...(typeof tag === 'string' && { tags: tag }),
+  ...(typeof commentAuthor === 'string' && { 'comments.author': commentAuthor }),
 });
 
 const options = { new: true, runValidators: true };
 
 // Express 5 forwards a rejected promise to the error handler, so no try/catch is needed here.
 const createDiagramsController = ({ Diagram }) => ({
-  list: async (req, res) => res.json(await Diagram.find(listFilter(req.query)).sort({ _id: 1 })),
+  list: async (req, res) => {
+    const limit = Number(req.query.limit ?? LIMITS.listLimitMax);
+    const skip = Number(req.query.skip ?? 0);
+    res.json(await Diagram.find(listFilter(req.query)).sort({ _id: 1 }).skip(skip).limit(limit));
+  },
+
+  // Aggregation pipeline: group by notation, count the diagrams and average the priority, then sort the groups.
+  stats: async (_req, res) =>
+    res.json(
+      await Diagram.aggregate([
+        { $group: { _id: '$notation', count: { $sum: 1 }, avgPriority: { $avg: '$priority' }, comments: { $sum: { $size: '$comments' } } } },
+        { $project: { _id: 0, notation: '$_id', count: 1, avgPriority: 1, comments: 1 } },
+        { $sort: { notation: 1 } },
+      ]),
+    ),
 
   get: async (req, res, next) => {
     const diagram = await Diagram.findById(req.diagramId);
@@ -267,6 +294,7 @@ const methodNotAllowed = (allow) => (_req, res, next) => {
 const createDiagramsRouter = (controller) => {
   const router = Router();
   router.route('/').get(validateListQuery, controller.list).post(validateDiagram, controller.create).all(methodNotAllowed('GET, POST'));
+  router.route('/stats').get(controller.stats).all(methodNotAllowed('GET'));
   router
     .route('/:id')
     .get(parseId, controller.get)
@@ -335,6 +363,9 @@ seed().catch((error) => {
   "commentText": 1000,
   "priorityMin": 0,
   "priorityMax": 2,
-  "priorityDefault": 1
+  "priorityDefault": 1,
+  "listLimitMax": 100,
+  "listSkipMax": 100000,
+  "pathLog": 200
 }
 ```

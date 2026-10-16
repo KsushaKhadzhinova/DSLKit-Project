@@ -1,3 +1,4 @@
 const { Diagram } = require('./diagram');
+const { RequestLog } = require('./request-log');
 
-module.exports = { Diagram };
+module.exports = { Diagram, RequestLog };

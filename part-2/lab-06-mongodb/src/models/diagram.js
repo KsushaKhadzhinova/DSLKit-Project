@@ -47,6 +47,9 @@ const diagramSchema = new mongoose.Schema(
   { timestamps: true, toJSON, strict: true },
 );
 
+// Multikey index on the nested field, used by ?commentAuthor=.
+diagramSchema.index({ 'comments.author': 1 });
+
 const Diagram = mongoose.models.Diagram || mongoose.model('Diagram', diagramSchema);
 
 module.exports = { Diagram };

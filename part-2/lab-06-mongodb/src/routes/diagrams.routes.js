@@ -10,6 +10,7 @@ const methodNotAllowed = (allow) => (_req, res, next) => {
 const createDiagramsRouter = (controller) => {
   const router = Router();
   router.route('/').get(validateListQuery, controller.list).post(validateDiagram, controller.create).all(methodNotAllowed('GET, POST'));
+  router.route('/stats').get(controller.stats).all(methodNotAllowed('GET'));
   router
     .route('/:id')
     .get(parseId, controller.get)

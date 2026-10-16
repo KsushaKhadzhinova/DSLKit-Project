@@ -53,10 +53,18 @@ const validateCommentText = validator({ text: commentChecks.text }, 'Invalid com
 
 // Only ?owner= and ?tag= with plain strings are accepted: ?owner[]=x arrives as an unknown key,
 // and a repeated parameter arrives as an array, so both are rejected before reaching MongoDB.
-const FILTERS = ['owner', 'tag'];
+// commentAuthor searches inside the nested comments array; limit and skip page the list.
+const FILTERS = ['owner', 'tag', 'commentAuthor'];
+const PAGING = { limit: [1, LIMITS.listLimitMax], skip: [0, LIMITS.listSkipMax] };
+const inRange = (value, [min, max]) => /^\d{1,9}$/.test(value) && Number(value) >= min && Number(value) <= max;
 const validateListQuery = (req, _res, next) => {
-  const bad = Object.keys(req.query).filter((name) => !FILTERS.includes(name) || typeof req.query[name] !== 'string' || req.query[name].trim() === '');
-  const details = bad.map((field) => ({ field, message: 'must be one of owner, tag with a non-empty string value' }));
+  const details = Object.entries(req.query)
+    .filter(([name, value]) => {
+      if (typeof value !== 'string') return true;
+      if (name in PAGING) return !inRange(value, PAGING[name]);
+      return !FILTERS.includes(name) || value.trim() === '' || value.length > LIMITS.owner;
+    })
+    .map(([field]) => ({ field, message: field in PAGING ? `must be an integer from ${PAGING[field][0]} to ${PAGING[field][1]}` : 'must be one of owner, tag, commentAuthor, limit, skip with a plain value' }));
   return details.length ? next(badRequest('Invalid query parameters', details)) : next();
 };
 
