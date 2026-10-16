@@ -2,7 +2,7 @@ const { createApp } = require('./src/app');
 const { createModels } = require('./src/models');
 
 const port = Number(process.env.PORT) || 3000;
-const { JWT_SECRET, JWT_EXPIRES_IN } = process.env;
+const { JWT_SECRET, JWT_EXPIRES_IN, CORS_ORIGIN } = process.env;
 
 if (!JWT_SECRET || JWT_SECRET.length < 32) {
   console.error('JWT_SECRET must be set to a random string of at least 32 characters (see .env.example)');
@@ -14,7 +14,7 @@ const models = createModels();
 models.sequelize
   .authenticate()
   .then(() =>
-    createApp(models, { jwtSecret: JWT_SECRET, jwtExpiresIn: JWT_EXPIRES_IN || '1h' }).listen(port, () =>
+    createApp(models, { jwtSecret: JWT_SECRET, jwtExpiresIn: JWT_EXPIRES_IN || '1h', corsOrigin: CORS_ORIGIN || 'http://localhost:5176' }).listen(port, () =>
       console.log(`Server running on http://localhost:${port}`),
     ),
   )
