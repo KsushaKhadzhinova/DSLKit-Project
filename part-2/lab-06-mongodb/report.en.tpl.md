@@ -31,7 +31,7 @@ The database address comes from the `MONGODB_URI` environment variable. The `dot
 
 ### 3.2 Schema and model
 
-The `Diagram` schema is defined in `src/models/diagram.js`. The main fields match labs 1 and 2: `title`, `notation`, `sourceCode`, `priority` and `owner`. The allowed values of `notation` and `priority` are set with `enum`, and `priority` defaults to `normal`. Two fields use the document model: the string array `tags` and the array of nested documents `comments` with the fields `author`, `text` and `createdAt`. A comment is stored inside its diagram, with no separate collection and no join. Mongoose adds `_id` to the diagram and to every comment, and the `timestamps` option maintains `createdAt` and `updatedAt`. Indexes on `owner` and `tags` speed up searches, and the JSON output is configured so that `_id` becomes `id` and the internal `__v` is hidden.
+The `Diagram` schema is defined in `src/models/diagram.js`. The main fields match labs 1 and 2: `title`, `notation`, `sourceCode`, `priority` and `owner`. The allowed values of `notation` are set with `enum`, while `priority` is an integer from 0 to 2 that defaults to 1. Required strings reject empty and whitespace-only values, and string lengths, the number of tags and the number of comments are capped. All limits live in a separate `limits.json` file read by both the schema and the request checks, so a limit can change without editing code. Two fields use the document model: the string array `tags` and the array of nested documents `comments` with the fields `author`, `text` and `createdAt`. A comment is stored inside its diagram, with no separate collection and no join. Mongoose adds `_id` to the diagram and to every comment, and the `timestamps` option maintains `createdAt` and `updatedAt`. Indexes on `owner` and `tags` speed up searches, and the JSON output is configured so that `_id` becomes `id` and the internal `__v` is hidden.
 
 Table 2 – Relational tables of lab 2 and the MongoDB document
 
@@ -45,7 +45,7 @@ Table 2 – Relational tables of lab 2 and the MongoDB document
 
 ### 3.3 CRUD through Mongoose
 
-Controllers receive the model as a parameter and call Mongoose methods, as table 3 shows. `findByIdAndUpdate` is called with `new: true` and `runValidators: true`: the client gets the updated document, and the schema checks run on updates as well. The identifier in the URL is checked before the database is touched: a string of 24 hexadecimal characters is accepted, anything else gives 400. A well-formed but unknown identifier gives 404. The error handler turns Mongoose `ValidationError` and `CastError` into 400, and any other failure into 500 without internal details. The error format, the 405 answer with an `Allow` header and the body size limit stay as in the previous labs.
+Controllers receive the model as a parameter and call Mongoose methods, as table 3 shows. `findByIdAndUpdate` is called with `new: true` and `runValidators: true`: the client gets the updated document, and the schema checks run on updates as well. The identifier in the URL is checked before the database is touched: a string of 24 hexadecimal characters is accepted, anything else gives 400. A well-formed but unknown identifier gives 404. The error handler turns Mongoose `ValidationError` and `CastError` into 400, and any other failure into 500 without internal details. Protection against operator injection has three layers. The request check accepts only strings of the right length in the fields, so a body such as `{ "$ne": null }` gets 400, and the list accepts only `owner` and `tag` with a string value. The `sanitizeFilter` and `strictQuery` settings stop an operator inside a value from reaching a query, and the schema drops extra body fields. The request body is limited to 100 KB. The error format, the 405 answer with an `Allow` header and the body size limit stay as in the previous labs.
 
 Table 3 – Routes and Mongoose methods
 
@@ -77,11 +77,32 @@ Changing one array element shows the difference from the relational model: the p
 
 To run the project, copy `.env.example` to `.env` and set `MONGODB_URI`, run `npm run seed`, then `npm run dev`. The seed removes the demo documents by title and inserts three diagrams, so it can be repeated. A check against a local `mongod` showed that the list returns diagrams with nested comments and tags, and a request with `tag=shop` returns two of the three diagrams.
 
-There are 30 automated tests. Nineteen cover the main routes: valid and invalid identifiers, creation, replacement that keeps comments, deletion, the 400, 404, 405 and 413 errors, and a 500 answer that leaks no error text. Eleven cover nested structures: the tag and owner filter, adding, editing and removing a comment, the unreachable foreign comment, schema checks at the model level, indexes and the translation of a Mongoose error into 400. The tests run on a temporary MongoDB instance through `mongodb-memory-server`, so no working database is touched. The same `npm test` command checks the build and formatting of this report. Screenshots of the Atlas cluster, Postman requests and MongoDB Compass data are not included in this version of the report.
+There are 41 automated tests. Nineteen cover the main routes: valid and invalid identifiers, creation, replacement that keeps comments, deletion, the 400, 404, 405 and 413 errors, and a 500 answer that leaks no error text. Eleven cover nested structures: the tag and owner filter, adding, editing and removing a comment, the unreachable foreign comment, schema checks at the model level, indexes and the translation of a Mongoose error into 400. Another eleven cover data protection: operators such as `$ne` in the body and in query parameters, whitespace-only values, the limits from `limits.json` at the border and beyond it, the integer priority, the body size cap and the creation time of every record. The tests run on a temporary MongoDB instance through `mongodb-memory-server`, so no working database is touched. The same `npm test` command checks the build and formatting of this report. Screenshots of the Atlas cluster, Postman requests and MongoDB Compass data are not included in this version of the report.
+
+## Answers to Control Questions
+
+{{answers}}
+1. **How does MongoDB differ from relational databases?** Data is stored as BSON documents, the schema is flexible, related data can be nested in a document, the identifier is an `ObjectId`, and scaling is horizontal through sharding.
+2. **What is an ObjectId?** A 12-byte document identifier made of a creation time, a random value and a counter. The driver creates it, it is unique and serves as the default `_id`.
+3. **How to search by a nested field?** Use a dotted path: `Model.find({ 'profile.city': 'Minsk' })`.
+4. **Which types does BSON support?** String, Int32, Int64, Double, Decimal128, Boolean, Date, ObjectId, Array, Object, Null, Binary.
+5. **What is an aggregation pipeline?** A chain of stages that process a collection, for example `$match` selects the diagrams of an owner and `$group` counts them by notation.
+6. **How to define a subdocument in Mongoose?** A nested schema in an array field, in the project it is `comments: [commentSchema]`.
+7. **How to update an element inside an array?** The positional operator: `$set: { 'comments.$.text': text }` with the filter `'comments._id': commentId`.
+8. **Pros and cons of nested documents?** The pros are one-query reads and atomic updates, the cons are document growth and duplicated data.
+9. **How to create an index in Mongoose?** The `index: true` option on a field or `schema.index({ owner: 1 })`, and `unique: true` for uniqueness. The project has indexes on `owner` and `tags`.
+10. **What is populate?** A method that replaces an `ObjectId` reference in a document with data from another collection. The project does not need it, because comments are nested instead of stored in a separate collection.
+11. **How to search when an array contains a value?** A condition on an array field compares the value with its elements: `Diagram.find({ tags: 'shop' })`, and `$in` and `$all` handle several values.
+12. **How to delete a document and return it?** `Model.findByIdAndDelete(id)` returns the removed document or `null`.
+13. **Which methods return a Query?** `find`, `findOne`, `findById`, `where`, `sort`, `limit` and `select`, which can be chained and finished with `await` or `exec`.
+14. **How to add custom methods?** `schema.methods.name = function () {}` for an instance method and `schema.statics.name = function () {}` for a static model method.
+15. **How to cascade a delete?** MongoDB has no cascade: nested documents go with their parent, and for references a `post('findOneAndDelete')` hook or manual removal of child documents is used.
+16. **Which applications suit MongoDB better?** Data with a flexible structure that is read as a whole object, like a diagram with tags and comments. It is worse for complex relations and multi-table transactions.
+{{/answers}}
 
 ## Conclusion
 
-In this lab the DSLKit server from lab 2 moved from Sequelize to Mongoose. The `diagrams` collection lives in MongoDB, the CRUD routes kept their addresses and response format, and identifiers became `ObjectId` strings. Tags and comments sit inside the diagram document, which replaces several tables and joins with a single query. For the comments array the work adds appending, changing an element with the positional operator and removal. The connection string is an environment variable, the schema validates data, and 30 tests confirm the API behavior on a temporary database. The connection to MongoDB Atlas is not done and no screenshots are attached.
+In this lab the DSLKit server from lab 2 moved from Sequelize to Mongoose. The `diagrams` collection lives in MongoDB, the CRUD routes kept their addresses and response format, and identifiers became `ObjectId` strings. Tags and comments sit inside the diagram document, which replaces several tables and joins with a single query. For the comments array the work adds appending, changing an element with the positional operator and removal. The connection string is an environment variable, the schema validates data, and 41 tests confirm the API behavior on a temporary database. The connection to MongoDB Atlas is not done and no screenshots are attached.
 
 ## Appendix A – Listing of db.js
 
@@ -106,3 +127,7 @@ In this lab the DSLKit server from lab 2 moved from Sequelize to Mongoose. The `
 ## Appendix F – Listing of seed.js
 
 {{code:part-2/lab-06-mongodb/scripts/seed.js}}
+
+## Appendix G – Listing of limits.json
+
+{{code:part-2/lab-06-mongodb/limits.json}}

@@ -31,7 +31,7 @@
 
 ### 3.2 Схема и модель
 
-Схема `Diagram` описана в `src/models/diagram.js`. Основные поля те же, что в лабораторных работах 1 и 2: `title`, `notation`, `sourceCode`, `priority` и `owner`. Допустимые значения `notation` и `priority` заданы через `enum`, у `priority` есть значение по умолчанию `normal`. Для нужд документной модели добавлены два вложенных поля: массив строк `tags` и массив вложенных документов `comments` с полями `author`, `text` и `createdAt`. Комментарий хранится внутри диаграммы, отдельной коллекции и соединений для него нет. Mongoose сам добавляет `_id` диаграммы и каждого комментария, а параметр `timestamps` ведёт `createdAt` и `updatedAt`. Для ускорения поиска объявлены индексы по `owner` и `tags`, а для ответов настроено преобразование в JSON: поле `_id` заменено на `id`, служебное `__v` скрыто.
+Схема `Diagram` описана в `src/models/diagram.js`. Основные поля те же, что в лабораторных работах 1 и 2: `title`, `notation`, `sourceCode`, `priority` и `owner`. Допустимые значения `notation` заданы через `enum`, а `priority` это целое число от 0 до 2 со значением по умолчанию 1. Обязательные строки не принимают пустые и пробельные значения, длины строк, число тегов и число комментариев ограничены. Все пределы лежат в отдельном файле `limits.json`, который читают и схема, и проверка запросов, поэтому изменить предел можно без правки кода. Для нужд документной модели добавлены два вложенных поля: массив строк `tags` и массив вложенных документов `comments` с полями `author`, `text` и `createdAt`. Комментарий хранится внутри диаграммы, отдельной коллекции и соединений для него нет. Mongoose сам добавляет `_id` диаграммы и каждого комментария, а параметр `timestamps` ведёт `createdAt` и `updatedAt`. Для ускорения поиска объявлены индексы по `owner` и `tags`, а для ответов настроено преобразование в JSON: поле `_id` заменено на `id`, служебное `__v` скрыто.
 
 Таблица 2 – Сопоставление таблиц реляционной версии и документа MongoDB
 
@@ -45,7 +45,7 @@
 
 ### 3.3 CRUD через Mongoose
 
-Контроллеры получают модель параметром и вызывают методы Mongoose, как показано в таблице 3. Метод `findByIdAndUpdate` вызывается с параметрами `new: true` и `runValidators: true`: клиент получает обновлённый документ, а проверки схемы срабатывают и при обновлении. Идентификатор в адресе проверяется до обращения к базе: допустима строка из 24 шестнадцатеричных символов, иначе ответ 400. Неизвестный, но корректный идентификатор даёт 404. Ошибки `ValidationError` и `CastError` от Mongoose обработчик ошибок переводит в ответ 400, а любой другой сбой в 500 без внутренних подробностей. Формат ошибок, ответ 405 с заголовком `Allow` и ограничение размера тела остались как в предыдущих работах.
+Контроллеры получают модель параметром и вызывают методы Mongoose, как показано в таблице 3. Метод `findByIdAndUpdate` вызывается с параметрами `new: true` и `runValidators: true`: клиент получает обновлённый документ, а проверки схемы срабатывают и при обновлении. Идентификатор в адресе проверяется до обращения к базе: допустима строка из 24 шестнадцатеричных символов, иначе ответ 400. Неизвестный, но корректный идентификатор даёт 404. Ошибки `ValidationError` и `CastError` от Mongoose обработчик ошибок переводит в ответ 400, а любой другой сбой в 500 без внутренних подробностей. Защита от инъекций операторов построена в три слоя. Проверка запроса принимает в полях только строки нужной длины, поэтому тело вида `{ "$ne": null }` отвергается ответом 400, а параметры списка допускают только `owner` и `tag` со строковым значением. Настройки `sanitizeFilter` и `strictQuery` не дают оператору из значения попасть в запрос, а лишние поля тела отбрасываются схемой. Размер тела запроса ограничен значением 100 КБ. Формат ошибок, ответ 405 с заголовком `Allow` и ограничение размера тела остались как в предыдущих работах.
 
 Таблица 3 – Соответствие маршрутов и методов Mongoose
 
@@ -77,11 +77,17 @@
 
 Порядок запуска: скопировать `.env.example` в `.env` и вписать `MONGODB_URI`, выполнить `npm run seed`, затем `npm run dev`. Сид удаляет демонстрационные документы по названию и вставляет три диаграммы, поэтому его можно запускать повторно. Проверка на локальном `mongod` показала, что список возвращает диаграммы с вложенными комментариями и тегами, а запрос с параметром `tag=shop` возвращает две диаграммы из трёх.
 
-Всего 30 автоматических тестов. Девятнадцать проверяют основные маршруты: корректные и некорректные идентификаторы, создание, замену с сохранением комментариев, удаление, ошибки 400, 404, 405 и 413, ответ 500 без утечки текста ошибки. Одиннадцать проверяют вложенные структуры: фильтр по тегу и владельцу, добавление, изменение и удаление комментария, недоступность чужого комментария, проверку схемы на уровне модели, индексы и перевод ошибки Mongoose в ответ 400. Тесты запускаются на временном экземпляре MongoDB через `mongodb-memory-server`, поэтому рабочая база не затрагивается. Те же команды `npm test` проверяют сборку и оформление этого отчёта. Скриншоты кластера Atlas, запросов в Postman и данных в MongoDB Compass в этот вариант отчёта не включены.
+Всего 41 автоматический тест. Девятнадцать проверяют основные маршруты: корректные и некорректные идентификаторы, создание, замену с сохранением комментариев, удаление, ошибки 400, 404, 405 и 413, ответ 500 без утечки текста ошибки. Одиннадцать проверяют вложенные структуры: фильтр по тегу и владельцу, добавление, изменение и удаление комментария, недоступность чужого комментария, проверку схемы на уровне модели, индексы и перевод ошибки Mongoose в ответ 400. Ещё одиннадцать проверяют защиту данных: операторы вроде `$ne` в теле и в параметрах запроса, пробельные значения, пределы из `limits.json` на границе и за ней, целочисленный приоритет, ограничение размера тела и наличие времени создания у каждой записи. Тесты запускаются на временном экземпляре MongoDB через `mongodb-memory-server`, поэтому рабочая база не затрагивается. Те же команды `npm test` проверяют сборку и оформление этого отчёта. Скриншоты кластера Atlas, запросов в Postman и данных в MongoDB Compass в этот вариант отчёта не включены.
+
+## Ответы на контрольные вопросы
+
+9. **Как создать индекс в Mongoose?** Параметр `index: true` у поля или `schema.index({ owner: 1 })`; уникальность задаёт `unique: true`. В проекте индексы стоят на `owner` и `tags`.
+10. **Что такое populate?** Метод, который заменяет ссылку `ObjectId` в документе данными из другой коллекции. В проекте он не нужен, потому что комментарии вложены, а не вынесены в отдельную коллекцию.
+11. **Как искать, когда массив содержит значение?** Условие на поле-массив сравнивает значение с элементами: `Diagram.find({ tags: 'shop' })`, для нескольких значений есть `$in` и `$all`.
 
 ## Заключение
 
-В лабораторной работе сервер DSLKit из лабораторной работы 2 переведён с Sequelize на Mongoose. Коллекция `diagrams` хранится в MongoDB, маршруты CRUD сохранили адреса и формат ответов, а идентификаторы стали строками `ObjectId`. Теги и комментарии лежат внутри документа диаграммы, что заменяет несколько таблиц и соединений одним запросом. Для массива комментариев реализованы добавление, изменение элемента позиционным оператором и удаление. Строка подключения вынесена в переменную окружения, схема проверяет данные, а 30 тестов подтверждают поведение API на временной базе. Не выполнено подключение к MongoDB Atlas и не приложены скриншоты.
+В лабораторной работе сервер DSLKit из лабораторной работы 2 переведён с Sequelize на Mongoose. Коллекция `diagrams` хранится в MongoDB, маршруты CRUD сохранили адреса и формат ответов, а идентификаторы стали строками `ObjectId`. Теги и комментарии лежат внутри документа диаграммы, что заменяет несколько таблиц и соединений одним запросом. Для массива комментариев реализованы добавление, изменение элемента позиционным оператором и удаление. Строка подключения вынесена в переменную окружения, схема проверяет данные, а 41 тест подтверждает поведение API на временной базе. Не выполнено подключение к MongoDB Atlas и не приложены скриншоты.
 
 ## Приложение А – Листинг файла db.js
 
@@ -122,7 +128,11 @@ connect()
 
 ```js
 const mongoose = require('mongoose');
-const { NOTATIONS, PRIORITIES, DEFAULT_PRIORITY } = require('./diagram.constants');
+const { NOTATIONS, PRIORITY, LIMITS } = require('./diagram.constants');
+
+// Query filters are never trusted: operators sent as values are stripped, unknown fields are ignored.
+mongoose.set('sanitizeFilter', true);
+mongoose.set('strictQuery', true);
 
 // Responses expose "id" instead of Mongo's "_id" and "__v".
 const toJSON = {
@@ -136,23 +146,34 @@ const toJSON = {
 // A comment lives inside the diagram document: no separate collection, no join.
 const commentSchema = new mongoose.Schema(
   {
-    author: { type: String, required: true, trim: true },
-    text: { type: String, required: true, trim: true },
+    author: { type: String, required: true, trim: true, minlength: 1, maxlength: LIMITS.author },
+    text: { type: String, required: true, trim: true, minlength: 1, maxlength: LIMITS.commentText },
   },
-  { timestamps: { createdAt: true, updatedAt: false }, toJSON },
+  { timestamps: { createdAt: true, updatedAt: false }, toJSON, strict: true },
 );
 
 const diagramSchema = new mongoose.Schema(
   {
-    title: { type: String, required: true, trim: true },
+    title: { type: String, required: true, trim: true, minlength: 1, maxlength: LIMITS.title },
     notation: { type: String, required: true, enum: NOTATIONS },
-    sourceCode: { type: String, required: true },
-    priority: { type: String, required: true, enum: PRIORITIES, default: DEFAULT_PRIORITY },
-    owner: { type: String, required: true, trim: true, index: true },
-    tags: { type: [{ type: String, trim: true, minlength: 1 }], index: true },
-    comments: [commentSchema],
+    sourceCode: { type: String, required: true, trim: true, minlength: 1, maxlength: LIMITS.sourceCode },
+    priority: {
+      type: Number,
+      required: true,
+      min: PRIORITY.min,
+      max: PRIORITY.max,
+      default: PRIORITY.default,
+      validate: { validator: Number.isInteger, message: 'priority must be an integer' },
+    },
+    owner: { type: String, required: true, trim: true, minlength: 1, maxlength: LIMITS.owner, index: true },
+    tags: {
+      type: [{ type: String, trim: true, minlength: 1, maxlength: LIMITS.tag }],
+      index: true,
+      validate: { validator: (v) => v.length <= LIMITS.tags, message: 'too many tags' },
+    },
+    comments: { type: [commentSchema], validate: { validator: (v) => v.length <= LIMITS.comments, message: 'too many comments' } },
   },
-  { timestamps: true, toJSON },
+  { timestamps: true, toJSON, strict: true },
 );
 
 const Diagram = mongoose.models.Diagram || mongoose.model('Diagram', diagramSchema);
@@ -234,7 +255,7 @@ module.exports = { createDiagramsController };
 ```js
 const { Router } = require('express');
 const { HttpError } = require('../errors');
-const { parseId, parseCommentId, validateDiagram, validateComment, validateCommentText } = require('../middleware/validate');
+const { validateListQuery, parseId, parseCommentId, validateDiagram, validateComment, validateCommentText } = require('../middleware/validate');
 
 const methodNotAllowed = (allow) => (_req, res, next) => {
   res.set('Allow', allow);
@@ -243,7 +264,7 @@ const methodNotAllowed = (allow) => (_req, res, next) => {
 
 const createDiagramsRouter = (controller) => {
   const router = Router();
-  router.route('/').get(controller.list).post(validateDiagram, controller.create).all(methodNotAllowed('GET, POST'));
+  router.route('/').get(validateListQuery, controller.list).post(validateDiagram, controller.create).all(methodNotAllowed('GET, POST'));
   router
     .route('/:id')
     .get(parseId, controller.get)
@@ -274,13 +295,13 @@ const demo = [
     title: 'Order processing',
     notation: 'BPMN',
     sourceCode: 'start -> check stock -> pay -> ship -> end',
-    priority: 'high',
+    priority: 2,
     owner: 'anna',
     tags: ['shop', 'process'],
     comments: [{ author: 'boris', text: 'Add a refund branch' }],
   },
   { title: 'Login flow', notation: 'UML', sourceCode: 'user -> server: login', owner: 'carol', tags: ['auth'] },
-  { title: 'Customers and orders', notation: 'ERD', sourceCode: 'Customer ||--o{ Order', priority: 'low', owner: 'anna', tags: ['shop', 'database'] },
+  { title: 'Customers and orders', notation: 'ERD', sourceCode: 'Customer ||--o{ Order', priority: 0, owner: 'anna', tags: ['shop', 'database'] },
 ];
 
 // Replaces the demo documents by title, so the script can be run many times.
@@ -296,4 +317,22 @@ seed().catch((error) => {
   console.error('Seed failed:', error.message);
   process.exit(1);
 });
+```
+
+## Приложение Ж – Листинг файла limits.json
+
+```json
+{
+  "title": 80,
+  "owner": 60,
+  "sourceCode": 10000,
+  "tags": 20,
+  "tag": 30,
+  "comments": 100,
+  "author": 60,
+  "commentText": 1000,
+  "priorityMin": 0,
+  "priorityMax": 2,
+  "priorityDefault": 1
+}
 ```
