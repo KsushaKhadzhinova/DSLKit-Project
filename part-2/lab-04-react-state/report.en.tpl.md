@@ -40,7 +40,7 @@ The automated tests (19 in total) cover the pure functions, both hooks and the a
 
 The Vite application implements adding, deleting and editing diagrams, filtering and sorting, saving to `localStorage` and two additional effects, the page title and autosave with debounce. The storage logic is extracted into a custom hook, which will simplify replacing `localStorage` with a REST API in laboratory work No. 5.
 
-## Appendix A – Key Code Fragments
+## Appendix A (mandatory) Key Code Fragments
 
 ```jsx
 // hooks/useLocalStorage.js: load through an initializer, save with an effect

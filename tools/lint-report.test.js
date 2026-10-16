@@ -113,3 +113,31 @@ test('captions are required even at the edges of the text', () => {
   has(lintReport('![Схема](a.svg)', 'ru'), 'Перед рисунком');
   has(lintReport(['| a |', '|---|'].join('\n'), 'ru'), 'Подпись таблицы 1');
 });
+
+const strictRu = ['## 1 Цель работы', '', 'Текст.', '', '## Заключение', '', 'Готово, листинг в приложении А.', '', '## Приложение А (обязательное) Листинг файла server.js', '', 'Текст приложения.', ''].join('\n');
+const strictEn = ['## 1 Purpose of the Work', '', 'Text.', '', '## Conclusion', '', 'Done, the listing is in appendix A.', '', '## Appendix A (mandatory) Listing of server.js', '', 'Appendix text.', ''].join('\n');
+
+test('strict mode accepts the appendix format from the teacher in both languages', () => {
+  assert.deepEqual(lintReport(strictRu, 'ru', { strict: true }), []);
+  assert.deepEqual(lintReport(strictEn, 'en', { strict: true }), []);
+});
+
+test('strict mode rejects the old appendix title, a missing appendix and a missing reference', () => {
+  has(lintReport(strictRu.replace(' (обязательное)', ' –'), 'ru', { strict: true }), 'обязательное');
+  has(lintReport(strictEn.replace(' (mandatory)', ' –'), 'en', { strict: true }), 'mandatory');
+  has(lintReport(['## 1 Цель работы', '', '## Заключение', ''].join('\n'), 'ru', { strict: true }), 'хотя бы одно приложение');
+  has(lintReport(['## 1 Purpose of the Work', '', '## Conclusion', ''].join('\n'), 'en', { strict: true }), 'At least one appendix');
+  has(lintReport(strictRu.replace('в приложении А', 'ниже'), 'ru', { strict: true }), 'Нет ссылки в тексте на приложение А');
+  has(lintReport(strictEn.replace('in appendix A', 'below'), 'en', { strict: true }), 'No reference to the appendix in the text A');
+});
+
+test('strict mode rejects semicolons and sentences that start with a figure or table reference', () => {
+  has(lintReport(strictRu.replace('Текст.', 'Первое; второе.'), 'ru', { strict: true }), 'Точка с запятой');
+  has(lintReport(strictEn.replace('Text.', 'First; second.'), 'en', { strict: true }), 'Semicolon');
+  has(lintReport(strictRu.replace('Текст.', 'Рисунок 2 показывает всё.'), 'ru', { strict: true }), 'начинается со ссылки');
+  has(lintReport(strictEn.replace('Text.', 'Works. Table 3 shows all.'), 'en', { strict: true }), 'starts with a figure or table reference');
+});
+
+test('the default mode keeps the old appendix format and ignores the strict rules', () => {
+  assert.deepEqual(lintReport(strictRu.replace(' (обязательное)', ' –').replace('Текст.', 'Первое; второе.'), 'ru'), []);
+});
