@@ -1,27 +1,23 @@
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import App from './App';
-import ErrorBoundary from './components/ErrorBoundary';
 import { FAVORITES_KEY, favoritesReducer } from './context/FavoritesContext';
-
-const at = '2026-10-16T10:00:00.000Z';
-const item = (id) => ({ id, addedAt: at });
 
 describe('favoritesReducer', () => {
   it('adds without duplicates, removes, toggles and clears', () => {
-    expect(favoritesReducer([], { type: 'ADD', id: 1, addedAt: at })).toEqual([item(1)]);
-    expect(favoritesReducer([item(1)], { type: 'ADD', id: 1, addedAt: at })).toEqual([item(1)]);
-    expect(favoritesReducer([item(1), item(2)], { type: 'REMOVE', id: 1 })).toEqual([item(2)]);
-    expect(favoritesReducer([item(1)], { type: 'TOGGLE', id: 2, addedAt: at })).toEqual([item(1), item(2)]);
-    expect(favoritesReducer([item(1), item(2)], { type: 'TOGGLE', id: 2 })).toEqual([item(1)]);
-    expect(favoritesReducer([item(1), item(2)], { type: 'CLEAR' })).toEqual([]);
+    expect(favoritesReducer([], { type: 'ADD', id: 1 })).toEqual([1]);
+    expect(favoritesReducer([1], { type: 'ADD', id: 1 })).toEqual([1]);
+    expect(favoritesReducer([1, 2], { type: 'REMOVE', id: 1 })).toEqual([2]);
+    expect(favoritesReducer([1], { type: 'TOGGLE', id: 2 })).toEqual([1, 2]);
+    expect(favoritesReducer([1, 2], { type: 'TOGGLE', id: 2 })).toEqual([1]);
+    expect(favoritesReducer([1, 2], { type: 'CLEAR' })).toEqual([]);
   });
 
   it('ignores unknown actions and does not mutate the state', () => {
-    const state = [item(1)];
+    const state = [1];
     expect(favoritesReducer(state, { type: 'UNKNOWN' })).toBe(state);
-    favoritesReducer(state, { type: 'ADD', id: 2, addedAt: at });
-    expect(state).toEqual([item(1)]);
+    favoritesReducer(state, { type: 'ADD', id: 2 });
+    expect(state).toEqual([1]);
   });
 });
 
@@ -56,8 +52,7 @@ describe('favorites through useReducer and Context', () => {
     const panel = screen.getByRole('region', { name: /Избранное/ });
     expect(within(panel).getByText(/Процесс согласования заказа/)).toBeInTheDocument();
     expect(within(panel).getByText('Выбрано: 1')).toBeInTheDocument();
-    expect(JSON.parse(localStorage.getItem(FAVORITES_KEY)).map((i) => i.id)).toEqual([2]);
-    expect(within(panel).getByText(/Добавлено: \d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/)).toBeInTheDocument();
+    expect(JSON.parse(localStorage.getItem(FAVORITES_KEY))).toEqual([2]);
 
     await user.click(within(panel).getByRole('button', { name: 'Убрать: Процесс согласования заказа' }));
     expect(screen.getByText('Пока ничего не выбрано.')).toBeInTheDocument();
@@ -73,7 +68,7 @@ describe('favorites through useReducer and Context', () => {
   });
 
   it('restores favorites after a reload', () => {
-    localStorage.setItem(FAVORITES_KEY, JSON.stringify([item(1)]));
+    localStorage.setItem(FAVORITES_KEY, JSON.stringify([1]));
     render(<App />);
     const toggle = screen.getAllByRole('button', { name: 'Убрать: Диаграмма последовательности входа' }).find((b) => b.hasAttribute('aria-pressed'));
     expect(toggle).toHaveAttribute('aria-pressed', 'true');
@@ -102,32 +97,5 @@ describe('prop drilling demo', () => {
   it('renders the user name initial through four nested levels', () => {
     render(<App />);
     expect(screen.getByRole('region', { name: 'Демонстрация prop drilling' })).toHaveTextContent('К');
-  });
-});
-
-describe('creation time and error page', () => {
-  it('shows a creation time for every template in the list', () => {
-    render(<App />);
-    expect(screen.getAllByText(/Создан: \d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/)).toHaveLength(5);
-  });
-
-  it('falls back to an empty list when stored items have the old shape', () => {
-    localStorage.setItem(FAVORITES_KEY, JSON.stringify([1, 2]));
-    render(<App />);
-    expect(screen.getByText('Выбрано: 0')).toBeInTheDocument();
-  });
-
-  it('shows the styled error page instead of a blank screen', () => {
-    const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
-    const Broken = () => {
-      throw new Error('boom');
-    };
-    render(
-      <ErrorBoundary>
-        <Broken />
-      </ErrorBoundary>,
-    );
-    expect(screen.getByRole('alert')).toHaveTextContent('500');
-    spy.mockRestore();
   });
 });

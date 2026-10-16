@@ -99,18 +99,3 @@ button {
   color: var(--bg);
   font-weight: 700;
 }
-
-.card__time {
-  color: var(--muted);
-  font-size: 0.875rem;
-}
-
-.error-page {
-  text-align: center;
-}
-
-.error-page h1 {
-  margin-block: 2rem 0;
-  color: var(--accent);
-  font-size: 4rem;
-}

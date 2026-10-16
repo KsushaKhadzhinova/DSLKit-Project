@@ -1,28 +1,22 @@
 import { TEMPLATES } from '../data/templates';
-import { useFavorites, useFavoritesDispatch } from '../context/FavoritesContext';
+import { useFavorites } from '../context/FavoritesContext';
 import { useLanguage } from '../context/LanguageContext';
-import { formatTime } from '../utils';
 
 function TemplateCard({ template }) {
-  const favorites = useFavorites();
-  const dispatch = useFavoritesDispatch();
+  const { favorites, dispatch } = useFavorites();
   const { language, t } = useLanguage();
-  const isFavorite = favorites.some((item) => item.id === template.id);
+  const isFavorite = favorites.includes(template.id);
   const title = template.title[language];
-  const label = `${t(isFavorite ? 'remove' : 'add')}: ${title}`;
 
   return (
     <li className="card">
       <span className="card__title">{title}</span>
       <span className="badge">{template.notation}</span>
-      <span className="card__time">
-        {t('created')}: {formatTime(template.createdAt)}
-      </span>
       <button
         type="button"
         aria-pressed={isFavorite}
-        aria-label={label}
-        onClick={() => dispatch({ type: 'TOGGLE', id: template.id, addedAt: new Date().toISOString() })}
+        aria-label={`${t(isFavorite ? 'remove' : 'add')}: ${title}`}
+        onClick={() => dispatch({ type: 'TOGGLE', id: template.id })}
       >
         {isFavorite ? '★' : '☆'} {t(isFavorite ? 'remove' : 'add')}
       </button>
@@ -45,10 +39,9 @@ export function TemplateList() {
 }
 
 export function FavoritesPanel() {
-  const favorites = useFavorites();
-  const dispatch = useFavoritesDispatch();
+  const { favorites, dispatch } = useFavorites();
   const { language, t } = useLanguage();
-  const chosen = favorites.map((item) => ({ ...item, template: TEMPLATES.find((template) => template.id === item.id) })).filter((item) => item.template);
+  const chosen = TEMPLATES.filter((template) => favorites.includes(template.id));
 
   return (
     <section aria-labelledby="favorites-title">
@@ -63,13 +56,10 @@ export function FavoritesPanel() {
       ) : (
         <>
           <ul>
-            {chosen.map(({ id, addedAt, template }) => (
-              <li key={id}>
+            {chosen.map((template) => (
+              <li key={template.id}>
                 {template.title[language]}{' '}
-                <span className="card__time">
-                  {t('added')}: {formatTime(addedAt)}
-                </span>{' '}
-                <button type="button" aria-label={`${t('remove')}: ${template.title[language]}`} onClick={() => dispatch({ type: 'REMOVE', id })}>
+                <button type="button" aria-label={`${t('remove')}: ${template.title[language]}`} onClick={() => dispatch({ type: 'REMOVE', id: template.id })}>
                   {t('remove')}
                 </button>
               </li>
