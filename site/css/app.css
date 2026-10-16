@@ -143,7 +143,7 @@
   border-radius: 50%;
   background: var(--color-secondary);
   color: var(--color-link);
-  font-size: var(--step--1);
+  font-size: var(--text-small);
   font-weight: 700;
 }
 
@@ -234,7 +234,7 @@
 
 .app-nav__quota-text {
   color: var(--color-text-light);
-  font-size: var(--step--1);
+  font-size: var(--text-small);
   font-weight: 600;
 }
 
@@ -265,7 +265,7 @@
 
 .app-nav__quota-plan {
   color: var(--color-muted);
-  font-size: var(--step--1);
+  font-size: var(--text-small);
 }
 
 /* Page areas: the content column sits beside the sidebar and spans the quota row */
@@ -382,7 +382,7 @@
 
 .template-card__caption {
   color: var(--color-muted);
-  font-size: var(--step--1);
+  font-size: var(--text-small);
 }
 
 .welcome__actions {
@@ -395,7 +395,7 @@
 
 .welcome__skip {
   margin-top: var(--space-3);
-  font-size: var(--step--1);
+  font-size: var(--text-small);
   text-align: center;
 }
 
@@ -403,7 +403,7 @@
 .dashboard__count {
   margin-bottom: var(--space-2);
   color: var(--color-text-light);
-  font-size: var(--step--1);
+  font-size: var(--text-small);
 }
 
 .dashboard__title {
@@ -567,14 +567,14 @@
   background: var(--color-background);
   color: var(--color-text-light);
   font-family: var(--font-mono);
-  font-size: var(--step--1);
+  font-size: var(--text-small);
   font-weight: 600;
   line-height: 1.6;
 }
 
 .project-card__updated {
   color: var(--color-muted);
-  font-size: var(--step--1);
+  font-size: var(--text-small);
 }
 
 .project-card__menu {
@@ -849,7 +849,7 @@
   border-radius: 50%;
   background: var(--color-surface);
   color: var(--color-on-primary);
-  font-size: var(--step--1);
+  font-size: var(--text-small);
   font-weight: 700;
   line-height: 1;
 }

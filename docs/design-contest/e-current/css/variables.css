@@ -1,0 +1,134 @@
+/* Design tokens. Light theme first, dark theme overrides the colour tokens.
+   The golden ratio is the base of the scales: type steps grow by √φ and φ,
+   spacing follows the Fibonacci numbers multiplied by 8 px (8, 16, 24, 40, 64, 104). */
+:root {
+  --phi: 1.618;
+  --phi-inverse: 0.618;
+  --phi-root: 1.272;
+
+  --color-primary: #2563eb;
+  --color-on-primary: #ffffff;
+  --color-primary-text: #1d4ed8;
+  --color-diagram-paper: #ffffff;
+  --color-secondary: #e8efff;
+  --color-accent: #16a34a;
+  --color-accent-text: #15803d;
+  --color-background: #f8f9fc;
+  --color-surface: #ffffff;
+  --color-border: #dde1e9;
+  --color-border-strong: #868ea3;
+  --color-text: #1c1f2e;
+  --color-text-light: #4a5068;
+  --color-muted: #5f6679;
+  --color-link: #1d4ed8;
+  --color-error: #c81e1e;
+  --color-warning: #b45309;
+  --color-code-background: #14151f;
+  --color-code-text: #cdd6f4;
+  --color-glow: rgb(37 99 235 / 0.16);
+  --shadow-small: 0 1px 2px rgb(28 31 46 / 0.06), 0 1px 3px rgb(28 31 46 / 0.1);
+  --shadow-large: 0 8px 24px rgb(28 31 46 / 0.08), 0 24px 64px rgb(28 31 46 / 0.12);
+
+  --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'Cascadia Code', Consolas, 'Courier New', monospace;
+
+  --step--1: calc(1rem / var(--phi-root));
+  --step-0: 1rem;
+  --step-1: calc(1rem * var(--phi-root));
+  --step-2: calc(1rem * var(--phi));
+  --step-3: calc(1rem * var(--phi) * var(--phi-root));
+  --step-4: calc(1rem * var(--phi) * var(--phi));
+  --step-5: calc(1rem * var(--phi) * var(--phi) * var(--phi-root));
+  --step-6: calc(1rem * var(--phi) * var(--phi) * var(--phi));
+
+  --columns-golden: 1fr 1.618fr;
+  --columns-golden-reverse: 1.618fr 1fr;
+
+  --line-body: var(--phi);
+  --line-heading: 1.15;
+
+  --space-1: 0.5rem;
+  --space-2: 1rem;
+  --space-3: 1.5rem;
+  --space-4: 2.5rem;
+  --space-5: 4rem;
+  --space-6: 6.5rem;
+
+  --radius-small: 0.5rem;
+  --radius-medium: 1rem;
+  --radius-large: 1.5rem;
+
+  --container: 1200px;
+  --measure: 62ch;
+  --header-height: 4rem;
+  --target-size: 3rem;
+  --target-size-small: 2rem;
+  --focus-ring: 0 0 0 3px var(--color-background), 0 0 0 5px var(--color-primary);
+
+  --breakpoint-small: 576px;
+  --breakpoint-medium: 768px;
+  --breakpoint-large: 1024px;
+
+  /* Names required by the lab assignment; they alias the golden-ratio scales above. */
+  --font-family-main: var(--font-sans);
+  --font-size-base: 1rem;
+  --font-size-h1: var(--step-5);
+  --font-size-h2: var(--step-4);
+  --spacing-small: var(--space-1);
+  --spacing-medium: var(--space-2);
+  --spacing-large: var(--space-3);
+  --spacing-xlarge: var(--space-4);
+  --container-max-width: var(--container);
+  --breakpoint-mobile: 576px;
+  --breakpoint-tablet: 768px;
+  --breakpoint-desktop: 1024px;
+}
+
+/* Dark theme: the checkbox in the header switches it without JavaScript. */
+:root:has(.theme__input:checked),
+:root[data-theme='dark'] {
+  --color-primary: #2563eb;
+  --color-secondary: #27304d;
+  --color-accent: #22c55e;
+  --color-accent-text: #4ade80;
+  --color-background: #1e1e2e;
+  --color-surface: #181825;
+  --color-border: #313244;
+  --color-border-strong: #6c7086;
+  --color-text: #cdd6f4;
+  --color-text-light: #a6adc8;
+  --color-muted: #9399b2;
+  --color-link: #8bb0ff;
+  --color-error: #f38ba8;
+  --color-warning: #fab387;
+  --color-code-background: #11111b;
+  --color-glow: rgb(139 176 255 / 0.14);
+  --shadow-small: 0 1px 2px rgb(0 0 0 / 0.3);
+  --shadow-large: 0 8px 24px rgb(0 0 0 / 0.35), 0 24px 64px rgb(0 0 0 / 0.4);
+  color-scheme: dark;
+}
+
+/* Without JavaScript the system preference decides, unless the page was told to stay light. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --color-primary: #2563eb;
+    --color-secondary: #27304d;
+    --color-accent: #22c55e;
+    --color-accent-text: #4ade80;
+    --color-background: #1e1e2e;
+    --color-surface: #181825;
+    --color-border: #313244;
+    --color-border-strong: #6c7086;
+    --color-text: #cdd6f4;
+    --color-text-light: #a6adc8;
+    --color-muted: #9399b2;
+    --color-link: #8bb0ff;
+    --color-error: #f38ba8;
+    --color-warning: #fab387;
+    --color-code-background: #11111b;
+    --color-glow: rgb(139 176 255 / 0.14);
+    --shadow-small: 0 1px 2px rgb(0 0 0 / 0.3);
+    --shadow-large: 0 8px 24px rgb(0 0 0 / 0.35), 0 24px 64px rgb(0 0 0 / 0.4);
+    color-scheme: dark;
+  }
+}

@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>Мои проекты — DSLKit</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body class="db">
+    <a class="skip-link" href="#main">Перейти к основному содержимому</a>
+    <header class="bar">
+      <a class="logo" href="dashboard.html" aria-label="DSLKit: мои проекты">
+        <svg viewBox="0 0 32 32" aria-hidden="true" focusable="false"><rect width="32" height="32" rx="8" fill="#2563eb" /><path d="M9 11l-4 5 4 5M23 11l4 5-4 5M18 9l-4 14" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+        <span>DSLKit</span>
+      </a>
+      <div class="search" role="search">
+        <label class="visually-hidden" for="q">Поиск диаграмм</label>
+        <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="9" cy="9" r="5" /><path d="M13 13l4 4" /></svg>
+        <input id="q" type="search" placeholder="Поиск диаграмм… Ctrl+K" autocomplete="off" />
+      </div>
+      <button type="button" class="avatar" aria-label="Профиль: Ксения" title="Профиль">KX</button>
+    </header>
+
+    <nav class="nav" aria-label="Разделы приложения">
+      <ul>
+        <li><a href="dashboard.html" aria-current="page"><svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 10l7-6 7 6M5 9v7h10V9" /></svg><span><span class="nav-extra">Мои </span><span class="cap">проекты</span></span></a></li>
+        <li><a href="editor.html"><svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4h14v12H3zM3 8h14M8 8v8" /></svg><span>Шаблоны</span></a></li>
+        <li><a href="dashboard.html"><svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="3" /><path d="M2 16c0-3 2-5 5-5s5 2 5 5M14 4a3 3 0 010 6M16 16c0-2-1-4-3-5" /></svg><span>Общие</span></a></li>
+        <li><a href="dashboard.html"><svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 6h12M8 6V4h4v2M6 6l1 10h6l1-10" /></svg><span>Корзина</span></a></li>
+      </ul>
+      <div class="quota">
+        <p id="quota">Бета: 3 из 5 диаграмм сегодня</p>
+        <progress aria-labelledby="quota" max="5" value="3">3 из 5</progress>
+      </div>
+    </nav>
+
+    <main id="main" class="home">
+      <section class="hero" aria-labelledby="hello">
+        <div class="hero__text">
+          <h1 id="hello">Добрый день, Ксения</h1>
+          <p>Продолжите работу или начните новую диаграмму.</p>
+        </div>
+        <a class="btn btn--primary" href="editor.html"><svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 4v12M4 10h12" /></svg><span>Новая диаграмма</span></a>
+      </section>
+
+      <section class="sect" aria-labelledby="recent">
+        <div class="sect__head"><h2 id="recent">Недавние</h2></div>
+        <ul class="grid">
+            <li><article class="card">
+              <div class="card__preview" aria-hidden="true"></div>
+              <div class="card__body">
+                <h3 class="card__title"><a href="editor.html">Order process</a></h3>
+                <p class="tags"><span class="tag">IDEF0</span> <span class="badge">в бете</span></p>
+                <p class="card__time">Изменён 2 ч назад</p>
+              </div>
+              <details class="menu">
+                <summary aria-label="Действия с проектом Order process" title="Действия"><svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="5" cy="10" r="1" /><circle cx="10" cy="10" r="1" /><circle cx="15" cy="10" r="1" /></svg></summary>
+                <div class="menu__panel">
+                  <a class="menu__item" href="editor.html">Открыть</a>
+                  <button type="button" class="menu__item">Переименовать</button>
+                  <button type="button" class="menu__item">Дублировать</button>
+                  <button type="button" class="menu__item">Поделиться</button>
+                  <button type="button" class="menu__item">В корзину</button>
+                </div>
+              </details>
+            </article></li>
+            <li><article class="card">
+              <div class="card__preview" aria-hidden="true"></div>
+              <div class="card__body">
+                <h3 class="card__title"><a href="editor.html">Shop schema</a></h3>
+                <p class="tags"><span class="tag">ERD</span> <span class="badge">в бете</span></p>
+                <p class="card__time">Изменён 2 ч назад</p>
+              </div>
+              <details class="menu">
+                <summary aria-label="Действия с проектом Shop schema" title="Действия"><svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="5" cy="10" r="1" /><circle cx="10" cy="10" r="1" /><circle cx="15" cy="10" r="1" /></svg></summary>
+                <div class="menu__panel">
+                  <a class="menu__item" href="editor.html">Открыть</a>
+                  <button type="button" class="menu__item">Переименовать</button>
+                  <button type="button" class="menu__item">Дублировать</button>
+                  <button type="button" class="menu__item">Поделиться</button>
+                  <button type="button" class="menu__item">В корзину</button>
+                </div>
+              </details>
+            </article></li>
+            <li><article class="card">
+              <div class="card__preview" aria-hidden="true"></div>
+              <div class="card__body">
+                <h3 class="card__title"><a href="editor.html">Hiring flow</a></h3>
+                <p class="tags"><span class="tag">BPMN</span></p>
+                <p class="card__time">Изменён 2 ч назад</p>
+              </div>
+              <details class="menu">
+                <summary aria-label="Действия с проектом Hiring flow" title="Действия"><svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="5" cy="10" r="1" /><circle cx="10" cy="10" r="1" /><circle cx="15" cy="10" r="1" /></svg></summary>
+                <div class="menu__panel">
+                  <a class="menu__item" href="editor.html">Открыть</a>
+                  <button type="button" class="menu__item">Переименовать</button>
+                  <button type="button" class="menu__item">Дублировать</button>
+                  <button type="button" class="menu__item">Поделиться</button>
+                  <button type="button" class="menu__item">В корзину</button>
+                </div>
+              </details>
+            </article></li>
+        </ul>
+      </section>
+
+      <details class="second">
+        <summary><svg class="icon chev" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 4l6 6-6 6" /></svg><span>Другие проекты <span class="second__count">5</span></span></summary>
+        <div>
+          <div class="filters">
+            <div class="filters" role="group" aria-label="Фильтр по нотации" style="margin:0">
+              <button type="button" class="chip" aria-pressed="true">Все</button>
+              <button type="button" class="chip" aria-pressed="false">BPMN</button>
+              <button type="button" class="chip" aria-pressed="false">ERD</button>
+              <button type="button" class="chip" aria-pressed="false">DFD</button>
+              <button type="button" class="chip" aria-pressed="false">IDEF0</button>
+            </div>
+            <div class="sort">
+              <label class="visually-hidden" for="sort">Сортировка</label>
+              <select id="sort"><option>Сначала новые</option><option>Сначала старые</option><option>По названию</option></select>
+            </div>
+          </div>
+          <ul class="grid">
+            <li><article class="card">
+              <div class="card__preview" aria-hidden="true"></div>
+              <div class="card__body">
+                <h3 class="card__title"><a href="editor.html">Data pipeline</a></h3>
+                <p class="tags"><span class="tag">DFD</span> <span class="badge">в бете</span></p>
+                <p class="card__time">Изменён 2 ч назад</p>
+              </div>
+              <details class="menu">
+                <summary aria-label="Действия с проектом Data pipeline" title="Действия"><svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="5" cy="10" r="1" /><circle cx="10" cy="10" r="1" /><circle cx="15" cy="10" r="1" /></svg></summary>
+                <div class="menu__panel">
+                  <a class="menu__item" href="editor.html">Открыть</a>
+                  <button type="button" class="menu__item">Переименовать</button>
+                  <button type="button" class="menu__item">Дублировать</button>
+                  <button type="button" class="menu__item">Поделиться</button>
+                  <button type="button" class="menu__item">В корзину</button>
+                </div>
+              </details>
+            </article></li>
+            <li><article class="card">
+              <div class="card__preview" aria-hidden="true"></div>
+              <div class="card__body">
+                <h3 class="card__title"><a href="editor.html">Warehouse</a></h3>
+                <p class="tags"><span class="tag">IDEF0</span> <span class="badge">в бете</span></p>
+                <p class="card__time">Изменён 2 ч назад</p>
+              </div>
+              <details class="menu">
+                <summary aria-label="Действия с проектом Warehouse" title="Действия"><svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="5" cy="10" r="1" /><circle cx="10" cy="10" r="1" /><circle cx="15" cy="10" r="1" /></svg></summary>
+                <div class="menu__panel">
+                  <a class="menu__item" href="editor.html">Открыть</a>
+                  <button type="button" class="menu__item">Переименовать</button>
+                  <button type="button" class="menu__item">Дублировать</button>
+                  <button type="button" class="menu__item">Поделиться</button>
+                  <button type="button" class="menu__item">В корзину</button>
+                </div>
+              </details>
+            </article></li>
+            <li><article class="card">
+              <div class="card__preview" aria-hidden="true"></div>
+              <div class="card__body">
+                <h3 class="card__title"><a href="editor.html">Users &amp; roles</a></h3>
+                <p class="tags"><span class="tag">ERD</span> <span class="badge">в бете</span></p>
+                <p class="card__time">Изменён 2 ч назад</p>
+              </div>
+              <details class="menu">
+                <summary aria-label="Действия с проектом Users &amp; roles" title="Действия"><svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="5" cy="10" r="1" /><circle cx="10" cy="10" r="1" /><circle cx="15" cy="10" r="1" /></svg></summary>
+                <div class="menu__panel">
+                  <a class="menu__item" href="editor.html">Открыть</a>
+                  <button type="button" class="menu__item">Переименовать</button>
+                  <button type="button" class="menu__item">Дублировать</button>
+                  <button type="button" class="menu__item">Поделиться</button>
+                  <button type="button" class="menu__item">В корзину</button>
+                </div>
+              </details>
+            </article></li>
+            <li><article class="card">
+              <div class="card__preview" aria-hidden="true"></div>
+              <div class="card__body">
+                <h3 class="card__title"><a href="editor.html">Release process</a></h3>
+                <p class="tags"><span class="tag">BPMN</span></p>
+                <p class="card__time">Изменён 2 ч назад</p>
+              </div>
+              <details class="menu">
+                <summary aria-label="Действия с проектом Release process" title="Действия"><svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="5" cy="10" r="1" /><circle cx="10" cy="10" r="1" /><circle cx="15" cy="10" r="1" /></svg></summary>
+                <div class="menu__panel">
+                  <a class="menu__item" href="editor.html">Открыть</a>
+                  <button type="button" class="menu__item">Переименовать</button>
+                  <button type="button" class="menu__item">Дублировать</button>
+                  <button type="button" class="menu__item">Поделиться</button>
+                  <button type="button" class="menu__item">В корзину</button>
+                </div>
+              </details>
+            </article></li>
+            <li><article class="card">
+              <div class="card__preview" aria-hidden="true"></div>
+              <div class="card__body">
+                <h3 class="card__title"><a href="editor.html">Billing</a></h3>
+                <p class="tags"><span class="tag">DFD</span> <span class="badge">в бете</span></p>
+                <p class="card__time">Изменён 2 ч назад</p>
+              </div>
+              <details class="menu">
+                <summary aria-label="Действия с проектом Billing" title="Действия"><svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="5" cy="10" r="1" /><circle cx="10" cy="10" r="1" /><circle cx="15" cy="10" r="1" /></svg></summary>
+                <div class="menu__panel">
+                  <a class="menu__item" href="editor.html">Открыть</a>
+                  <button type="button" class="menu__item">Переименовать</button>
+                  <button type="button" class="menu__item">Дублировать</button>
+                  <button type="button" class="menu__item">Поделиться</button>
+                  <button type="button" class="menu__item">В корзину</button>
+                </div>
+              </details>
+            </article></li>
+          </ul>
+        </div>
+      </details>
+    </main>
+  </body>
+</html>

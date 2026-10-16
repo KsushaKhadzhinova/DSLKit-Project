@@ -1,0 +1,3499 @@
+[
+ {
+  "page": "index.html",
+  "view": "desktop",
+  "root": 17.2,
+  "fonts": {
+   "Inter": {
+    "n": 113,
+    "ex": "a.skip-link"
+   }
+  },
+  "sizes": {
+   "1": {
+    "n": 48,
+    "ex": "a.skip-link"
+   },
+   "1.272": {
+    "n": 23,
+    "ex": "span.header__logo-text"
+   },
+   "0.875": {
+    "n": 29,
+    "ex": "a.nav__link"
+   },
+   "0.75": {
+    "n": 1,
+    "ex": "span.theme__label"
+   },
+   "3.33": {
+    "n": 1,
+    "ex": "h1.hero__title"
+   },
+   "2.618": {
+    "n": 9,
+    "ex": "strong.hero__fact-value"
+   },
+   "2.058": {
+    "n": 2,
+    "ex": "h3.plan__title"
+   }
+  },
+  "spaces": {
+   "1": {
+    "n": 53,
+    "ex": "a.skip-link"
+   },
+   "4": {
+    "n": 24,
+    "ex": "section.hero"
+   },
+   "0.5": {
+    "n": 117,
+    "ex": "a.skip-link"
+   },
+   "1.5": {
+    "n": 89,
+    "ex": "div.header__inner"
+   },
+   "6.5": {
+    "n": 1,
+    "ex": "section.hero"
+   },
+   "0.25": {
+    "n": 8,
+    "ex": "p.hero__badge"
+   },
+   "2.5": {
+    "n": 14,
+    "ex": "a.button"
+   },
+   "0.125": {
+    "n": 12,
+    "ex": "span.badge"
+   },
+   "0.375": {
+    "n": 11,
+    "ex": "div.form__field"
+   }
+  },
+  "radii": {
+   "1": {
+    "n": 13,
+    "ex": "img.hero__image"
+   },
+   "0.5": {
+    "n": 23,
+    "ex": "a.skip-link"
+   },
+   "pill": {
+    "n": 11,
+    "ex": "label.theme__button"
+   },
+   "1.5": {
+    "n": 3,
+    "ex": "article.plan"
+   }
+  },
+  "lineRatio": 1.618,
+  "targets": 39,
+  "small": 1,
+  "smallEx": [
+   {
+    "w": 26,
+    "h": 26,
+    "t": "INPUT"
+   }
+  ],
+  "grids": [
+   {
+    "sel": "section.hero",
+    "a": 432,
+    "b": 699,
+    "ratio": 1.618
+   },
+   {
+    "sel": "div.plans",
+    "a": 449,
+    "b": 726,
+    "ratio": 1.618
+   },
+   {
+    "sel": "div.form__field",
+    "a": 26,
+    "b": 513,
+    "ratio": 19.873
+   }
+  ],
+  "h1": 1,
+  "overflow": false
+ },
+ {
+  "page": "index.html",
+  "view": "tablet",
+  "root": 15.92,
+  "fonts": {
+   "Inter": {
+    "n": 113,
+    "ex": "a.skip-link"
+   }
+  },
+  "sizes": {
+   "1": {
+    "n": 48,
+    "ex": "a.skip-link"
+   },
+   "1.272": {
+    "n": 23,
+    "ex": "span.header__logo-text"
+   },
+   "0.879": {
+    "n": 29,
+    "ex": "a.nav__link"
+   },
+   "0.75": {
+    "n": 1,
+    "ex": "span.theme__label"
+   },
+   "2.544": {
+    "n": 1,
+    "ex": "h1.hero__title"
+   },
+   "2.618": {
+    "n": 9,
+    "ex": "strong.hero__fact-value"
+   },
+   "2.058": {
+    "n": 2,
+    "ex": "h3.plan__title"
+   }
+  },
+  "spaces": {
+   "1": {
+    "n": 45,
+    "ex": "a.skip-link"
+   },
+   "4": {
+    "n": 22,
+    "ex": "section.hero"
+   },
+   "0.5": {
+    "n": 125,
+    "ex": "a.skip-link"
+   },
+   "1.5": {
+    "n": 87,
+    "ex": "div.header__inner"
+   },
+   "2.5": {
+    "n": 17,
+    "ex": "section.hero"
+   },
+   "0.25": {
+    "n": 8,
+    "ex": "p.hero__badge"
+   },
+   "0.125": {
+    "n": 12,
+    "ex": "span.badge"
+   },
+   "0.375": {
+    "n": 11,
+    "ex": "div.form__field"
+   }
+  },
+  "radii": {
+   "1": {
+    "n": 13,
+    "ex": "img.hero__image"
+   },
+   "0.5": {
+    "n": 23,
+    "ex": "a.skip-link"
+   },
+   "pill": {
+    "n": 11,
+    "ex": "label.theme__button"
+   },
+   "1.5": {
+    "n": 3,
+    "ex": "article.plan"
+   }
+  },
+  "lineRatio": 1.618,
+  "targets": 39,
+  "small": 3,
+  "smallEx": [
+   {
+    "w": 308,
+    "h": 42,
+    "t": "Перейти к основному соде"
+   },
+   {
+    "w": 42,
+    "h": 44,
+    "t": "FAQ"
+   },
+   {
+    "w": 24,
+    "h": 24,
+    "t": "INPUT"
+   }
+  ],
+  "grids": [
+   {
+    "sel": "ul.cards",
+    "a": 348,
+    "b": 348,
+    "ratio": 1
+   },
+   {
+    "sel": "ol.steps",
+    "a": 348,
+    "b": 348,
+    "ratio": 1
+   },
+   {
+    "sel": "ul.cards",
+    "a": 348,
+    "b": 348,
+    "ratio": 1
+   },
+   {
+    "sel": "div.form__field",
+    "a": 24,
+    "b": 474,
+    "ratio": 19.869
+   }
+  ],
+  "h1": 1,
+  "overflow": false
+ },
+ {
+  "page": "index.html",
+  "view": "mobile",
+  "root": 15,
+  "fonts": {
+   "Inter": {
+    "n": 107,
+    "ex": "a.skip-link"
+   }
+  },
+  "sizes": {
+   "1": {
+    "n": 49,
+    "ex": "a.skip-link"
+   },
+   "1.272": {
+    "n": 23,
+    "ex": "span.header__logo-text"
+   },
+   "0.75": {
+    "n": 1,
+    "ex": "span.theme__label"
+   },
+   "0.933": {
+    "n": 22,
+    "ex": "p.hero__badge"
+   },
+   "2.058": {
+    "n": 3,
+    "ex": "h1.hero__title"
+   },
+   "2.618": {
+    "n": 9,
+    "ex": "strong.hero__fact-value"
+   }
+  },
+  "spaces": {
+   "1": {
+    "n": 45,
+    "ex": "a.skip-link"
+   },
+   "4": {
+    "n": 10,
+    "ex": "section.hero"
+   },
+   "0.5": {
+    "n": 113,
+    "ex": "a.skip-link"
+   },
+   "1.5": {
+    "n": 91,
+    "ex": "div.header__inner"
+   },
+   "2.5": {
+    "n": 25,
+    "ex": "section.hero"
+   },
+   "0.25": {
+    "n": 8,
+    "ex": "p.hero__badge"
+   },
+   "0.125": {
+    "n": 12,
+    "ex": "span.badge"
+   },
+   "0.375": {
+    "n": 11,
+    "ex": "div.form__field"
+   }
+  },
+  "radii": {
+   "1": {
+    "n": 13,
+    "ex": "img.hero__image"
+   },
+   "0.5": {
+    "n": 18,
+    "ex": "a.skip-link"
+   },
+   "0.125": {
+    "n": 1,
+    "ex": "span.burger__icon"
+   },
+   "pill": {
+    "n": 11,
+    "ex": "label.theme__button"
+   },
+   "1.5": {
+    "n": 3,
+    "ex": "article.plan"
+   }
+  },
+  "lineRatio": 1.618,
+  "targets": 32,
+  "small": 2,
+  "smallEx": [
+   {
+    "w": 290,
+    "h": 39,
+    "t": "Перейти к основному соде"
+   },
+   {
+    "w": 23,
+    "h": 23,
+    "t": "INPUT"
+   }
+  ],
+  "grids": [],
+  "h1": 1,
+  "overflow": false
+ },
+ {
+  "page": "en/index.html",
+  "view": "desktop",
+  "root": 17.2,
+  "fonts": {
+   "Inter": {
+    "n": 113,
+    "ex": "a.skip-link"
+   }
+  },
+  "sizes": {
+   "1": {
+    "n": 48,
+    "ex": "a.skip-link"
+   },
+   "1.272": {
+    "n": 23,
+    "ex": "span.header__logo-text"
+   },
+   "0.875": {
+    "n": 29,
+    "ex": "a.nav__link"
+   },
+   "0.75": {
+    "n": 1,
+    "ex": "span.theme__label"
+   },
+   "3.33": {
+    "n": 1,
+    "ex": "h1.hero__title"
+   },
+   "2.618": {
+    "n": 9,
+    "ex": "strong.hero__fact-value"
+   },
+   "2.058": {
+    "n": 2,
+    "ex": "h3.plan__title"
+   }
+  },
+  "spaces": {
+   "1": {
+    "n": 53,
+    "ex": "a.skip-link"
+   },
+   "4": {
+    "n": 24,
+    "ex": "section.hero"
+   },
+   "0.5": {
+    "n": 117,
+    "ex": "a.skip-link"
+   },
+   "1.5": {
+    "n": 89,
+    "ex": "div.header__inner"
+   },
+   "6.5": {
+    "n": 1,
+    "ex": "section.hero"
+   },
+   "0.25": {
+    "n": 8,
+    "ex": "p.hero__badge"
+   },
+   "2.5": {
+    "n": 14,
+    "ex": "a.button"
+   },
+   "0.125": {
+    "n": 12,
+    "ex": "span.badge"
+   },
+   "0.375": {
+    "n": 11,
+    "ex": "div.form__field"
+   }
+  },
+  "radii": {
+   "1": {
+    "n": 13,
+    "ex": "img.hero__image"
+   },
+   "0.5": {
+    "n": 23,
+    "ex": "a.skip-link"
+   },
+   "pill": {
+    "n": 11,
+    "ex": "label.theme__button"
+   },
+   "1.5": {
+    "n": 3,
+    "ex": "article.plan"
+   }
+  },
+  "lineRatio": 1.618,
+  "targets": 39,
+  "small": 2,
+  "smallEx": [
+   {
+    "w": 26,
+    "h": 26,
+    "t": "INPUT"
+   },
+   {
+    "w": 107,
+    "h": 23,
+    "t": "privacy policy"
+   }
+  ],
+  "grids": [
+   {
+    "sel": "section.hero",
+    "a": 432,
+    "b": 699,
+    "ratio": 1.618
+   },
+   {
+    "sel": "div.plans",
+    "a": 449,
+    "b": 726,
+    "ratio": 1.618
+   },
+   {
+    "sel": "div.form__field",
+    "a": 26,
+    "b": 513,
+    "ratio": 19.873
+   }
+  ],
+  "h1": 1,
+  "overflow": false
+ },
+ {
+  "page": "en/index.html",
+  "view": "tablet",
+  "root": 15.92,
+  "fonts": {
+   "Inter": {
+    "n": 113,
+    "ex": "a.skip-link"
+   }
+  },
+  "sizes": {
+   "1": {
+    "n": 48,
+    "ex": "a.skip-link"
+   },
+   "1.272": {
+    "n": 23,
+    "ex": "span.header__logo-text"
+   },
+   "0.879": {
+    "n": 29,
+    "ex": "a.nav__link"
+   },
+   "0.75": {
+    "n": 1,
+    "ex": "span.theme__label"
+   },
+   "2.544": {
+    "n": 1,
+    "ex": "h1.hero__title"
+   },
+   "2.618": {
+    "n": 9,
+    "ex": "strong.hero__fact-value"
+   },
+   "2.058": {
+    "n": 2,
+    "ex": "h3.plan__title"
+   }
+  },
+  "spaces": {
+   "1": {
+    "n": 45,
+    "ex": "a.skip-link"
+   },
+   "4": {
+    "n": 22,
+    "ex": "section.hero"
+   },
+   "0.5": {
+    "n": 125,
+    "ex": "a.skip-link"
+   },
+   "1.5": {
+    "n": 87,
+    "ex": "div.header__inner"
+   },
+   "2.5": {
+    "n": 17,
+    "ex": "section.hero"
+   },
+   "0.25": {
+    "n": 8,
+    "ex": "p.hero__badge"
+   },
+   "0.125": {
+    "n": 12,
+    "ex": "span.badge"
+   },
+   "0.375": {
+    "n": 11,
+    "ex": "div.form__field"
+   }
+  },
+  "radii": {
+   "1": {
+    "n": 13,
+    "ex": "img.hero__image"
+   },
+   "0.5": {
+    "n": 23,
+    "ex": "a.skip-link"
+   },
+   "pill": {
+    "n": 11,
+    "ex": "label.theme__button"
+   },
+   "1.5": {
+    "n": 3,
+    "ex": "article.plan"
+   }
+  },
+  "lineRatio": 1.618,
+  "targets": 39,
+  "small": 4,
+  "smallEx": [
+   {
+    "w": 182,
+    "h": 42,
+    "t": "Skip to main content"
+   },
+   {
+    "w": 42,
+    "h": 44,
+    "t": "FAQ"
+   },
+   {
+    "w": 24,
+    "h": 24,
+    "t": "INPUT"
+   },
+   {
+    "w": 99,
+    "h": 21,
+    "t": "privacy policy"
+   }
+  ],
+  "grids": [
+   {
+    "sel": "ul.cards",
+    "a": 348,
+    "b": 348,
+    "ratio": 1
+   },
+   {
+    "sel": "ol.steps",
+    "a": 348,
+    "b": 348,
+    "ratio": 1
+   },
+   {
+    "sel": "ul.cards",
+    "a": 348,
+    "b": 348,
+    "ratio": 1
+   },
+   {
+    "sel": "div.form__field",
+    "a": 24,
+    "b": 474,
+    "ratio": 19.869
+   }
+  ],
+  "h1": 1,
+  "overflow": false
+ },
+ {
+  "page": "en/index.html",
+  "view": "mobile",
+  "root": 15,
+  "fonts": {
+   "Inter": {
+    "n": 107,
+    "ex": "a.skip-link"
+   }
+  },
+  "sizes": {
+   "1": {
+    "n": 49,
+    "ex": "a.skip-link"
+   },
+   "1.272": {
+    "n": 23,
+    "ex": "span.header__logo-text"
+   },
+   "0.75": {
+    "n": 1,
+    "ex": "span.theme__label"
+   },
+   "0.933": {
+    "n": 22,
+    "ex": "p.hero__badge"
+   },
+   "2.058": {
+    "n": 3,
+    "ex": "h1.hero__title"
+   },
+   "2.618": {
+    "n": 9,
+    "ex": "strong.hero__fact-value"
+   }
+  },
+  "spaces": {
+   "1": {
+    "n": 45,
+    "ex": "a.skip-link"
+   },
+   "4": {
+    "n": 10,
+    "ex": "section.hero"
+   },
+   "0.5": {
+    "n": 113,
+    "ex": "a.skip-link"
+   },
+   "1.5": {
+    "n": 91,
+    "ex": "div.header__inner"
+   },
+   "2.5": {
+    "n": 25,
+    "ex": "section.hero"
+   },
+   "0.25": {
+    "n": 8,
+    "ex": "p.hero__badge"
+   },
+   "0.125": {
+    "n": 12,
+    "ex": "span.badge"
+   },
+   "0.375": {
+    "n": 11,
+    "ex": "div.form__field"
+   }
+  },
+  "radii": {
+   "1": {
+    "n": 13,
+    "ex": "img.hero__image"
+   },
+   "0.5": {
+    "n": 18,
+    "ex": "a.skip-link"
+   },
+   "0.125": {
+    "n": 1,
+    "ex": "span.burger__icon"
+   },
+   "pill": {
+    "n": 11,
+    "ex": "label.theme__button"
+   },
+   "1.5": {
+    "n": 3,
+    "ex": "article.plan"
+   }
+  },
+  "lineRatio": 1.618,
+  "targets": 32,
+  "small": 2,
+  "smallEx": [
+   {
+    "w": 172,
+    "h": 39,
+    "t": "Skip to main content"
+   },
+   {
+    "w": 23,
+    "h": 23,
+    "t": "INPUT"
+   }
+  ],
+  "grids": [],
+  "h1": 1,
+  "overflow": false
+ },
+ {
+  "page": "privacy.html",
+  "view": "desktop",
+  "root": 17.2,
+  "fonts": {
+   "Inter": {
+    "n": 35,
+    "ex": "a.skip-link"
+   }
+  },
+  "sizes": {
+   "1": {
+    "n": 14,
+    "ex": "a.skip-link"
+   },
+   "1.272": {
+    "n": 1,
+    "ex": "span.header__logo-text"
+   },
+   "0.875": {
+    "n": 12,
+    "ex": "a.nav__link"
+   },
+   "0.75": {
+    "n": 1,
+    "ex": "span.theme__label"
+   },
+   "3.33": {
+    "n": 1,
+    "ex": "h1.policy__title"
+   },
+   "1.618": {
+    "n": 6,
+    "ex": "h2.policy__heading"
+   }
+  },
+  "spaces": {
+   "1": {
+    "n": 14,
+    "ex": "a.skip-link"
+   },
+   "4": {
+    "n": 2,
+    "ex": "div.footer__inner"
+   },
+   "0.5": {
+    "n": 25,
+    "ex": "a.skip-link"
+   },
+   "1.5": {
+    "n": 19,
+    "ex": "div.header__inner"
+   }
+  },
+  "radii": {
+   "0.5": {
+    "n": 7,
+    "ex": "a.skip-link"
+   },
+   "pill": {
+    "n": 1,
+    "ex": "label.theme__button"
+   }
+  },
+  "lineRatio": 1.618,
+  "targets": 16,
+  "small": 2,
+  "smallEx": [
+   {
+    "w": 116,
+    "h": 23,
+    "t": "hello@dslkit.io"
+   },
+   {
+    "w": 116,
+    "h": 23,
+    "t": "hello@dslkit.io"
+   }
+  ],
+  "grids": [],
+  "h1": 1,
+  "overflow": false
+ },
+ {
+  "page": "privacy.html",
+  "view": "tablet",
+  "root": 15.92,
+  "fonts": {
+   "Inter": {
+    "n": 35,
+    "ex": "a.skip-link"
+   }
+  },
+  "sizes": {
+   "1": {
+    "n": 14,
+    "ex": "a.skip-link"
+   },
+   "1.272": {
+    "n": 1,
+    "ex": "span.header__logo-text"
+   },
+   "0.879": {
+    "n": 12,
+    "ex": "a.nav__link"
+   },
+   "0.75": {
+    "n": 1,
+    "ex": "span.theme__label"
+   },
+   "2.93": {
+    "n": 1,
+    "ex": "h1.policy__title"
+   },
+   "1.618": {
+    "n": 6,
+    "ex": "h2.policy__heading"
+   }
+  },
+  "spaces": {
+   "1": {
+    "n": 6,
+    "ex": "a.skip-link"
+   },
+   "4": {
+    "n": 2,
+    "ex": "div.footer__inner"
+   },
+   "0.5": {
+    "n": 33,
+    "ex": "a.skip-link"
+   },
+   "1.5": {
+    "n": 17,
+    "ex": "div.header__inner"
+   }
+  },
+  "radii": {
+   "0.5": {
+    "n": 7,
+    "ex": "a.skip-link"
+   },
+   "pill": {
+    "n": 1,
+    "ex": "label.theme__button"
+   }
+  },
+  "lineRatio": 1.618,
+  "targets": 16,
+  "small": 4,
+  "smallEx": [
+   {
+    "w": 308,
+    "h": 42,
+    "t": "Перейти к основному соде"
+   },
+   {
+    "w": 42,
+    "h": 44,
+    "t": "FAQ"
+   },
+   {
+    "w": 107,
+    "h": 21,
+    "t": "hello@dslkit.io"
+   },
+   {
+    "w": 107,
+    "h": 21,
+    "t": "hello@dslkit.io"
+   }
+  ],
+  "grids": [],
+  "h1": 1,
+  "overflow": false
+ },
+ {
+  "page": "privacy.html",
+  "view": "mobile",
+  "root": 15,
+  "fonts": {
+   "Inter": {
+    "n": 29,
+    "ex": "a.skip-link"
+   }
+  },
+  "sizes": {
+   "1": {
+    "n": 15,
+    "ex": "a.skip-link"
+   },
+   "2": {
+    "n": 1,
+    "ex": "h1.policy__title"
+   },
+   "1.272": {
+    "n": 1,
+    "ex": "span.header__logo-text"
+   },
+   "0.75": {
+    "n": 1,
+    "ex": "span.theme__label"
+   },
+   "0.933": {
+    "n": 5,
+    "ex": "p.policy__updated"
+   },
+   "1.618": {
+    "n": 6,
+    "ex": "h2.policy__heading"
+   }
+  },
+  "spaces": {
+   "1": {
+    "n": 6,
+    "ex": "a.skip-link"
+   },
+   "4": {
+    "n": 2,
+    "ex": "div.footer__inner"
+   },
+   "0.5": {
+    "n": 21,
+    "ex": "a.skip-link"
+   },
+   "1.5": {
+    "n": 17,
+    "ex": "div.header__inner"
+   }
+  },
+  "radii": {
+   "0.5": {
+    "n": 2,
+    "ex": "a.skip-link"
+   },
+   "0.125": {
+    "n": 1,
+    "ex": "span.burger__icon"
+   },
+   "pill": {
+    "n": 1,
+    "ex": "label.theme__button"
+   }
+  },
+  "lineRatio": 1.618,
+  "targets": 9,
+  "small": 3,
+  "smallEx": [
+   {
+    "w": 290,
+    "h": 39,
+    "t": "Перейти к основному соде"
+   },
+   {
+    "w": 101,
+    "h": 20,
+    "t": "hello@dslkit.io"
+   },
+   {
+    "w": 101,
+    "h": 20,
+    "t": "hello@dslkit.io"
+   }
+  ],
+  "grids": [],
+  "h1": 1,
+  "overflow": false
+ },
+ {
+  "page": "thanks.html",
+  "view": "desktop",
+  "root": 17.2,
+  "fonts": {
+   "Inter": {
+    "n": 26,
+    "ex": "a.skip-link"
+   }
+  },
+  "sizes": {
+   "1": {
+    "n": 8,
+    "ex": "a.skip-link"
+   },
+   "1.272": {
+    "n": 6,
+    "ex": "span.header__logo-text"
+   },
+   "0.875": {
+    "n": 10,
+    "ex": "a.nav__link"
+   },
+   "0.75": {
+    "n": 1,
+    "ex": "span.theme__label"
+   },
+   "2.618": {
+    "n": 1,
+    "ex": "h1.section__title"
+   }
+  },
+  "spaces": {
+   "1": {
+    "n": 16,
+    "ex": "a.skip-link"
+   },
+   "4": {
+    "n": 4,
+    "ex": "section.section"
+   },
+   "0.5": {
+    "n": 17,
+    "ex": "a.skip-link"
+   },
+   "1.5": {
+    "n": 15,
+    "ex": "div.header__inner"
+   }
+  },
+  "radii": {
+   "0.5": {
+    "n": 9,
+    "ex": "a.skip-link"
+   },
+   "pill": {
+    "n": 1,
+    "ex": "label.theme__button"
+   }
+  },
+  "lineRatio": 1.618,
+  "targets": 19,
+  "small": 2,
+  "smallEx": [
+   {
+    "w": 236,
+    "h": 29,
+    "t": "вопросами и ответами"
+   },
+   {
+    "w": 187,
+    "h": 29,
+    "t": "главную страницу"
+   }
+  ],
+  "grids": [],
+  "h1": 1,
+  "overflow": false
+ },
+ {
+  "page": "thanks.html",
+  "view": "tablet",
+  "root": 15.92,
+  "fonts": {
+   "Inter": {
+    "n": 26,
+    "ex": "a.skip-link"
+   }
+  },
+  "sizes": {
+   "1": {
+    "n": 8,
+    "ex": "a.skip-link"
+   },
+   "1.272": {
+    "n": 6,
+    "ex": "span.header__logo-text"
+   },
+   "0.879": {
+    "n": 10,
+    "ex": "a.nav__link"
+   },
+   "0.75": {
+    "n": 1,
+    "ex": "span.theme__label"
+   },
+   "2.618": {
+    "n": 1,
+    "ex": "h1.section__title"
+   }
+  },
+  "spaces": {
+   "1": {
+    "n": 8,
+    "ex": "a.skip-link"
+   },
+   "4": {
+    "n": 4,
+    "ex": "section.section"
+   },
+   "0.5": {
+    "n": 25,
+    "ex": "a.skip-link"
+   },
+   "1.5": {
+    "n": 13,
+    "ex": "div.header__inner"
+   }
+  },
+  "radii": {
+   "0.5": {
+    "n": 9,
+    "ex": "a.skip-link"
+   },
+   "pill": {
+    "n": 1,
+    "ex": "label.theme__button"
+   }
+  },
+  "lineRatio": 1.618,
+  "targets": 19,
+  "small": 4,
+  "smallEx": [
+   {
+    "w": 308,
+    "h": 42,
+    "t": "Перейти к основному соде"
+   },
+   {
+    "w": 42,
+    "h": 44,
+    "t": "FAQ"
+   },
+   {
+    "w": 219,
+    "h": 27,
+    "t": "вопросами и ответами"
+   },
+   {
+    "w": 173,
+    "h": 27,
+    "t": "главную страницу"
+   }
+  ],
+  "grids": [],
+  "h1": 1,
+  "overflow": false
+ },
+ {
+  "page": "thanks.html",
+  "view": "mobile",
+  "root": 15,
+  "fonts": {
+   "Inter": {
+    "n": 20,
+    "ex": "a.skip-link"
+   }
+  },
+  "sizes": {
+   "1": {
+    "n": 9,
+    "ex": "a.skip-link"
+   },
+   "1.272": {
+    "n": 6,
+    "ex": "span.header__logo-text"
+   },
+   "0.75": {
+    "n": 1,
+    "ex": "span.theme__label"
+   },
+   "2.618": {
+    "n": 1,
+    "ex": "h1.section__title"
+   },
+   "0.933": {
+    "n": 3,
+    "ex": "address.footer__address"
+   }
+  },
+  "spaces": {
+   "1": {
+    "n": 8,
+    "ex": "a.skip-link"
+   },
+   "4": {
+    "n": 2,
+    "ex": "div.footer__inner"
+   },
+   "0.5": {
+    "n": 13,
+    "ex": "a.skip-link"
+   },
+   "1.5": {
+    "n": 13,
+    "ex": "div.header__inner"
+   },
+   "2.5": {
+    "n": 2,
+    "ex": "section.section"
+   }
+  },
+  "radii": {
+   "0.5": {
+    "n": 4,
+    "ex": "a.skip-link"
+   },
+   "0.125": {
+    "n": 1,
+    "ex": "span.burger__icon"
+   },
+   "pill": {
+    "n": 1,
+    "ex": "label.theme__button"
+   }
+  },
+  "lineRatio": 1.618,
+  "targets": 12,
+  "small": 3,
+  "smallEx": [
+   {
+    "w": 290,
+    "h": 39,
+    "t": "Перейти к основному соде"
+   },
+   {
+    "w": 206,
+    "h": 26,
+    "t": "вопросами и ответами"
+   },
+   {
+    "w": 163,
+    "h": 26,
+    "t": "главную страницу"
+   }
+  ],
+  "grids": [],
+  "h1": 1,
+  "overflow": false
+ },
+ {
+  "page": "app/welcome.html",
+  "view": "desktop",
+  "root": 17.2,
+  "fonts": {
+   "Inter": {
+    "n": 33,
+    "ex": "a.skip-link"
+   }
+  },
+  "sizes": {
+   "1": {
+    "n": 11,
+    "ex": "a.skip-link"
+   },
+   "1.272": {
+    "n": 8,
+    "ex": "span.app-topbar__logo-text"
+   },
+   "0.875": {
+    "n": 13,
+    "ex": "span"
+   },
+   "3.33": {
+    "n": 1,
+    "ex": "h1.welcome__title"
+   }
+  },
+  "spaces": {
+   "1": {
+    "n": 49,
+    "ex": "a.skip-link"
+   },
+   "0.5": {
+    "n": 56,
+    "ex": "a.skip-link"
+   },
+   "1.5": {
+    "n": 12,
+    "ex": "header.app-topbar"
+   },
+   "3.75": {
+    "n": 1,
+    "ex": "input.app-topbar__search-input"
+   },
+   "2.5": {
+    "n": 4,
+    "ex": "main.welcome"
+   },
+   "0.125": {
+    "n": 6,
+    "ex": "span.badge"
+   }
+  },
+  "radii": {
+   "1": {
+    "n": 6,
+    "ex": "article.template-card"
+   },
+   "0.5": {
+    "n": 17,
+    "ex": "a.skip-link"
+   },
+   "2.907": {
+    "n": 1,
+    "ex": "button.app-topbar__avatar"
+   },
+   "pill": {
+    "n": 4,
+    "ex": "progress.app-nav__progress"
+   }
+  },
+  "lineRatio": 1.618,
+  "targets": 20,
+  "small": 1,
+  "smallEx": [
+   {
+    "w": 80,
+    "h": 20,
+    "t": "Пропустить"
+   }
+  ],
+  "grids": [],
+  "h1": 1,
+  "overflow": false
+ },
+ {
+  "page": "app/welcome.html",
+  "view": "tablet",
+  "root": 15.92,
+  "fonts": {
+   "Inter": {
+    "n": 33,
+    "ex": "a.skip-link"
+   }
+  },
+  "sizes": {
+   "1": {
+    "n": 11,
+    "ex": "a.skip-link"
+   },
+   "1.272": {
+    "n": 8,
+    "ex": "span.app-topbar__logo-text"
+   },
+   "0.879": {
+    "n": 13,
+    "ex": "span"
+   },
+   "3.33": {
+    "n": 1,
+    "ex": "h1.welcome__title"
+   }
+  },
+  "spaces": {
+   "1": {
+    "n": 49,
+    "ex": "a.skip-link"
+   },
+   "0.5": {
+    "n": 60,
+    "ex": "a.skip-link"
+   },
+   "3.764": {
+    "n": 1,
+    "ex": "input.app-topbar__search-input"
+   },
+   "1.5": {
+    "n": 12,
+    "ex": "main.welcome"
+   },
+   "0.125": {
+    "n": 6,
+    "ex": "span.badge"
+   }
+  },
+  "radii": {
+   "1": {
+    "n": 6,
+    "ex": "article.template-card"
+   },
+   "0.5": {
+    "n": 17,
+    "ex": "a.skip-link"
+   },
+   "3.141": {
+    "n": 1,
+    "ex": "button.app-topbar__avatar"
+   },
+   "pill": {
+    "n": 4,
+    "ex": "progress.app-nav__progress"
+   }
+  },
+  "lineRatio": 1.618,
+  "targets": 20,
+  "small": 2,
+  "smallEx": [
+   {
+    "w": 308,
+    "h": 42,
+    "t": "Перейти к основному соде"
+   },
+   {
+    "w": 74,
+    "h": 19,
+    "t": "Пропустить"
+   }
+  ],
+  "grids": [],
+  "h1": 1,
+  "overflow": false
+ },
+ {
+  "page": "app/welcome.html",
+  "view": "mobile",
+  "root": 15,
+  "fonts": {
+   "Inter": {
+    "n": 32,
+    "ex": "a.skip-link"
+   }
+  },
+  "sizes": {
+   "1": {
+    "n": 11,
+    "ex": "a.skip-link"
+   },
+   "0.933": {
+    "n": 13,
+    "ex": "span"
+   },
+   "2.618": {
+    "n": 1,
+    "ex": "h1.welcome__title"
+   },
+   "1.272": {
+    "n": 7,
+    "ex": "p.welcome__lead"
+   }
+  },
+  "spaces": {
+   "1": {
+    "n": 51,
+    "ex": "a.skip-link"
+   },
+   "0.5": {
+    "n": 62,
+    "ex": "a.skip-link"
+   },
+   "3.933": {
+    "n": 1,
+    "ex": "input.app-topbar__search-input"
+   },
+   "1.5": {
+    "n": 8,
+    "ex": "ul.template-list"
+   },
+   "0.125": {
+    "n": 6,
+    "ex": "span.badge"
+   }
+  },
+  "radii": {
+   "1": {
+    "n": 6,
+    "ex": "article.template-card"
+   },
+   "0.5": {
+    "n": 17,
+    "ex": "a.skip-link"
+   },
+   "3.333": {
+    "n": 1,
+    "ex": "button.app-topbar__avatar"
+   },
+   "pill": {
+    "n": 4,
+    "ex": "progress.app-nav__progress"
+   }
+  },
+  "lineRatio": 1.618,
+  "targets": 20,
+  "small": 2,
+  "smallEx": [
+   {
+    "w": 290,
+    "h": 39,
+    "t": "Перейти к основному соде"
+   },
+   {
+    "w": 74,
+    "h": 19,
+    "t": "Пропустить"
+   }
+  ],
+  "grids": [],
+  "h1": 1,
+  "overflow": false
+ },
+ {
+  "page": "app/dashboard.html",
+  "view": "desktop",
+  "root": 17.2,
+  "fonts": {
+   "Inter": {
+    "n": 45,
+    "ex": "a.skip-link"
+   },
+   "JetBrains Mono": {
+    "n": 8,
+    "ex": "span.project-card__tag"
+   }
+  },
+  "sizes": {
+   "1": {
+    "n": 14,
+    "ex": "a.skip-link"
+   },
+   "1.272": {
+    "n": 9,
+    "ex": "span.app-topbar__logo-text"
+   },
+   "0.875": {
+    "n": 29,
+    "ex": "span"
+   },
+   "2.058": {
+    "n": 1,
+    "ex": "h1.dashboard__title"
+   }
+  },
+  "spaces": {
+   "1": {
+    "n": 67,
+    "ex": "a.skip-link"
+   },
+   "0.5": {
+    "n": 100,
+    "ex": "a.skip-link"
+   },
+   "1.5": {
+    "n": 6,
+    "ex": "header.app-topbar"
+   },
+   "3.75": {
+    "n": 1,
+    "ex": "input.app-topbar__search-input"
+   },
+   "2.5": {
+    "n": 4,
+    "ex": "main.dashboard"
+   },
+   "0.125": {
+    "n": 18,
+    "ex": "span.badge"
+   }
+  },
+  "radii": {
+   "1": {
+    "n": 8,
+    "ex": "article.project-card"
+   },
+   "0.5": {
+    "n": 33,
+    "ex": "a.skip-link"
+   },
+   "2.907": {
+    "n": 1,
+    "ex": "button.app-topbar__avatar"
+   },
+   "pill": {
+    "n": 15,
+    "ex": "progress.app-nav__progress"
+   }
+  },
+  "lineRatio": 1.618,
+  "targets": 32,
+  "small": 0,
+  "smallEx": [],
+  "grids": [],
+  "h1": 1,
+  "overflow": false
+ },
+ {
+  "page": "app/dashboard.html",
+  "view": "tablet",
+  "root": 15.92,
+  "fonts": {
+   "Inter": {
+    "n": 45,
+    "ex": "a.skip-link"
+   },
+   "JetBrains Mono": {
+    "n": 8,
+    "ex": "span.project-card__tag"
+   }
+  },
+  "sizes": {
+   "1": {
+    "n": 14,
+    "ex": "a.skip-link"
+   },
+   "1.272": {
+    "n": 9,
+    "ex": "span.app-topbar__logo-text"
+   },
+   "0.879": {
+    "n": 29,
+    "ex": "span"
+   },
+   "2.058": {
+    "n": 1,
+    "ex": "h1.dashboard__title"
+   }
+  },
+  "spaces": {
+   "1": {
+    "n": 67,
+    "ex": "a.skip-link"
+   },
+   "0.5": {
+    "n": 104,
+    "ex": "a.skip-link"
+   },
+   "3.764": {
+    "n": 1,
+    "ex": "input.app-topbar__search-input"
+   },
+   "1.5": {
+    "n": 6,
+    "ex": "main.dashboard"
+   },
+   "0.125": {
+    "n": 18,
+    "ex": "span.badge"
+   }
+  },
+  "radii": {
+   "1": {
+    "n": 8,
+    "ex": "article.project-card"
+   },
+   "0.5": {
+    "n": 33,
+    "ex": "a.skip-link"
+   },
+   "3.141": {
+    "n": 1,
+    "ex": "button.app-topbar__avatar"
+   },
+   "pill": {
+    "n": 15,
+    "ex": "progress.app-nav__progress"
+   }
+  },
+  "lineRatio": 1.618,
+  "targets": 32,
+  "small": 1,
+  "smallEx": [
+   {
+    "w": 308,
+    "h": 42,
+    "t": "Перейти к основному соде"
+   }
+  ],
+  "grids": [
+   {
+    "sel": "ul.project-list",
+    "a": 348,
+    "b": 348,
+    "ratio": 1
+   }
+  ],
+  "h1": 1,
+  "overflow": false
+ },
+ {
+  "page": "app/dashboard.html",
+  "view": "mobile",
+  "root": 15,
+  "fonts": {
+   "Inter": {
+    "n": 44,
+    "ex": "a.skip-link"
+   },
+   "JetBrains Mono": {
+    "n": 8,
+    "ex": "span.project-card__tag"
+   }
+  },
+  "sizes": {
+   "1": {
+    "n": 14,
+    "ex": "a.skip-link"
+   },
+   "0.933": {
+    "n": 29,
+    "ex": "span"
+   },
+   "2.058": {
+    "n": 1,
+    "ex": "h1.dashboard__title"
+   },
+   "1.272": {
+    "n": 8,
+    "ex": "a.project-card__link"
+   }
+  },
+  "spaces": {
+   "1": {
+    "n": 69,
+    "ex": "a.skip-link"
+   },
+   "0.5": {
+    "n": 106,
+    "ex": "a.skip-link"
+   },
+   "3.933": {
+    "n": 1,
+    "ex": "input.app-topbar__search-input"
+   },
+   "0.125": {
+    "n": 18,
+    "ex": "span.badge"
+   },
+   "1.5": {
+    "n": 2,
+    "ex": "ul.project-list"
+   }
+  },
+  "radii": {
+   "1": {
+    "n": 8,
+    "ex": "article.project-card"
+   },
+   "0.5": {
+    "n": 33,
+    "ex": "a.skip-link"
+   },
+   "3.333": {
+    "n": 1,
+    "ex": "button.app-topbar__avatar"
+   },
+   "pill": {
+    "n": 15,
+    "ex": "progress.app-nav__progress"
+   }
+  },
+  "lineRatio": 1.618,
+  "targets": 32,
+  "small": 1,
+  "smallEx": [
+   {
+    "w": 290,
+    "h": 39,
+    "t": "Перейти к основному соде"
+   }
+  ],
+  "grids": [],
+  "h1": 1,
+  "overflow": false
+ },
+ {
+  "page": "app/settings.html",
+  "view": "desktop",
+  "root": 17.2,
+  "fonts": {
+   "Inter": {
+    "n": 31,
+    "ex": "a.skip-link"
+   }
+  },
+  "sizes": {
+   "1": {
+    "n": 25,
+    "ex": "a.skip-link"
+   },
+   "1.272": {
+    "n": 2,
+    "ex": "span.app-topbar__logo-text"
+   },
+   "0.875": {
+    "n": 3,
+    "ex": "span"
+   },
+   "2.058": {
+    "n": 1,
+    "ex": "h1.settings__title"
+   }
+  },
+  "spaces": {
+   "1": {
+    "n": 44,
+    "ex": "a.skip-link"
+   },
+   "0.5": {
+    "n": 73,
+    "ex": "a.skip-link"
+   },
+   "1.5": {
+    "n": 24,
+    "ex": "header.app-topbar"
+   },
+   "3.75": {
+    "n": 1,
+    "ex": "input.app-topbar__search-input"
+   },
+   "2.5": {
+    "n": 6,
+    "ex": "main.settings"
+   }
+  },
+  "radii": {
+   "1": {
+    "n": 5,
+    "ex": "section.settings-group"
+   },
+   "0.5": {
+    "n": 21,
+    "ex": "a.skip-link"
+   },
+   "2.907": {
+    "n": 1,
+    "ex": "button.app-topbar__avatar"
+   },
+   "pill": {
+    "n": 5,
+    "ex": "progress.app-nav__progress"
+   }
+  },
+  "lineRatio": 1.618,
+  "targets": 27,
+  "small": 7,
+  "smallEx": [
+   {
+    "w": 43,
+    "h": 26,
+    "t": "INPUT"
+   },
+   {
+    "w": 43,
+    "h": 26,
+    "t": "INPUT"
+   },
+   {
+    "w": 43,
+    "h": 26,
+    "t": "INPUT"
+   },
+   {
+    "w": 43,
+    "h": 26,
+    "t": "INPUT"
+   },
+   {
+    "w": 1,
+    "h": 1,
+    "t": "INPUT"
+   },
+   {
+    "w": 1,
+    "h": 1,
+    "t": "INPUT"
+   }
+  ],
+  "grids": [
+   {
+    "sel": "main.settings",
+    "a": 241,
+    "b": 669,
+    "ratio": 2.78
+   },
+   {
+    "sel": "li.settings-row",
+    "a": 365,
+    "b": 225,
+    "ratio": 1.618
+   },
+   {
+    "sel": "li.settings-row",
+    "a": 365,
+    "b": 225,
+    "ratio": 1.618
+   },
+   {
+    "sel": "li.settings-row",
+    "a": 365,
+    "b": 225,
+    "ratio": 1.618
+   },
+   {
+    "sel": "li.settings-row",
+    "a": 365,
+    "b": 225,
+    "ratio": 1.618
+   },
+   {
+    "sel": "li.settings-row",
+    "a": 365,
+    "b": 225,
+    "ratio": 1.618
+   },
+   {
+    "sel": "li.settings-row",
+    "a": 365,
+    "b": 225,
+    "ratio": 1.618
+   },
+   {
+    "sel": "li.settings-row",
+    "a": 365,
+    "b": 225,
+    "ratio": 1.618
+   },
+   {
+    "sel": "li.settings-row",
+    "a": 365,
+    "b": 225,
+    "ratio": 1.618
+   },
+   {
+    "sel": "div.theme-options",
+    "a": 299,
+    "b": 299,
+    "ratio": 1
+   }
+  ],
+  "h1": 1,
+  "overflow": false
+ },
+ {
+  "page": "app/settings.html",
+  "view": "tablet",
+  "root": 15.92,
+  "fonts": {
+   "Inter": {
+    "n": 31,
+    "ex": "a.skip-link"
+   }
+  },
+  "sizes": {
+   "1": {
+    "n": 25,
+    "ex": "a.skip-link"
+   },
+   "1.272": {
+    "n": 2,
+    "ex": "span.app-topbar__logo-text"
+   },
+   "0.879": {
+    "n": 3,
+    "ex": "span"
+   },
+   "2.058": {
+    "n": 1,
+    "ex": "h1.settings__title"
+   }
+  },
+  "spaces": {
+   "1": {
+    "n": 44,
+    "ex": "a.skip-link"
+   },
+   "0.5": {
+    "n": 77,
+    "ex": "a.skip-link"
+   },
+   "3.764": {
+    "n": 1,
+    "ex": "input.app-topbar__search-input"
+   },
+   "1.5": {
+    "n": 26,
+    "ex": "main.settings"
+   }
+  },
+  "radii": {
+   "1": {
+    "n": 5,
+    "ex": "section.settings-group"
+   },
+   "0.5": {
+    "n": 21,
+    "ex": "a.skip-link"
+   },
+   "3.141": {
+    "n": 1,
+    "ex": "button.app-topbar__avatar"
+   },
+   "pill": {
+    "n": 5,
+    "ex": "progress.app-nav__progress"
+   }
+  },
+  "lineRatio": 1.618,
+  "targets": 27,
+  "small": 8,
+  "smallEx": [
+   {
+    "w": 308,
+    "h": 42,
+    "t": "Перейти к основному соде"
+   },
+   {
+    "w": 40,
+    "h": 24,
+    "t": "INPUT"
+   },
+   {
+    "w": 40,
+    "h": 24,
+    "t": "INPUT"
+   },
+   {
+    "w": 40,
+    "h": 24,
+    "t": "INPUT"
+   },
+   {
+    "w": 40,
+    "h": 24,
+    "t": "INPUT"
+   },
+   {
+    "w": 1,
+    "h": 1,
+    "t": "INPUT"
+   }
+  ],
+  "grids": [
+   {
+    "sel": "li.settings-row",
+    "a": 400,
+    "b": 247,
+    "ratio": 1.618
+   },
+   {
+    "sel": "li.settings-row",
+    "a": 400,
+    "b": 247,
+    "ratio": 1.618
+   },
+   {
+    "sel": "li.settings-row",
+    "a": 400,
+    "b": 247,
+    "ratio": 1.618
+   },
+   {
+    "sel": "li.settings-row",
+    "a": 400,
+    "b": 247,
+    "ratio": 1.618
+   },
+   {
+    "sel": "li.settings-row",
+    "a": 400,
+    "b": 247,
+    "ratio": 1.618
+   },
+   {
+    "sel": "li.settings-row",
+    "a": 400,
+    "b": 247,
+    "ratio": 1.618
+   },
+   {
+    "sel": "li.settings-row",
+    "a": 400,
+    "b": 247,
+    "ratio": 1.618
+   },
+   {
+    "sel": "li.settings-row",
+    "a": 400,
+    "b": 247,
+    "ratio": 1.618
+   }
+  ],
+  "h1": 1,
+  "overflow": false
+ },
+ {
+  "page": "app/settings.html",
+  "view": "mobile",
+  "root": 15,
+  "fonts": {
+   "Inter": {
+    "n": 30,
+    "ex": "a.skip-link"
+   }
+  },
+  "sizes": {
+   "1": {
+    "n": 25,
+    "ex": "a.skip-link"
+   },
+   "0.933": {
+    "n": 3,
+    "ex": "span"
+   },
+   "2.058": {
+    "n": 1,
+    "ex": "h1.settings__title"
+   },
+   "1.272": {
+    "n": 1,
+    "ex": "legend.settings-group__title"
+   }
+  },
+  "spaces": {
+   "1": {
+    "n": 50,
+    "ex": "a.skip-link"
+   },
+   "0.5": {
+    "n": 95,
+    "ex": "a.skip-link"
+   },
+   "3.933": {
+    "n": 1,
+    "ex": "input.app-topbar__search-input"
+   },
+   "1.5": {
+    "n": 2,
+    "ex": "main.settings"
+   }
+  },
+  "radii": {
+   "1": {
+    "n": 5,
+    "ex": "section.settings-group"
+   },
+   "0.5": {
+    "n": 21,
+    "ex": "a.skip-link"
+   },
+   "3.333": {
+    "n": 1,
+    "ex": "button.app-topbar__avatar"
+   },
+   "pill": {
+    "n": 5,
+    "ex": "progress.app-nav__progress"
+   }
+  },
+  "lineRatio": 1.618,
+  "targets": 27,
+  "small": 8,
+  "smallEx": [
+   {
+    "w": 290,
+    "h": 39,
+    "t": "Перейти к основному соде"
+   },
+   {
+    "w": 38,
+    "h": 23,
+    "t": "INPUT"
+   },
+   {
+    "w": 38,
+    "h": 23,
+    "t": "INPUT"
+   },
+   {
+    "w": 38,
+    "h": 23,
+    "t": "INPUT"
+   },
+   {
+    "w": 38,
+    "h": 23,
+    "t": "INPUT"
+   },
+   {
+    "w": 1,
+    "h": 1,
+    "t": "INPUT"
+   }
+  ],
+  "grids": [],
+  "h1": 1,
+  "overflow": false
+ },
+ {
+  "page": "app/editor.html",
+  "view": "desktop",
+  "root": 17.2,
+  "fonts": {
+   "Inter": {
+    "n": 67,
+    "ex": "a.skip-link"
+   },
+   "JetBrains Mono": {
+    "n": 20,
+    "ex": "code"
+   }
+  },
+  "sizes": {
+   "1": {
+    "n": 6,
+    "ex": "a.editor-toolbar__logo"
+   },
+   "0.875": {
+    "n": 52,
+    "ex": "a.skip-link"
+   },
+   "1.75": {
+    "n": 1,
+    "ex": "h1.visually-hidden"
+   },
+   "0.805": {
+    "n": 20,
+    "ex": "code"
+   },
+   "0.814": {
+    "n": 6,
+    "ex": "text"
+   },
+   "0.581": {
+    "n": 1,
+    "ex": "text"
+   },
+   "1.313": {
+    "n": 1,
+    "ex": "h2.visually-hidden"
+   }
+  },
+  "spaces": {
+   "1": {
+    "n": 67,
+    "ex": "a.skip-link"
+   },
+   "0.5": {
+    "n": 110,
+    "ex": "a.skip-link"
+   },
+   "1.5": {
+    "n": 33,
+    "ex": "div.editor-toolbar__row"
+   },
+   "0.25": {
+    "n": 20,
+    "ex": "div.editor-toolbar__group"
+   },
+   "0.058": {
+    "n": 8,
+    "ex": "button.editor-activity__button"
+   },
+   "0.349": {
+    "n": 8,
+    "ex": "button.editor-activity__button"
+   },
+   "0.125": {
+    "n": 12,
+    "ex": "ul.file-tree"
+   },
+   "0.375": {
+    "n": 8,
+    "ex": "button.problems__tab"
+   }
+  },
+  "radii": {
+   "1": {
+    "n": 4,
+    "ex": "div.editor-menu__panel"
+   },
+   "0.5": {
+    "n": 36,
+    "ex": "a.skip-link"
+   },
+   "pill": {
+    "n": 8,
+    "ex": "span.editor-toolbar__switch-track"
+   },
+   "2.907": {
+    "n": 2,
+    "ex": "span.editor-toolbar__avatar"
+   }
+  },
+  "lineRatio": 1.618,
+  "targets": 44,
+  "small": 1,
+  "smallEx": [
+   {
+    "w": 296,
+    "h": 42,
+    "t": "Перейти к основному соде"
+   }
+  ],
+  "grids": [
+   {
+    "sel": "main.editor-main",
+    "a": 376,
+    "b": 608,
+    "ratio": 1.618
+   }
+  ],
+  "h1": 1,
+  "overflow": false
+ },
+ {
+  "page": "app/editor.html",
+  "view": "tablet",
+  "root": 15.92,
+  "fonts": {
+   "Inter": {
+    "n": 54,
+    "ex": "a.skip-link"
+   },
+   "JetBrains Mono": {
+    "n": 20,
+    "ex": "code"
+   }
+  },
+  "sizes": {
+   "1": {
+    "n": 6,
+    "ex": "a.editor-toolbar__logo"
+   },
+   "0.879": {
+    "n": 43,
+    "ex": "a.skip-link"
+   },
+   "1.759": {
+    "n": 1,
+    "ex": "h1.visually-hidden"
+   },
+   "0.809": {
+    "n": 20,
+    "ex": "code"
+   },
+   "0.875": {
+    "n": 2,
+    "ex": "p.canvas__status"
+   },
+   "0.628": {
+    "n": 1,
+    "ex": "text"
+   },
+   "1.319": {
+    "n": 1,
+    "ex": "h2.visually-hidden"
+   }
+  },
+  "spaces": {
+   "1": {
+    "n": 57,
+    "ex": "a.skip-link"
+   },
+   "0.5": {
+    "n": 78,
+    "ex": "a.skip-link"
+   },
+   "1.5": {
+    "n": 33,
+    "ex": "div.editor-toolbar__row"
+   },
+   "0.25": {
+    "n": 20,
+    "ex": "div.editor-toolbar__group"
+   },
+   "0.063": {
+    "n": 8,
+    "ex": "button.editor-activity__button"
+   },
+   "0.377": {
+    "n": 8,
+    "ex": "button.editor-activity__button"
+   },
+   "0.125": {
+    "n": 2,
+    "ex": "div.editor-tabs__list"
+   },
+   "0.375": {
+    "n": 8,
+    "ex": "button.problems__tab"
+   }
+  },
+  "radii": {
+   "1": {
+    "n": 3,
+    "ex": "div.editor-menu__panel"
+   },
+   "0.5": {
+    "n": 30,
+    "ex": "a.skip-link"
+   },
+   "pill": {
+    "n": 5,
+    "ex": "span.editor-toolbar__switch-track"
+   },
+   "3.141": {
+    "n": 2,
+    "ex": "span.editor-toolbar__avatar"
+   }
+  },
+  "lineRatio": 1.618,
+  "targets": 38,
+  "small": 1,
+  "smallEx": [
+   {
+    "w": 275,
+    "h": 39,
+    "t": "Перейти к основному соде"
+   }
+  ],
+  "grids": [
+   {
+    "sel": "main.editor-main",
+    "a": 275,
+    "b": 445,
+    "ratio": 1.618
+   }
+  ],
+  "h1": 1,
+  "overflow": false
+ },
+ {
+  "page": "app/editor.html",
+  "view": "mobile",
+  "root": 15,
+  "fonts": {
+   "Inter": {
+    "n": 46,
+    "ex": "a.skip-link"
+   },
+   "JetBrains Mono": {
+    "n": 1,
+    "ex": "span.editor-topbar__title"
+   }
+  },
+  "sizes": {
+   "1": {
+    "n": 7,
+    "ex": "span"
+   },
+   "0.933": {
+    "n": 35,
+    "ex": "a.skip-link"
+   },
+   "1.867": {
+    "n": 1,
+    "ex": "h1.visually-hidden"
+   },
+   "0.875": {
+    "n": 2,
+    "ex": "p.canvas__status"
+   },
+   "0.667": {
+    "n": 1,
+    "ex": "text"
+   },
+   "1.4": {
+    "n": 1,
+    "ex": "h2.visually-hidden"
+   }
+  },
+  "spaces": {
+   "1": {
+    "n": 42,
+    "ex": "a.skip-link"
+   },
+   "4": {
+    "n": 1,
+    "ex": "figure.canvas"
+   },
+   "0.5": {
+    "n": 63,
+    "ex": "a.skip-link"
+   },
+   "1.5": {
+    "n": 22,
+    "ex": "button.button"
+   },
+   "0.25": {
+    "n": 16,
+    "ex": "fieldset.editor-segmented"
+   },
+   "0.067": {
+    "n": 4,
+    "ex": "button.editor-segmented__button"
+   },
+   "0.4": {
+    "n": 4,
+    "ex": "button.editor-segmented__button"
+   },
+   "0.125": {
+    "n": 10,
+    "ex": "div.editor-tabs__list"
+   },
+   "0.375": {
+    "n": 8,
+    "ex": "button.problems__tab"
+   }
+  },
+  "radii": {
+   "1": {
+    "n": 3,
+    "ex": "div.editor-menu__panel"
+   },
+   "0.5": {
+    "n": 17,
+    "ex": "a.skip-link"
+   },
+   "3.333": {
+    "n": 2,
+    "ex": "span.editor-topbar__dot"
+   },
+   "pill": {
+    "n": 7,
+    "ex": "fieldset.editor-segmented"
+   }
+  },
+  "lineRatio": 1.618,
+  "targets": 30,
+  "small": 1,
+  "smallEx": [
+   {
+    "w": 273,
+    "h": 38,
+    "t": "Перейти к основному соде"
+   }
+  ],
+  "grids": [],
+  "h1": 1,
+  "overflow": false
+ },
+ {
+  "page": "en/app/editor.html",
+  "view": "desktop",
+  "root": 17.2,
+  "fonts": {
+   "Inter": {
+    "n": 67,
+    "ex": "a.skip-link"
+   },
+   "JetBrains Mono": {
+    "n": 20,
+    "ex": "code"
+   }
+  },
+  "sizes": {
+   "1": {
+    "n": 6,
+    "ex": "a.editor-toolbar__logo"
+   },
+   "0.875": {
+    "n": 52,
+    "ex": "a.skip-link"
+   },
+   "1.75": {
+    "n": 1,
+    "ex": "h1.visually-hidden"
+   },
+   "0.805": {
+    "n": 20,
+    "ex": "code"
+   },
+   "0.814": {
+    "n": 6,
+    "ex": "text"
+   },
+   "0.581": {
+    "n": 1,
+    "ex": "text"
+   },
+   "1.313": {
+    "n": 1,
+    "ex": "h2.visually-hidden"
+   }
+  },
+  "spaces": {
+   "1": {
+    "n": 67,
+    "ex": "a.skip-link"
+   },
+   "0.5": {
+    "n": 110,
+    "ex": "a.skip-link"
+   },
+   "1.5": {
+    "n": 33,
+    "ex": "div.editor-toolbar__row"
+   },
+   "0.25": {
+    "n": 20,
+    "ex": "div.editor-toolbar__group"
+   },
+   "0.058": {
+    "n": 8,
+    "ex": "button.editor-activity__button"
+   },
+   "0.349": {
+    "n": 8,
+    "ex": "button.editor-activity__button"
+   },
+   "0.125": {
+    "n": 12,
+    "ex": "ul.file-tree"
+   },
+   "0.375": {
+    "n": 8,
+    "ex": "button.problems__tab"
+   }
+  },
+  "radii": {
+   "1": {
+    "n": 4,
+    "ex": "div.editor-menu__panel"
+   },
+   "0.5": {
+    "n": 36,
+    "ex": "a.skip-link"
+   },
+   "pill": {
+    "n": 8,
+    "ex": "span.editor-toolbar__switch-track"
+   },
+   "2.907": {
+    "n": 2,
+    "ex": "span.editor-toolbar__avatar"
+   }
+  },
+  "lineRatio": 1.618,
+  "targets": 44,
+  "small": 1,
+  "smallEx": [
+   {
+    "w": 177,
+    "h": 42,
+    "t": "Skip to main content"
+   }
+  ],
+  "grids": [
+   {
+    "sel": "main.editor-main",
+    "a": 376,
+    "b": 608,
+    "ratio": 1.618
+   }
+  ],
+  "h1": 1,
+  "overflow": false
+ },
+ {
+  "page": "en/app/editor.html",
+  "view": "tablet",
+  "root": 15.92,
+  "fonts": {
+   "Inter": {
+    "n": 54,
+    "ex": "a.skip-link"
+   },
+   "JetBrains Mono": {
+    "n": 20,
+    "ex": "code"
+   }
+  },
+  "sizes": {
+   "1": {
+    "n": 6,
+    "ex": "a.editor-toolbar__logo"
+   },
+   "0.879": {
+    "n": 43,
+    "ex": "a.skip-link"
+   },
+   "1.759": {
+    "n": 1,
+    "ex": "h1.visually-hidden"
+   },
+   "0.809": {
+    "n": 20,
+    "ex": "code"
+   },
+   "0.875": {
+    "n": 2,
+    "ex": "p.canvas__status"
+   },
+   "0.628": {
+    "n": 1,
+    "ex": "text"
+   },
+   "1.319": {
+    "n": 1,
+    "ex": "h2.visually-hidden"
+   }
+  },
+  "spaces": {
+   "1": {
+    "n": 57,
+    "ex": "a.skip-link"
+   },
+   "0.5": {
+    "n": 78,
+    "ex": "a.skip-link"
+   },
+   "1.5": {
+    "n": 33,
+    "ex": "div.editor-toolbar__row"
+   },
+   "0.25": {
+    "n": 20,
+    "ex": "div.editor-toolbar__group"
+   },
+   "0.063": {
+    "n": 8,
+    "ex": "button.editor-activity__button"
+   },
+   "0.377": {
+    "n": 8,
+    "ex": "button.editor-activity__button"
+   },
+   "0.125": {
+    "n": 2,
+    "ex": "div.editor-tabs__list"
+   },
+   "0.375": {
+    "n": 8,
+    "ex": "button.problems__tab"
+   }
+  },
+  "radii": {
+   "1": {
+    "n": 3,
+    "ex": "div.editor-menu__panel"
+   },
+   "0.5": {
+    "n": 30,
+    "ex": "a.skip-link"
+   },
+   "pill": {
+    "n": 5,
+    "ex": "span.editor-toolbar__switch-track"
+   },
+   "3.141": {
+    "n": 2,
+    "ex": "span.editor-toolbar__avatar"
+   }
+  },
+  "lineRatio": 1.618,
+  "targets": 38,
+  "small": 1,
+  "smallEx": [
+   {
+    "w": 164,
+    "h": 39,
+    "t": "Skip to main content"
+   }
+  ],
+  "grids": [
+   {
+    "sel": "main.editor-main",
+    "a": 275,
+    "b": 445,
+    "ratio": 1.618
+   }
+  ],
+  "h1": 1,
+  "overflow": false
+ },
+ {
+  "page": "en/app/editor.html",
+  "view": "mobile",
+  "root": 15,
+  "fonts": {
+   "Inter": {
+    "n": 46,
+    "ex": "a.skip-link"
+   },
+   "JetBrains Mono": {
+    "n": 1,
+    "ex": "span.editor-topbar__title"
+   }
+  },
+  "sizes": {
+   "1": {
+    "n": 7,
+    "ex": "span"
+   },
+   "0.933": {
+    "n": 35,
+    "ex": "a.skip-link"
+   },
+   "1.867": {
+    "n": 1,
+    "ex": "h1.visually-hidden"
+   },
+   "0.875": {
+    "n": 2,
+    "ex": "p.canvas__status"
+   },
+   "0.667": {
+    "n": 1,
+    "ex": "text"
+   },
+   "1.4": {
+    "n": 1,
+    "ex": "h2.visually-hidden"
+   }
+  },
+  "spaces": {
+   "1": {
+    "n": 42,
+    "ex": "a.skip-link"
+   },
+   "4": {
+    "n": 1,
+    "ex": "figure.canvas"
+   },
+   "0.5": {
+    "n": 63,
+    "ex": "a.skip-link"
+   },
+   "1.5": {
+    "n": 22,
+    "ex": "button.button"
+   },
+   "0.25": {
+    "n": 16,
+    "ex": "fieldset.editor-segmented"
+   },
+   "0.067": {
+    "n": 4,
+    "ex": "button.editor-segmented__button"
+   },
+   "0.4": {
+    "n": 4,
+    "ex": "button.editor-segmented__button"
+   },
+   "0.125": {
+    "n": 10,
+    "ex": "div.editor-tabs__list"
+   },
+   "0.375": {
+    "n": 8,
+    "ex": "button.problems__tab"
+   }
+  },
+  "radii": {
+   "1": {
+    "n": 3,
+    "ex": "div.editor-menu__panel"
+   },
+   "0.5": {
+    "n": 17,
+    "ex": "a.skip-link"
+   },
+   "3.333": {
+    "n": 2,
+    "ex": "span.editor-topbar__dot"
+   },
+   "pill": {
+    "n": 7,
+    "ex": "fieldset.editor-segmented"
+   }
+  },
+  "lineRatio": 1.618,
+  "targets": 30,
+  "small": 1,
+  "smallEx": [
+   {
+    "w": 162,
+    "h": 38,
+    "t": "Skip to main content"
+   }
+  ],
+  "grids": [],
+  "h1": 1,
+  "overflow": false
+ },
+ {
+  "page": "errors/404.html",
+  "view": "desktop",
+  "root": 17.2,
+  "fonts": {
+   "Inter": {
+    "n": 23,
+    "ex": "a.skip-link"
+   },
+   "JetBrains Mono": {
+    "n": 2,
+    "ex": "p.error__code"
+   }
+  },
+  "sizes": {
+   "1": {
+    "n": 17,
+    "ex": "a.skip-link"
+   },
+   "1.272": {
+    "n": 1,
+    "ex": "span.header__logo-text"
+   },
+   "0.875": {
+    "n": 5,
+    "ex": "p.error__code"
+   },
+   "2.618": {
+    "n": 2,
+    "ex": "h1.error__title"
+   }
+  },
+  "spaces": {
+   "1": {
+    "n": 10,
+    "ex": "a.skip-link"
+   },
+   "4": {
+    "n": 2,
+    "ex": "div.footer__inner"
+   },
+   "0.5": {
+    "n": 13,
+    "ex": "a.skip-link"
+   },
+   "1.5": {
+    "n": 17,
+    "ex": "div.header__inner"
+   },
+   "2.5": {
+    "n": 8,
+    "ex": "section.error"
+   },
+   "0.125": {
+    "n": 4,
+    "ex": "p.error__code"
+   }
+  },
+  "radii": {
+   "0.5": {
+    "n": 3,
+    "ex": "a.skip-link"
+   },
+   "1.5": {
+    "n": 2,
+    "ex": "section.error"
+   },
+   "pill": {
+    "n": 2,
+    "ex": "p.error__code"
+   }
+  },
+  "lineRatio": 1.618,
+  "targets": 9,
+  "small": 0,
+  "smallEx": [],
+  "grids": [
+   {
+    "sel": "div.header__inner",
+    "a": 109,
+    "b": 1040,
+    "ratio": 9.551
+   }
+  ],
+  "h1": 1,
+  "overflow": false
+ },
+ {
+  "page": "errors/404.html",
+  "view": "tablet",
+  "root": 15.92,
+  "fonts": {
+   "Inter": {
+    "n": 23,
+    "ex": "a.skip-link"
+   },
+   "JetBrains Mono": {
+    "n": 2,
+    "ex": "p.error__code"
+   }
+  },
+  "sizes": {
+   "1": {
+    "n": 17,
+    "ex": "a.skip-link"
+   },
+   "1.272": {
+    "n": 1,
+    "ex": "span.header__logo-text"
+   },
+   "0.879": {
+    "n": 5,
+    "ex": "p.error__code"
+   },
+   "2.618": {
+    "n": 2,
+    "ex": "h1.error__title"
+   }
+  },
+  "spaces": {
+   "1": {
+    "n": 12,
+    "ex": "a.skip-link"
+   },
+   "4": {
+    "n": 2,
+    "ex": "div.footer__inner"
+   },
+   "0.5": {
+    "n": 13,
+    "ex": "a.skip-link"
+   },
+   "1.5": {
+    "n": 15,
+    "ex": "div.header__inner"
+   },
+   "2.5": {
+    "n": 8,
+    "ex": "section.error"
+   },
+   "0.125": {
+    "n": 4,
+    "ex": "p.error__code"
+   }
+  },
+  "radii": {
+   "0.5": {
+    "n": 3,
+    "ex": "a.skip-link"
+   },
+   "1.5": {
+    "n": 2,
+    "ex": "section.error"
+   },
+   "pill": {
+    "n": 2,
+    "ex": "p.error__code"
+   }
+  },
+  "lineRatio": 1.618,
+  "targets": 9,
+  "small": 1,
+  "smallEx": [
+   {
+    "w": 308,
+    "h": 42,
+    "t": "Перейти к основному соде"
+   }
+  ],
+  "grids": [
+   {
+    "sel": "div.header__inner",
+    "a": 101,
+    "b": 588,
+    "ratio": 5.832
+   }
+  ],
+  "h1": 1,
+  "overflow": false
+ },
+ {
+  "page": "errors/404.html",
+  "view": "mobile",
+  "root": 15,
+  "fonts": {
+   "Inter": {
+    "n": 23,
+    "ex": "a.skip-link"
+   },
+   "JetBrains Mono": {
+    "n": 2,
+    "ex": "p.error__code"
+   }
+  },
+  "sizes": {
+   "1": {
+    "n": 17,
+    "ex": "a.skip-link"
+   },
+   "1.272": {
+    "n": 1,
+    "ex": "span.header__logo-text"
+   },
+   "0.933": {
+    "n": 5,
+    "ex": "p.error__code"
+   },
+   "2.618": {
+    "n": 2,
+    "ex": "h1.error__title"
+   }
+  },
+  "spaces": {
+   "1": {
+    "n": 12,
+    "ex": "a.skip-link"
+   },
+   "4": {
+    "n": 2,
+    "ex": "div.footer__inner"
+   },
+   "0.5": {
+    "n": 13,
+    "ex": "a.skip-link"
+   },
+   "1.5": {
+    "n": 15,
+    "ex": "div.header__inner"
+   },
+   "2.5": {
+    "n": 8,
+    "ex": "section.error"
+   },
+   "0.125": {
+    "n": 4,
+    "ex": "p.error__code"
+   }
+  },
+  "radii": {
+   "0.5": {
+    "n": 3,
+    "ex": "a.skip-link"
+   },
+   "1.5": {
+    "n": 2,
+    "ex": "section.error"
+   },
+   "pill": {
+    "n": 2,
+    "ex": "p.error__code"
+   }
+  },
+  "lineRatio": 1.618,
+  "targets": 9,
+  "small": 1,
+  "smallEx": [
+   {
+    "w": 290,
+    "h": 39,
+    "t": "Перейти к основному соде"
+   }
+  ],
+  "grids": [],
+  "h1": 1,
+  "overflow": false
+ },
+ {
+  "page": "errors/500.html",
+  "view": "desktop",
+  "root": 17.2,
+  "fonts": {
+   "Inter": {
+    "n": 25,
+    "ex": "a.skip-link"
+   },
+   "JetBrains Mono": {
+    "n": 2,
+    "ex": "p.error__code"
+   }
+  },
+  "sizes": {
+   "1": {
+    "n": 19,
+    "ex": "a.skip-link"
+   },
+   "1.272": {
+    "n": 1,
+    "ex": "span.header__logo-text"
+   },
+   "0.875": {
+    "n": 5,
+    "ex": "p.error__code"
+   },
+   "2.618": {
+    "n": 2,
+    "ex": "h1.error__title"
+   }
+  },
+  "spaces": {
+   "1": {
+    "n": 10,
+    "ex": "a.skip-link"
+   },
+   "4": {
+    "n": 2,
+    "ex": "div.footer__inner"
+   },
+   "0.5": {
+    "n": 13,
+    "ex": "a.skip-link"
+   },
+   "1.5": {
+    "n": 17,
+    "ex": "div.header__inner"
+   },
+   "2.5": {
+    "n": 8,
+    "ex": "section.error"
+   },
+   "0.125": {
+    "n": 4,
+    "ex": "p.error__code"
+   }
+  },
+  "radii": {
+   "0.5": {
+    "n": 3,
+    "ex": "a.skip-link"
+   },
+   "1.5": {
+    "n": 2,
+    "ex": "section.error"
+   },
+   "pill": {
+    "n": 2,
+    "ex": "p.error__code"
+   }
+  },
+  "lineRatio": 1.618,
+  "targets": 11,
+  "small": 2,
+  "smallEx": [
+   {
+    "w": 116,
+    "h": 23,
+    "t": "hello@dslkit.io"
+   },
+   {
+    "w": 116,
+    "h": 23,
+    "t": "hello@dslkit.io"
+   }
+  ],
+  "grids": [
+   {
+    "sel": "div.header__inner",
+    "a": 109,
+    "b": 1040,
+    "ratio": 9.551
+   }
+  ],
+  "h1": 1,
+  "overflow": false
+ },
+ {
+  "page": "errors/500.html",
+  "view": "tablet",
+  "root": 15.92,
+  "fonts": {
+   "Inter": {
+    "n": 25,
+    "ex": "a.skip-link"
+   },
+   "JetBrains Mono": {
+    "n": 2,
+    "ex": "p.error__code"
+   }
+  },
+  "sizes": {
+   "1": {
+    "n": 19,
+    "ex": "a.skip-link"
+   },
+   "1.272": {
+    "n": 1,
+    "ex": "span.header__logo-text"
+   },
+   "0.879": {
+    "n": 5,
+    "ex": "p.error__code"
+   },
+   "2.618": {
+    "n": 2,
+    "ex": "h1.error__title"
+   }
+  },
+  "spaces": {
+   "1": {
+    "n": 12,
+    "ex": "a.skip-link"
+   },
+   "4": {
+    "n": 2,
+    "ex": "div.footer__inner"
+   },
+   "0.5": {
+    "n": 13,
+    "ex": "a.skip-link"
+   },
+   "1.5": {
+    "n": 15,
+    "ex": "div.header__inner"
+   },
+   "2.5": {
+    "n": 8,
+    "ex": "section.error"
+   },
+   "0.125": {
+    "n": 4,
+    "ex": "p.error__code"
+   }
+  },
+  "radii": {
+   "0.5": {
+    "n": 3,
+    "ex": "a.skip-link"
+   },
+   "1.5": {
+    "n": 2,
+    "ex": "section.error"
+   },
+   "pill": {
+    "n": 2,
+    "ex": "p.error__code"
+   }
+  },
+  "lineRatio": 1.618,
+  "targets": 11,
+  "small": 3,
+  "smallEx": [
+   {
+    "w": 308,
+    "h": 42,
+    "t": "Перейти к основному соде"
+   },
+   {
+    "w": 107,
+    "h": 21,
+    "t": "hello@dslkit.io"
+   },
+   {
+    "w": 107,
+    "h": 21,
+    "t": "hello@dslkit.io"
+   }
+  ],
+  "grids": [
+   {
+    "sel": "div.header__inner",
+    "a": 101,
+    "b": 588,
+    "ratio": 5.832
+   }
+  ],
+  "h1": 1,
+  "overflow": false
+ },
+ {
+  "page": "errors/500.html",
+  "view": "mobile",
+  "root": 15,
+  "fonts": {
+   "Inter": {
+    "n": 25,
+    "ex": "a.skip-link"
+   },
+   "JetBrains Mono": {
+    "n": 2,
+    "ex": "p.error__code"
+   }
+  },
+  "sizes": {
+   "1": {
+    "n": 19,
+    "ex": "a.skip-link"
+   },
+   "1.272": {
+    "n": 1,
+    "ex": "span.header__logo-text"
+   },
+   "0.933": {
+    "n": 5,
+    "ex": "p.error__code"
+   },
+   "2.618": {
+    "n": 2,
+    "ex": "h1.error__title"
+   }
+  },
+  "spaces": {
+   "1": {
+    "n": 12,
+    "ex": "a.skip-link"
+   },
+   "4": {
+    "n": 2,
+    "ex": "div.footer__inner"
+   },
+   "0.5": {
+    "n": 13,
+    "ex": "a.skip-link"
+   },
+   "1.5": {
+    "n": 15,
+    "ex": "div.header__inner"
+   },
+   "2.5": {
+    "n": 8,
+    "ex": "section.error"
+   },
+   "0.125": {
+    "n": 4,
+    "ex": "p.error__code"
+   }
+  },
+  "radii": {
+   "0.5": {
+    "n": 3,
+    "ex": "a.skip-link"
+   },
+   "1.5": {
+    "n": 2,
+    "ex": "section.error"
+   },
+   "pill": {
+    "n": 2,
+    "ex": "p.error__code"
+   }
+  },
+  "lineRatio": 1.618,
+  "targets": 11,
+  "small": 3,
+  "smallEx": [
+   {
+    "w": 290,
+    "h": 39,
+    "t": "Перейти к основному соде"
+   },
+   {
+    "w": 101,
+    "h": 20,
+    "t": "hello@dslkit.io"
+   },
+   {
+    "w": 101,
+    "h": 20,
+    "t": "hello@dslkit.io"
+   }
+  ],
+  "grids": [],
+  "h1": 1,
+  "overflow": false
+ }
+]

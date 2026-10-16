@@ -57,7 +57,7 @@
   .nav__link {
     min-height: var(--target-size-small);
     padding: 0 var(--space-1);
-    font-size: var(--step--1);
+    font-size: var(--text-small);
   }
 
   .hero__facts {
@@ -103,4 +103,63 @@
   .cards {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
+}
+
+/* Touch targets: every control is at least 44 x 44 px (WCAG 2.5.8 asks 24 px, the interface rules of the project ask 44 px). */
+.header__logo,
+.nav__link,
+.footer__link,
+.card__link,
+.template-card__link,
+.project-card__link,
+.app-topbar__logo,
+.editor-toolbar__logo,
+.canvas__engine-link,
+.problems__location {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--target-size-small);
+}
+
+.filter__chip,
+.app-topbar__new,
+.app-topbar__search-input,
+.sort__select,
+.settings-row__select,
+.editor-tabs__tab,
+.problems__tab,
+.editor-segmented__button,
+.canvas__history-item,
+.button {
+  min-height: var(--target-size-small);
+}
+
+.app-topbar__avatar,
+.app-topbar__search-button,
+.project-card__menu,
+.editor-activity__button,
+.editor-tabs__close,
+.button--icon {
+  min-width: var(--target-size-small);
+  min-height: var(--target-size-small);
+}
+
+.form__checkbox {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.app-topbar__logo {
+  min-width: var(--target-size-small);
+  justify-content: center;
+}
+
+.problems__location {
+  align-self: center;
+  min-width: var(--target-size-small);
+  justify-content: center;
+}
+
+.template-card__link {
+  min-width: var(--target-size-small);
 }

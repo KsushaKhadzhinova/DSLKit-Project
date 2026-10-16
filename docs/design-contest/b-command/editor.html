@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <meta name="description" content="Редактор DSLKit: слева код диаграммы, справа результат." />
+    <title>Редактор order.dsl — DSLKit</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body class="app-page app-page--editor">
+    <a class="skip-link" href="#main">Перейти к основному содержимому</a>
+    <svg class="sprite" aria-hidden="true" focusable="false">
+      <symbol id="i-search" viewBox="0 0 20 20"><circle cx="9" cy="9" r="5" /><path d="M13 13l4 4" /></symbol>
+      <symbol id="i-play" viewBox="0 0 20 20"><path d="M6 4l10 6-10 6z" /></symbol>
+      <symbol id="i-more" viewBox="0 0 20 20"><circle cx="5" cy="10" r="1" /><circle cx="10" cy="10" r="1" /><circle cx="15" cy="10" r="1" /></symbol>
+      <symbol id="i-undo" viewBox="0 0 20 20"><path d="M8 5L4 9l4 4" /><path d="M4 9h7a4 4 0 010 8H9" /></symbol>
+      <symbol id="i-redo" viewBox="0 0 20 20"><path d="M12 5l4 4-4 4" /><path d="M16 9H9a4 4 0 000 8h2" /></symbol>
+      <symbol id="i-share" viewBox="0 0 20 20"><circle cx="5" cy="10" r="2" /><circle cx="15" cy="5" r="2" /><circle cx="15" cy="15" r="2" /><path d="M7 9l6-3M7 11l6 3" /></symbol>
+      <symbol id="i-format" viewBox="0 0 20 20"><path d="M4 6h12M4 10h8M4 14h10" /></symbol>
+      <symbol id="i-layout" viewBox="0 0 20 20"><path d="M3 4h14v12H3zM3 8h14M8 8v8" /></symbol>
+      <symbol id="i-gear" viewBox="0 0 20 20"><circle cx="10" cy="10" r="3" /><path d="M10 2v3M10 15v3M2 10h3M15 10h3M4.5 4.5l2 2M13.5 13.5l2 2M15.5 4.5l-2 2M6.5 13.5l-2 2" /></symbol>
+      <symbol id="i-theme" viewBox="0 0 20 20"><path d="M16 11A6 6 0 119 4a5 5 0 007 7z" /></symbol>
+      <symbol id="i-code" viewBox="0 0 20 20"><path d="M7 6l-4 4 4 4M13 6l4 4-4 4" /></symbol>
+      <symbol id="i-files" viewBox="0 0 20 20"><path d="M3 6h5l2 2h7v8H3z" /></symbol>
+      <symbol id="i-error" viewBox="0 0 20 20"><circle cx="10" cy="10" r="7" /><path d="M7 7l6 6M13 7l-6 6" /></symbol>
+      <symbol id="i-warning" viewBox="0 0 20 20"><path d="M10 3l8 14H2z" /><path d="M10 8v4M10 14v.5" /></symbol>
+      <symbol id="i-history" viewBox="0 0 20 20"><circle cx="10" cy="10" r="7" /><path d="M10 6v4l3 2" /></symbol>
+      <symbol id="i-refresh" viewBox="0 0 20 20"><path d="M16 10a6 6 0 11-2-4.5M16 3v4h-4" /></symbol>
+      <symbol id="i-plus" viewBox="0 0 20 20"><path d="M10 4v12M4 10h12" /></symbol>
+      <symbol id="i-minus" viewBox="0 0 20 20"><path d="M4 10h12" /></symbol>
+      <symbol id="i-fit" viewBox="0 0 20 20"><path d="M4 8V4h4M12 4h4v4M16 12v4h-4M8 16H4v-4" /></symbol>
+      <symbol id="i-copy" viewBox="0 0 20 20"><path d="M7 7h9v9H7z" /><path d="M13 7V4H4v9h3" /></symbol>
+      <symbol id="i-trash" viewBox="0 0 20 20"><path d="M4 6h12M8 6V4h4v2M6 6l1 10h6l1-10" /></symbol>
+      <symbol id="i-home" viewBox="0 0 20 20"><path d="M3 10l7-6 7 6M5 9v7h10V9" /></symbol>
+      <symbol id="i-users" viewBox="0 0 20 20"><circle cx="7" cy="7" r="3" /><path d="M2 16c0-3 2-5 5-5s5 2 5 5M14 4a3 3 0 010 6M16 16c0-2-1-4-3-5" /></symbol>
+      <symbol id="i-engine" viewBox="0 0 20 20"><rect x="3" y="4" width="14" height="5" rx="1" /><rect x="3" y="11" width="14" height="5" rx="1" /><path d="M6 6.5h.01M6 13.5h.01" /></symbol>
+    </svg>
+    <header class="topbar">
+      <h1 class="visually-hidden">Редактор order.dsl</h1>
+      <a class="topbar__logo" href="dashboard.html" aria-label="DSLKit, к списку проектов">
+        <svg class="topbar__mark" width="24" height="24" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#2563eb" /><path d="M9 11l-4 5 4 5M23 11l4 5-4 5M18 9l-4 14" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+        <span class="topbar__logo-text">DSLKit</span>
+      </a>
+
+      <button type="button" class="palette-trigger" data-open-palette aria-label="Поиск и команды" aria-keyshortcuts="Control+K" title="Поиск и команды (Ctrl+K)">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="#i-search" /></svg>
+        <span class="palette-trigger__text">Поиск и команды…</span>
+        <kbd>Ctrl K</kbd>
+      </button>
+
+      <div class="topbar__spacer"></div>
+
+      <div class="segmented" role="group" aria-label="Режим просмотра">
+        <button type="button" class="segmented__button" data-view="code" aria-pressed="false">Код</button>
+        <button type="button" class="segmented__button" data-view="split" aria-pressed="true">Разделить</button>
+        <button type="button" class="segmented__button" data-view="canvas" aria-pressed="false">Холст</button>
+      </div>
+
+      <button type="button" class="button button--primary" id="run" aria-describedby="run-note" aria-keyshortcuts="Control+Enter" title="Запустить (Ctrl+Enter)">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="#i-play" /></svg>
+        <span>Запустить</span>
+      </button>
+      <span class="visually-hidden" id="run-note">Запуск перейдёт к первой проблеме в коде.</span>
+
+      <details class="menu">
+        <summary class="button button--quiet button--icon" aria-label="Ещё действия" title="Ещё действия">
+          <svg class="icon" aria-hidden="true" focusable="false"><use href="#i-more" /></svg>
+        </summary>
+        <div class="menu__panel">
+          <button type="button" class="menu__item"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-share" /></svg>Поделиться</button>
+          <button type="button" class="menu__item"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-format" /></svg>Форматировать код</button>
+          <a class="menu__item" href="#settings"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-gear" /></svg>Настройки</a>
+          <button type="button" class="menu__item" data-theme-toggle><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-theme" /></svg>Сменить тему</button>
+          <button type="button" class="menu__item" data-open-palette><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-search" /></svg>Все команды<kbd>Ctrl K</kbd></button>
+        </div>
+      </details>
+    </header>
+
+    <main id="main" class="editor-main" data-view="split">
+      <section class="pane-code" aria-label="Код DSL">
+        <div class="editor-tabs" role="tablist" aria-label="Открытые файлы">
+          <button type="button" role="tab" class="editor-tabs__tab" aria-selected="true" aria-controls="editor-panel">order.dsl</button>
+          <button type="button" role="tab" class="editor-tabs__tab" aria-selected="false" tabindex="-1">rules.dsl</button>
+          <button type="button" role="tab" class="editor-tabs__tab" aria-selected="false" tabindex="-1">invoice.dsl</button>
+        </div>
+
+        <div class="editor-panel" id="editor-panel" role="tabpanel" tabindex="0">
+          <div class="code">
+            <ol class="code__lines">
+              <li class="code__line"><code><span class="code__keyword">diagram</span> idef0 <span class="code__string">"Order process"</span></code></li>
+              <li class="code__line"><code><span class="code__keyword">box</span> A0 <span class="code__string">"Process order"</span> {</code></li>
+              <li class="code__line"><code> <span class="code__keyword">input</span>: Order</code></li>
+              <li class="code__line code__line--error" id="line-4"><code> <span class="code__keyword">contro</span>: Rules</code></li>
+              <li class="code__hint" id="problem-1">
+                <svg class="icon" aria-hidden="true" focusable="false"><use href="#i-error" /></svg>
+                <span class="code__hint-text"><b>Ошибка.</b>Неизвестное свойство «contro». Возможно, «control»?</span>
+                <button type="button" class="button" aria-label="Исправить: заменить contro на control">Исправить</button>
+              </li>
+              <li class="code__line"><code> <span class="code__keyword">output</span>: Invoice</code></li>
+              <li class="code__line"><code>}</code></li>
+              <li class="code__line code__line--error" id="line-7"><code><span class="code__keyword">box</span> A1 <span class="code__string">"Ship goods"</span> {</code></li>
+              <li class="code__hint" id="problem-2">
+                <svg class="icon" aria-hidden="true" focusable="false"><use href="#i-error" /></svg>
+                <span class="code__hint-text"><b>Ошибка.</b>Не закрыт блок «A1».</span>
+                <button type="button" class="button" aria-label="Исправить: добавить закрывающую скобку блока A1">Исправить</button>
+              </li>
+              <li class="code__hint code__hint--warning" id="problem-3">
+                <svg class="icon" aria-hidden="true" focusable="false"><use href="#i-warning" /></svg>
+                <span class="code__hint-text"><b>Предупреждение.</b>У блока A1 нет выходов.</span>
+              </li>
+              <li class="code__line"><code> <span class="code__keyword">input</span>: Invoice</code></li>
+              <li class="code__line"><code><span class="code__keyword">arrow</span> A0.output -&gt; A1.input</code></li>
+            </ol>
+          </div>
+        </div>
+
+        <p class="editor-summary" role="status" aria-live="polite">
+          <span class="editor-summary__item editor-summary__item--error"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-error" /></svg>2 ошибки</span>
+          <span class="editor-summary__item editor-summary__item--warning"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-warning" /></svg>1 предупреждение</span>
+          <span class="editor-summary__hint"><kbd>F8</kbd> далее</span>
+        </p>
+      </section>
+
+      <figure class="canvas" id="canvas-figure">
+        <figcaption class="canvas__head">
+          <span class="canvas__breadcrumb">IDEF0 · A-0 › A0</span>
+          <span class="canvas__status" role="status">Последняя удачная отрисовка, 21:45</span>
+        </figcaption>
+
+        <svg class="canvas__diagram" focusable="false" role="img" aria-labelledby="canvas-title canvas-desc" viewBox="0 0 480 250">
+          <title id="canvas-title">Диаграмма IDEF0: Order process</title>
+          <desc id="canvas-desc">Блок A0 Process order получает Order, управляется Rules и выдаёт Invoice. Стрелка Invoice ведёт к блоку A1 Ship goods.</desc>
+          <g class="canvas__block">
+            <rect class="canvas__box" x="20" y="40" width="190" height="84" rx="6" />
+            <text class="canvas__code" x="115" y="76" text-anchor="middle">A0</text>
+            <text class="canvas__name" x="115" y="102" text-anchor="middle">Process order</text>
+          </g>
+          <g class="canvas__block">
+            <rect class="canvas__box" x="270" y="150" width="190" height="84" rx="6" />
+            <text class="canvas__code" x="365" y="186" text-anchor="middle">A1</text>
+            <text class="canvas__name" x="365" y="212" text-anchor="middle">Ship goods</text>
+          </g>
+          <path class="canvas__arrow" d="M210 82H240V192H262" />
+          <path class="canvas__arrowhead" d="M270 192L260 186V198Z" />
+          <text class="canvas__label" x="248" y="140">Invoice</text>
+        </svg>
+
+        <div class="canvas__zoom" role="group" aria-label="Масштаб">
+          <button type="button" class="button button--icon" aria-label="Увеличить" title="Увеличить"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-plus" /></svg></button>
+          <button type="button" class="button button--icon" aria-label="Уменьшить" title="Уменьшить"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-minus" /></svg></button>
+          <button type="button" class="button button--icon" aria-label="Вписать диаграмму в экран" title="Вписать в экран"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-fit" /></svg></button>
+        </div>
+      </figure>
+    </main>
+
+    <footer class="editor-status">
+      <span class="editor-status__type">IDEF0</span>
+      <span class="editor-status__item"><span class="editor-status__dot" aria-hidden="true"></span>Kroki: доступен</span>
+      <span class="editor-status__item"><span id="quota-text">Бета: 3 из 5</span><progress aria-labelledby="quota-text" max="5" value="3">3 из 5</progress></span>
+      <span class="editor-status__item editor-status__autosave">Автосохранение: вкл</span>
+      <span class="editor-status__item editor-status__cursor">стр. 4, стлб. 12</span>
+    </footer>
+
+    <nav class="editor-bottom-nav" aria-label="Нижняя навигация">
+      <button type="button" class="editor-bottom-nav__item" data-view="code" aria-pressed="true">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="#i-code" /></svg><span>Код</span>
+      </button>
+      <button type="button" class="editor-bottom-nav__item" data-view="canvas" aria-pressed="false">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="#i-layout" /></svg><span>Холст</span>
+      </button>
+      <button type="button" class="editor-bottom-nav__item" data-open-palette>
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="#i-search" /></svg><span>Команды</span>
+      </button>
+    </nav>
+
+    <dialog class="palette" id="palette" aria-label="Командная палитра">
+      <div class="palette__field">
+        <svg class="icon" aria-hidden="true" focusable="false"><use href="#i-search" /></svg>
+        <label class="visually-hidden" for="palette-input">Команда или файл</label>
+        <input class="palette__input" id="palette-input" type="search" placeholder="Введите команду или имя файла" autocomplete="off" />
+      </div>
+      <div class="palette__list" id="palette-list">
+        <p class="palette__group">Правка</p>
+        <button type="button" class="palette__item"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-undo" /></svg>Отменить<kbd>Ctrl Z</kbd></button>
+        <button type="button" class="palette__item"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-redo" /></svg>Повторить<kbd>Ctrl Shift Z</kbd></button>
+        <button type="button" class="palette__item"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-format" /></svg>Форматировать код<kbd>Shift Alt F</kbd></button>
+        <button type="button" class="palette__item"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-files" /></svg>Сохранить, автосохранение: вкл<kbd>Ctrl S</kbd></button>
+        <button type="button" class="palette__item"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-share" /></svg>Поделиться ссылкой<kbd>Ctrl Shift L</kbd></button>
+        <p class="palette__group">Диаграмма</p>
+        <button type="button" class="palette__item"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-layout" /></svg>Автораскладка<kbd>Ctrl Alt L</kbd></button>
+        <button type="button" class="palette__item"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-refresh" /></svg>Обновить с сервера<kbd>Ctrl Shift R</kbd></button>
+        <button type="button" class="palette__item"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-engine" /></svg>Движок отрисовки: Kroki или локально</button>
+        <button type="button" class="palette__item"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-history" /></svg>История запусков</button>
+        <button type="button" class="palette__item"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-error" /></svg>Следующая проблема<kbd>F8</kbd></button>
+        <p class="palette__group">Приложение</p>
+        <button type="button" class="palette__item"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-files" /></svg>Открыть файл: rules.dsl, invoice.dsl</button>
+        <button type="button" class="palette__item"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-gear" /></svg>Настройки<kbd>Ctrl ,</kbd></button>
+        <button type="button" class="palette__item" data-theme-toggle><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-theme" /></svg>Сменить тему</button>
+        <p class="palette__empty" hidden>Ничего не найдено</p>
+      </div>
+    </dialog>
+
+    <script>
+      (function () {
+        var palette = document.getElementById('palette');
+        var input = document.getElementById('palette-input');
+        var main = document.getElementById('main');
+        function openPalette() { if (!palette.open) { palette.showModal(); input.value = ''; filter(); input.focus(); } }
+        function filter() {
+          var q = input.value.trim().toLowerCase(), shown = 0;
+          palette.querySelectorAll('.palette__item').forEach(function (b) { var ok = b.textContent.toLowerCase().indexOf(q) !== -1; b.hidden = !ok; if (ok) shown++; });
+          palette.querySelectorAll('.palette__group').forEach(function (g) { var n = g.nextElementSibling, any = false; while (n && !n.classList.contains('palette__group') && !n.classList.contains('palette__empty')) { if (!n.hidden) any = true; n = n.nextElementSibling; } g.hidden = !any; });
+          palette.querySelector('.palette__empty').hidden = shown > 0;
+        }
+        input.addEventListener('input', filter);
+        document.querySelectorAll('[data-open-palette]').forEach(function (b) { b.addEventListener('click', function () { var d = b.closest('details'); if (d) d.open = false; openPalette(); }); });
+        palette.addEventListener('click', function (e) { if (e.target === palette || e.target.closest('.palette__item')) palette.close(); });
+        document.addEventListener('keydown', function (e) {
+          if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); openPalette(); }
+          if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') document.getElementById('run').click();
+        });
+        function setView(v) {
+          main.dataset.view = v;
+          document.querySelectorAll('[data-view].segmented__button, [data-view].editor-bottom-nav__item').forEach(function (b) {
+            var bv = b.dataset.view, on = bv === v || (v === 'split' && bv === 'code' && b.classList.contains('editor-bottom-nav__item'));
+            b.setAttribute('aria-pressed', on ? 'true' : 'false');
+          });
+        }
+        document.querySelectorAll('[data-view]').forEach(function (b) { if (b !== main) b.addEventListener('click', function () { setView(b.dataset.view); }); });
+        if (window.matchMedia('(max-width: 767px)').matches) setView('code');
+        document.getElementById('run').addEventListener('click', function () { setView(main.dataset.view === 'canvas' ? 'code' : main.dataset.view); var l = document.getElementById('line-4'); l.scrollIntoView({ block: 'center' }); });
+        document.querySelectorAll('[data-theme-toggle]').forEach(function (b) { b.addEventListener('click', function () { var r = document.documentElement, dark = getComputedStyle(r).colorScheme === 'dark'; r.dataset.theme = dark ? 'light' : 'dark'; }); });
+      })();
+    </script>
+  </body>
+</html>

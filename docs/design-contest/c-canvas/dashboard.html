@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="description" content="Проекты DSLKit: поиск, фильтр по нотации и сортировка диаграмм." />
+<title>Мои проекты — DSLKit</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body class="page-dash">
+<svg class="sprite" aria-hidden="true" focusable="false">
+  <symbol id="i-home" viewBox="0 0 20 20"><path d="M3 10l7-6 7 6M5 9v7h10V9" /></symbol>
+  <symbol id="i-tpl" viewBox="0 0 20 20"><path d="M3 4h14v12H3zM3 8h14M8 8v8" /></symbol>
+  <symbol id="i-users" viewBox="0 0 20 20"><circle cx="7" cy="7" r="3" /><path d="M2 16c0-3 2-5 5-5s5 2 5 5M14 4a3 3 0 010 6M16 16c0-2-1-4-3-5" /></symbol>
+  <symbol id="i-trash" viewBox="0 0 20 20"><path d="M4 6h12M8 6V4h4v2M6 6l1 10h6l1-10" /></symbol>
+  <symbol id="i-search" viewBox="0 0 20 20"><circle cx="9" cy="9" r="5" /><path d="M13 13l4 4" /></symbol>
+  <symbol id="i-plus" viewBox="0 0 20 20"><path d="M10 4v12M4 10h12" /></symbol>
+  <symbol id="i-more" viewBox="0 0 20 20"><circle cx="5" cy="10" r="1" /><circle cx="10" cy="10" r="1" /><circle cx="15" cy="10" r="1" /></symbol>
+  <symbol id="pv-idef0" viewBox="0 0 162 100"><rect class="pv-box" x="18" y="16" width="56" height="30" rx="6" /><rect class="pv-box" x="88" y="54" width="56" height="30" rx="6" /><path class="pv-line" d="M74 31H81V69H86" /></symbol>
+  <symbol id="pv-erd" viewBox="0 0 162 100"><rect class="pv-box" x="14" y="18" width="46" height="40" rx="4" /><path class="pv-line" d="M14 30H60" /><rect class="pv-box" x="102" y="18" width="46" height="40" rx="4" /><path class="pv-line" d="M102 30H148" /><path class="pv-line" d="M60 44H102" /><rect class="pv-box" x="58" y="68" width="46" height="24" rx="4" /><path class="pv-line" d="M81 58V68" /></symbol>
+  <symbol id="pv-bpmn" viewBox="0 0 162 100"><circle class="pv-box" cx="16" cy="50" r="8" /><rect class="pv-box" x="38" y="34" width="40" height="32" rx="6" /><path class="pv-box" d="M104 36l14 14-14 14-14-14z" /><circle class="pv-box" cx="146" cy="50" r="8" /><path class="pv-line" d="M24 50H38M78 50H90M118 50H138" /></symbol>
+  <symbol id="pv-dfd" viewBox="0 0 162 100"><rect class="pv-box" x="10" y="36" width="34" height="28" /><circle class="pv-box" cx="115" cy="50" r="22" /><path class="pv-line" d="M44 50H93" /></symbol>
+</svg>
+<a class="skip-link" href="#main">Перейти к основному содержимому</a>
+
+<header class="apptop">
+  <a class="logo" href="#" aria-label="DSLKit">
+    <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#2563eb" /><path d="M9 11l-4 5 4 5M23 11l4 5-4 5M18 9l-4 14" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+    <span>DSLKit</span>
+  </a>
+  <div class="search" role="search">
+    <label class="visually-hidden" for="q">Поиск диаграмм</label>
+    <input id="q" class="search__input" type="search" placeholder="Поиск диаграмм… Ctrl+K" autocomplete="off" />
+    <svg class="icon" aria-hidden="true"><use href="#i-search" /></svg>
+  </div>
+  <div class="apptop__end">
+    <a class="btn btn--primary" href="editor.html" aria-label="Новая диаграмма"><svg class="icon" aria-hidden="true"><use href="#i-plus" /></svg><span class="label">Новая диаграмма</span></a>
+    <button type="button" class="avatar" aria-label="Профиль">KX</button>
+  </div>
+</header>
+
+<div class="shell">
+  <nav class="side" aria-label="Разделы приложения">
+    <ul class="side__nav">
+      <li><a class="side__link" href="dashboard.html" aria-current="page"><svg class="icon" aria-hidden="true"><use href="#i-home" /></svg>Мои проекты</a></li>
+      <li><a class="side__link" href="#"><svg class="icon" aria-hidden="true"><use href="#i-tpl" /></svg>Шаблоны</a></li>
+      <li><a class="side__link" href="#"><svg class="icon" aria-hidden="true"><use href="#i-users" /></svg>Общие</a></li>
+      <li><a class="side__link" href="#"><svg class="icon" aria-hidden="true"><use href="#i-trash" /></svg>Корзина</a></li>
+    </ul>
+    <div class="quota">
+      <p id="quota-side">Бета: 3 из 5 диаграмм в день</p>
+      <progress max="5" value="3" aria-labelledby="quota-side">3 из 5</progress>
+    </div>
+  </nav>
+
+  <main id="main" class="dash">
+    <h1 class="dash__title">Мои проекты</h1>
+    <div class="quota quota--top">
+      <p id="quota-top">Бета: 3 из 5 диаграмм в день</p>
+      <progress max="5" value="3" aria-labelledby="quota-top">3 из 5</progress>
+    </div>
+
+    <div class="toolbar">
+      <div class="chips" role="group" aria-label="Фильтр по нотации">
+        <button type="button" class="chip" data-filter="all" aria-pressed="true">Все</button>
+        <button type="button" class="chip" data-filter="bpmn" aria-pressed="false">BPMN</button>
+        <button type="button" class="chip" data-filter="erd" aria-pressed="false">ERD</button>
+        <button type="button" class="chip" data-filter="dfd" aria-pressed="false">DFD</button>
+        <button type="button" class="chip" data-filter="idef0" aria-pressed="false">IDEF0</button>
+      </div>
+      <label class="visually-hidden" for="sort">Сортировка</label>
+      <select id="sort" class="select"><option>Сначала новые</option><option>Сначала старые</option><option>По названию</option></select>
+    </div>
+    <p class="count" id="count" role="status" aria-live="polite">Найдено проектов: 8</p>
+
+    <ul class="cards" id="cards">
+        <li class="card" data-notation="idef0">
+          <div class="card__preview" aria-hidden="true"><svg viewBox="0 0 162 100" preserveAspectRatio="xMidYMid meet"><use href="#pv-idef0" /></svg></div>
+          <h2 class="card__title"><a class="card__link" href="editor.html">Order process</a></h2>
+          <p class="card__meta"><span class="tag">IDEF0</span> <span class="badge">в бете</span></p>
+          <p class="card__updated">Изменён 2 ч назад</p>
+          <div class="menu">
+            <button type="button" data-menu aria-expanded="false" class="btn btn--icon" aria-label="Действия с проектом Order process" data-tip="Действия"><svg class="icon" aria-hidden="true"><use href="#i-more" /></svg></button>
+            <div class="menu__panel" data-panel hidden>
+              <a class="menu__item" href="editor.html">Открыть</a>
+              <button type="button" class="menu__item">Переименовать</button>
+              <button type="button" class="menu__item">Дублировать</button>
+              <button type="button" class="menu__item">Поделиться</button>
+              <div class="sep"></div>
+              <button type="button" class="menu__item">В корзину</button>
+            </div>
+          </div>
+        </li>
+        <li class="card" data-notation="erd">
+          <div class="card__preview" aria-hidden="true"><svg viewBox="0 0 162 100" preserveAspectRatio="xMidYMid meet"><use href="#pv-erd" /></svg></div>
+          <h2 class="card__title"><a class="card__link" href="editor.html">Shop schema</a></h2>
+          <p class="card__meta"><span class="tag">ERD</span> <span class="badge">в бете</span></p>
+          <p class="card__updated">Изменён 2 ч назад</p>
+          <div class="menu">
+            <button type="button" data-menu aria-expanded="false" class="btn btn--icon" aria-label="Действия с проектом Shop schema" data-tip="Действия"><svg class="icon" aria-hidden="true"><use href="#i-more" /></svg></button>
+            <div class="menu__panel" data-panel hidden>
+              <a class="menu__item" href="editor.html">Открыть</a>
+              <button type="button" class="menu__item">Переименовать</button>
+              <button type="button" class="menu__item">Дублировать</button>
+              <button type="button" class="menu__item">Поделиться</button>
+              <div class="sep"></div>
+              <button type="button" class="menu__item">В корзину</button>
+            </div>
+          </div>
+        </li>
+        <li class="card" data-notation="bpmn">
+          <div class="card__preview" aria-hidden="true"><svg viewBox="0 0 162 100" preserveAspectRatio="xMidYMid meet"><use href="#pv-bpmn" /></svg></div>
+          <h2 class="card__title"><a class="card__link" href="editor.html">Hiring flow</a></h2>
+          <p class="card__meta"><span class="tag">BPMN</span></p>
+          <p class="card__updated">Изменён 2 ч назад</p>
+          <div class="menu">
+            <button type="button" data-menu aria-expanded="false" class="btn btn--icon" aria-label="Действия с проектом Hiring flow" data-tip="Действия"><svg class="icon" aria-hidden="true"><use href="#i-more" /></svg></button>
+            <div class="menu__panel" data-panel hidden>
+              <a class="menu__item" href="editor.html">Открыть</a>
+              <button type="button" class="menu__item">Переименовать</button>
+              <button type="button" class="menu__item">Дублировать</button>
+              <button type="button" class="menu__item">Поделиться</button>
+              <div class="sep"></div>
+              <button type="button" class="menu__item">В корзину</button>
+            </div>
+          </div>
+        </li>
+        <li class="card" data-notation="dfd">
+          <div class="card__preview" aria-hidden="true"><svg viewBox="0 0 162 100" preserveAspectRatio="xMidYMid meet"><use href="#pv-dfd" /></svg></div>
+          <h2 class="card__title"><a class="card__link" href="editor.html">Data pipeline</a></h2>
+          <p class="card__meta"><span class="tag">DFD</span> <span class="badge">в бете</span></p>
+          <p class="card__updated">Изменён 2 ч назад</p>
+          <div class="menu">
+            <button type="button" data-menu aria-expanded="false" class="btn btn--icon" aria-label="Действия с проектом Data pipeline" data-tip="Действия"><svg class="icon" aria-hidden="true"><use href="#i-more" /></svg></button>
+            <div class="menu__panel" data-panel hidden>
+              <a class="menu__item" href="editor.html">Открыть</a>
+              <button type="button" class="menu__item">Переименовать</button>
+              <button type="button" class="menu__item">Дублировать</button>
+              <button type="button" class="menu__item">Поделиться</button>
+              <div class="sep"></div>
+              <button type="button" class="menu__item">В корзину</button>
+            </div>
+          </div>
+        </li>
+        <li class="card" data-notation="idef0">
+          <div class="card__preview" aria-hidden="true"><svg viewBox="0 0 162 100" preserveAspectRatio="xMidYMid meet"><use href="#pv-idef0" /></svg></div>
+          <h2 class="card__title"><a class="card__link" href="editor.html">Warehouse</a></h2>
+          <p class="card__meta"><span class="tag">IDEF0</span> <span class="badge">в бете</span></p>
+          <p class="card__updated">Изменён 2 ч назад</p>
+          <div class="menu">
+            <button type="button" data-menu aria-expanded="false" class="btn btn--icon" aria-label="Действия с проектом Warehouse" data-tip="Действия"><svg class="icon" aria-hidden="true"><use href="#i-more" /></svg></button>
+            <div class="menu__panel" data-panel hidden>
+              <a class="menu__item" href="editor.html">Открыть</a>
+              <button type="button" class="menu__item">Переименовать</button>
+              <button type="button" class="menu__item">Дублировать</button>
+              <button type="button" class="menu__item">Поделиться</button>
+              <div class="sep"></div>
+              <button type="button" class="menu__item">В корзину</button>
+            </div>
+          </div>
+        </li>
+        <li class="card" data-notation="erd">
+          <div class="card__preview" aria-hidden="true"><svg viewBox="0 0 162 100" preserveAspectRatio="xMidYMid meet"><use href="#pv-erd" /></svg></div>
+          <h2 class="card__title"><a class="card__link" href="editor.html">Users &amp; roles</a></h2>
+          <p class="card__meta"><span class="tag">ERD</span> <span class="badge">в бете</span></p>
+          <p class="card__updated">Изменён 2 ч назад</p>
+          <div class="menu">
+            <button type="button" data-menu aria-expanded="false" class="btn btn--icon" aria-label="Действия с проектом Users &amp; roles" data-tip="Действия"><svg class="icon" aria-hidden="true"><use href="#i-more" /></svg></button>
+            <div class="menu__panel" data-panel hidden>
+              <a class="menu__item" href="editor.html">Открыть</a>
+              <button type="button" class="menu__item">Переименовать</button>
+              <button type="button" class="menu__item">Дублировать</button>
+              <button type="button" class="menu__item">Поделиться</button>
+              <div class="sep"></div>
+              <button type="button" class="menu__item">В корзину</button>
+            </div>
+          </div>
+        </li>
+        <li class="card" data-notation="bpmn">
+          <div class="card__preview" aria-hidden="true"><svg viewBox="0 0 162 100" preserveAspectRatio="xMidYMid meet"><use href="#pv-bpmn" /></svg></div>
+          <h2 class="card__title"><a class="card__link" href="editor.html">Release process</a></h2>
+          <p class="card__meta"><span class="tag">BPMN</span></p>
+          <p class="card__updated">Изменён 2 ч назад</p>
+          <div class="menu">
+            <button type="button" data-menu aria-expanded="false" class="btn btn--icon" aria-label="Действия с проектом Release process" data-tip="Действия"><svg class="icon" aria-hidden="true"><use href="#i-more" /></svg></button>
+            <div class="menu__panel" data-panel hidden>
+              <a class="menu__item" href="editor.html">Открыть</a>
+              <button type="button" class="menu__item">Переименовать</button>
+              <button type="button" class="menu__item">Дублировать</button>
+              <button type="button" class="menu__item">Поделиться</button>
+              <div class="sep"></div>
+              <button type="button" class="menu__item">В корзину</button>
+            </div>
+          </div>
+        </li>
+        <li class="card" data-notation="dfd">
+          <div class="card__preview" aria-hidden="true"><svg viewBox="0 0 162 100" preserveAspectRatio="xMidYMid meet"><use href="#pv-dfd" /></svg></div>
+          <h2 class="card__title"><a class="card__link" href="editor.html">Billing</a></h2>
+          <p class="card__meta"><span class="tag">DFD</span> <span class="badge">в бете</span></p>
+          <p class="card__updated">Изменён 2 ч назад</p>
+          <div class="menu">
+            <button type="button" data-menu aria-expanded="false" class="btn btn--icon" aria-label="Действия с проектом Billing" data-tip="Действия"><svg class="icon" aria-hidden="true"><use href="#i-more" /></svg></button>
+            <div class="menu__panel" data-panel hidden>
+              <a class="menu__item" href="editor.html">Открыть</a>
+              <button type="button" class="menu__item">Переименовать</button>
+              <button type="button" class="menu__item">Дублировать</button>
+              <button type="button" class="menu__item">Поделиться</button>
+              <div class="sep"></div>
+              <button type="button" class="menu__item">В корзину</button>
+            </div>
+          </div>
+        </li>
+    </ul>
+  </main>
+</div>
+
+<nav class="bottomnav" aria-label="Разделы приложения">
+  <a href="dashboard.html" aria-current="page"><svg class="icon" aria-hidden="true"><use href="#i-home" /></svg>Проекты</a>
+  <a href="#"><svg class="icon" aria-hidden="true"><use href="#i-tpl" /></svg>Шаблоны</a>
+  <a href="#"><svg class="icon" aria-hidden="true"><use href="#i-users" /></svg>Общие</a>
+  <a href="#"><svg class="icon" aria-hidden="true"><use href="#i-trash" /></svg>Корзина</a>
+</nav>
+
+<script>
+  (function () {
+    var chips = document.querySelectorAll('[data-filter]');
+    var cards = document.querySelectorAll('.card');
+    chips.forEach(function (c) {
+      c.addEventListener('click', function () {
+        chips.forEach(function (x) { x.setAttribute('aria-pressed', x === c); });
+        var f = c.dataset.filter, n = 0;
+        cards.forEach(function (card) { var show = f === 'all' || card.dataset.notation === f; card.hidden = !show; if (show) n++; });
+        document.getElementById('count').textContent = 'Найдено проектов: ' + n;
+      });
+    });
+  })();
+
+  (function () {
+    var triggers = document.querySelectorAll('[data-menu]');
+    function close(except) {
+      triggers.forEach(function (t) {
+        if (t === except) return;
+        t.setAttribute('aria-expanded', 'false');
+        t.parentElement.querySelector('[data-panel]').hidden = true;
+      });
+    }
+    triggers.forEach(function (t) {
+      t.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var panel = t.parentElement.querySelector('[data-panel]');
+        var open = panel.hidden;
+        close(t);
+        panel.hidden = !open;
+        t.setAttribute('aria-expanded', String(open));
+      });
+    });
+    document.addEventListener('click', function (e) { if (!e.target.closest('[data-panel]')) close(); });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
+  })();
+</script>
+</body>
+</html>

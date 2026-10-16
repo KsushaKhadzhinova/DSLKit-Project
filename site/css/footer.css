@@ -36,5 +36,5 @@
 .footer__address,
 .footer__copy {
   color: var(--color-muted);
-  font-size: var(--step--1);
+  font-size: var(--text-small);
 }

@@ -36,7 +36,7 @@
   background: var(--color-secondary);
   color: var(--color-link);
   font-family: var(--font-mono);
-  font-size: var(--step--1);
+  font-size: var(--text-small);
   font-weight: 600;
 }
 
@@ -89,7 +89,7 @@
 
 .policy__updated {
   color: var(--color-muted);
-  font-size: var(--step--1);
+  font-size: var(--text-small);
 }
 
 .policy__section {

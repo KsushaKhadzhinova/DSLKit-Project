@@ -163,6 +163,8 @@ The styles of the DSLKit project are split into files following the BEM methodol
   --columns-golden: 1fr 1.618fr;
   --columns-golden-reverse: 1.618fr 1fr;
 
+  /* Smallest readable text: the golden step, but never below 14 px (WCAG and the interface rules). */
+  --text-small: max(var(--step--1), 0.875rem, 14px);
   --line-body: var(--phi);
   --line-heading: 1.15;
 
@@ -180,8 +182,8 @@ The styles of the DSLKit project are split into files following the BEM methodol
   --container: 1200px;
   --measure: 62ch;
   --header-height: 4rem;
-  --target-size: 3rem;
-  --target-size-small: 2rem;
+  --target-size: max(3rem, 48px);
+  --target-size-small: max(2.75rem, 44px);
   --focus-ring: 0 0 0 3px var(--color-background), 0 0 0 5px var(--color-primary);
 
   --breakpoint-small: 576px;
@@ -351,24 +353,24 @@ address {
 }
 
 small {
-  font-size: var(--step--1);
+  font-size: var(--text-small);
 }
 
 code,
 kbd,
 pre {
   font-family: var(--font-mono);
-  font-size: 0.92em;
+  font-size: var(--text-small);
   font-feature-settings: 'zero';
 }
 
 kbd {
   padding: 0.125rem 0.375rem;
   border: 1px solid var(--color-border-strong);
-  border-radius: 0.25rem;
+  border-radius: var(--radius-small);
   background: var(--color-surface);
   color: var(--color-text-light);
-  font-size: var(--step--1);
+  font-size: var(--text-small);
   line-height: 1.2;
 }
 
@@ -447,7 +449,7 @@ time {
   border-radius: 62.4375rem;
   background: var(--color-secondary);
   color: var(--color-link);
-  font-size: var(--step--1);
+  font-size: var(--text-small);
   font-weight: 600;
   line-height: 1.4;
   white-space: nowrap;
@@ -697,7 +699,7 @@ label > span {
   min-height: var(--target-size-small);
   padding: 0 var(--space-1);
   color: var(--color-text-light);
-  font-size: var(--step--1);
+  font-size: var(--text-small);
   font-weight: 600;
   text-decoration: none;
 }
@@ -775,7 +777,7 @@ label > span {
   display: none;
   min-height: var(--target-size-small);
   padding: 0 var(--space-2);
-  font-size: var(--step--1);
+  font-size: var(--text-small);
 }
 ```
 
@@ -837,7 +839,7 @@ label > span {
   border-radius: 62.4375rem;
   background: var(--color-surface);
   color: var(--color-text-light);
-  font-size: var(--step--1);
+  font-size: var(--text-small);
   font-weight: 600;
 }
 
@@ -871,7 +873,7 @@ label > span {
 .hero__cta-note {
   margin: 0;
   color: var(--color-text-light);
-  font-size: var(--step--1);
+  font-size: var(--text-small);
 }
 
 .hero__actions {
@@ -886,7 +888,7 @@ label > span {
 
 .hero__note {
   color: var(--color-muted);
-  font-size: var(--step--1);
+  font-size: var(--text-small);
 }
 
 .hero__facts {
@@ -913,7 +915,7 @@ label > span {
 
 .hero__fact-label {
   color: var(--color-text-light);
-  font-size: var(--step--1);
+  font-size: var(--text-small);
 }
 
 .hero__figure {
@@ -931,7 +933,7 @@ label > span {
 
 .hero__caption {
   color: var(--color-muted);
-  font-size: var(--step--1);
+  font-size: var(--text-small);
   text-align: center;
 }
 
@@ -1006,7 +1008,7 @@ label > span {
 .footer__address,
 .footer__copy {
   color: var(--color-muted);
-  font-size: var(--step--1);
+  font-size: var(--text-small);
 }
 ```
 
@@ -1072,7 +1074,7 @@ label > span {
   .nav__link {
     min-height: var(--target-size-small);
     padding: 0 var(--space-1);
-    font-size: var(--step--1);
+    font-size: var(--text-small);
   }
 
   .hero__facts {
@@ -1118,6 +1120,65 @@ label > span {
   .cards {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
+}
+
+/* Touch targets: every control is at least 44 x 44 px (WCAG 2.5.8 asks 24 px, the interface rules of the project ask 44 px). */
+.header__logo,
+.nav__link,
+.footer__link,
+.card__link,
+.template-card__link,
+.project-card__link,
+.app-topbar__logo,
+.editor-toolbar__logo,
+.canvas__engine-link,
+.problems__location {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--target-size-small);
+}
+
+.filter__chip,
+.app-topbar__new,
+.app-topbar__search-input,
+.sort__select,
+.settings-row__select,
+.editor-tabs__tab,
+.problems__tab,
+.editor-segmented__button,
+.canvas__history-item,
+.button {
+  min-height: var(--target-size-small);
+}
+
+.app-topbar__avatar,
+.app-topbar__search-button,
+.project-card__menu,
+.editor-activity__button,
+.editor-tabs__close,
+.button--icon {
+  min-width: var(--target-size-small);
+  min-height: var(--target-size-small);
+}
+
+.form__checkbox {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.app-topbar__logo {
+  min-width: var(--target-size-small);
+  justify-content: center;
+}
+
+.problems__location {
+  align-self: center;
+  min-width: var(--target-size-small);
+  justify-content: center;
+}
+
+.template-card__link {
+  min-width: var(--target-size-small);
 }
 ```
 

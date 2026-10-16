@@ -44,6 +44,8 @@
   --columns-golden: 1fr 1.618fr;
   --columns-golden-reverse: 1.618fr 1fr;
 
+  /* Smallest readable text: the golden step, but never below 14 px (WCAG and the interface rules). */
+  --text-small: max(var(--step--1), 0.875rem, 14px);
   --line-body: var(--phi);
   --line-heading: 1.15;
 
@@ -61,8 +63,8 @@
   --container: 1200px;
   --measure: 62ch;
   --header-height: 4rem;
-  --target-size: 3rem;
-  --target-size-small: 2rem;
+  --target-size: max(3rem, 48px);
+  --target-size-small: max(2.75rem, 44px);
   --focus-ring: 0 0 0 3px var(--color-background), 0 0 0 5px var(--color-primary);
 
   --breakpoint-small: 576px;
