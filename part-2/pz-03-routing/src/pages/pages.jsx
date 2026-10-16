@@ -43,6 +43,9 @@ export function CatalogItem() {
   const navigate = useNavigate();
   const template = findTemplate(id);
 
+  // history.state.idx is 0 on the first entry, so there is nothing to go back to: open the catalog instead.
+  const goBack = () => (window.history.state?.idx === 0 ? navigate('/catalog') : navigate(-1));
+
   if (!template) return <NotFound />;
 
   return (
@@ -50,7 +53,7 @@ export function CatalogItem() {
       <h1>{template.title}</h1>
       <p>Нотация: {template.notation}</p>
       <p>{template.description}</p>
-      <button type="button" onClick={() => navigate(-1)}>
+      <button type="button" onClick={goBack}>
         Назад
       </button>
     </>

@@ -37,7 +37,7 @@ The `PrivateRoute` component works as a layout route: when the `isAuth` flag is 
 
 ### 3.4 Testing
 
-Thirteen automated tests on `MemoryRouter` cover all pages, the `NavLink` highlight, menu navigation, the dynamic route with a wrong `id`, the 404 page, the guest redirect to `/login`, the return after sign-in, sign-out and keeping the sign-in between loads. The manual check is described in `README.md`.
+Fifteen automated tests on `MemoryRouter` cover all pages, the `NavLink` highlight, menu navigation, the dynamic route with a wrong `id`, the 404 page, the guest redirect to `/login`, the return after sign-in, sign-out and keeping the sign-in between loads. The manual check is described in `README.md`.
 
 ## Conclusion
 

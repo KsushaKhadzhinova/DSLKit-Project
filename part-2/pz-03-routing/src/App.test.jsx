@@ -98,3 +98,19 @@ describe('protected route', () => {
     expect(screen.getByRole('heading', { name: 'Личный кабинет' })).toBeInTheDocument();
   });
 });
+
+describe('accessibility helpers', () => {
+  it('has a skip link to the main content', () => {
+    renderAt('/');
+    expect(screen.getByRole('link', { name: 'Перейти к содержимому' })).toHaveAttribute('href', '#main');
+  });
+
+  it('opens the catalog from "Назад" when the page is the first history entry', async () => {
+    const user = userEvent.setup();
+    window.history.replaceState({ idx: 0 }, '');
+    renderAt('/catalog/2');
+    await user.click(screen.getByRole('button', { name: 'Назад' }));
+    expect(screen.getByRole('heading', { name: 'Каталог шаблонов' })).toBeInTheDocument();
+    window.history.replaceState(null, '');
+  });
+});
