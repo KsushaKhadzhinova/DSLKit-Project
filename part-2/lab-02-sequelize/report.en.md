@@ -16,7 +16,7 @@ To learn how to connect a relational database to a Node.js application, use the 
 
 ### 3.1 Database
 
-PostgreSQL is not installed on the developer machine, and installing system software is not required for a study project, so SQLite is used for local runs: the database file creates itself. The choice is made in `config/config.js`. If the `DATABASE_URL` variable is set, PostgreSQL is used (with `DATABASE_SSL=true` TLS is added for Neon and Supabase), otherwise SQLite with the file from `SQLITE_STORAGE`. Migrations, the model and controllers do not depend on the dialect. A connection to a real PostgreSQL has not been verified in this work yet, and it remains to be done before submission. A template of the variables is in `.env.example`, and the real `.env` is not committed.
+PostgreSQL is not installed on the developer machine, and installing system software is not required for a study project, so SQLite is used for local runs: the database file creates itself. The choice is made in `config/config.js`. If the `DATABASE_URL` variable is set, PostgreSQL is used (with `DATABASE_SSL=true` TLS is enabled for Neon and Supabase and the server certificate is verified; verification can only be switched off with `DATABASE_SSL_REJECT_UNAUTHORIZED=false`), otherwise SQLite with the file from `SQLITE_STORAGE`. Migrations, the model and controllers do not depend on the dialect. The work has not been run against a real PostgreSQL: SQLite and the PostgreSQL settings are tested, and the rest relies on Sequelize hiding dialect differences. A template of the variables is in `.env.example`, and the real `.env` is not committed.
 
 ### 3.2 Installation and setup
 
@@ -24,7 +24,7 @@ The packages `sequelize`, `pg`, `pg-hstore`, `sqlite3` and, as a development dep
 
 ### 3.3 Model and migrations
 
-The `Diagram` model is defined in `src/models/diagram.js`: the fields `title`, `notation`, `sourceCode`, `priority` and `owner`, while Sequelize adds `id`, `createdAt` and `updatedAt` itself. The allowed values of `notation` and `priority` are set with an `isIn` check, so the model refuses a value outside the list even if request validation is bypassed. Sequelize derives the table name from the model name in the plural, which gives `Diagrams`.
+The `Diagram` model is defined in `src/models/diagram.js`: the fields `title`, `notation`, `sourceCode`, `priority` and `owner`, while Sequelize adds `id`, `createdAt` and `updatedAt` itself. The allowed values of `notation` and `priority` are set with an `isIn` check in the model and `CHECK` constraints in the migrations, so the database refuses a value outside the list even if both request validation and the model are bypassed. Lengths match the column types: `title` up to 80 characters, `owner` up to 60, `sourceCode` up to 10000, and `title` and `owner` are trimmed before saving. An id in the address cannot exceed 2147483647, otherwise PostgreSQL would fail with a 500 response. The request body is limited to 100kb. Sequelize derives the table name from the model name in the plural, which gives `Diagrams`.
 
 The schema is created only by migrations, and `sync()` is not used. The first migration creates the table without the `priority` field, and the second adds it with `addColumn` and the default `normal`; its `down` function drops the column. This shows a change to the schema of an existing table, as the assignment requires. The files are listed in table 1.
 
@@ -56,11 +56,11 @@ Table 2 – Routes and the matching Sequelize calls
 
 The run order is: `npm run db:migrate` creates the table and adds the `priority` column, `npm run db:seed` fills the database, and `npm run dev` starts the server. The check on SQLite showed that the list returns three records with `createdAt` and `updatedAt`, a replacement changes `updatedAt`, the first deletion gives 204, and the repeated one gives 404.
 
-There are 22 automated tests. Eighteen check the HTTP routes on a temporary SQLite database with the real migrations applied. Four check the migrations themselves: the set of columns after both migrations, rolling back the second migration to drop `priority` and applying it again, inserting and reverting the seed, and the model refusing values outside the lists. The tests run the real `sequelize-cli`, so a mistake in a migration file is caught.
+There are 32 automated tests. Twenty-three check the HTTP routes on a temporary SQLite database with the real migrations applied. Five check the migrations themselves: the set of columns after both migrations, rolling back the second migration to drop `priority` and applying it again, running the seed twice and undoing only its own rows, the model refusing values outside the lists, and the database refusing such a value when the model is bypassed. Four check the connection settings, including certificate verification by default. The tests run the real `sequelize-cli`, so a mistake in a migration file is caught.
 
 ## Conclusion
 
-For DSLKit, the `diagrams` collection from lab 1 is moved from an array to a database through Sequelize: the `Diagram` model, two migrations (creating the table and adding the `priority` field), a seed with three diagrams, and controllers built on ORM methods. Locally the work uses SQLite, and the `DATABASE_URL` variable switches it to PostgreSQL or cloud Neon without code changes. 22 automated tests confirm the routes, the migrations with rollback, and the seed. Running on a real PostgreSQL and attaching screenshots of the database structure and of Postman requests are still to be done.
+For DSLKit, the `diagrams` collection from lab 1 is moved from an array to a database through Sequelize: the `Diagram` model, two migrations (creating the table and adding the `priority` field), a seed with three diagrams, and controllers built on ORM methods. Locally the work uses SQLite, and the `DATABASE_URL` variable switches it to PostgreSQL or cloud Neon without code changes. 32 automated tests confirm the routes, the constraints, the migrations with rollback, and the seed. The work has not been run on a real PostgreSQL, and screenshots of the database structure and of Postman requests are still to be attached.
 
 ## Appendix A – Listing of config.js
 
