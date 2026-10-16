@@ -11,13 +11,13 @@ const columns = async (sequelize) => Object.keys(await sequelize.getQueryInterfa
 before(() => db.cli('db:migrate'));
 after(() => db.cleanup());
 
-test('migrations create the table with the priority column added by the second migration', async () => {
+test('migrations create the table with the priority column added by the third migration', async () => {
   const { sequelize } = open();
-  assert.deepEqual((await columns(sequelize)).sort(), ['createdAt', 'id', 'notation', 'owner', 'priority', 'sourceCode', 'title', 'updatedAt']);
+  assert.deepEqual((await columns(sequelize)).sort(), ['createdAt', 'id', 'notation', 'ownerId', 'priority', 'sourceCode', 'title', 'updatedAt']);
   await sequelize.close();
 });
 
-test('the third migration creates Users with a unique email and a checked role', async () => {
+test('the first migration creates Users with a unique email and a checked role', async () => {
   const { sequelize, User } = open();
   const table = await sequelize.getQueryInterface().describeTable('Users');
   assert.deepEqual(Object.keys(table).sort(), ['createdAt', 'email', 'id', 'passwordHash', 'role', 'updatedAt']);
@@ -28,8 +28,7 @@ test('the third migration creates Users with a unique email and a checked role',
   await sequelize.close();
 });
 
-test('undoing the last two migrations removes the priority column, migrating again restores it', async () => {
-  db.cli('db:migrate:undo');
+test('undoing the last migration removes the priority column, migrating again restores it', async () => {
   db.cli('db:migrate:undo');
   let { sequelize } = open();
   assert.equal((await columns(sequelize)).includes('priority'), false);
@@ -64,7 +63,7 @@ test('the seeds insert three diagrams and an admin with a hashed password, and c
 
 test('the model rejects values outside the allowed lists', async () => {
   const { sequelize, Diagram } = open();
-  await assert.rejects(Diagram.create({ title: 't', notation: 'XYZ', sourceCode: 's', owner: 'o' }), /Validation error/);
+  await assert.rejects(Diagram.create({ title: 't', notation: 'XYZ', sourceCode: 's', ownerId: 1 }), /Validation error/);
   await assert.rejects(Diagram.create({ title: 't', notation: 'UML', sourceCode: 's', owner: 'o', priority: 'urgent' }), /Validation error/);
   await sequelize.close();
 });

@@ -16,7 +16,8 @@ const createApp = (models, settings) => {
   if (!config.jwtSecret) throw new Error('jwtSecret is required');
   const authenticate = createAuthenticate(models, config);
   const app = express();
-  app.use(express.json());
+  // The limit is set explicitly so it does not change with the library default.
+  app.use(express.json({ limit: '100kb' }));
   app.use('/auth', createAuthRouter(createAuthController(models, config)));
   app.use('/diagrams', createDiagramsRouter(createDiagramsController(models), authenticate));
   app.use(createUsersRouter(createUsersController(models), authenticate));

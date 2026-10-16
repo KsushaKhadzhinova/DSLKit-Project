@@ -3,7 +3,7 @@ const { notFound, forbidden } = require('../errors');
 const missing = (id) => notFound(`Diagram ${id} not found`);
 
 // Only the owner or an admin may change or delete a diagram.
-const mayChange = (user, diagram) => user.role === 'admin' || diagram.owner === user.email;
+const mayChange = (user, diagram) => user.role === 'admin' || diagram.ownerId === user.id;
 
 // Express 5 forwards a rejected promise to the error handler, so no try/catch is needed here.
 const createDiagramsController = ({ Diagram }) => ({
@@ -15,7 +15,7 @@ const createDiagramsController = ({ Diagram }) => ({
   },
 
   create: async (req, res) => {
-    const diagram = await Diagram.create({ ...req.diagramFields, owner: req.user.email });
+    const diagram = await Diagram.create({ ...req.diagramFields, ownerId: req.user.id });
     res.status(201).location(`/diagrams/${diagram.id}`).json(diagram);
   },
 

@@ -9,18 +9,22 @@ let app;
 let alice;
 let bob;
 let admin;
+let aliceId;
+let bobId;
 
 before(async () => {
   app = await startServer();
   alice = await app.tokenFor('alice@example.com');
   bob = await app.tokenFor('bob@example.com');
   admin = await app.tokenFor('admin@example.com', 'admin');
+  aliceId = (await app.models.User.findOne({ where: { email: 'alice@example.com' } })).id;
+  bobId = (await app.models.User.findOne({ where: { email: 'bob@example.com' } })).id;
 });
 after(() => app.close());
 
 beforeEach(async () => {
   await app.models.Diagram.destroy({ where: {} });
-  await app.models.Diagram.create({ title: 'Order processing', notation: 'BPMN', sourceCode: 'start -> end', priority: 'high', owner: 'alice@example.com' });
+  await app.models.Diagram.create({ title: 'Order processing', notation: 'BPMN', sourceCode: 'start -> end', priority: 'high', ownerId: aliceId });
 });
 
 const firstId = async () => (await app.models.Diagram.findOne()).id;
@@ -49,14 +53,14 @@ test('GET /diagrams returns the list', async () => {
 test('GET /diagrams/:id returns one diagram, 404 when missing', async () => {
   const found = await app.call('GET', `/diagrams/${await firstId()}`, { token: bob });
   assert.equal(found.res.status, 200);
-  assert.equal(found.body.owner, 'alice@example.com');
+  assert.equal(found.body.ownerId, aliceId);
   const missing = await app.call('GET', '/diagrams/9999', { token: bob });
   assert.equal(missing.res.status, 404);
   assert.match(missing.body.error, /not found/);
 });
 
 test('GET /diagrams/:id answers 400 for ids that are not plain positive integers', async () => {
-  for (const id of ['abc', '0', '-3', '1.5', '0x1', '1e0', '%201', '01', '99999999999999999999']) {
+  for (const id of ['abc', '0', '-3', '1.5', '0x1', '1e0', '%201', '01', '2147483648', '99999999999999999999']) {
     const { res, body } = await app.call('GET', `/diagrams/${id}`, { token: alice });
     assert.equal(res.status, 400, id);
     assert.match(body.error, /positive integer/);
@@ -64,11 +68,11 @@ test('GET /diagrams/:id answers 400 for ids that are not plain positive integers
 });
 
 test('POST /diagrams creates a diagram owned by the caller, answers 201 with Location', async () => {
-  const { res, body } = await app.call('POST', '/diagrams', { token: bob, body: { ...valid, owner: 'someone@else.com', id: 500 } });
+  const { res, body } = await app.call('POST', '/diagrams', { token: bob, body: { ...valid, ownerId: 999, owner: 'someone@else.com', id: 500 } });
   assert.equal(res.status, 201);
   assert.equal(res.headers.get('location'), `/diagrams/${body.id}`);
   assert.notEqual(body.id, 500);
-  assert.deepEqual(strip({ ...body, id: undefined }), { ...valid, id: undefined, owner: 'bob@example.com' });
+  assert.deepEqual(strip({ ...body, id: undefined }), { ...valid, id: undefined, ownerId: bobId });
 });
 
 test('POST /diagrams defaults the priority and drops unknown fields', async () => {
@@ -104,9 +108,9 @@ test('a body over the size limit answers 413', async () => {
 
 test('PUT by the owner replaces the diagram, keeps the owner and ignores a body id', async () => {
   const id = await firstId();
-  const { res, body } = await app.call('PUT', `/diagrams/${id}`, { token: alice, body: { ...valid, id: 500, owner: 'bob@example.com' } });
+  const { res, body } = await app.call('PUT', `/diagrams/${id}`, { token: alice, body: { ...valid, id: 500, ownerId: bobId } });
   assert.equal(res.status, 200);
-  assert.deepEqual(strip(body), { id, ...valid, owner: 'alice@example.com' });
+  assert.deepEqual(strip(body), { id, ...valid, ownerId: aliceId });
   assert.deepEqual(strip((await app.call('GET', `/diagrams/${id}`, { token: bob })).body), strip(body));
   assert.equal(await app.models.Diagram.findByPk(500), null);
 });
@@ -163,4 +167,32 @@ test('an unexpected failure answers 500 without leaking the message', async (t) 
   const { res, body } = await app.call('GET', '/diagrams', { token: alice });
   assert.equal(res.status, 500);
   assert.deepEqual(body, { error: 'Internal server error' });
+});
+
+test('the title is trimmed before saving', async () => {
+  const { res, body } = await app.call('POST', '/diagrams', { token: alice, body: { ...valid, title: '  Spaced  ' } });
+  assert.equal(res.status, 201);
+  assert.equal(body.title, 'Spaced');
+});
+
+test('text fields at the limit are accepted, one character more is rejected with 400', async () => {
+  for (const [field, max] of Object.entries({ title: 80, sourceCode: 10000 })) {
+    assert.equal((await app.call('POST', '/diagrams', { token: alice, body: { ...valid, [field]: 'x'.repeat(max) } })).res.status, 201, field);
+    const { res, body } = await app.call('POST', '/diagrams', { token: alice, body: { ...valid, [field]: 'x'.repeat(max + 1) } });
+    assert.equal(res.status, 400, field);
+    assert.deepEqual(body.details, [{ field, message: `must be at most ${max} characters` }]);
+  }
+});
+
+test('a value that is only longer because of surrounding spaces is accepted', async () => {
+  assert.equal((await app.call('POST', '/diagrams', { token: alice, body: { ...valid, title: ` ${'x'.repeat(80)} ` } })).res.status, 201);
+});
+
+test('the largest INTEGER id is accepted and simply not found', async () => {
+  assert.equal((await app.call('GET', '/diagrams/2147483647', { token: alice })).res.status, 404);
+});
+
+test('a body over 100 kb answers 413', async () => {
+  const raw = JSON.stringify({ ...valid, sourceCode: 'y'.repeat(101 * 1024) });
+  assert.equal((await app.call('POST', '/diagrams', { token: alice, body: {}, raw })).res.status, 413);
 });

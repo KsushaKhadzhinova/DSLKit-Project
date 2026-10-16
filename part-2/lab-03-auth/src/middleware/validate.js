@@ -1,12 +1,16 @@
 const { badRequest } = require('../errors');
-const { NOTATIONS, PRIORITIES, DEFAULT_PRIORITY } = require('../models/diagram.constants');
+const { NOTATIONS, PRIORITIES, DEFAULT_PRIORITY, LIMITS, MAX_ID } = require('../models/diagram.constants');
 
-const isText = (value) => typeof value === 'string' && value.trim() !== '';
+// Text is checked after trimming, so the stored value is what was measured.
+const text = (name) => (v) => {
+  if (typeof v !== 'string' || v.trim() === '') return 'must be a non-empty string';
+  return v.trim().length <= LIMITS[name] || `must be at most ${LIMITS[name]} characters`;
+};
 
 const checks = {
-  title: (v) => isText(v) || 'must be a non-empty string',
+  title: text('title'),
   notation: (v) => NOTATIONS.includes(v) || `must be one of ${NOTATIONS.join(', ')}`,
-  sourceCode: (v) => isText(v) || 'must be a non-empty string',
+  sourceCode: text('sourceCode'),
   priority: (v) => PRIORITIES.includes(v) || `must be one of ${PRIORITIES.join(', ')}`,
 };
 
@@ -15,13 +19,14 @@ const parseId =
   (key = 'diagramId', label = 'Diagram') =>
   (req, _res, next) => {
     const id = Number(req.params.id);
-    if (!/^[1-9]\d*$/.test(req.params.id) || !Number.isSafeInteger(id)) return next(badRequest(`${label} id must be a positive integer`));
+    // Ids above the INTEGER column range would make PostgreSQL fail with a 500, so they are rejected here.
+  if (!/^[1-9]\d*$/.test(req.params.id) || id > MAX_ID) return next(badRequest(`${label} id must be a positive integer up to ${MAX_ID}`));
     req[key] = id;
     return next();
   };
 
 // POST and PUT both carry the whole diagram, so one validator serves both.
-// The owner is never taken from the body: the controller sets it from the token.
+// The owner is never taken from the body: the controller sets it from the token. The title is trimmed before saving.
 // Priority is optional and falls back to the default; unknown fields are dropped.
 const validateDiagram = (req, _res, next) => {
   const body = req.body;
@@ -34,7 +39,7 @@ const validateDiagram = (req, _res, next) => {
     .filter(({ result }) => result !== true)
     .map(({ field, result }) => ({ field, message: result }));
   if (details.length > 0) return next(badRequest('Invalid diagram data', details));
-  req.diagramFields = Object.fromEntries(Object.keys(checks).map((name) => [name, fields[name]]));
+  req.diagramFields = Object.fromEntries(Object.keys(checks).map((name) => [name, name === 'title' ? fields[name].trim() : fields[name]]));
   return next();
 };
 

@@ -44,7 +44,7 @@ Table 1 – Responses of protected routes for different tokens
 
 ### 3.4 Additional mechanism: roles
 
-Role-based access control is chosen because a SaaS editor needs an administrator and an ordinary user. The `requireRole('admin')` middleware returns 403 to everyone except administrators. Administrators get the three routes listed in table 2. In addition, a diagram can be changed and deleted only by its owner or an administrator: the owner becomes the calling user, and an `owner` field in the request body is ignored. Any logged-in user can read diagrams.
+Role-based access control is chosen because a SaaS editor needs an administrator and an ordinary user. The `requireRole('admin')` middleware returns 403 to everyone except administrators. Administrators get the three routes listed in table 2. In addition, a diagram can be changed and deleted only by its owner or an administrator: the owner becomes the calling user, and an `ownerId` field in the request body is ignored. Any logged-in user can read diagrams.
 
 Table 2 – Routes and access rights
 
@@ -78,7 +78,7 @@ DSLKit now has users with bcrypt password hashes, registration, login with a JWT
 
 ## Appendix B – Listing of the Users table migration
 
-{{code:part-2/lab-03-auth/migrations/20261016000003-create-users.js}}
+{{code:part-2/lab-03-auth/migrations/20261016000001-create-users.js}}
 
 ## Appendix C – Listing of auth.js
 

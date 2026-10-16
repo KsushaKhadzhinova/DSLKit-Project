@@ -4,9 +4,17 @@ const ROLES = ['user', 'admin'];
 
 const defineUser = (sequelize) => {
   const User = sequelize.define('User', {
-    email: { type: DataTypes.STRING, allowNull: false, unique: true },
-    passwordHash: { type: DataTypes.STRING, allowNull: false },
-    role: { type: DataTypes.STRING, allowNull: false, defaultValue: 'user', validate: { isIn: [ROLES] } },
+    // Lowercased on the way in, the database also checks it, so one address is one account.
+    email: {
+      type: DataTypes.STRING(254),
+      allowNull: false,
+      unique: true,
+      set(value) {
+        this.setDataValue('email', typeof value === 'string' ? value.trim().toLowerCase() : value);
+      },
+    },
+    passwordHash: { type: DataTypes.STRING(100), allowNull: false },
+    role: { type: DataTypes.STRING(10), allowNull: false, defaultValue: 'user', validate: { isIn: [ROLES] } },
   });
 
   // The hash must never leave the server, so the public view is built in one place.

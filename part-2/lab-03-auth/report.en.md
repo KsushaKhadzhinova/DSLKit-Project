@@ -44,7 +44,7 @@ Table 1 – Responses of protected routes for different tokens
 
 ### 3.4 Additional mechanism: roles
 
-Role-based access control is chosen because a SaaS editor needs an administrator and an ordinary user. The `requireRole('admin')` middleware returns 403 to everyone except administrators. Administrators get the three routes listed in table 2. In addition, a diagram can be changed and deleted only by its owner or an administrator: the owner becomes the calling user, and an `owner` field in the request body is ignored. Any logged-in user can read diagrams.
+Role-based access control is chosen because a SaaS editor needs an administrator and an ordinary user. The `requireRole('admin')` middleware returns 403 to everyone except administrators. Administrators get the three routes listed in table 2. In addition, a diagram can be changed and deleted only by its owner or an administrator: the owner becomes the calling user, and an `ownerId` field in the request body is ignored. Any logged-in user can read diagrams.
 
 Table 2 – Routes and access rights
 
@@ -81,9 +81,17 @@ const ROLES = ['user', 'admin'];
 
 const defineUser = (sequelize) => {
   const User = sequelize.define('User', {
-    email: { type: DataTypes.STRING, allowNull: false, unique: true },
-    passwordHash: { type: DataTypes.STRING, allowNull: false },
-    role: { type: DataTypes.STRING, allowNull: false, defaultValue: 'user', validate: { isIn: [ROLES] } },
+    // Lowercased on the way in, the database also checks it, so one address is one account.
+    email: {
+      type: DataTypes.STRING(254),
+      allowNull: false,
+      unique: true,
+      set(value) {
+        this.setDataValue('email', typeof value === 'string' ? value.trim().toLowerCase() : value);
+      },
+    },
+    passwordHash: { type: DataTypes.STRING(100), allowNull: false },
+    role: { type: DataTypes.STRING(10), allowNull: false, defaultValue: 'user', validate: { isIn: [ROLES] } },
   });
 
   // The hash must never leave the server, so the public view is built in one place.
@@ -99,15 +107,32 @@ module.exports = { defineUser, ROLES };
 ## Appendix B – Listing of the Users table migration
 
 ```js
+// A migration is a snapshot, so the allowed values are copied here instead of imported.
+const ROLES = ['user', 'admin'];
+
 module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.createTable('Users', {
       id: { allowNull: false, autoIncrement: true, primaryKey: true, type: Sequelize.INTEGER },
-      email: { allowNull: false, unique: true, type: Sequelize.STRING },
-      passwordHash: { allowNull: false, type: Sequelize.STRING },
-      role: { allowNull: false, type: Sequelize.STRING, defaultValue: 'user' },
+      email: { allowNull: false, unique: true, type: Sequelize.STRING(254) },
+      // A bcrypt hash is 60 characters; 100 leaves room for a stronger variant.
+      passwordHash: { allowNull: false, type: Sequelize.STRING(100) },
+      role: { allowNull: false, type: Sequelize.STRING(10), defaultValue: 'user' },
       createdAt: { allowNull: false, type: Sequelize.DATE },
       updatedAt: { allowNull: false, type: Sequelize.DATE },
+    });
+    await queryInterface.addConstraint('Users', {
+      type: 'check',
+      fields: ['role'],
+      name: 'users_role_check',
+      where: { role: { [Sequelize.Op.in]: ROLES } },
+    });
+    // Emails are stored lowercased, so the unique index cannot be dodged with another letter case.
+    await queryInterface.addConstraint('Users', {
+      type: 'check',
+      fields: ['email'],
+      name: 'users_email_lowercase_check',
+      where: Sequelize.where(Sequelize.fn('lower', Sequelize.col('email')), Sequelize.col('email')),
     });
   },
 
@@ -278,7 +303,7 @@ const { notFound, forbidden } = require('../errors');
 const missing = (id) => notFound(`Diagram ${id} not found`);
 
 // Only the owner or an admin may change or delete a diagram.
-const mayChange = (user, diagram) => user.role === 'admin' || diagram.owner === user.email;
+const mayChange = (user, diagram) => user.role === 'admin' || diagram.ownerId === user.id;
 
 // Express 5 forwards a rejected promise to the error handler, so no try/catch is needed here.
 const createDiagramsController = ({ Diagram }) => ({
@@ -290,7 +315,7 @@ const createDiagramsController = ({ Diagram }) => ({
   },
 
   create: async (req, res) => {
-    const diagram = await Diagram.create({ ...req.diagramFields, owner: req.user.email });
+    const diagram = await Diagram.create({ ...req.diagramFields, ownerId: req.user.id });
     res.status(201).location(`/diagrams/${diagram.id}`).json(diagram);
   },
 

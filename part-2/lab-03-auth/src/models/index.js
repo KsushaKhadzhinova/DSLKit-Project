@@ -7,7 +7,12 @@ const allConfigs = require('../../config/config');
 const createModels = (config = allConfigs[process.env.NODE_ENV || 'development']) => {
   const { use_env_variable: urlVariable, ...options } = config;
   const sequelize = urlVariable ? new Sequelize(process.env[urlVariable], options) : new Sequelize(options);
-  return { sequelize, Diagram: defineDiagram(sequelize), User: defineUser(sequelize) };
+  const Diagram = defineDiagram(sequelize);
+  const User = defineUser(sequelize);
+  // RESTRICT matches the foreign key in the migration: a user with diagrams cannot be deleted.
+  User.hasMany(Diagram, { foreignKey: 'ownerId', onDelete: 'RESTRICT' });
+  Diagram.belongsTo(User, { foreignKey: 'ownerId', onDelete: 'RESTRICT' });
+  return { sequelize, Diagram, User };
 };
 
 module.exports = { createModels };

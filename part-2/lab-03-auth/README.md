@@ -66,7 +66,7 @@ curl -s http://localhost:3000/profile -H "Authorization: Bearer <token>"
 | `src/routes/auth.routes.js`, `users.routes.js` | Маршруты                                                     |
 | `tests/`                                       | Тесты HTTP, JWT, ролей, владельца диаграмм, миграций и сидов |
 
-Поле `owner` диаграммы теперь задаёт сервер по токену, а не клиент.
+Поле `ownerId` диаграммы теперь задаёт сервер по токену, а не клиент.
 
 ## 5 Проверка
 
