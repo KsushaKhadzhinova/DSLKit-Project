@@ -1,0 +1,60 @@
+body {
+  margin: 0;
+  background: #f6f7f9;
+  color: #1c2430;
+  font:
+    16px/1.5 system-ui,
+    sans-serif;
+}
+.app {
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: 1rem;
+}
+.card {
+  background: #fff;
+  border: 1px solid #d5dae1;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin-block: 1rem;
+}
+form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+input[type='text'],
+input:not([type]) {
+  flex: 1 1 8rem;
+  padding: 0.4rem;
+}
+.inline {
+  display: flex;
+  gap: 0.25rem;
+}
+.log {
+  list-style: none;
+  margin: 1rem 0 0;
+  padding: 0;
+  max-height: 18rem;
+  overflow-y: auto;
+}
+.log li {
+  padding: 0.15rem 0;
+}
+.log .system {
+  color: #5b6675;
+  font-style: italic;
+}
+.log .private {
+  color: #7a2e8f;
+}
+.hint {
+  min-height: 1.5rem;
+  color: #5b6675;
+}
+.error {
+  color: #b3261e;
+  min-height: 1.5rem;
+}

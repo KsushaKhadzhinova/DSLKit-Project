@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>DSLKit live rooms</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="app">
+      <h1>DSLKit live rooms</h1>
+
+      <form id="login" class="card">
+        <label>Username <input id="username" maxlength="24" autocomplete="off" required /></label>
+        <button type="submit">Connect</button>
+        <p id="login-error" class="error" role="alert"></p>
+      </form>
+
+      <section id="workspace" class="card" hidden>
+        <p>Connected as <strong id="me"></strong>. Online: <span id="online"></span></p>
+
+        <form id="room-form">
+          <label>Diagram room <input id="room" value="diagram-1" maxlength="40" /></label>
+          <button type="submit">Join</button>
+          <button type="button" id="leave">Leave</button>
+          <label class="inline"><input type="checkbox" id="editing" /> I am editing</label>
+        </form>
+
+        <p>In room: <span id="members">nobody</span></p>
+        <ul id="log" class="log" aria-live="polite"></ul>
+        <p id="typing" class="hint"></p>
+
+        <form id="chat-form">
+          <input id="text" maxlength="500" autocomplete="off" placeholder="Message" />
+          <input id="to" placeholder="Private to (socket id)" />
+          <button type="submit">Send</button>
+        </form>
+        <p id="status" class="error" role="alert"></p>
+      </section>
+    </main>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="client.js"></script>
+  </body>
+</html>
