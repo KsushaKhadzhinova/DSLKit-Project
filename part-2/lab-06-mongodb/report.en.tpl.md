@@ -100,34 +100,36 @@ There are 41 automated tests. Nineteen cover the main routes: valid and invalid 
 16. **Which applications suit MongoDB better?** Data with a flexible structure that is read as a whole object, like a diagram with tags and comments. It is worse for complex relations and multi-table transactions.
 {{/answers}}
 
+Listing of db.js is given in appendix A. Listing of server.js is given in appendix B. Listing of diagram.js is given in appendix C. Listing of diagrams.controller.js is given in appendix D. Listing of diagrams.routes.js is given in appendix E. Listing of seed.js is given in appendix F. Listing of limits.json is given in appendix G.
+
 ## Conclusion
 
 In this lab the DSLKit server from lab 2 moved from Sequelize to Mongoose. The `diagrams` collection lives in MongoDB, the CRUD routes kept their addresses and response format, and identifiers became `ObjectId` strings. Tags and comments sit inside the diagram document, which replaces several tables and joins with a single query. For the comments array the work adds appending, changing an element with the positional operator and removal. The connection string is an environment variable, the schema validates data, and 41 tests confirm the API behavior on a temporary database. The connection to MongoDB Atlas is not done and no screenshots are attached.
 
-## Appendix A – Listing of db.js
+## Appendix A (mandatory) Listing of db.js
 
 {{code:part-2/lab-06-mongodb/src/db.js}}
 
-## Appendix B – Listing of server.js
+## Appendix B (mandatory) Listing of server.js
 
 {{code:part-2/lab-06-mongodb/server.js}}
 
-## Appendix C – Listing of diagram.js
+## Appendix C (mandatory) Listing of diagram.js
 
 {{code:part-2/lab-06-mongodb/src/models/diagram.js}}
 
-## Appendix D – Listing of diagrams.controller.js
+## Appendix D (mandatory) Listing of diagrams.controller.js
 
 {{code:part-2/lab-06-mongodb/src/controllers/diagrams.controller.js}}
 
-## Appendix E – Listing of diagrams.routes.js
+## Appendix E (mandatory) Listing of diagrams.routes.js
 
 {{code:part-2/lab-06-mongodb/src/routes/diagrams.routes.js}}
 
-## Appendix F – Listing of seed.js
+## Appendix F (mandatory) Listing of seed.js
 
 {{code:part-2/lab-06-mongodb/scripts/seed.js}}
 
-## Appendix G – Listing of limits.json
+## Appendix G (mandatory) Listing of limits.json
 
 {{code:part-2/lab-06-mongodb/limits.json}}

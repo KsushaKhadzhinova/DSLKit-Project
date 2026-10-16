@@ -85,11 +85,13 @@ There are 41 automated tests. Nineteen cover the main routes: valid and invalid 
 10. **What is populate?** A method that replaces an `ObjectId` reference in a document with data from another collection. The project does not need it, because comments are nested instead of stored in a separate collection.
 11. **How to search when an array contains a value?** A condition on an array field compares the value with its elements: `Diagram.find({ tags: 'shop' })`, and `$in` and `$all` handle several values.
 
+Listing of db.js is given in appendix A. Listing of server.js is given in appendix B. Listing of diagram.js is given in appendix C. Listing of diagrams.controller.js is given in appendix D. Listing of diagrams.routes.js is given in appendix E. Listing of seed.js is given in appendix F. Listing of limits.json is given in appendix G.
+
 ## Conclusion
 
 In this lab the DSLKit server from lab 2 moved from Sequelize to Mongoose. The `diagrams` collection lives in MongoDB, the CRUD routes kept their addresses and response format, and identifiers became `ObjectId` strings. Tags and comments sit inside the diagram document, which replaces several tables and joins with a single query. For the comments array the work adds appending, changing an element with the positional operator and removal. The connection string is an environment variable, the schema validates data, and 41 tests confirm the API behavior on a temporary database. The connection to MongoDB Atlas is not done and no screenshots are attached.
 
-## Appendix A – Listing of db.js
+## Appendix A (mandatory) Listing of db.js
 
 ```js
 const mongoose = require('mongoose');
@@ -103,7 +105,7 @@ const connect = async (uri = process.env.MONGODB_URI) => {
 module.exports = { connect, disconnect: () => mongoose.disconnect() };
 ```
 
-## Appendix B – Listing of server.js
+## Appendix B (mandatory) Listing of server.js
 
 ```js
 require('dotenv').config({ quiet: true });
@@ -124,7 +126,7 @@ connect()
   });
 ```
 
-## Appendix C – Listing of diagram.js
+## Appendix C (mandatory) Listing of diagram.js
 
 ```js
 const mongoose = require('mongoose');
@@ -181,7 +183,7 @@ const Diagram = mongoose.models.Diagram || mongoose.model('Diagram', diagramSche
 module.exports = { Diagram };
 ```
 
-## Appendix D – Listing of diagrams.controller.js
+## Appendix D (mandatory) Listing of diagrams.controller.js
 
 ```js
 const { notFound } = require('../errors');
@@ -250,7 +252,7 @@ const createDiagramsController = ({ Diagram }) => ({
 module.exports = { createDiagramsController };
 ```
 
-## Appendix E – Listing of diagrams.routes.js
+## Appendix E (mandatory) Listing of diagrams.routes.js
 
 ```js
 const { Router } = require('express');
@@ -283,7 +285,7 @@ const createDiagramsRouter = (controller) => {
 module.exports = { createDiagramsRouter };
 ```
 
-## Appendix F – Listing of seed.js
+## Appendix F (mandatory) Listing of seed.js
 
 ```js
 require('dotenv').config({ quiet: true });
@@ -319,7 +321,7 @@ seed().catch((error) => {
 });
 ```
 
-## Appendix G – Listing of limits.json
+## Appendix G (mandatory) Listing of limits.json
 
 ```json
 {

@@ -81,15 +81,17 @@
 
 ## Ответы на контрольные вопросы
 
-9. **Как создать индекс в Mongoose?** Параметр `index: true` у поля или `schema.index({ owner: 1 })`; уникальность задаёт `unique: true`. В проекте индексы стоят на `owner` и `tags`.
+9. **Как создать индекс в Mongoose?** Параметр `index: true` у поля или `schema.index({ owner: 1 })`. Уникальность задаёт `unique: true`. В проекте индексы стоят на `owner` и `tags`.
 10. **Что такое populate?** Метод, который заменяет ссылку `ObjectId` в документе данными из другой коллекции. В проекте он не нужен, потому что комментарии вложены, а не вынесены в отдельную коллекцию.
 11. **Как искать, когда массив содержит значение?** Условие на поле-массив сравнивает значение с элементами: `Diagram.find({ tags: 'shop' })`, для нескольких значений есть `$in` и `$all`.
+
+Листинг файла db.js приведён в приложении А. Листинг файла server.js приведён в приложении Б. Листинг файла diagram.js приведён в приложении В. Листинг файла diagrams.controller.js приведён в приложении Г. Листинг файла diagrams.routes.js приведён в приложении Д. Листинг файла seed.js приведён в приложении Е. Листинг файла limits.json приведён в приложении Ж.
 
 ## Заключение
 
 В лабораторной работе сервер DSLKit из лабораторной работы 2 переведён с Sequelize на Mongoose. Коллекция `diagrams` хранится в MongoDB, маршруты CRUD сохранили адреса и формат ответов, а идентификаторы стали строками `ObjectId`. Теги и комментарии лежат внутри документа диаграммы, что заменяет несколько таблиц и соединений одним запросом. Для массива комментариев реализованы добавление, изменение элемента позиционным оператором и удаление. Строка подключения вынесена в переменную окружения, схема проверяет данные, а 41 тест подтверждает поведение API на временной базе. Не выполнено подключение к MongoDB Atlas и не приложены скриншоты.
 
-## Приложение А – Листинг файла db.js
+## Приложение А (обязательное) Листинг файла db.js
 
 ```js
 const mongoose = require('mongoose');
@@ -103,7 +105,7 @@ const connect = async (uri = process.env.MONGODB_URI) => {
 module.exports = { connect, disconnect: () => mongoose.disconnect() };
 ```
 
-## Приложение Б – Листинг файла server.js
+## Приложение Б (обязательное) Листинг файла server.js
 
 ```js
 require('dotenv').config({ quiet: true });
@@ -124,7 +126,7 @@ connect()
   });
 ```
 
-## Приложение В – Листинг файла diagram.js
+## Приложение В (обязательное) Листинг файла diagram.js
 
 ```js
 const mongoose = require('mongoose');
@@ -181,7 +183,7 @@ const Diagram = mongoose.models.Diagram || mongoose.model('Diagram', diagramSche
 module.exports = { Diagram };
 ```
 
-## Приложение Г – Листинг файла diagrams.controller.js
+## Приложение Г (обязательное) Листинг файла diagrams.controller.js
 
 ```js
 const { notFound } = require('../errors');
@@ -250,7 +252,7 @@ const createDiagramsController = ({ Diagram }) => ({
 module.exports = { createDiagramsController };
 ```
 
-## Приложение Д – Листинг файла diagrams.routes.js
+## Приложение Д (обязательное) Листинг файла diagrams.routes.js
 
 ```js
 const { Router } = require('express');
@@ -283,7 +285,7 @@ const createDiagramsRouter = (controller) => {
 module.exports = { createDiagramsRouter };
 ```
 
-## Приложение Е – Листинг файла seed.js
+## Приложение Е (обязательное) Листинг файла seed.js
 
 ```js
 require('dotenv').config({ quiet: true });
@@ -319,7 +321,7 @@ seed().catch((error) => {
 });
 ```
 
-## Приложение Ж – Листинг файла limits.json
+## Приложение Ж (обязательное) Листинг файла limits.json
 
 ```json
 {

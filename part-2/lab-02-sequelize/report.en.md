@@ -26,7 +26,7 @@ The packages `sequelize`, `pg`, `pg-hstore`, `sqlite3` and, as a development dep
 
 The `Diagram` model is defined in `src/models/diagram.js`: the fields `title`, `notation`, `sourceCode`, `priority` and `owner`, while Sequelize adds `id`, `createdAt` and `updatedAt` itself. The allowed values of `notation` and `priority` are set with an `isIn` check, so the model refuses a value outside the list even if request validation is bypassed. Sequelize derives the table name from the model name in the plural, which gives `Diagrams`.
 
-The schema is created only by migrations, and `sync()` is not used. The first migration creates the table without the `priority` field, and the second adds it with `addColumn` and the default `normal`; its `down` function drops the column. This shows a change to the schema of an existing table, as the assignment requires. The files are listed in table 1.
+The schema is created only by migrations, and `sync()` is not used. The first migration creates the table without the `priority` field, and the second adds it with `addColumn` and the default `normal`. Its `down` function drops the column. This shows a change to the schema of an existing table, as the assignment requires. The files are listed in table 1.
 
 Table 1 – Database files
 
@@ -58,11 +58,13 @@ The run order is: `npm run db:migrate` creates the table and adds the `priority`
 
 There are 22 automated tests. Eighteen check the HTTP routes on a temporary SQLite database with the real migrations applied. Four check the migrations themselves: the set of columns after both migrations, rolling back the second migration to drop `priority` and applying it again, inserting and reverting the seed, and the model refusing values outside the lists. The tests run the real `sequelize-cli`, so a mistake in a migration file is caught.
 
+Listing of config.js is given in appendix A. Listing of the model index.js is given in appendix B. Listing of diagram.js is given in appendix C. Listing of the table creation migration is given in appendix D. Listing of the priority migration is given in appendix E. Listing of the demo-diagrams.js seed is given in appendix F. Listing of diagrams.controller.js is given in appendix G.
+
 ## Conclusion
 
 For DSLKit, the `diagrams` collection from lab 1 is moved from an array to a database through Sequelize: the `Diagram` model, two migrations (creating the table and adding the `priority` field), a seed with three diagrams, and controllers built on ORM methods. Locally the work uses SQLite, and the `DATABASE_URL` variable switches it to PostgreSQL or cloud Neon without code changes. 22 automated tests confirm the routes, the migrations with rollback, and the seed. Running on a real PostgreSQL and attaching screenshots of the database structure and of Postman requests are still to be done.
 
-## Appendix A – Listing of config.js
+## Appendix A (mandatory) Listing of config.js
 
 ```js
 try {
@@ -87,7 +89,7 @@ const fromEnv = () => {
 module.exports = { development: fromEnv(), test: fromEnv(), production: fromEnv() };
 ```
 
-## Appendix B – Listing of the model index.js
+## Appendix B (mandatory) Listing of the model index.js
 
 ```js
 const { Sequelize } = require('sequelize');
@@ -104,7 +106,7 @@ const createModels = (config = allConfigs[process.env.NODE_ENV || 'development']
 module.exports = { createModels };
 ```
 
-## Appendix C – Listing of diagram.js
+## Appendix C (mandatory) Listing of diagram.js
 
 ```js
 const { DataTypes } = require('sequelize');
@@ -123,7 +125,7 @@ const defineDiagram = (sequelize) =>
 module.exports = { defineDiagram };
 ```
 
-## Appendix D – Listing of the table creation migration
+## Appendix D (mandatory) Listing of the table creation migration
 
 ```js
 module.exports = {
@@ -145,7 +147,7 @@ module.exports = {
 };
 ```
 
-## Appendix E – Listing of the priority migration
+## Appendix E (mandatory) Listing of the priority migration
 
 ```js
 module.exports = {
@@ -163,7 +165,7 @@ module.exports = {
 };
 ```
 
-## Appendix F – Listing of the demo-diagrams.js seed
+## Appendix F (mandatory) Listing of the demo-diagrams.js seed
 
 ```js
 const titles = ['Order processing', 'Billing schema', 'Login flow'];
@@ -184,7 +186,7 @@ module.exports = {
 };
 ```
 
-## Appendix G – Listing of diagrams.controller.js
+## Appendix G (mandatory) Listing of diagrams.controller.js
 
 ```js
 const { notFound } = require('../errors');
