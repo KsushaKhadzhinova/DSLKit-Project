@@ -149,7 +149,7 @@ Each message gets an `at` timestamp when the server receives it. The client show
 
 8. How do you save the message history in MongoDB?
 
-   A Mongoose schema with room, author, text and time; in this work the history lives in memory.
+   A Mongoose schema with room, author, text and time. In this work the history lives in memory.
 
 9. How do you send a private message to a specific user by socket.id?
 
@@ -184,38 +184,40 @@ Acknowledgements and `socket.volatile`.
 One client, everyone, everyone except the sender.
 {{/answers}}
 
+Listing of server.js is given in appendix A. Listing of app.js is given in appendix B. Listing of socket.js is given in appendix C. Listing of validate.js is given in appendix D. Listing of history.js is given in appendix E. Listing of rate-limit.js is given in appendix F. Listing of client.js is given in appendix G. Listing of index.html is given in appendix H.
+
 ## Conclusion
 
 For DSLKit, a server on Express and Socket.IO with an HTML and JavaScript client was built. Users exchange messages in real time, get notifications about connecting, disconnecting, joining a room and leaving it, and for each diagram see the list of people and those who are editing it. On top of that the work adds an in-memory history, private messages, a typing indicator, acknowledgements and a rate limit. 19 automated tests confirm the behavior of every event. Limits are kept in `limits.json`, and every message carries a timestamp. MongoDB history storage and screenshots of two windows are not included.
 
-## Appendix A – Listing of server.js
+## Appendix A (mandatory) Listing of server.js
 
 {{code:part-2/lab-07-websocket/server.js}}
 
-## Appendix B – Listing of app.js
+## Appendix B (mandatory) Listing of app.js
 
 {{code:part-2/lab-07-websocket/src/app.js}}
 
-## Appendix C – Listing of socket.js
+## Appendix C (mandatory) Listing of socket.js
 
 {{code:part-2/lab-07-websocket/src/socket.js}}
 
-## Appendix D – Listing of validate.js
+## Appendix D (mandatory) Listing of validate.js
 
 {{code:part-2/lab-07-websocket/src/validate.js}}
 
-## Appendix E – Listing of history.js
+## Appendix E (mandatory) Listing of history.js
 
 {{code:part-2/lab-07-websocket/src/history.js}}
 
-## Appendix F – Listing of rate-limit.js
+## Appendix F (mandatory) Listing of rate-limit.js
 
 {{code:part-2/lab-07-websocket/src/rate-limit.js}}
 
-## Appendix G – Listing of client.js
+## Appendix G (mandatory) Listing of client.js
 
 {{code:part-2/lab-07-websocket/public/client.js}}
 
-## Appendix H – Listing of index.html
+## Appendix H (mandatory) Listing of index.html
 
 {{code:part-2/lab-07-websocket/public/index.html}}

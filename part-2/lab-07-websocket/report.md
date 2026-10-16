@@ -131,11 +131,13 @@
     Каждый процесс знает только о своих соединениях, поэтому рассылка в комнату не дойдёт до клиентов на другом сервере. Адаптер Redis (`@socket.io/redis-adapter`) пересылает события между процессами через Redis Pub/Sub, и `io.to(room).emit` доходит до всех. Нужен и «липкий» балансировщик, который закрепляет клиента за сервером на время handshake при long polling. Данные вроде истории и списка людей придётся перенести из памяти процесса в общее хранилище.
 
 
+Листинг server.js приведён в приложении А. Листинг app.js приведён в приложении Б. Листинг socket.js приведён в приложении В. Листинг validate.js приведён в приложении Г. Листинг history.js приведён в приложении Д. Листинг rate-limit.js приведён в приложении Е. Листинг client.js приведён в приложении Ж. Листинг index.html приведён в приложении И.
+
 ## Заключение
 
 Для DSLKit реализован сервер на Express и Socket.IO с клиентом на HTML и JavaScript. Пользователи обмениваются сообщениями в реальном времени, получают уведомления о подключении, отключении, входе в комнату и выходе, а для каждой диаграммы видят список людей и тех, кто её редактирует. Дополнительно сделаны история в памяти, личные сообщения, индикатор набора текста, подтверждения и ограничение частоты. 19 автоматических тестов подтверждают поведение каждого события. Ограничения вынесены в `limits.json`, у каждого сообщения есть метка времени. Хранение истории в MongoDB и скриншоты двух окон в работу не включены.
 
-## Приложение А – Листинг server.js
+## Приложение А (обязательное) Листинг server.js
 
 ```js
 const { createServer } = require('./src/app');
@@ -151,7 +153,7 @@ const port = Number(process.env.PORT) || 3000;
 createServer().httpServer.listen(port, () => console.log(`Server running on http://localhost:${port}`));
 ```
 
-## Приложение Б – Листинг app.js
+## Приложение Б (обязательное) Листинг app.js
 
 ```js
 const http = require('node:http');
@@ -178,7 +180,7 @@ const createServer = (options = {}) => {
 module.exports = { createServer };
 ```
 
-## Приложение В – Листинг socket.js
+## Приложение В (обязательное) Листинг socket.js
 
 ```js
 const { cleanName, cleanRoom, cleanText, limits } = require('./validate');
@@ -300,7 +302,7 @@ const attachSocket = (io, { historyLimit = limits.historyLimit, rateMax = limits
 module.exports = { attachSocket };
 ```
 
-## Приложение Г – Листинг validate.js
+## Приложение Г (обязательное) Листинг validate.js
 
 ```js
 const limits = require('../limits.json');
@@ -322,7 +324,7 @@ const cleanText = (value) => {
 module.exports = { cleanName, cleanRoom, cleanText, limits };
 ```
 
-## Приложение Д – Листинг history.js
+## Приложение Д (обязательное) Листинг history.js
 
 ```js
 // In-memory message history, one capped list per room. A database (lab 6) can replace it
@@ -345,7 +347,7 @@ const createHistory = (limit = 50) => {
 module.exports = { createHistory };
 ```
 
-## Приложение Е – Листинг rate-limit.js
+## Приложение Е (обязательное) Листинг rate-limit.js
 
 ```js
 // Sliding window: at most `max` events per `windowMs` for one socket.
@@ -363,7 +365,7 @@ const createLimiter = (max, windowMs, now = Date.now) => {
 module.exports = { createLimiter };
 ```
 
-## Приложение Ж – Листинг client.js
+## Приложение Ж (обязательное) Листинг client.js
 
 ```js
 /* global io */
@@ -476,7 +478,7 @@ $('chat-form').addEventListener('submit', (event) => {
 });
 ```
 
-## Приложение И – Листинг index.html
+## Приложение И (обязательное) Листинг index.html
 
 ```html
 <!doctype html>

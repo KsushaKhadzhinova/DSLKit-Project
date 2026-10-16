@@ -131,11 +131,13 @@ Each message gets an `at` timestamp when the server receives it. The client show
     Each process knows only its own connections, so a room broadcast does not reach clients on another server. The Redis adapter (`@socket.io/redis-adapter`) forwards events between processes through Redis Pub/Sub, and `io.to(room).emit` reaches everyone. A sticky load balancer is needed too to keep a client on one server during the long polling handshake. Data such as the history and the user list must move from process memory to a shared store.
 
 
+Listing of server.js is given in appendix A. Listing of app.js is given in appendix B. Listing of socket.js is given in appendix C. Listing of validate.js is given in appendix D. Listing of history.js is given in appendix E. Listing of rate-limit.js is given in appendix F. Listing of client.js is given in appendix G. Listing of index.html is given in appendix H.
+
 ## Conclusion
 
 For DSLKit, a server on Express and Socket.IO with an HTML and JavaScript client was built. Users exchange messages in real time, get notifications about connecting, disconnecting, joining a room and leaving it, and for each diagram see the list of people and those who are editing it. On top of that the work adds an in-memory history, private messages, a typing indicator, acknowledgements and a rate limit. 19 automated tests confirm the behavior of every event. Limits are kept in `limits.json`, and every message carries a timestamp. MongoDB history storage and screenshots of two windows are not included.
 
-## Appendix A – Listing of server.js
+## Appendix A (mandatory) Listing of server.js
 
 ```js
 const { createServer } = require('./src/app');
@@ -151,7 +153,7 @@ const port = Number(process.env.PORT) || 3000;
 createServer().httpServer.listen(port, () => console.log(`Server running on http://localhost:${port}`));
 ```
 
-## Appendix B – Listing of app.js
+## Appendix B (mandatory) Listing of app.js
 
 ```js
 const http = require('node:http');
@@ -178,7 +180,7 @@ const createServer = (options = {}) => {
 module.exports = { createServer };
 ```
 
-## Appendix C – Listing of socket.js
+## Appendix C (mandatory) Listing of socket.js
 
 ```js
 const { cleanName, cleanRoom, cleanText, limits } = require('./validate');
@@ -300,7 +302,7 @@ const attachSocket = (io, { historyLimit = limits.historyLimit, rateMax = limits
 module.exports = { attachSocket };
 ```
 
-## Appendix D – Listing of validate.js
+## Appendix D (mandatory) Listing of validate.js
 
 ```js
 const limits = require('../limits.json');
@@ -322,7 +324,7 @@ const cleanText = (value) => {
 module.exports = { cleanName, cleanRoom, cleanText, limits };
 ```
 
-## Appendix E – Listing of history.js
+## Appendix E (mandatory) Listing of history.js
 
 ```js
 // In-memory message history, one capped list per room. A database (lab 6) can replace it
@@ -345,7 +347,7 @@ const createHistory = (limit = 50) => {
 module.exports = { createHistory };
 ```
 
-## Appendix F – Listing of rate-limit.js
+## Appendix F (mandatory) Listing of rate-limit.js
 
 ```js
 // Sliding window: at most `max` events per `windowMs` for one socket.
@@ -363,7 +365,7 @@ const createLimiter = (max, windowMs, now = Date.now) => {
 module.exports = { createLimiter };
 ```
 
-## Appendix G – Listing of client.js
+## Appendix G (mandatory) Listing of client.js
 
 ```js
 /* global io */
@@ -476,7 +478,7 @@ $('chat-form').addEventListener('submit', (event) => {
 });
 ```
 
-## Appendix H – Listing of index.html
+## Appendix H (mandatory) Listing of index.html
 
 ```html
 <!doctype html>
