@@ -62,7 +62,7 @@ test('GET /diagrams/:id answers 404 for a missing diagram', async () => {
 });
 
 test('GET /diagrams/:id answers 400 for a non-numeric id', async () => {
-  for (const id of ['abc', '0', '-3', '1.5', '0x1', '1e0', '%201', '01', '99999999999999999999']) {
+  for (const id of ['abc', '0', '-3', '1.5', '0x1', '1e0', '%201', '01', '2147483648', '99999999999999999999']) {
     const { res, body } = await call('GET', `/diagrams/${id}`);
     assert.equal(res.status, 400, id);
     assert.match(body.error, /positive integer/);
@@ -208,4 +208,8 @@ test('text fields at the limit are accepted, one character more is rejected with
 
 test('a value that is only longer because of surrounding spaces is accepted', async () => {
   assert.equal((await call('POST', '/diagrams', { ...valid, title: ` ${'x'.repeat(80)} ` })).res.status, 201);
+});
+
+test('the largest INTEGER id is accepted and simply not found', async () => {
+  assert.equal((await call('GET', '/diagrams/2147483647')).res.status, 404);
 });
