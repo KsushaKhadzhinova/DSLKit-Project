@@ -1,19 +1,25 @@
 ### VS Code REST Client (extension humao.rest-client). Start the server first: npm run dev
+### Run `npm run seed`, then GET /diagrams and copy an "id" and a comment "id" into the variables below.
 @base = http://localhost:3000
+@id = 000000000000000000000001
+@commentId = 000000000000000000000002
 
 ### List all diagrams -> 200
 GET {{base}}/diagrams
 
+### Filter by tag (array contains) and owner -> 200
+GET {{base}}/diagrams?tag=shop&owner=anna
+
 ### One diagram -> 200
-GET {{base}}/diagrams/1
+GET {{base}}/diagrams/{{id}}
 
-### Missing diagram -> 404
-GET {{base}}/diagrams/999
+### Well-formed but unknown ObjectId -> 404
+GET {{base}}/diagrams/64b7f0c2a1b2c3d4e5f60718
 
-### Bad id -> 400
+### Not an ObjectId -> 400
 GET {{base}}/diagrams/abc
 
-### Create -> 201 + Location
+### Create with tags -> 201 + Location
 POST {{base}}/diagrams
 Content-Type: application/json
 
@@ -22,14 +28,15 @@ Content-Type: application/json
   "notation": "UML",
   "sourceCode": "user -> server",
   "priority": "normal",
-  "owner": "carol"
+  "owner": "carol",
+  "tags": ["auth", "web"]
 }
 
 ### Invalid data -> 400 with details
 POST {{base}}/diagrams
 Content-Type: application/json
 
-{ "title": "", "notation": "XYZ" }
+{ "title": "", "notation": "XYZ", "tags": [""] }
 
 ### Malformed JSON -> 400
 POST {{base}}/diagrams
@@ -37,8 +44,8 @@ Content-Type: application/json
 
 { "title":
 
-### Replace -> 200
-PUT {{base}}/diagrams/1
+### Replace (comments are kept) -> 200
+PUT {{base}}/diagrams/{{id}}
 Content-Type: application/json
 
 {
@@ -46,11 +53,27 @@ Content-Type: application/json
   "notation": "BPMN",
   "sourceCode": "start -> check -> pay -> ship",
   "priority": "low",
-  "owner": "anna"
+  "owner": "anna",
+  "tags": ["shop"]
 }
 
-### Delete -> 204 (repeat it -> 404)
-DELETE {{base}}/diagrams/2
+### Add a comment: $push into the nested array -> 201
+POST {{base}}/diagrams/{{id}}/comments
+Content-Type: application/json
+
+{ "author": "boris", "text": "Add a refund branch" }
+
+### Edit one comment inside the array: positional $ -> 200
+PUT {{base}}/diagrams/{{id}}/comments/{{commentId}}
+Content-Type: application/json
+
+{ "text": "Refund branch added" }
+
+### Remove one comment: $pull -> 200
+DELETE {{base}}/diagrams/{{id}}/comments/{{commentId}}
+
+### Delete the diagram with its comments -> 204 (repeat it -> 404)
+DELETE {{base}}/diagrams/{{id}}
 
 ### Unknown route -> 404
 GET {{base}}/projects
