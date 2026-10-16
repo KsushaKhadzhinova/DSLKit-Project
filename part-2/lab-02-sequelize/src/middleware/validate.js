@@ -1,5 +1,5 @@
 const { badRequest } = require('../errors');
-const { NOTATIONS, PRIORITIES, DEFAULT_PRIORITY, LIMITS } = require('../models/diagram.constants');
+const { NOTATIONS, PRIORITIES, DEFAULT_PRIORITY, LIMITS, MAX_ID } = require('../models/diagram.constants');
 
 // Text is checked after trimming, so the stored value is what was measured.
 const text = (name) => (v) => {
@@ -19,7 +19,8 @@ const checks = {
 const parseId = (req, _res, next) => {
   // Number() would accept '0x1', '1e0' and ' 1', so the raw text is checked first.
   const id = Number(req.params.id);
-  if (!/^[1-9]\d*$/.test(req.params.id) || !Number.isSafeInteger(id)) return next(badRequest('Diagram id must be a positive integer'));
+  // Ids above the INTEGER column range would make PostgreSQL fail with a 500, so they are rejected here.
+  if (!/^[1-9]\d*$/.test(req.params.id) || id > MAX_ID) return next(badRequest(`Diagram id must be a positive integer up to ${MAX_ID}`));
   req.diagramId = id;
   return next();
 };
