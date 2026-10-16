@@ -28,7 +28,11 @@ The functions `filterDiagrams`, `sortDiagrams` and `getStats` are pure and live 
 
 The tab title is updated by an effect and shows the number of diagrams. The `useAutosaveStatus` hook shows "Saving…" after a change and "Saved" after 500 ms of quiet. This is a debounce: every new change clears the previous timer with the effect cleanup function.
 
-### 3.5 Testing
+### 3.5 Input Validation
+
+The form and the edit mode check the diagram title before saving. A value made of spaces only counts as empty and is rejected with the message "Введите название диаграммы". A title longer than the limit is rejected with a message that names the allowed number of characters. The limit and the minimum length live in a separate file, `src/limits.json`, not in the component code. The "Создана" field of every record shows a unique creation time with seconds, so records differ visually. The `ErrorBoundary` component shows a styled message instead of a blank page when rendering fails.
+
+### 3.6 Testing
 
 The automated tests (19 in total) cover the pure functions, both hooks and the application behavior: adding, deleting, editing with Enter and Esc, status toggling, filters, sorting and restoring the list after a re-render. Manual check: `npm run dev`, then the steps from the "What to check" section of `README.md`, the `localStorage` content is viewed in the Application tab of the developer tools.
 

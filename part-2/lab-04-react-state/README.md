@@ -15,6 +15,7 @@
 | Статистика                                          | всего, опубликовано, черновики (`StatsBar.jsx`)                                     |
 | Пустой localStorage                                 | начальные данные `data/initialDiagrams.js`, повреждённый JSON тоже даёт начальные   |
 | Хук `useLocalStorage` вынесен, как советует условие | `hooks/useLocalStorage.js`                                                          |
+| Проверка ввода (требование преподавателя)          | `utils/validation.js`: пробельное название, длина; пределы в `src/limits.json`; `ErrorBoundary` |
 
 ## Запуск
 

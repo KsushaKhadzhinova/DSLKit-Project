@@ -1,23 +1,38 @@
 import { useState } from 'react';
 import { NOTATIONS } from '../data/initialDiagrams';
+import { validateTitle } from '../utils/validation';
 
 export default function DiagramForm({ onAdd }) {
   const [title, setTitle] = useState('');
   const [notation, setNotation] = useState(NOTATIONS[0]);
+  const [error, setError] = useState(null);
 
   // A form submit covers both the button and the Enter key.
   const handleSubmit = (event) => {
     event.preventDefault();
-    if (!title.trim()) return;
+    const problem = validateTitle(title);
+    setError(problem);
+    if (problem) return;
     onAdd({ title: title.trim(), notation });
     setTitle('');
   };
 
   return (
-    <form className="form" onSubmit={handleSubmit}>
+    <form className="form" onSubmit={handleSubmit} noValidate>
       <label className="field">
         Название диаграммы
-        <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Например, схема оплаты" />
+        <input
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          placeholder="Например, схема оплаты"
+          aria-invalid={error ? 'true' : undefined}
+          aria-describedby={error ? 'title-error' : undefined}
+        />
+        {error && (
+          <span id="title-error" className="error" role="alert">
+            {error}
+          </span>
+        )}
       </label>
       <label className="field">
         Нотация

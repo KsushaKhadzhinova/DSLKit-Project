@@ -119,3 +119,18 @@ button[type='submit'] {
   text-align: center;
   color: var(--muted);
 }
+
+.error {
+  color: var(--danger);
+  font-size: 0.8125rem;
+}
+
+.error-page {
+  text-align: center;
+}
+
+.error-page h1 {
+  margin-block: 2rem 0;
+  color: var(--accent);
+  font-size: 4rem;
+}
