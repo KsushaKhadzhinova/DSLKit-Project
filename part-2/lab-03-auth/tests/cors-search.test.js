@@ -19,12 +19,12 @@ const titles = (body) => body.map((d) => d.title);
 
 test('every response names the allowed origin of the React client', async () => {
   const { res } = await app.call('GET', '/diagrams', { token });
-  assert.equal(res.headers.get('access-control-allow-origin'), 'http://localhost:5176');
+  assert.equal(res.headers.get('access-control-allow-origin'), 'http://localhost:5178');
   assert.match(res.headers.get('vary'), /Origin/);
 });
 
 test('a preflight request answers 204 with the allowed methods and headers, without a token', async () => {
-  const { res } = await app.call('OPTIONS', '/diagrams/1', { headers: { Origin: 'http://localhost:5176', 'Access-Control-Request-Method': 'PUT' } });
+  const { res } = await app.call('OPTIONS', '/diagrams/1', { headers: { Origin: 'http://localhost:5178', 'Access-Control-Request-Method': 'PUT' } });
   assert.equal(res.status, 204);
   assert.equal(res.headers.get('access-control-allow-methods'), 'GET, POST, PUT, DELETE, OPTIONS');
   assert.equal(res.headers.get('access-control-allow-headers'), 'Content-Type, Authorization');

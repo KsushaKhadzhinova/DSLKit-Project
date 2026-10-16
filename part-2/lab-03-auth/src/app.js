@@ -9,7 +9,7 @@ const { createDiagramsRouter } = require('./routes/diagrams.routes');
 const { routeNotFound, errorHandler } = require('./middleware/error-handler');
 const { createCors } = require('./middleware/cors');
 
-const DEFAULTS = { jwtExpiresIn: '1h', bcryptRounds: 10, corsOrigin: 'http://localhost:5176' };
+const DEFAULTS = { jwtExpiresIn: '1h', bcryptRounds: 10, corsOrigin: 'http://localhost:5178' };
 
 // settings: { jwtSecret, jwtExpiresIn?, bcryptRounds?, corsOrigin? }
 const createApp = (models, settings) => {

@@ -14,7 +14,7 @@ const models = createModels();
 models.sequelize
   .authenticate()
   .then(() =>
-    createApp(models, { jwtSecret: JWT_SECRET, jwtExpiresIn: JWT_EXPIRES_IN || '1h', corsOrigin: CORS_ORIGIN || 'http://localhost:5176' }).listen(port, () =>
+    createApp(models, { jwtSecret: JWT_SECRET, jwtExpiresIn: JWT_EXPIRES_IN || '1h', corsOrigin: CORS_ORIGIN || 'http://localhost:5178' }).listen(port, () =>
       console.log(`Server running on http://localhost:${port}`),
     ),
   )
