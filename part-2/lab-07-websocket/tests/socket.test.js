@@ -37,7 +37,10 @@ const ask = (socket, event, payload) => new Promise((resolve) => socket.emit(eve
 test('a client connects and receives a welcome with the online list', async () => {
   const { info } = await join('alice');
   assert.equal(info.username, 'alice');
-  assert.deepEqual(info.online, ['alice']);
+  assert.deepEqual(
+    info.online.map((u) => u.username),
+    ['alice'],
+  );
 });
 
 test('connection is rejected without a valid username', async () => {

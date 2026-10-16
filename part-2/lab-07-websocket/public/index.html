@@ -3,41 +3,128 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>DSLKit live rooms</title>
+    <meta name="description" content="DSLKit live rooms: chat, who is online and who is editing a diagram." />
+    <meta name="theme-color" content="#2563eb" />
+    <title>Live rooms — DSLKit</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="dslkit.css" />
     <link rel="stylesheet" href="style.css" />
+    <script src="theme.js"></script>
   </head>
-  <body>
-    <main class="app">
-      <h1>DSLKit live rooms</h1>
+  <body class="page">
+    <a class="skip-link" href="#main">Skip to the main content</a>
+    <header class="header">
+      <div class="header__inner">
+        <a class="header__logo" href="/">
+          <img class="header__logo-image" src="logo.svg" alt="" width="32" height="32" />
+          <span class="header__logo-text">DSLKit</span>
+        </a>
+        <input class="burger__input" type="checkbox" id="burger-toggle" />
+        <label class="burger__button" for="burger-toggle">
+          <span class="burger__label">Menu</span>
+          <span class="burger__icon" aria-hidden="true"></span>
+        </label>
+        <nav class="nav" aria-label="Main navigation">
+          <ul class="nav__list">
+            <li class="nav__item"><a class="nav__link" href="#chat-title">Chat</a></li>
+            <li class="nav__item"><a class="nav__link" href="#people-title">People</a></li>
+          </ul>
+        </nav>
+        <div class="header__tools">
+          <input class="theme__input" type="checkbox" id="theme-toggle" />
+          <label class="theme__button" for="theme-toggle" title="Dark theme"
+            ><svg class="theme__icon theme__icon--moon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">
+              <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z" /></svg
+            ><svg class="theme__icon theme__icon--sun" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">
+              <circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2" />
+              <path
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"
+              /></svg
+            ><span class="theme__label">Dark theme</span></label
+          >
+        </div>
+      </div>
+    </header>
 
-      <form id="login" class="card">
-        <label>Username <input id="username" maxlength="24" autocomplete="off" required /></label>
-        <button type="submit">Connect</button>
-        <p id="login-error" class="error" role="alert"></p>
+    <main class="main" id="main">
+      <h1 class="live__title">Live rooms</h1>
+      <p class="live__lead">Every diagram has its own room. Talk to the people who have it open and see who is editing it right now.</p>
+
+      <form id="login" class="form" novalidate>
+        <div class="form__field">
+          <label class="form__label" for="username">Username</label>
+          <input class="form__input" id="username" name="username" maxlength="24" autocomplete="off" aria-describedby="username-hint login-error" required />
+          <p class="form__hint" id="username-hint">Up to 24 letters, digits, dots, dashes or underscores.</p>
+          <p class="form__error" id="login-error" role="alert"></p>
+        </div>
+        <div class="actions">
+          <button class="button button--primary" type="submit">Connect</button>
+        </div>
       </form>
 
-      <section id="workspace" class="card" hidden>
-        <p>Connected as <strong id="me"></strong>. Online: <span id="online"></span></p>
+      <div id="workspace" class="live" hidden>
+        <section class="live__people form" aria-labelledby="people-title">
+          <h2 class="live__heading" id="people-title">People</h2>
+          <p class="live__me">You are <strong id="me"></strong></p>
+          <h3 class="live__subheading">Online</h3>
+          <ul id="online" class="people"></ul>
+          <h3 class="live__subheading">In this room</h3>
+          <ul id="members" class="people"></ul>
+          <div class="form__field form__field--checkbox">
+            <input class="form__checkbox" type="checkbox" id="editing" />
+            <label class="form__label" for="editing">I am editing this diagram</label>
+          </div>
+        </section>
 
-        <form id="room-form">
-          <label>Diagram room <input id="room" value="diagram-1" maxlength="40" /></label>
-          <button type="submit">Join</button>
-          <button type="button" id="leave">Leave</button>
-          <label class="inline"><input type="checkbox" id="editing" /> I am editing</label>
-        </form>
+        <section class="live__chat form" aria-labelledby="chat-title">
+          <div class="live__bar">
+            <h2 class="live__heading" id="chat-title">Chat</h2>
+            <span class="badge" id="conn" role="status">Connected</span>
+          </div>
+          <form id="room-form" class="live__row" novalidate>
+            <label class="visually-hidden" for="room">Diagram room</label>
+            <input class="form__input" id="room" value="diagram-1" maxlength="40" autocomplete="off" />
+            <button class="button" type="submit">Join</button>
+            <button class="button button--quiet button--icon live__icon" type="button" id="leave" data-tip="Leave the room" aria-label="Leave the room">
+              <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M8 4H4v12h4M12 6l4 4-4 4M16 10H8" />
+              </svg>
+            </button>
+          </form>
+          <p class="form__error" id="room-error" role="alert"></p>
 
-        <p>In room: <span id="members">nobody</span></p>
-        <ul id="log" class="log" aria-live="polite"></ul>
-        <p id="typing" class="hint"></p>
+          <ul id="log" class="log" aria-live="polite" aria-label="Messages"></ul>
+          <p class="form__hint" id="typing" aria-live="polite"></p>
 
-        <form id="chat-form">
-          <input id="text" maxlength="500" autocomplete="off" placeholder="Message" />
-          <input id="to" placeholder="Private to (socket id)" />
-          <button type="submit">Send</button>
-        </form>
-        <p id="status" class="error" role="alert"></p>
-      </section>
+          <form id="chat-form" class="live__send" novalidate>
+            <p class="live__target" id="target" hidden>
+              <span>Private to <strong id="target-name"></strong></span>
+              <button class="button button--quiet button--icon live__icon" type="button" id="target-clear" data-tip="Write to the room" aria-label="Write to the room instead">
+                <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path d="M5 5l10 10M15 5L5 15" />
+                </svg>
+              </button>
+            </p>
+            <div class="live__row">
+              <label class="visually-hidden" for="text">Message</label>
+              <input class="form__input" id="text" maxlength="500" autocomplete="off" placeholder="Message" />
+              <button class="button button--primary" type="submit">Send</button>
+            </div>
+            <p class="form__error" id="status" role="alert"></p>
+          </form>
+        </section>
+      </div>
     </main>
+
+    <footer class="footer">
+      <div class="footer__inner">
+        <p class="footer__copy"><small>© 2026 DSLKit. Lab 7: real time with WebSocket.</small></p>
+      </div>
+    </footer>
     <script src="/socket.io/socket.io.js"></script>
     <script src="client.js"></script>
   </body>

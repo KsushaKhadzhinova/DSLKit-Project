@@ -26,25 +26,30 @@ const pause = (ms = 400) => new Promise((r) => setTimeout(r, ms));
 
 const open = async (name) => {
   const page = await browser.newPage();
-  await page.setViewport({ width: 640, height: 520 });
+  await page.setViewport({ width: 1280, height: 800 });
   await page.goto(url);
   await page.type('#username', name);
-  await page.click('#login button');
+  await page.click('#login button[type=submit]');
   await page.waitForSelector('#workspace:not([hidden])');
   return page;
 };
 const enter = async (page, room) => {
+  await page.bringToFront();
   await page.$eval('#room', (el) => (el.value = ''));
   await page.type('#room', room);
   await page.click('#room-form button[type=submit]');
   await pause();
 };
 const say = async (page, text) => {
+  await page.bringToFront();
   await page.type('#text', text);
-  await page.click('#chat-form button');
+  await page.click('#chat-form button[type=submit]');
   await pause();
 };
-const shot = (page, name) => page.screenshot({ path: path.join(out, name) });
+const shot = async (page, name) => {
+  await page.bringToFront();
+  return page.screenshot({ path: path.join(out, name) });
+};
 
 try {
   const alice = await open('alice');
@@ -65,15 +70,18 @@ try {
   await shot(carol, '05-room-diagram-2-carol.png');
   await shot(alice, '06-room-diagram-1-alice-no-leak.png');
 
+  await alice.bringToFront();
   await alice.click('#editing');
   await pause();
   await shot(bob, '07-who-is-editing-bob.png');
 
+  await bob.bringToFront();
   await bob.type('#text', '   ');
-  await bob.click('#chat-form button');
+  await bob.click('#chat-form button[type=submit]');
   await pause();
   await shot(bob, '08-validation-error-bob.png');
 
+  await bob.bringToFront();
   await bob.click('#leave');
   await pause();
   await shot(alice, '09-leave-notification-alice.png');

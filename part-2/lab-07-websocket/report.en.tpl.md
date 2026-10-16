@@ -34,7 +34,7 @@ Figure 1 – Event exchange on connect, room join, message and disconnect
 
 ### 3.2 Client choice and project structure
 
-The client is plain HTML and JavaScript. The chat page is small and needs no bundler. Express serves it from the `public` folder at the same address as the server, so no CORS setup is needed, and checking the app takes one address opened in two windows. The event protocol does not depend on the client, so a React component for the main project can reuse it unchanged. The project structure is shown in table 1.
+The client is plain HTML and JavaScript. The chat page is small and needs no bundler. Express serves it from the `public` folder at the same address as the server, so no CORS headers are needed and the server sends none, and checking the app takes one address opened in two windows. The event protocol does not depend on the client, so a React component for the main project can reuse it unchanged. The project structure is shown in table 1.
 
 Table 1 – Project structure
 
@@ -88,7 +88,7 @@ The work includes extras from the assignment and a few of its own.
 
 ### 3.5 Verification
 
-The work is checked by automated tests: 19 tests start a real server on a free port and connect several `socket.io-client` clients over WebSocket. The scenarios are summarized in table 3. Manual checking uses two browser windows and the steps from the README file.
+The work is checked by automated tests: 41 tests start a real server on a free port and connect several `socket.io-client` clients over WebSocket. The scenarios are summarized in table 3. Manual checking uses two browser windows and the steps from the README file.
 
 Table 3 – Automated test scenarios
 
@@ -113,6 +113,10 @@ Table 3 – Automated test scenarios
 All limits live in a separate `limits.json` file: user name length (24), room name (40), message length (500), history size (50), message rate (5 per 2 seconds) and packet size. The server reads the file at start and serves it to the client at `/limits.json`, so the client and the server use the same numbers.
 
 Three cases are checked. An empty message is rejected. A message of only spaces becomes empty after trimming and is rejected the same way. A message over the limit is rejected, and one of exactly the maximum length is accepted. The client checks whitespace-only text before sending and caps the field with the `maxLength` attribute, and the server repeats the check because a client cannot be trusted. The error comes back in the acknowledgement and shows under the form.
+
+The same rules protect the server from overload. The rate of all events is limited per socket (40 per 2 seconds), a user can join at most 5 rooms, a room holds at most 50 people, and the server accepts at most 200 connections. The number of rooms with history is capped too, so room names invented by a client cannot use memory without end. Control characters and text-direction overrides are removed from message text, and a username counts as taken regardless of letter case. A packet larger than 10,000 bytes closes only the sender's connection.
+
+The handshake is checked against the `Origin` header. A page from another site cannot open a socket on behalf of a visitor, because the server accepts only its own address and the addresses listed in the `ALLOWED_ORIGINS` variable. The value `*` is not used for CORS. Server responses carry the `Content-Security-Policy`, `X-Content-Type-Options`, `X-Frame-Options` and `Referrer-Policy` headers, and an unknown address or a server failure opens styled 404 and 500 pages without the error text.
 
 Each message gets an `at` timestamp when the server receives it. The client shows the date and time with seconds next to the author, so two messages never look the same, and a newcomer sees the time on messages from the history too.
 
@@ -188,7 +192,7 @@ Listing of server.js is given in appendix A. Listing of app.js is given in appen
 
 ## Conclusion
 
-For DSLKit, a server on Express and Socket.IO with an HTML and JavaScript client was built. Users exchange messages in real time, get notifications about connecting, disconnecting, joining a room and leaving it, and for each diagram see the list of people and those who are editing it. On top of that the work adds an in-memory history, private messages, a typing indicator, acknowledgements and a rate limit. 19 automated tests confirm the behavior of every event. Limits are kept in `limits.json`, and every message carries a timestamp. MongoDB history storage and screenshots of two windows are not included.
+For DSLKit, a server on Express and Socket.IO with an HTML and JavaScript client was built. Users exchange messages in real time, get notifications about connecting, disconnecting, joining a room and leaving it, and for each diagram see the list of people and those who are editing it. On top of that the work adds an in-memory history, private messages, a typing indicator, acknowledgements and a rate limit. 41 automated tests confirm the behavior of every event. Limits are kept in `limits.json`, and every message carries a timestamp. MongoDB history storage and screenshots of two windows are not included.
 
 ## Appendix A (mandatory) Listing of server.js
 
