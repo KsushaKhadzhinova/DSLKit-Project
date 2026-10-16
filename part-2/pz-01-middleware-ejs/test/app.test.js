@@ -1,15 +1,20 @@
 import { test } from 'node:test';
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import assert from 'node:assert/strict';
 import { createApp } from '../src/app.js';
 import { createDiagramStore, validateDiagram } from '../src/data/diagrams.js';
-import { createRequestLog } from '../src/middleware/requestLogger.js';
+import { openRequestLog } from '../src/data/requestLog.js';
+import { requestLogger } from '../src/middleware/requestLogger.js';
+import { loadLimits } from '../src/limits.js';
 import { serverError } from '../src/middleware/errorHandlers.js';
 
 const start = async () => {
   const lines = [];
   const waiters = [];
   const errors = [];
-  const log = createRequestLog(3);
+  const log = openRequestLog();
   const server = createApp({
     log,
     write: (l) => {
@@ -93,14 +98,88 @@ withServer('logger writes to console and to the in-memory table', async ({ base,
   await fetch(`${base}/item/1`);
   await logged;
   assert.match(lines.at(-1), /GET \/item\/1 200 \d+ms/);
-  assert.equal(log.all()[0].url, '/item/1');
+  assert.equal(log.recent(5)[0].url, '/item/1');
+  assert.equal(log.recent(5)[0].status, 200);
   assert.match(await (await fetch(`${base}/log`)).text(), /\/item\/1/);
 });
 
-test('request log keeps only the newest rows', () => {
-  const log = createRequestLog(2);
-  [1, 2, 3].forEach((n) => log.add({ n }));
-  assert.deepEqual(log.all(), [{ n: 3 }, { n: 2 }]);
+test('request log is a SQLite table that keeps method, url, time, status and duration', () => {
+  const log = openRequestLog();
+  const id = log.start({ time: '2026-01-01T00:00:00.000Z', method: 'GET', url: '/a' });
+  log.start({ time: '2026-01-01T00:00:01.000Z', method: 'POST', url: '/b' });
+  log.finish(id, 200, 5);
+  const rows = log.recent(1);
+  assert.equal(rows.length, 1);
+  assert.equal(rows[0].url, '/b');
+  assert.deepEqual(log.recent(5)[1], { id, time: '2026-01-01T00:00:00.000Z', method: 'GET', url: '/a', status: 200, ms: 5 });
+  log.close();
+});
+
+test('request log survives reopening a file and creates missing folders', async () => {
+  const dir = mkdtempSync(join(tmpdir(), 'pz1-'));
+  const file = join(dir, 'nested', 'log.db');
+  const first = openRequestLog(file);
+  first.start({ time: 't', method: 'GET', url: '/kept' });
+  first.close();
+  const second = openRequestLog(file);
+  assert.equal(second.recent(1)[0].url, '/kept');
+  second.close();
+  rmSync(dir, { recursive: true, force: true });
+});
+
+test('a database that cannot be opened shows the styled 500 page with a clear message', async () => {
+  const errors = [];
+  const log = openRequestLog(join('package.json', 'blocked', 'log.db'));
+  const server = createApp({ log, write: () => {}, writeError: (...a) => errors.push(a) }).listen(0);
+  await new Promise((resolve) => server.once('listening', resolve));
+  const res = await fetch(`http://127.0.0.1:${server.address().port}/`);
+  const html = await res.text();
+  server.closeAllConnections();
+  await new Promise((resolve) => server.close(resolve));
+  assert.equal(res.status, 500);
+  assert.match(html, /<link rel="stylesheet"/);
+  assert.match(html, /request log table could not be written/);
+  assert.match(errors[0][0], /GET \//);
+});
+
+test('a failing finish update is reported on the console but does not break the response', async () => {
+  const lines = [];
+  const log = {
+    start: () => 1,
+    finish: () => {
+      throw new Error('disk full');
+    },
+  };
+  const handlers = {};
+  requestLogger(log, (l) => lines.push(l))({ method: 'GET', originalUrl: '/x' }, { statusCode: 200, on: (e, f) => (handlers[e] = f) }, () => {});
+  handlers.finish();
+  assert.match(lines[0], /could not finish row 1: disk full/);
+  assert.match(lines[1], /GET \/x 200/);
+});
+
+test('limits are read from limits.json', () => {
+  const limits = loadLimits();
+  assert.equal(typeof limits.title.maxLength, 'number');
+  assert.equal(limits.revision.min, 0);
+});
+
+withServer('the footer links to the 500 demo page', async ({ base }) => {
+  assert.match(await (await fetch(`${base}/`)).text(), /href="\/boom"/);
+});
+
+test('the fallback page is sent when the 500 template itself fails', () => {
+  const sent = {};
+  const res = {
+    locals: {},
+    headersSent: false,
+    status: () => res,
+    render: (view, locals, done) => done(new Error('template broken')),
+    type: () => res,
+    send: (body) => (sent.body = body),
+  };
+  serverError(() => {})(new Error('x'), { method: 'GET', originalUrl: '/' }, res);
+  assert.match(sent.body, /500 – server error/);
+  assert.match(sent.body, /style.css/);
 });
 
 withServer('an error is logged and shows the 500 page', async ({ base, errors }) => {
@@ -147,4 +226,14 @@ withServer('errors that carry a 4xx status keep it', async ({ base }) => {
   });
   assert.equal(res.status, 413);
   assert.match(await res.text(), /Bad request/);
+});
+
+test('a file that is not a database is rejected and the connection is closed', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'pz1-'));
+  const file = join(dir, 'broken.db');
+  writeFileSync(file, 'this is not a sqlite database, '.repeat(50));
+  const log = openRequestLog(file);
+  assert.throws(() => log.start({ time: 't', method: 'GET', url: '/' }));
+  assert.doesNotThrow(() => log.close());
+  rmSync(dir, { recursive: true, force: true });
 });

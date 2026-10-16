@@ -1,0 +1,8 @@
+{
+  "title": { "maxLength": 80 },
+  "description": { "maxLength": 500 },
+  "code": { "maxLength": 5000 },
+  "revision": { "min": 0, "max": 100000 },
+  "bodyLimit": "20kb",
+  "logRows": 100
+}
