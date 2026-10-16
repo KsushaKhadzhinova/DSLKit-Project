@@ -1,0 +1,13 @@
+{
+  "title": 80,
+  "owner": 60,
+  "sourceCode": 10000,
+  "tags": 20,
+  "tag": 30,
+  "comments": 100,
+  "author": 60,
+  "commentText": 1000,
+  "priorityMin": 0,
+  "priorityMax": 2,
+  "priorityDefault": 1
+}

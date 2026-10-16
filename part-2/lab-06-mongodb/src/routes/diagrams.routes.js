@@ -1,6 +1,6 @@
 const { Router } = require('express');
 const { HttpError } = require('../errors');
-const { parseId, parseCommentId, validateDiagram, validateComment, validateCommentText } = require('../middleware/validate');
+const { validateListQuery, parseId, parseCommentId, validateDiagram, validateComment, validateCommentText } = require('../middleware/validate');
 
 const methodNotAllowed = (allow) => (_req, res, next) => {
   res.set('Allow', allow);
@@ -9,7 +9,7 @@ const methodNotAllowed = (allow) => (_req, res, next) => {
 
 const createDiagramsRouter = (controller) => {
   const router = Router();
-  router.route('/').get(controller.list).post(validateDiagram, controller.create).all(methodNotAllowed('GET, POST'));
+  router.route('/').get(validateListQuery, controller.list).post(validateDiagram, controller.create).all(methodNotAllowed('GET, POST'));
   router
     .route('/:id')
     .get(parseId, controller.get)

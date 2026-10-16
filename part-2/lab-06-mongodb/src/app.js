@@ -5,7 +5,7 @@ const { routeNotFound, errorHandler } = require('./middleware/error-handler');
 
 const createApp = (models) => {
   const app = express();
-  app.use(express.json());
+  app.use(express.json({ limit: '100kb' }));
   app.use('/diagrams', createDiagramsRouter(createDiagramsController(models)));
   app.use(routeNotFound);
   app.use(errorHandler);

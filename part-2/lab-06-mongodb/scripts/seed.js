@@ -7,13 +7,13 @@ const demo = [
     title: 'Order processing',
     notation: 'BPMN',
     sourceCode: 'start -> check stock -> pay -> ship -> end',
-    priority: 'high',
+    priority: 2,
     owner: 'anna',
     tags: ['shop', 'process'],
     comments: [{ author: 'boris', text: 'Add a refund branch' }],
   },
   { title: 'Login flow', notation: 'UML', sourceCode: 'user -> server: login', owner: 'carol', tags: ['auth'] },
-  { title: 'Customers and orders', notation: 'ERD', sourceCode: 'Customer ||--o{ Order', priority: 'low', owner: 'anna', tags: ['shop', 'database'] },
+  { title: 'Customers and orders', notation: 'ERD', sourceCode: 'Customer ||--o{ Order', priority: 0, owner: 'anna', tags: ['shop', 'database'] },
 ];
 
 // Replaces the demo documents by title, so the script can be run many times.

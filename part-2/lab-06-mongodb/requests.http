@@ -27,7 +27,7 @@ Content-Type: application/json
   "title": "Login flow",
   "notation": "UML",
   "sourceCode": "user -> server",
-  "priority": "normal",
+  "priority": 1,
   "owner": "carol",
   "tags": ["auth", "web"]
 }
@@ -52,7 +52,7 @@ Content-Type: application/json
   "title": "Order processing v2",
   "notation": "BPMN",
   "sourceCode": "start -> check -> pay -> ship",
-  "priority": "low",
+  "priority": 0,
   "owner": "anna",
   "tags": ["shop"]
 }

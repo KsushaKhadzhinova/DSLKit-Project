@@ -2,7 +2,7 @@ const { test, before, after, beforeEach } = require('node:test');
 const assert = require('node:assert/strict');
 const { startTestServer, createCaller } = require('./helpers');
 
-const valid = { title: 'Login flow', notation: 'UML', sourceCode: 'user -> server', priority: 'low', owner: 'carol', tags: ['auth'] };
+const valid = { title: 'Login flow', notation: 'UML', sourceCode: 'user -> server', priority: 0, owner: 'carol', tags: ['auth'] };
 const MISSING_ID = '64b7f0c2a1b2c3d4e5f60718';
 const stamps = { id: undefined, createdAt: undefined, updatedAt: undefined, comments: undefined };
 
@@ -22,7 +22,7 @@ after(() => ctx.stop());
 
 beforeEach(async () => {
   await models.Diagram.deleteMany({});
-  await models.Diagram.create({ title: 'Order processing', notation: 'BPMN', sourceCode: 'start -> end', priority: 'high', owner: 'anna', tags: ['shop'] });
+  await models.Diagram.create({ title: 'Order processing', notation: 'BPMN', sourceCode: 'start -> end', priority: 2, owner: 'anna', tags: ['shop'] });
 });
 
 test('GET /diagrams returns the list', async () => {
@@ -73,7 +73,7 @@ test('POST /diagrams defaults priority and tags and drops unknown fields', async
   const { priority, tags, ...rest } = valid;
   const { res, body } = await call('POST', '/diagrams', { ...rest, admin: true, comments: [{ author: 'x', text: 'y' }] });
   assert.equal(res.status, 201);
-  assert.equal(body.priority, 'normal');
+  assert.equal(body.priority, 1);
   assert.deepEqual(body.tags, []);
   assert.deepEqual(body.comments, []);
   assert.equal('admin' in body, false);

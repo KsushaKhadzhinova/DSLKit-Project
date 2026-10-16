@@ -97,10 +97,10 @@ test('deleting a diagram removes its comments with it (they are part of the docu
 test('the model itself rejects values outside the lists, even without the HTTP checks', async () => {
   const base = { title: 't', sourceCode: 's', owner: 'o' };
   await assert.rejects(models.Diagram.create({ ...base, notation: 'XYZ' }), { name: 'ValidationError' });
-  await assert.rejects(models.Diagram.create({ ...base, notation: 'UML', priority: 'urgent' }), { name: 'ValidationError' });
+  await assert.rejects(models.Diagram.create({ ...base, notation: 'UML', priority: 5 }), { name: 'ValidationError' });
   await assert.rejects(models.Diagram.create({ ...base, notation: 'UML', comments: [{ author: 'a' }] }), { name: 'ValidationError' });
   const ok = await models.Diagram.create({ ...base, notation: 'UML' });
-  assert.equal(ok.priority, 'normal');
+  assert.equal(ok.priority, 1);
   assert.deepEqual([...ok.tags], []);
 });
 
