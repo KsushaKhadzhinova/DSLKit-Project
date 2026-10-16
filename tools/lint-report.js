@@ -10,6 +10,9 @@ const L = {
     table: 'Таблица',
     ref: 'рисунк\\S*',
     appendix: /^## Приложение [А-Я] – \S/,
+    appendixStrict: /^## Приложение [А-Я] \(обязательное\) \S/,
+    appendixRef: (letter) => new RegExp(`приложени\\S* ${letter}(?![А-Яа-яЁё])`, 'i'),
+    startsWithRef: /(?:^|[.!?]\s+)(?:Рисунок|Таблица|Рисунки|Таблицы) \d+(?! –)/m,
     appendixAny: /^## Приложение/m,
     messages: {
       goal: 'Раздел «1 Цель работы» отсутствует или не пронумерован',
@@ -24,6 +27,11 @@ const L = {
       code: 'Код в основном тексте, его место в приложении',
       image: 'Рисунок в приложении',
       appendix: 'Название приложения',
+      appendixStrict: 'Приложение должно называться «Приложение А (обязательное) Название»',
+      noAppendix: 'Нужно хотя бы одно приложение',
+      appendixRef: 'Нет ссылки в тексте на приложение',
+      semicolon: 'Точка с запятой в тексте, сложное предложение разбить',
+      startsWithRef: 'Предложение начинается со ссылки на рисунок или таблицу',
     },
   },
   en: {
@@ -37,6 +45,9 @@ const L = {
     table: 'Table',
     ref: 'figure',
     appendix: /^## Appendix [A-Z] – \S/,
+    appendixStrict: /^## Appendix [A-Z] \(mandatory\) \S/,
+    appendixRef: (letter) => new RegExp(`appendix ${letter}\\b`, 'i'),
+    startsWithRef: /(?:^|[.!?]\s+)(?:Figure|Table|Figures|Tables) \d+(?! –)/m,
     appendixAny: /^## Appendix/m,
     messages: {
       goal: 'Section "1 Purpose of the Work" is missing',
@@ -50,6 +61,11 @@ const L = {
       code: 'Code in the main text, it belongs to an appendix',
       image: 'Figure inside an appendix',
       appendix: 'Appendix title',
+      appendixStrict: 'An appendix must be titled "Appendix A (mandatory) Title"',
+      noAppendix: 'At least one appendix is required',
+      appendixRef: 'No reference to the appendix in the text',
+      semicolon: 'Semicolon in the text, split the sentence',
+      startsWithRef: 'A sentence starts with a figure or table reference',
     },
   },
 };
@@ -60,7 +76,8 @@ const strip = (s) =>
     .replace(/^[!|].*$/gm, '')
     .replace(/`[^`\n]*`/g, '');
 
-export const lintReport = (text, lang = 'ru') => {
+// strict adds the rules from the teacher's remarks for Part 2: appendix format, references, no semicolons.
+export const lintReport = (text, lang = 'ru', { strict = false } = {}) => {
   const r = L[lang];
   const m = r.messages;
   const errors = [];
@@ -77,9 +94,21 @@ export const lintReport = (text, lang = 'ru') => {
   check(/^```/m.test(body), m.code);
   check(appendixAt >= 0 && /^!\[/m.test(text.slice(appendixAt)), m.image);
   check(
-    text.split('\n').some((l) => r.appendixAny.test(l) && !r.appendix.test(l)),
+    !strict && text.split('\n').some((l) => r.appendixAny.test(l) && !r.appendix.test(l)),
     m.appendix,
   );
+  if (strict) {
+    const titles = text.split('\n').filter((l) => r.appendixAny.test(l));
+    check(titles.length === 0, m.noAppendix);
+    check(titles.some((l) => !r.appendixStrict.test(l)), m.appendixStrict);
+    titles.forEach((l) => {
+      const found = /Приложение ([А-Я])|Appendix ([A-Z])/.exec(l);
+      const letter = found[1] ?? found[2];
+      check(!r.appendixRef(letter).test(strip(body)), `${m.appendixRef} ${letter}`);
+    });
+    check(/;/.test(prose), m.semicolon);
+    check(r.startsWithRef.test(prose), m.startsWithRef);
+  }
   const lines = text.split('\n');
   const at = (i, step) => {
     for (let j = i + step; j >= 0 && j < lines.length; j += step) if (lines[j].trim()) return lines[j];
