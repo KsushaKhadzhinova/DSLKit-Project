@@ -28,7 +28,8 @@ test('undoing the last migration removes the priority column, migrating again re
   await sequelize.close();
 });
 
-test('the seed inserts three diagrams and can be undone', async () => {
+test('the seed inserts three marked diagrams, is idempotent, and undo keeps rows users created', async () => {
+  db.cli('db:seed:all');
   db.cli('db:seed:all');
   const { sequelize, Diagram } = open();
   const rows = await Diagram.findAll({ order: [['id', 'ASC']] });
@@ -36,12 +37,18 @@ test('the seed inserts three diagrams and can be undone', async () => {
     rows.map((d) => d.title),
     ['Order processing', 'Billing schema', 'Login flow'],
   );
+  assert.ok(rows.every((d) => d.owner === 'demo'));
   assert.equal(rows[0].priority, 'high');
+  await Diagram.create({ title: 'Mine', notation: 'UML', sourceCode: 's', owner: 'carol' });
   await sequelize.close();
 
   db.cli('db:seed:undo:all');
   const again = open();
-  assert.equal(await again.Diagram.count(), 0);
+  assert.deepEqual(
+    (await again.Diagram.findAll()).map((d) => d.title),
+    ['Mine'],
+  );
+  await again.Diagram.destroy({ where: {} });
   await again.sequelize.close();
 });
 
