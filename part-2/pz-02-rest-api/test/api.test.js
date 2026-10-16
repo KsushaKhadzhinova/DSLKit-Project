@@ -22,7 +22,8 @@ const withApi = (name, fn) =>
     try {
       await fn({ call, errors, base });
     } finally {
-      server.close();
+      server.closeAllConnections();
+      await new Promise((resolve) => server.close(resolve));
     }
   });
 
@@ -215,4 +216,10 @@ withApi('unsupported methods on known routes give 405 with Allow, OPTIONS lists 
   assert.equal(options.status, 204);
   assert.equal(options.headers.get('allow'), 'GET, POST, HEAD, OPTIONS');
   assert.equal((await fetch(`${base}/users/1`, { method: 'HEAD' })).status, 200);
+});
+
+withApi('PATCH with an empty object is rejected', async ({ call }) => {
+  const res = await call('PATCH', '/users/1', {});
+  assert.equal(res.status, 400);
+  assert.equal(res.json.error.details[0].field, 'body');
 });

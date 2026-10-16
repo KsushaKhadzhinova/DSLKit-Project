@@ -15,6 +15,7 @@ const checkField = (name, rule, value) => {
 // partial=true is used by PATCH: required fields may be missing, present ones are still checked.
 export const validate = (schema, body, { partial = false } = {}) => {
   if (body === null || typeof body !== 'object' || Array.isArray(body)) return [{ field: 'body', message: 'body must be a JSON object' }];
+  if (partial && Object.keys(body).length === 0) return [{ field: 'body', message: 'send at least one field to change' }];
   const errors = [];
   for (const field of Object.keys(body)) {
     if (!Object.hasOwn(schema, field)) errors.push({ field, message: `${field} is not a known field` });
