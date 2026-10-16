@@ -16,7 +16,7 @@ To learn the middleware concept in Express.js, to write custom middleware for re
 
 ### 3.1 Project structure
 
-The project lives in `part-2/pz-01-middleware-ejs` and runs on Express 5 with the EJS template engine. Table 1 shows the structure.
+The project lives in `part-2/pz-01-middleware-ejs` and runs on Express 5 with the EJS template engine. The structure is shown in table 1.
 
 Table 1 – Structure of the practical session 1 project
 
@@ -56,17 +56,16 @@ Table 2 – Application routes
 | `POST /add` | Field validation, adding to the array and redirect to the home page, on an error status 400 and the form with the entered values |
 | `GET /login` | Hint page |
 | `GET /log` | Table of the request log |
-| `GET /boom` | Deliberate failure that demonstrates the 500 page |
 
 The templates print every value with escaping, so markup typed into the form is shown as text. Every record has a "creation time" field. It is set when the record is added and is always later than the previous one, even if two records are created in the same millisecond, so records never look identical.
 
 ### 3.5 The 500 page and the order of handlers
 
-The 500 page is shown when a request ends with a server error. The error handler has four parameters and is mounted after all routes and all middleware, so any exception, whether a log write failure, a route error or a broken request body, reaches it. The handler writes the error to the error log, chooses the status code and renders the `500.ejs` template in the common site design: with the header, the footer and the style sheet. When the error carries its own code, for example 413 for an oversized form, the code is kept and the page gets the heading "bad request". When the error comes from an unavailable log database, the page shows a clear explanation. For a failure before the simulated authorization the handler supplies a guest itself so that the header can be drawn. If even the 500 template fails to render, a fallback page with the same styling is sent, so the user never sees bare text on a black background. The link "Demo of the 500 page" in the footer of every page leads to `/boom` and lets the page be shown at the defence. The 404 page works the same way and is mounted before the 500 handler. Appendix D holds the listing.
+The 500 page is shown when a request ends with a server error. The error handler has four parameters and is mounted after all routes and all middleware, so any exception, whether a log write failure, a route error or a broken request body, reaches it. The handler writes the error to the error log, chooses the status code and renders the `500.ejs` template in the common site design: with the header, the footer and the style sheet. When the error carries its own code, for example 413 for an oversized form, the code is kept and the page gets the heading "bad request". When the error comes from an unavailable log database, the page shows a clear explanation. For a failure before the simulated authorization the handler supplies a guest itself so that the header can be drawn. If even the 500 template fails to render, a fallback page with the same styling is sent, so the user never sees bare text on a black background. The 500 page is caused by a real failure, not by a button. To show it at the defence, start the server with `DB_FILE=package.json/blocked/log.db npm start`: the database file cannot be created, so every request ends with the 500 page. The second way is to stop the database while the server is running. The 404 page works the same way and is mounted before the 500 handler. Appendix D holds the listing.
 
 ### 3.6 Form field checks
 
-The add form is validated on the server, and the same limits are passed to the markup as the attributes `maxlength`, `min` and `max`. Values are trimmed first, so a field of only spaces counts as empty. Table 3 lists the rules.
+The add form is validated on the server, and the same limits are passed to the markup as the attributes `maxlength`, `min` and `max`. Values are trimmed first, so a field of only spaces counts as empty. The rules are listed in table 3.
 
 Table 3 – Checks of the add form fields
 
@@ -78,7 +77,7 @@ Table 3 – Checks of the add form fields
 | Diagram code | Optional, not longer than the limit in `limits.json` |
 | Revision | Required, a whole number from 0 to the limit in `limits.json`, negative and fractional values are rejected |
 
-On an error the server answers with status 400, shows the form again, keeps the entered values and prints a message under every wrong field. A missing request body and repeated form keys also give status 400 instead of 500. All limits live in the file `limits.json`, not in the code; Appendix E holds the validation listing and Appendix F holds the limits file.
+On an error the server answers with status 400, shows the form again, keeps the entered values and prints a message under every wrong field. A missing request body and repeated form keys give status 400 instead of 500. All limits live in the file `limits.json`, not in the code. Appendix E holds the validation listing and appendix F holds the limits file.
 
 ### 3.7 Automatic verification
 
@@ -92,34 +91,34 @@ Automatic tests on the built-in `node:test` start the server on a free port and 
 
 For the DSLKit project an Express application with EJS templates was built: the list of diagrams, the detail page and the add form take data from an array in memory. By the rules of the even variant the request log is written to a SQLite table, and its failure is shown with a styled 500 page. The form rejects empty and whitespace values, text that is too long and negative numbers using limits from a separate file, and every record has a unique creation time. Automatic tests cover all the code. Screenshots of the pages taken in a browser remain to be attached.
 
-## Appendix A – Listing of the file requestLogger.js
+## Appendix A (mandatory) Listing of the file requestLogger.js
 
 {{code:part-2/pz-01-middleware-ejs/src/middleware/requestLogger.js}}
 
-## Appendix B – Listing of the file requestLog.js with the log table
+## Appendix B (mandatory) Listing of the file requestLog.js with the log table
 
 {{code:part-2/pz-01-middleware-ejs/src/data/requestLog.js}}
 
-## Appendix C – Listing of the file fakeAuth.js
+## Appendix C (mandatory) Listing of the file fakeAuth.js
 
 {{code:part-2/pz-01-middleware-ejs/src/middleware/fakeAuth.js}}
 
-## Appendix D – Listing of the file errorHandlers.js
+## Appendix D (mandatory) Listing of the file errorHandlers.js
 
 {{code:part-2/pz-01-middleware-ejs/src/middleware/errorHandlers.js}}
 
-## Appendix E – Listing of the file diagrams.js with the form checks
+## Appendix E (mandatory) Listing of the file diagrams.js with the form checks
 
 {{code:part-2/pz-01-middleware-ejs/src/data/diagrams.js}}
 
-## Appendix F – The limits file limits.json
+## Appendix F (mandatory) The limits file limits.json
 
 {{code:part-2/pz-01-middleware-ejs/limits.json}}
 
-## Appendix G – Listing of the template index.ejs
+## Appendix G (mandatory) Listing of the template index.ejs
 
 {{code:part-2/pz-01-middleware-ejs/views/index.ejs}}
 
-## Appendix H – Listing of the file app.js
+## Appendix H (mandatory) Listing of the file app.js
 
 {{code:part-2/pz-01-middleware-ejs/src/app.js}}

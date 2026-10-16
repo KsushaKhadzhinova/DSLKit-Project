@@ -28,7 +28,6 @@ npm test
 | `POST /add?auth=1` | Проверка полей, добавление в массив, переход на главную; ошибка даёт код 400 |
 | `GET /login`       | Пояснение, как «войти»                                                       |
 | `GET /log`         | Таблица последних запросов из журнала                                        |
-| `GET /boom`        | Намеренная ошибка для страницы 500                                           |
 | любой другой адрес | Страница 404                                                                 |
 
 ## Устройство
@@ -52,4 +51,4 @@ npm test
 
 ---
 
-**English.** Express 5 + EJS server for the DSLKit diagram catalogue; data in memory, no database. Run `npm install && npm start` (port 3000, override with `PORT`), test with `npm test`. Simulated auth: add `?auth=1` to open `/add`; guests are redirected to `/login`. Request log goes to the console and to an in-memory table shown at `/log`. Pages: `/`, `/item/:id`, `/add`, `/login`, `/log`, `/boom` (demo 500), any other URL gives the 404 page.
+**English.** Express 5 + EJS server for the DSLKit diagram catalogue; catalogue data in memory, the request log in a SQLite table (variant 26 is even). Run `npm install && npm start` (port 3000, override with `PORT`; `DB_FILE` sets the database file), test with `npm test`. Simulated auth: add `?auth=1` to open `/add`; guests are redirected to `/login`. Pages: `/`, `/item/:id`, `/add`, `/login`, `/log`, any other URL gives the 404 page. The 500 page is caused by a real failure, not by a button: start with `DB_FILE=package.json/blocked/log.db npm start` (the database file cannot be created) and every request ends with the styled 500 page. Limits live in `limits.json`.

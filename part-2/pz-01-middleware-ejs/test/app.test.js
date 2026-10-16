@@ -166,10 +166,6 @@ test('limits are read from limits.json', () => {
   assert.equal(limits.revision.min, 0);
 });
 
-withServer('the footer links to the 500 demo page', async ({ base }) => {
-  assert.match(await (await fetch(`${base}/`)).text(), /href="\/boom"/);
-});
-
 test('the fallback page is sent when the 500 template itself fails', () => {
   const sent = {};
   const res = {
@@ -185,11 +181,21 @@ test('the fallback page is sent when the 500 template itself fails', () => {
   assert.match(sent.body, /style.css/);
 });
 
-withServer('an error is logged and shows the 500 page', async ({ base, errors }) => {
-  const res = await fetch(`${base}/boom`);
+test('a database that stops while the server runs shows the styled 500 page', async () => {
+  const errors = [];
+  const log = openRequestLog(join(tmpdir(), `dslkit-stop-${process.pid}.db`));
+  const server = createApp({ log, write: () => {}, writeError: (...a) => errors.push(a) }).listen(0);
+  await new Promise((resolve) => server.once('listening', resolve));
+  const base = `http://127.0.0.1:${server.address().port}`;
+  assert.equal((await fetch(`${base}/`)).status, 200);
+  log.close();
+  const res = await fetch(`${base}/`);
+  const html = await res.text();
+  server.closeAllConnections();
+  await new Promise((resolve) => server.close(resolve));
   assert.equal(res.status, 500);
-  assert.match(await res.text(), /server error/);
-  assert.match(errors[0][0], /GET \/boom/);
+  assert.match(html, /server error/);
+  assert.match(errors[0][0], /GET \//);
 });
 
 test('error handler ends the response when headers were already sent', () => {

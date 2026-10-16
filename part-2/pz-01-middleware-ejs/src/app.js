@@ -63,11 +63,6 @@ export const createApp = ({
   app.get('/login', (req, res) => res.render('login', { title: 'Sign in' }));
   app.get('/log', (req, res) => res.render('log', { title: 'Request log', rows: log.recent(limits.logRows) }));
 
-  // Deliberate failure to demonstrate the 500 page.
-  app.get('/boom', () => {
-    throw new Error('Demo failure');
-  });
-
   app.use(notFound);
   app.use(serverError(writeError));
   return app;
