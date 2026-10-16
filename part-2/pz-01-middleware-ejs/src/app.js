@@ -39,18 +39,24 @@ export const createApp = ({
     return item ? res.render('item', { title: item.title, item }) : next();
   });
 
-  app.get('/add', requireAuth, (req, res) => res.render('add', { title: 'Add diagram', notations: NOTATIONS, errors: {}, values: {} }));
+  app.get('/add', requireAuth, (req, res) => res.render('add', { title: 'Add diagram', notations: NOTATIONS, errors: {}, values: { revision: '1' } }));
 
   app.post('/add', requireAuth, (req, res) => {
     const body = req.body ?? {};
     // Missing body or repeated keys (arrays) must not crash: only plain strings count.
     const text = (value) => (typeof value === 'string' ? value.trim() : '');
-    const values = { title: text(body.title), notation: text(body.notation), description: text(body.description), code: text(body.code) };
-    const errors = validateDiagram(values);
+    const values = {
+      title: text(body.title),
+      notation: text(body.notation),
+      description: text(body.description),
+      code: text(body.code),
+      revision: text(body.revision),
+    };
+    const errors = validateDiagram(values, limits);
     if (Object.keys(errors).length) {
       return res.status(400).render('add', { title: 'Add diagram', notations: NOTATIONS, errors, values });
     }
-    store.add(values);
+    store.add({ ...values, revision: Number(values.revision) });
     return res.redirect(`/${res.locals.authQuery}`);
   });
 

@@ -67,7 +67,7 @@ withServer('add form redirects guests to /login and opens with ?auth=1', async (
   const guest = await fetch(`${base}/add`, { redirect: 'manual' });
   assert.equal(guest.status, 302);
   assert.equal(guest.headers.get('location'), '/login');
-  assert.equal((await post(`${base}/add`, { title: 'x', notation: 'UML' })).status, 302);
+  assert.equal((await post(`${base}/add`, { title: 'x', notation: 'UML', description: 'd', revision: '1' })).status, 302);
   const owner = await fetch(`${base}/add?auth=1`);
   assert.equal(owner.status, 200);
   assert.match(await owner.text(), /Owner/);
@@ -75,12 +75,15 @@ withServer('add form redirects guests to /login and opens with ?auth=1', async (
 });
 
 withServer('POST /add stores the item and redirects to the list', async ({ base }) => {
-  const res = await post(`${base}/add?auth=1`, { title: 'New <b>one</b>', notation: 'DFD', description: 'd', code: 'c' });
+  const res = await post(`${base}/add?auth=1`, { title: 'New <b>one</b>', notation: 'DFD', description: 'd', code: 'c', revision: '2' });
   assert.equal(res.status, 302);
   assert.equal(res.headers.get('location'), '/?auth=1');
   const html = await (await fetch(`${base}/`)).text();
   assert.match(html, /New &lt;b&gt;one&lt;\/b&gt;/);
-  assert.match(await (await fetch(`${base}/item/4`)).text(), /DFD/);
+  const detail = await (await fetch(`${base}/item/4`)).text();
+  assert.match(detail, /DFD/);
+  assert.match(detail, /Revision/);
+  assert.match(detail, /<time datetime="\d{4}-\d{2}-\d{2}T[^"]+Z">/);
 });
 
 withServer('invalid input re-renders the form with 400 and keeps values', async ({ base }) => {
@@ -195,13 +198,66 @@ test('error handler ends the response when headers were already sent', () => {
   assert.equal(ended, true);
 });
 
-test('store and validation helpers', () => {
-  const store = createDiagramStore();
-  assert.equal(store.all().length, 3);
-  assert.equal(store.add({ title: 't', notation: 'UML' }).id, 4);
-  assert.equal(store.find(4).title, 't');
-  assert.deepEqual(validateDiagram({ title: 'ok', notation: 'ERD' }), {});
-  assert.match(validateDiagram({ title: 'x'.repeat(81), notation: 'ERD' }).title, /80/);
+test('store hands out a unique, increasing creation time', () => {
+  const store = createDiagramStore(() => Date.parse('2026-10-05T00:00:00.000Z'));
+  const first = store.add({ title: 'a', notation: 'UML', description: 'd', code: '', revision: 0 });
+  const second = store.add({ title: 'b', notation: 'UML', description: 'd', code: '', revision: 0 });
+  assert.equal(first.id, 4);
+  assert.equal(store.find(4).title, 'a');
+  assert.equal(first.createdAt, '2026-10-05T00:00:00.000Z');
+  assert.equal(second.createdAt, '2026-10-05T00:00:00.001Z');
+  const times = store.all().map((item) => item.createdAt);
+  assert.equal(new Set(times).size, times.length);
+  assert.equal(createDiagramStore().all().length, 3);
+});
+
+const limits = loadLimits();
+const valid = { title: 'ok', notation: 'ERD', description: 'd', code: '', revision: '0' };
+
+test('validation accepts a correct form and enforces limits from limits.json', () => {
+  assert.deepEqual(validateDiagram(valid, limits), {});
+  assert.match(validateDiagram({ ...valid, title: 'x'.repeat(limits.title.maxLength + 1) }, limits).title, /at most 80/);
+  assert.match(validateDiagram({ ...valid, description: 'x'.repeat(limits.description.maxLength + 1) }, limits).description, /at most 500/);
+  assert.match(validateDiagram({ ...valid, code: 'x'.repeat(limits.code.maxLength + 1) }, limits).code, /at most 5000/);
+  assert.deepEqual(validateDiagram({ ...valid, title: 'x'.repeat(limits.title.maxLength) }, limits), {});
+});
+
+test('validation rejects empty values and numeric fields below zero', () => {
+  assert.match(validateDiagram({ ...valid, title: '' }, limits).title, /required/);
+  assert.match(validateDiagram({ ...valid, description: '' }, limits).description, /required/);
+  assert.match(validateDiagram({ ...valid, revision: '' }, limits).revision, /required/);
+  for (const revision of ['-1', '1.5', '1e3', 'abc', '100001']) {
+    assert.match(validateDiagram({ ...valid, revision }, limits).revision, /whole number from 0 to 100000/, revision);
+  }
+  assert.deepEqual(validateDiagram({ ...valid, revision: '100000' }, limits), {});
+});
+
+withServer('whitespace-only, too long and negative values are refused with 400', async ({ base }) => {
+  const send = (fields) => post(`${base}/add?auth=1`, { ...valid, ...fields });
+  const blank = await send({ title: '   	 ', description: '  ' });
+  const html = await blank.text();
+  assert.equal(blank.status, 400);
+  assert.match(html, /Title is required/);
+  assert.match(html, /Description is required/);
+  assert.equal((await send({ title: 'x'.repeat(81) })).status, 400);
+  const negative = await send({ revision: '-5' });
+  assert.equal(negative.status, 400);
+  assert.match(await negative.text(), /whole number from 0 to 100000/);
+  assert.equal((await send({})).status, 302);
+});
+
+withServer('the form carries the limits from limits.json as attributes', async ({ base }) => {
+  const html = await (await fetch(`${base}/add?auth=1`)).text();
+  assert.match(html, /maxlength="80"/);
+  assert.match(html, /maxlength="500"/);
+  assert.match(html, /min="0" max="100000"/);
+});
+
+withServer('every record shows its creation time on the list', async ({ base }) => {
+  const html = await (await fetch(`${base}/`)).text();
+  const times = html.match(/<time datetime="[^"]+"/g);
+  assert.equal(times.length, 3);
+  assert.equal(new Set(times).size, 3);
 });
 
 withServer('missing body, repeated keys and bad JSON-like input give 400, not 500', async ({ base }) => {

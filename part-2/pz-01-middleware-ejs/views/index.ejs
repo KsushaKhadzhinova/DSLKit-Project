@@ -5,7 +5,7 @@
 <% } else { %>
   <table class="table">
     <thead>
-      <tr><th>#</th><th>Title</th><th>Notation</th></tr>
+      <tr><th>#</th><th>Title</th><th>Notation</th><th>Created</th></tr>
     </thead>
     <tbody>
       <% items.forEach((item) => { %>
@@ -13,6 +13,7 @@
           <td><%= item.id %></td>
           <td><a href="/item/<%= item.id %><%= authQuery %>"><%= item.title %></a></td>
           <td><%= item.notation %></td>
+          <td><time datetime="<%= item.createdAt %>"><%= item.createdAt %></time></td>
         </tr>
       <% }) %>
     </tbody>

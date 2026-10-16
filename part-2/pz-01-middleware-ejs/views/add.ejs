@@ -2,7 +2,7 @@
 <h1>Add diagram</h1>
 <form method="post" action="/add<%= authQuery %>" class="form" novalidate>
   <label>Title
-    <input name="title" value="<%= values.title || '' %>" required maxlength="80" />
+    <input name="title" value="<%= values.title || '' %>" required maxlength="<%= limits.title.maxLength %>" />
   </label>
   <% if (errors.title) { %><p class="form__error"><%= errors.title %></p><% } %>
 
@@ -16,11 +16,20 @@
   <% if (errors.notation) { %><p class="form__error"><%= errors.notation %></p><% } %>
 
   <label>Description
-    <textarea name="description" rows="3"><%= values.description || '' %></textarea>
+    <textarea name="description" rows="3" required maxlength="<%= limits.description.maxLength %>"><%= values.description || '' %></textarea>
   </label>
+  <% if (errors.description) { %><p class="form__error"><%= errors.description %></p><% } %>
+
   <label>Diagram code
-    <textarea name="code" rows="6"><%= values.code || '' %></textarea>
+    <textarea name="code" rows="6" maxlength="<%= limits.code.maxLength %>"><%= values.code || '' %></textarea>
   </label>
+  <% if (errors.code) { %><p class="form__error"><%= errors.code %></p><% } %>
+
+  <label>Revision
+    <input name="revision" type="number" inputmode="numeric" step="1" min="<%= limits.revision.min %>" max="<%= limits.revision.max %>" value="<%= values.revision || '' %>" required />
+  </label>
+  <% if (errors.revision) { %><p class="form__error"><%= errors.revision %></p><% } %>
+
   <button class="button" type="submit">Save</button>
 </form>
 <%- include('partials/footer') %>

@@ -2,6 +2,12 @@
 <h1><%= item.title %></h1>
 <p class="badge"><%= item.notation %></p>
 <p><%= item.description %></p>
+<dl class="facts">
+  <dt>Revision</dt>
+  <dd><%= item.revision %></dd>
+  <dt>Created</dt>
+  <dd><time datetime="<%= item.createdAt %>"><%= item.createdAt %></time></dd>
+</dl>
 <% if (item.code) { %>
   <h2>Source</h2>
   <pre class="code"><%= item.code %></pre>
