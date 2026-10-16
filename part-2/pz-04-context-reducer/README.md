@@ -1,6 +1,6 @@
 # Практическое занятие №4. Управление состоянием приложения
 
-Проект DSLKit (SaaS, редактор диаграмм как кода). Условие: `materials/text/part-2/Модуль 02…/25. Практическое занятие 4…`. Отчёты: [`report.tpl.md`](report.tpl.md) на русском, [`report.en.tpl.md`](report.en.tpl.md) на английском (без титульного листа и ответов на контрольные вопросы).
+Проект DSLKit (SaaS, редактор диаграмм как кода). Условие: `materials/text/part-2/Модуль 02…/25. Практическое занятие 4…`. Отчёты: [`report.tpl.md`](report.tpl.md) на русском, [`report.en.tpl.md`](report.en.tpl.md) на английском (без титульного листа, ответы на вопросы 25, 26, 27 варианта 26), собранные [`report.md`](report.md) и [`report.en.md`](report.en.md). Сборка: `node tools/build.js part-2/pz-04-context-reducer` из корня репозитория.
 
 **Ветка.** По условию работа сдаётся в ветке `pz24` (создана от `work/part1-finish`).
 
@@ -21,7 +21,7 @@
 cd part-2/pz-04-context-reducer
 npm install
 npm run dev      # http://localhost:5177
-npm test         # Vitest и React Testing Library, 10 тестов
+npm test         # Vitest и React Testing Library, 13 тестов
 npm run build
 ```
 
