@@ -17,7 +17,7 @@ export const validate = (schema, body, { partial = false } = {}) => {
   if (body === null || typeof body !== 'object' || Array.isArray(body)) return [{ field: 'body', message: 'body must be a JSON object' }];
   const errors = [];
   for (const field of Object.keys(body)) {
-    if (!schema[field]) errors.push({ field, message: `${field} is not a known field` });
+    if (!Object.hasOwn(schema, field)) errors.push({ field, message: `${field} is not a known field` });
   }
   for (const [field, rule] of Object.entries(schema)) {
     const value = body[field];

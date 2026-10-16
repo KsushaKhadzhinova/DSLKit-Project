@@ -182,3 +182,12 @@ test('default stores stamp real ISO dates and sorting keeps equal values stable'
   const [item] = users.all();
   assert.equal(listItems([item, { ...item, id: 9 }], schemas.users, { sort: 'role' }).data.length, 2);
 });
+
+withApi('prototype keys are not treated as schema fields', async ({ call }) => {
+  const body = '{"name":"x","email":"a@b.co","constructor":1,"__proto__":{"role":"owner"}}';
+  const res = await call('POST', '/users', undefined, body);
+  assert.equal(res.status, 400);
+  assert.deepEqual(res.json.error.details.map((d) => d.field).sort(), ['__proto__', 'constructor']);
+  assert.equal((await call('GET', '/diagrams?sort=constructor')).status, 400);
+  assert.equal((await call('GET', '/diagrams?sort=toString')).status, 400);
+});
