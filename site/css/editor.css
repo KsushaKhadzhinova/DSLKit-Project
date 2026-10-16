@@ -1021,3 +1021,144 @@
 .canvas__menu {
   margin-left: 0;
 }
+
+/* Interface rules: 44 px targets, text from 14 px, proportions from the golden ratio */
+.app-page--editor {
+  --step--1: 0.875rem;
+  --target-size-small: 2.75rem;
+  --sidebar-width: clamp(14rem, 19.1vw, 19rem);
+  --problems-height: clamp(13rem, 23.6dvh, 18rem);
+}
+
+@media (min-width: 1024px) {
+  .app-page--editor {
+    --problems-height: clamp(13rem, 23.6dvh, 18rem);
+  }
+}
+
+.problems__tab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  min-width: var(--target-size-small);
+}
+
+.problems__count {
+  font-weight: 700;
+}
+
+/* Tooltips for icon controls: shown on hover and on keyboard focus */
+[data-tip] {
+  position: relative;
+}
+
+[data-tip]::after {
+  content: attr(data-tip);
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  left: 50%;
+  z-index: 30;
+  padding: 0.375rem 0.625rem;
+  border-radius: var(--radius-small);
+  background: var(--color-text);
+  color: var(--color-background);
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.3;
+  white-space: nowrap;
+  transform: translateX(-50%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 120ms ease;
+}
+
+[data-tip]:hover::after,
+[data-tip]:focus-visible::after {
+  opacity: 1;
+}
+
+.editor-activity__button[data-tip]::after {
+  top: 50%;
+  left: calc(100% + 0.5rem);
+  transform: translateY(-50%);
+}
+
+.canvas__zoom [data-tip]::after,
+.editor-toolbar__row .editor-menu__summary[data-tip]::after,
+.canvas__menu .editor-menu__summary[data-tip]::after {
+  top: 50%;
+  right: calc(100% + 0.5rem);
+  left: auto;
+  transform: translateY(-50%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tip]::after {
+    transition: none;
+  }
+}
+
+/* One typeface per role: Inter for the interface, JetBrains Mono for code only; two text sizes, 1rem and 0.875rem */
+.editor-tabs__tab,
+.canvas__breadcrumb,
+.problems__location {
+  font-family: var(--font-sans);
+}
+
+.canvas > figcaption {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+/* The status lines go under the diagram, the top of the canvas keeps only the toolbar */
+.canvas__remote,
+.canvas__diagram {
+  order: 1;
+}
+
+.canvas__status,
+.canvas__service,
+.canvas__history {
+  order: 2;
+  margin: 0;
+  padding: 0 var(--space-3);
+  color: var(--color-muted);
+  font-size: 0.875rem;
+}
+
+/* The picture from Kroki gets the colours and the font of the application instead of its own white frame and black lines */
+.canvas__remote svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.canvas__remote svg polygon[fill='white'] {
+  fill: transparent;
+}
+
+.canvas__remote svg [stroke='black'] {
+  stroke: var(--color-text-light);
+}
+
+.canvas__remote svg [fill='black'] {
+  fill: var(--color-text-light);
+}
+
+.canvas__remote svg .node :is(ellipse, polygon, path, rect)[stroke='black'] {
+  fill: var(--color-surface);
+  stroke: var(--color-primary);
+  stroke-width: 1.5;
+}
+
+.canvas__remote svg text {
+  fill: var(--color-text);
+  font-family: var(--font-sans);
+}
+
+.canvas__remote svg {
+  background: transparent !important;
+}

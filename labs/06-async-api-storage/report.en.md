@@ -459,6 +459,7 @@ import { API_CONFIG } from '../api/config.js';
 import { createCache, createHistory } from '../storage/localStorage.js';
 import { findEngine } from '../engines/engines.js';
 import { parseDsl, sanitizeSvg, sourceKey } from '../utils/dataParser.js';
+import { createTranslator } from '../utils/i18n.js';
 
 const MESSAGES = {
   empty: 'В редакторе нет кода диаграммы.',
@@ -507,8 +508,9 @@ export const initDiagramRunner = ({
   const history = createHistory({ storage });
   let controller = null;
 
+  const tr = createTranslator(root);
   const setStatus = (text) => {
-    status.textContent = text;
+    status.textContent = tr(text);
   };
   const setBusy = (busy) => {
     canvas.setAttribute('aria-busy', String(busy));
@@ -523,14 +525,14 @@ export const initDiagramRunner = ({
   };
 
   const showAction = () => {
-    renderButton.textContent = currentEngine().action;
+    renderButton.textContent = tr(currentEngine().action);
   };
 
   const show = (svgText, note) => {
     const svg = sanitizeSvg(svgText, parser);
     if (!svg) return false;
     svg.setAttribute('role', 'img');
-    svg.setAttribute('aria-label', `Диаграмма: ${currentEngine().label}`);
+    svg.setAttribute('aria-label', tr(`Диаграмма: ${tr(currentEngine().label)}`));
     remote.replaceChildren(root.importNode(svg, true));
     remote.hidden = false;
     local?.setAttribute('hidden', '');
@@ -548,7 +550,7 @@ export const initDiagramRunner = ({
         button.type = 'button';
         button.className = 'button button--quiet canvas__history-item';
         button.dataset.key = entry.key;
-        button.textContent = `${entry.title || 'Без названия'} · ${formatTime(entry.at)}`;
+        button.textContent = `${entry.title || tr('Без названия')} · ${formatTime(entry.at)}`;
         item.append(button);
         return item;
       }),
@@ -623,10 +625,10 @@ ${input}`);
     Promise.resolve()
       .then(() => api.checkHealth())
       .then(() => {
-        service.textContent = 'Сервис Kroki доступен';
+        service.textContent = tr('Сервис Kroki доступен');
       })
       .catch(() => {
-        service.textContent = 'Сервис Kroki недоступен, будут использованы сохранённые копии';
+        service.textContent = tr('Сервис Kroki недоступен, будут использованы сохранённые копии');
       });
   }
 

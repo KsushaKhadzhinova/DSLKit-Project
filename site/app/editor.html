@@ -30,19 +30,18 @@
               <path d="M6 4l10 6-10 6z" />
             </svg>
             <span>Запустить</span>
-            <kbd>Ctrl+Enter</kbd>
           </button>
           <p class="editor-toolbar__reason" id="run-reason">Исправьте ошибки в панели проблем, чтобы запустить</p>
         </div>
 
         <div class="editor-toolbar__group">
-          <button type="button" class="button button--icon" aria-label="Отменить">
+          <button type="button" class="button button--icon" aria-label="Отменить" data-tip="Отменить">
             <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
               <path d="M8 5L4 9l4 4" />
               <path d="M4 9h7a4 4 0 010 8H9" />
             </svg>
           </button>
-          <button type="button" class="button button--icon" aria-label="Повторить">
+          <button type="button" class="button button--icon" aria-label="Повторить" data-tip="Повторить">
             <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
               <path d="M12 5l4 4-4 4" />
               <path d="M16 9H9a4 4 0 000 8h2" />
@@ -50,18 +49,17 @@
           </button>
         </div>
 
-        <button type="button" class="button button--quiet">
+        <button type="button" class="button button--icon" aria-label="Сохранить" data-tip="Сохранить (Ctrl+S)">
           <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
             <path d="M4 4h10l2 2v10H4z" />
             <path d="M7 4v4h5V4M7 16v-5h6v5" />
           </svg>
-          <span>Сохранить</span>
         </button>
 
         <div class="editor-toolbar__spacer"></div>
 
         <details class="editor-menu">
-          <summary class="button button--icon editor-menu__summary" aria-label="Ещё действия">
+          <summary class="button button--icon editor-menu__summary" aria-label="Ещё действия" data-tip="Ещё действия">
             <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
               <circle cx="4" cy="10" r="1.5" />
               <circle cx="10" cy="10" r="1.5" />
@@ -85,7 +83,7 @@
       </div>
 
       <div class="editor-topbar">
-        <button type="button" class="button button--icon" aria-label="Меню">
+        <button type="button" class="button button--icon" aria-label="Меню" data-tip="Меню">
           <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
             <path d="M3 6h14M3 10h14M3 14h14" />
           </svg>
@@ -103,18 +101,18 @@
     </header>
 
     <nav class="editor-activity" aria-label="Панель действий">
-      <button type="button" class="editor-activity__button editor-activity__button--active" aria-label="Файлы" aria-pressed="true">
+      <button type="button" class="editor-activity__button editor-activity__button--active" aria-label="Файлы" aria-pressed="true" data-tip="Файлы">
         <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
           <path d="M3 6h5l2 2h7v8H3z" />
         </svg>
       </button>
-      <button type="button" class="editor-activity__button" aria-label="Поиск" aria-pressed="false">
+      <button type="button" class="editor-activity__button" aria-label="Поиск" aria-pressed="false" data-tip="Поиск">
         <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
           <circle cx="9" cy="9" r="5" />
           <path d="M13 13l4 4" />
         </svg>
       </button>
-      <button type="button" class="editor-activity__button" aria-label="Git" aria-pressed="false">
+      <button type="button" class="editor-activity__button" aria-label="Git" aria-pressed="false" data-tip="Git">
         <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
           <circle cx="6" cy="5" r="2" />
           <circle cx="6" cy="15" r="2" />
@@ -122,12 +120,12 @@
           <path d="M6 7v6M14 10c0 3-4 2-8 4" />
         </svg>
       </button>
-      <button type="button" class="editor-activity__button" aria-label="AI-помощник" aria-pressed="false">
+      <button type="button" class="editor-activity__button" aria-label="AI-помощник" aria-pressed="false" data-tip="AI-помощник">
         <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
           <path d="M10 3l1.6 4.4L16 9l-4.4 1.6L10 15l-1.6-4.4L4 9l4.4-1.6z" />
         </svg>
       </button>
-      <a class="editor-activity__button editor-activity__settings" href="settings.html" aria-label="Настройки">
+      <a class="editor-activity__button editor-activity__settings" href="settings.html" aria-label="Настройки" data-tip="Настройки">
         <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
           <circle cx="10" cy="10" r="3" />
           <path d="M10 2v3M10 15v3M2 10h3M15 10h3M4.5 4.5l2 2M13.5 13.5l2 2M15.5 4.5l-2 2M6.5 13.5l-2 2" />
@@ -230,7 +228,14 @@
             <span>rules.dsl</span>
           </button>
         </div>
-        <button type="button" class="editor-tabs__close" aria-label="Закрыть файл order.dsl" aria-haspopup="dialog" aria-controls="close-tab-modal">
+        <button
+          type="button"
+          class="editor-tabs__close"
+          aria-label="Закрыть файл order.dsl"
+          aria-haspopup="dialog"
+          aria-controls="close-tab-modal"
+          data-tip="Закрыть файл order.dsl"
+        >
           <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
             <path d="M5 5l10 10M15 5L5 15" />
           </svg>
@@ -280,7 +285,7 @@
           <nav class="canvas__breadcrumb" aria-label="Путь диаграммы">A-0 › A0</nav>
           <button type="button" class="button button--primary canvas__render">Нарисовать через Kroki</button>
           <details class="editor-menu canvas__menu">
-            <summary class="button button--icon editor-menu__summary" aria-label="Ещё действия с диаграммой">
+            <summary class="button button--icon editor-menu__summary" aria-label="Ещё действия с диаграммой" data-tip="Ещё действия с диаграммой">
               <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
                 <circle cx="4" cy="10" r="1.5" />
                 <circle cx="10" cy="10" r="1.5" />
@@ -319,15 +324,15 @@
         </svg>
 
         <div class="canvas__zoom">
-          <button type="button" class="button button--icon" aria-label="Увеличить">
+          <button type="button" class="button button--icon" aria-label="Увеличить" data-tip="Увеличить">
             <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
               <path d="M10 4v12M4 10h12" />
             </svg>
           </button>
-          <button type="button" class="button button--icon" aria-label="Уменьшить">
+          <button type="button" class="button button--icon" aria-label="Уменьшить" data-tip="Уменьшить">
             <span aria-hidden="true">−</span>
           </button>
-          <button type="button" class="button button--icon" aria-label="Вписать диаграмму в экран">
+          <button type="button" class="button button--icon" aria-label="Вписать диаграмму в экран" data-tip="Вписать диаграмму в экран">
             <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
               <path d="M4 8V4h4M12 4h4v4M16 12v4h-4M8 16H4v-4" />
             </svg>
@@ -340,10 +345,29 @@
       <h2 class="visually-hidden">Проблемы</h2>
 
       <div class="problems__tabs">
-        <button type="button" class="problems__tab problems__tab--active" aria-pressed="true">Проблемы 3</button>
-        <button type="button" class="problems__tab" aria-pressed="false">AI</button>
-        <button type="button" class="problems__tab" aria-pressed="false">Вывод</button>
-        <button type="button" class="problems__tab" aria-pressed="false">Версии</button>
+        <button type="button" class="problems__tab problems__tab--active" aria-pressed="true" aria-label="Проблемы: 3" data-tip="Проблемы: 3">
+          <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M10 3l8 14H2z" />
+            <path d="M10 8v4M10 14v.5" /></svg
+          ><span class="problems__count">3</span>
+        </button>
+        <button type="button" class="problems__tab" aria-pressed="false" aria-label="AI-помощник" data-tip="AI-помощник">
+          <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M10 3l1.6 4.4L16 9l-4.4 1.6L10 15l-1.6-4.4L4 9l4.4-1.6z" />
+          </svg>
+        </button>
+        <button type="button" class="problems__tab" aria-pressed="false" aria-label="Вывод" data-tip="Вывод">
+          <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M3 4h14v12H3z" />
+            <path d="M6 8l3 2-3 2M11 12h3" />
+          </svg>
+        </button>
+        <button type="button" class="problems__tab" aria-pressed="false" aria-label="Версии" data-tip="Версии">
+          <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="10" cy="10" r="7" />
+            <path d="M10 6v4l3 2" />
+          </svg>
+        </button>
       </div>
 
       <p class="problems__status" role="status" aria-live="polite">Проблем: 3 (ошибки: 2, предупреждения: 1)</p>
@@ -362,14 +386,14 @@
             <circle cx="10" cy="10" r="7" />
             <path d="M7 7l6 6M13 7l-6 6" />
           </svg>
-          <span class="problems__severity">Ошибка</span>
+          <span class="problems__severity visually-hidden">Ошибка</span>
           <span class="problems__message">Неизвестное свойство «contro». Возможно, вы имели в виду «control»?</span>
           <a class="problems__location" href="#line-4">order.dsl:4</a>
-          <button type="button" class="button button--quiet">
+          <button type="button" class="button button--quiet" data-tip="Исправить с помощью AI">
             <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
               <path d="M10 3l1.6 4.4L16 9l-4.4 1.6L10 15l-1.6-4.4L4 9l4.4-1.6z" />
             </svg>
-            <span>Исправить с помощью AI</span>
+            <span>Исправить</span>
           </button>
         </li>
         <li class="problems__item" id="problem-2">
@@ -385,7 +409,7 @@
             <circle cx="10" cy="10" r="7" />
             <path d="M7 7l6 6M13 7l-6 6" />
           </svg>
-          <span class="problems__severity">Ошибка</span>
+          <span class="problems__severity visually-hidden">Ошибка</span>
           <span class="problems__message">Не закрыт блок «A1»</span>
           <a class="problems__location" href="#line-7">order.dsl:7</a>
         </li>
@@ -402,7 +426,7 @@
             <path d="M10 3l8 14H2z" />
             <path d="M10 8v4M10 14v.5" />
           </svg>
-          <span class="problems__severity">Предупреждение</span>
+          <span class="problems__severity visually-hidden">Предупреждение</span>
           <span class="problems__message">У блока A1 нет выходов</span>
           <a class="problems__location" href="#line-7">order.dsl:7</a>
         </li>
@@ -415,7 +439,14 @@
         <path d="M7 7l6 6M13 7l-6 6" />
       </svg>
       <span class="editor-banner__text">2 ошибки в order.dsl</span>
-      <button type="button" class="button button--icon" aria-label="Показать ошибки" aria-expanded="false" aria-controls="problems-panel">
+      <button
+        type="button"
+        class="button button--icon"
+        aria-label="Показать ошибки"
+        aria-expanded="false"
+        aria-controls="problems-panel"
+        data-tip="Показать ошибки"
+      >
         <span aria-hidden="true">▲</span>
       </button>
     </div>

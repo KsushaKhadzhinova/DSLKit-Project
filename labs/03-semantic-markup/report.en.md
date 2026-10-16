@@ -51,7 +51,7 @@ Table 1 – Semantic tags of the home page
 
 ### 3.4 Heading Hierarchy
 
-Every page has one first-level heading. On the home page it reads "Write code, get a diagram", sections get second-level headings, and cards and steps get third-level headings. No level is skipped, and an automated test confirms it for all 15 pages of the site.
+Every page has one first-level heading. On the home page it reads "Write code, get a diagram", sections get second-level headings, and cards and steps get third-level headings. No level is skipped, and an automated test confirms it for all 16 pages of the site.
 
 ### 3.5 Accessibility
 
@@ -712,9 +712,9 @@ const eachPage = (title, check, subset = names) =>
   });
 
 test('the site has the landing pages in both languages, error pages and application screens', () => {
-  for (const page of ['index.html', 'en/index.html', 'thanks.html', 'privacy.html', 'errors/404.html', 'app/editor.html'])
+  for (const page of ['index.html', 'en/index.html', 'thanks.html', 'privacy.html', 'errors/404.html', 'app/editor.html', 'en/app/editor.html'])
     assert.ok(names.includes(page), page);
-  assert.equal(names.length, 15);
+  assert.equal(names.length, 16);
 });
 
 eachPage('every page has lang, title, charset and viewport', documentProblems);

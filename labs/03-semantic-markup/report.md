@@ -51,7 +51,7 @@
 
 ### 3.4 Иерархия заголовков
 
-Каждая страница содержит один заголовок первого уровня. На главной это «Пишите код — получайте диаграмму», секции получают заголовки второго уровня, карточки и шаги заголовки третьего. Пропусков уровней нет, это проверяет автоматический тест для всех 15 страниц сайта.
+Каждая страница содержит один заголовок первого уровня. На главной это «Пишите код — получайте диаграмму», секции получают заголовки второго уровня, карточки и шаги заголовки третьего. Пропусков уровней нет, это проверяет автоматический тест для всех 16 страниц сайта.
 
 ### 3.5 Доступность
 
@@ -712,9 +712,9 @@ const eachPage = (title, check, subset = names) =>
   });
 
 test('the site has the landing pages in both languages, error pages and application screens', () => {
-  for (const page of ['index.html', 'en/index.html', 'thanks.html', 'privacy.html', 'errors/404.html', 'app/editor.html'])
+  for (const page of ['index.html', 'en/index.html', 'thanks.html', 'privacy.html', 'errors/404.html', 'app/editor.html', 'en/app/editor.html'])
     assert.ok(names.includes(page), page);
-  assert.equal(names.length, 15);
+  assert.equal(names.length, 16);
 });
 
 eachPage('every page has lang, title, charset and viewport', documentProblems);
