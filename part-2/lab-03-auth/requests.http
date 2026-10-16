@@ -1,0 +1,62 @@
+### VS Code REST Client (extension humao.rest-client). Start the server first: npm run dev
+@base = http://localhost:3000
+
+### Register -> 201
+POST {{base}}/auth/register
+Content-Type: application/json
+
+{ "email": "alice@example.com", "password": "correct horse 42" }
+
+### Duplicate email -> 409
+POST {{base}}/auth/register
+Content-Type: application/json
+
+{ "email": "Alice@Example.com", "password": "correct horse 42" }
+
+### Weak password -> 400 with details
+POST {{base}}/auth/register
+Content-Type: application/json
+
+{ "email": "bob@example.com", "password": "short" }
+
+### Login -> 200 { token }; the token is stored in a variable for the requests below
+# @name login
+POST {{base}}/auth/login
+Content-Type: application/json
+
+{ "email": "alice@example.com", "password": "correct horse 42" }
+
+###
+@token = {{login.response.body.token}}
+
+### Wrong password -> 401
+POST {{base}}/auth/login
+Content-Type: application/json
+
+{ "email": "alice@example.com", "password": "wrong password" }
+
+### Current user -> 200
+GET {{base}}/profile
+Authorization: Bearer {{token}}
+
+### No token -> 401
+GET {{base}}/profile
+
+### Create a diagram, the owner is the caller -> 201
+POST {{base}}/diagrams
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{ "title": "Login flow", "notation": "UML", "sourceCode": "user -> server", "priority": "low" }
+
+### List diagrams -> 200
+GET {{base}}/diagrams
+Authorization: Bearer {{token}}
+
+### Somebody else's diagram -> 403 (replace 1 with an id owned by another user)
+DELETE {{base}}/diagrams/1
+Authorization: Bearer {{token}}
+
+### Admin only: regular user -> 403
+GET {{base}}/users
+Authorization: Bearer {{token}}
