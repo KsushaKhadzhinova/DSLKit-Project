@@ -2,17 +2,17 @@ import { Router } from 'express';
 import { ApiError, notFound, validationFailed } from './errors.js';
 import { applyDefaults, validate } from './validation.js';
 
+const DIGITS = /^[1-9]\d{0,14}$/;
+
 export const parseId = (raw) => {
-  const id = Number(raw);
-  if (!Number.isInteger(id) || id < 1) throw new ApiError(400, 'invalid_id', 'id must be a positive integer');
-  return id;
+  if (!DIGITS.test(String(raw))) throw new ApiError(400, 'invalid_id', 'id must be a positive integer');
+  return Number(raw);
 };
 
-const parsePositive = (raw, name, fallback, max = Infinity) => {
+const parsePositive = (raw, name, fallback, max = Number.MAX_SAFE_INTEGER) => {
   if (raw === undefined) return fallback;
-  const value = Number(raw);
-  if (!Number.isInteger(value) || value < 1 || value > max) throw new ApiError(400, 'invalid_query', `${name} must be an integer from 1 to ${max}`);
-  return value;
+  if (!DIGITS.test(String(raw)) || Number(raw) > max) throw new ApiError(400, 'invalid_query', `${name} must be an integer from 1 to ${max}`);
+  return Number(raw);
 };
 
 // Filtering by any schema field (?status=draft), search (?q=text), sorting (?sort=-title), pagination (?page=2&limit=10).

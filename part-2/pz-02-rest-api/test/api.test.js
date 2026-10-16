@@ -191,3 +191,13 @@ withApi('prototype keys are not treated as schema fields', async ({ call }) => {
   assert.equal((await call('GET', '/diagrams?sort=constructor')).status, 400);
   assert.equal((await call('GET', '/diagrams?sort=toString')).status, 400);
 });
+
+withApi('ids, page and limit accept only plain positive integers', async ({ call }) => {
+  for (const id of ['1e0', '1.0', '01', '0x1', '-1', '%201', '1%20', '99999999999999999999']) {
+    assert.equal((await call('GET', `/users/${id}`)).json.error.code, 'invalid_id', id);
+  }
+  for (const query of ['page=1.0', 'page=1e0', 'limit=1e1', 'limit=010', 'page=-1', 'limit=%205']) {
+    assert.equal((await call('GET', `/users?${query}`)).json.error.code, 'invalid_query', query);
+  }
+  assert.equal((await call('GET', '/users?page=1&limit=100')).status, 200);
+});
