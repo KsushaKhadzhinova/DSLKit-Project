@@ -15,6 +15,9 @@ export default function Layout() {
 
   return (
     <>
+      <a className="skip-link" href="#main">
+        Перейти к содержимому
+      </a>
       <header className="header">
         <nav className="nav" aria-label="Основная навигация">
           {NAV.map(({ to, label, end }) => (
@@ -33,7 +36,7 @@ export default function Layout() {
           )}
         </nav>
       </header>
-      <main className="page">
+      <main className="page" id="main" tabIndex={-1}>
         <Outlet />
       </main>
     </>

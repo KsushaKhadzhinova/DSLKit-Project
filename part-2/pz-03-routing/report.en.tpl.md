@@ -12,7 +12,7 @@ The assignment names React Router v6 with a note "v6?". The `react-router-dom` l
 
 ### 3.1 Route Map
 
-The application consists of the pages shown in Table 1. All pages live inside the shared layout route `Layout`, which renders the menu and inserts the page content through `Outlet`.
+The application consists of the pages shown in Table 1. All pages, including sign-in and sign-out, live inside the shared layout route `Layout`, which renders the menu and inserts the page content through `Outlet`.
 
 Table 1 – Application routes
 
@@ -29,7 +29,7 @@ Table 1 – Application routes
 
 ### 3.2 Menu and Dynamic Route
 
-The menu is built with `NavLink`, the function in `className` receives the `isActive` flag and adds the active item class. The home link has `end` so that it does not stay active on every path. The `/catalog/:id` page reads the parameter with `useParams`, looks up the template in the data and, if none is found, sends the user to the 404 page with the `Navigate` component. The "Back" button calls `navigate(-1)`. The code is given in Appendix A.
+The menu is built with `NavLink`, the function in `className` receives the `isActive` flag and adds the active item class. The home link has `end` so that it does not stay active on every path. The `/catalog/:id` page reads the parameter with `useParams`, looks up the template in the data and, if none is found, renders the 404 page in place with the `NotFound` component, the address does not change. The "Back" button calls `navigate(-1)`. The code is given in Appendix A.
 
 ### 3.3 Protected Route and Simulated Sign-in
 
@@ -37,13 +37,13 @@ The `PrivateRoute` component works as a layout route: when the `isAuth` flag is 
 
 ### 3.4 Testing
 
-Thirteen automated tests on `MemoryRouter` cover all pages, the `NavLink` highlight, menu navigation, the dynamic route with a wrong `id`, the 404 page, the guest redirect to `/login`, the return after sign-in, sign-out and keeping the sign-in between loads. The manual check is described in `README.md`.
+Fifteen automated tests on `MemoryRouter` cover all pages, the `NavLink` highlight, menu navigation, the dynamic route with a wrong `id`, the 404 page, the guest redirect to `/login`, the return after sign-in, sign-out and keeping the sign-in between loads. The manual check is described in `README.md`.
 
 ## Conclusion
 
 The Vite application contains seven routes, a menu with the active item highlighted, a dynamic route handling an unknown parameter, a 404 page and a protected dashboard with simulated sign-in and programmatic navigation. `react-router-dom` 7 is chosen, its API for the tasks of this work matches v6.
 
-## Appendix A – Key Code Fragments
+## Appendix A (mandatory) Key Code Fragments
 
 ```jsx
 // App.jsx: route map, Layout provides the menu and Outlet
@@ -61,10 +61,10 @@ The Vite application contains seven routes, a menu with the active item highligh
 ```
 
 ```jsx
-// CatalogItem: URL parameter and redirect to 404
+// CatalogItem: URL parameter and the 404 page in place
 const { id } = useParams();
 const template = findTemplate(id);
-if (!template) return <Navigate to="/not-found" replace />;
+if (!template) return <NotFound />;
 ```
 
 ```jsx

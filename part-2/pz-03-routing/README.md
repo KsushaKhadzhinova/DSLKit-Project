@@ -11,7 +11,7 @@
 | Требование условия                  | Реализация                                                                                    |
 | ----------------------------------- | --------------------------------------------------------------------------------------------- |
 | Минимум 4 страницы                  | `/`, `/catalog`, `/catalog/:id`, `/about`, `/login`, `/dashboard`, `*` (`pages/pages.jsx`)    |
-| Динамический маршрут и `useParams`  | `CatalogItem`, неизвестный `id` ведёт на 404 через `<Navigate>`                               |
+| Динамический маршрут и `useParams`  | `CatalogItem`, неизвестный `id` показывает 404 на месте                                       |
 | Меню с подсветкой (`NavLink`)       | `components/Layout.jsx`, активный пункт получает класс `nav__link--active`                    |
 | Страница 404                        | маршрут `*`, компонент `NotFound`                                                             |
 | Защищённый маршрут, имитация логина | `components/PrivateRoute.jsx` (layout-маршрут с `Outlet`), `auth.jsx` с флагом в localStorage |
@@ -23,7 +23,7 @@
 cd part-2/pz-03-routing
 npm install
 npm run dev      # http://localhost:5176
-npm test         # Vitest, React Testing Library и MemoryRouter, 13 тестов
+npm test         # Vitest, React Testing Library и MemoryRouter, 15 тестов
 npm run build
 ```
 
@@ -36,4 +36,4 @@ npm run build
 
 ## Не сделано, ждёт владельца
 
-Скриншоты страниц и меню, PDF для СЭО, титульный лист, ветка «pz23» из условия. Для хостинга не в корне сервера нужен `basename` у `BrowserRouter`, в работе он не используется.
+Скриншоты страниц и меню, PDF для СЭО, титульный лист. Для хостинга не в корне сервера нужен `basename` у `BrowserRouter`, в работе он не используется.
