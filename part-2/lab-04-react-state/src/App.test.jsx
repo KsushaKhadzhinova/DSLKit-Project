@@ -19,9 +19,9 @@ describe('App', () => {
     await user.click(screen.getByRole('button', { name: 'Добавить' }));
     expect(screen.getAllByRole('listitem')).toHaveLength(3);
 
-    await user.type(screen.getByLabelText('Название диаграммы'), 'Схема оплаты{Enter}');
+    await user.type(screen.getByLabelText(/Название диаграммы/), 'Схема оплаты{Enter}');
     expect(titles()).toContain('Схема оплаты');
-    expect(screen.getByLabelText('Название диаграммы')).toHaveValue('');
+    expect(screen.getByLabelText(/Название диаграммы/)).toHaveValue('');
     expect(stored().some((d) => d.title === 'Схема оплаты' && d.published === false)).toBe(true);
     expect(document.title).toBe('DSLKit: диаграмм 4');
   });
@@ -53,6 +53,8 @@ describe('App', () => {
     await user.click(within(row).getByRole('button', { name: /^Изменить/ }));
     await user.clear(screen.getByLabelText('Новое название'));
     await user.click(screen.getByRole('button', { name: /^Сохранить/ }));
+    expect(screen.getByText('Введите название диаграммы')).toBeInTheDocument();
+    await user.type(screen.getByLabelText('Новое название'), '{Escape}');
     expect(titles()).toContain('Вход в систему');
   });
 
@@ -101,7 +103,7 @@ describe('App', () => {
       throw new Error('QuotaExceededError');
     });
     render(<App />);
-    await user.type(screen.getByLabelText('Название диаграммы'), 'В памяти{Enter}');
+    await user.type(screen.getByLabelText(/Название диаграммы/), 'В памяти{Enter}');
     expect(titles()).toContain('В памяти');
     spy.mockRestore();
   });
@@ -109,15 +111,15 @@ describe('App', () => {
   it('gives each new diagram a unique id', async () => {
     const user = userEvent.setup();
     render(<App />);
-    await user.type(screen.getByLabelText('Название диаграммы'), 'Первая{Enter}');
-    await user.type(screen.getByLabelText('Название диаграммы'), 'Вторая{Enter}');
+    await user.type(screen.getByLabelText(/Название диаграммы/), 'Первая{Enter}');
+    await user.type(screen.getByLabelText(/Название диаграммы/), 'Вторая{Enter}');
     expect(new Set(stored().map((d) => d.id)).size).toBe(5);
   });
 
   it('restores the saved list after a reload', async () => {
     const user = userEvent.setup();
     const first = render(<App />);
-    await user.type(screen.getByLabelText('Название диаграммы'), 'Сохранённая{Enter}');
+    await user.type(screen.getByLabelText(/Название диаграммы/), 'Сохранённая{Enter}');
     first.unmount();
 
     render(<App />);

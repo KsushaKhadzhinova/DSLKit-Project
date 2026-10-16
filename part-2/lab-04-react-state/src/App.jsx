@@ -7,13 +7,14 @@ import { INITIAL_DIAGRAMS } from './data/initialDiagrams';
 import { useAutosaveStatus } from './hooks/useAutosaveStatus';
 import { useLocalStorage } from './hooks/useLocalStorage';
 import { filterDiagrams, getStats, sortDiagrams } from './utils/diagrams';
+import { isDiagramList } from './utils/validation';
 
 export const STORAGE_KEY = 'dslkit.diagrams';
 
 const today = () => new Date().toISOString().slice(0, 10);
 
 export default function App() {
-  const [diagrams, setDiagrams] = useLocalStorage(STORAGE_KEY, INITIAL_DIAGRAMS, Array.isArray);
+  const [diagrams, setDiagrams] = useLocalStorage(STORAGE_KEY, INITIAL_DIAGRAMS, isDiagramList);
   const [query, setQuery] = useState('');
   const [status, setStatus] = useState('all');
   const [sortBy, setSortBy] = useState('date');
@@ -25,7 +26,7 @@ export default function App() {
 
   // Functional updates read the latest state, so quick consecutive clicks do not lose changes.
   const addDiagram = ({ title, notation }) =>
-    setDiagrams((prev) => [...prev, { id: crypto.randomUUID(), title, notation, published: false, updatedAt: today() }]);
+    setDiagrams((prev) => [...prev, { id: crypto.randomUUID(), title, notation, published: false, createdAt: new Date().toISOString(), updatedAt: today() }]);
   const deleteDiagram = (id) => setDiagrams((prev) => prev.filter((d) => d.id !== id));
   const renameDiagram = (id, title) => setDiagrams((prev) => prev.map((d) => (d.id === id ? { ...d, title, updatedAt: today() } : d)));
   const togglePublished = (id) => setDiagrams((prev) => prev.map((d) => (d.id === id ? { ...d, published: !d.published, updatedAt: today() } : d)));

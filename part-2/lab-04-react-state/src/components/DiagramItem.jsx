@@ -1,31 +1,57 @@
 import { useState } from 'react';
+import { formatTime, validateTitle } from '../utils/validation';
 
 export default function DiagramItem({ diagram, onToggle, onRename, onDelete }) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(diagram.title);
+  const [error, setError] = useState(null);
+
+  const finish = () => {
+    setError(null);
+    setEditing(false);
+  };
 
   const save = () => {
-    if (draft.trim()) onRename(diagram.id, draft.trim());
-    setEditing(false);
+    const problem = validateTitle(draft);
+    if (problem) {
+      setError(problem);
+      return;
+    }
+    onRename(diagram.id, draft.trim());
+    finish();
   };
 
   const handleKeyDown = (event) => {
     if (event.key === 'Enter') save();
     if (event.key === 'Escape') {
       setDraft(diagram.title);
-      setEditing(false);
+      finish();
     }
   };
 
   return (
     <li className="item">
       {editing ? (
-        <input aria-label="Новое название" value={draft} onChange={(e) => setDraft(e.target.value)} onKeyDown={handleKeyDown} autoFocus />
+        <span className="item__title">
+          <input
+            aria-label="Новое название"
+            aria-invalid={error ? 'true' : undefined}
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            onKeyDown={handleKeyDown}
+            autoFocus
+          />
+          {error && (
+            <span className="error" role="alert">
+              {error}
+            </span>
+          )}
+        </span>
       ) : (
         <span className="item__title">{diagram.title}</span>
       )}
       <span className="badge">{diagram.notation}</span>
-      <span className="item__date">{diagram.updatedAt}</span>
+      <span className="item__date">Создана: {formatTime(diagram.createdAt)}</span>
       <button
         type="button"
         className="badge"
