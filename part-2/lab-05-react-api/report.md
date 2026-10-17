@@ -483,7 +483,11 @@ const createCors = (origin) => {
   return (req, res, next) => {
     res.vary('Origin');
     const allowed = req.get('Origin') === origin;
-    if (allowed) res.set('Access-Control-Allow-Origin', origin);
+    if (allowed) {
+      res.set('Access-Control-Allow-Origin', origin);
+      // Lets the browser app read the total size of a paged list.
+      res.set('Access-Control-Expose-Headers', 'X-Total-Count');
+    }
     if (req.method !== 'OPTIONS' || !req.get('Access-Control-Request-Method')) return next();
     if (allowed) {
       res.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
