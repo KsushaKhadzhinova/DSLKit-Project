@@ -3,12 +3,13 @@
 import { useLanguage } from '../context/LanguageContext';
 
 function UserAvatar({ userName }) {
-  return <span className="avatar">{userName.charAt(0).toUpperCase()}</span>;
+  // An empty or missing name must not break the page.
+  return <span className="badge">{(userName || '?').trim().charAt(0).toUpperCase() || '?'}</span>;
 }
 
 function UserMenu({ userName }) {
   return (
-    <div className="user-menu">
+    <div className="actions">
       <UserAvatar userName={userName} />
     </div>
   );
@@ -16,15 +17,15 @@ function UserMenu({ userName }) {
 
 function Navigation({ userName }) {
   return (
-    <nav>
+    <div>
       <UserMenu userName={userName} />
-    </nav>
+    </div>
   );
 }
 
 function DrillingHeader({ userName }) {
   return (
-    <div className="drilling-header">
+    <div className="card">
       <Navigation userName={userName} />
     </div>
   );
@@ -33,9 +34,11 @@ function DrillingHeader({ userName }) {
 export default function PropDrilling({ userName }) {
   const { t } = useLanguage();
   return (
-    <section aria-labelledby="drilling-title">
-      <h2 id="drilling-title">{t('drillingTitle')}</h2>
-      <p>{t('drillingHint')}</p>
+    <section className="section" id="drilling" aria-labelledby="drilling-title">
+      <h2 className="section__title" id="drilling-title">
+        {t('drillingTitle')}
+      </h2>
+      <p className="section__lead">{t('drillingHint')}</p>
       <DrillingHeader userName={userName} />
     </section>
   );

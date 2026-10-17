@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useReducer } from 'react';
+import { TEMPLATES } from '../data/templates';
 
 export const FAVORITES_KEY = 'dslkit.favorites';
 
@@ -18,10 +19,16 @@ export function favoritesReducer(state, action) {
   }
 }
 
+// localStorage can hold anything: keep only known template ids, once each, in their stored order.
+export function sanitizeFavorites(value) {
+  if (!Array.isArray(value)) return [];
+  const known = new Set(TEMPLATES.map((template) => template.id));
+  return [...new Set(value)].filter((id) => known.has(id));
+}
+
 function loadFavorites() {
   try {
-    const parsed = JSON.parse(localStorage.getItem(FAVORITES_KEY));
-    return Array.isArray(parsed) ? parsed : [];
+    return sanitizeFavorites(JSON.parse(localStorage.getItem(FAVORITES_KEY)));
   } catch {
     return [];
   }
