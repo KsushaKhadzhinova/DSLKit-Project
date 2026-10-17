@@ -39,8 +39,24 @@ const withServer = (name, fn) =>
     }
   });
 
-const post = (url, body) =>
-  fetch(url, { method: 'POST', redirect: 'manual', headers: { 'content-type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams(body) });
+// Opens the form like a browser does and returns the CSRF cookie and the token from the hidden field.
+const session = async (base) => {
+  const res = await fetch(`${base}/add?auth=1`);
+  const html = await res.text();
+  return { cookie: res.headers.get('set-cookie').split(';')[0], token: html.match(/name="_csrf" value="([0-9a-f]+)"/)[1] };
+};
+
+// Posts a form with a valid CSRF cookie and token unless `csrf: false` is given.
+const post = async (url, body, { csrf = true, headers = {} } = {}) => {
+  const fields = body instanceof URLSearchParams ? body : new URLSearchParams(body);
+  const cookie = {};
+  if (csrf) {
+    const { cookie: value, token } = await session(new URL(url).origin);
+    fields.set('_csrf', token);
+    cookie.cookie = value;
+  }
+  return fetch(url, { method: 'POST', redirect: 'manual', headers: { 'content-type': 'application/x-www-form-urlencoded', ...cookie, ...headers }, body: fields });
+};
 
 withServer('home lists the seeded diagrams', async ({ base }) => {
   const res = await fetch(`${base}/`);
@@ -60,7 +76,7 @@ withServer('detail page shows one item, unknown id gives 404', async ({ base }) 
 withServer('unknown URL renders the 404 page', async ({ base }) => {
   const res = await fetch(`${base}/nope`);
   assert.equal(res.status, 404);
-  assert.match(await res.text(), /page not found/);
+  assert.match(await res.text(), /Page not found/);
 });
 
 withServer('add form redirects guests to /login and opens with ?auth=1', async ({ base }) => {
@@ -72,6 +88,7 @@ withServer('add form redirects guests to /login and opens with ?auth=1', async (
   assert.equal(owner.status, 200);
   assert.match(await owner.text(), /Owner/);
   assert.match(await (await fetch(`${base}/login`)).text(), /auth=1/);
+  assert.equal((await fetch(`${base}/log`, { redirect: 'manual' })).status, 302);
 });
 
 withServer('POST /add stores the item and redirects to the list', async ({ base }) => {
@@ -103,7 +120,7 @@ withServer('logger writes to console and to the in-memory table', async ({ base,
   assert.match(lines.at(-1), /GET \/item\/1 200 \d+ms/);
   assert.equal(log.recent(5)[0].url, '/item/1');
   assert.equal(log.recent(5)[0].status, 200);
-  assert.match(await (await fetch(`${base}/log`)).text(), /\/item\/1/);
+  assert.match(await (await fetch(`${base}/log?auth=1`)).text(), /\/item\/1/);
 });
 
 test('request log is a SQLite table that keeps method, url, time, status and duration', () => {
@@ -177,8 +194,8 @@ test('the fallback page is sent when the 500 template itself fails', () => {
     send: (body) => (sent.body = body),
   };
   serverError(() => {})(new Error('x'), { method: 'GET', originalUrl: '/' }, res);
-  assert.match(sent.body, /500 – server error/);
-  assert.match(sent.body, /style.css/);
+  assert.match(sent.body, /server error/);
+  assert.match(sent.body, /dslkit.css/);
 });
 
 test('a database that stops while the server runs shows the styled 500 page', async () => {
@@ -194,7 +211,7 @@ test('a database that stops while the server runs shows the styled 500 page', as
   server.closeAllConnections();
   await new Promise((resolve) => server.close(resolve));
   assert.equal(res.status, 500);
-  assert.match(html, /server error/);
+  assert.match(html, /Server error/);
   assert.match(errors[0][0], /GET \//);
 });
 
@@ -267,8 +284,10 @@ withServer('every record shows its creation time on the list', async ({ base }) 
 });
 
 withServer('missing body, repeated keys and bad JSON-like input give 400, not 500', async ({ base }) => {
-  const noBody = await fetch(`${base}/add?auth=1`, { method: 'POST' });
+  const { cookie, token } = await session(base);
+  const noBody = await fetch(`${base}/add?auth=1`, { method: 'POST', headers: { cookie, 'content-type': 'application/x-www-form-urlencoded' }, body: `_csrf=${token}` });
   assert.equal(noBody.status, 400);
+  assert.equal((await fetch(`${base}/add?auth=1`, { method: 'POST' })).status, 403);
   const repeated = await post(
     `${base}/add?auth=1`,
     new URLSearchParams([
@@ -287,7 +306,7 @@ withServer('errors that carry a 4xx status keep it', async ({ base }) => {
     body: 'title=' + 'x'.repeat(200000),
   });
   assert.equal(res.status, 413);
-  assert.match(await res.text(), /Bad request/);
+  assert.match(await res.text(), /Request too large/);
 });
 
 test('a file that is not a database is rejected and the connection is closed', () => {

@@ -1,35 +1,49 @@
 <%- include('partials/header') %>
-<h1>Add diagram</h1>
-<form method="post" action="/add<%= authQuery %>" class="form" novalidate>
-  <label>Title
-    <input name="title" value="<%= values.title || '' %>" required maxlength="<%= limits.title.maxLength %>" />
-  </label>
-  <% if (errors.title) { %><p class="form__error"><%= errors.title %></p><% } %>
+<section class="section" aria-labelledby="page-title">
+  <h1 class="section__title" id="page-title">Add diagram</h1>
+  <p class="section__lead">Every field is checked on the server with the same limits as in the form.</p>
+  <% const invalid = Object.keys(errors).length > 0; %>
+  <form method="post" action="/add<%= authQuery %>" class="form" novalidate>
+    <% if (invalid) { %><p class="form__error" role="alert">The form has errors. Fix the marked fields and send it again.</p><% } %>
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
 
-  <label>Notation
-    <select name="notation">
-      <% notations.forEach((notation) => { %>
-        <option value="<%= notation %>" <%= values.notation === notation ? 'selected' : '' %>><%= notation %></option>
-      <% }) %>
-    </select>
-  </label>
-  <% if (errors.notation) { %><p class="form__error"><%= errors.notation %></p><% } %>
+    <div class="form__field">
+      <label class="form__label" for="title">Title</label>
+      <input class="form__input" id="title" name="title" value="<%= values.title || '' %>" required maxlength="<%= limits.title.maxLength %>" autocomplete="off"<%- errors.title ? ' aria-invalid="true" aria-describedby="title-error"' : '' %> />
+      <% if (errors.title) { %><p class="form__error" id="title-error"><%= errors.title %></p><% } %>
+    </div>
 
-  <label>Description
-    <textarea name="description" rows="3" required maxlength="<%= limits.description.maxLength %>"><%= values.description || '' %></textarea>
-  </label>
-  <% if (errors.description) { %><p class="form__error"><%= errors.description %></p><% } %>
+    <div class="form__field">
+      <label class="form__label" for="notation">Notation</label>
+      <select class="form__input" id="notation" name="notation"<%- errors.notation ? ' aria-invalid="true" aria-describedby="notation-error"' : '' %>>
+        <% notations.forEach((notation) => { %>
+          <option value="<%= notation %>" <%= values.notation === notation ? 'selected' : '' %>><%= notation %></option>
+        <% }) %>
+      </select>
+      <% if (errors.notation) { %><p class="form__error" id="notation-error"><%= errors.notation %></p><% } %>
+    </div>
 
-  <label>Diagram code
-    <textarea name="code" rows="6" maxlength="<%= limits.code.maxLength %>"><%= values.code || '' %></textarea>
-  </label>
-  <% if (errors.code) { %><p class="form__error"><%= errors.code %></p><% } %>
+    <div class="form__field">
+      <label class="form__label" for="description">Description</label>
+      <textarea class="form__input" id="description" name="description" rows="3" required maxlength="<%= limits.description.maxLength %>"<%- errors.description ? ' aria-invalid="true" aria-describedby="description-error"' : '' %>><%= values.description || '' %></textarea>
+      <p class="form__hint">Up to <%= limits.description.maxLength %> characters.</p>
+      <% if (errors.description) { %><p class="form__error" id="description-error"><%= errors.description %></p><% } %>
+    </div>
 
-  <label>Revision
-    <input name="revision" type="number" inputmode="numeric" step="1" min="<%= limits.revision.min %>" max="<%= limits.revision.max %>" value="<%= values.revision || '' %>" required />
-  </label>
-  <% if (errors.revision) { %><p class="form__error"><%= errors.revision %></p><% } %>
+    <div class="form__field">
+      <label class="form__label" for="code">Diagram code</label>
+      <textarea class="form__input" id="code" name="code" rows="6" maxlength="<%= limits.code.maxLength %>"<%- errors.code ? ' aria-invalid="true" aria-describedby="code-error"' : '' %>><%= values.code || '' %></textarea>
+      <p class="form__hint">Optional, up to <%= limits.code.maxLength %> characters.</p>
+      <% if (errors.code) { %><p class="form__error" id="code-error"><%= errors.code %></p><% } %>
+    </div>
 
-  <button class="button" type="submit">Save</button>
-</form>
+    <div class="form__field">
+      <label class="form__label" for="revision">Revision</label>
+      <input class="form__input" id="revision" name="revision" type="number" inputmode="numeric" step="1" min="<%= limits.revision.min %>" max="<%= limits.revision.max %>" value="<%= values.revision || '' %>" required<%- errors.revision ? ' aria-invalid="true" aria-describedby="revision-error"' : '' %> />
+      <% if (errors.revision) { %><p class="form__error" id="revision-error"><%= errors.revision %></p><% } %>
+    </div>
+
+    <button class="button button--primary form__submit" type="submit">Save diagram</button>
+  </form>
+</section>
 <%- include('partials/footer') %>

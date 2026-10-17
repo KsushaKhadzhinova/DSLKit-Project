@@ -1,15 +1,20 @@
 <%- include('partials/header') %>
-<h1>Request log</h1>
-<table class="table">
-  <thead>
-    <tr><th>Time</th><th>Method</th><th>URL</th><th>Status</th><th>ms</th></tr>
-  </thead>
-  <tbody>
-    <% rows.forEach((row) => { %>
-      <tr>
-        <td><%= row.time %></td><td><%= row.method %></td><td><%= row.url %></td><td><%= row.status %></td><td><%= row.ms %></td>
-      </tr>
-    <% }) %>
-  </tbody>
-</table>
+<section class="section" aria-labelledby="page-title">
+  <h1 class="section__title" id="page-title">Request log</h1>
+  <p class="section__lead">The last <%= rows.length %> rows of the <code>request_log</code> table in the database.</p>
+  <div class="table-wrap">
+    <table class="table">
+      <thead>
+        <tr><th scope="col">Time</th><th scope="col">Method</th><th scope="col">URL</th><th scope="col">Status</th><th scope="col">ms</th></tr>
+      </thead>
+      <tbody>
+        <% rows.forEach((row) => { %>
+          <tr>
+            <td><time datetime="<%= row.time %>"><%= formatTime(row.time) %></time></td><td><%= row.method %></td><td class="table__url"><%= row.url %></td><td><%= row.status %></td><td><%= row.ms %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</section>
 <%- include('partials/footer') %>

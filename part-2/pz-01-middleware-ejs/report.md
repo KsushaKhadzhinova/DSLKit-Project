@@ -27,10 +27,12 @@
 | `src/middleware/requestLogger.js` | Запись каждого запроса в таблицу журнала |
 | `src/middleware/fakeAuth.js` | Имитация авторизации |
 | `src/middleware/errorHandlers.js` | Обработчики ошибок 404 и 500 |
+| `src/middleware/security.js` | Заголовки безопасности, токен CSRF, ограничение частоты запросов, экранирование журнала |
 | `src/data/requestLog.js` | Таблица `request_log` в SQLite |
 | `src/data/diagrams.js` | Хранилище записей в памяти и проверка полей формы |
 | `limits.json` | Все пределы длины и чисел |
 | `views/` | Шаблоны EJS и частичные шаблоны |
+| `public/` | Стили и логотип из Части 1 проекта, переключатель темы |
 
 Настройка EJS выполнена в `src/app.js`, где заданы `view engine` и каталог `views`. Общий каркас страниц вынесен в частичные шаблоны `header` и `footer`, которые подключаются в начале и в конце каждой страницы. Шаблон списка приведён в приложении Ж. Сборка приложения и порядок подключения middleware показаны в приложении З.
 
@@ -55,13 +57,13 @@ Middleware `fakeAuth` проверяет параметр `?auth=1`. Если о
 | `GET /add` | Форма добавления, доступна с `?auth=1` |
 | `POST /add` | Проверка полей, добавление в массив и переход на главную, при ошибке код 400 и форма с сохранёнными значениями |
 | `GET /login` | Страница-подсказка |
-| `GET /log` | Таблица журнала запросов |
+| `GET /log` | Таблица журнала запросов, доступна с `?auth=1` |
 
 Шаблоны выводят все значения с экранированием, поэтому введённая в форме разметка показывается как текст. У каждой записи есть поле «время создания». Оно задаётся при добавлении и всегда позже предыдущего, даже если две записи созданы в одну миллисекунду, поэтому записи не совпадают визуально.
 
 ### 3.5 Страница 500 и порядок обработчиков
 
-Страница 500 показывается, когда запрос завершился ошибкой сервера. Обработчик ошибок имеет четыре параметра и подключён после всех маршрутов и всех middleware, поэтому любое исключение, будь то сбой записи в журнал, ошибка маршрута или сломанное тело запроса, попадает именно в него. Обработчик записывает ошибку в журнал ошибок, выбирает код ответа и рендерит шаблон `500.ejs` в общем оформлении сайта: с шапкой, подвалом и таблицей стилей. Если у ошибки есть собственный код, например 413 для слишком большой формы, он сохраняется, а страница получает заголовок «bad request». Если ошибку вызвала недоступная база журнала, на странице появляется понятное пояснение. Для сбоя до имитации авторизации обработчик сам подставляет гостя, чтобы шапка отрисовалась. Если даже шаблон 500 не удалось отрисовать, отправляется запасная страница с тем же оформлением, поэтому пользователь никогда не видит голый текст на чёрном фоне. Страницу 500 вызывает настоящий сбой, а не кнопка. Чтобы показать её на защите, запустите сервер командой `DB_FILE=package.json/blocked/log.db npm start`: файл базы нельзя создать, поэтому любой запрос заканчивается страницей 500. Второй способ состоит в остановке базы во время работы сервера. Страница 404 устроена так же и подключена перед обработчиком 500. Листинг приведён в приложении Г.
+Страница 500 показывается, когда запрос завершился ошибкой сервера. Обработчик ошибок имеет четыре параметра и подключён после всех маршрутов и всех middleware, поэтому любое исключение, будь то сбой записи в журнал, ошибка маршрута или сломанное тело запроса, попадает именно в него. Обработчик записывает ошибку в журнал ошибок, выбирает код ответа и рендерит шаблон `500.ejs` в общем оформлении сайта: с шапкой, подвалом и таблицей стилей. Если у ошибки есть собственный код, например 413 для слишком большой формы, он сохраняется, а страница получает собственный заголовок, например «Request too large». Если ошибку вызвала недоступная база журнала, на странице появляется понятное пояснение. Для сбоя до имитации авторизации обработчик сам подставляет гостя, чтобы шапка отрисовалась. Если даже шаблон 500 не удалось отрисовать, отправляется запасная страница с тем же оформлением, поэтому пользователь никогда не видит голый текст на чёрном фоне. Страницу 500 вызывает настоящий сбой, а не кнопка. Чтобы показать её на защите, запустите сервер командой `DB_FILE=package.json/blocked/log.db npm start`: файл базы нельзя создать, поэтому любой запрос заканчивается страницей 500. Второй способ состоит в остановке базы во время работы сервера. Страница 404 устроена так же и подключена перед обработчиком 500. Листинг приведён в приложении Г.
 
 ### 3.6 Проверка полей формы
 
@@ -79,9 +81,51 @@ Middleware `fakeAuth` проверяет параметр `?auth=1`. Если о
 
 При ошибке сервер отвечает кодом 400, снова показывает форму, оставляет введённые значения и пишет сообщение под каждым неверным полем. Пропавшее тело запроса и повторяющиеся ключи формы тоже дают код 400, а не 500. Все пределы лежат в файле `limits.json`, а не в коде. Листинг проверки приведён в приложении Д, а файл пределов в приложении Е.
 
-### 3.7 Автоматическая проверка
+### 3.7 Защита формы и сервера
 
-Автоматические тесты на встроенном `node:test` запускают сервер на свободном порту и проверяют страницы, перенаправление гостя, добавление записи, проверку полей, экранирование, таблицу журнала, недоступную базу, уникальное время создания и обе страницы ошибок. Команда запуска: `npm test` в каталоге проекта.
+Форма и сервер защищены от типовых атак, и всё сделано вручную, без новых пакетов. Для защиты от подделки межсайтового запроса сервер кладёт случайный токен в cookie `dslkit_csrf` с признаками `HttpOnly` и `SameSite=Strict` и в скрытое поле формы. Запрос на изменение данных принимается только если оба значения совпадают, а заголовок `Origin`, когда он есть, указывает на этот же сайт. Иначе показывается страница с кодом 403. Каждый ответ получает заголовки `Content-Security-Policy`, `X-Content-Type-Options`, `X-Frame-Options` и `Referrer-Policy`, а имя фреймворка в заголовках скрыто. Политика не разрешает встроенные скрипты и стили, поэтому в шаблонах их нет. Ограничение частоты запросов отвечает кодом 429 со страницей в общем оформлении и заголовком `Retry-After`: общий предел и более строгий предел для отправки формы лежат в `limits.json`. Размер тела формы и число её полей тоже ограничены этим файлом, поэтому огромные значения дают страницу с кодом 400 или 413, а не сбой. Адрес запроса в журнале проходит через экранирование: переводы строк и управляющие символы заменяются записью `\uXXXX`, а длина обрезается, поэтому злоумышленник не может подделать строки журнала. Страница `/log` открыта только с `?auth=1`, потому что в ней видны адреса чужих запросов. Листинг приведён в приложении И.
+
+### 3.8 Внешний вид страниц
+
+Оформление страниц взято из Части 1 проекта: шапка с логотипом и навигацией, подвал, кнопки, карточки и поля формы используют те же стили и разметку, что сайт и приложение DSLKit. Переключатель светлой и тёмной темы работает так же, как в Части 1, а шапка закреплена при прокрутке. На каждой странице одна главная кнопка. Список диаграмм с временем создания каждой записи показан на рисунке 1.
+
+![Список диаграмм](figures/list.png)
+
+Рисунок 1 – Главная страница с карточками диаграмм и временем создания
+
+Детальная страница одной записи с её ревизией и кодом показана на рисунке 2.
+
+![Детальная страница](figures/detail.png)
+
+Рисунок 2 – Страница диаграммы с описанием, ревизией и исходным кодом
+
+Форма после отправки пробельного названия и отрицательной ревизии показана на рисунке 3. Под каждым неверным полем стоит сообщение, а введённые значения сохранены.
+
+![Форма с ошибками](figures/form-errors.png)
+
+Рисунок 3 – Форма добавления с сообщениями о пустом названии и отрицательной ревизии
+
+Таблица журнала запросов из базы данных показана на рисунке 4.
+
+![Журнал запросов](figures/log.png)
+
+Рисунок 4 – Страница журнала с последними строками таблицы request_log
+
+Страница 404 для неизвестного адреса показана на рисунке 5.
+
+![Страница 404](figures/not-found.png)
+
+Рисунок 5 – Страница ошибки 404 в оформлении сайта
+
+Страница 500 при настоящем сбое показана на рисунке 6. Сервер запущен с файлом базы, который нельзя создать, поэтому запись журнала не удалась.
+
+![Страница 500](figures/server-error.png)
+
+Рисунок 6 – Страница ошибки 500 с пояснением о недоступной таблице журнала
+
+### 3.9 Автоматическая проверка
+
+Автоматические тесты на встроенном `node:test` запускают сервер на свободном порту и проверяют страницы, перенаправление гостя, добавление записи, проверку полей, экранирование, таблицу журнала, недоступную базу, уникальное время создания, обе страницы ошибок, токен CSRF, заголовки безопасности, ограничение частоты, экранирование журнала и огромные значения. Команда запуска: `npm test` в каталоге проекта.
 
 ## 4 Ответы на контрольные вопросы
 
@@ -89,21 +133,25 @@ Middleware `fakeAuth` проверяет параметр `?auth=1`. Если о
 
 ## Заключение
 
-Для проекта DSLKit собрано приложение на Express с шаблонами EJS: список диаграмм, детальная страница и форма добавления получают данные из массива в памяти. Журнал запросов по правилам чётного варианта пишется в таблицу SQLite, а его сбой показывается оформленной страницей 500. Форма отвергает пустые и пробельные значения, слишком длинный текст и отрицательные числа по пределам из отдельного файла, а у каждой записи есть уникальное время создания. Автоматические тесты покрывают весь код. Остаётся приложить снимки страниц, сделанные в браузере.
+Для проекта DSLKit собрано приложение на Express с шаблонами EJS: список диаграмм, детальная страница и форма добавления получают данные из массива в памяти. Журнал запросов по правилам чётного варианта пишется в таблицу SQLite, а его сбой показывается оформленной страницей 500. Форма отвергает пустые и пробельные значения, слишком длинный текст и отрицательные числа по пределам из отдельного файла, а у каждой записи есть уникальное время создания. Форма защищена токеном CSRF, а сервер заголовками безопасности и ограничением частоты запросов. Оформление взято из Части 1 проекта. Автоматические тесты покрывают весь код, снимки страниц приведены в тексте.
 
 ## Приложение А (обязательное) Листинг файла requestLogger.js
 
 ```js
+import { safeLogText } from './security.js';
+
 // Writes the request into the request_log table BEFORE the route runs, so a database failure
 // reaches the error handler and the user sees the styled 500 page. Status and duration are added
 // to the same row when the response finishes.
 export const requestLogger =
-  (log, write = console.log) =>
+  (log, write = console.log, urlMax = 500) =>
   (req, res, next) => {
     const startedAt = Date.now();
+    // The address is user input: line breaks and control characters are escaped and the length is cut (log injection).
+    const url = safeLogText(req.originalUrl, urlMax);
     let id;
     try {
-      id = log.start({ time: new Date(startedAt).toISOString(), method: req.method, url: req.originalUrl });
+      id = log.start({ time: new Date(startedAt).toISOString(), method: req.method, url });
     } catch (cause) {
       const error = new Error('Request log write failed', { cause });
       error.publicMessage = 'The request log table could not be written. Check the database file and try again.';
@@ -116,7 +164,7 @@ export const requestLogger =
       } catch (error) {
         write(`[log] could not finish row ${id}: ${error.message}`);
       }
-      write(`[${new Date(startedAt).toISOString()}] ${req.method} ${req.originalUrl} ${res.statusCode} ${ms}ms`);
+      write(`[${new Date(startedAt).toISOString()}] ${req.method} ${url} ${res.statusCode} ${ms}ms`);
     });
     return next();
   };
@@ -193,31 +241,39 @@ export const requireAuth = (req, res, next) => (req.user.guest ? res.redirect('/
 ## Приложение Г (обязательное) Листинг файла errorHandlers.js
 
 ```js
+import { safeLogText } from './security.js';
+
 export const notFound = (req, res) => {
   res.status(404).render('404', { title: 'Not found', url: req.originalUrl });
 };
 
+const HEADINGS = { 403: 'Request refused', 413: 'Request too large', 429: 'Too many requests' };
+
 // Last resort when even the 500 template fails: still a styled page, never a bare text screen.
 const fallbackPage = (status) =>
-  `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>${status} – DSLKit</title><link rel="stylesheet" href="/style.css"></head>` +
-  `<body><main class="page"><h1>${status} – server error</h1><p>The error page could not be drawn. The error was logged.</p><a href="/">Back to the list</a></main></body></html>`;
+  `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>${status} – DSLKit</title><link rel="stylesheet" href="/dslkit.css"><link rel="stylesheet" href="/pz.css"></head>` +
+  `<body class="page"><main class="main"><section class="error"><p class="error__code">Error code: ${status}</p><h1 class="error__title">${status} – server error</h1><p class="error__text">The error page could not be drawn. The error was logged.</p><a class="button button--primary" href="/">Back to the list</a></section></main></body></html>`;
 
 // Four parameters mark this as the error-handling middleware. It is mounted after every route and
 // middleware, so any failure ends on the 500 page (or the 4xx variant for client errors).
 export const serverError =
   (write = console.error) =>
   (err, req, res, _next) => {
-    write(`[error] ${req.method} ${req.originalUrl}`, err);
+    write(`[error] ${safeLogText(req.method)} ${safeLogText(req.originalUrl)}`, err);
     if (res.headersSent) return res.end();
+    if (err.retryAfter) res.set('Retry-After', String(err.retryAfter));
     // Errors from body-parser and others carry their own 4xx/5xx status.
     const status = err.status >= 400 && err.status < 600 ? err.status : 500;
+    const heading = HEADINGS[status] ?? (status >= 500 ? 'Server error' : 'Bad request');
     const locals = {
-      title: status >= 500 ? 'Server error' : 'Bad request',
+      title: heading,
+      heading,
       status,
       message: err.publicMessage ?? '',
       // The failure may happen before fakeAuth ran, so the page needs its own defaults.
       user: res.locals.user ?? { name: 'Guest', guest: true },
       authQuery: res.locals.authQuery ?? '',
+      path: '',
     };
     return res.status(status).render('500', locals, (renderError, html) => {
       if (renderError) {
@@ -316,7 +372,13 @@ export const validateDiagram = (input, limits) => {
   "code": { "maxLength": 5000 },
   "revision": { "min": 0, "max": 100000 },
   "bodyLimit": "20kb",
-  "logRows": 100
+  "parameterLimit": 20,
+  "logRows": 100,
+  "logUrlMax": 500,
+  "rateLimit": {
+    "all": { "windowMs": 60000, "max": 300 },
+    "write": { "windowMs": 60000, "max": 20 }
+  }
 }
 ```
 
@@ -324,27 +386,33 @@ export const validateDiagram = (input, limits) => {
 
 ```ejs
 <%- include('partials/header') %>
-<h1>Diagrams</h1>
-<% if (items.length === 0) { %>
-  <p>No diagrams yet.</p>
-<% } else { %>
-  <table class="table">
-    <thead>
-      <tr><th>#</th><th>Title</th><th>Notation</th><th>Created</th></tr>
-    </thead>
-    <tbody>
+<section class="section" aria-labelledby="page-title">
+  <h1 class="section__title" id="page-title">Diagrams</h1>
+  <p class="section__lead">The catalogue of diagrams stored by the server. Every record shows when it was created.</p>
+  <% if (items.length === 0) { %>
+    <p class="note">No diagrams yet.</p>
+  <% } else { %>
+    <ul class="cards">
       <% items.forEach((item) => { %>
-        <tr>
-          <td><%= item.id %></td>
-          <td><a href="/item/<%= item.id %><%= authQuery %>"><%= item.title %></a></td>
-          <td><%= item.notation %></td>
-          <td><time datetime="<%= item.createdAt %>"><%= item.createdAt %></time></td>
-        </tr>
+        <li class="cards__item">
+          <article class="card">
+            <h2 class="card__title"><%= item.title %></h2>
+            <p class="card__meta">
+              <span class="badge"><%= item.notation %></span>
+              <span>#<%= item.id %></span>
+              <span>Created <time datetime="<%= item.createdAt %>"><%= formatTime(item.createdAt) %></time></span>
+            </p>
+            <p class="card__text"><%= item.description %></p>
+            <a class="card__link" href="/item/<%= item.id %><%= authQuery %>">Open<span class="visually-hidden"> <%= item.title %></span></a>
+          </article>
+        </li>
       <% }) %>
-    </tbody>
-  </table>
-<% } %>
-<a class="button" href="/add<%= authQuery %>">Add diagram</a>
+    </ul>
+  <% } %>
+  <div class="page-actions">
+    <a class="button button--primary" href="/add<%= authQuery %>">Add diagram</a>
+  </div>
+</section>
 <%- include('partials/footer') %>
 ```
 
@@ -359,6 +427,7 @@ import { requestLogger } from './middleware/requestLogger.js';
 import { loadLimits } from './limits.js';
 import { fakeAuth, requireAuth } from './middleware/fakeAuth.js';
 import { notFound, serverError } from './middleware/errorHandlers.js';
+import { csrf, rateLimit, securityHeaders } from './middleware/security.js';
 
 const dir = (path) => fileURLToPath(new URL(path, import.meta.url));
 
@@ -370,33 +439,47 @@ export const createApp = ({
   log = openRequestLog(DEFAULT_DB_FILE),
   write = console.log,
   writeError = console.error,
+  now = Date.now,
 } = {}) => {
   const app = express();
   app.set('view engine', 'ejs');
   app.set('views', dir('../views'));
 
+  app.disable('x-powered-by');
   app.locals.limits = limits;
+  // Records keep the exact ISO time for the machine; people read "2026-10-01 09:00:00.000 UTC".
+  app.locals.formatTime = (iso) => String(iso).replace('T', ' ').replace('Z', ' UTC');
 
-  // Order matters: static files and the pure auth check come first, then the logger (which can fail
-  // and hand over to the error handler), then the body parser and the routes. The two error
-  // handlers are the very last, so every failure ends on a styled page.
+  // Order matters: headers first so every answer has them, then static files and the pure checks,
+  // then the rate limits (a flood is refused before it reaches the database), then the logger (which can fail
+  // and hand over to the error handler), the body parser and the CSRF check (the token is a form field), then the routes.
+  // The two error handlers are the very last, so every failure ends on a styled page.
+  app.use(securityHeaders);
   app.use(express.static(dir('../public')));
+  app.use((req, res, next) => {
+    res.locals.path = req.path;
+    next();
+  });
   app.use(fakeAuth);
-  app.use(requestLogger(log, write));
-  app.use(express.urlencoded({ extended: false, limit: limits.bodyLimit }));
+  app.use(rateLimit({ ...limits.rateLimit.all, now }));
+  app.use(rateLimit({ ...limits.rateLimit.write, only: ['POST'], now }));
+  app.use(requestLogger(log, write, limits.logUrlMax));
+  app.use(express.urlencoded({ extended: false, limit: limits.bodyLimit, parameterLimit: limits.parameterLimit }));
+  app.use(csrf);
 
   app.get('/', (req, res) => res.render('index', { title: 'Diagrams', items: store.all() }));
 
   app.get('/item/:id', (req, res, next) => {
-    const item = store.find(Number(req.params.id));
+    // Only plain digits are a number: Number() would also accept "0x1" or "1e0".
+    const item = /^\d{1,9}$/.test(req.params.id) ? store.find(Number(req.params.id)) : undefined;
     return item ? res.render('item', { title: item.title, item }) : next();
   });
 
   app.get('/add', requireAuth, (req, res) => res.render('add', { title: 'Add diagram', notations: NOTATIONS, errors: {}, values: { revision: '1' } }));
 
   app.post('/add', requireAuth, (req, res) => {
-    const body = req.body ?? {};
-    // Missing body or repeated keys (arrays) must not crash: only plain strings count.
+    const body = req.body; // the CSRF check has already proved that the form body exists
+    // Repeated keys (arrays) must not crash: only plain strings count.
     const text = (value) => (typeof value === 'string' ? value.trim() : '');
     const values = {
       title: text(body.title),
@@ -414,10 +497,113 @@ export const createApp = ({
   });
 
   app.get('/login', (req, res) => res.render('login', { title: 'Sign in' }));
-  app.get('/log', (req, res) => res.render('log', { title: 'Request log', rows: log.recent(limits.logRows) }));
+  app.get('/log', requireAuth, (req, res) => res.render('log', { title: 'Request log', rows: log.recent(limits.logRows) }));
 
   app.use(notFound);
   app.use(serverError(writeError));
   return app;
+};
+```
+
+## Приложение И (обязательное) Листинг файла security.js
+
+```js
+import { randomBytes, timingSafeEqual } from 'node:crypto';
+
+// Security headers set by hand, no extra package. The pages use only files from the same origin,
+// so the policy can be strict: no inline script or style, no framing, forms post only to this site.
+const CSP = [
+  "default-src 'self'",
+  "script-src 'self'",
+  "style-src 'self'",
+  "img-src 'self' data:",
+  "object-src 'none'",
+  "base-uri 'none'",
+  "form-action 'self'",
+  "frame-ancestors 'none'",
+].join('; ');
+
+export const securityHeaders = (req, res, next) => {
+  res.set({
+    'Content-Security-Policy': CSP,
+    'X-Content-Type-Options': 'nosniff',
+    'X-Frame-Options': 'DENY',
+    // same-origin, not no-referrer: with no-referrer browsers send "Origin: null" with every form, and the Origin check below would refuse the site's own forms.
+    'Referrer-Policy': 'same-origin',
+    'Cross-Origin-Opener-Policy': 'same-origin',
+    'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
+  });
+  next();
+};
+
+const COOKIE = 'dslkit_csrf';
+const TOKEN = /^[0-9a-f]{48}$/;
+const UNSAFE = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
+
+const readCookie = (header = '', name) => {
+  for (const part of header.split(';')) {
+    const [key, ...rest] = part.trim().split('=');
+    if (key === name) return rest.join('=');
+  }
+  return undefined;
+};
+
+const sameToken = (a, b) => typeof a === 'string' && typeof b === 'string' && a.length === b.length && timingSafeEqual(Buffer.from(a), Buffer.from(b));
+
+const refused = (message) => Object.assign(new Error(message), { status: 403, publicMessage: message });
+
+// CSRF protection with a double-submit token: the server puts a random token into a SameSite=Strict cookie
+// and into a hidden field of every form. A state-changing request must send both and they must match.
+// A page of another site can neither read the cookie nor guess the token. The Origin header is checked as well when it is present.
+// It runs after the form parser, because the token is a field of the form body.
+export const csrf = (req, res, next) => {
+  let token = readCookie(req.headers.cookie, COOKIE);
+  const known = TOKEN.test(token ?? '');
+  if (UNSAFE.has(req.method)) {
+    const origin = req.headers.origin;
+    if (origin && origin !== `${req.protocol}://${req.headers.host}`) return next(refused('The request comes from another site and was refused.'));
+    if (!known || !sameToken(token, req.body?._csrf)) return next(refused('The form token is missing or wrong. Open the form again and resend it.'));
+  }
+  if (!known) {
+    token = randomBytes(24).toString('hex');
+    res.append('Set-Cookie', `${COOKIE}=${token}; Path=/; HttpOnly; SameSite=Strict${req.secure ? '; Secure' : ''}`);
+  }
+  res.locals.csrfToken = token;
+  next();
+};
+
+const tooMany = (retryAfter) => Object.assign(new Error('Too many requests'), { status: 429, retryAfter, publicMessage: `Too many requests. Try again in ${retryAfter} s.` });
+
+// Fixed-window rate limit per client address, kept in memory. `only` limits it to some methods.
+export const rateLimit = ({ windowMs, max, only, now = Date.now }) => {
+  const hits = new Map();
+  return (req, res, next) => {
+    if (only && !only.includes(req.method)) return next();
+    const time = now();
+    if (hits.size > 10000) for (const [key, entry] of hits) if (entry.reset <= time) hits.delete(key);
+    const key = req.ip ?? 'unknown';
+    let entry = hits.get(key);
+    if (!entry || entry.reset <= time) {
+      entry = { count: 0, reset: time + windowMs };
+      hits.set(key, entry);
+    }
+    entry.count += 1;
+    if (entry.count <= max) return next();
+    const retryAfter = Math.max(1, Math.ceil((entry.reset - time) / 1000));
+    res.set('Retry-After', String(retryAfter));
+    return next(tooMany(retryAfter));
+  };
+};
+
+// Control characters (line breaks, tabs, escape codes) in user input could forge extra lines in a log, so they are escaped.
+// The text is also cut, so one huge address cannot fill the log.
+export const safeLogText = (text, max = 500) => {
+  let escaped = '';
+  for (const char of String(text)) {
+    const code = char.codePointAt(0);
+    const control = code < 32 || (code >= 127 && code <= 159) || code === 0x2028 || code === 0x2029;
+    escaped += control ? `\\u${code.toString(16).padStart(4, '0')}` : char;
+  }
+  return escaped.length > max ? `${escaped.slice(0, max)}…` : escaped;
 };
 ```

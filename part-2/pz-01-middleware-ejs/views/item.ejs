@@ -1,16 +1,22 @@
 <%- include('partials/header') %>
-<h1><%= item.title %></h1>
-<p class="badge"><%= item.notation %></p>
-<p><%= item.description %></p>
-<dl class="facts">
-  <dt>Revision</dt>
-  <dd><%= item.revision %></dd>
-  <dt>Created</dt>
-  <dd><time datetime="<%= item.createdAt %>"><%= item.createdAt %></time></dd>
-</dl>
-<% if (item.code) { %>
-  <h2>Source</h2>
-  <pre class="code"><%= item.code %></pre>
-<% } %>
-<a href="/<%= authQuery %>">Back to the list</a>
+<section class="section" aria-labelledby="page-title">
+  <h1 class="section__title" id="page-title"><%= item.title %></h1>
+  <p><span class="badge"><%= item.notation %></span></p>
+  <p class="section__lead"><%= item.description %></p>
+  <dl class="facts">
+    <dt>Number</dt>
+    <dd><%= item.id %></dd>
+    <dt>Revision</dt>
+    <dd><%= item.revision %></dd>
+    <dt>Created</dt>
+    <dd><time datetime="<%= item.createdAt %>"><%= formatTime(item.createdAt) %></time></dd>
+  </dl>
+  <% if (item.code) { %>
+    <h2>Source</h2>
+    <pre class="code"><%= item.code %></pre>
+  <% } %>
+  <div class="page-actions">
+    <a class="button button--primary" href="/<%= authQuery %>">Back to the list</a>
+  </div>
+</section>
 <%- include('partials/footer') %>

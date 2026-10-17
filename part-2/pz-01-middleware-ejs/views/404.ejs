@@ -1,5 +1,8 @@
 <%- include('partials/header') %>
-<h1>404 – page not found</h1>
-<p>Nothing lives at <code><%= url %></code>.</p>
-<a href="/<%= authQuery %>">Back to the list</a>
+<section class="error" aria-labelledby="page-title">
+  <p class="error__code">Error code: 404</p>
+  <h1 class="error__title" id="page-title">Page not found</h1>
+  <p class="error__text">There is no page at <code><%= url %></code>. The address may contain a typo or the record may not exist.</p>
+  <a class="button button--primary" href="/<%= authQuery %>">Back to the list</a>
+</section>
 <%- include('partials/footer') %>

@@ -4,5 +4,11 @@
   "code": { "maxLength": 5000 },
   "revision": { "min": 0, "max": 100000 },
   "bodyLimit": "20kb",
-  "logRows": 100
+  "parameterLimit": 20,
+  "logRows": 100,
+  "logUrlMax": 500,
+  "rateLimit": {
+    "all": { "windowMs": 60000, "max": 300 },
+    "write": { "windowMs": 60000, "max": 20 }
+  }
 }
