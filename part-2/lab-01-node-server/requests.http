@@ -57,3 +57,12 @@ DELETE {{base}}/diagrams/2
 
 ### Unknown route -> 404
 GET {{base}}/projects
+
+### Page 2 of size 5, sorted by title descending -> 200 (X-Total-Count has the full size)
+GET {{base}}/diagrams?limit=5&offset=5&sort=title&order=desc
+
+### Page size over 100 -> 400
+GET {{base}}/diagrams?limit=1000
+
+### Unknown sort field -> 400
+GET {{base}}/diagrams?sort=password

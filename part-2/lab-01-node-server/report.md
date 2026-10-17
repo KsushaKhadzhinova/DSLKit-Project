@@ -78,6 +78,10 @@
 
 Листинг файла server.js приведён в приложении А. Листинг файла app.js приведён в приложении Б. Листинг файла diagrams.routes.js приведён в приложении В. Листинг файла diagrams.controller.js приведён в приложении Г. Листинг файла diagram.model.js приведён в приложении Д. Листинг файла validate.js приведён в приложении Е. Листинг файла error-handler.js приведён в приложении Ж.
 
+### 3.6 Постраничный вывод и сортировка
+
+Список принимает параметры `limit`, `offset`, `sort` и `order`. Параметр `limit` задаёт размер страницы от 1 до 100, `offset` задаёт смещение от 0 до 1000000, `sort` выбирает поле из белого списка, а `order` принимает значения `asc` и `desc`. Без параметров возвращается весь список по возрастанию `id`, поэтому клиенты прежних работ продолжают работать. Ответ остаётся массивом, а полный размер выборки приходит в заголовке `X-Total-Count`. Числа читаются как строки не длиннее девяти цифр, поэтому значения `-1`, `1e9`, `0x10` и огромные числа получают ответ 400 со списком ошибок по полям. Имя поля сортировки проверяется по белому списку и не попадает в запрос к базе без проверки. Равные значения упорядочены по `id`, поэтому страницы не пересекаются. Разбор параметров вынесен в отдельный модуль, он приведён в приложении И.
+
 ## Заключение
 
 Для проекта DSLKit создан REST API ресурса `diagrams` на Express: пять маршрутов выполняют чтение списка и одной записи, создание, полную замену и удаление, данные временно лежат в массиве в памяти. Ошибки приводятся к единому формату JSON с кодами 400, 404 и 500 через глобальный обработчик, запуск в режиме разработки идёт через `nodemon`, а 18 автоматических тестов подтверждают поведение каждого маршрута. Структура с маршрутами, контроллерами и моделью позволит в следующей работе заменить массив базой данных без переписывания остального кода. Остаётся приложить скриншоты запросов из Postman или браузера.
@@ -154,11 +158,26 @@ module.exports = { createDiagramsRouter };
 
 ```js
 const { notFound } = require('../errors');
+const { parseListQuery } = require('../middleware/list-query');
 
 const missing = (id) => notFound(`Diagram ${id} not found`);
 
+const SORTABLE = ['id', 'title', 'notation', 'priority', 'owner'];
+
+// Numbers compare as numbers, text with the locale rules, equal values keep the order of ids.
+const byField = (sort, order) => (a, b) => {
+  const result = typeof a[sort] === 'number' ? a[sort] - b[sort] : String(a[sort]).localeCompare(String(b[sort]));
+  return (order === 'desc' ? -result : result) || a.id - b.id;
+};
+
 const createDiagramsController = (store) => ({
-  list: (_req, res) => res.json(store.findAll()),
+  // ?limit=&offset=&sort=&order= (see list-query.js). The answer stays an array, the full size comes in X-Total-Count.
+  list: (req, res) => {
+    const { limit, offset, sort, order } = parseListQuery(req.query, SORTABLE);
+    const all = [...store.findAll()].sort(byField(sort, order));
+    res.set('X-Total-Count', String(all.length));
+    res.json(all.slice(offset, limit === undefined ? undefined : offset + limit));
+  },
 
   get: (req, res, next) => {
     const diagram = store.findById(req.diagramId);
@@ -301,4 +320,47 @@ const errorHandler = (err, _req, res, next) => {
 };
 
 module.exports = { routeNotFound, errorHandler };
+```
+
+## Приложение И (обязательное) Листинг файла list-query.js
+
+```js
+const { badRequest } = require('../errors');
+
+// Limits of the list query. The page size is capped so one request cannot ask for the whole table,
+// and the numbers are read as short digit strings, so 1e9, -1, 0x10 or a huge value are refused with 400.
+const MAX_LIMIT = 100;
+const MAX_OFFSET = 1000000;
+const ORDERS = ['asc', 'desc'];
+
+// Reads ?limit=, ?offset=, ?sort= and ?order= from req.query.
+// sortable: the field names a client may sort by (a whitelist, so a field name never reaches the database unchecked).
+// Without limit the whole list is returned (the clients of the earlier labs expect that), without sort the order is by id.
+// A bad value throws the 400 error with the list of problems, Express 5 passes it to the error handler.
+const parseListQuery = (query, sortable) => {
+  const problems = [];
+  const integer = (name, min, max) => {
+    const value = query[name];
+    if (value === undefined) return undefined;
+    if (typeof value !== 'string' || !/^\d{1,9}$/.test(value) || Number(value) < min || Number(value) > max) {
+      problems.push({ field: name, message: `${name} must be an integer from ${min} to ${max}` });
+      return undefined;
+    }
+    return Number(value);
+  };
+  const limit = integer('limit', 1, MAX_LIMIT);
+  const offset = integer('offset', 0, MAX_OFFSET) ?? 0;
+
+  const sort = query.sort ?? 'id';
+  if (typeof sort !== 'string' || !sortable.includes(sort)) {
+    problems.push({ field: 'sort', message: `sort must be one of: ${sortable.join(', ')}` });
+  }
+  const order = typeof query.order === 'string' ? query.order.toLowerCase() : (query.order ?? 'asc');
+  if (!ORDERS.includes(order)) problems.push({ field: 'order', message: 'order must be asc or desc' });
+
+  if (problems.length) throw badRequest('Invalid list query', problems);
+  return { limit, offset, sort, order };
+};
+
+module.exports = { parseListQuery, MAX_LIMIT, MAX_OFFSET };
 ```

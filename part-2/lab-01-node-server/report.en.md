@@ -78,6 +78,10 @@ Table 3 – Results of requests to the running server
 
 Listing of server.js is given in appendix A. Listing of app.js is given in appendix B. Listing of diagrams.routes.js is given in appendix C. Listing of diagrams.controller.js is given in appendix D. Listing of diagram.model.js is given in appendix E. Listing of validate.js is given in appendix F. Listing of error-handler.js is given in appendix G.
 
+### 3.6 Paging and sorting
+
+The list accepts the `limit`, `offset`, `sort` and `order` parameters. `limit` sets the page size from 1 to 100, `offset` sets the shift from 0 to 1000000, `sort` picks a field from a whitelist and `order` takes `asc` or `desc`. Without parameters the whole list is returned in ascending `id` order, so the clients of the earlier works keep working. The answer stays an array and the full size of the selection comes in the `X-Total-Count` header. Numbers are read as strings of at most nine digits, so `-1`, `1e9`, `0x10` and huge numbers get a 400 answer with a list of errors by field. The sort field name is checked against the whitelist and never reaches the database query unchecked. Equal values are ordered by `id`, so pages do not overlap. Parsing of the parameters is moved to a separate module, it is given in Appendix H.
+
 ## Conclusion
 
 For DSLKit, a REST API for the `diagrams` resource was built on Express: five routes read the list and a single record, create, replace and delete, and the data temporarily lives in an in-memory array. Errors are unified into one JSON shape with the codes 400, 404 and 500 through a global handler, development mode runs on `nodemon`, and 18 automated tests confirm the behavior of every route. The split into routes, controllers and a model lets the next lab swap the array for a database without rewriting the rest of the code. Screenshots of the requests from Postman or a browser are still to be attached.
@@ -154,11 +158,26 @@ module.exports = { createDiagramsRouter };
 
 ```js
 const { notFound } = require('../errors');
+const { parseListQuery } = require('../middleware/list-query');
 
 const missing = (id) => notFound(`Diagram ${id} not found`);
 
+const SORTABLE = ['id', 'title', 'notation', 'priority', 'owner'];
+
+// Numbers compare as numbers, text with the locale rules, equal values keep the order of ids.
+const byField = (sort, order) => (a, b) => {
+  const result = typeof a[sort] === 'number' ? a[sort] - b[sort] : String(a[sort]).localeCompare(String(b[sort]));
+  return (order === 'desc' ? -result : result) || a.id - b.id;
+};
+
 const createDiagramsController = (store) => ({
-  list: (_req, res) => res.json(store.findAll()),
+  // ?limit=&offset=&sort=&order= (see list-query.js). The answer stays an array, the full size comes in X-Total-Count.
+  list: (req, res) => {
+    const { limit, offset, sort, order } = parseListQuery(req.query, SORTABLE);
+    const all = [...store.findAll()].sort(byField(sort, order));
+    res.set('X-Total-Count', String(all.length));
+    res.json(all.slice(offset, limit === undefined ? undefined : offset + limit));
+  },
 
   get: (req, res, next) => {
     const diagram = store.findById(req.diagramId);
@@ -301,4 +320,47 @@ const errorHandler = (err, _req, res, next) => {
 };
 
 module.exports = { routeNotFound, errorHandler };
+```
+
+## Appendix H (mandatory) Listing of list-query.js
+
+```js
+const { badRequest } = require('../errors');
+
+// Limits of the list query. The page size is capped so one request cannot ask for the whole table,
+// and the numbers are read as short digit strings, so 1e9, -1, 0x10 or a huge value are refused with 400.
+const MAX_LIMIT = 100;
+const MAX_OFFSET = 1000000;
+const ORDERS = ['asc', 'desc'];
+
+// Reads ?limit=, ?offset=, ?sort= and ?order= from req.query.
+// sortable: the field names a client may sort by (a whitelist, so a field name never reaches the database unchecked).
+// Without limit the whole list is returned (the clients of the earlier labs expect that), without sort the order is by id.
+// A bad value throws the 400 error with the list of problems, Express 5 passes it to the error handler.
+const parseListQuery = (query, sortable) => {
+  const problems = [];
+  const integer = (name, min, max) => {
+    const value = query[name];
+    if (value === undefined) return undefined;
+    if (typeof value !== 'string' || !/^\d{1,9}$/.test(value) || Number(value) < min || Number(value) > max) {
+      problems.push({ field: name, message: `${name} must be an integer from ${min} to ${max}` });
+      return undefined;
+    }
+    return Number(value);
+  };
+  const limit = integer('limit', 1, MAX_LIMIT);
+  const offset = integer('offset', 0, MAX_OFFSET) ?? 0;
+
+  const sort = query.sort ?? 'id';
+  if (typeof sort !== 'string' || !sortable.includes(sort)) {
+    problems.push({ field: 'sort', message: `sort must be one of: ${sortable.join(', ')}` });
+  }
+  const order = typeof query.order === 'string' ? query.order.toLowerCase() : (query.order ?? 'asc');
+  if (!ORDERS.includes(order)) problems.push({ field: 'order', message: 'order must be asc or desc' });
+
+  if (problems.length) throw badRequest('Invalid list query', problems);
+  return { limit, offset, sort, order };
+};
+
+module.exports = { parseListQuery, MAX_LIMIT, MAX_OFFSET };
 ```
