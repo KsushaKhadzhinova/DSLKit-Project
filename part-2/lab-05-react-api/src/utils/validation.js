@@ -22,11 +22,13 @@ export function validateDiagram({ title, sourceCode, notation }) {
   return errors;
 }
 
+// The server hashes the password with bcrypt, which reads only the first 72 bytes, so the limit counts bytes (a Cyrillic letter is two bytes).
 export function validateCredentials({ email, password }) {
   const errors = {};
-  if (!/^\S+@\S+\.\S+$/.test(email.trim())) errors.email = 'Введите адрес электронной почты';
+  const address = email.trim();
+  if (!/^\S+@\S+\.\S+$/.test(address) || address.length > limits.email.maxLength) errors.email = 'Введите адрес электронной почты';
   if (password.length < limits.password.minLength) errors.password = `Пароль не короче ${limits.password.minLength} символов`;
-  else if (password.length > limits.password.maxLength) errors.password = `Пароль не длиннее ${limits.password.maxLength} символов`;
+  else if (new TextEncoder().encode(password).length > limits.password.maxBytes) errors.password = `Пароль не длиннее ${limits.password.maxBytes} байт`;
   return errors;
 }
 

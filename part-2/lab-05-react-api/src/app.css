@@ -1,0 +1,236 @@
+/* Rules that the Part 1 stylesheet (dslkit.css) does not have: the page frame, the responsive header,
+   the list of records, the loading indicator and the messages. Mobile first, breakpoints 576, 768 and 1024 px. */
+:root {
+  /* Text never below 14 px, controls 44 px and higher, as in the Part 1 editor. */
+  --step--1: 0.9375rem;
+  --target-size-small: 3rem;
+}
+
+.page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  overflow-x: clip;
+}
+
+.main {
+  flex: 1;
+  display: grid;
+  align-content: start;
+  gap: var(--space-3);
+  width: 100%;
+  max-width: calc(var(--container) + var(--space-3) * 2);
+  padding: var(--space-4) var(--space-3);
+  margin-inline: auto;
+}
+
+.page-title {
+  font-size: var(--step-3);
+}
+
+.page-lead {
+  max-width: var(--measure);
+  margin-top: var(--space-1);
+  color: var(--color-text-light);
+}
+
+/* Header: the Part 1 markup, the burger and the theme switch work without JavaScript. */
+button.nav__link {
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.theme__button svg {
+  display: block;
+}
+
+/* Forms */
+.form--center {
+  width: 100%;
+  max-width: 34rem;
+  margin-inline: auto;
+}
+
+.form--wide {
+  max-width: none;
+}
+
+.form__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.form__row {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.toolbar {
+  max-width: calc(var(--measure) - var(--space-5));
+}
+
+/* Records */
+.card__title {
+  overflow-wrap: anywhere;
+}
+
+.card__title .form__input {
+  font-weight: 600;
+}
+
+.card__text {
+  font-size: var(--step--1);
+}
+
+.card .actions {
+  margin-top: auto;
+  padding-top: var(--space-1);
+  gap: var(--space-1);
+}
+
+.card[aria-busy='true'] {
+  border-style: dashed;
+}
+
+/* Loading indicator and messages */
+.status {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-text-light);
+}
+
+.spinner {
+  flex: none;
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 3px solid var(--color-border);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .spinner {
+    animation: spin 0.8s linear infinite;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.alert {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-2) var(--space-3);
+  border-left: 4px solid var(--color-error);
+  border-radius: var(--radius-small);
+  background: var(--color-secondary);
+}
+
+.alert__text {
+  flex: 1 1 16rem;
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+.error-page {
+  display: grid;
+  gap: var(--space-3);
+  justify-items: center;
+  max-width: 36rem;
+  padding: var(--space-5) var(--space-3);
+  margin-inline: auto;
+  text-align: center;
+}
+
+.error-page__code {
+  color: var(--color-primary-text);
+  font-size: var(--step-6);
+  font-weight: 800;
+  line-height: 1;
+}
+
+@media (min-width: 576px) {
+  .burger__label {
+    position: static;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    clip-path: none;
+  }
+
+  .cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 768px) {
+  .header__inner {
+    grid-template-columns: auto 1fr auto;
+  }
+
+  .burger__input,
+  .burger__button {
+    display: none;
+  }
+
+  .header__tools {
+    grid-column: auto;
+    grid-row: auto;
+  }
+
+  .nav {
+    display: block;
+    grid-column: auto;
+    grid-row: auto;
+    padding-bottom: 0;
+  }
+
+  .nav__list {
+    flex-flow: row wrap;
+    gap: 0;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .nav__link {
+    min-height: var(--target-size-small);
+    padding: 0 var(--space-1);
+  }
+
+  .form {
+    padding: var(--space-4);
+  }
+
+  .form__row {
+    grid-template-columns: 1fr 10rem 1fr;
+    align-items: start;
+  }
+}
+
+@media (min-width: 1024px) {
+  .header__inner {
+    gap: var(--space-3);
+  }
+
+  .nav__list {
+    gap: var(--space-1);
+  }
+
+  .nav__link {
+    padding: 0 var(--space-2);
+  }
+
+  .cards {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}

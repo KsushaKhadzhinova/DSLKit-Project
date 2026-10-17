@@ -87,3 +87,17 @@ describe('errorMessage', () => {
     expect(isCanceled(new Error('x'))).toBe(false);
   });
 });
+
+describe('storage and odd responses', () => {
+  it('works without a token when the storage is blocked', async () => {
+    const spy = vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
+      throw new Error('blocked');
+    });
+    await fetchDiagrams();
+    expect(sent.headers.Authorization).toBeUndefined();
+    spy.mockRestore();
+  });
+  it('does not break on an HTML error page from a proxy', () => {
+    expect(errorMessage({ response: { status: 502, data: '<html>Bad gateway</html>' } })).toBe('Ошибка сервера (502)');
+  });
+});

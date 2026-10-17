@@ -16,7 +16,7 @@ vi.mock('./api', async (importOriginal) => ({
 
 const record = (id, title) => ({ id, title, notation: 'UML', sourceCode: 'a -> b', priority: 'normal', createdAt: `2026-10-16T10:00:0${id}.000Z` });
 const initial = [record(1, 'Order processing'), record(2, 'Billing schema')];
-const titles = () => screen.queryAllByRole('listitem').map((li) => li.querySelector('.item__title').textContent);
+const titles = () => within(screen.getByRole('main')).queryAllByRole('listitem').map((li) => li.querySelector('.card__title').textContent);
 const deferred = () => {
   let resolve;
   const promise = new Promise((res) => {
@@ -201,7 +201,7 @@ describe('editing', () => {
     await screen.findByText('Order processing');
     await edit(user, 'Order processing{Enter}');
     expect(api.updateDiagram).not.toHaveBeenCalled();
-    expect(within(screen.getAllByRole('listitem')[0]).queryByLabelText('Новое название')).not.toBeInTheDocument();
+    expect(within(within(screen.getByRole('main')).getAllByRole('listitem')[0]).queryByLabelText('Новое название')).not.toBeInTheDocument();
   });
 });
 
@@ -284,7 +284,7 @@ describe('session', () => {
     await user.click(screen.getByLabelText(/^Пароль/));
     await user.paste('p'.repeat(73));
     await user.click(screen.getByRole('button', { name: 'Войти' }));
-    expect(screen.getByText('Пароль не длиннее 72 символов')).toBeInTheDocument();
+    expect(screen.getByText('Пароль не длиннее 72 байт')).toBeInTheDocument();
   });
 
   it('logs out with the button', async () => {
@@ -301,5 +301,76 @@ describe('session', () => {
     await screen.findByText('Order processing');
     window.dispatchEvent(new Event('auth:logout'));
     expect(await screen.findByRole('form', { name: 'Вход' })).toBeInTheDocument();
+  });
+});
+
+describe('races and safety', () => {
+  it('sends one DELETE for a fast double click on the same record', async () => {
+    const user = userEvent.setup();
+    const pending = deferred();
+    api.deleteDiagram.mockReturnValue(pending.promise);
+    render(<App />);
+    await screen.findByText('Order processing');
+    const button = screen.getByRole('button', { name: 'Удалить: Order processing' });
+    await user.dblClick(button);
+    pending.resolve({});
+    expect(api.deleteDiagram).toHaveBeenCalledTimes(1);
+    expect(titles()).toEqual(['Billing schema']);
+  });
+
+  it('does not delete or edit a record that still has a temporary id', async () => {
+    const user = userEvent.setup();
+    api.addDiagram.mockReturnValue(deferred().promise);
+    render(<App />);
+    await screen.findByText('Order processing');
+    await user.type(screen.getByLabelText('Название'), 'Draft');
+    await user.type(screen.getByLabelText('Исходный код'), 'a -> b');
+    await user.click(screen.getByRole('button', { name: 'Добавить' }));
+    expect(screen.getByRole('button', { name: 'Удалить: Draft' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Изменить: Draft' })).toBeDisabled();
+    await user.click(screen.getByRole('button', { name: 'Удалить: Draft' }));
+    expect(api.deleteDiagram).not.toHaveBeenCalled();
+  });
+
+  it('keeps the record removed when the server says it is already gone (404)', async () => {
+    const user = userEvent.setup();
+    api.deleteDiagram.mockRejectedValue(serverError(404, 'Diagram 1 not found'));
+    render(<App />);
+    await screen.findByText('Order processing');
+    await user.click(screen.getByRole('button', { name: 'Удалить: Order processing' }));
+    await waitFor(() => expect(api.deleteDiagram).toHaveBeenCalled());
+    expect(titles()).toEqual(['Billing schema']);
+    expect(screen.queryByText(/Не удалось удалить/)).not.toBeInTheDocument();
+  });
+
+  it('shows markup from the server as plain text', async () => {
+    const user = userEvent.setup();
+    api.addDiagram.mockRejectedValue(serverError(400, '<img src=x onerror=alert(1)>'));
+    const { container } = render(<App />);
+    await screen.findByText('Order processing');
+    await user.type(screen.getByLabelText('Название'), 'Draft');
+    await user.type(screen.getByLabelText('Исходный код'), 'a');
+    await user.click(screen.getByRole('button', { name: 'Добавить' }));
+    expect(await screen.findByText(/<img src=x onerror=alert\(1\)>/)).toBeInTheDocument();
+    expect(container.querySelector('img[src="x"]')).toBeNull();
+  });
+
+  it('tells the user that the session expired when the token is rejected', async () => {
+    render(<App />);
+    await screen.findByText('Order processing');
+    window.dispatchEvent(new Event('auth:logout'));
+    expect(await screen.findByText('Сессия истекла. Войдите снова.')).toBeInTheDocument();
+  });
+
+  it('rejects a password above 72 bytes even when it is short in characters', async () => {
+    const user = userEvent.setup();
+    localStorage.clear();
+    render(<App />);
+    await user.type(screen.getByLabelText(/^Электронная почта/), 'kate@example.com');
+    await user.click(screen.getByLabelText(/^Пароль/));
+    await user.paste('п'.repeat(40));
+    await user.click(screen.getByRole('button', { name: 'Войти' }));
+    expect(screen.getByText('Пароль не длиннее 72 байт')).toBeInTheDocument();
+    expect(api.login).not.toHaveBeenCalled();
   });
 });

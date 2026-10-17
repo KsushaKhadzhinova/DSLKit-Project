@@ -1,54 +1,58 @@
 import { useEffect, useState } from 'react';
-import { TOKEN_KEY } from './api';
+import { clearToken, getToken } from './api';
 import AuthForm from './components/AuthForm';
 import DiagramForm from './components/DiagramForm';
 import DiagramItem from './components/DiagramItem';
+import Footer from './components/Footer';
+import Header from './components/Header';
 import limits from './limits.json';
 import { useDebouncedValue } from './hooks/useDebouncedValue';
 import { useDiagrams } from './hooks/useDiagrams';
 
 // The list screen is separate so the hook runs only for a signed-in user.
-function Diagrams({ onLogout }) {
+function Diagrams() {
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebouncedValue(search.trim(), limits.searchDebounceMs);
   const { items, loading, error, notice, retry, dismissNotice, add, remove, update } = useDiagrams(debouncedSearch);
 
   return (
     <>
-      <div className="filters">
-        <label className="field">
-          Поиск по названию
-          <input type="search" value={search} maxLength={limits.title.maxLength} onChange={(e) => setSearch(e.target.value)} />
-        </label>
-        <button type="button" onClick={onLogout}>
-          Выйти
-        </button>
-      </div>
       <DiagramForm onAdd={add} />
+      <div className="form__field toolbar">
+        <label className="form__label" htmlFor="search">
+          Поиск по названию
+        </label>
+        <input id="search" className="form__input" type="search" autoComplete="off" value={search} maxLength={limits.title.maxLength} onChange={(e) => setSearch(e.target.value)} />
+      </div>
       {notice && (
-        <p className="error" role="alert">
-          {notice}{' '}
-          <button type="button" onClick={dismissNotice}>
+        <div className="alert" role="alert">
+          <p className="alert__text">{notice}</p>
+          <button type="button" className="button button--quiet" onClick={dismissNotice}>
             Закрыть
           </button>
-        </p>
+        </div>
       )}
       {loading && (
-        <p role="status" className="spinner">
+        <p role="status" className="status">
+          <span className="spinner" aria-hidden="true"></span>
           Загрузка…
         </p>
       )}
       {error && !loading && (
-        <div role="alert" className="error">
-          <p>{error}</p>
-          <button type="button" onClick={retry}>
+        <div role="alert" className="alert">
+          <p className="alert__text">{error}</p>
+          <button type="button" className="button" onClick={retry}>
             Повторить
           </button>
         </div>
       )}
-      {!loading && !error && items.length === 0 && <p>Диаграмм не найдено.</p>}
+      {!loading && !error && items.length === 0 && (
+        <p className="note">
+          <span className="note__text">Диаграмм не найдено.</span>
+        </p>
+      )}
       {!error && (
-        <ul className="list">
+        <ul className="cards">
           {items.map((diagram) => (
             <DiagramItem key={diagram.id} diagram={diagram} onUpdate={update} onRemove={remove} />
           ))}
@@ -59,24 +63,51 @@ function Diagrams({ onLogout }) {
 }
 
 export default function App() {
-  const [signedIn, setSignedIn] = useState(() => Boolean(localStorage.getItem(TOKEN_KEY)));
+  const [signedIn, setSignedIn] = useState(() => Boolean(getToken()));
+  const [expired, setExpired] = useState(false);
 
   // api.js sends this event when the server answers 401 for the saved token.
   useEffect(() => {
-    const handleLogout = () => setSignedIn(false);
+    const handleLogout = () => {
+      setSignedIn(false);
+      setExpired(true);
+    };
     window.addEventListener('auth:logout', handleLogout);
     return () => window.removeEventListener('auth:logout', handleLogout);
   }, []);
 
   const logout = () => {
-    localStorage.removeItem(TOKEN_KEY);
+    clearToken();
+    setExpired(false);
     setSignedIn(false);
   };
 
   return (
-    <main className="app">
-      <h1>DSLKit: диаграммы на сервере</h1>
-      {signedIn ? <Diagrams onLogout={logout} /> : <AuthForm onLoggedIn={() => setSignedIn(true)} />}
-    </main>
+    <div className="page">
+      <a className="skip-link" href="#main">
+        Перейти к основному содержимому
+      </a>
+      <Header signedIn={signedIn} onLogout={logout} />
+      <main className="main" id="main">
+        <div>
+          <h1 className="page-title">{signedIn ? 'Диаграммы проекта' : 'Вход в DSLKit'}</h1>
+          <p className="page-lead">
+            {signedIn ? 'Список хранится на сервере: запись появляется сразу, а при отказе сервера возвращается как было.' : 'Диаграммы хранятся на сервере и доступны после входа.'}
+          </p>
+        </div>
+        {signedIn ? (
+          <Diagrams />
+        ) : (
+          <AuthForm
+            notice={expired ? 'Сессия истекла. Войдите снова.' : undefined}
+            onLoggedIn={() => {
+              setExpired(false);
+              setSignedIn(true);
+            }}
+          />
+        )}
+      </main>
+      <Footer />
+    </div>
   );
 }

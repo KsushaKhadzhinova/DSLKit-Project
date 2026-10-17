@@ -2,11 +2,34 @@ import axios from 'axios';
 
 export const TOKEN_KEY = 'token';
 
+// The token lives in localStorage so that it survives a reload. Storage can be blocked by the browser, then the user simply has to sign in again.
+export const getToken = () => {
+  try {
+    return localStorage.getItem(TOKEN_KEY);
+  } catch {
+    return null;
+  }
+};
+export const saveToken = (token) => {
+  try {
+    localStorage.setItem(TOKEN_KEY, token);
+  } catch {
+    /* the session lasts until the page is closed */
+  }
+};
+export const clearToken = () => {
+  try {
+    localStorage.removeItem(TOKEN_KEY);
+  } catch {
+    /* nothing to remove */
+  }
+};
+
 const api = axios.create({ baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000', timeout: 8000 });
 
 // Every request carries the JWT saved after login.
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem(TOKEN_KEY);
+  const token = getToken();
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
@@ -15,8 +38,8 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401 && localStorage.getItem(TOKEN_KEY)) {
-      localStorage.removeItem(TOKEN_KEY);
+    if (error.response?.status === 401 && getToken()) {
+      clearToken();
       window.dispatchEvent(new Event('auth:logout'));
     }
     return Promise.reject(error);
@@ -35,11 +58,13 @@ export const deleteDiagram = (id) => api.delete(`/diagrams/${id}`);
 export const isCanceled = (error) => axios.isCancel(error);
 
 // A text for the user: the server message when there is one, a clear text when the server is unreachable.
+// The text is shown by React as plain text, so markup in a server message cannot run.
 export const errorMessage = (error) => {
   if (error.response) {
-    const { error: message, details } = error.response.data ?? {};
-    const extra = Array.isArray(details) ? details.map((d) => `${d.field}: ${d.message}`).join('; ') : '';
-    return [message || `Ошибка сервера (${error.response.status})`, extra].filter(Boolean).join(' – ');
+    const data = error.response.data;
+    const { error: message, details } = data && typeof data === 'object' ? data : {};
+    const extra = Array.isArray(details) ? details.map((d) => `${d.field}: ${d.message}`).join(', ') : '';
+    return [typeof message === 'string' && message ? message : `Ошибка сервера (${error.response.status})`, extra].filter(Boolean).join(' – ');
   }
   if (error.code === 'ECONNABORTED') return 'Сервер не ответил вовремя';
   return 'Сервер недоступен. Проверьте, что он запущен';

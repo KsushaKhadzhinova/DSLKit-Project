@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { addDiagram, deleteDiagram, errorMessage, fetchDiagrams, isCanceled, updateDiagram } from '../api';
 
+const isTemporary = (id) => typeof id === 'string' && id.startsWith('temp-');
+
 // Owns the server state of the list: loading, error, the items and the optimistic changes.
 export function useDiagrams(search) {
   const [items, setItems] = useState([]);
@@ -9,6 +11,11 @@ export function useDiagrams(search) {
   const [notice, setNotice] = useState(null);
   const [attempt, setAttempt] = useState(0);
   const tempCounter = useRef(0);
+  // The latest list for the handlers, so a fast second click never works with an old copy.
+  const itemsRef = useRef(items);
+  itemsRef.current = items;
+  // Ids with a request in flight: a second delete or edit of the same record is ignored until the first one ends.
+  const busyIds = useRef(new Set());
 
   // The request is cancelled when the search text changes, on retry and when the component unmounts.
   useEffect(() => {
@@ -16,9 +23,11 @@ export function useDiagrams(search) {
     setLoading(true);
     setError(null);
     fetchDiagrams(search, controller.signal)
-      .then((response) => setItems(response.data))
+      .then((response) => {
+        if (!controller.signal.aborted) setItems(response.data);
+      })
       .catch((failure) => {
-        if (!isCanceled(failure)) setError(errorMessage(failure));
+        if (!isCanceled(failure) && !controller.signal.aborted) setError(errorMessage(failure));
       })
       .finally(() => {
         if (!controller.signal.aborted) setLoading(false);
@@ -46,39 +55,45 @@ export function useDiagrams(search) {
   }, []);
 
   // Optimistic delete: the item disappears at once and returns to its place when the server refuses.
-  const remove = useCallback(
-    async (id) => {
-      const index = items.findIndex((item) => item.id === id);
-      const removed = items[index];
-      setItems((current) => current.filter((item) => item.id !== id));
-      try {
-        await deleteDiagram(id);
-      } catch (failure) {
-        setItems((current) => [...current.slice(0, index), removed, ...current.slice(index)]);
+  // A record that is still being created (temporary id) or already being changed is skipped.
+  const remove = useCallback(async (id) => {
+    const index = itemsRef.current.findIndex((item) => item.id === id);
+    if (index < 0 || isTemporary(id) || busyIds.current.has(id)) return;
+    const removed = itemsRef.current[index];
+    busyIds.current.add(id);
+    setItems((current) => current.filter((item) => item.id !== id));
+    try {
+      await deleteDiagram(id);
+    } catch (failure) {
+      // 404 means the record is already gone, so the list is right and nothing is restored.
+      if (failure.response?.status !== 404) {
+        setItems((current) => (current.some((item) => item.id === id) ? current : [...current.slice(0, index), removed, ...current.slice(index)]));
         setNotice(`Не удалось удалить диаграмму. ${errorMessage(failure)}`);
       }
-    },
-    [items],
-  );
+    } finally {
+      busyIds.current.delete(id);
+    }
+  }, []);
 
   // Optimistic edit: PUT replaces the whole record, so the server gets all fields; the old record comes back on failure.
-  const update = useCallback(
-    async (id, changes) => {
-      const previous = items.find((item) => item.id === id);
-      const { title, notation, sourceCode, priority } = { ...previous, ...changes };
-      setItems((current) => current.map((item) => (item.id === id ? { ...item, ...changes } : item)));
-      try {
-        const { data } = await updateDiagram(id, { title, notation, sourceCode, priority });
-        setItems((current) => current.map((item) => (item.id === id ? data : item)));
-        return true;
-      } catch (failure) {
-        setItems((current) => current.map((item) => (item.id === id ? previous : item)));
-        setNotice(`Не удалось сохранить изменения. ${errorMessage(failure)}`);
-        return false;
-      }
-    },
-    [items],
-  );
+  const update = useCallback(async (id, changes) => {
+    const previous = itemsRef.current.find((item) => item.id === id);
+    if (!previous || isTemporary(id) || busyIds.current.has(id)) return false;
+    const { title, notation, sourceCode, priority } = { ...previous, ...changes };
+    busyIds.current.add(id);
+    setItems((current) => current.map((item) => (item.id === id ? { ...item, ...changes } : item)));
+    try {
+      const { data } = await updateDiagram(id, { title, notation, sourceCode, priority });
+      setItems((current) => current.map((item) => (item.id === id ? data : item)));
+      return true;
+    } catch (failure) {
+      setItems((current) => current.map((item) => (item.id === id ? previous : item)));
+      setNotice(`Не удалось сохранить изменения. ${errorMessage(failure)}`);
+      return false;
+    } finally {
+      busyIds.current.delete(id);
+    }
+  }, []);
 
   return { items, loading, error, notice, retry, dismissNotice, add, remove, update };
 }
