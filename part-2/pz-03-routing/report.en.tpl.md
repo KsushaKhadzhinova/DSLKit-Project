@@ -31,13 +31,55 @@ Table 1 – Application routes
 
 The menu is built with `NavLink`, the function in `className` receives the `isActive` flag and adds the active item class. The home link has `end` so that it does not stay active on every path. The `/catalog/:id` page reads the parameter with `useParams`, looks up the template in the data and, if none is found, renders the 404 page in place with the `NotFound` component, the address does not change. The "Back" button calls `navigate(-1)`. The code is given in Appendix A.
 
-### 3.3 Protected Route and Simulated Sign-in
+### 3.3 Protected Route and Fake Login
 
-The `PrivateRoute` component works as a layout route: when the `isAuth` flag is set it renders `Outlet`, otherwise it redirects to `/login` and passes the requested path in `state`, without showing it in the address. The flag is kept in the `AuthProvider` state and in `localStorage`. After "Sign in" is pressed, `Login` calls `navigate` to the requested page or to `/dashboard`. Sign-out is a separate route `/logout`: it clears the flag and returns home declaratively. The first version with `navigate('/')` and `logout()` in one handler did not work, because `PrivateRoute` managed to redirect to `/login` first.
+The `PrivateRoute` component works as a wrapper route: for a signed-in user it renders `Outlet`, otherwise it redirects to `/login` and passes the whole requested address, with the query and the hash, in `state` without showing it in the address bar. The login form asks for a user name. An empty name and a name made of spaces are rejected, the length limit comes from the file `src/limits.json`. The session is kept in the `AuthProvider` state and in `localStorage`, and a record without a valid name does not count as a login. After the login `Login` returns to the requested page or to `/dashboard`. The return address is checked by the `safeReturnPath` function: foreign addresses that start with `//` or with a protocol name are ignored. Logout is a separate route `/logout` that clears the session and returns to the home page declaratively. A login or logout in another tab is picked up by the `storage` event.
 
-### 3.4 Testing
+A server check is impossible in this work, so the guard hides pages in the interface and does not protect data. In a real project the server checks access by a token.
 
-Fifteen automated tests on `MemoryRouter` cover all pages, the `NavLink` highlight, menu navigation, the dynamic route with a wrong `id`, the 404 page, the guest redirect to `/login`, the return after sign-in, sign-out and keeping the sign-in between loads. The manual check is described in `README.md`.
+### 3.4 Accessibility and Error Pages
+
+After a route change the page is not reloaded, so the focus stays on the clicked link. The `Layout` component moves the focus to the main content and updates the tab title so that a screen reader announces the new page. There is a skip link and one level-one heading per page. The 404 page uses the error card of the first-part site and is shown for any unknown path and for an unknown `id`. The identifier from the address is never inserted into the page as markup. The 500 page appears through `ErrorBoundary` when rendering fails.
+
+### 3.5 Appearance
+
+The application uses the styles and markup of the first-part site: a sticky header with the logo, a menu with the active item marked by `aria-current`, a phone menu button, a moon and sun theme switch, cards, form fields and a footer. There is only one main button on every screen.
+
+### 3.6 Demonstration
+
+The menu with the highlighted item "Каталог" and the template cards are shown in figure 1.
+
+![Template catalog](figures/02-catalog.png)
+
+Figure 1 – Template catalog with the sticky header and the highlighted menu item
+
+The dynamic route `/catalog/2` opens a template page, as figure 2 shows.
+
+![Template page](figures/03-catalog-item.png)
+
+Figure 2 – Template page opened at the address `/catalog/2`
+
+An unknown path shows the styled 404 page, which figure 3 contains.
+
+![404 page](figures/05-not-found.png)
+
+Figure 3 – The page "Ошибка 404: страница не найдена" in the site style
+
+A guest who opens `/dashboard` lands on the login form with a hint, and the empty name error is visible in figure 4.
+
+![Login form](figures/07-login-validation.png)
+
+Figure 4 – Login form with the protected page hint and the error message
+
+After the login the requested page is returned, and figure 5 shows it.
+
+![Dashboard](figures/08-dashboard-after-login.png)
+
+Figure 5 – Dashboard after login with the greeting and the "Выйти" menu item
+
+### 3.7 Testing
+
+Forty automated tests on `MemoryRouter` check all the pages, the `NavLink` highlight, the dynamic route, the 404 page, the guest redirect, the return with query parameters, the name check, a forged return address, a logout in another tab, the focus move, markup rendered as text and the 500 page. The manual check is described in `README.md`.
 
 ## Conclusion
 
@@ -69,11 +111,12 @@ if (!template) return <NotFound />;
 
 ```jsx
 // PrivateRoute: protection and remembering the requested path
-return isAuth ? <Outlet /> : <Navigate to="/login" replace state={{ from: location.pathname }} />;
+const from = `${location.pathname}${location.search}${location.hash}`;
+return isAuth ? <Outlet /> : <Navigate to="/login" replace state={{ from }} />;
 ```
 
 ```jsx
 // Login: programmatic navigation after the simulated sign-in
-login();
-navigate(location.state?.from ?? '/dashboard', { replace: true });
+login(name);
+navigate(safeReturnPath(location.state?.from), { replace: true });
 ```

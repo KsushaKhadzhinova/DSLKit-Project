@@ -1,0 +1,3 @@
+{
+  "userName": { "minLength": 1, "maxLength": 40 }
+}
