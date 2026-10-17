@@ -1,6 +1,9 @@
 ### VS Code REST Client (extension humao.rest-client). Start the server first: npm run dev
 @base = http://localhost:3000
 
+### Health check -> 200
+GET {{base}}/health
+
 ### List all diagrams -> 200
 GET {{base}}/diagrams
 
