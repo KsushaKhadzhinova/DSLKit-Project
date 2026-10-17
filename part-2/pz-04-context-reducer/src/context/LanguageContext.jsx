@@ -1,12 +1,21 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 
+export const LANGUAGE_KEY = 'dslkit.language';
+
 const DICTIONARY = {
   ru: {
     title: 'Шаблоны диаграмм',
+    lead: 'Выберите шаблоны в избранное. Тема, язык и избранное лежат в контекстах и доступны любому компоненту без передачи через props.',
     theme: 'Тема',
-    light: 'Светлая',
-    dark: 'Тёмная',
+    themeDark: 'Тёмная тема',
+    themeLight: 'Светлая тема',
     language: 'Язык',
+    switchLanguage: 'Сменить язык',
+    skip: 'Перейти к основному содержимому',
+    menu: 'Меню',
+    nav: 'Основная навигация',
+    footerNav: 'Нижняя навигация',
+    copy: '© 2026 DSLKit. Учебный проект БГУИР.',
     add: 'В избранное',
     remove: 'Убрать',
     favorites: 'Избранное',
@@ -18,10 +27,17 @@ const DICTIONARY = {
   },
   en: {
     title: 'Diagram templates',
+    lead: 'Pick templates into favorites. The theme, the language and the favorites live in contexts and any component reads them without props.',
     theme: 'Theme',
-    light: 'Light',
-    dark: 'Dark',
+    themeDark: 'Dark theme',
+    themeLight: 'Light theme',
     language: 'Language',
+    switchLanguage: 'Switch language',
+    skip: 'Skip to the main content',
+    menu: 'Menu',
+    nav: 'Main navigation',
+    footerNav: 'Footer navigation',
+    copy: '© 2026 DSLKit. BSUIR study project.',
     add: 'Add to favorites',
     remove: 'Remove',
     favorites: 'Favorites',
@@ -33,20 +49,39 @@ const DICTIONARY = {
   },
 };
 
+const LANGUAGES = Object.keys(DICTIONARY);
+
+// Only a known language code is accepted from storage.
+export function readLanguage() {
+  try {
+    const saved = localStorage.getItem(LANGUAGE_KEY);
+    if (LANGUAGES.includes(saved)) return saved;
+  } catch {
+    // Storage is blocked: keep the default.
+  }
+  return 'ru';
+}
+
 const LanguageContext = createContext(null);
 
 export function LanguageProvider({ children }) {
-  const [language, setLanguage] = useState('ru');
+  const [language, setLanguage] = useState(readLanguage);
 
   useEffect(() => {
     document.documentElement.lang = language;
+    try {
+      localStorage.setItem(LANGUAGE_KEY, language);
+    } catch {
+      // The choice lives in memory only.
+    }
   }, [language]);
 
   const value = useMemo(
     () => ({
       language,
       toggleLanguage: () => setLanguage((prev) => (prev === 'ru' ? 'en' : 'ru')),
-      t: (key) => DICTIONARY[language][key],
+      // A missing key falls back to Russian and then to the key itself, so the page never shows "undefined".
+      t: (key) => DICTIONARY[language][key] ?? DICTIONARY.ru[key] ?? key,
     }),
     [language],
   );
