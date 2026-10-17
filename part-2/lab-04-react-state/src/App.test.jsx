@@ -3,13 +3,15 @@ import userEvent from '@testing-library/user-event';
 import App, { STORAGE_KEY } from './App';
 import { INITIAL_DIAGRAMS } from './data/initialDiagrams';
 
-const titles = () => screen.queryAllByRole('listitem').map((li) => li.querySelector('.item__title')?.textContent);
+// Only the diagram cards: the header and the footer have list items too.
+const items = () => within(screen.getByRole('list', { name: 'Диаграммы' })).getAllByRole('listitem');
+const titles = () => items().map((li) => li.querySelector('.card__title')?.textContent);
 const stored = () => JSON.parse(localStorage.getItem(STORAGE_KEY));
 
 describe('App', () => {
   it('shows the initial diagrams and stores them when storage is empty', () => {
     render(<App />);
-    expect(screen.getAllByRole('listitem')).toHaveLength(INITIAL_DIAGRAMS.length);
+    expect(items()).toHaveLength(INITIAL_DIAGRAMS.length);
     expect(stored()).toHaveLength(INITIAL_DIAGRAMS.length);
   });
 
@@ -17,7 +19,7 @@ describe('App', () => {
     const user = userEvent.setup();
     render(<App />);
     await user.click(screen.getByRole('button', { name: 'Добавить' }));
-    expect(screen.getAllByRole('listitem')).toHaveLength(3);
+    expect(items()).toHaveLength(3);
 
     await user.type(screen.getByLabelText(/Название диаграммы/), 'Схема оплаты{Enter}');
     expect(titles()).toContain('Схема оплаты');
@@ -94,7 +96,7 @@ describe('App', () => {
   it('falls back to the initial data when the stored value is not an array', () => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({ broken: true }));
     render(<App />);
-    expect(screen.getAllByRole('listitem')).toHaveLength(INITIAL_DIAGRAMS.length);
+    expect(items()).toHaveLength(INITIAL_DIAGRAMS.length);
   });
 
   it('keeps working when localStorage rejects writes', async () => {
@@ -124,5 +126,26 @@ describe('App', () => {
 
     render(<App />);
     expect(titles()).toContain('Сохранённая');
+  });
+});
+
+describe('page frame of the Part 1 site', () => {
+  it('has a skip link, one h1, a sticky-header markup and the footer', () => {
+    render(<App />);
+    expect(screen.getByRole('link', { name: 'Перейти к основному содержимому' })).toHaveAttribute('href', '#main');
+    expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1);
+    expect(document.querySelector('header.header')).toBeInTheDocument();
+    expect(screen.getByRole('contentinfo')).toBeInTheDocument();
+    expect(screen.getAllByRole('button', { name: 'Добавить' })).toHaveLength(1);
+  });
+
+  it('opens and closes the phone menu with its checkbox, a link click closes it', async () => {
+    const user = userEvent.setup();
+    render(<App />);
+    const burger = screen.getByRole('checkbox', { name: 'Меню' });
+    await user.click(burger);
+    expect(burger).toBeChecked();
+    await user.click(screen.getByRole('link', { name: 'Список' }));
+    expect(burger).not.toBeChecked();
   });
 });

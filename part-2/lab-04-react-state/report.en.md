@@ -30,11 +30,45 @@ The tab title is updated by an effect and shows the number of diagrams. The `use
 
 ### 3.5 Input Validation
 
-The form and the edit mode check the diagram title before saving. A value made of spaces only counts as empty and is rejected with the message "Введите название диаграммы". A title longer than the limit is rejected with a message that names the allowed number of characters. The limit and the minimum length live in a separate file, `src/limits.json`, not in the component code. The "Создана" field of every record shows a unique creation time with seconds, so records differ visually. The `ErrorBoundary` component shows a styled message instead of a blank page when rendering fails.
+The form and the edit mode check the diagram title before saving. A value made of spaces only counts as empty and is rejected with the message "Введите название диаграммы". A title longer than the limit is rejected with a message that names the allowed number of characters. The title length limit and the maximum number of records live in a separate file, `src/limits.json`, not in the component code. The list is capped at 200 records, so endless additions cannot fill `localStorage`. The "Создана" field of every record shows the creation time with seconds. If a record is created in the same second as the previous one, its time is moved one second forward, so no two records share a time.
 
-### 3.6 Testing
+### 3.6 Resistance to Foreign Data
 
-The automated tests (19 in total) cover the pure functions, both hooks and the application behavior: adding, deleting, editing with Enter and Esc, status toggling, filters, sorting and restoring the list after a re-render. Manual check: `npm run dev`, then the steps from the "What to check" section of `README.md`, the `localStorage` content is viewed in the Application tab of the developer tools.
+The content of `localStorage` can be edited by hand or left over from an older version. The `isDiagramList` function accepts only a list in which every record has a valid title, a known notation, a boolean status and correct dates, and the identifiers are unique. On any rejection the initial set is used. Titles are rendered as text, so markup inside a title is never executed. The identifier is created with `crypto.randomUUID`, and a fallback is used on an address without a secure context. The `ErrorBoundary` component shows the 500 page in the site style instead of a blank screen when rendering fails.
+
+### 3.7 Appearance
+
+The application uses the same styles and markup as the site of the first part: a sticky header with the logo, a menu with a phone button, a moon and sun theme switch with a tooltip, cards, form fields and a footer. The light theme comes first, the dark theme follows the system setting or the switch. The single main button on the screen is "Добавить".
+
+### 3.8 Demonstration
+
+The top of the page with the header and the add form is shown in the upper part of figure 1.
+
+![Main page of the application](figures/01-list-desktop.png)
+
+Figure 1 – Header, title and the add diagram form in the light theme
+
+The reaction to an input made of spaces is visible under the field in figure 2.
+
+![Input error message](figures/02-validation-error.png)
+
+Figure 2 – The message "Введите название диаграммы" under the field with a red border
+
+The new diagram appears first in the list, and the statistics line shows the record count in figure 3.
+
+![List after adding](figures/03-after-add.png)
+
+Figure 3 – Diagram list with the new record and the statistics line
+
+After the page is reloaded the list stays the same, as figure 4 shows.
+
+![List after reload](figures/05-after-reload.png)
+
+Figure 4 – Diagram list after a page reload
+
+### 3.9 Testing
+
+Fifty-five automated tests check the pure functions, both hooks and the application behaviour: adding, deleting, editing with Enter and Esc, status switching, filters, sorting, list restoring, whitespace and huge values, unique creation time, broken storage data, markup rendered as text, the theme switch and the 500 page. The manual check is described in `README.md`, the content of `localStorage` is viewed in the Application tab of the developer tools.
 
 ## Conclusion
 
