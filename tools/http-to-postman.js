@@ -46,7 +46,10 @@ export const parseHttp = (text) => {
       const [key, ...value] = rest[i].split(':');
       headers.push({ key: key.trim(), value: value.join(':').trim() });
     }
-    const body = rest.slice(i + 1).join('\n').trim();
+    const body = rest
+      .slice(i + 1)
+      .join('\n')
+      .trim();
     requests.push({ title, name, method, url, headers, body });
   }
   return { variables, captures, requests };
@@ -65,7 +68,10 @@ export const toPostman = (text, name) => {
   const { variables, captures, requests } = parseHttp(text);
   return {
     info: { name, description: 'Generated from requests.http by tools/make-postman.js. Start the server first.', schema: SCHEMA },
-    variable: [...Object.entries(variables).map(([key, value]) => ({ key, value })), ...Object.values(captures).map(({ variable }) => ({ key: variable, value: '' }))],
+    variable: [
+      ...Object.entries(variables).map(([key, value]) => ({ key, value })),
+      ...Object.values(captures).map(({ variable }) => ({ key: variable, value: '' })),
+    ],
     item: requests.map((request) => {
       const exec = testScript(request, captures);
       return {
