@@ -1,0 +1,12 @@
+{
+  "name": "dslkit-lab-08-docker",
+  "private": true,
+  "version": "1.0.0",
+  "description": "DSLKit, lab 8: Docker images and Docker Compose for the React client, the Express API and PostgreSQL",
+  "scripts": {
+    "up": "docker compose up --build -d",
+    "down": "docker compose down",
+    "shots": "node shots/shots.mjs",
+    "test": "node --test docker.test.mjs report.test.mjs"
+  }
+}

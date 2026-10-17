@@ -1,0 +1,9 @@
+node_modules
+coverage
+dist
+shots
+figures
+.env
+*.md
+report*
+**/*.test.*

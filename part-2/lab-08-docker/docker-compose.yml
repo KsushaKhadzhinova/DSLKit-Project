@@ -1,0 +1,73 @@
+# DSLKit: React client (Nginx) + Express API + PostgreSQL. Start: docker compose up --build
+name: dslkit
+
+services:
+  db:
+    image: ${REGISTRY:-}library/postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-dslkit}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:-dslkit}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks: [internal]
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  backend:
+    build:
+      context: ../lab-03-auth
+      dockerfile: ../lab-08-docker/backend/Dockerfile
+      args:
+        REGISTRY: ${REGISTRY:-}
+    restart: unless-stopped
+    environment:
+      PORT: 3000
+      DATABASE_URL: postgres://${POSTGRES_USER:-dslkit}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-dslkit}
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env, at least 32 random characters}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-1h}
+      CORS_ORIGIN: http://localhost:${FRONTEND_PORT:-8080}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
+      # Exactly one reverse proxy (Nginx) stands in front, so the rate limit sees the real client address.
+      TRUST_PROXY: '1'
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      # Published for checks from the host only, the browser uses the proxy /api of the frontend.
+      - '127.0.0.1:${BACKEND_PORT:-3000}:3000'
+    read_only: true
+    tmpfs: [/tmp]
+    cap_drop: [ALL]
+    security_opt: ['no-new-privileges:true']
+    networks: [internal, public]
+
+  frontend:
+    build:
+      context: ../lab-05-react-api
+      dockerfile: ../lab-08-docker/frontend/Dockerfile
+      additional_contexts:
+        deploy: ./frontend
+      args:
+        REGISTRY: ${REGISTRY:-}
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - '${FRONTEND_PORT:-8080}:8080'
+    networks: [public]
+
+networks:
+  # No access from outside: only the backend reaches the database.
+  internal:
+    internal: true
+  public:
+
+volumes:
+  pgdata:
