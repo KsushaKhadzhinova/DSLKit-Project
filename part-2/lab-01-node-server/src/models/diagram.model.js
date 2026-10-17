@@ -1,3 +1,6 @@
+// Length limits live in limits.json, so they are not scattered over the code.
+const LIMITS = require('../../limits.json');
+
 const NOTATIONS = ['UML', 'BPMN', 'ERD', 'DFD', 'IDEF0', 'Petri'];
 const PRIORITIES = ['low', 'normal', 'high'];
 const DEFAULT_PRIORITY = 'normal';
@@ -38,4 +41,4 @@ const createDiagramStore = (initial = SEED) => {
   };
 };
 
-module.exports = { NOTATIONS, PRIORITIES, DEFAULT_PRIORITY, createDiagramStore };
+module.exports = { NOTATIONS, PRIORITIES, DEFAULT_PRIORITY, LIMITS, createDiagramStore };
