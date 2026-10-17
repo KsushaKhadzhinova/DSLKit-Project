@@ -12,6 +12,8 @@ const createApp = (models, { isReady = connected } = {}) => {
   const app = express();
   app.disable('x-powered-by');
   app.use(securityHeaders);
+  // Before requireDatabase: the probe itself must answer 503 while the database is down.
+  app.get('/health', (req, res) => (isReady() ? res.json({ status: 'ok' }) : res.status(503).json({ status: 'unavailable' })));
   app.use(requireDatabase(isReady));
   app.use(logRequests(models, LIMITS.pathLog));
   app.use(express.json({ limit: '100kb' }));
