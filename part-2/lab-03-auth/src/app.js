@@ -42,6 +42,15 @@ const createApp = (models, settings) => {
   // Behind a reverse proxy req.ip is the proxy unless this is set (TRUST_PROXY), and the limits would count everyone as one client.
   if (config.trustProxy !== undefined) app.set('trust proxy', config.trustProxy);
   app.use(securityHeaders);
+  // Liveness and database check for the Docker healthcheck, placed before the request log so probes do not fill it.
+  app.get('/health', async (req, res) => {
+    try {
+      await models.sequelize.authenticate();
+      res.json({ status: 'ok' });
+    } catch {
+      res.status(503).json({ status: 'unavailable' });
+    }
+  });
   app.use(createRequestLogger(models));
   // The limit is set explicitly (limits.json), so it does not change with the library default.
   app.use(express.json({ limit: LIMITS.bodyBytes }));
