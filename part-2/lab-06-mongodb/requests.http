@@ -1,6 +1,9 @@
 ### VS Code REST Client (extension humao.rest-client). Start the server first: npm run dev
 ### Run `npm run seed`, then GET /diagrams and copy an "id" and a comment "id" into the variables below.
 @base = http://localhost:3000
+
+### Health check -> 200
+GET {{base}}/health
 @id = 000000000000000000000001
 @commentId = 000000000000000000000002
 
