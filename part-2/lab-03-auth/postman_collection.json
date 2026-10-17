@@ -453,6 +453,132 @@
           ]
         }
       }
+    },
+    {
+      "name": "Page 2 of size 5, sorted by title descending -> 200 (X-Total-Count has the full size)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{base}}/diagrams?limit=5&offset=5&sort=title&order=desc",
+          "host": [
+            "{{base}}"
+          ],
+          "path": [
+            "diagrams"
+          ],
+          "query": [
+            {
+              "key": "limit",
+              "value": "5"
+            },
+            {
+              "key": "offset",
+              "value": "5"
+            },
+            {
+              "key": "sort",
+              "value": "title"
+            },
+            {
+              "key": "order",
+              "value": "desc"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Page size over 100 -> 400",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 400', () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{base}}/diagrams?limit=1000",
+          "host": [
+            "{{base}}"
+          ],
+          "path": [
+            "diagrams"
+          ],
+          "query": [
+            {
+              "key": "limit",
+              "value": "1000"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Unknown sort field -> 400",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 400', () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{base}}/diagrams?sort=password",
+          "host": [
+            "{{base}}"
+          ],
+          "path": [
+            "diagrams"
+          ],
+          "query": [
+            {
+              "key": "sort",
+              "value": "password"
+            }
+          ]
+        }
+      }
     }
   ]
 }

@@ -1,8 +1,11 @@
 const { Op } = require('sequelize');
 const { notFound, forbidden, badRequest } = require('../errors');
 const { LIMITS } = require('../models/diagram.constants');
+const { parseListQuery } = require('../middleware/list-query');
 
 const missing = (id) => notFound(`Diagram ${id} not found`);
+
+const SORTABLE = ['id', 'title', 'notation', 'priority', 'ownerId', 'createdAt'];
 
 // Only the owner or an admin may change or delete a diagram.
 const mayChange = (user, diagram) => user.role === 'admin' || diagram.ownerId === user.id;
@@ -10,6 +13,7 @@ const mayChange = (user, diagram) => user.role === 'admin' || diagram.ownerId ==
 // Express 5 forwards a rejected promise to the error handler, so no try/catch is needed here.
 const createDiagramsController = ({ Diagram }) => ({
   // ?search=text keeps diagrams whose title contains the text. The value is a bound parameter, so it cannot change the query.
+  // ?limit=&offset=&sort=&order= (see list-query.js) page and sort the result, the answer stays an array and X-Total-Count holds the full size.
   list: async (req, res, next) => {
     const { search } = req.query;
     if (search !== undefined && (typeof search !== 'string' || search.trim().length > LIMITS.title)) {
@@ -17,7 +21,10 @@ const createDiagramsController = ({ Diagram }) => ({
     }
     const term = (search ?? '').trim();
     const where = term ? { title: { [Op.like]: `%${term}%` } } : undefined;
-    return res.json(await Diagram.findAll({ where, order: [['id', 'ASC']] }));
+    const { limit, offset, sort, order } = parseListQuery(req.query, SORTABLE);
+    const { count, rows } = await Diagram.findAndCountAll({ where, order: [[sort, order.toUpperCase()], ['id', 'ASC']], limit, offset });
+    res.set('X-Total-Count', String(count));
+    return res.json(rows);
   },
 
   get: async (req, res, next) => {
