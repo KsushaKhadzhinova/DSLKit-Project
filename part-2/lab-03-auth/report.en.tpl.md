@@ -70,6 +70,10 @@ Logout does not revoke a token: it stays valid until it expires, which is why th
 
 Listing of user.js is given in appendix A. Listing of the Users table migration is given in appendix B. Listing of auth.js is given in appendix C. Listing of auth.controller.js is given in appendix D. Listing of validate-auth.js is given in appendix E. Listing of users.routes.js is given in appendix F. Listing of diagrams.controller.js is given in appendix G.
 
+### 3.7 Paging and sorting
+
+The list accepts the `limit`, `offset`, `sort` and `order` parameters. `limit` sets the page size from 1 to 100, `offset` sets the shift from 0 to 1000000, `sort` picks a field from a whitelist and `order` takes `asc` or `desc`. Without parameters the whole list is returned in ascending `id` order, so the clients of the earlier works keep working. The answer stays an array and the full size of the selection comes in the `X-Total-Count` header. The parameters work together with `search`, and `X-Total-Count` counts the search result and is exposed to the client origin through CORS. Numbers are read as strings of at most nine digits, so `-1`, `1e9`, `0x10` and huge numbers get a 400 answer with a list of errors by field. The sort field name is checked against the whitelist and never reaches the database query unchecked. Equal values are ordered by `id`, so pages do not overlap. Parsing of the parameters is moved to a separate module, it is given in Appendix H.
+
 ## Conclusion
 
 DSLKit now has users with bcrypt password hashes, registration, login with a JWT token, a token-checking middleware and protected routes, including the profile of the current user. The additional role-based mechanism separates the rights of an administrator, a diagram owner and an outsider. The tests confirm both the successful scenarios and the rejections of tampered, expired and foreign tokens. A run on a real PostgreSQL, screenshots of Postman requests and answers to the control questions, if the teacher requires them, are still to be done.
@@ -101,3 +105,7 @@ DSLKit now has users with bcrypt password hashes, registration, login with a JWT
 ## Appendix G (mandatory) Listing of diagrams.controller.js
 
 {{code:part-2/lab-03-auth/src/controllers/diagrams.controller.js}}
+
+## Appendix H (mandatory) Listing of list-query.js
+
+{{code:part-2/lab-03-auth/src/middleware/list-query.js}}

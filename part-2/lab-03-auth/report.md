@@ -72,6 +72,10 @@
 
 Листинг файла user.js приведён в приложении А. Листинг миграции создания таблицы Users приведён в приложении Б. Листинг файла auth.js приведён в приложении В. Листинг файла auth.controller.js приведён в приложении Г. Листинг файла validate-auth.js приведён в приложении Д. Листинг файла users.routes.js приведён в приложении Е. Листинг файла diagrams.controller.js приведён в приложении Ж.
 
+### 3.7 Постраничный вывод и сортировка
+
+Список принимает параметры `limit`, `offset`, `sort` и `order`. Параметр `limit` задаёт размер страницы от 1 до 100, `offset` задаёт смещение от 0 до 1000000, `sort` выбирает поле из белого списка, а `order` принимает значения `asc` и `desc`. Без параметров возвращается весь список по возрастанию `id`, поэтому клиенты прежних работ продолжают работать. Ответ остаётся массивом, а полный размер выборки приходит в заголовке `X-Total-Count`. Параметры работают вместе с параметром `search`, а заголовок `X-Total-Count` учитывает поиск и разрешён для адреса клиента через CORS. Числа читаются как строки не длиннее девяти цифр, поэтому значения `-1`, `1e9`, `0x10` и огромные числа получают ответ 400 со списком ошибок по полям. Имя поля сортировки проверяется по белому списку и не попадает в запрос к базе без проверки. Равные значения упорядочены по `id`, поэтому страницы не пересекаются. Разбор параметров вынесен в отдельный модуль, он приведён в приложении И.
+
 ## Заключение
 
 В проект DSLKit добавлены пользователи с паролями в виде хешей bcrypt, регистрация, вход с токеном JWT, промежуточный обработчик проверки токена и защищённые маршруты, включая профиль текущего пользователя. Дополнительный механизм ролевой модели разделяет права администратора, владельца диаграммы и постороннего пользователя. Тесты подтверждают как успешные сценарии, так и отказы на подделанных, просроченных и чужих токенах. Остаются проверка на настоящем PostgreSQL, скриншоты запросов из Postman и ответы на контрольные вопросы, если их потребует преподаватель.
@@ -347,8 +351,11 @@ module.exports = { createUsersRouter };
 const { Op } = require('sequelize');
 const { notFound, forbidden, badRequest } = require('../errors');
 const { LIMITS } = require('../models/diagram.constants');
+const { parseListQuery } = require('../middleware/list-query');
 
 const missing = (id) => notFound(`Diagram ${id} not found`);
+
+const SORTABLE = ['id', 'title', 'notation', 'priority', 'ownerId', 'createdAt'];
 
 // Only the owner or an admin may change or delete a diagram.
 const mayChange = (user, diagram) => user.role === 'admin' || diagram.ownerId === user.id;
@@ -356,6 +363,7 @@ const mayChange = (user, diagram) => user.role === 'admin' || diagram.ownerId ==
 // Express 5 forwards a rejected promise to the error handler, so no try/catch is needed here.
 const createDiagramsController = ({ Diagram }) => ({
   // ?search=text keeps diagrams whose title contains the text. The value is a bound parameter, so it cannot change the query.
+  // ?limit=&offset=&sort=&order= (see list-query.js) page and sort the result, the answer stays an array and X-Total-Count holds the full size.
   list: async (req, res, next) => {
     const { search } = req.query;
     if (search !== undefined && (typeof search !== 'string' || search.trim().length > LIMITS.title)) {
@@ -363,7 +371,10 @@ const createDiagramsController = ({ Diagram }) => ({
     }
     const term = (search ?? '').trim();
     const where = term ? { title: { [Op.like]: `%${term}%` } } : undefined;
-    return res.json(await Diagram.findAll({ where, order: [['id', 'ASC']] }));
+    const { limit, offset, sort, order } = parseListQuery(req.query, SORTABLE);
+    const { count, rows } = await Diagram.findAndCountAll({ where, order: [[sort, order.toUpperCase()], ['id', 'ASC']], limit, offset });
+    res.set('X-Total-Count', String(count));
+    return res.json(rows);
   },
 
   get: async (req, res, next) => {
@@ -393,4 +404,47 @@ const createDiagramsController = ({ Diagram }) => ({
 });
 
 module.exports = { createDiagramsController };
+```
+
+## Приложение И (обязательное) Листинг файла list-query.js
+
+```js
+const { badRequest } = require('../errors');
+
+// Limits of the list query. The page size is capped so one request cannot ask for the whole table,
+// and the numbers are read as short digit strings, so 1e9, -1, 0x10 or a huge value are refused with 400.
+const MAX_LIMIT = 100;
+const MAX_OFFSET = 1000000;
+const ORDERS = ['asc', 'desc'];
+
+// Reads ?limit=, ?offset=, ?sort= and ?order= from req.query.
+// sortable: the field names a client may sort by (a whitelist, so a field name never reaches the database unchecked).
+// Without limit the whole list is returned (the clients of the earlier labs expect that), without sort the order is by id.
+// A bad value throws the 400 error with the list of problems, Express 5 passes it to the error handler.
+const parseListQuery = (query, sortable) => {
+  const problems = [];
+  const integer = (name, min, max) => {
+    const value = query[name];
+    if (value === undefined) return undefined;
+    if (typeof value !== 'string' || !/^\d{1,9}$/.test(value) || Number(value) < min || Number(value) > max) {
+      problems.push({ field: name, message: `${name} must be an integer from ${min} to ${max}` });
+      return undefined;
+    }
+    return Number(value);
+  };
+  const limit = integer('limit', 1, MAX_LIMIT);
+  const offset = integer('offset', 0, MAX_OFFSET) ?? 0;
+
+  const sort = query.sort ?? 'id';
+  if (typeof sort !== 'string' || !sortable.includes(sort)) {
+    problems.push({ field: 'sort', message: `sort must be one of: ${sortable.join(', ')}` });
+  }
+  const order = typeof query.order === 'string' ? query.order.toLowerCase() : (query.order ?? 'asc');
+  if (!ORDERS.includes(order)) problems.push({ field: 'order', message: 'order must be asc or desc' });
+
+  if (problems.length) throw badRequest('Invalid list query', problems);
+  return { limit, offset, sort, order };
+};
+
+module.exports = { parseListQuery, MAX_LIMIT, MAX_OFFSET };
 ```
