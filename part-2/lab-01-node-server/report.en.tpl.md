@@ -78,6 +78,10 @@ Table 3 – Results of requests to the running server
 
 Listing of server.js is given in appendix A. Listing of app.js is given in appendix B. Listing of diagrams.routes.js is given in appendix C. Listing of diagrams.controller.js is given in appendix D. Listing of diagram.model.js is given in appendix E. Listing of validate.js is given in appendix F. Listing of error-handler.js is given in appendix G.
 
+### 3.6 Paging and sorting
+
+The list accepts the `limit`, `offset`, `sort` and `order` parameters. `limit` sets the page size from 1 to 100, `offset` sets the shift from 0 to 1000000, `sort` picks a field from a whitelist and `order` takes `asc` or `desc`. Without parameters the whole list is returned in ascending `id` order, so the clients of the earlier works keep working. The answer stays an array and the full size of the selection comes in the `X-Total-Count` header. Numbers are read as strings of at most nine digits, so `-1`, `1e9`, `0x10` and huge numbers get a 400 answer with a list of errors by field. The sort field name is checked against the whitelist and never reaches the database query unchecked. Equal values are ordered by `id`, so pages do not overlap. Parsing of the parameters is moved to a separate module, it is given in Appendix H.
+
 ## Conclusion
 
 For DSLKit, a REST API for the `diagrams` resource was built on Express: five routes read the list and a single record, create, replace and delete, and the data temporarily lives in an in-memory array. Errors are unified into one JSON shape with the codes 400, 404 and 500 through a global handler, development mode runs on `nodemon`, and 18 automated tests confirm the behavior of every route. The split into routes, controllers and a model lets the next lab swap the array for a database without rewriting the rest of the code. Screenshots of the requests from Postman or a browser are still to be attached.
@@ -109,3 +113,7 @@ For DSLKit, a REST API for the `diagrams` resource was built on Express: five ro
 ## Appendix G (mandatory) Listing of error-handler.js
 
 {{code:part-2/lab-01-node-server/src/middleware/error-handler.js}}
+
+## Appendix H (mandatory) Listing of list-query.js
+
+{{code:part-2/lab-01-node-server/src/middleware/list-query.js}}

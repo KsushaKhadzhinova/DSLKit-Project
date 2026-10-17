@@ -60,6 +60,10 @@ PostgreSQL на компьютере разработчика не устано�
 
 Листинг файла config.js приведён в приложении А. Листинг файла index.js модели приведён в приложении Б. Листинг миграции создания таблицы приведён в приложении Г. Листинг миграции добавления поля priority приведён в приложении Д. Листинг сида demo-diagrams.js приведён в приложении Е. Листинг файла diagrams.controller.js приведён в приложении Ж.
 
+### 3.6 Постраничный вывод и сортировка
+
+Список принимает параметры `limit`, `offset`, `sort` и `order`. Параметр `limit` задаёт размер страницы от 1 до 100, `offset` задаёт смещение от 0 до 1000000, `sort` выбирает поле из белого списка, а `order` принимает значения `asc` и `desc`. Без параметров возвращается весь список по возрастанию `id`, поэтому клиенты прежних работ продолжают работать. Ответ остаётся массивом, а полный размер выборки приходит в заголовке `X-Total-Count`. Числа читаются как строки не длиннее девяти цифр, поэтому значения `-1`, `1e9`, `0x10` и огромные числа получают ответ 400 со списком ошибок по полям. Имя поля сортировки проверяется по белому списку и не попадает в запрос к базе без проверки. Равные значения упорядочены по `id`, поэтому страницы не пересекаются. Разбор параметров вынесен в отдельный модуль, он приведён в приложении И.
+
 ## Заключение
 
 Для проекта DSLKit коллекция `diagrams` из лабораторной работы 1 переведена с массива на базу данных через Sequelize: модель `Diagram`, две миграции (создание таблицы и добавление поля `priority`), сид с тремя диаграммами и контроллеры на методах ORM. Локально работа использует SQLite, а переменная `DATABASE_URL` переключает её на PostgreSQL или облачный Neon без изменения кода. 32 автоматических теста подтверждают маршруты, ограничения, миграции с откатом и сид. Запуск на настоящем PostgreSQL не проверялся, скриншоты структуры базы и запросов из Postman остаётся приложить.
@@ -248,12 +252,21 @@ module.exports = {
 
 ```js
 const { notFound } = require('../errors');
+const { parseListQuery } = require('../middleware/list-query');
 
 const missing = (id) => notFound(`Diagram ${id} not found`);
 
+const SORTABLE = ['id', 'title', 'notation', 'priority', 'owner', 'createdAt'];
+
 // Express 5 forwards a rejected promise to the error handler, so no try/catch is needed here.
 const createDiagramsController = ({ Diagram }) => ({
-  list: async (_req, res) => res.json(await Diagram.findAll({ order: [['id', 'ASC']] })),
+  // ?limit=&offset=&sort=&order= (see list-query.js). The answer stays an array, the full size comes in X-Total-Count.
+  list: async (req, res) => {
+    const { limit, offset, sort, order } = parseListQuery(req.query, SORTABLE);
+    const { count, rows } = await Diagram.findAndCountAll({ order: [[sort, order.toUpperCase()], ['id', 'ASC']], limit, offset });
+    res.set('X-Total-Count', String(count));
+    res.json(rows);
+  },
 
   get: async (req, res, next) => {
     const diagram = await Diagram.findByPk(req.diagramId);
@@ -277,4 +290,47 @@ const createDiagramsController = ({ Diagram }) => ({
 });
 
 module.exports = { createDiagramsController };
+```
+
+## Приложение И (обязательное) Листинг файла list-query.js
+
+```js
+const { badRequest } = require('../errors');
+
+// Limits of the list query. The page size is capped so one request cannot ask for the whole table,
+// and the numbers are read as short digit strings, so 1e9, -1, 0x10 or a huge value are refused with 400.
+const MAX_LIMIT = 100;
+const MAX_OFFSET = 1000000;
+const ORDERS = ['asc', 'desc'];
+
+// Reads ?limit=, ?offset=, ?sort= and ?order= from req.query.
+// sortable: the field names a client may sort by (a whitelist, so a field name never reaches the database unchecked).
+// Without limit the whole list is returned (the clients of the earlier labs expect that), without sort the order is by id.
+// A bad value throws the 400 error with the list of problems, Express 5 passes it to the error handler.
+const parseListQuery = (query, sortable) => {
+  const problems = [];
+  const integer = (name, min, max) => {
+    const value = query[name];
+    if (value === undefined) return undefined;
+    if (typeof value !== 'string' || !/^\d{1,9}$/.test(value) || Number(value) < min || Number(value) > max) {
+      problems.push({ field: name, message: `${name} must be an integer from ${min} to ${max}` });
+      return undefined;
+    }
+    return Number(value);
+  };
+  const limit = integer('limit', 1, MAX_LIMIT);
+  const offset = integer('offset', 0, MAX_OFFSET) ?? 0;
+
+  const sort = query.sort ?? 'id';
+  if (typeof sort !== 'string' || !sortable.includes(sort)) {
+    problems.push({ field: 'sort', message: `sort must be one of: ${sortable.join(', ')}` });
+  }
+  const order = typeof query.order === 'string' ? query.order.toLowerCase() : (query.order ?? 'asc');
+  if (!ORDERS.includes(order)) problems.push({ field: 'order', message: 'order must be asc or desc' });
+
+  if (problems.length) throw badRequest('Invalid list query', problems);
+  return { limit, offset, sort, order };
+};
+
+module.exports = { parseListQuery, MAX_LIMIT, MAX_OFFSET };
 ```

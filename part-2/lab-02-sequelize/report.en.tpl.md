@@ -60,6 +60,10 @@ There are 32 automated tests. Twenty-three check the HTTP routes on a temporary 
 
 Listing of config.js is given in appendix A. Listing of the model index.js is given in appendix B. Listing of diagram.js is given in appendix C. Listing of the table creation migration is given in appendix D. Listing of the priority migration is given in appendix E. Listing of the demo-diagrams.js seed is given in appendix F. Listing of diagrams.controller.js is given in appendix G.
 
+### 3.6 Paging and sorting
+
+The list accepts the `limit`, `offset`, `sort` and `order` parameters. `limit` sets the page size from 1 to 100, `offset` sets the shift from 0 to 1000000, `sort` picks a field from a whitelist and `order` takes `asc` or `desc`. Without parameters the whole list is returned in ascending `id` order, so the clients of the earlier works keep working. The answer stays an array and the full size of the selection comes in the `X-Total-Count` header. Numbers are read as strings of at most nine digits, so `-1`, `1e9`, `0x10` and huge numbers get a 400 answer with a list of errors by field. The sort field name is checked against the whitelist and never reaches the database query unchecked. Equal values are ordered by `id`, so pages do not overlap. Parsing of the parameters is moved to a separate module, it is given in Appendix H.
+
 ## Conclusion
 
 For DSLKit, the `diagrams` collection from lab 1 is moved from an array to a database through Sequelize: the `Diagram` model, two migrations (creating the table and adding the `priority` field), a seed with three diagrams, and controllers built on ORM methods. Locally the work uses SQLite, and the `DATABASE_URL` variable switches it to PostgreSQL or cloud Neon without code changes. 32 automated tests confirm the routes, the constraints, the migrations with rollback, and the seed. The work has not been run on a real PostgreSQL, and screenshots of the database structure and of Postman requests are still to be attached.
@@ -91,3 +95,7 @@ For DSLKit, the `diagrams` collection from lab 1 is moved from an array to a dat
 ## Appendix G (mandatory) Listing of diagrams.controller.js
 
 {{code:part-2/lab-02-sequelize/src/controllers/diagrams.controller.js}}
+
+## Appendix H (mandatory) Listing of list-query.js
+
+{{code:part-2/lab-02-sequelize/src/middleware/list-query.js}}
