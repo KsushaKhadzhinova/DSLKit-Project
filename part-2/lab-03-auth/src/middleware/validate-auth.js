@@ -1,18 +1,20 @@
-const { badRequest } = require('../errors');
+const { badRequest, unauthorized } = require('../errors');
 const { ROLES } = require('../models/user');
+const LIMITS = require('../../limits.json');
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const MIN_PASSWORD = 8;
+const MIN_PASSWORD = LIMITS.passwordMin;
 // bcrypt ignores everything after the 72nd byte, so longer passwords would silently weaken.
-const MAX_PASSWORD_BYTES = 72;
+const MAX_PASSWORD_BYTES = LIMITS.passwordMaxBytes;
 
 const objectBody = (body) => body !== null && typeof body === 'object' && !Array.isArray(body);
 const normalizeEmail = (email) => (typeof email === 'string' ? email.trim().toLowerCase() : email);
 
-const validEmail = (email) => typeof email === 'string' && email.length <= 254 && EMAIL.test(email);
+const validEmail = (email) => typeof email === 'string' && email.length <= LIMITS.email && EMAIL.test(email);
 
 const passwordProblem = (password) => {
   if (typeof password !== 'string') return 'must be a string';
+  if (password.trim() === '') return 'must not be empty or only spaces';
   if (password.length < MIN_PASSWORD) return `must be at least ${MIN_PASSWORD} characters`;
   if (Buffer.byteLength(password) > MAX_PASSWORD_BYTES) return `must be at most ${MAX_PASSWORD_BYTES} bytes`;
   return undefined;
@@ -36,9 +38,11 @@ const validateRegistration = (req, _res, next) => {
 const validateLogin = (req, _res, next) => {
   if (!objectBody(req.body)) return next(badRequest('Request body must be a JSON object'));
   const { email, password } = req.body;
-  if (typeof email !== 'string' || typeof password !== 'string' || !email || !password) {
+  if (typeof email !== 'string' || typeof password !== 'string' || !email.trim() || !password.trim()) {
     return reject(next, [{ field: 'email, password', message: 'both are required strings' }]);
   }
+  // A value longer than any stored one cannot match an account, so it gets the usual answer without hashing it.
+  if (email.length > LIMITS.email || Buffer.byteLength(password) > MAX_PASSWORD_BYTES) return next(unauthorized('Invalid email or password'));
   req.credentials = { email: normalizeEmail(email), password };
   return next();
 };

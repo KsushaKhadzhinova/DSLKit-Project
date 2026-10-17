@@ -67,6 +67,8 @@ PostgreSQL на компьютере разработчика не устано�
 ## Приложение А (обязательное) Листинг файла config.js
 
 ```js
+const { readFileSync } = require('node:fs');
+
 try {
   process.loadEnvFile();
 } catch {
@@ -75,14 +77,18 @@ try {
 
 // DATABASE_URL selects PostgreSQL, otherwise a local SQLite file is used.
 // With DATABASE_SSL=true the server certificate is verified; only DATABASE_SSL_REJECT_UNAUTHORIZED=false turns that off.
+// DATABASE_SSL_CA is a path to a PEM file with the certificate authority, the safe way to trust a private or self-signed server.
 const fromEnv = () => {
-  const { DATABASE_URL, DATABASE_SSL, DATABASE_SSL_REJECT_UNAUTHORIZED, SQLITE_STORAGE } = process.env;
+  const { DATABASE_URL, DATABASE_SSL, DATABASE_SSL_REJECT_UNAUTHORIZED, DATABASE_SSL_CA, SQLITE_STORAGE, NODE_ENV } = process.env;
   if (!DATABASE_URL) return { dialect: 'sqlite', storage: SQLITE_STORAGE || './dev.sqlite', logging: false };
+  if (NODE_ENV === 'production' && (DATABASE_SSL !== 'true' || DATABASE_SSL_REJECT_UNAUTHORIZED === 'false')) {
+    throw new Error('In production DATABASE_SSL=true is required and certificate checks cannot be turned off, use DATABASE_SSL_CA instead');
+  }
   return {
     use_env_variable: 'DATABASE_URL',
     dialect: 'postgres',
     logging: false,
-    ...(DATABASE_SSL === 'true' && { dialectOptions: { ssl: { require: true, rejectUnauthorized: DATABASE_SSL_REJECT_UNAUTHORIZED !== 'false' } } }),
+    ...(DATABASE_SSL === 'true' && { dialectOptions: { ssl: { require: true, rejectUnauthorized: DATABASE_SSL_REJECT_UNAUTHORIZED !== 'false', ...(DATABASE_SSL_CA && { ca: readFileSync(DATABASE_SSL_CA, 'utf8') }) } } }),
   };
 };
 
@@ -95,13 +101,14 @@ module.exports = { development: fromEnv(), test: fromEnv(), production: fromEnv(
 ```js
 const { Sequelize } = require('sequelize');
 const { defineDiagram } = require('./diagram');
+const { defineRequestLog } = require('./request-log');
 const allConfigs = require('../../config/config');
 
 // Builds the connection from config/config.js; NODE_ENV picks the block.
 const createModels = (config = allConfigs[process.env.NODE_ENV || 'development']) => {
   const { use_env_variable: urlVariable, ...options } = config;
   const sequelize = urlVariable ? new Sequelize(process.env[urlVariable], options) : new Sequelize(options);
-  return { sequelize, Diagram: defineDiagram(sequelize) };
+  return { sequelize, Diagram: defineDiagram(sequelize), RequestLog: defineRequestLog(sequelize) };
 };
 
 module.exports = { createModels };
@@ -117,9 +124,9 @@ const { NOTATIONS, PRIORITIES, DEFAULT_PRIORITY, LIMITS } = require('./diagram.c
 const defineDiagram = (sequelize) =>
   sequelize.define('Diagram', {
     title: { type: DataTypes.STRING(LIMITS.title), allowNull: false, validate: { len: [1, LIMITS.title] } },
-    notation: { type: DataTypes.STRING, allowNull: false, validate: { isIn: [NOTATIONS] } },
+    notation: { type: DataTypes.STRING(10), allowNull: false, validate: { isIn: [NOTATIONS] } },
     sourceCode: { type: DataTypes.TEXT, allowNull: false, validate: { len: [1, LIMITS.sourceCode] } },
-    priority: { type: DataTypes.STRING, allowNull: false, defaultValue: DEFAULT_PRIORITY, validate: { isIn: [PRIORITIES] } },
+    priority: { type: DataTypes.STRING(10), allowNull: false, defaultValue: DEFAULT_PRIORITY, validate: { isIn: [PRIORITIES] } },
     owner: { type: DataTypes.STRING(LIMITS.owner), allowNull: false, validate: { len: [1, LIMITS.owner] } },
   });
 
@@ -129,17 +136,19 @@ module.exports = { defineDiagram };
 ## Приложение Г (обязательное) Листинг миграции создания таблицы
 
 ```js
-// A migration is a snapshot, so the allowed values are copied here instead of imported.
+// A migration is a snapshot, so the allowed values and limits are copied here instead of imported.
 const NOTATIONS = ['UML', 'BPMN', 'ERD', 'DFD', 'IDEF0', 'Petri'];
+const LIMITS = { title: 80, owner: 60 };
 
 module.exports = {
   async up(queryInterface, Sequelize) {
+    const { fn, col, where, Op } = Sequelize;
     await queryInterface.createTable('Diagrams', {
       id: { allowNull: false, autoIncrement: true, primaryKey: true, type: Sequelize.INTEGER },
-      title: { allowNull: false, type: Sequelize.STRING(80) },
-      notation: { allowNull: false, type: Sequelize.STRING },
+      title: { allowNull: false, type: Sequelize.STRING(LIMITS.title) },
+      notation: { allowNull: false, type: Sequelize.STRING(10) },
       sourceCode: { allowNull: false, type: Sequelize.TEXT },
-      owner: { allowNull: false, type: Sequelize.STRING(60) },
+      owner: { allowNull: false, type: Sequelize.STRING(LIMITS.owner) },
       createdAt: { allowNull: false, type: Sequelize.DATE },
       updatedAt: { allowNull: false, type: Sequelize.DATE },
     });
@@ -147,8 +156,25 @@ module.exports = {
       type: 'check',
       fields: ['notation'],
       name: 'diagrams_notation_check',
-      where: { notation: { [Sequelize.Op.in]: NOTATIONS } },
+      where: { notation: { [Op.in]: NOTATIONS } },
     });
+    // The API trims and checks every text, these checks keep the table clean for any other writer (SQLite does not enforce VARCHAR length).
+    for (const column of ['title', 'owner', 'sourceCode']) {
+      await queryInterface.addConstraint('Diagrams', {
+        type: 'check',
+        fields: [column],
+        name: `diagrams_${column}_not_blank`,
+        where: where(fn('length', fn('trim', col(column))), { [Op.gt]: 0 }),
+      });
+    }
+    for (const column of ['title', 'owner']) {
+      await queryInterface.addConstraint('Diagrams', {
+        type: 'check',
+        fields: [column],
+        name: `diagrams_${column}_length`,
+        where: where(fn('length', col(column)), { [Op.lte]: LIMITS[column] }),
+      });
+    }
   },
 
   async down(queryInterface) {
@@ -161,13 +187,12 @@ module.exports = {
 
 ```js
 const PRIORITIES = ['low', 'normal', 'high'];
-const NOTATIONS = ['UML', 'BPMN', 'ERD', 'DFD', 'IDEF0', 'Petri'];
 
 module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.addColumn('Diagrams', 'priority', {
       allowNull: false,
-      type: Sequelize.STRING,
+      type: Sequelize.STRING(10),
       defaultValue: 'normal',
     });
     await queryInterface.addConstraint('Diagrams', {
@@ -178,17 +203,14 @@ module.exports = {
     });
   },
 
-  async down(queryInterface, Sequelize) {
+  async down(queryInterface) {
     await queryInterface.removeConstraint('Diagrams', 'diagrams_priority_check');
-    await queryInterface.removeColumn('Diagrams', 'priority');
-    // SQLite drops a column by rebuilding the table from its columns only, which loses the CHECK from the first migration.
     if (queryInterface.sequelize.getDialect() === 'sqlite') {
-      await queryInterface.addConstraint('Diagrams', {
-        type: 'check',
-        fields: ['notation'],
-        name: 'diagrams_notation_check',
-        where: { notation: { [Sequelize.Op.in]: NOTATIONS } },
-      });
+      // The generic removeColumn rebuilds a SQLite table from its columns only and loses every CHECK,
+      // while the native DROP COLUMN (SQLite 3.35+) leaves the rest of the table as it was.
+      await queryInterface.sequelize.query('ALTER TABLE `Diagrams` DROP COLUMN `priority`');
+    } else {
+      await queryInterface.removeColumn('Diagrams', 'priority');
     }
   },
 };
@@ -200,36 +222,24 @@ module.exports = {
 // Every seeded row has this owner, so the seed can tell its rows from the ones users created.
 const MARKER = 'demo';
 
+const ROWS = [
+  { title: 'Order processing', notation: 'BPMN', sourceCode: 'start -> check -> pay -> ship', priority: 'high' },
+  { title: 'Billing schema', notation: 'ERD', sourceCode: 'entity Invoice { id; total }', priority: 'normal' },
+  { title: 'Login flow', notation: 'UML', sourceCode: 'user -> server: login', priority: 'low' },
+];
+
+// Idempotent per row: a row that is already there is left alone, a deleted one comes back, nothing is duplicated.
 module.exports = {
   async up(queryInterface) {
-    const existing = await queryInterface.rawSelect('Diagrams', { where: { owner: MARKER } }, ['id']);
-    if (existing) return;
     const now = new Date();
-    await queryInterface.bulkInsert('Diagrams', [
-      {
-        title: 'Order processing',
-        notation: 'BPMN',
-        sourceCode: 'start -> check -> pay -> ship',
-        priority: 'high',
-        owner: MARKER,
-        createdAt: now,
-        updatedAt: now,
-      },
-      {
-        title: 'Billing schema',
-        notation: 'ERD',
-        sourceCode: 'entity Invoice { id; total }',
-        priority: 'normal',
-        owner: MARKER,
-        createdAt: now,
-        updatedAt: now,
-      },
-      { title: 'Login flow', notation: 'UML', sourceCode: 'user -> server: login', priority: 'low', owner: MARKER, createdAt: now, updatedAt: now },
-    ]);
+    for (const row of ROWS) {
+      const exists = await queryInterface.rawSelect('Diagrams', { where: { owner: MARKER, title: row.title } }, ['id']);
+      if (!exists) await queryInterface.bulkInsert('Diagrams', [{ ...row, owner: MARKER, createdAt: now, updatedAt: now }]);
+    }
   },
 
-  async down(queryInterface) {
-    await queryInterface.bulkDelete('Diagrams', { owner: MARKER });
+  async down(queryInterface, Sequelize) {
+    await queryInterface.bulkDelete('Diagrams', { owner: MARKER, title: { [Sequelize.Op.in]: ROWS.map((row) => row.title) } });
   },
 };
 ```

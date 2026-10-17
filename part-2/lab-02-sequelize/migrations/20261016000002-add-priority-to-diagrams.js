@@ -1,11 +1,10 @@
 const PRIORITIES = ['low', 'normal', 'high'];
-const NOTATIONS = ['UML', 'BPMN', 'ERD', 'DFD', 'IDEF0', 'Petri'];
 
 module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.addColumn('Diagrams', 'priority', {
       allowNull: false,
-      type: Sequelize.STRING,
+      type: Sequelize.STRING(10),
       defaultValue: 'normal',
     });
     await queryInterface.addConstraint('Diagrams', {
@@ -16,17 +15,14 @@ module.exports = {
     });
   },
 
-  async down(queryInterface, Sequelize) {
+  async down(queryInterface) {
     await queryInterface.removeConstraint('Diagrams', 'diagrams_priority_check');
-    await queryInterface.removeColumn('Diagrams', 'priority');
-    // SQLite drops a column by rebuilding the table from its columns only, which loses the CHECK from the first migration.
     if (queryInterface.sequelize.getDialect() === 'sqlite') {
-      await queryInterface.addConstraint('Diagrams', {
-        type: 'check',
-        fields: ['notation'],
-        name: 'diagrams_notation_check',
-        where: { notation: { [Sequelize.Op.in]: NOTATIONS } },
-      });
+      // The generic removeColumn rebuilds a SQLite table from its columns only and loses every CHECK,
+      // while the native DROP COLUMN (SQLite 3.35+) leaves the rest of the table as it was.
+      await queryInterface.sequelize.query('ALTER TABLE `Diagrams` DROP COLUMN `priority`');
+    } else {
+      await queryInterface.removeColumn('Diagrams', 'priority');
     }
   },
 };

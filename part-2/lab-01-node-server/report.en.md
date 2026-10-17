@@ -105,11 +105,17 @@ const express = require('express');
 const { createDiagramStore } = require('./models/diagram.model');
 const { createDiagramsController } = require('./controllers/diagrams.controller');
 const { createDiagramsRouter } = require('./routes/diagrams.routes');
+const { securityHeaders, requireJson } = require('./middleware/http');
+const { LIMITS } = require('./models/diagram.model');
 const { routeNotFound, errorHandler } = require('./middleware/error-handler');
 
 const createApp = (store = createDiagramStore()) => {
   const app = express();
-  app.use(express.json());
+  app.disable('x-powered-by');
+  app.use(securityHeaders);
+  // The limit is set explicitly (limits.json), so it does not change with the library default.
+  app.use(express.json({ limit: LIMITS.bodyBytes }));
+  app.use(requireJson);
   app.use('/diagrams', createDiagramsRouter(createDiagramsController(store)));
   app.use(routeNotFound);
   app.use(errorHandler);
@@ -123,23 +129,19 @@ module.exports = { createApp };
 
 ```js
 const { Router } = require('express');
-const { HttpError } = require('../errors');
 const { parseId, validateDiagram } = require('../middleware/validate');
+const { allowMethods } = require('../middleware/http');
 
-const methodNotAllowed = (allow) => (_req, res, next) => {
-  res.set('Allow', allow);
-  next(new HttpError(405, `Method not allowed, use ${allow}`));
-};
 
 const createDiagramsRouter = (controller) => {
   const router = Router();
-  router.route('/').get(controller.list).post(validateDiagram, controller.create).all(methodNotAllowed('GET, POST'));
+  router.route('/').get(controller.list).post(validateDiagram, controller.create).all(allowMethods(['GET', 'POST']));
   router
     .route('/:id')
     .get(parseId, controller.get)
     .put(parseId, validateDiagram, controller.replace)
     .delete(parseId, controller.remove)
-    .all(methodNotAllowed('GET, PUT, DELETE'));
+    .all(allowMethods(['GET', 'PUT', 'DELETE']));
   return router;
 };
 
@@ -180,6 +182,9 @@ module.exports = { createDiagramsController };
 ## Appendix E (mandatory) Listing of diagram.model.js
 
 ```js
+// Length limits live in limits.json, so they are not scattered over the code.
+const LIMITS = require('../../limits.json');
+
 const NOTATIONS = ['UML', 'BPMN', 'ERD', 'DFD', 'IDEF0', 'Petri'];
 const PRIORITIES = ['low', 'normal', 'high'];
 const DEFAULT_PRIORITY = 'normal';
@@ -220,23 +225,28 @@ const createDiagramStore = (initial = SEED) => {
   };
 };
 
-module.exports = { NOTATIONS, PRIORITIES, DEFAULT_PRIORITY, createDiagramStore };
+module.exports = { NOTATIONS, PRIORITIES, DEFAULT_PRIORITY, LIMITS, createDiagramStore };
 ```
 
 ## Appendix F (mandatory) Listing of validate.js
 
 ```js
 const { badRequest } = require('../errors');
-const { NOTATIONS, PRIORITIES, DEFAULT_PRIORITY } = require('../models/diagram.model');
+const { NOTATIONS, PRIORITIES, DEFAULT_PRIORITY, LIMITS } = require('../models/diagram.model');
 
-const isText = (value) => typeof value === 'string' && value.trim() !== '';
+// Text is checked after trimming, so a value of spaces is empty and the stored value is what was measured.
+const text = (name) => (v) => {
+  if (typeof v !== 'string' || v.trim() === '') return 'must be a non-empty string';
+  return v.trim().length <= LIMITS[name] || `must be at most ${LIMITS[name]} characters`;
+};
+const TRIMMED = ['title', 'owner'];
 
 const checks = {
-  title: (v) => isText(v) || 'must be a non-empty string',
+  title: text('title'),
   notation: (v) => NOTATIONS.includes(v) || `must be one of ${NOTATIONS.join(', ')}`,
-  sourceCode: (v) => isText(v) || 'must be a non-empty string',
+  sourceCode: text('sourceCode'),
   priority: (v) => PRIORITIES.includes(v) || `must be one of ${PRIORITIES.join(', ')}`,
-  owner: (v) => isText(v) || 'must be a non-empty string',
+  owner: text('owner'),
 };
 
 const parseId = (req, _res, next) => {
@@ -251,7 +261,7 @@ const parseId = (req, _res, next) => {
 // Priority is optional and falls back to the default; unknown fields are dropped.
 const validateDiagram = (req, _res, next) => {
   const body = req.body;
-  if (typeof body !== 'object' || Array.isArray(body)) {
+  if (body === null || typeof body !== 'object' || Array.isArray(body)) {
     return next(badRequest('Request body must be a JSON object'));
   }
   const fields = { ...body, priority: body.priority ?? DEFAULT_PRIORITY };
@@ -260,7 +270,7 @@ const validateDiagram = (req, _res, next) => {
     .filter(({ result }) => result !== true)
     .map(({ field, result }) => ({ field, message: result }));
   if (details.length > 0) return next(badRequest('Invalid diagram data', details));
-  req.diagramFields = Object.fromEntries(Object.keys(checks).map((name) => [name, fields[name]]));
+  req.diagramFields = Object.fromEntries(Object.keys(checks).map((name) => [name, TRIMMED.includes(name) ? fields[name].trim() : fields[name]]));
   return next();
 };
 
@@ -275,7 +285,9 @@ const { notFound } = require('../errors');
 const routeNotFound = (req, _res, next) => next(notFound(`Route ${req.method} ${req.path} not found`));
 
 // Express treats a function with four parameters as error-handling middleware.
-const errorHandler = (err, _req, res, _next) => {
+const errorHandler = (err, _req, res, next) => {
+  // Once the response has started, only Express can close the connection properly.
+  if (res.headersSent) return next(err);
   const malformedJson = err.type === 'entity.parse.failed';
   const status = malformedJson ? 400 : (err.status ?? 500);
   if (status >= 500) console.error(err);
@@ -283,7 +295,7 @@ const errorHandler = (err, _req, res, _next) => {
     error: status >= 500 ? 'Internal server error' : malformedJson ? 'Malformed JSON in request body' : err.message,
   };
   if (err.details) body.details = err.details;
-  res.status(status).json(body);
+  return res.status(status).json(body);
 };
 
 module.exports = { routeNotFound, errorHandler };

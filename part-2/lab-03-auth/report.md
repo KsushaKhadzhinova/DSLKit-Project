@@ -66,7 +66,9 @@
 
 ### 3.6 Ограничения
 
-Выход из системы не отзывает токен: он действует до истечения срока, поэтому срок выбран коротким. Ограничения числа попыток входа нет, на практике его добавляют на уровне прокси или отдельным механизмом блокировки. Токен хранится на стороне клиента, и выбор между localStorage и cookie с флагом httpOnly делается в клиентской лабораторной работе.
+Выход из системы не отзывает токен: он действует до истечения срока, поэтому срок выбран коротким. Число попыток входа ограничено: не более 20 запросов входа с одного адреса за 15 минут, а после 5 неудачных попыток почта блокируется на 15 минут. Счётчики хранятся в памяти процесса. Токен хранится на стороне клиента, и выбор между localStorage и cookie с флагом httpOnly делается в клиентской лабораторной работе.
+
+Листинг файла user.js приведён в приложении А. Листинг миграции создания таблицы Users приведён в приложении Б. Листинг файла auth.js приведён в приложении В. Листинг файла auth.controller.js приведён в приложении Г. Листинг файла validate-auth.js приведён в приложении Д. Листинг файла users.routes.js приведён в приложении Е. Листинг файла diagrams.controller.js приведён в приложении Ж.
 
 Листинг файла user.js приведён в приложении А. Листинг миграции создания таблицы Users приведён в приложении Б. Листинг файла auth.js приведён в приложении В. Листинг файла auth.controller.js приведён в приложении Г. Листинг файла validate-auth.js приведён в приложении Д. Листинг файла users.routes.js приведён в приложении Е. Листинг файла diagrams.controller.js приведён в приложении Ж.
 
@@ -100,6 +102,10 @@ const defineUser = (sequelize) => {
   User.prototype.toPublic = function toPublic() {
     return { id: this.id, email: this.email, role: this.role, createdAt: this.createdAt };
   };
+  // Whatever serializes a User by accident (res.json(user), logs, JSON.stringify) still cannot show the hash.
+  User.prototype.toJSON = function toJSON() {
+    return this.toPublic();
+  };
   return User;
 };
 
@@ -114,6 +120,7 @@ const ROLES = ['user', 'admin'];
 
 module.exports = {
   async up(queryInterface, Sequelize) {
+    const { fn, col, where, Op } = Sequelize;
     await queryInterface.createTable('Users', {
       id: { allowNull: false, autoIncrement: true, primaryKey: true, type: Sequelize.INTEGER },
       email: { allowNull: false, unique: true, type: Sequelize.STRING(254) },
@@ -127,14 +134,27 @@ module.exports = {
       type: 'check',
       fields: ['role'],
       name: 'users_role_check',
-      where: { role: { [Sequelize.Op.in]: ROLES } },
+      where: { role: { [Op.in]: ROLES } },
     });
     // Emails are stored lowercased, so the unique index cannot be dodged with another letter case.
     await queryInterface.addConstraint('Users', {
       type: 'check',
       fields: ['email'],
       name: 'users_email_lowercase_check',
-      where: Sequelize.where(Sequelize.fn('lower', Sequelize.col('email')), Sequelize.col('email')),
+      where: where(fn('lower', col('email')), col('email')),
+    });
+    // SQLite does not enforce VARCHAR length, so the length and the empty value are checked explicitly.
+    await queryInterface.addConstraint('Users', {
+      type: 'check',
+      fields: ['email'],
+      name: 'users_email_length',
+      where: where(fn('length', col('email')), { [Op.between]: [3, 254] }),
+    });
+    await queryInterface.addConstraint('Users', {
+      type: 'check',
+      fields: ['passwordHash'],
+      name: 'users_password_hash_not_empty',
+      where: where(fn('length', col('passwordHash')), { [Op.gt]: 0 }),
     });
   },
 
@@ -149,6 +169,7 @@ module.exports = {
 ```js
 const jwt = require('jsonwebtoken');
 const { unauthorized, forbidden } = require('../errors');
+const { ISSUER } = require('../settings');
 
 const bearerToken = (req) => {
   const [scheme, token, ...rest] = (req.get('Authorization') || '').split(' ');
@@ -164,7 +185,7 @@ const createAuthenticate =
     if (!token) return next(unauthorized('Missing Bearer token'));
     let payload;
     try {
-      payload = jwt.verify(token, jwtSecret, { algorithms: ['HS256'] });
+      payload = jwt.verify(token, jwtSecret, { algorithms: ['HS256'], issuer: ISSUER });
     } catch (error) {
       return next(unauthorized(error.name === 'TokenExpiredError' ? 'Token expired' : 'Invalid token'));
     }
@@ -184,9 +205,10 @@ module.exports = { createAuthenticate, requireRole };
 ```js
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const { unauthorized, conflict } = require('../errors');
+const { unauthorized, conflict, tooManyRequests } = require('../errors');
+const { ISSUER } = require('../settings');
 
-const createAuthController = ({ User }, { jwtSecret, jwtExpiresIn, bcryptRounds }) => {
+const createAuthController = ({ User }, { jwtSecret, jwtExpiresIn, bcryptRounds }, loginGuard) => {
   // Compared when the email is unknown, so a missing account costs the same time as a wrong password.
   const dummyHash = bcrypt.hashSync('not-a-real-password', bcryptRounds);
 
@@ -205,10 +227,23 @@ const createAuthController = ({ User }, { jwtSecret, jwtExpiresIn, bcryptRounds 
 
     login: async (req, res, next) => {
       const { email, password } = req.credentials;
+      // A locked email is refused before the password is looked at, so guessing cannot continue and the answer does not depend on the account.
+      const wait = loginGuard.retryAfter(email);
+      if (wait > 0) return next(tooManyRequests('Too many failed logins, try again later', wait));
       const user = await User.findOne({ where: { email } });
       const matches = await bcrypt.compare(password, user ? user.passwordHash : dummyHash);
-      if (!user || !matches) return next(unauthorized('Invalid email or password'));
-      const token = jwt.sign({ id: user.id, email: user.email, role: user.role }, jwtSecret, { algorithm: 'HS256', expiresIn: jwtExpiresIn });
+      if (!user || !matches) {
+        loginGuard.fail(email);
+        return next(unauthorized('Invalid email or password'));
+      }
+      loginGuard.succeed(email);
+      // The role in the token is only a hint for the client: the server asks the database on every request.
+      const token = jwt.sign({ id: user.id, email: user.email, role: user.role }, jwtSecret, {
+        algorithm: 'HS256',
+        expiresIn: jwtExpiresIn,
+        issuer: ISSUER,
+        subject: String(user.id),
+      });
       return res.json({ token, tokenType: 'Bearer', expiresIn: jwtExpiresIn });
     },
   };
@@ -220,21 +255,23 @@ module.exports = { createAuthController };
 ## Приложение Д (обязательное) Листинг файла validate-auth.js
 
 ```js
-const { badRequest } = require('../errors');
+const { badRequest, unauthorized } = require('../errors');
 const { ROLES } = require('../models/user');
+const LIMITS = require('../../limits.json');
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const MIN_PASSWORD = 8;
+const MIN_PASSWORD = LIMITS.passwordMin;
 // bcrypt ignores everything after the 72nd byte, so longer passwords would silently weaken.
-const MAX_PASSWORD_BYTES = 72;
+const MAX_PASSWORD_BYTES = LIMITS.passwordMaxBytes;
 
 const objectBody = (body) => body !== null && typeof body === 'object' && !Array.isArray(body);
 const normalizeEmail = (email) => (typeof email === 'string' ? email.trim().toLowerCase() : email);
 
-const validEmail = (email) => typeof email === 'string' && email.length <= 254 && EMAIL.test(email);
+const validEmail = (email) => typeof email === 'string' && email.length <= LIMITS.email && EMAIL.test(email);
 
 const passwordProblem = (password) => {
   if (typeof password !== 'string') return 'must be a string';
+  if (password.trim() === '') return 'must not be empty or only spaces';
   if (password.length < MIN_PASSWORD) return `must be at least ${MIN_PASSWORD} characters`;
   if (Buffer.byteLength(password) > MAX_PASSWORD_BYTES) return `must be at most ${MAX_PASSWORD_BYTES} bytes`;
   return undefined;
@@ -258,9 +295,11 @@ const validateRegistration = (req, _res, next) => {
 const validateLogin = (req, _res, next) => {
   if (!objectBody(req.body)) return next(badRequest('Request body must be a JSON object'));
   const { email, password } = req.body;
-  if (typeof email !== 'string' || typeof password !== 'string' || !email || !password) {
+  if (typeof email !== 'string' || typeof password !== 'string' || !email.trim() || !password.trim()) {
     return reject(next, [{ field: 'email, password', message: 'both are required strings' }]);
   }
+  // A value longer than any stored one cannot match an account, so it gets the usual answer without hashing it.
+  if (email.length > LIMITS.email || Buffer.byteLength(password) > MAX_PASSWORD_BYTES) return next(unauthorized('Invalid email or password'));
   req.credentials = { email: normalizeEmail(email), password };
   return next();
 };
@@ -282,15 +321,20 @@ const { Router } = require('express');
 const { requireRole } = require('../middleware/auth');
 const { parseId } = require('../middleware/validate');
 const { validateRole } = require('../middleware/validate-auth');
+const { allowMethods } = require('../middleware/http');
 
 // Every route here needs a valid token; the /users routes also need the admin role.
+// The 405 and OPTIONS answers come without a token, because they say nothing about the data.
 const createUsersRouter = (controller, authenticate) => {
   const router = Router();
   const admin = [authenticate, requireRole('admin')];
-  router.get('/profile', authenticate, controller.profile);
-  router.get('/users', ...admin, controller.list);
-  router.patch('/users/:id/role', ...admin, parseId('userId', 'User'), validateRole, controller.setRole);
-  router.delete('/users/:id', ...admin, parseId('userId', 'User'), controller.remove);
+  router.route('/profile').get(authenticate, controller.profile).all(allowMethods(['GET']));
+  router.route('/users').get(...admin, controller.list).all(allowMethods(['GET']));
+  router.route('/users/:id/role').patch(...admin, parseId('userId', 'User'), validateRole, controller.setRole).all(allowMethods(['PATCH']));
+  router
+    .route('/users/:id')
+    .delete(...admin, parseId('userId', 'User'), controller.remove)
+    .all(allowMethods(['DELETE']));
   return router;
 };
 

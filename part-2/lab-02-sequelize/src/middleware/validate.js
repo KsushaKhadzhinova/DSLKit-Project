@@ -29,7 +29,7 @@ const parseId = (req, _res, next) => {
 // Title and owner are trimmed before saving. Priority is optional and falls back to the default; unknown fields are dropped.
 const validateDiagram = (req, _res, next) => {
   const body = req.body;
-  if (typeof body !== 'object' || Array.isArray(body)) {
+  if (body === null || typeof body !== 'object' || Array.isArray(body)) {
     return next(badRequest('Request body must be a JSON object'));
   }
   const fields = { ...body, priority: body.priority ?? DEFAULT_PRIORITY };

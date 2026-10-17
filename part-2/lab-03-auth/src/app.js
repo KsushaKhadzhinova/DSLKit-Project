@@ -6,21 +6,51 @@ const { createDiagramsController } = require('./controllers/diagrams.controller'
 const { createAuthRouter } = require('./routes/auth.routes');
 const { createUsersRouter } = require('./routes/users.routes');
 const { createDiagramsRouter } = require('./routes/diagrams.routes');
+const { securityHeaders, requireJson } = require('./middleware/http');
+const { createRequestLogger } = require('./middleware/request-log');
+const { createRateLimiter, createLoginGuard } = require('./middleware/rate-limit');
 const { routeNotFound, errorHandler } = require('./middleware/error-handler');
 const { createCors } = require('./middleware/cors');
+const { checkJwtSettings } = require('./settings');
+const LIMITS = require('../limits.json');
 
-const DEFAULTS = { jwtExpiresIn: '1h', bcryptRounds: 10, corsOrigin: 'http://localhost:5178' };
+const MINUTE = 60 * 1000;
+const DEFAULTS = {
+  jwtExpiresIn: '1h',
+  bcryptRounds: 10,
+  // Origin of the React client of lab 5 that may call the API.
+  corsOrigin: 'http://localhost:5178',
+  // Failed logins per email before it is locked, and for how long.
+  loginMaxAttempts: 5,
+  loginLockMs: 15 * MINUTE,
+  // Requests per client address in a window: login and registration are limited separately.
+  loginRateMax: 20,
+  loginRateWindowMs: 15 * MINUTE,
+  registerRateMax: 10,
+  registerRateWindowMs: 60 * MINUTE,
+};
 
-// settings: { jwtSecret, jwtExpiresIn?, bcryptRounds?, corsOrigin? }
+// settings: { jwtSecret, jwtExpiresIn?, bcryptRounds?, login*/register* limits?, trustProxy?, corsOrigin? }
 const createApp = (models, settings) => {
   const config = { ...DEFAULTS, ...settings };
-  if (!config.jwtSecret) throw new Error('jwtSecret is required');
+  checkJwtSettings(config);
   const authenticate = createAuthenticate(models, config);
+  const loginGuard = createLoginGuard({ maxAttempts: config.loginMaxAttempts, lockMs: config.loginLockMs });
+  const limiters = {
+    loginLimiter: createRateLimiter({ windowMs: config.loginRateWindowMs, max: config.loginRateMax }),
+    registerLimiter: createRateLimiter({ windowMs: config.registerRateWindowMs, max: config.registerRateMax }),
+  };
   const app = express();
+  app.disable('x-powered-by');
   app.use(createCors(config.corsOrigin));
-  // The limit is set explicitly so it does not change with the library default.
-  app.use(express.json({ limit: '100kb' }));
-  app.use('/auth', createAuthRouter(createAuthController(models, config)));
+  // Behind a reverse proxy req.ip is the proxy unless this is set (TRUST_PROXY), and the limits would count everyone as one client.
+  if (config.trustProxy !== undefined) app.set('trust proxy', config.trustProxy);
+  app.use(securityHeaders);
+  app.use(createRequestLogger(models));
+  // The limit is set explicitly (limits.json), so it does not change with the library default.
+  app.use(express.json({ limit: LIMITS.bodyBytes }));
+  app.use(requireJson);
+  app.use('/auth', createAuthRouter(createAuthController(models, config, loginGuard), limiters));
   app.use('/diagrams', createDiagramsRouter(createDiagramsController(models), authenticate));
   app.use(createUsersRouter(createUsersController(models), authenticate));
   app.use(routeNotFound);
