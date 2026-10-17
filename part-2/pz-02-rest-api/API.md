@@ -1,6 +1,6 @@
 # DSLKit REST API
 
-Base URL: `http://localhost:3000/api`. Requests and responses are JSON (`Content-Type: application/json`). Data lives in memory and resets when the server restarts. There is no authentication in this practical.
+Base URL: `http://localhost:3000/api`. Requests and responses are JSON (`Content-Type: application/json`). Data lives in memory and resets when the server restarts. There is no authentication in this practical. Every response has the headers `Content-Security-Policy`, `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy` and `Cache-Control: no-store`. No CORS headers are sent, so browsers allow only same-origin calls.
 
 ## Resources
 
@@ -20,9 +20,9 @@ Each resource has the same six operations, shown for `{res}` = `users`, `project
 | -------- | ------------ | -------------------------------------- | ------------------ | ------------- |
 | `GET`    | `/{res}`     | List with filter, search, sort, paging | 200 `{data, meta}` | 400           |
 | `GET`    | `/{res}/:id` | One record                             | 200                | 400, 404      |
-| `POST`   | `/{res}`     | Create                                 | 201 and `Location` | 400, 413      |
-| `PUT`    | `/{res}/:id` | Replace the whole record               | 200                | 400, 404      |
-| `PATCH`  | `/{res}/:id` | Change only the sent fields            | 200                | 400, 404      |
+| `POST`   | `/{res}`     | Create                                 | 201 and `Location` | 400, 409, 413 |
+| `PUT`    | `/{res}/:id` | Replace the whole record               | 200                | 400, 404, 409 |
+| `PATCH`  | `/{res}/:id` | Change only the sent fields            | 200                | 400, 404, 409 |
 | `DELETE` | `/{res}/:id` | Delete                                 | 204 without a body | 400, 404, 409 |
 
 Extra operations:
@@ -65,7 +65,10 @@ Every error has one shape. `details` appears for validation errors.
 | 404    | `not_found`                                   | Unknown record or route                                                                                                             |
 | 405    | `method_not_allowed`                          | Method not supported on a known path; the `Allow` header lists the right ones                                                       |
 | 409    | `conflict`                                    | Deleting a user who owns projects or a project that has diagrams, or an email already used by another user (compared ignoring case) |
+| 400    | `bad_request`                                 | Malformed URL, for example a broken percent escape                                                                                  |
+| 415    | `unsupported_media_type`                      | Unknown `Content-Encoding` or charset of the body                                                                                   |
 | 413    | `payload_too_large`                           | Body over 100 KB                                                                                                                    |
+| 429    | `too_many_requests`                           | More than 300 requests per minute from one address (`RATE_LIMIT_MAX`), the `Retry-After` header says when to retry                  |
 | 500    | `internal_error`                              | Unexpected failure, logged on the server                                                                                            |
 
 ## Examples (curl)

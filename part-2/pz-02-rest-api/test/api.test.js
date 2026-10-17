@@ -171,7 +171,7 @@ withApi('unexpected errors become a 500 JSON response and are logged', async ({ 
     const res = await call('GET', '/diagrams/1');
     assert.equal(res.status, 500);
     assert.equal(res.json.error.code, 'internal_error');
-    assert.match(errors[0][0], /GET \/api\/diagrams\/1/);
+    assert.equal(errors[0][0], '[error] "GET" "/api/diagrams/1"');
   } finally {
     JSON.stringify = original;
   }
