@@ -27,10 +27,12 @@ Table 1 – Structure of the practical session 1 project
 | `src/middleware/requestLogger.js` | Writes every request into the log table |
 | `src/middleware/fakeAuth.js` | Simulated authorization |
 | `src/middleware/errorHandlers.js` | 404 and 500 error handlers |
+| `src/middleware/security.js` | Security headers, CSRF token, rate limit, log escaping |
 | `src/data/requestLog.js` | The `request_log` table in SQLite |
 | `src/data/diagrams.js` | In-memory record store and form field validation |
 | `limits.json` | All length and number limits |
 | `views/` | EJS templates and partial templates |
+| `public/` | Styles and logo from Part 1 of the project, theme switch |
 
 EJS is configured in `src/app.js`, where the view engine and the views folder are set. The common page frame is moved into the partial templates `header` and `footer`, which are included at the start and at the end of every page. Appendix G holds the list template, and Appendix H holds the application assembly.
 
@@ -55,13 +57,13 @@ Table 2 – Application routes
 | `GET /add` | Add form, available with `?auth=1` |
 | `POST /add` | Field validation, adding to the array and redirect to the home page, on an error status 400 and the form with the entered values |
 | `GET /login` | Hint page |
-| `GET /log` | Table of the request log |
+| `GET /log` | Table of the request log, available with `?auth=1` |
 
 The templates print every value with escaping, so markup typed into the form is shown as text. Every record has a "creation time" field. It is set when the record is added and is always later than the previous one, even if two records are created in the same millisecond, so records never look identical.
 
 ### 3.5 The 500 page and the order of handlers
 
-The 500 page is shown when a request ends with a server error. The error handler has four parameters and is mounted after all routes and all middleware, so any exception, whether a log write failure, a route error or a broken request body, reaches it. The handler writes the error to the error log, chooses the status code and renders the `500.ejs` template in the common site design: with the header, the footer and the style sheet. When the error carries its own code, for example 413 for an oversized form, the code is kept and the page gets the heading "bad request". When the error comes from an unavailable log database, the page shows a clear explanation. For a failure before the simulated authorization the handler supplies a guest itself so that the header can be drawn. If even the 500 template fails to render, a fallback page with the same styling is sent, so the user never sees bare text on a black background. The 500 page is caused by a real failure, not by a button. To show it at the defence, start the server with `DB_FILE=package.json/blocked/log.db npm start`: the database file cannot be created, so every request ends with the 500 page. The second way is to stop the database while the server is running. The 404 page works the same way and is mounted before the 500 handler. Appendix D holds the listing.
+The 500 page is shown when a request ends with a server error. The error handler has four parameters and is mounted after all routes and all middleware, so any exception, whether a log write failure, a route error or a broken request body, reaches it. The handler writes the error to the error log, chooses the status code and renders the `500.ejs` template in the common site design: with the header, the footer and the style sheet. When the error carries its own code, for example 413 for an oversized form, the code is kept and the page gets its own heading, for example "Request too large". When the error comes from an unavailable log database, the page shows a clear explanation. For a failure before the simulated authorization the handler supplies a guest itself so that the header can be drawn. If even the 500 template fails to render, a fallback page with the same styling is sent, so the user never sees bare text on a black background. The 500 page is caused by a real failure, not by a button. To show it at the defence, start the server with `DB_FILE=package.json/blocked/log.db npm start`: the database file cannot be created, so every request ends with the 500 page. The second way is to stop the database while the server is running. The 404 page works the same way and is mounted before the 500 handler. Appendix D holds the listing.
 
 ### 3.6 Form field checks
 
@@ -79,9 +81,51 @@ Table 3 – Checks of the add form fields
 
 On an error the server answers with status 400, shows the form again, keeps the entered values and prints a message under every wrong field. A missing request body and repeated form keys give status 400 instead of 500. All limits live in the file `limits.json`, not in the code. Appendix E holds the validation listing and appendix F holds the limits file.
 
-### 3.7 Automatic verification
+### 3.7 Protection of the form and the server
 
-Automatic tests on the built-in `node:test` start the server on a free port and check the pages, the guest redirect, adding an item, field validation, escaping, the log table, an unavailable database, the unique creation time and both error pages. The command is `npm test` in the project folder.
+The form and the server are protected against common attacks, all by hand and without new packages. To stop cross-site request forgery the server puts a random token into the `dslkit_csrf` cookie with the flags `HttpOnly` and `SameSite=Strict` and into a hidden form field. A request that changes data is accepted only when both values match and the `Origin` header, when present, points to this very site. Otherwise a page with status 403 is shown. Every response carries the headers `Content-Security-Policy`, `X-Content-Type-Options`, `X-Frame-Options` and `Referrer-Policy`, and the framework name is hidden from the headers. The policy forbids inline scripts and styles, so the templates have none. The rate limit answers with status 429, a page in the common design and the `Retry-After` header: the general limit and a stricter limit for form submissions live in `limits.json`. The size of the form body and the number of its fields are limited by the same file, so huge values give a page with status 400 or 413 instead of a crash. The request URL goes through escaping before it reaches the log: line breaks and control characters are replaced with the notation \uXXXX and the length is cut, so an attacker cannot forge log lines. The `/log` page opens only with `?auth=1`, because it shows the addresses of other requests. Appendix I holds the listing.
+
+### 3.8 Appearance of the pages
+
+The pages take their design from Part 1 of the project: the header with the logo and navigation, the footer, the buttons, the cards and the form fields use the same styles and markup as the DSLKit site and application. The light and dark theme switch works as in Part 1, and the header stays fixed while scrolling. Every page has one main button. The list of diagrams with the creation time of every record is shown in figure 1.
+
+![Diagram list](figures/list.png)
+
+Figure 1 – Home page with diagram cards and creation times
+
+The detail page of one record with its revision and code is shown in figure 2.
+
+![Detail page](figures/detail.png)
+
+Figure 2 – Diagram page with the description, the revision and the source code
+
+The form after sending a whitespace-only title and a negative revision is shown in figure 3. A message stands under every wrong field and the entered values are kept.
+
+![Form with errors](figures/form-errors.png)
+
+Figure 3 – Add form with messages about the empty title and the negative revision
+
+The request log table from the database is shown in figure 4.
+
+![Request log](figures/log.png)
+
+Figure 4 – Log page with the latest rows of the request_log table
+
+The 404 page for an unknown address is shown in figure 5.
+
+![404 page](figures/not-found.png)
+
+Figure 5 – The 404 error page in the site design
+
+The 500 page during a real failure is shown in figure 6. The server was started with a database file that cannot be created, so the log write failed.
+
+![500 page](figures/server-error.png)
+
+Figure 6 – The 500 error page with an explanation about the unavailable log table
+
+### 3.9 Automatic verification
+
+Automatic tests on the built-in `node:test` start the server on a free port and check the pages, the guest redirect, adding an item, field validation, escaping, the log table, an unavailable database, the unique creation time, both error pages, the CSRF token, the security headers, the rate limit, log escaping and huge values. The command is `npm test` in the project folder.
 
 ## 4 Answers to Control Questions
 
@@ -89,7 +133,7 @@ Automatic tests on the built-in `node:test` start the server on a free port and 
 
 ## Conclusion
 
-For the DSLKit project an Express application with EJS templates was built: the list of diagrams, the detail page and the add form take data from an array in memory. By the rules of the even variant the request log is written to a SQLite table, and its failure is shown with a styled 500 page. The form rejects empty and whitespace values, text that is too long and negative numbers using limits from a separate file, and every record has a unique creation time. Automatic tests cover all the code. Screenshots of the pages taken in a browser remain to be attached.
+For the DSLKit project an Express application with EJS templates was built: the list of diagrams, the detail page and the add form take data from an array in memory. By the rules of the even variant the request log is written to a SQLite table, and its failure is shown with a styled 500 page. The form rejects empty and whitespace values, text that is too long and negative numbers using limits from a separate file, and every record has a unique creation time. The form is protected by a CSRF token, and the server by security headers and a rate limit. The design is taken from Part 1 of the project. Automatic tests cover all the code, and screenshots of the pages are given in the text.
 
 ## Appendix A (mandatory) Listing of the file requestLogger.js
 
@@ -122,3 +166,7 @@ For the DSLKit project an Express application with EJS templates was built: the 
 ## Appendix H (mandatory) Listing of the file app.js
 
 {{code:part-2/pz-01-middleware-ejs/src/app.js}}
+
+## Appendix I (mandatory) Listing of the file security.js
+
+{{code:part-2/pz-01-middleware-ejs/src/middleware/security.js}}

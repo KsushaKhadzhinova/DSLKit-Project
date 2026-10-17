@@ -1,6 +1,9 @@
 <%- include('partials/header') %>
-<h1><%= status %> – <%= status >= 500 ? 'server error' : 'bad request' %></h1>
-<p><%= status >= 500 ? 'Something went wrong on our side. The error was logged.' : 'The server could not accept this request.' %></p>
-<% if (message) { %><p class="notice"><%= message %></p><% } %>
-<a href="/<%= authQuery %>">Back to the list</a>
+<section class="error" aria-labelledby="page-title">
+  <p class="error__code">Error code: <%= status %></p>
+  <h1 class="error__title" id="page-title"><%= heading %></h1>
+  <p class="error__text"><%= status >= 500 ? 'Something went wrong on our side. The error was logged.' : 'The server could not accept this request.' %></p>
+  <% if (message) { %><p class="error__notice" role="alert"><%= message %></p><% } %>
+  <a class="button button--primary" href="/<%= authQuery %>">Back to the list</a>
+</section>
 <%- include('partials/footer') %>

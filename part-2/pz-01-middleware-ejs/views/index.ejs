@@ -1,23 +1,29 @@
 <%- include('partials/header') %>
-<h1>Diagrams</h1>
-<% if (items.length === 0) { %>
-  <p>No diagrams yet.</p>
-<% } else { %>
-  <table class="table">
-    <thead>
-      <tr><th>#</th><th>Title</th><th>Notation</th><th>Created</th></tr>
-    </thead>
-    <tbody>
+<section class="section" aria-labelledby="page-title">
+  <h1 class="section__title" id="page-title">Diagrams</h1>
+  <p class="section__lead">The catalogue of diagrams stored by the server. Every record shows when it was created.</p>
+  <% if (items.length === 0) { %>
+    <p class="note">No diagrams yet.</p>
+  <% } else { %>
+    <ul class="cards">
       <% items.forEach((item) => { %>
-        <tr>
-          <td><%= item.id %></td>
-          <td><a href="/item/<%= item.id %><%= authQuery %>"><%= item.title %></a></td>
-          <td><%= item.notation %></td>
-          <td><time datetime="<%= item.createdAt %>"><%= item.createdAt %></time></td>
-        </tr>
+        <li class="cards__item">
+          <article class="card">
+            <h2 class="card__title"><%= item.title %></h2>
+            <p class="card__meta">
+              <span class="badge"><%= item.notation %></span>
+              <span>#<%= item.id %></span>
+              <span>Created <time datetime="<%= item.createdAt %>"><%= formatTime(item.createdAt) %></time></span>
+            </p>
+            <p class="card__text"><%= item.description %></p>
+            <a class="card__link" href="/item/<%= item.id %><%= authQuery %>">Open<span class="visually-hidden"> <%= item.title %></span></a>
+          </article>
+        </li>
       <% }) %>
-    </tbody>
-  </table>
-<% } %>
-<a class="button" href="/add<%= authQuery %>">Add diagram</a>
+    </ul>
+  <% } %>
+  <div class="page-actions">
+    <a class="button button--primary" href="/add<%= authQuery %>">Add diagram</a>
+  </div>
+</section>
 <%- include('partials/footer') %>

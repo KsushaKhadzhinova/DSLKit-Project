@@ -66,6 +66,7 @@
 import express from 'express';
 import { ApiError, errorBody, notFound } from './errors.js';
 import { createResourceRouter, listItems, methodsOnly, parseId } from './resource.js';
+import { logSafe, rateLimit, securityHeaders } from './security.js';
 import { createStores } from './store.js';
 
 export const NOTATIONS = ['UML', 'BPMN', 'ERD', 'DFD', 'IDEF0', 'Petri'];
@@ -92,14 +93,23 @@ export const schemas = {
   },
 };
 
+const CLIENT_ERRORS = {
+  400: ['bad_request', 'The request URL or headers are malformed'],
+  415: ['unsupported_media_type', 'The request encoding or charset is not supported'],
+};
+
 const missingReference = (field, collection, value) =>
   value !== undefined && !collection.find(value) ? [{ field, message: `${field} refers to a record that does not exist` }] : [];
 
 const conflict = (message) => new ApiError(409, 'conflict', message);
 
-export const createApp = ({ stores = createStores(), writeError = console.error } = {}) => {
+export const createApp = ({ stores = createStores(), writeError = console.error, limit = { windowMs: 60000, max: 300 }, now = Date.now } = {}) => {
   const { users, projects, diagrams } = stores;
   const app = express();
+  app.disable('x-powered-by');
+  app.use(securityHeaders);
+  // Refused before the body is read, so a flood costs little.
+  app.use(rateLimit({ ...limit, now }));
   app.use(express.json({ limit: '100kb' }));
 
   const api = express.Router();
@@ -180,7 +190,14 @@ export const createApp = ({ stores = createStores(), writeError = console.error 
     if (err instanceof ApiError) return res.status(err.status).json(errorBody(err));
     if (err.type === 'entity.parse.failed') return res.status(400).json(errorBody(new ApiError(400, 'invalid_json', 'Request body is not valid JSON')));
     if (err.type === 'entity.too.large') return res.status(413).json(errorBody(new ApiError(413, 'payload_too_large', 'Request body is too large')));
-    writeError(`[error] ${req.method} ${req.originalUrl}`, err);
+    // Errors of the framework and of the body parser that blame the client keep their 4xx status: a broken
+    // percent escape in the URL is 400 and an unsupported Content-Encoding is 415, neither is a server failure.
+    const status = err.status ?? err.statusCode;
+    if (status >= 400 && status < 500) {
+      const known = CLIENT_ERRORS[status] ?? ['bad_request', 'The request cannot be processed'];
+      return res.status(status).json(errorBody(new ApiError(status, known[0], known[1])));
+    }
+    writeError(`[error] ${logSafe(req.method)} ${logSafe(req.originalUrl)}`, err);
     return res.status(500).json(errorBody(new ApiError(500, 'internal_error', 'Internal server error')));
   });
   return app;

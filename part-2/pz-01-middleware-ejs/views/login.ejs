@@ -1,5 +1,9 @@
 <%- include('partials/header') %>
-<h1>Sign in</h1>
-<p>Authorization is simulated. Adding diagrams needs the query parameter <code>?auth=1</code>.</p>
-<a class="button" href="/add?auth=1">Continue as Owner</a>
+<section class="section" aria-labelledby="page-title">
+  <h1 class="section__title" id="page-title">Sign in</h1>
+  <p class="section__lead">Authorization is simulated. Adding diagrams and reading the request log need the query parameter <code>?auth=1</code>.</p>
+  <div class="page-actions">
+    <a class="button button--primary" href="/add?auth=1">Continue as Owner</a>
+  </div>
+</section>
 <%- include('partials/footer') %>
