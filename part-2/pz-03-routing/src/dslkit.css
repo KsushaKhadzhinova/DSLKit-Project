@@ -64,8 +64,8 @@
   --container: 1200px;
   --measure: 62ch;
   --header-height: 4rem;
-  --target-size: 3rem;
-  --target-size-small: 2.75rem;
+  --target-size: max(3rem, 48px);
+  --target-size-small: max(2.75rem, 44px);
   --focus-ring: 0 0 0 3px var(--color-background), 0 0 0 5px var(--color-primary);
 
   --breakpoint-small: 576px;
@@ -239,7 +239,7 @@ code,
 kbd,
 pre {
   font-family: var(--font-mono);
-  font-size: 0.92em;
+  font-size: var(--text-small);
   font-feature-settings: 'zero';
 }
 
