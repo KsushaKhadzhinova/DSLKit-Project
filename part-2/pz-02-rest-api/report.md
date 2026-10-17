@@ -108,6 +108,8 @@ export const createApp = ({ stores = createStores(), writeError = console.error,
   const app = express();
   app.disable('x-powered-by');
   app.use(securityHeaders);
+  // Liveness probe, before the rate limit so monitoring never uses up the quota.
+  app.get('/health', (req, res) => res.json({ status: 'ok' }));
   // Refused before the body is read, so a flood costs little.
   app.use(rateLimit({ ...limit, now }));
   app.use(express.json({ limit: '100kb' }));
