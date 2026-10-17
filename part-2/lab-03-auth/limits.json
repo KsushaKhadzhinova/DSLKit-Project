@@ -1,0 +1,8 @@
+{
+  "title": 80,
+  "sourceCode": 10000,
+  "email": 254,
+  "passwordMin": 8,
+  "passwordMaxBytes": 72,
+  "bodyBytes": "100kb"
+}

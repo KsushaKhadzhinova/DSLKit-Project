@@ -66,7 +66,7 @@ The work is verified by automated tests on a temporary SQLite database with the 
 
 ### 3.6 Limitations
 
-Logout does not revoke a token: it stays valid until it expires, which is why the lifetime is short. There is no limit on login attempts. In practice it is added at the proxy level or as a separate lockout mechanism. The token is kept on the client side, and the choice between localStorage and an httpOnly cookie is made in the client lab.
+Logout does not revoke a token: it stays valid until it expires, which is why the lifetime is short. Login attempts are limited: at most 20 login requests per address in 15 minutes, and after 5 failed attempts the email is locked for 15 minutes. The counters are kept in process memory. The token is kept on the client side, and the choice between localStorage and an httpOnly cookie is made in the client lab.
 
 Listing of user.js is given in appendix A. Listing of the Users table migration is given in appendix B. Listing of auth.js is given in appendix C. Listing of auth.controller.js is given in appendix D. Listing of validate-auth.js is given in appendix E. Listing of users.routes.js is given in appendix F. Listing of diagrams.controller.js is given in appendix G.
 

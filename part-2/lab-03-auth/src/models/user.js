@@ -21,6 +21,10 @@ const defineUser = (sequelize) => {
   User.prototype.toPublic = function toPublic() {
     return { id: this.id, email: this.email, role: this.role, createdAt: this.createdAt };
   };
+  // Whatever serializes a User by accident (res.json(user), logs, JSON.stringify) still cannot show the hash.
+  User.prototype.toJSON = function toJSON() {
+    return this.toPublic();
+  };
   return User;
 };
 

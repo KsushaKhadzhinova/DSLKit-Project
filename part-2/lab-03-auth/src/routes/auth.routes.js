@@ -1,10 +1,12 @@
 const { Router } = require('express');
 const { validateRegistration, validateLogin } = require('../middleware/validate-auth');
+const { allowMethods } = require('../middleware/http');
 
-const createAuthRouter = (controller) => {
+// The limiters run before validation, so requests with bad data count too.
+const createAuthRouter = (controller, { registerLimiter, loginLimiter }) => {
   const router = Router();
-  router.post('/register', validateRegistration, controller.register);
-  router.post('/login', validateLogin, controller.login);
+  router.route('/register').post(registerLimiter, validateRegistration, controller.register).all(allowMethods(['POST']));
+  router.route('/login').post(loginLimiter, validateLogin, controller.login).all(allowMethods(['POST']));
   return router;
 };
 

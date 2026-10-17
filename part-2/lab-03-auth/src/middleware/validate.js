@@ -20,7 +20,7 @@ const parseId =
   (req, _res, next) => {
     const id = Number(req.params.id);
     // Ids above the INTEGER column range would make PostgreSQL fail with a 500, so they are rejected here.
-  if (!/^[1-9]\d*$/.test(req.params.id) || id > MAX_ID) return next(badRequest(`${label} id must be a positive integer up to ${MAX_ID}`));
+    if (!/^[1-9]\d*$/.test(req.params.id) || id > MAX_ID) return next(badRequest(`${label} id must be a positive integer up to ${MAX_ID}`));
     req[key] = id;
     return next();
   };
@@ -30,7 +30,7 @@ const parseId =
 // Priority is optional and falls back to the default; unknown fields are dropped.
 const validateDiagram = (req, _res, next) => {
   const body = req.body;
-  if (typeof body !== 'object' || Array.isArray(body)) {
+  if (body === null || typeof body !== 'object' || Array.isArray(body)) {
     return next(badRequest('Request body must be a JSON object'));
   }
   const fields = { ...body, priority: body.priority ?? DEFAULT_PRIORITY };

@@ -1,35 +1,23 @@
 // Every seeded row has this owner, so the seed can tell its rows from the ones users created.
 const MARKER = 'demo';
 
+const ROWS = [
+  { title: 'Order processing', notation: 'BPMN', sourceCode: 'start -> check -> pay -> ship', priority: 'high' },
+  { title: 'Billing schema', notation: 'ERD', sourceCode: 'entity Invoice { id; total }', priority: 'normal' },
+  { title: 'Login flow', notation: 'UML', sourceCode: 'user -> server: login', priority: 'low' },
+];
+
+// Idempotent per row: a row that is already there is left alone, a deleted one comes back, nothing is duplicated.
 module.exports = {
   async up(queryInterface) {
-    const existing = await queryInterface.rawSelect('Diagrams', { where: { owner: MARKER } }, ['id']);
-    if (existing) return;
     const now = new Date();
-    await queryInterface.bulkInsert('Diagrams', [
-      {
-        title: 'Order processing',
-        notation: 'BPMN',
-        sourceCode: 'start -> check -> pay -> ship',
-        priority: 'high',
-        owner: MARKER,
-        createdAt: now,
-        updatedAt: now,
-      },
-      {
-        title: 'Billing schema',
-        notation: 'ERD',
-        sourceCode: 'entity Invoice { id; total }',
-        priority: 'normal',
-        owner: MARKER,
-        createdAt: now,
-        updatedAt: now,
-      },
-      { title: 'Login flow', notation: 'UML', sourceCode: 'user -> server: login', priority: 'low', owner: MARKER, createdAt: now, updatedAt: now },
-    ]);
+    for (const row of ROWS) {
+      const exists = await queryInterface.rawSelect('Diagrams', { where: { owner: MARKER, title: row.title } }, ['id']);
+      if (!exists) await queryInterface.bulkInsert('Diagrams', [{ ...row, owner: MARKER, createdAt: now, updatedAt: now }]);
+    }
   },
 
-  async down(queryInterface) {
-    await queryInterface.bulkDelete('Diagrams', { owner: MARKER });
+  async down(queryInterface, Sequelize) {
+    await queryInterface.bulkDelete('Diagrams', { owner: MARKER, title: { [Sequelize.Op.in]: ROWS.map((row) => row.title) } });
   },
 };

@@ -3,6 +3,7 @@ const ROLES = ['user', 'admin'];
 
 module.exports = {
   async up(queryInterface, Sequelize) {
+    const { fn, col, where, Op } = Sequelize;
     await queryInterface.createTable('Users', {
       id: { allowNull: false, autoIncrement: true, primaryKey: true, type: Sequelize.INTEGER },
       email: { allowNull: false, unique: true, type: Sequelize.STRING(254) },
@@ -16,14 +17,27 @@ module.exports = {
       type: 'check',
       fields: ['role'],
       name: 'users_role_check',
-      where: { role: { [Sequelize.Op.in]: ROLES } },
+      where: { role: { [Op.in]: ROLES } },
     });
     // Emails are stored lowercased, so the unique index cannot be dodged with another letter case.
     await queryInterface.addConstraint('Users', {
       type: 'check',
       fields: ['email'],
       name: 'users_email_lowercase_check',
-      where: Sequelize.where(Sequelize.fn('lower', Sequelize.col('email')), Sequelize.col('email')),
+      where: where(fn('lower', col('email')), col('email')),
+    });
+    // SQLite does not enforce VARCHAR length, so the length and the empty value are checked explicitly.
+    await queryInterface.addConstraint('Users', {
+      type: 'check',
+      fields: ['email'],
+      name: 'users_email_length',
+      where: where(fn('length', col('email')), { [Op.between]: [3, 254] }),
+    });
+    await queryInterface.addConstraint('Users', {
+      type: 'check',
+      fields: ['passwordHash'],
+      name: 'users_password_hash_not_empty',
+      where: where(fn('length', col('passwordHash')), { [Op.gt]: 0 }),
     });
   },
 

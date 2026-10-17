@@ -36,7 +36,6 @@ test('every /diagrams route answers 401 without a token', async () => {
     ['POST', '/diagrams'],
     ['PUT', '/diagrams/1'],
     ['DELETE', '/diagrams/1'],
-    ['PATCH', '/diagrams/1'],
   ];
   for (const [method, path] of routes) {
     assert.equal((await app.call(method, path, { body: valid })).res.status, 401, `${method} ${path}`);
@@ -141,10 +140,10 @@ test('DELETE answers 204, then 404 for the same id', async () => {
 
 test('unsupported methods answer 405 with an Allow header', async () => {
   for (const [method, path, allow] of [
-    ['PATCH', '/diagrams/1', 'GET, PUT, DELETE'],
-    ['POST', '/diagrams/1', 'GET, PUT, DELETE'],
-    ['DELETE', '/diagrams', 'GET, POST'],
-    ['PUT', '/diagrams', 'GET, POST'],
+    ['PATCH', '/diagrams/1', 'GET, PUT, DELETE, HEAD, OPTIONS'],
+    ['POST', '/diagrams/1', 'GET, PUT, DELETE, HEAD, OPTIONS'],
+    ['DELETE', '/diagrams', 'GET, POST, HEAD, OPTIONS'],
+    ['PUT', '/diagrams', 'GET, POST, HEAD, OPTIONS'],
   ]) {
     const { res, body } = await app.call(method, path, { token: alice, body: valid });
     assert.equal(res.status, 405, `${method} ${path}`);

@@ -4,6 +4,7 @@ const { createApp } = require('../src/app');
 const { createModels } = require('../src/models');
 const { createTempDatabase } = require('./helpers');
 
+const limits = require('../limits.json');
 const valid = { title: 'Login flow', notation: 'UML', sourceCode: 'user -> server', priority: 'low', owner: 'carol' };
 
 const db = createTempDatabase();
@@ -177,10 +178,10 @@ test('a body over the size limit answers 413', async () => {
 
 test('unsupported methods answer 405 with an Allow header', async () => {
   for (const [method, path, allow] of [
-    ['PATCH', '/diagrams/1', 'GET, PUT, DELETE'],
-    ['POST', '/diagrams/1', 'GET, PUT, DELETE'],
-    ['DELETE', '/diagrams', 'GET, POST'],
-    ['PUT', '/diagrams', 'GET, POST'],
+    ['PATCH', '/diagrams/1', 'GET, PUT, DELETE, HEAD, OPTIONS'],
+    ['POST', '/diagrams/1', 'GET, PUT, DELETE, HEAD, OPTIONS'],
+    ['DELETE', '/diagrams', 'GET, POST, HEAD, OPTIONS'],
+    ['PUT', '/diagrams', 'GET, POST, HEAD, OPTIONS'],
   ]) {
     const { res, body } = await call(method, path, valid);
     assert.equal(res.status, 405, `${method} ${path}`);

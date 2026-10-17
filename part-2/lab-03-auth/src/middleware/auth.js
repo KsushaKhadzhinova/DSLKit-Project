@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const { unauthorized, forbidden } = require('../errors');
+const { ISSUER } = require('../settings');
 
 const bearerToken = (req) => {
   const [scheme, token, ...rest] = (req.get('Authorization') || '').split(' ');
@@ -15,7 +16,7 @@ const createAuthenticate =
     if (!token) return next(unauthorized('Missing Bearer token'));
     let payload;
     try {
-      payload = jwt.verify(token, jwtSecret, { algorithms: ['HS256'] });
+      payload = jwt.verify(token, jwtSecret, { algorithms: ['HS256'], issuer: ISSUER });
     } catch (error) {
       return next(unauthorized(error.name === 'TokenExpiredError' ? 'Token expired' : 'Invalid token'));
     }

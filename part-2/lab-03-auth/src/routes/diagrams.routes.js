@@ -1,22 +1,17 @@
 const { Router } = require('express');
-const { HttpError } = require('../errors');
 const { parseId, validateDiagram } = require('../middleware/validate');
+const { allowMethods } = require('../middleware/http');
 
-const methodNotAllowed = (allow) => (_req, res, next) => {
-  res.set('Allow', allow);
-  next(new HttpError(405, `Method not allowed, use ${allow}`));
-};
-
+// The token is checked per method, so 405 and OPTIONS answers do not need one.
 const createDiagramsRouter = (controller, authenticate) => {
   const router = Router();
-  router.use(authenticate);
-  router.route('/').get(controller.list).post(validateDiagram, controller.create).all(methodNotAllowed('GET, POST'));
+  router.route('/').get(authenticate, controller.list).post(authenticate, validateDiagram, controller.create).all(allowMethods(['GET', 'POST']));
   router
     .route('/:id')
-    .get(parseId(), controller.get)
-    .put(parseId(), validateDiagram, controller.replace)
-    .delete(parseId(), controller.remove)
-    .all(methodNotAllowed('GET, PUT, DELETE'));
+    .get(authenticate, parseId(), controller.get)
+    .put(authenticate, parseId(), validateDiagram, controller.replace)
+    .delete(authenticate, parseId(), controller.remove)
+    .all(allowMethods(['GET', 'PUT', 'DELETE']));
   return router;
 };
 
