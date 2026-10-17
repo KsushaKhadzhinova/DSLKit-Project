@@ -1,0 +1,74 @@
+### VS Code REST Client (extension humao.rest-client). Start the server first: npm start
+@base = http://localhost:3000/api
+
+### Health check -> 200
+GET http://localhost:3000/health
+
+### List users -> 200
+GET {{base}}/users
+
+### Create a user -> 201
+POST {{base}}/users
+Content-Type: application/json
+
+{ "name": "Anna", "email": "anna@example.com", "role": "owner" }
+
+### Invalid user -> 400 with details
+POST {{base}}/users
+Content-Type: application/json
+
+{ "name": "", "email": "not-an-email" }
+
+### One user -> 200
+GET {{base}}/users/1
+
+### Missing user -> 404
+GET {{base}}/users/999
+
+### Bad id -> 400
+GET {{base}}/users/abc
+
+### Partial update with PATCH -> 200
+PATCH {{base}}/users/1
+Content-Type: application/json
+
+{ "role": "editor" }
+
+### Replace with PUT -> 200
+PUT {{base}}/users/1
+Content-Type: application/json
+
+{ "name": "Anna Smith", "email": "anna@example.com", "role": "owner" }
+
+### Create a project -> 201
+POST {{base}}/projects
+Content-Type: application/json
+
+{ "name": "Billing", "description": "Invoices and payments", "ownerId": 1 }
+
+### Create a diagram -> 201
+POST {{base}}/diagrams
+Content-Type: application/json
+
+{ "title": "Billing schema", "notation": "ERD", "code": "invoice -> payment", "projectId": 1 }
+
+### Search, sort and page -> 200
+GET {{base}}/diagrams?q=billing&sort=-title&page=1&limit=10
+
+### Diagrams of one project -> 200
+GET {{base}}/projects/1/diagrams
+
+### Publish a diagram -> 200
+POST {{base}}/diagrams/1/publish
+
+### Duplicate a diagram -> 201
+POST {{base}}/diagrams/1/duplicate
+
+### Delete a user who owns projects -> 409
+DELETE {{base}}/users/1
+
+### Delete a diagram -> 204
+DELETE {{base}}/diagrams/1
+
+### Unknown route -> 404
+GET {{base}}/nothing
