@@ -191,6 +191,8 @@ const createAuthenticate =
     } catch (error) {
       return next(unauthorized(error.name === 'TokenExpiredError' ? 'Token expired' : 'Invalid token'));
     }
+    // A signed token without a usable integer id cannot name a user; it is refused like any other bad token.
+    if (!Number.isSafeInteger(payload.id)) return next(unauthorized('Invalid token'));
     const user = await User.findByPk(payload.id);
     if (!user) return next(unauthorized('User no longer exists'));
     req.user = { id: user.id, email: user.email, role: user.role };
@@ -269,7 +271,10 @@ const MAX_PASSWORD_BYTES = LIMITS.passwordMaxBytes;
 const objectBody = (body) => body !== null && typeof body === 'object' && !Array.isArray(body);
 const normalizeEmail = (email) => (typeof email === 'string' ? email.trim().toLowerCase() : email);
 
-const validEmail = (email) => typeof email === 'string' && email.length <= LIMITS.email && EMAIL.test(email);
+// Control characters (NUL, tab, escape) are not part of an address; NUL also breaks the SQL text of a query.
+const CONTROL = /[\u0000-\u001F\u007F]/;
+
+const validEmail = (email) => typeof email === 'string' && email.length <= LIMITS.email && EMAIL.test(email) && !CONTROL.test(email);
 
 const passwordProblem = (password) => {
   if (typeof password !== 'string') return 'must be a string';
@@ -301,7 +306,9 @@ const validateLogin = (req, _res, next) => {
     return reject(next, [{ field: 'email, password', message: 'both are required strings' }]);
   }
   // A value longer than any stored one cannot match an account, so it gets the usual answer without hashing it.
-  if (email.length > LIMITS.email || Buffer.byteLength(password) > MAX_PASSWORD_BYTES) return next(unauthorized('Invalid email or password'));
+  if (email.length > LIMITS.email || CONTROL.test(email) || Buffer.byteLength(password) > MAX_PASSWORD_BYTES) {
+    return next(unauthorized('Invalid email or password'));
+  }
   req.credentials = { email: normalizeEmail(email), password };
   return next();
 };

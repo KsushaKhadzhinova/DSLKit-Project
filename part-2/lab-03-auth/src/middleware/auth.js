@@ -20,6 +20,8 @@ const createAuthenticate =
     } catch (error) {
       return next(unauthorized(error.name === 'TokenExpiredError' ? 'Token expired' : 'Invalid token'));
     }
+    // A signed token without a usable integer id cannot name a user; it is refused like any other bad token.
+    if (!Number.isSafeInteger(payload.id)) return next(unauthorized('Invalid token'));
     const user = await User.findByPk(payload.id);
     if (!user) return next(unauthorized('User no longer exists'));
     req.user = { id: user.id, email: user.email, role: user.role };
