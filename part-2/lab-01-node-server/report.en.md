@@ -255,19 +255,25 @@ module.exports = { NOTATIONS, PRIORITIES, DEFAULT_PRIORITY, LIMITS, createDiagra
 const { badRequest } = require('../errors');
 const { NOTATIONS, PRIORITIES, DEFAULT_PRIORITY, LIMITS } = require('../models/diagram.model');
 
+// Spaces of every kind plus zero-width characters (joiners, word joiner, BOM) look empty, so they count as empty.
+const INVISIBLE = /[\s​-‍⁠﻿]/g;
+// Control characters (NUL, bell, escape) are not text; a single-line field must not carry them.
+const CONTROL = /[\u0000-\u001F\u007F]/;
+
 // Text is checked after trimming, so a value of spaces is empty and the stored value is what was measured.
-const text = (name) => (v) => {
-  if (typeof v !== 'string' || v.trim() === '') return 'must be a non-empty string';
+const text = (name, singleLine = false) => (v) => {
+  if (typeof v !== 'string' || v.replace(INVISIBLE, '') === '') return 'must be a non-empty string';
+  if (singleLine && CONTROL.test(v)) return 'must not contain control characters';
   return v.trim().length <= LIMITS[name] || `must be at most ${LIMITS[name]} characters`;
 };
 const TRIMMED = ['title', 'owner'];
 
 const checks = {
-  title: text('title'),
+  title: text('title', true),
   notation: (v) => NOTATIONS.includes(v) || `must be one of ${NOTATIONS.join(', ')}`,
   sourceCode: text('sourceCode'),
   priority: (v) => PRIORITIES.includes(v) || `must be one of ${PRIORITIES.join(', ')}`,
-  owner: text('owner'),
+  owner: text('owner', true),
 };
 
 const parseId = (req, _res, next) => {
