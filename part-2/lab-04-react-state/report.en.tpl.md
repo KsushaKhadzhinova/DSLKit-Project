@@ -74,6 +74,27 @@ Fifty-five automated tests check the pure functions, both hooks and the applicat
 
 The Vite application implements adding, deleting and editing diagrams, filtering and sorting, saving to `localStorage` and two additional effects, the page title and autosave with debounce. The storage logic is extracted into a custom hook, which will simplify replacing `localStorage` with a REST API in laboratory work No. 5.
 
+## Answers to Control Questions
+
+{{answers}}
+1. **What is the `useState` hook for?** It keeps a value between renders. To update from the previous value, pass a function: `setCount((prev) => prev + 1)`.
+2. **What is a side effect?** An action outside rendering: writing to `localStorage`, a timer, changing `document.title`. In the project `useLocalStorage` and `useAutosaveStatus` work this way.
+3. **How does the dependency array work?** The effect runs after rendering if any value in the array has changed. An empty array means one run after mounting.
+4. **How to load data from `localStorage` on mount?** Read the value with the initializer function of `useState` or in an effect with an empty dependency array.
+5. **Why can hooks not be called in conditions?** React matches hooks by the order of calls, and a different order on the next render breaks the state.
+6. **How does `localStorage` differ from `sessionStorage`?** The first lives between sessions, the second is cleared when the tab is closed.
+7. **How to make a lazy state initialization?** Pass a function to `useState`: `useState(() => readStorage(key))`. It is called once at the first render.
+8. **How to debug an infinite render loop?** Check the dependency array for objects created anew on every render, and check whether the effect changes its own value without a condition.
+9. **How to save an object or an array to `localStorage`?** Serialize it with `JSON.stringify` and read it with `JSON.parse` inside `try/catch` with a check of the data shape.
+10. **What happens if the state is changed right after `setState`?** The value in the current call does not change, because updates are batched and applied at the next render. For a chain, the functional form is used.
+11. **How to imitate loading from a server?** Start a `setTimeout` in `useEffect` that writes the data to the state after a second, and call `clearTimeout` in the cleanup.
+12. **Which cleanup function can an effect return?** The one that removes a subscription or a timer. In the project it is `return () => clearTimeout(timer)` in `useAutosaveStatus`.
+13. **How to work with forms?** A controlled component keeps the value in the state and sets it through `value` and `onChange`, an uncontrolled one reads the value from the DOM through a `ref`. The forms of the project are controlled.
+14. **How to implement the Enter hotkey?** Wrap the fields in `<form onSubmit>`, then Enter submits the form, or handle `onKeyDown` and check `event.key`.
+15. **How to optimize a large list?** Virtualize the list, memoize calculations with `useMemo` and wrap the row components in `React.memo`.
+16. **How to implement debounce for autosave?** Set a `setTimeout` of 500 ms in the effect and clear it at the next change: `const t = setTimeout(save, 500); return () => clearTimeout(t);`.
+{{/answers}}
+
 ## Appendix A (mandatory) Key Code Fragments
 
 ```jsx

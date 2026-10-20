@@ -74,6 +74,12 @@ Fifty-five automated tests check the pure functions, both hooks and the applicat
 
 The Vite application implements adding, deleting and editing diagrams, filtering and sorting, saving to `localStorage` and two additional effects, the page title and autosave with debounce. The storage logic is extracted into a custom hook, which will simplify replacing `localStorage` with a REST API in laboratory work No. 5.
 
+## Answers to Control Questions
+
+9. **How to save an object or an array to `localStorage`?** Serialize it with `JSON.stringify` and read it with `JSON.parse` inside `try/catch` with a check of the data shape.
+10. **What happens if the state is changed right after `setState`?** The value in the current call does not change, because updates are batched and applied at the next render. For a chain, the functional form is used.
+11. **How to imitate loading from a server?** Start a `setTimeout` in `useEffect` that writes the data to the state after a second, and call `clearTimeout` in the cleanup.
+
 ## Appendix A (mandatory) Key Code Fragments
 
 ```jsx
