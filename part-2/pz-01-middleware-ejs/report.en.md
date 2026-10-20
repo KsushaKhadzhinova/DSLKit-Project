@@ -56,10 +56,15 @@ Table 2 – Application routes
 | `GET /item/:id` | Detail page, an unknown id leads to the 404 page |
 | `GET /add` | Add form, available with `?auth=1` |
 | `POST /add` | Field validation, adding to the array and redirect to the home page, on an error status 400 and the form with the entered values |
+| `GET /item/:id/edit` | Form for editing a record with the current values, available with `?auth=1` |
+| `POST /item/:id/edit` | Field validation and update of the record, the id and the creation time stay, status 400 on an error |
+| `POST /item/:id/delete` | Deletes the record and goes to the home page, a repeated delete gives 404 |
 | `GET /login` | Hint page |
 | `GET /log` | Table of the request log, available with `?auth=1` |
 
 The templates print every value with escaping, so markup typed into the form is shown as text. Every record has a "creation time" field. It is set when the record is added and is always later than the previous one, even if two records are created in the same millisecond, so records never look identical.
+
+On the detail page a signed-in user sees the buttons "Edit" and "Delete". Editing opens the same form as adding, but filled with the current values, and checks the fields with the same rules. Deleting is a form with the `POST` method rather than a link, because a link opened with `GET` must not change data. Both forms carry the hidden `_csrf` field, without it the server answers 403, and a guest goes to the sign-in page. The id of a deleted record is never reused. Listing of the item.ejs template is given in appendix J.
 
 ### 3.5 The 500 page and the order of handlers
 
@@ -125,15 +130,25 @@ Figure 6 – The 500 error page with an explanation about the unavailable log ta
 
 ### 3.9 Automatic verification
 
-Automatic tests on the built-in `node:test` start the server on a free port and check the pages, the guest redirect, adding an item, field validation, escaping, the log table, an unavailable database, the unique creation time, both error pages, the CSRF token, the security headers, the rate limit, log escaping and huge values. The command is `npm test` in the project folder.
+Automatic tests on the built-in `node:test` start the server on a free port and check the pages, the guest redirect, adding an item, field validation, escaping, the log table, an unavailable database, the unique creation time, editing and deleting a record with the CSRF token, both error pages, the CSRF token, the security headers, the rate limit, log escaping and huge values. The command is `npm test` in the project folder.
 
 ## 4 Answers to Control Questions
 
-@@ANSWERS@@
+25. How do you protect an Express application from CSRF with middleware (in theory)?
+
+    A browser attaches cookies to a request to our site by itself, even when the form was sent by a page of another site, so a cookie alone is not enough. The middleware issues a random token and puts it into a cookie with the `HttpOnly` and `SameSite=Strict` flags and into a hidden field of every form. A request that changes data (`POST`, `PUT`, `PATCH`, `DELETE`) is accepted only when the field value matches the cookie and the `Origin` header, when present, points to this very site. A page of another site can neither read the cookie nor guess the token. The comparison uses `timingSafeEqual`. The order matters: the middleware is mounted after the form parser, because the token is in the body, and before the routes. In the work this is the `csrf` function in `security.js`, and the add, edit and delete forms carry the hidden field.
+
+26. How do you use a helper function (for example, a date formatter) in an EJS template?
+
+    The function is put into `app.locals` and becomes available in all templates, or into `res.locals` for one request, or it is passed as the second argument of `res.render()`. In the work `app.locals.formatTime` turns an ISO string such as `2026-10-01T09:00:00.000Z` into the readable "2026-10-01 09:00:00.000 UTC". In the template the call looks like this: `<%= formatTime(item.createdAt) %>`. The `<%=` tag escapes the result, and the exact machine value stays in the `datetime` attribute of the `time` element.
+
+27. Why is the static files middleware usually mounted before all routes?
+
+    A request for a style sheet or a logo should be answered at once, without passing authorization, the log, the form parser and the search through the routes. The page loads faster, and the log does not get a row for every file. If static files came after the routes, a template route or the 404 handler could grab the address of a file first. In the work `express.static` comes after the security headers, so files get them too, and before everything else. The price of this order is that static files are available without signing in, so nothing private may be put into `public`.
 
 ## Conclusion
 
-For the DSLKit project an Express application with EJS templates was built: the list of diagrams, the detail page and the add form take data from an array in memory. By the rules of the even variant the request log is written to a SQLite table, and its failure is shown with a styled 500 page. The form rejects empty and whitespace values, text that is too long and negative numbers using limits from a separate file, and every record has a unique creation time. The form is protected by a CSRF token, and the server by security headers and a rate limit. The design is taken from Part 1 of the project. Automatic tests cover all the code, and screenshots of the pages are given in the text.
+For the DSLKit project an Express application with EJS templates was built: the list of diagrams, the detail page and the add form take data from an array in memory. By the rules of the even variant the request log is written to a SQLite table, and its failure is shown with a styled 500 page. The form rejects empty and whitespace values, text that is too long and negative numbers using limits from a separate file, and every record has a unique creation time. Records can be edited and deleted with buttons on the detail page. The form is protected by a CSRF token, and the server by security headers and a rate limit. The design is taken from Part 1 of the project. Automatic tests cover all the code, and screenshots of the pages are given in the text.
 
 ## Appendix A (mandatory) Listing of the file requestLogger.js
 
@@ -340,6 +355,19 @@ export const createDiagramStore = (now = Date.now) => {
       items.push(item);
       return item;
     },
+    // Edit keeps the id and the creation time, only the form fields change.
+    update: (id, { title, notation, description, code, revision }) => {
+      const item = items.find((one) => one.id === id);
+      if (!item) return undefined;
+      Object.assign(item, { title, notation, description, code, revision });
+      return item;
+    },
+    remove: (id) => {
+      const index = items.findIndex((one) => one.id === id);
+      if (index < 0) return false;
+      items.splice(index, 1);
+      return true;
+    },
   };
 };
 
@@ -473,30 +501,65 @@ export const createApp = ({
 
   app.get('/', (req, res) => res.render('index', { title: 'Diagrams', items: store.all() }));
 
-  app.get('/item/:id', (req, res, next) => {
-    // Only plain digits are a number: Number() would also accept "0x1" or "1e0".
-    const item = /^\d{1,9}$/.test(req.params.id) ? store.find(Number(req.params.id)) : undefined;
-    return item ? res.render('item', { title: item.title, item }) : next();
-  });
+  // Only plain digits are a number: Number() would also accept "0x1" or "1e0".
+  const findItem = (req) => (/^\d{1,9}$/.test(req.params.id) ? store.find(Number(req.params.id)) : undefined);
 
-  app.get('/add', requireAuth, (req, res) => res.render('add', { title: 'Add diagram', notations: NOTATIONS, errors: {}, values: { revision: '1' } }));
+  // Adding and editing share one template, only the texts and the address differ.
+  const formView = { notations: NOTATIONS, heading: 'Add diagram', action: '/add', submit: 'Save diagram' };
+  const editView = (item) => ({ ...formView, heading: 'Edit diagram', action: `/item/${item.id}/edit`, submit: 'Save changes' });
 
-  app.post('/add', requireAuth, (req, res) => {
-    const body = req.body; // the CSRF check has already proved that the form body exists
-    // Repeated keys (arrays) must not crash: only plain strings count.
+  // Repeated keys (arrays) must not crash: only plain strings count.
+  const readForm = (body) => {
     const text = (value) => (typeof value === 'string' ? value.trim() : '');
-    const values = {
+    return {
       title: text(body.title),
       notation: text(body.notation),
       description: text(body.description),
       code: text(body.code),
       revision: text(body.revision),
     };
+  };
+
+  app.get('/item/:id', (req, res, next) => {
+    const item = findItem(req);
+    return item ? res.render('item', { title: item.title, item }) : next();
+  });
+
+  app.get('/add', requireAuth, (req, res) => res.render('add', { ...formView, title: 'Add diagram', errors: {}, values: { revision: '1' } }));
+
+  app.post('/add', requireAuth, (req, res) => {
+    const values = readForm(req.body); // the CSRF check has already proved that the form body exists
     const errors = validateDiagram(values, limits);
     if (Object.keys(errors).length) {
-      return res.status(400).render('add', { title: 'Add diagram', notations: NOTATIONS, errors, values });
+      return res.status(400).render('add', { ...formView, title: 'Add diagram', errors, values });
     }
     store.add({ ...values, revision: Number(values.revision) });
+    return res.redirect(`/${res.locals.authQuery}`);
+  });
+
+  // Edit and delete change data, so both need the simulated sign-in and the CSRF token (the delete button is a form, not a link).
+  app.get('/item/:id/edit', requireAuth, (req, res, next) => {
+    const item = findItem(req);
+    if (!item) return next();
+    return res.render('add', { ...editView(item), title: 'Edit diagram', errors: {}, values: { ...item, revision: String(item.revision) } });
+  });
+
+  app.post('/item/:id/edit', requireAuth, (req, res, next) => {
+    const item = findItem(req);
+    if (!item) return next();
+    const values = readForm(req.body);
+    const errors = validateDiagram(values, limits);
+    if (Object.keys(errors).length) {
+      return res.status(400).render('add', { ...editView(item), title: 'Edit diagram', errors, values });
+    }
+    store.update(item.id, { ...values, revision: Number(values.revision) });
+    return res.redirect(`/item/${item.id}${res.locals.authQuery}`);
+  });
+
+  app.post('/item/:id/delete', requireAuth, (req, res, next) => {
+    const item = findItem(req);
+    if (!item) return next();
+    store.remove(item.id);
     return res.redirect(`/${res.locals.authQuery}`);
   });
 
@@ -610,4 +673,38 @@ export const safeLogText = (text, max = 500) => {
   }
   return escaped.length > max ? `${escaped.slice(0, max)}…` : escaped;
 };
+```
+
+## Appendix J (mandatory) Listing of the template item.ejs
+
+```ejs
+<%- include('partials/header') %>
+<section class="section" aria-labelledby="page-title">
+  <h1 class="section__title" id="page-title"><%= item.title %></h1>
+  <p><span class="badge"><%= item.notation %></span></p>
+  <p class="section__lead"><%= item.description %></p>
+  <dl class="facts">
+    <dt>Number</dt>
+    <dd><%= item.id %></dd>
+    <dt>Revision</dt>
+    <dd><%= item.revision %></dd>
+    <dt>Created</dt>
+    <dd><time datetime="<%= item.createdAt %>"><%= formatTime(item.createdAt) %></time></dd>
+  </dl>
+  <% if (item.code) { %>
+    <h2>Source</h2>
+    <pre class="code"><%= item.code %></pre>
+  <% } %>
+  <div class="page-actions">
+    <a class="button button--primary" href="/<%= authQuery %>">Back to the list</a>
+    <% if (!user.guest) { %>
+      <a class="button button--tonal" href="/item/<%= item.id %>/edit<%= authQuery %>">Edit<span class="visually-hidden"> <%= item.title %></span></a>
+      <form class="inline-form" method="post" action="/item/<%= item.id %>/delete<%= authQuery %>">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+        <button class="button button--quiet" type="submit">Delete<span class="visually-hidden"> <%= item.title %></span></button>
+      </form>
+    <% } %>
+  </div>
+</section>
+<%- include('partials/footer') %>
 ```

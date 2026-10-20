@@ -46,7 +46,7 @@ Middleware `fakeAuth` проверяет параметр `?auth=1`. Если о
 
 ### 3.4 Маршруты и страницы
 
-Реализованы четыре маршрута из условия и три служебных, они сведены в таблице 2.
+Реализованы четыре маршрута из условия и служебные маршруты, они сведены в таблице 2.
 
 Таблица 2 – Маршруты приложения
 
@@ -56,10 +56,15 @@ Middleware `fakeAuth` проверяет параметр `?auth=1`. Если о
 | `GET /item/:id` | Детальная страница, неизвестный номер ведёт на страницу 404 |
 | `GET /add` | Форма добавления, доступна с `?auth=1` |
 | `POST /add` | Проверка полей, добавление в массив и переход на главную, при ошибке код 400 и форма с сохранёнными значениями |
+| `GET /item/:id/edit` | Форма изменения записи с текущими значениями, доступна с `?auth=1` |
+| `POST /item/:id/edit` | Проверка полей и изменение записи, номер и время создания не меняются, при ошибке код 400 |
+| `POST /item/:id/delete` | Удаление записи и переход на главную, повторное удаление даёт 404 |
 | `GET /login` | Страница-подсказка |
 | `GET /log` | Таблица журнала запросов, доступна с `?auth=1` |
 
 Шаблоны выводят все значения с экранированием, поэтому введённая в форме разметка показывается как текст. У каждой записи есть поле «время создания». Оно задаётся при добавлении и всегда позже предыдущего, даже если две записи созданы в одну миллисекунду, поэтому записи не совпадают визуально.
+
+На детальной странице вошедший пользователь видит кнопки «Edit» и «Delete». Изменение открывает ту же форму, что и добавление, но уже заполненную текущими значениями, и проверяет поля теми же правилами. Удаление сделано не ссылкой, а формой с методом `POST`, потому что ссылка по адресу `GET` не должна менять данные. В обеих формах стоит скрытое поле `_csrf`, без него сервер отвечает 403, а гость переходит на страницу входа. Номер записи после удаления не используется повторно. Листинг шаблона item.ejs приведён в приложении К.
 
 ### 3.5 Страница 500 и порядок обработчиков
 
@@ -125,15 +130,25 @@ Middleware `fakeAuth` проверяет параметр `?auth=1`. Если о
 
 ### 3.9 Автоматическая проверка
 
-Автоматические тесты на встроенном `node:test` запускают сервер на свободном порту и проверяют страницы, перенаправление гостя, добавление записи, проверку полей, экранирование, таблицу журнала, недоступную базу, уникальное время создания, обе страницы ошибок, токен CSRF, заголовки безопасности, ограничение частоты, экранирование журнала и огромные значения. Команда запуска: `npm test` в каталоге проекта.
+Автоматические тесты на встроенном `node:test` запускают сервер на свободном порту и проверяют страницы, перенаправление гостя, добавление записи, проверку полей, экранирование, таблицу журнала, недоступную базу, уникальное время создания, изменение и удаление записи с токеном CSRF, обе страницы ошибок, токен CSRF, заголовки безопасности, ограничение частоты, экранирование журнала и огромные значения. Команда запуска: `npm test` в каталоге проекта.
 
 ## 4 Ответы на контрольные вопросы
 
-@@ANSWERS@@
+25. Как в Express реализовать защиту от CSRF с помощью middleware (теоретически)?
+
+    Браузер сам прикладывает cookie к запросу на наш сайт, даже если форму отправила страница чужого сайта, поэтому одной cookie для защиты мало. Middleware выдаёт случайный токен, кладёт его в cookie с флагами `HttpOnly` и `SameSite=Strict` и в скрытое поле каждой формы. Запрос, меняющий данные (`POST`, `PUT`, `PATCH`, `DELETE`), принимается, только если значение поля совпадает с cookie, а заголовок `Origin`, когда он есть, указывает на этот же сайт. Страница чужого сайта не может ни прочитать cookie, ни угадать токен. Сравнение делается функцией `timingSafeEqual`. Порядок важен: middleware подключается после разбора формы, потому что токен лежит в теле, и до маршрутов. В работе это функция `csrf` из `security.js`, а формы добавления, изменения и удаления несут скрытое поле.
+
+26. Как в EJS использовать функцию helper (например, для форматирования даты) в шаблоне?
+
+    Функцию кладут в `app.locals`, и она становится доступна во всех шаблонах, либо в `res.locals` для одного запроса, либо передают вторым аргументом `res.render()`. В работе `app.locals.formatTime` превращает строку ISO вида `2026-10-01T09:00:00.000Z` в читаемое «2026-10-01 09:00:00.000 UTC». В шаблоне вызов выглядит так: `<%= formatTime(item.createdAt) %>`. Запись `<%=` экранирует результат, а точное машинное значение остаётся в атрибуте `datetime` элемента `time`.
+
+27. Почему middleware для статики обычно подключается до всех маршрутов?
+
+    Запрос файла стилей или логотипа должен получить ответ сразу, не проходя авторизацию, журнал, разбор формы и поиск среди маршрутов. Так страница быстрее, а в журнал не попадает по строке на каждый файл. Если поставить статику после маршрутов, шаблонный маршрут или обработчик 404 могут перехватить адрес файла раньше. В работе `express.static` стоит после заголовков безопасности, чтобы заголовки получали и файлы, и до всего остального. Платой за такой порядок служит то, что статические файлы доступны без входа, поэтому в `public` нельзя класть ничего закрытого.
 
 ## Заключение
 
-Для проекта DSLKit собрано приложение на Express с шаблонами EJS: список диаграмм, детальная страница и форма добавления получают данные из массива в памяти. Журнал запросов по правилам чётного варианта пишется в таблицу SQLite, а его сбой показывается оформленной страницей 500. Форма отвергает пустые и пробельные значения, слишком длинный текст и отрицательные числа по пределам из отдельного файла, а у каждой записи есть уникальное время создания. Форма защищена токеном CSRF, а сервер заголовками безопасности и ограничением частоты запросов. Оформление взято из Части 1 проекта. Автоматические тесты покрывают весь код, снимки страниц приведены в тексте.
+Для проекта DSLKit собрано приложение на Express с шаблонами EJS: список диаграмм, детальная страница и форма добавления получают данные из массива в памяти. Журнал запросов по правилам чётного варианта пишется в таблицу SQLite, а его сбой показывается оформленной страницей 500. Форма отвергает пустые и пробельные значения, слишком длинный текст и отрицательные числа по пределам из отдельного файла, а у каждой записи есть уникальное время создания. Записи можно изменять и удалять кнопками на детальной странице. Форма защищена токеном CSRF, а сервер заголовками безопасности и ограничением частоты запросов. Оформление взято из Части 1 проекта. Автоматические тесты покрывают весь код, снимки страниц приведены в тексте.
 
 ## Приложение А (обязательное) Листинг файла requestLogger.js
 
@@ -340,6 +355,19 @@ export const createDiagramStore = (now = Date.now) => {
       items.push(item);
       return item;
     },
+    // Edit keeps the id and the creation time, only the form fields change.
+    update: (id, { title, notation, description, code, revision }) => {
+      const item = items.find((one) => one.id === id);
+      if (!item) return undefined;
+      Object.assign(item, { title, notation, description, code, revision });
+      return item;
+    },
+    remove: (id) => {
+      const index = items.findIndex((one) => one.id === id);
+      if (index < 0) return false;
+      items.splice(index, 1);
+      return true;
+    },
   };
 };
 
@@ -473,30 +501,65 @@ export const createApp = ({
 
   app.get('/', (req, res) => res.render('index', { title: 'Diagrams', items: store.all() }));
 
-  app.get('/item/:id', (req, res, next) => {
-    // Only plain digits are a number: Number() would also accept "0x1" or "1e0".
-    const item = /^\d{1,9}$/.test(req.params.id) ? store.find(Number(req.params.id)) : undefined;
-    return item ? res.render('item', { title: item.title, item }) : next();
-  });
+  // Only plain digits are a number: Number() would also accept "0x1" or "1e0".
+  const findItem = (req) => (/^\d{1,9}$/.test(req.params.id) ? store.find(Number(req.params.id)) : undefined);
 
-  app.get('/add', requireAuth, (req, res) => res.render('add', { title: 'Add diagram', notations: NOTATIONS, errors: {}, values: { revision: '1' } }));
+  // Adding and editing share one template, only the texts and the address differ.
+  const formView = { notations: NOTATIONS, heading: 'Add diagram', action: '/add', submit: 'Save diagram' };
+  const editView = (item) => ({ ...formView, heading: 'Edit diagram', action: `/item/${item.id}/edit`, submit: 'Save changes' });
 
-  app.post('/add', requireAuth, (req, res) => {
-    const body = req.body; // the CSRF check has already proved that the form body exists
-    // Repeated keys (arrays) must not crash: only plain strings count.
+  // Repeated keys (arrays) must not crash: only plain strings count.
+  const readForm = (body) => {
     const text = (value) => (typeof value === 'string' ? value.trim() : '');
-    const values = {
+    return {
       title: text(body.title),
       notation: text(body.notation),
       description: text(body.description),
       code: text(body.code),
       revision: text(body.revision),
     };
+  };
+
+  app.get('/item/:id', (req, res, next) => {
+    const item = findItem(req);
+    return item ? res.render('item', { title: item.title, item }) : next();
+  });
+
+  app.get('/add', requireAuth, (req, res) => res.render('add', { ...formView, title: 'Add diagram', errors: {}, values: { revision: '1' } }));
+
+  app.post('/add', requireAuth, (req, res) => {
+    const values = readForm(req.body); // the CSRF check has already proved that the form body exists
     const errors = validateDiagram(values, limits);
     if (Object.keys(errors).length) {
-      return res.status(400).render('add', { title: 'Add diagram', notations: NOTATIONS, errors, values });
+      return res.status(400).render('add', { ...formView, title: 'Add diagram', errors, values });
     }
     store.add({ ...values, revision: Number(values.revision) });
+    return res.redirect(`/${res.locals.authQuery}`);
+  });
+
+  // Edit and delete change data, so both need the simulated sign-in and the CSRF token (the delete button is a form, not a link).
+  app.get('/item/:id/edit', requireAuth, (req, res, next) => {
+    const item = findItem(req);
+    if (!item) return next();
+    return res.render('add', { ...editView(item), title: 'Edit diagram', errors: {}, values: { ...item, revision: String(item.revision) } });
+  });
+
+  app.post('/item/:id/edit', requireAuth, (req, res, next) => {
+    const item = findItem(req);
+    if (!item) return next();
+    const values = readForm(req.body);
+    const errors = validateDiagram(values, limits);
+    if (Object.keys(errors).length) {
+      return res.status(400).render('add', { ...editView(item), title: 'Edit diagram', errors, values });
+    }
+    store.update(item.id, { ...values, revision: Number(values.revision) });
+    return res.redirect(`/item/${item.id}${res.locals.authQuery}`);
+  });
+
+  app.post('/item/:id/delete', requireAuth, (req, res, next) => {
+    const item = findItem(req);
+    if (!item) return next();
+    store.remove(item.id);
     return res.redirect(`/${res.locals.authQuery}`);
   });
 
@@ -610,4 +673,38 @@ export const safeLogText = (text, max = 500) => {
   }
   return escaped.length > max ? `${escaped.slice(0, max)}…` : escaped;
 };
+```
+
+## Приложение К (обязательное) Листинг шаблона item.ejs
+
+```ejs
+<%- include('partials/header') %>
+<section class="section" aria-labelledby="page-title">
+  <h1 class="section__title" id="page-title"><%= item.title %></h1>
+  <p><span class="badge"><%= item.notation %></span></p>
+  <p class="section__lead"><%= item.description %></p>
+  <dl class="facts">
+    <dt>Number</dt>
+    <dd><%= item.id %></dd>
+    <dt>Revision</dt>
+    <dd><%= item.revision %></dd>
+    <dt>Created</dt>
+    <dd><time datetime="<%= item.createdAt %>"><%= formatTime(item.createdAt) %></time></dd>
+  </dl>
+  <% if (item.code) { %>
+    <h2>Source</h2>
+    <pre class="code"><%= item.code %></pre>
+  <% } %>
+  <div class="page-actions">
+    <a class="button button--primary" href="/<%= authQuery %>">Back to the list</a>
+    <% if (!user.guest) { %>
+      <a class="button button--tonal" href="/item/<%= item.id %>/edit<%= authQuery %>">Edit<span class="visually-hidden"> <%= item.title %></span></a>
+      <form class="inline-form" method="post" action="/item/<%= item.id %>/delete<%= authQuery %>">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+        <button class="button button--quiet" type="submit">Delete<span class="visually-hidden"> <%= item.title %></span></button>
+      </form>
+    <% } %>
+  </div>
+</section>
+<%- include('partials/footer') %>
 ```

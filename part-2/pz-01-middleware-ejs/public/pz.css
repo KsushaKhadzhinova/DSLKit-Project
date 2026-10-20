@@ -299,3 +299,9 @@ kbd {
 .section > p + .section__lead {
   margin-top: var(--space-2);
 }
+
+/* A form that sits in a row of buttons (the Delete button of the detail page). */
+.inline-form {
+  display: inline-flex;
+  margin: 0;
+}

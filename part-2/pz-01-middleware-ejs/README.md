@@ -38,6 +38,9 @@ DB_FILE=package.json/blocked/log.db npm start
 | `GET /item/:id`    | Детальная страница, неизвестный или некорректный номер даёт страницу 404                |
 | `GET /add?auth=1`  | Форма добавления, гостя без `?auth=1` перенаправляет на `/login`                        |
 | `POST /add?auth=1` | Проверка полей, добавление в массив, переход на главную, ошибка полей даёт код 400      |
+| `GET /item/:id/edit?auth=1` | Форма изменения записи с текущими значениями |
+| `POST /item/:id/edit?auth=1` | Проверка полей и изменение записи, номер и время создания не меняются, ошибка даёт 400 |
+| `POST /item/:id/delete?auth=1` | Удаление записи и переход на главную, повтор даёт 404. Кнопки «Edit» и «Delete» на детальной странице, форма удаления несёт скрытое поле `_csrf` |
 | `GET /login`       | Пояснение, как «войти»                                                                  |
 | `GET /log?auth=1`  | Таблица последних запросов из журнала (только с `?auth=1`)                              |
 | любой другой адрес | Страница 404                                                                            |
@@ -73,4 +76,4 @@ DB_FILE=package.json/blocked/log.db npm start
 
 ---
 
-**English.** Branch: `pz21`. Express 5 + EJS server for the DSLKit diagram catalogue. Catalogue data is in memory (as the task requires), the request log is a SQLite table (variant 26 is even). The look comes from Part 1 of the project (same header, footer, buttons, cards, form fields and theme switch). Run `npm install && npm start` (Node.js 22.13 or newer, port 3000; `PORT` and `DB_FILE` are in `.env.example`, load them with `node --env-file=.env src/server.js`), test with `npm test`. Simulated auth: add `?auth=1` to open `/add` and `/log`, guests are redirected to `/login`. The 500 page is caused by a real failure, not by a button: start with `DB_FILE=package.json/blocked/log.db npm start` and every request ends with the styled 500 page. Limits live in `limits.json`. Protection: CSRF token, security headers with a strict Content-Security-Policy, rate limit, escaped log lines. Audit notes: `AUDIT.md`.
+**English.** Branch: `pz21`. Express 5 + EJS server for the DSLKit diagram catalogue. Catalogue data is in memory (as the task requires), the request log is a SQLite table (variant 26 is even). The look comes from Part 1 of the project (same header, footer, buttons, cards, form fields and theme switch). Run `npm install && npm start` (Node.js 22.13 or newer, port 3000; `PORT` and `DB_FILE` are in `.env.example`, load them with `node --env-file=.env src/server.js`), test with `npm test`. Records can be edited and deleted with the buttons on the detail page (the delete button is a `POST` form with the CSRF field). Simulated auth: add `?auth=1` to open `/add` and `/log`, guests are redirected to `/login`. The 500 page is caused by a real failure, not by a button: start with `DB_FILE=package.json/blocked/log.db npm start` and every request ends with the styled 500 page. Limits live in `limits.json`. Protection: CSRF token, security headers with a strict Content-Security-Policy, rate limit, escaped log lines. Audit notes: `AUDIT.md`.
