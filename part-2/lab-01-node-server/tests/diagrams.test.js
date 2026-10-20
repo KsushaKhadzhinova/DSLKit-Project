@@ -65,7 +65,7 @@ test('POST /diagrams creates a diagram, answers 201 with Location', async () => 
   const { res, body } = await call('POST', '/diagrams', valid);
   assert.equal(res.status, 201);
   assert.equal(res.headers.get('location'), `/diagrams/${body.id}`);
-  assert.deepEqual({ ...body, id: undefined }, { ...valid, id: undefined });
+  assert.deepEqual({ ...body, id: undefined, createdAt: undefined }, { ...valid, id: undefined, createdAt: undefined });
   assert.equal(store.findById(body.id).title, 'Login flow');
 });
 
@@ -106,7 +106,7 @@ test('PUT /diagrams/:id replaces the whole diagram', async () => {
   const id = store.findAll()[0].id;
   const { res, body } = await call('PUT', `/diagrams/${id}`, valid);
   assert.equal(res.status, 200);
-  assert.deepEqual(body, { id, ...valid });
+  assert.deepEqual(body, { id, ...valid, createdAt: store.findById(id).createdAt });
   assert.equal(store.findAll().length, 1);
 });
 
@@ -154,7 +154,7 @@ test('an id in the body is ignored on POST and PUT', async () => {
 test('PUT stores the new state, which GET then returns', async () => {
   const id = store.findAll()[0].id;
   await call('PUT', `/diagrams/${id}`, valid);
-  assert.deepEqual((await call('GET', `/diagrams/${id}`)).body, { id, ...valid });
+  assert.deepEqual((await call('GET', `/diagrams/${id}`)).body, { id, ...valid, createdAt: store.findById(id).createdAt });
 });
 
 test('a body over the size limit answers 413', async () => {
@@ -165,8 +165,8 @@ test('a body over the size limit answers 413', async () => {
 
 test('unsupported methods answer 405 with an Allow header', async () => {
   for (const [method, path, allow] of [
-    ['PATCH', '/diagrams/1', 'GET, PUT, DELETE, HEAD, OPTIONS'],
-    ['POST', '/diagrams/1', 'GET, PUT, DELETE, HEAD, OPTIONS'],
+    ['PATCH', '/diagrams', 'GET, POST, HEAD, OPTIONS'],
+    ['POST', '/diagrams/1', 'GET, PUT, PATCH, DELETE, HEAD, OPTIONS'],
     ['DELETE', '/diagrams', 'GET, POST, HEAD, OPTIONS'],
     ['PUT', '/diagrams', 'GET, POST, HEAD, OPTIONS'],
   ]) {
@@ -253,7 +253,7 @@ test('HEAD answers like GET without a body and OPTIONS lists the methods with 20
   assert.equal((await fetch(`${base}/diagrams/9999`, { method: 'HEAD' })).status, 404);
   for (const [path, allow] of [
     ['/diagrams', 'GET, POST, HEAD, OPTIONS'],
-    ['/diagrams/1', 'GET, PUT, DELETE, HEAD, OPTIONS'],
+    ['/diagrams/1', 'GET, PUT, PATCH, DELETE, HEAD, OPTIONS'],
   ]) {
     const res = await fetch(base + path, { method: 'OPTIONS' });
     assert.equal(res.status, 204, path);
@@ -282,4 +282,60 @@ test('the 413 limit comes from limits.json', async () => {
   const raw = JSON.stringify({ ...valid, sourceCode: 'x'.repeat(100 * 1024 - 200) });
   assert.ok(raw.length < 100 * 1024);
   assert.equal((await call('POST', '/diagrams', {}, raw)).res.status, 400);
+});
+
+test('every record gets a creation time and no two records share one', async () => {
+  const first = (await call('POST', '/diagrams', valid)).body;
+  const second = (await call('POST', '/diagrams', valid)).body;
+  assert.match(first.createdAt, /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/);
+  assert.ok(second.createdAt > first.createdAt);
+  const fast = createDiagramStore([]);
+  const stamps = Array.from({ length: 50 }, () => fast.create(valid).createdAt);
+  assert.equal(new Set(stamps).size, 50);
+  assert.deepEqual([...stamps].sort(), stamps);
+});
+
+test('a client cannot set the creation time, and PUT keeps the first one', async () => {
+  const created = (await call('POST', '/diagrams', { ...valid, createdAt: '2000-01-01T00:00:00.000Z' })).body;
+  assert.notEqual(created.createdAt, '2000-01-01T00:00:00.000Z');
+  const replaced = (await call('PUT', `/diagrams/${created.id}`, { ...valid, createdAt: '1999-01-01T00:00:00.000Z' })).body;
+  assert.equal(replaced.createdAt, created.createdAt);
+});
+
+test('the list can be sorted by creation time', async () => {
+  await call('POST', '/diagrams', valid);
+  const { body } = await call('GET', '/diagrams?sort=createdAt&order=desc');
+  assert.ok(body[0].createdAt > body[1].createdAt);
+});
+
+test('PATCH changes only the sent fields and keeps the rest', async () => {
+  const before = store.findAll()[0];
+  const { res, body } = await call('PATCH', `/diagrams/${before.id}`, { title: '  New title  ', priority: 'low' });
+  assert.equal(res.status, 200);
+  assert.deepEqual(body, { ...before, title: 'New title', priority: 'low' });
+  assert.equal(store.findById(before.id).owner, 'anna');
+});
+
+test('PATCH is checked like PUT: bad values, unknown fields only, empty body, wrong types and missing id', async () => {
+  const id = store.findAll()[0].id;
+  const bad = await call('PATCH', `/diagrams/${id}`, { title: '   ', notation: 'XYZ' });
+  assert.equal(bad.res.status, 400);
+  assert.deepEqual(bad.body.details.map((d) => d.field), ['title', 'notation']);
+  for (const body of [{}, { admin: true }, { id: 7, createdAt: 'x' }]) {
+    assert.equal((await call('PATCH', `/diagrams/${id}`, body)).res.status, 400, JSON.stringify(body));
+  }
+  for (const raw of ['[]', 'null', '"text"', '5']) {
+    assert.equal((await call('PATCH', `/diagrams/${id}`, {}, raw)).res.status, 400, raw);
+  }
+  assert.equal((await call('PATCH', '/diagrams/9999', { title: 'x' })).res.status, 404);
+  assert.equal((await call('PATCH', '/diagrams/abc', { title: 'x' })).res.status, 400);
+  assert.equal(store.findById(id).title, 'Order processing');
+});
+
+test('PATCH cannot change the id or the creation time', async () => {
+  const before = store.findAll()[0];
+  const { body } = await call('PATCH', `/diagrams/${before.id}`, { owner: 'dan', id: 99, createdAt: '2001-01-01T00:00:00.000Z' });
+  assert.equal(body.id, before.id);
+  assert.equal(body.createdAt, before.createdAt);
+  assert.equal(body.owner, 'dan');
 });

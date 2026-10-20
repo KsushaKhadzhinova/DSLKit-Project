@@ -3,7 +3,7 @@ const { parseListQuery } = require('../middleware/list-query');
 
 const missing = (id) => notFound(`Diagram ${id} not found`);
 
-const SORTABLE = ['id', 'title', 'notation', 'priority', 'owner'];
+const SORTABLE = ['id', 'title', 'notation', 'priority', 'owner', 'createdAt'];
 
 // Numbers compare as numbers, text with the locale rules, equal values keep the order of ids.
 const byField = (sort, order) => (a, b) => {
@@ -32,6 +32,11 @@ const createDiagramsController = (store) => ({
 
   replace: (req, res, next) => {
     const diagram = store.replace(req.diagramId, req.diagramFields);
+    return diagram ? res.json(diagram) : next(missing(req.diagramId));
+  },
+
+  update: (req, res, next) => {
+    const diagram = store.update(req.diagramId, req.diagramFields);
     return diagram ? res.json(diagram) : next(missing(req.diagramId));
   },
 
