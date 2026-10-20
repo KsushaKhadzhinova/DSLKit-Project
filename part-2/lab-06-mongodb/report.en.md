@@ -77,7 +77,7 @@ Changing one array element shows the difference from the relational model: the p
 
 To run the project, copy `.env.example` to `.env` and set `MONGODB_URI`, run `npm run seed`, then `npm run dev`. The seed removes the demo documents by title and inserts three diagrams, so it can be repeated. A check against a local `mongod` showed that the list returns diagrams with nested comments and tags, and a request with `tag=shop` returns two of the three diagrams.
 
-There are 41 automated tests. Nineteen cover the main routes: valid and invalid identifiers, creation, replacement that keeps comments, deletion, the 400, 404, 405 and 413 errors, and a 500 answer that leaks no error text. Eleven cover nested structures: the tag and owner filter, adding, editing and removing a comment, the unreachable foreign comment, schema checks at the model level, indexes and the translation of a Mongoose error into 400. Another eleven cover data protection: operators such as `$ne` in the body and in query parameters, whitespace-only values, the limits from `limits.json` at the border and beyond it, the integer priority, the body size cap and the creation time of every record. The tests run on a temporary MongoDB instance through `mongodb-memory-server`, so no working database is touched. The same `npm test` command checks the build and formatting of this report. Screenshots of the Atlas cluster, Postman requests and MongoDB Compass data are not included in this version of the report.
+The routes gained partial update `PATCH /diagrams/:id`, sorting with `?sort=title` or `?sort=-priority`, a record counter (the `/diagrams/count` route and the `X-Total-Count` header of the list) and `?q=` search over a text index of the title and the source code. There are 92 automated tests. Nineteen cover the main routes: valid and invalid identifiers, creation, replacement that keeps comments, deletion, the 400, 404, 405 and 413 errors, and a 500 answer that leaks no error text. Eleven cover nested structures: the tag and owner filter, adding, editing and removing a comment, the unreachable foreign comment, schema checks at the model level, indexes and the translation of a Mongoose error into 400. Ten cover `PATCH`, sorting, the counter and the text search. Twenty-eight cover wrong user behavior: empty, truncated and non-JSON bodies, wrong types, whitespace-only values, out-of-range values, forged fields, operator injection, malformed identifiers, repeated and parallel requests and a stopped database. Another eleven cover data protection: operators such as `$ne` in the body and in query parameters, whitespace-only values, the limits from `limits.json` at the border and beyond it, the integer priority, the body size cap and the creation time of every record. The tests run on a temporary MongoDB instance through `mongodb-memory-server`, so no working database is touched. The same `npm test` command checks the build and formatting of this report. Screenshots of the Atlas cluster, Postman requests and MongoDB Compass data are not included in this version of the report.
 
 ## Answers to Control Questions
 
@@ -89,7 +89,7 @@ Listing of db.js is given in appendix A. Listing of server.js is given in append
 
 ## Conclusion
 
-In this lab the DSLKit server from lab 2 moved from Sequelize to Mongoose. The `diagrams` collection lives in MongoDB, the CRUD routes kept their addresses and response format, and identifiers became `ObjectId` strings. Tags and comments sit inside the diagram document, which replaces several tables and joins with a single query. For the comments array the work adds appending, changing an element with the positional operator and removal. The connection string is an environment variable, the schema validates data, and 41 tests confirm the API behavior on a temporary database. The connection to MongoDB Atlas is not done and no screenshots are attached.
+In this lab the DSLKit server from lab 2 moved from Sequelize to Mongoose. The `diagrams` collection lives in MongoDB, the CRUD routes kept their addresses and response format, and identifiers became `ObjectId` strings. Tags and comments sit inside the diagram document, which replaces several tables and joins with a single query. For the comments array the work adds appending, changing an element with the positional operator and removal. The connection string is an environment variable, the schema validates data, and 92 tests confirm the API behavior on a temporary database. The connection to MongoDB Atlas is not done and no screenshots are attached.
 
 ## Appendix A (mandatory) Listing of db.js
 
@@ -188,6 +188,9 @@ const diagramSchema = new mongoose.Schema(
 // Multikey index on the nested field, used by ?commentAuthor=.
 diagramSchema.index({ 'comments.author': 1 });
 
+// Text index on the title and the source: used by ?q= through $text.
+diagramSchema.index({ title: 'text', sourceCode: 'text' });
+
 const Diagram = mongoose.models.Diagram || mongoose.model('Diagram', diagramSchema);
 
 module.exports = { Diagram };
@@ -196,6 +199,7 @@ module.exports = { Diagram };
 ## Appendix D (mandatory) Listing of diagrams.controller.js
 
 ```js
+const mongoose = require('mongoose');
 const { notFound } = require('../errors');
 const { LIMITS } = require('../models/diagram.constants');
 
@@ -204,7 +208,8 @@ const missingComment = (id) => notFound(`Comment ${id} not found`);
 
 // ?owner=anna&tag=shop narrows the list; tag matches when the tags array contains the value.
 // commentAuthor looks inside the nested comments array with the dotted path comments.author.
-const listFilter = ({ owner, tag, commentAuthor }) => ({
+const listFilter = ({ owner, tag, commentAuthor, q }) => ({
+  ...(typeof q === 'string' && { $text: mongoose.trusted({ $search: q }) }),
   ...(typeof owner === 'string' && { owner }),
   ...(typeof tag === 'string' && { tags: tag }),
   ...(typeof commentAuthor === 'string' && { 'comments.author': commentAuthor }),
@@ -217,8 +222,15 @@ const createDiagramsController = ({ Diagram }) => ({
   list: async (req, res) => {
     const limit = Number(req.query.limit ?? LIMITS.listLimitMax);
     const skip = Number(req.query.skip ?? 0);
-    res.json(await Diagram.find(listFilter(req.query)).sort({ _id: 1 }).skip(skip).limit(limit));
+    const sortKey = req.query.sort;
+    const sort = sortKey ? { [sortKey.replace('-', '')]: sortKey.startsWith('-') ? -1 : 1, _id: 1 } : { _id: 1 };
+    const filter = listFilter(req.query);
+    res.set('X-Total-Count', String(await Diagram.countDocuments(filter)));
+    res.json(await Diagram.find(filter).sort(sort).skip(skip).limit(limit));
   },
+
+  // The record counter: how many diagrams match the same filters as the list.
+  count: async (req, res) => res.json({ count: await Diagram.countDocuments(listFilter(req.query)) }),
 
   // Aggregation pipeline: group by notation, count the diagrams and average the priority, then sort the groups.
   stats: async (_req, res) =>
@@ -242,6 +254,12 @@ const createDiagramsController = ({ Diagram }) => ({
 
   replace: async (req, res, next) => {
     const diagram = await Diagram.findByIdAndUpdate(req.diagramId, req.diagramFields, options);
+    return diagram ? res.json(diagram) : next(missing(req.diagramId));
+  },
+
+  // PATCH changes only the fields that were sent; comments stay untouched.
+  patch: async (req, res, next) => {
+    const diagram = await Diagram.findByIdAndUpdate(req.diagramId, { $set: req.diagramFields }, options);
     return diagram ? res.json(diagram) : next(missing(req.diagramId));
   },
 
@@ -284,7 +302,7 @@ module.exports = { createDiagramsController };
 ```js
 const { Router } = require('express');
 const { HttpError } = require('../errors');
-const { validateListQuery, parseId, parseCommentId, validateDiagram, validateComment, validateCommentText } = require('../middleware/validate');
+const { validatePatch, validateListQuery, parseId, parseCommentId, validateDiagram, validateComment, validateCommentText } = require('../middleware/validate');
 
 const methodNotAllowed = (allow) => (_req, res, next) => {
   res.set('Allow', allow);
@@ -294,13 +312,15 @@ const methodNotAllowed = (allow) => (_req, res, next) => {
 const createDiagramsRouter = (controller) => {
   const router = Router();
   router.route('/').get(validateListQuery, controller.list).post(validateDiagram, controller.create).all(methodNotAllowed('GET, POST'));
+  router.route('/count').get(validateListQuery, controller.count).all(methodNotAllowed('GET'));
   router.route('/stats').get(controller.stats).all(methodNotAllowed('GET'));
   router
     .route('/:id')
     .get(parseId, controller.get)
     .put(parseId, validateDiagram, controller.replace)
+    .patch(parseId, validatePatch, controller.patch)
     .delete(parseId, controller.remove)
-    .all(methodNotAllowed('GET, PUT, DELETE'));
+    .all(methodNotAllowed('GET, PUT, PATCH, DELETE'));
   router.route('/:id/comments').post(parseId, validateComment, controller.addComment).all(methodNotAllowed('POST'));
   router
     .route('/:id/comments/:commentId')

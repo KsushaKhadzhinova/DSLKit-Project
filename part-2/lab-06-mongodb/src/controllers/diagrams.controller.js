@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const { notFound } = require('../errors');
 const { LIMITS } = require('../models/diagram.constants');
 
@@ -6,7 +7,8 @@ const missingComment = (id) => notFound(`Comment ${id} not found`);
 
 // ?owner=anna&tag=shop narrows the list; tag matches when the tags array contains the value.
 // commentAuthor looks inside the nested comments array with the dotted path comments.author.
-const listFilter = ({ owner, tag, commentAuthor }) => ({
+const listFilter = ({ owner, tag, commentAuthor, q }) => ({
+  ...(typeof q === 'string' && { $text: mongoose.trusted({ $search: q }) }),
   ...(typeof owner === 'string' && { owner }),
   ...(typeof tag === 'string' && { tags: tag }),
   ...(typeof commentAuthor === 'string' && { 'comments.author': commentAuthor }),
@@ -19,8 +21,15 @@ const createDiagramsController = ({ Diagram }) => ({
   list: async (req, res) => {
     const limit = Number(req.query.limit ?? LIMITS.listLimitMax);
     const skip = Number(req.query.skip ?? 0);
-    res.json(await Diagram.find(listFilter(req.query)).sort({ _id: 1 }).skip(skip).limit(limit));
+    const sortKey = req.query.sort;
+    const sort = sortKey ? { [sortKey.replace('-', '')]: sortKey.startsWith('-') ? -1 : 1, _id: 1 } : { _id: 1 };
+    const filter = listFilter(req.query);
+    res.set('X-Total-Count', String(await Diagram.countDocuments(filter)));
+    res.json(await Diagram.find(filter).sort(sort).skip(skip).limit(limit));
   },
+
+  // The record counter: how many diagrams match the same filters as the list.
+  count: async (req, res) => res.json({ count: await Diagram.countDocuments(listFilter(req.query)) }),
 
   // Aggregation pipeline: group by notation, count the diagrams and average the priority, then sort the groups.
   stats: async (_req, res) =>
@@ -44,6 +53,12 @@ const createDiagramsController = ({ Diagram }) => ({
 
   replace: async (req, res, next) => {
     const diagram = await Diagram.findByIdAndUpdate(req.diagramId, req.diagramFields, options);
+    return diagram ? res.json(diagram) : next(missing(req.diagramId));
+  },
+
+  // PATCH changes only the fields that were sent; comments stay untouched.
+  patch: async (req, res, next) => {
+    const diagram = await Diagram.findByIdAndUpdate(req.diagramId, { $set: req.diagramFields }, options);
     return diagram ? res.json(diagram) : next(missing(req.diagramId));
   },
 

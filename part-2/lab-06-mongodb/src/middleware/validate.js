@@ -48,13 +48,27 @@ const validator = (checks, message, defaults, target) => (req, _res, next) => {
 // POST and PUT both carry the whole diagram, so one validator serves both.
 // Priority and tags are optional; unknown fields (including comments) are dropped.
 const validateDiagram = validator(diagramChecks, 'Invalid diagram data', { priority: PRIORITY.default, tags: [] }, 'diagramFields');
+// PATCH carries only the fields to change: each one present is checked, at least one is required.
+const validatePatch = (req, _res, next) => {
+  if (!isPlainObject(req.body)) return next(badRequest('Request body must be a JSON object'));
+  const given = Object.entries(req.body).filter(([name, v]) => name in diagramChecks && v !== undefined);
+  if (given.length === 0) return next(badRequest('Send at least one of ' + Object.keys(diagramChecks).join(', ')));
+  const details = given
+    .map(([name, v]) => ({ field: name, result: diagramChecks[name](v) }))
+    .filter(({ result }) => result !== true)
+    .map(({ field, result }) => ({ field, message: result }));
+  if (details.length > 0) return next(badRequest('Invalid diagram data', details));
+  req.diagramFields = Object.fromEntries(given);
+  return next();
+};
 const validateComment = validator(commentChecks, 'Invalid comment data', {}, 'commentFields');
 const validateCommentText = validator({ text: commentChecks.text }, 'Invalid comment data', {}, 'commentFields');
 
 // Only ?owner= and ?tag= with plain strings are accepted: ?owner[]=x arrives as an unknown key,
 // and a repeated parameter arrives as an array, so both are rejected before reaching MongoDB.
 // commentAuthor searches inside the nested comments array; limit and skip page the list.
-const FILTERS = ['owner', 'tag', 'commentAuthor'];
+const FILTERS = ['owner', 'tag', 'commentAuthor', 'q'];
+const SORTS = ['title', '-title', 'priority', '-priority', 'createdAt', '-createdAt'];
 const PAGING = { limit: [1, LIMITS.listLimitMax], skip: [0, LIMITS.listSkipMax] };
 const inRange = (value, [min, max]) => /^\d{1,9}$/.test(value) && Number(value) >= min && Number(value) <= max;
 const validateListQuery = (req, _res, next) => {
@@ -62,10 +76,19 @@ const validateListQuery = (req, _res, next) => {
     .filter(([name, value]) => {
       if (typeof value !== 'string') return true;
       if (name in PAGING) return !inRange(value, PAGING[name]);
+      if (name === 'sort') return !SORTS.includes(value);
       return !FILTERS.includes(name) || value.trim() === '' || value.length > LIMITS.owner;
     })
-    .map(([field]) => ({ field, message: field in PAGING ? `must be an integer from ${PAGING[field][0]} to ${PAGING[field][1]}` : 'must be one of owner, tag, commentAuthor, limit, skip with a plain value' }));
+    .map(([field]) => ({
+      field,
+      message:
+        field in PAGING
+          ? `must be an integer from ${PAGING[field][0]} to ${PAGING[field][1]}`
+          : field === 'sort'
+            ? `must be one of ${SORTS.join(', ')}`
+            : 'must be one of owner, tag, commentAuthor, q, sort, limit, skip with a plain value',
+    }));
   return details.length ? next(badRequest('Invalid query parameters', details)) : next();
 };
 
-module.exports = { validateListQuery, parseId, parseCommentId, validateDiagram, validateComment, validateCommentText };
+module.exports = { validatePatch, validateListQuery, parseId, parseCommentId, validateDiagram, validateComment, validateCommentText };

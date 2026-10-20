@@ -170,8 +170,7 @@ test('a body over the size limit answers 413', async () => {
 
 test('unsupported methods answer 405 with an Allow header', async () => {
   for (const [method, path, allow] of [
-    ['PATCH', '/diagrams/1', 'GET, PUT, DELETE'],
-    ['POST', '/diagrams/1', 'GET, PUT, DELETE'],
+    ['POST', '/diagrams/1', 'GET, PUT, PATCH, DELETE'],
     ['DELETE', '/diagrams', 'GET, POST'],
     ['PUT', '/diagrams', 'GET, POST'],
     ['GET', `/diagrams/${MISSING_ID}/comments`, 'POST'],

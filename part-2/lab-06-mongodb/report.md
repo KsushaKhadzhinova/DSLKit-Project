@@ -77,7 +77,7 @@
 
 Порядок запуска: скопировать `.env.example` в `.env` и вписать `MONGODB_URI`, выполнить `npm run seed`, затем `npm run dev`. Сид удаляет демонстрационные документы по названию и вставляет три диаграммы, поэтому его можно запускать повторно. Проверка на локальном `mongod` показала, что список возвращает диаграммы с вложенными комментариями и тегами, а запрос с параметром `tag=shop` возвращает две диаграммы из трёх.
 
-Всего 41 автоматический тест. Девятнадцать проверяют основные маршруты: корректные и некорректные идентификаторы, создание, замену с сохранением комментариев, удаление, ошибки 400, 404, 405 и 413, ответ 500 без утечки текста ошибки. Одиннадцать проверяют вложенные структуры: фильтр по тегу и владельцу, добавление, изменение и удаление комментария, недоступность чужого комментария, проверку схемы на уровне модели, индексы и перевод ошибки Mongoose в ответ 400. Ещё одиннадцать проверяют защиту данных: операторы вроде `$ne` в теле и в параметрах запроса, пробельные значения, пределы из `limits.json` на границе и за ней, целочисленный приоритет, ограничение размера тела и наличие времени создания у каждой записи. Тесты запускаются на временном экземпляре MongoDB через `mongodb-memory-server`, поэтому рабочая база не затрагивается. Те же команды `npm test` проверяют сборку и оформление этого отчёта. Скриншоты кластера Atlas, запросов в Postman и данных в MongoDB Compass в этот вариант отчёта не включены.
+К маршрутам добавлены частичное изменение `PATCH /diagrams/:id`, сортировка `?sort=title` или `?sort=-priority`, счётчик записей (маршрут `/diagrams/count` и заголовок `X-Total-Count` в списке) и поиск `?q=` по текстовому индексу заголовка и исходного кода. Всего 92 автоматических теста. Девятнадцать проверяют основные маршруты: корректные и некорректные идентификаторы, создание, замену с сохранением комментариев, удаление, ошибки 400, 404, 405 и 413, ответ 500 без утечки текста ошибки. Одиннадцать проверяют вложенные структуры: фильтр по тегу и владельцу, добавление, изменение и удаление комментария, недоступность чужого комментария, проверку схемы на уровне модели, индексы и перевод ошибки Mongoose в ответ 400. Десять проверяют `PATCH`, сортировку, счётчик и текстовый поиск. Двадцать восемь проверяют неправильные действия пользователя: пустое, оборванное и не-JSON тело, неверные типы, пробельные значения, значения за пределами, поддельные поля, внедрение операторов, неверные идентификаторы, повторные и параллельные запросы, остановку базы. Ещё одиннадцать проверяют защиту данных: операторы вроде `$ne` в теле и в параметрах запроса, пробельные значения, пределы из `limits.json` на границе и за ней, целочисленный приоритет, ограничение размера тела и наличие времени создания у каждой записи. Тесты запускаются на временном экземпляре MongoDB через `mongodb-memory-server`, поэтому рабочая база не затрагивается. Те же команды `npm test` проверяют сборку и оформление этого отчёта. Скриншоты кластера Atlas, запросов в Postman и данных в MongoDB Compass в этот вариант отчёта не включены.
 
 ## Ответы на контрольные вопросы
 
@@ -89,7 +89,7 @@
 
 ## Заключение
 
-В лабораторной работе сервер DSLKit из лабораторной работы 2 переведён с Sequelize на Mongoose. Коллекция `diagrams` хранится в MongoDB, маршруты CRUD сохранили адреса и формат ответов, а идентификаторы стали строками `ObjectId`. Теги и комментарии лежат внутри документа диаграммы, что заменяет несколько таблиц и соединений одним запросом. Для массива комментариев реализованы добавление, изменение элемента позиционным оператором и удаление. Строка подключения вынесена в переменную окружения, схема проверяет данные, а 41 тест подтверждает поведение API на временной базе. Не выполнено подключение к MongoDB Atlas и не приложены скриншоты.
+В лабораторной работе сервер DSLKit из лабораторной работы 2 переведён с Sequelize на Mongoose. Коллекция `diagrams` хранится в MongoDB, маршруты CRUD сохранили адреса и формат ответов, а идентификаторы стали строками `ObjectId`. Теги и комментарии лежат внутри документа диаграммы, что заменяет несколько таблиц и соединений одним запросом. Для массива комментариев реализованы добавление, изменение элемента позиционным оператором и удаление. Строка подключения вынесена в переменную окружения, схема проверяет данные, а 92 теста подтверждают поведение API на временной базе. Не выполнено подключение к MongoDB Atlas и не приложены скриншоты.
 
 ## Приложение А (обязательное) Листинг файла db.js
 
@@ -188,6 +188,9 @@ const diagramSchema = new mongoose.Schema(
 // Multikey index on the nested field, used by ?commentAuthor=.
 diagramSchema.index({ 'comments.author': 1 });
 
+// Text index on the title and the source: used by ?q= through $text.
+diagramSchema.index({ title: 'text', sourceCode: 'text' });
+
 const Diagram = mongoose.models.Diagram || mongoose.model('Diagram', diagramSchema);
 
 module.exports = { Diagram };
@@ -196,6 +199,7 @@ module.exports = { Diagram };
 ## Приложение Г (обязательное) Листинг файла diagrams.controller.js
 
 ```js
+const mongoose = require('mongoose');
 const { notFound } = require('../errors');
 const { LIMITS } = require('../models/diagram.constants');
 
@@ -204,7 +208,8 @@ const missingComment = (id) => notFound(`Comment ${id} not found`);
 
 // ?owner=anna&tag=shop narrows the list; tag matches when the tags array contains the value.
 // commentAuthor looks inside the nested comments array with the dotted path comments.author.
-const listFilter = ({ owner, tag, commentAuthor }) => ({
+const listFilter = ({ owner, tag, commentAuthor, q }) => ({
+  ...(typeof q === 'string' && { $text: mongoose.trusted({ $search: q }) }),
   ...(typeof owner === 'string' && { owner }),
   ...(typeof tag === 'string' && { tags: tag }),
   ...(typeof commentAuthor === 'string' && { 'comments.author': commentAuthor }),
@@ -217,8 +222,15 @@ const createDiagramsController = ({ Diagram }) => ({
   list: async (req, res) => {
     const limit = Number(req.query.limit ?? LIMITS.listLimitMax);
     const skip = Number(req.query.skip ?? 0);
-    res.json(await Diagram.find(listFilter(req.query)).sort({ _id: 1 }).skip(skip).limit(limit));
+    const sortKey = req.query.sort;
+    const sort = sortKey ? { [sortKey.replace('-', '')]: sortKey.startsWith('-') ? -1 : 1, _id: 1 } : { _id: 1 };
+    const filter = listFilter(req.query);
+    res.set('X-Total-Count', String(await Diagram.countDocuments(filter)));
+    res.json(await Diagram.find(filter).sort(sort).skip(skip).limit(limit));
   },
+
+  // The record counter: how many diagrams match the same filters as the list.
+  count: async (req, res) => res.json({ count: await Diagram.countDocuments(listFilter(req.query)) }),
 
   // Aggregation pipeline: group by notation, count the diagrams and average the priority, then sort the groups.
   stats: async (_req, res) =>
@@ -242,6 +254,12 @@ const createDiagramsController = ({ Diagram }) => ({
 
   replace: async (req, res, next) => {
     const diagram = await Diagram.findByIdAndUpdate(req.diagramId, req.diagramFields, options);
+    return diagram ? res.json(diagram) : next(missing(req.diagramId));
+  },
+
+  // PATCH changes only the fields that were sent; comments stay untouched.
+  patch: async (req, res, next) => {
+    const diagram = await Diagram.findByIdAndUpdate(req.diagramId, { $set: req.diagramFields }, options);
     return diagram ? res.json(diagram) : next(missing(req.diagramId));
   },
 
@@ -284,7 +302,7 @@ module.exports = { createDiagramsController };
 ```js
 const { Router } = require('express');
 const { HttpError } = require('../errors');
-const { validateListQuery, parseId, parseCommentId, validateDiagram, validateComment, validateCommentText } = require('../middleware/validate');
+const { validatePatch, validateListQuery, parseId, parseCommentId, validateDiagram, validateComment, validateCommentText } = require('../middleware/validate');
 
 const methodNotAllowed = (allow) => (_req, res, next) => {
   res.set('Allow', allow);
@@ -294,13 +312,15 @@ const methodNotAllowed = (allow) => (_req, res, next) => {
 const createDiagramsRouter = (controller) => {
   const router = Router();
   router.route('/').get(validateListQuery, controller.list).post(validateDiagram, controller.create).all(methodNotAllowed('GET, POST'));
+  router.route('/count').get(validateListQuery, controller.count).all(methodNotAllowed('GET'));
   router.route('/stats').get(controller.stats).all(methodNotAllowed('GET'));
   router
     .route('/:id')
     .get(parseId, controller.get)
     .put(parseId, validateDiagram, controller.replace)
+    .patch(parseId, validatePatch, controller.patch)
     .delete(parseId, controller.remove)
-    .all(methodNotAllowed('GET, PUT, DELETE'));
+    .all(methodNotAllowed('GET, PUT, PATCH, DELETE'));
   router.route('/:id/comments').post(parseId, validateComment, controller.addComment).all(methodNotAllowed('POST'));
   router
     .route('/:id/comments/:commentId')
