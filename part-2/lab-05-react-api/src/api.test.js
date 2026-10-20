@@ -45,6 +45,15 @@ describe('requests', () => {
   });
 });
 
+describe('paging parameters', () => {
+  it('sends limit and offset together with the search text, and omits an offset of 0', async () => {
+    await fetchDiagrams('ord', undefined, { limit: 20, offset: 40 });
+    expect(sent.params).toEqual({ search: 'ord', limit: 20, offset: 40 });
+    await fetchDiagrams('', undefined, { limit: 20, offset: 0 });
+    expect(sent.params).toEqual({ limit: 20 });
+  });
+});
+
 describe('401 handling', () => {
   it('removes the token and announces the logout when a saved token is rejected', async () => {
     localStorage.setItem('token', 'old');
@@ -74,7 +83,9 @@ describe('401 handling', () => {
 
 describe('errorMessage', () => {
   it('uses the server message and field details', () => {
-    expect(errorMessage({ response: { status: 400, data: { error: 'Invalid', details: [{ field: 'title', message: 'empty' }] } } })).toBe('Invalid – title: empty');
+    expect(errorMessage({ response: { status: 400, data: { error: 'Invalid', details: [{ field: 'title', message: 'empty' }] } } })).toBe(
+      'Invalid – title: empty',
+    );
   });
   it('falls back to the status when the body has no message', () => {
     expect(errorMessage({ response: { status: 502 } })).toBe('Ошибка сервера (502)');

@@ -212,7 +212,7 @@ button.nav__link {
   }
 
   .form__row {
-    grid-template-columns: 1fr 10rem 1fr;
+    grid-template-columns: 1fr 10rem;
     align-items: start;
   }
 }

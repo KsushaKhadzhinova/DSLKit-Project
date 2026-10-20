@@ -3,5 +3,6 @@
   "sourceCode": { "minLength": 1, "maxLength": 10000 },
   "email": { "maxLength": 254 },
   "password": { "minLength": 8, "maxBytes": 72 },
-  "searchDebounceMs": 400
+  "searchDebounceMs": 400,
+  "pageSize": 20
 }

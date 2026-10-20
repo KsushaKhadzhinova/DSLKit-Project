@@ -44,7 +44,7 @@ The `useDiagrams` hook keeps the list, the loading flag and the error, and reque
 
 Figure 2 – Loading indicator while the server answers slowly
 
-The loaded list is shown in figure 3. Every record has a "Создана" field with the exact time, so the records differ visually.
+The first request asks not for the whole list but for one page: `limit=20&offset=0`. The server gives the size of the whole list in the `X-Total-Count` header, and the hook keeps it together with the number of loaded records. The loaded list is shown in figure 3. Every record has a "Создана" field with the exact time, so the records differ visually.
 
 ![Diagram list](figures/03-list.png)
 
@@ -96,19 +96,29 @@ The client does not send a request on every letter. The `useDebouncedValue` hook
 
 Figure 9 – List after a search for the word "order"
 
-### 3.6 Input Validation
+### 3.6 Loading in Parts
 
-The form checks the values before sending. The title and the source code cannot be empty or made of spaces, the title is at most 80 characters, the source code is at most 10000, the password is from 8 to 72 bytes. The password length is counted in bytes, because the bcrypt hash on the server uses only the first 72 bytes, and a Russian letter takes two bytes. The limits are in the `limits.json` file and match the server limits. The file is shown in Appendix E, and the check functions in Appendix D. The server repeats the same check, so the client cannot be bypassed.
+The server can give the list in pages through the `limit` and `offset` parameters, so the client shows the first 20 records, the line "Показано N из M" and the "Загрузить ещё" button, as in figure 10. A click requests the next page with an offset equal to the number of records already loaded and appends it to the end of the list without a reset. While a page is loading, the button is disabled and shows "Загрузка…", so a double click sends one request. A record added in this session does not move the offset of the next page, and the deletion of a loaded record lowers it, so records are neither skipped nor doubled. If the server did not send the size of the list, the button is not shown. A change of the search text cancels the page loading for the old search, and a late answer does not overwrite the new list. A page loading error is shown as a notice, the list stays in place and the button works again.
 
-### 3.7 Testing
+![Load more](figures/10-load-more.png)
 
-The main component and its states are shown in Appendix C. The work is covered by 42 automated Vitest tests with a mocked server. The tests cover the loading and error states, retry, optimistic add, delete and edit with rollback, search with cancellation of the previous request, login and logout, the token header and the handling of code 401, a double click on delete, records with a temporary identifier, and server markup shown as plain text. The server part with CORS and search is covered by ten tests in laboratory work 3. For a manual check, start the server with `npm run dev` in the `part-2/lab-03-auth` folder and the client with the same command in the `part-2/lab-05-react-api` folder. The screenshots for figures 1–9 are taken by the `shots/shots.mjs` script.
+Figure 10 – The first page of the list with the counter and the "Загрузить ещё" button
+
+While an edit or a delete is running, the card gets the "Сохраняется…" mark and `aria-busy`, its buttons are disabled, and a line "Сохранение на сервере…" with an indicator is shown above the list and disappears after the answer.
+
+### 3.7 Input Validation
+
+The form checks the values before sending. The title and the source code cannot be empty or made of spaces, the title is at most 80 characters, the source code is at most 10000, the password is from 8 to 72 bytes. The title and source code fields have the `maxLength` attribute, the source code is typed into a multi-line field with a character counter, and the check stays in case the attribute is bypassed. The password length is counted in bytes, because the bcrypt hash on the server uses only the first 72 bytes, and a Russian letter takes two bytes. The limits are in the `limits.json` file and match the server limits. The file is shown in Appendix E, and the check functions in Appendix D. The server repeats the same check, so the client cannot be bypassed.
+
+### 3.8 Testing
+
+The main component and its states are shown in Appendix C. The work is covered by 69 automated Vitest tests with a mocked server. The tests cover the loading and error states, retry, optimistic add, delete and edit with rollback, search with cancellation of the previous request, login and logout, the token header and the handling of code 401, a double click on delete, loading in parts (a double click, a page error, a late answer of the old search, duplicates, the offset shift), the progress indicator of edit and delete, the limit and the counter of the multi-line field, records with a temporary identifier, and server markup shown as plain text. The server part with CORS and search is covered by ten tests in laboratory work 3. For a manual check, start the server with `npm run dev` in the `part-2/lab-03-auth` folder and the client with the same command in the `part-2/lab-05-react-api` folder. The screenshots for figures 1–10 are taken by the `shots/shots.mjs` script.
 
 Repository branch: 25.
 
 ## Conclusion
 
-The React client works with the server API: it receives the list with a loading indicator and a retry button, adds, edits and deletes records with optimistic updates and rollback, puts the token into every request and searches on the server with a delayed request and cancellation. All calls are collected in one module, and the value limits are moved to a separate file. The work gives a ready base for integrating the client into the course project.
+The React client works with the server API: it receives the list with a loading indicator and a retry button, adds, edits and deletes records with optimistic updates and rollback, puts the token into every request and searches on the server with a delayed request and cancellation, and loads the list in parts with the "Загрузить ещё" button. All calls are collected in one module, and the value limits are moved to a separate file. The work gives a ready base for integrating the client into the course project.
 
 ## Appendix A (mandatory) Listing of api.js
 
@@ -164,8 +174,15 @@ api.interceptors.response.use(
 export const register = (email, password) => api.post('/auth/register', { email, password });
 export const login = (email, password) => api.post('/auth/login', { email, password });
 
-// The search text is a query parameter; the signal lets the caller cancel the request.
-export const fetchDiagrams = (search = '', signal) => api.get('/diagrams', { params: search ? { search } : undefined, signal });
+// The search text, the page size and the offset are query parameters (the server reads ?search=, ?limit= and ?offset=);
+// the signal lets the caller cancel the request. The size of the whole list comes back in the X-Total-Count header.
+export const fetchDiagrams = (search = '', signal, { limit, offset } = {}) => {
+  const params = {};
+  if (search) params.search = search;
+  if (limit !== undefined) params.limit = limit;
+  if (offset) params.offset = offset;
+  return api.get('/diagrams', { params: Object.keys(params).length > 0 ? params : undefined, signal });
+};
 export const addDiagram = (diagram) => api.post('/diagrams', diagram);
 export const updateDiagram = (id, diagram) => api.put(`/diagrams/${id}`, diagram);
 export const deleteDiagram = (id) => api.delete(`/diagrams/${id}`);
@@ -193,31 +210,65 @@ export default api;
 ```js
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { addDiagram, deleteDiagram, errorMessage, fetchDiagrams, isCanceled, updateDiagram } from '../api';
+import limits from '../limits.json';
 
 const isTemporary = (id) => typeof id === 'string' && id.startsWith('temp-');
 
-// Owns the server state of the list: loading, error, the items and the optimistic changes.
+// The server sends the size of the whole list in X-Total-Count. A missing or broken value means "unknown", then there is no next page.
+const readTotal = (response) => {
+  const value = Number(response.headers?.['x-total-count']);
+  return Number.isInteger(value) && value >= 0 ? value : null;
+};
+
+// Owns the server state of the list: loading, error, the items, the pages and the optimistic changes.
 export function useDiagrams(search) {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState(null);
   const [notice, setNotice] = useState(null);
   const [attempt, setAttempt] = useState(0);
+  // fetched: how many records of the server list are loaded (the offset of the next page), total: the size of the whole list.
+  const [paging, setPaging] = useState({ fetched: 0, total: null });
+  // Ids of records with a PUT or DELETE in flight, shown as a progress indicator.
+  const [busy, setBusy] = useState(() => new Set());
   const tempCounter = useRef(0);
-  // The latest list for the handlers, so a fast second click never works with an old copy.
+  // The latest values for the handlers, so a fast second click never works with an old copy.
   const itemsRef = useRef(items);
   itemsRef.current = items;
+  const pagingRef = useRef(paging);
+  pagingRef.current = paging;
   // Ids with a request in flight: a second delete or edit of the same record is ignored until the first one ends.
   const busyIds = useRef(new Set());
+  // Records added in this session: they are not part of the loaded pages, so they do not move the offset of the next page.
+  const localIds = useRef(new Set());
+  const moreController = useRef(null);
+  const loadingMoreRef = useRef(false);
+
+  const markBusy = (id) => {
+    busyIds.current.add(id);
+    setBusy(new Set(busyIds.current));
+  };
+  const unmarkBusy = (id) => {
+    busyIds.current.delete(id);
+    setBusy(new Set(busyIds.current));
+  };
+  const changeTotal = (delta) => setPaging((current) => (current.total === null ? current : { ...current, total: Math.max(0, current.total + delta) }));
 
   // The request is cancelled when the search text changes, on retry and when the component unmounts.
+  // A page that is being loaded for the old search is cancelled too, so its answer never reaches the new list.
   useEffect(() => {
     const controller = new AbortController();
     setLoading(true);
+    setLoadingMore(false);
+    loadingMoreRef.current = false;
     setError(null);
-    fetchDiagrams(search, controller.signal)
+    fetchDiagrams(search, controller.signal, { limit: limits.pageSize, offset: 0 })
       .then((response) => {
-        if (!controller.signal.aborted) setItems(response.data);
+        if (controller.signal.aborted) return;
+        localIds.current.clear();
+        setItems(response.data);
+        setPaging({ fetched: response.data.length, total: readTotal(response) });
       })
       .catch((failure) => {
         if (!isCanceled(failure) && !controller.signal.aborted) setError(errorMessage(failure));
@@ -225,23 +276,58 @@ export function useDiagrams(search) {
       .finally(() => {
         if (!controller.signal.aborted) setLoading(false);
       });
-    return () => controller.abort();
+    return () => {
+      controller.abort();
+      moreController.current?.abort();
+    };
   }, [search, attempt]);
 
   const retry = useCallback(() => setAttempt((n) => n + 1), []);
   const dismissNotice = useCallback(() => setNotice(null), []);
+
+  // "Load more": the next page is appended, the records already on the screen are never doubled.
+  // A second click while a page is loading is ignored.
+  const loadMore = useCallback(async () => {
+    const { fetched, total } = pagingRef.current;
+    if (loadingMoreRef.current || total === null || fetched >= total) return;
+    loadingMoreRef.current = true;
+    setLoadingMore(true);
+    const controller = new AbortController();
+    moreController.current = controller;
+    try {
+      const response = await fetchDiagrams(search, controller.signal, { limit: limits.pageSize, offset: fetched });
+      if (controller.signal.aborted) return;
+      const loaded = response.data;
+      loaded.forEach((record) => localIds.current.delete(record.id));
+      setItems((current) => {
+        const known = new Set(current.map((item) => item.id));
+        return [...current, ...loaded.filter((record) => !known.has(record.id))];
+      });
+      setPaging({ fetched: fetched + loaded.length, total: readTotal(response) ?? total });
+    } catch (failure) {
+      if (!isCanceled(failure) && !controller.signal.aborted) setNotice(`Не удалось загрузить ещё. ${errorMessage(failure)}`);
+    } finally {
+      if (!controller.signal.aborted) {
+        loadingMoreRef.current = false;
+        setLoadingMore(false);
+      }
+    }
+  }, [search]);
 
   // Optimistic add: the item appears at once with a temporary id, the real record replaces it on success.
   const add = useCallback(async (fields) => {
     tempCounter.current += 1;
     const tempId = `temp-${tempCounter.current}`;
     setItems((current) => [...current, { ...fields, id: tempId, createdAt: new Date().toISOString(), pending: true }]);
+    changeTotal(1);
     try {
       const { data } = await addDiagram(fields);
+      localIds.current.add(data.id);
       setItems((current) => current.map((item) => (item.id === tempId ? data : item)));
       return true;
     } catch (failure) {
       setItems((current) => current.filter((item) => item.id !== tempId));
+      changeTotal(-1);
       setNotice(`Не удалось добавить диаграмму. ${errorMessage(failure)}`);
       return false;
     }
@@ -253,18 +339,24 @@ export function useDiagrams(search) {
     const index = itemsRef.current.findIndex((item) => item.id === id);
     if (index < 0 || isTemporary(id) || busyIds.current.has(id)) return;
     const removed = itemsRef.current[index];
-    busyIds.current.add(id);
+    const wasLocal = localIds.current.delete(id);
+    markBusy(id);
     setItems((current) => current.filter((item) => item.id !== id));
+    changeTotal(-1);
+    if (!wasLocal) setPaging((current) => ({ ...current, fetched: Math.max(0, current.fetched - 1) }));
     try {
       await deleteDiagram(id);
     } catch (failure) {
       // 404 means the record is already gone, so the list is right and nothing is restored.
       if (failure.response?.status !== 404) {
         setItems((current) => (current.some((item) => item.id === id) ? current : [...current.slice(0, index), removed, ...current.slice(index)]));
+        changeTotal(1);
+        if (wasLocal) localIds.current.add(id);
+        else setPaging((current) => ({ ...current, fetched: current.fetched + 1 }));
         setNotice(`Не удалось удалить диаграмму. ${errorMessage(failure)}`);
       }
     } finally {
-      busyIds.current.delete(id);
+      unmarkBusy(id);
     }
   }, []);
 
@@ -273,7 +365,7 @@ export function useDiagrams(search) {
     const previous = itemsRef.current.find((item) => item.id === id);
     if (!previous || isTemporary(id) || busyIds.current.has(id)) return false;
     const { title, notation, sourceCode, priority } = { ...previous, ...changes };
-    busyIds.current.add(id);
+    markBusy(id);
     setItems((current) => current.map((item) => (item.id === id ? { ...item, ...changes } : item)));
     try {
       const { data } = await updateDiagram(id, { title, notation, sourceCode, priority });
@@ -284,11 +376,15 @@ export function useDiagrams(search) {
       setNotice(`Не удалось сохранить изменения. ${errorMessage(failure)}`);
       return false;
     } finally {
-      busyIds.current.delete(id);
+      unmarkBusy(id);
     }
   }, []);
 
-  return { items, loading, error, notice, retry, dismissNotice, add, remove, update };
+  const hasMore = paging.total !== null && paging.fetched < paging.total;
+  // Requests that are still running in the background: shown as one progress line for edits, deletes and adds.
+  const syncing = busy.size + items.filter((item) => item.pending).length;
+
+  return { items, loading, loadingMore, error, notice, busy, syncing, hasMore, total: paging.total, retry, dismissNotice, loadMore, add, remove, update };
 }
 ```
 
@@ -310,7 +406,8 @@ import { useDiagrams } from './hooks/useDiagrams';
 function Diagrams() {
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebouncedValue(search.trim(), limits.searchDebounceMs);
-  const { items, loading, error, notice, retry, dismissNotice, add, remove, update } = useDiagrams(debouncedSearch);
+  const { items, loading, loadingMore, error, notice, busy, syncing, hasMore, total, retry, dismissNotice, loadMore, add, remove, update } =
+    useDiagrams(debouncedSearch);
 
   return (
     <>
@@ -319,7 +416,15 @@ function Diagrams() {
         <label className="form__label" htmlFor="search">
           Поиск по названию
         </label>
-        <input id="search" className="form__input" type="search" autoComplete="off" value={search} maxLength={limits.title.maxLength} onChange={(e) => setSearch(e.target.value)} />
+        <input
+          id="search"
+          className="form__input"
+          type="search"
+          autoComplete="off"
+          value={search}
+          maxLength={limits.title.maxLength}
+          onChange={(e) => setSearch(e.target.value)}
+        />
       </div>
       {notice && (
         <div className="alert" role="alert">
@@ -348,12 +453,30 @@ function Diagrams() {
           <span className="note__text">Диаграмм не найдено.</span>
         </p>
       )}
+      {syncing > 0 && (
+        <p role="status" className="status">
+          <span className="spinner" aria-hidden="true"></span>
+          Сохранение на сервере…
+        </p>
+      )}
       {!error && (
         <ul className="cards">
           {items.map((diagram) => (
-            <DiagramItem key={diagram.id} diagram={diagram} onUpdate={update} onRemove={remove} />
+            <DiagramItem key={diagram.id} diagram={diagram} busy={busy.has(diagram.id)} onUpdate={update} onRemove={remove} />
           ))}
         </ul>
+      )}
+      {!error && !loading && total !== null && total > 0 && (
+        <p className="stats">
+          Показано {items.length} из {total}
+        </p>
+      )}
+      {!error && !loading && hasMore && (
+        <div className="actions">
+          <button type="button" className="button" disabled={loadingMore} aria-busy={loadingMore ? 'true' : undefined} onClick={loadMore}>
+            {loadingMore ? 'Загрузка…' : 'Загрузить ещё'}
+          </button>
+        </div>
       )}
     </>
   );
@@ -389,7 +512,9 @@ export default function App() {
         <div>
           <h1 className="page-title">{signedIn ? 'Диаграммы проекта' : 'Вход в DSLKit'}</h1>
           <p className="page-lead">
-            {signedIn ? 'Список хранится на сервере: запись появляется сразу, а при отказе сервера возвращается как было.' : 'Диаграммы хранятся на сервере и доступны после входа.'}
+            {signedIn
+              ? 'Список хранится на сервере: запись появляется сразу, а при отказе сервера возвращается как было.'
+              : 'Диаграммы хранятся на сервере и доступны после входа.'}
           </p>
         </div>
         {signedIn ? (
@@ -459,7 +584,8 @@ export const formatTime = (iso) => new Date(iso).toLocaleString('sv-SE');
   "sourceCode": { "minLength": 1, "maxLength": 10000 },
   "email": { "maxLength": 254 },
   "password": { "minLength": 8, "maxBytes": 72 },
-  "searchDebounceMs": 400
+  "searchDebounceMs": 400,
+  "pageSize": 20
 }
 ```
 

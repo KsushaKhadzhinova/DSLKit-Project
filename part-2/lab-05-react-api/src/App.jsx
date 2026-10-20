@@ -13,7 +13,8 @@ import { useDiagrams } from './hooks/useDiagrams';
 function Diagrams() {
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebouncedValue(search.trim(), limits.searchDebounceMs);
-  const { items, loading, error, notice, retry, dismissNotice, add, remove, update } = useDiagrams(debouncedSearch);
+  const { items, loading, loadingMore, error, notice, busy, syncing, hasMore, total, retry, dismissNotice, loadMore, add, remove, update } =
+    useDiagrams(debouncedSearch);
 
   return (
     <>
@@ -22,7 +23,15 @@ function Diagrams() {
         <label className="form__label" htmlFor="search">
           Поиск по названию
         </label>
-        <input id="search" className="form__input" type="search" autoComplete="off" value={search} maxLength={limits.title.maxLength} onChange={(e) => setSearch(e.target.value)} />
+        <input
+          id="search"
+          className="form__input"
+          type="search"
+          autoComplete="off"
+          value={search}
+          maxLength={limits.title.maxLength}
+          onChange={(e) => setSearch(e.target.value)}
+        />
       </div>
       {notice && (
         <div className="alert" role="alert">
@@ -51,12 +60,30 @@ function Diagrams() {
           <span className="note__text">Диаграмм не найдено.</span>
         </p>
       )}
+      {syncing > 0 && (
+        <p role="status" className="status">
+          <span className="spinner" aria-hidden="true"></span>
+          Сохранение на сервере…
+        </p>
+      )}
       {!error && (
         <ul className="cards">
           {items.map((diagram) => (
-            <DiagramItem key={diagram.id} diagram={diagram} onUpdate={update} onRemove={remove} />
+            <DiagramItem key={diagram.id} diagram={diagram} busy={busy.has(diagram.id)} onUpdate={update} onRemove={remove} />
           ))}
         </ul>
+      )}
+      {!error && !loading && total !== null && total > 0 && (
+        <p className="stats">
+          Показано {items.length} из {total}
+        </p>
+      )}
+      {!error && !loading && hasMore && (
+        <div className="actions">
+          <button type="button" className="button" disabled={loadingMore} aria-busy={loadingMore ? 'true' : undefined} onClick={loadMore}>
+            {loadingMore ? 'Загрузка…' : 'Загрузить ещё'}
+          </button>
+        </div>
       )}
     </>
   );
@@ -92,7 +119,9 @@ export default function App() {
         <div>
           <h1 className="page-title">{signedIn ? 'Диаграммы проекта' : 'Вход в DSLKit'}</h1>
           <p className="page-lead">
-            {signedIn ? 'Список хранится на сервере: запись появляется сразу, а при отказе сервера возвращается как было.' : 'Диаграммы хранятся на сервере и доступны после входа.'}
+            {signedIn
+              ? 'Список хранится на сервере: запись появляется сразу, а при отказе сервера возвращается как было.'
+              : 'Диаграммы хранятся на сервере и доступны после входа.'}
           </p>
         </div>
         {signedIn ? (
