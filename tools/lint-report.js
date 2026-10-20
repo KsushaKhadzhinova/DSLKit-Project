@@ -12,7 +12,7 @@ const L = {
     appendix: /^## Приложение [А-Я] – \S/,
     appendixStrict: /^## Приложение [А-Я] \(обязательное\) \S/,
     appendixRef: (letter) => new RegExp(`приложени\\S* ${letter}(?![А-Яа-яЁё])`, 'i'),
-    startsWithRef: /(?:^|[.!?]\s+)(?:Рисунок|Таблица|Рисунки|Таблицы) \d+(?! –)/m,
+    startsWithRef: /(?:^|[.!?]\s+)(?:Рисунок|Таблица|Рисунки|Таблицы) \d+(?!\d| –)/m,
     appendixAny: /^## Приложение/m,
     messages: {
       goal: 'Раздел «1 Цель работы» отсутствует или не пронумерован',
@@ -47,7 +47,7 @@ const L = {
     appendix: /^## Appendix [A-Z] – \S/,
     appendixStrict: /^## Appendix [A-Z] \(mandatory\) \S/,
     appendixRef: (letter) => new RegExp(`appendix ${letter}\\b`, 'i'),
-    startsWithRef: /(?:^|[.!?]\s+)(?:Figure|Table|Figures|Tables) \d+(?! –)/m,
+    startsWithRef: /(?:^|[.!?]\s+)(?:Figure|Table|Figures|Tables) \d+(?!\d| –)/m,
     appendixAny: /^## Appendix/m,
     messages: {
       goal: 'Section "1 Purpose of the Work" is missing',
