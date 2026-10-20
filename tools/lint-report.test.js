@@ -136,6 +136,10 @@ test('strict mode rejects semicolons and sentences that start with a figure or t
   has(lintReport(strictEn.replace('Text.', 'First; second.'), 'en', { strict: true }), 'Semicolon');
   has(lintReport(strictRu.replace('Текст.', 'Рисунок 2 показывает всё.'), 'ru', { strict: true }), 'начинается со ссылки');
   has(lintReport(strictEn.replace('Text.', 'Works. Table 3 shows all.'), 'en', { strict: true }), 'starts with a figure or table reference');
+  // A reference with a two-digit number is found too, and a caption with a two-digit number is not taken for a sentence start.
+  has(lintReport(strictRu.replace('Текст.', 'Рисунок 12 показывает всё.'), 'ru', { strict: true }), 'начинается со ссылки');
+  const caption = strictRu.replace('Текст.', ['Текст.', '', 'Рисунок 10 – Подпись'].join(String.fromCharCode(10)));
+  assert.ok(!lintReport(caption, 'ru', { strict: true }).some((e) => e.includes('начинается со ссылки')));
 });
 
 test('the default mode keeps the old appendix format and ignores the strict rules', () => {
