@@ -98,6 +98,41 @@ Sixty-one automated tests on `MemoryRouter` check all the pages, the catalog fil
 
 The Vite application contains eight routes, a menu with the active item highlighted, a dynamic route handling an unknown parameter, a 404 page a protected dashboard with simulated sign-in and programmatic navigation, a catalog filter through `useSearchParams`, lazy page loading, breadcrumbs and a section for the admin role only. `react-router-dom` 7 is chosen, its API for the tasks of this work matches v6.
 
+## Answers to Control Questions
+
+{{answers}}
+1. **How to pass a parameter through the URL?** Declare the segment `path="catalog/:id"` and read `const { id } = useParams()`.
+2. **What is `Outlet`?** The place in a nested wrapper route where the child page is inserted. The `Layout` of the project is built this way.
+3. **How to navigate programmatically?** Call the function from `useNavigate()`, for example `navigate('/dashboard')`.
+4. **How to protect a route?** Write a component that returns `<Navigate to="/login" replace />` when the user is not signed in and `<Outlet />` otherwise. In the project it is `PrivateRoute`.
+5. **How does `Link` differ from `NavLink`?** `NavLink` knows whether the link is active and sets `aria-current` and a class. It is used in the menu, and `Link` everywhere else.
+6. **How to create nested routes?** Put a `<Route>` inside the parent one and place `<Outlet />` in the parent element.
+7. **How to pass `state` without showing it in the URL?** Through `navigate(path, { state })` or `<Navigate state>`, and read it through `useLocation().state`.
+8. **What is `useNavigate`?** A hook that returns the navigation function. Going back is `navigate(-1)`.
+9. **How to handle an unknown parameter?** Look the data up by `id` and, if there is none, show the 404 page in place or redirect to `*`. The project shows `NotFound`.
+10. **How to get the current path?** `useLocation().pathname`.
+11. **How to make an active link?** `NavLink` with a function in `className`: `({ isActive }) => (isActive ? 'on' : 'off')`.
+12. **How to make a redirect?** Render `<Navigate to="/" replace />`.
+13. **How to check the user role?** In a wrapper component compare `user.role` with the required one and show 403 or redirect when they differ. In the project this is `RoleRoute`, it lets only the admin role into `/admin`.
+14. **How to read the query string?** `const [params, setParams] = useSearchParams()` and `params.get('sort')`. The catalog of the project keeps its filter in `?q=` and `?sort=` this way.
+15. **How to set an optional parameter?** Write two routes or use `path="catalog/:id?"`, where the question mark makes the segment optional.
+16. **How to handle all non-existent routes?** Add `<Route path="*" element={<NotFound />} />` as the last one.
+17. **How to use `useLocation`?** It returns an object with `pathname`, `search`, `hash` and `state`, and the query parameters are easier to parse with `URLSearchParams`.
+18. **How to nest one `Routes` in another?** The parent route ends with `/*`, and the component declares its own `<Routes>` with relative paths inside.
+19. **How to replace an entry in the history?** `navigate(path, { replace: true })` or the `replace` attribute of `Link` and `Navigate`.
+20. **How to place the application not at the server root?** Pass `basename="/app"` to `BrowserRouter` and set `base` in the bundler.
+21. **How to load pages lazily?** Declare `const Page = lazy(() => import('./Page'))` and wrap the page output in `<Suspense fallback=...>`. The project does this for the catalog, the dashboard and the admin page.
+22. **How to protect a route with the `useAuth` hook?** The hook returns `isAuth` from the context, and `PrivateRoute` decides by it. In the project the hook is in `auth.jsx`.
+23. **How to make breadcrumbs?** Split `pathname` by slashes and build a chain of links of the accumulated paths. In the project this is the `Breadcrumbs` component.
+24. **How to pass parameters to a component through `element`?** Write `element={<Page title="Каталог" />}`.
+25. **How does `BrowserRouter` differ from `HashRouter`?** The first uses ordinary addresses and needs the server set up to return `index.html`, the second keeps the path after `#` and works on static hosting without setup.
+26. **How to make a modal window with its own route?** Nest the modal route in the gallery page and show it through `Outlet` over the content, closing is `navigate(-1)`.
+27. **How to test routing?** Wrap the component in `MemoryRouter initialEntries={['/catalog/2']}` and check the rendering and the transitions. The tests of the project are written this way.
+28. **How to set the style of the active route?** Through the `className` or `style` function of `NavLink`, which receives `isActive`.
+29. **How to warn about unsaved data when leaving?** Use `useBlocker` in a data router or the `beforeunload` event for closing the tab.
+30. **Can several `Routes` be used?** Yes, each `Routes` matches the path independently, so they are used for modular routing and side panels.
+{{/answers}}
+
 ## Appendix A (mandatory) Key Code Fragments
 
 ```jsx

@@ -98,6 +98,12 @@ Sixty-one automated tests on `MemoryRouter` check all the pages, the catalog fil
 
 The Vite application contains eight routes, a menu with the active item highlighted, a dynamic route handling an unknown parameter, a 404 page a protected dashboard with simulated sign-in and programmatic navigation, a catalog filter through `useSearchParams`, lazy page loading, breadcrumbs and a section for the admin role only. `react-router-dom` 7 is chosen, its API for the tasks of this work matches v6.
 
+## Answers to Control Questions
+
+25. **How does `BrowserRouter` differ from `HashRouter`?** The first uses ordinary addresses and needs the server set up to return `index.html`, the second keeps the path after `#` and works on static hosting without setup.
+26. **How to make a modal window with its own route?** Nest the modal route in the gallery page and show it through `Outlet` over the content, closing is `navigate(-1)`.
+27. **How to test routing?** Wrap the component in `MemoryRouter initialEntries={['/catalog/2']}` and check the rendering and the transitions. The tests of the project are written this way.
+
 ## Appendix A (mandatory) Key Code Fragments
 
 ```jsx
