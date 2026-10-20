@@ -29,7 +29,7 @@ cp .env.example .env     # fill in POSTGRES_PASSWORD and JWT_SECRET, optionally 
 docker compose up --build
 ```
 
-Client: http://localhost:8080 (the port is set by `FRONTEND_PORT`). Server checks: http://localhost:8080/api/health and http://127.0.0.1:3000/health. Containers: `docker ps`. Stop: `docker compose down`, and with the database data removed: `docker compose down -v`.
+Ports from the task (80 and 5000): `FRONTEND_PORT=80`, `BACKEND_PORT=5000` in `.env`. Client: http://localhost:8080 (the port is set by `FRONTEND_PORT`). Server checks: http://localhost:8080/api/health and http://127.0.0.1:3000/health. Containers: `docker ps`. Stop: `docker compose down`, and with the database data removed: `docker compose down -v`.
 
 If Docker Hub is unavailable, put `REGISTRY=mirror.gcr.io/` (with the trailing slash) or another mirror address into `.env`.
 

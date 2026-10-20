@@ -40,7 +40,7 @@ The client image is built in two stages too, the listing is given in Appendix B.
 
 The listing is given in Appendix C. Containers talk by service name: the server connects to the database at `db:5432` and Nginx forwards requests to `backend:3000`. The database keeps its data in the named volume `pgdata`, so recreating the container does not erase it. This was checked: after `docker compose restart db` the users stayed in the table. The start order is set with `service_healthy` conditions: the server waits for the database and the client waits for the server.
 
-The application opens at `http://localhost:8080`. Port 80 is not used because it is often taken on work machines, and the value is changed with the `FRONTEND_PORT` variable. The result is shown in figure 2.
+The application opens at `http://localhost:8080`. Port 80 is not used because it is often taken on work machines, and the value is changed with the `FRONTEND_PORT` variable. The task text names ports 80 and 5000, they are obtained with `FRONTEND_PORT=80` and `BACKEND_PORT=5000` in `.env`. The stack is stopped with `docker compose down`, the containers stay listed by `docker ps` until then, and `docker compose down -v` removes the `pgdata` volume with the database data. The result is shown in figure 2.
 
 ![Login form in the browser](figures/02-app-login.png)
 
@@ -63,7 +63,7 @@ Eight additional requirements from the task list and several security measures a
 5. **Nginx reverse proxy.** Nginx serves the static files, returns `index.html` for the routes of the single-page application and forwards `/api/` to the server (Appendix D). The `X-Forwarded-For` header is passed and the server has `TRUST_PROXY=1`, so the rate limiter sees the real client address.
 6. **Running without root.** The server runs as `node` and Nginx as `nginx`. The server container is started with a read-only file system and without privileges (`cap_drop: ALL`, `no-new-privileges`).
 7. **The `.dockerignore` file.** It excludes `node_modules`, tests, reports and `.env` from the build context.
-8. **Registry mirror.** For the Republic of Belarus the `REGISTRY` variable is provided: the value `mirror.gcr.io/` is put before the base image names in both Dockerfiles and in Compose. The build and the pull of the PostgreSQL image through this mirror succeeded, and in the main run the images came from Docker Hub directly.
+8. **Registry mirror.** For the Republic of Belarus the `REGISTRY` variable is provided: the value `mirror.gcr.io/` is put before the base image names in both Dockerfiles and in Compose. The build and the pull of the PostgreSQL image through this mirror succeeded, and in the main run the images came from Docker Hub directly. Instead of the variable, a mirror can be set for the whole Docker daemon in `daemon.json` with the key `"registry-mirrors": ["https://mirror.gcr.io", "https://dockerhub.timeweb.cloud"]`. At the last edit of the report the Docker daemon was not running on the author machine, so the stack was not started again and the figures come from the earlier run.
 
 The state of the stack is confirmed by figure 4: the `/health` answers through the proxy and directly, the networks and the volume of the project.
 

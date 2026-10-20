@@ -29,7 +29,7 @@ cp .env.example .env     # заполните POSTGRES_PASSWORD и JWT_SECRET, �
 docker compose up --build
 ```
 
-Клиент: http://localhost:8080 (порт задаёт `FRONTEND_PORT`). Проверка сервера: http://localhost:8080/api/health и http://127.0.0.1:3000/health. Список контейнеров: `docker ps`. Остановка: `docker compose down`, с удалением данных базы: `docker compose down -v`.
+Порты из условия (80 и 5000): `FRONTEND_PORT=80`, `BACKEND_PORT=5000` в `.env`. Клиент: http://localhost:8080 (порт задаёт `FRONTEND_PORT`). Проверка сервера: http://localhost:8080/api/health и http://127.0.0.1:3000/health. Список контейнеров: `docker ps`. Остановка: `docker compose down`, с удалением данных базы: `docker compose down -v`.
 
 Если Docker Hub недоступен, впишите в `.env` строку `REGISTRY=mirror.gcr.io/` (с косой чертой в конце) или адрес другого зеркала.
 
