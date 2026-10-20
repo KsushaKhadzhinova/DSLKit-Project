@@ -35,6 +35,7 @@ test('every /diagrams route answers 401 without a token', async () => {
     ['GET', '/diagrams/1'],
     ['POST', '/diagrams'],
     ['PUT', '/diagrams/1'],
+    ['PATCH', '/diagrams/1'],
     ['DELETE', '/diagrams/1'],
   ];
   for (const [method, path] of routes) {
@@ -140,8 +141,8 @@ test('DELETE answers 204, then 404 for the same id', async () => {
 
 test('unsupported methods answer 405 with an Allow header', async () => {
   for (const [method, path, allow] of [
-    ['PATCH', '/diagrams/1', 'GET, PUT, DELETE, HEAD, OPTIONS'],
-    ['POST', '/diagrams/1', 'GET, PUT, DELETE, HEAD, OPTIONS'],
+    ['PATCH', '/diagrams', 'GET, POST, HEAD, OPTIONS'],
+    ['POST', '/diagrams/1', 'GET, PUT, PATCH, DELETE, HEAD, OPTIONS'],
     ['DELETE', '/diagrams', 'GET, POST, HEAD, OPTIONS'],
     ['PUT', '/diagrams', 'GET, POST, HEAD, OPTIONS'],
   ]) {
@@ -194,4 +195,56 @@ test('the largest INTEGER id is accepted and simply not found', async () => {
 test('a body over 100 kb answers 413', async () => {
   const raw = JSON.stringify({ ...valid, sourceCode: 'y'.repeat(101 * 1024) });
   assert.equal((await app.call('POST', '/diagrams', { token: alice, body: {}, raw })).res.status, 413);
+});
+
+test('PATCH by the owner changes only the sent fields and keeps the owner', async () => {
+  const id = await firstId();
+  const { res, body } = await app.call('PATCH', `/diagrams/${id}`, {
+    token: alice,
+    body: { title: '  New title  ', priority: 'low', ownerId: bobId, id: 500 },
+  });
+  assert.equal(res.status, 200);
+  assert.deepEqual(strip(body), { id, title: 'New title', notation: 'BPMN', sourceCode: 'start -> end', priority: 'low', ownerId: aliceId });
+  assert.equal((await app.models.Diagram.findByPk(id)).title, 'New title');
+});
+
+test('PATCH follows the PUT rules for access: 403 for another user, an admin may change any diagram, 404 for a missing one', async () => {
+  const id = await firstId();
+  assert.equal((await app.call('PATCH', `/diagrams/${id}`, { token: bob, body: { title: 'Hacked' } })).res.status, 403);
+  assert.equal((await app.models.Diagram.findByPk(id)).title, 'Order processing');
+  assert.equal((await app.call('PATCH', `/diagrams/${id}`, { token: admin, body: { title: 'By admin' } })).res.status, 200);
+  assert.equal((await app.call('PATCH', '/diagrams/9999', { token: alice, body: { title: 'x' } })).res.status, 404);
+  assert.equal((await app.call('PATCH', `/diagrams/${id}`, { body: { title: 'x' } })).res.status, 401);
+});
+
+test('PATCH checks every sent field, refuses an empty body and odd bodies and ids', async () => {
+  const id = await firstId();
+  const bad = await app.call('PATCH', `/diagrams/${id}`, { token: alice, body: { title: '   ', notation: 'XYZ', priority: 'urgent' } });
+  assert.equal(bad.res.status, 400);
+  assert.deepEqual(
+    bad.body.details.map((d) => d.field),
+    ['title', 'notation', 'priority'],
+  );
+  for (const body of [{}, { admin: true }, { id: 7, ownerId: bobId }]) {
+    assert.equal((await app.call('PATCH', `/diagrams/${id}`, { token: alice, body })).res.status, 400, JSON.stringify(body));
+  }
+  for (const raw of ['[]', 'null', '"text"', '5']) {
+    assert.equal((await app.call('PATCH', `/diagrams/${id}`, { token: alice, body: {}, raw })).res.status, 400, raw);
+  }
+  assert.equal((await app.call('PATCH', '/diagrams/abc', { token: alice, body: { title: 'x' } })).res.status, 400);
+  assert.equal((await app.models.Diagram.findByPk(id)).title, 'Order processing');
+});
+
+test('a real database failure gives 500 without internals: the diagrams table is gone while the server runs', async (t) => {
+  t.mock.method(console, 'error', () => {});
+  const other = await startServer();
+  try {
+    const token = await other.tokenFor('real@example.com');
+    await other.models.sequelize.query('DROP TABLE Diagrams');
+    const { res, body } = await other.call('GET', '/diagrams', { token });
+    assert.equal(res.status, 500);
+    assert.deepEqual(body, { error: 'Internal server error' });
+  } finally {
+    await other.close();
+  }
 });

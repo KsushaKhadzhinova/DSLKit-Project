@@ -9,9 +9,18 @@ const { allowMethods } = require('../middleware/http');
 const createUsersRouter = (controller, authenticate) => {
   const router = Router();
   const admin = [authenticate, requireRole('admin')];
-  router.route('/profile').get(authenticate, controller.profile).all(allowMethods(['GET']));
-  router.route('/users').get(...admin, controller.list).all(allowMethods(['GET']));
-  router.route('/users/:id/role').patch(...admin, parseId('userId', 'User'), validateRole, controller.setRole).all(allowMethods(['PATCH']));
+  router
+    .route('/profile')
+    .get(authenticate, controller.profile)
+    .all(allowMethods(['GET']));
+  router
+    .route('/users')
+    .get(...admin, controller.list)
+    .all(allowMethods(['GET']));
+  router
+    .route('/users/:id/role')
+    .patch(...admin, parseId('userId', 'User'), validateRole, controller.setRole)
+    .all(allowMethods(['PATCH']));
   router
     .route('/users/:id')
     .delete(...admin, parseId('userId', 'User'), controller.remove)

@@ -13,7 +13,14 @@ const createDiagramsController = ({ Diagram }) => ({
   // ?limit=&offset=&sort=&order= (see list-query.js) page and sort the result, the answer stays an array and X-Total-Count holds the full size.
   list: async (req, res) => {
     const { limit, offset, sort, order } = parseListQuery(req.query, SORTABLE);
-    const { count, rows } = await Diagram.findAndCountAll({ order: [[sort, order.toUpperCase()], ['id', 'ASC']], limit, offset });
+    const { count, rows } = await Diagram.findAndCountAll({
+      order: [
+        [sort, order.toUpperCase()],
+        ['id', 'ASC'],
+      ],
+      limit,
+      offset,
+    });
     res.set('X-Total-Count', String(count));
     res.json(rows);
   },
@@ -29,6 +36,14 @@ const createDiagramsController = ({ Diagram }) => ({
   },
 
   replace: async (req, res, next) => {
+    const diagram = await Diagram.findByPk(req.diagramId);
+    if (!diagram) return next(missing(req.diagramId));
+    if (!mayChange(req.user, diagram)) return next(forbidden('Only the owner or an admin can change this diagram'));
+    return res.json(await diagram.update(req.diagramFields));
+  },
+
+  // PATCH: only the sent fields change, the same owner-or-admin rule as PUT applies.
+  update: async (req, res, next) => {
     const diagram = await Diagram.findByPk(req.diagramId);
     if (!diagram) return next(missing(req.diagramId));
     if (!mayChange(req.user, diagram)) return next(forbidden('Only the owner or an admin can change this diagram'));
