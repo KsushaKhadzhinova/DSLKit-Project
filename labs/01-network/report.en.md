@@ -1,5 +1,23 @@
 # Laboratory Work 1. Network Protocol Analysis and Developer Tools
 
+## Contents
+
+- [1 Purpose of the Work](#1-purpose-of-the-work)
+- [2 Brief Theoretical Background](#2-brief-theoretical-background)
+- [3 Progress of the Work](#3-progress-of-the-work)
+  - [3.1 Site Selection and Justification](#31-site-selection-and-justification)
+  - [3.2 Method](#32-method)
+  - [3.3 Log Analysis Results](#33-log-analysis-results)
+  - [3.4 Graphical Presentation of Results](#34-graphical-presentation-of-results)
+  - [3.5 Interpretation of Results](#35-interpretation-of-results)
+  - [3.6 Working with the DevTools Panels](#36-working-with-the-devtools-panels)
+- [Conclusion](#conclusion)
+- [References](#references)
+- [Appendix A – Listing of analyze-har.js](#appendix-a--listing-of-analyze-harjs)
+- [Appendix B – Listing of figures.js](#appendix-b--listing-of-figuresjs)
+- [Appendix C – Listing of cli.js](#appendix-c--listing-of-clijs)
+- [Appendix D – Listing of the tests analyze-har.test.js](#appendix-d--listing-of-the-tests-analyze-hartestjs)
+
 ## 1 Purpose of the Work
 
 Gain practical skills in analysing web application network traffic: study the structure of HTTP/HTTPS requests and responses, headers, status codes, caching, cookies, security and timing on the example of a site close in topic to the DSLKit course project (a web IDE for diagrams as code).
@@ -393,6 +411,10 @@ Figure 14 – Page load with the Slow 4G profile
 ## Conclusion
 
 The draw.io site uses HTTPS and HTTP/2, serves static resources through the Cloudflare CDN with a 30 day cache, sets no cookies on the first visit and builds its protection on CSP, HSTS and `nosniff`. Most of the page weight, 6.40 MiB, comes from scripts (99 percent), so on a slow connection the load time grows 10.7 times, from 1.4 to 15.2 s. For DSLKit this means that heavy libraries (shapes, a WebAssembly core) must be cached for a long time, loaded lazily and compressed, while the HTML document should stay light.
+
+## References
+
+1. Laboratory work 1 "Network protocol analysis and developer tools": methodical instructions of the course ITiVP, module 01 (task, procedure, review questions).\n2. Module 01 materials "Internet architecture and network protocols", topic "Standardization organizations" (IETF, W3C, RFC): the theoretical basis of section 2.\n3. draw.io, a cloud diagram editor, the analysed site: https://app.diagrams.net/\n4. Network logs in HAR format recorded for this site on 14 October 2026 in Google Chrome 155: `labs/01-network/data/draw-io-normal.har` and `labs/01-network/data/draw-io-fast3g.har`.
 
 ## Appendix A – Listing of analyze-har.js
 
