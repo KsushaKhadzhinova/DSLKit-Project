@@ -1028,12 +1028,6 @@
   --problems-height: clamp(13rem, 23.6dvh, 18rem);
 }
 
-@media (min-width: 1024px) {
-  .app-page--editor {
-    --problems-height: clamp(13rem, 23.6dvh, 18rem);
-  }
-}
-
 .problems__tab {
   display: inline-flex;
   align-items: center;
