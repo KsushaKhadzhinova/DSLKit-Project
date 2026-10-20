@@ -42,11 +42,12 @@ Table 2 – API endpoints
 | `PUT /api/{resource}/:id`          | Full replacement                          | 200     |
 | `PATCH /api/{resource}/:id`        | Partial change                            | 200     |
 | `DELETE /api/{resource}/:id`       | Delete                                    | 204     |
+| `GET /api/users/:id/projects`      | Projects of one user                      | 200     |
 | `GET /api/projects/:id/diagrams`   | Diagrams of one project                   | 200     |
 | `POST /api/diagrams/:id/publish`   | Publish, repeating changes nothing        | 200     |
 | `POST /api/diagrams/:id/duplicate` | Copy of a diagram as a draft              | 201     |
 
-Lists accept `page` and `limit` for paging, `sort` for sorting (a minus sign means descending), `q` for search in text fields and any field name for an exact filter. A list response holds the array `data` and the object `meta` with the total count. The file `API.md` collects detailed request and response examples.
+Lists accept `page` and `limit` for paging, `sort` for sorting (a minus sign means descending), `q` for search in text fields and any field name for an exact filter. A list response holds the array `data` and the object `meta` with the total count. The route `GET /api/users/:id/projects` returns the projects of one user with the same list parameters and answers 404 for an unknown user. The file `API.md` collects detailed request and response examples.
 
 ### 3.3 Validation and errors
 
@@ -55,6 +56,20 @@ The schema of every resource sets the type, whether the field is required, the m
 ### 3.4 Verification
 
 Automatic tests start the server on a free port and check every method, the status codes, filters, sorting, paging, validation errors, the links between resources, the extra operations and the 500 response. Line and function coverage is 100 percent and branch coverage is above 98 percent. The command is `npm test` in the project folder. Manual checks in Postman or Insomnia can use the requests from `API.md`.
+
+### 3.5 Answers to the control questions
+
+25. What are "cross-resource links" and how are they implemented in a REST API (for example, getting the orders of a user)?
+
+    These are links between records of different resources, for example a project belongs to a user and a diagram belongs to a project. An API expresses a link in three ways. The first is a reference field in the record, in the work this is `ownerId` of a project and `projectId` of a diagram, and the server checks that such a record exists. The second is a nested route for reading, for example `GET /api/users/:id/projects` returns the projects of a user and `GET /api/projects/:id/diagrams` the diagrams of a project. The third is a list filter, and `GET /api/projects?ownerId=1` gives the same result. Nesting is kept at most two levels deep, and resource names are plural. The link guards deletion as well: a user with projects and a project with diagrams are not deleted, the answer is 409.
+
+26. Which status codes are used for redirects (3xx)? Are they needed in a REST API?
+
+    Code 301 means a permanent move of the address, 302 a temporary one, 307 and 308 do the same but keep the request method, 303 sends the client to another address with `GET`, and 304 says the cached response is still current. In Express a redirect is made by `res.redirect(status, url)`. A REST API needs redirects rarely: after `POST` it returns 201 with a `Location` header and the record itself instead of redirecting the client. Redirects are used when an address or an API version moves, and 304 for conditional requests with `ETag`. This work has no redirects.
+
+27. How do you state the possible error codes and their descriptions in the API documentation?
+
+    In OpenAPI each operation lists the codes in its `responses` section, for example `400`, `404` and `409`, and gives a description and a body schema for each. The common error schema is described once in `components` and attached by reference. In the work the documentation lives in `API.md`: the table of each route has a column with the possible error codes, and the "Errors" section shows the single response shape `{ "error": { "code", "message", "details" } }` and lists the `code` values with their status codes. That way a client knows which errors to expect and how to parse them.
 
 ## Conclusion
 
@@ -115,6 +130,19 @@ export const createApp = ({ stores = createStores(), writeError = console.error,
   app.use(express.json({ limit: '100kb' }));
 
   const api = express.Router();
+  // Link between resources: the projects that belong to one user. It is mounted before the standard router so it wins over /:id.
+  api.get('/users/:id/projects', (req, res) => {
+    const user = users.find(parseId(req.params.id));
+    if (!user) throw notFound('User');
+    res.json(
+      listItems(
+        projects.all().filter((p) => p.ownerId === user.id),
+        schemas.projects,
+        req.query,
+      ),
+    );
+  });
+  api.all('/users/:id/projects', methodsOnly('GET'));
   api.use(
     '/users',
     createResourceRouter({

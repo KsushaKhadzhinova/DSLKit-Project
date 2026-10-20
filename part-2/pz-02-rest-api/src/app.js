@@ -50,6 +50,19 @@ export const createApp = ({ stores = createStores(), writeError = console.error,
   app.use(express.json({ limit: '100kb' }));
 
   const api = express.Router();
+  // Link between resources: the projects that belong to one user. It is mounted before the standard router so it wins over /:id.
+  api.get('/users/:id/projects', (req, res) => {
+    const user = users.find(parseId(req.params.id));
+    if (!user) throw notFound('User');
+    res.json(
+      listItems(
+        projects.all().filter((p) => p.ownerId === user.id),
+        schemas.projects,
+        req.query,
+      ),
+    );
+  });
+  api.all('/users/:id/projects', methodsOnly('GET'));
   api.use(
     '/users',
     createResourceRouter({

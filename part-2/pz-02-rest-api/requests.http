@@ -55,6 +55,12 @@ Content-Type: application/json
 ### Search, sort and page -> 200
 GET {{base}}/diagrams?q=billing&sort=-title&page=1&limit=10
 
+### Projects of one user -> 200
+GET {{base}}/users/1/projects
+
+### Projects of an unknown user -> 404
+GET {{base}}/users/99/projects
+
 ### Diagrams of one project -> 200
 GET {{base}}/projects/1/diagrams
 

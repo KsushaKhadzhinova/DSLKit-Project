@@ -256,3 +256,46 @@ withApi('email is unique ignoring case, on create, PUT and PATCH', async ({ call
   assert.equal((await call('PUT', '/users/2', { name: 'Alan', email: 'alan@example.com' })).status, 200);
   assert.equal((await call('POST', '/users', { name: 'New', email: 'new@example.com' })).status, 201);
 });
+
+withApi('GET /users/:id/projects lists the projects of one user with the list options', async ({ call }) => {
+  const own = await call('GET', '/users/1/projects');
+  assert.equal(own.status, 200);
+  assert.deepEqual(
+    own.json.data.map((p) => p.id),
+    [1],
+  );
+  assert.deepEqual(own.json.meta, { page: 1, limit: 20, total: 1 });
+  assert.deepEqual(
+    (await call('GET', '/users/2/projects')).json.data.map((p) => p.name),
+    ['Billing'],
+  );
+  await call('POST', '/projects', { name: 'Second', ownerId: 1 });
+  await call('POST', '/projects', { name: 'Third', ownerId: 1 });
+  const page = await call('GET', '/users/1/projects?limit=2&page=2&sort=name');
+  assert.deepEqual(
+    page.json.data.map((p) => p.name),
+    ['Third'],
+  );
+  assert.equal(page.json.meta.total, 3);
+  assert.equal((await call('GET', '/users/1/projects?q=second')).json.data.length, 1);
+});
+
+withApi('GET /users/:id/projects answers 404 for a missing user, 400 for a bad id or query, 405 for other methods', async ({ call }) => {
+  assert.equal((await call('GET', '/users/99/projects')).status, 404);
+  assert.equal((await call('GET', '/users/99/projects')).json.error.code, 'not_found');
+  for (const id of ['abc', '0', '-1', '1.5', '0x1', '1e0', '9'.repeat(30)]) assert.equal((await call('GET', `/users/${id}/projects`)).status, 400, id);
+  assert.equal((await call('GET', '/users/1/projects?limit=0')).status, 400);
+  assert.equal((await call('GET', '/users/1/projects?sort=password')).status, 400);
+  const post = await call('POST', '/users/1/projects', {});
+  assert.equal(post.status, 405);
+  assert.equal(post.headers.get('allow'), 'GET, HEAD, OPTIONS');
+});
+
+withApi('a user without projects gets an empty list and a deleted project disappears from it', async ({ call }) => {
+  const user = (await call('POST', '/users', { name: 'New', email: 'new@example.com' })).json;
+  assert.deepEqual((await call('GET', `/users/${user.id}/projects`)).json, { data: [], meta: { page: 1, limit: 20, total: 0 } });
+  const project = (await call('POST', '/projects', { name: 'Mine', ownerId: user.id })).json;
+  assert.equal((await call('GET', `/users/${user.id}/projects`)).json.meta.total, 1);
+  await call('DELETE', `/projects/${project.id}`);
+  assert.equal((await call('GET', `/users/${user.id}/projects`)).json.meta.total, 0);
+});

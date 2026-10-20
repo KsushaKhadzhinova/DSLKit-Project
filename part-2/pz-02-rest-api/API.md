@@ -29,6 +29,7 @@ Extra operations:
 
 | Method | URL                       | Purpose                                                 | Success | Errors   |
 | ------ | ------------------------- | ------------------------------------------------------- | ------- | -------- |
+| `GET`  | `/users/:id/projects`     | Projects owned by one user, same query options as lists | 200     | 400, 404 |
 | `GET`  | `/projects/:id/diagrams`  | Diagrams of one project, same query options as lists    | 200     | 400, 404 |
 | `POST` | `/diagrams/:id/publish`   | Set status to `published`; repeating it changes nothing | 200     | 400, 404 |
 | `POST` | `/diagrams/:id/duplicate` | Copy a diagram as a draft titled "... (copy)"           | 201     | 400, 404 |
