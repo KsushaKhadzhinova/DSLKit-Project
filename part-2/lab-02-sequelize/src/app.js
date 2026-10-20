@@ -1,6 +1,8 @@
 const express = require('express');
 const { createDiagramsController } = require('./controllers/diagrams.controller');
 const { createDiagramsRouter } = require('./routes/diagrams.routes');
+const { createProjectsController } = require('./controllers/projects.controller');
+const { createProjectsRouter } = require('./routes/projects.routes');
 const { securityHeaders, requireJson } = require('./middleware/http');
 const { createRequestLogger } = require('./middleware/request-log');
 const { LIMITS } = require('./models/diagram.constants');
@@ -24,6 +26,7 @@ const createApp = (models) => {
   app.use(express.json({ limit: LIMITS.bodyBytes }));
   app.use(requireJson);
   app.use('/diagrams', createDiagramsRouter(createDiagramsController(models)));
+  app.use('/projects', createProjectsRouter(createProjectsController(models)));
   app.use(routeNotFound);
   app.use(errorHandler);
   return app;

@@ -104,7 +104,7 @@ test('HEAD answers like GET without a body and OPTIONS lists the methods with 20
   assert.equal((await fetch(`${base}/diagrams/9999`, { method: 'HEAD' })).status, 404);
   const options = await fetch(`${base}/diagrams/1`, { method: 'OPTIONS' });
   assert.equal(options.status, 204);
-  assert.equal(options.headers.get('allow'), 'GET, PUT, DELETE, HEAD, OPTIONS');
+  assert.equal(options.headers.get('allow'), 'GET, PUT, PATCH, DELETE, HEAD, OPTIONS');
 });
 
 test('security headers are set on every answer and the framework is not named', async () => {
