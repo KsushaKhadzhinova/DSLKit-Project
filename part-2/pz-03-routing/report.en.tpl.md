@@ -25,15 +25,16 @@ Table 1 – Application routes
 | `/login`       | Sign in (simulated)    | open                            |
 | `/logout`      | Sign out, redirect `/` | open                            |
 | `/dashboard`   | Dashboard              | after sign-in only              |
+| `/admin`       | Admin section          | admin role only, else 403       |
 | `*`            | 404                    | open                            |
 
 ### 3.2 Menu and Dynamic Route
 
-The menu is built with `NavLink`, the function in `className` receives the `isActive` flag and adds the active item class. The home link has `end` so that it does not stay active on every path. The `/catalog/:id` page reads the parameter with `useParams`, looks up the template in the data and, if none is found, renders the 404 page in place with the `NotFound` component, the address does not change. The "Back" button calls `navigate(-1)`. The code is given in Appendix A.
+The menu is built with `NavLink`, the function in `className` receives the `isActive` flag and adds the active item class. The home link has `end` so that it does not stay active on every path. The `/catalog/:id` page reads the parameter with `useParams`, looks up the template in the data and, if none is found, renders the 404 page in place with the `NotFound` component, the address does not change. The "Back" button calls `navigate(-1)`. Breadcrumbs stand above the content: the `Breadcrumbs` component splits `pathname` into parts and builds the trail "Главная / Каталог / template name", the last item is marked with `aria-current`. For an unknown address and an unknown `id` no trail is shown. The catalog, dashboard and admin pages load lazily through `lazy`, and `Layout` wraps `Outlet` in `Suspense` with the message "Загрузка страницы…", so the menu stays on the screen while the page code downloads. The catalog reads its filter from the address with the `useSearchParams` hook: the link `/catalog?q=UML&sort=title` immediately shows the filtered and sorted list. The query is cut to the limit from `limits.json`, a whitespace-only query and an unknown sort are ignored, and the query text is output as text. The code is given in Appendix A.
 
 ### 3.3 Protected Route and Fake Login
 
-The `PrivateRoute` component works as a wrapper route: for a signed-in user it renders `Outlet`, otherwise it redirects to `/login` and passes the whole requested address, with the query and the hash, in `state` without showing it in the address bar. The login form asks for a user name. An empty name and a name made of spaces are rejected, the length limit comes from the file `src/limits.json`. The session is kept in the `AuthProvider` state and in `localStorage`, and a record without a valid name does not count as a login. After the login `Login` returns to the requested page or to `/dashboard`. The return address is checked by the `safeReturnPath` function: foreign addresses that start with `//` or with a protocol name are ignored. Logout is a separate route `/logout` that clears the session and returns to the home page declaratively. A login or logout in another tab is picked up by the `storage` event.
+The `PrivateRoute` component works as a wrapper route: for a signed-in user it renders `Outlet`, otherwise it redirects to `/login` and passes the whole requested address, with the query and the hash, in `state` without showing it in the address bar. The login form asks for a user name. An empty name and a name made of spaces are rejected, the length limit comes from the file `src/limits.json`. The session is kept in the `AuthProvider` state and in `localStorage`, and a record without a valid name does not count as a login. After the login `Login` returns to the requested page or to `/dashboard`. The return address is checked by the `safeReturnPath` function: foreign addresses that start with `//` or with a protocol name are ignored. Logout is a separate route `/logout` that clears the session and returns to the home page declaratively. A login or logout in another tab is picked up by the `storage` event. The role is derived from the name: the name `admin` in any letter case gives the admin role, other names give the user role. The `RoleRoute` component is nested in `PrivateRoute` and lets only the admin role through to `/admin`, while other roles get the 403 page in the site style. A guest on `/admin` first lands on the sign-in and returns to `/admin` after signing in as admin.
 
 A server check is impossible in this work, so the guard hides pages in the interface and does not protect data. In a real project the server checks access by a token.
 
@@ -77,13 +78,25 @@ After the login the requested page is returned, and figure 5 shows it.
 
 Figure 5 – Dashboard after login with the greeting and the "Выйти" menu item
 
+The catalog filter is kept in the address, as in figure 6.
+
+![Catalog filter](figures/12-catalog-filter.png)
+
+Figure 6 – The catalog at the link `/catalog?q=UML&sort=title` with breadcrumbs and the counter of found items
+
+A plain user sees the 403 error on the admin page, as in figure 7.
+
+![403 page](figures/13-forbidden.png)
+
+Figure 7 – The 403 page for a user without the admin role
+
 ### 3.7 Testing
 
-Forty automated tests on `MemoryRouter` check all the pages, the `NavLink` highlight, the dynamic route, the 404 page, the guest redirect, the return with query parameters, the name check, a forged return address, a logout in another tab, the focus move, markup rendered as text and the 500 page. The manual check is described in `README.md`.
+Sixty-one automated tests on `MemoryRouter` check all the pages, the catalog filter in the address (a huge and a whitespace-only query, a forged sort, markup in the query), lazy loading with the fallback message, breadcrumbs, the admin-only route (guest, user, admin, a logout in another tab), a double click on the sign-in button, the `NavLink` highlight, the dynamic route, the 404 page, the guest redirect, the return with query parameters, the name check, a forged return address, a logout in another tab, the focus move, markup rendered as text and the 500 page. The manual check is described in `README.md`.
 
 ## Conclusion
 
-The Vite application contains seven routes, a menu with the active item highlighted, a dynamic route handling an unknown parameter, a 404 page and a protected dashboard with simulated sign-in and programmatic navigation. `react-router-dom` 7 is chosen, its API for the tasks of this work matches v6.
+The Vite application contains eight routes, a menu with the active item highlighted, a dynamic route handling an unknown parameter, a 404 page a protected dashboard with simulated sign-in and programmatic navigation, a catalog filter through `useSearchParams`, lazy page loading, breadcrumbs and a section for the admin role only. `react-router-dom` 7 is chosen, its API for the tasks of this work matches v6.
 
 ## Appendix A (mandatory) Key Code Fragments
 
@@ -96,10 +109,33 @@ The Vite application contains seven routes, a menu with the active item highligh
     <Route path="logout" element={<Logout />} />
     <Route element={<PrivateRoute />}>
       <Route path="dashboard" element={<Dashboard />} />
+      <Route element={<RoleRoute role="admin" />}>
+        <Route path="admin" element={<Admin />} />
+      </Route>
     </Route>
     <Route path="*" element={<NotFound />} />
   </Route>
 </Routes>
+```
+
+```jsx
+// App.jsx: lazy loading, Layout wraps Outlet in Suspense
+const Catalog = lazy(() => import('./pages/Catalog'));
+<Suspense fallback={<p role="status">Загрузка страницы…</p>}>
+  <Outlet />
+</Suspense>
+```
+
+```jsx
+// Catalog.jsx: the filter in the address
+const [searchParams, setSearchParams] = useSearchParams();
+const raw = (searchParams.get('q') ?? '').slice(0, limits.search.maxLength);
+setSearchParams({ q: value }, { replace: true });
+```
+
+```jsx
+// RoleRoute: lets only the needed role through
+return auth.role === role ? <Outlet /> : <Forbidden />;
 ```
 
 ```jsx

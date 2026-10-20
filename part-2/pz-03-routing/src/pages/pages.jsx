@@ -1,19 +1,11 @@
 import { useEffect, useId, useState } from 'react';
 import { Link, Navigate, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { safeReturnPath, useAuth, validateUserName } from '../auth';
-import { findTemplate, TEMPLATES } from '../data/templates';
+import { findTemplate } from '../data/templates';
 import limits from '../limits.json';
 import ErrorPage from '../shell/ErrorPage';
 import { usePageTitle } from '../usePageTitle';
-
-function PageHead({ title, lead }) {
-  return (
-    <div className="page-head">
-      <h1 className="page__title">{title}</h1>
-      {lead && <p className="page-head__lead">{lead}</p>}
-    </div>
-  );
-}
+import PageHead from './PageHead';
 
 export function Home() {
   usePageTitle('Главная');
@@ -33,31 +25,6 @@ export function About() {
     <>
       <PageHead title="О проекте" />
       <p className="prose">DSLKit это SaaS-сервис для описания диаграмм текстом. Страница нужна для практического занятия по маршрутизации.</p>
-    </>
-  );
-}
-
-export function Catalog() {
-  usePageTitle('Каталог шаблонов');
-  return (
-    <>
-      <PageHead title="Каталог шаблонов" lead="Выберите шаблон, чтобы открыть его страницу по адресу /catalog/номер." />
-      <ul className="cards">
-        {TEMPLATES.map((t) => (
-          <li className="cards__item" key={t.id}>
-            <article className="card">
-              <h2 className="card__title">{t.title}</h2>
-              <p className="card__meta">
-                <span className="badge">{t.notation}</span>
-              </p>
-              <p className="card__text">{t.description}</p>
-              <Link className="card__link" to={`/catalog/${t.id}`} aria-label={`Открыть шаблон: ${t.title}`}>
-                Открыть шаблон
-              </Link>
-            </article>
-          </li>
-        ))}
-      </ul>
     </>
   );
 }
@@ -126,7 +93,10 @@ export function Login() {
 
   return (
     <>
-      <PageHead title="Вход" lead="Имитация входа: имя нужно только для приветствия, пароль не спрашивается и ничего не отправляется на сервер." />
+      <PageHead
+        title="Вход"
+        lead="Имитация входа: имя нужно только для приветствия, пароль не спрашивается и ничего не отправляется на сервер. Имя admin даёт роль администратора."
+      />
       {location.state?.from && (
         <div className="note">
           <p className="note__text" role="alert">
@@ -162,17 +132,6 @@ export function Login() {
           Войти
         </button>
       </form>
-    </>
-  );
-}
-
-export function Dashboard() {
-  usePageTitle('Личный кабинет');
-  const { userName } = useAuth();
-  return (
-    <>
-      <PageHead title="Личный кабинет" lead={`Здравствуйте, ${userName}.`} />
-      <p className="prose">Здесь будут ваши диаграммы. Страница доступна только после входа.</p>
     </>
   );
 }

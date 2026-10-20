@@ -23,7 +23,7 @@
 cd part-2/pz-03-routing
 npm install
 npm run dev      # http://localhost:5176
-npm test         # Vitest, React Testing Library и MemoryRouter, 40 тестов
+npm test         # Vitest, React Testing Library и MemoryRouter, 61 тест
 npm run build
 ```
 

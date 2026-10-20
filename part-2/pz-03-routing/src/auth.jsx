@@ -3,6 +3,7 @@ import limits from './limits.json';
 
 export const AUTH_KEY = 'dslkit.isAuth';
 export const USER_KEY = 'dslkit.userName';
+export const ADMIN_NAME = 'admin';
 
 const AuthContext = createContext(null);
 
@@ -13,6 +14,9 @@ export function validateUserName(value) {
   if (length > limits.userName.maxLength) return `Имя не длиннее ${limits.userName.maxLength} символов`;
   return null;
 }
+
+// Fake roles: the name admin (any letter case) gives the admin role, every other name is a plain user.
+export const roleFor = (name) => (typeof name === 'string' && name.trim().toLowerCase() === ADMIN_NAME ? 'admin' : 'user');
 
 // A return address must be a path on this site. "//host", "https://host" and "/login" itself are not followed.
 export function safeReturnPath(value, fallback = '/dashboard') {
@@ -69,7 +73,10 @@ export function AuthProvider({ children }) {
     return () => window.removeEventListener('storage', onStorage);
   }, []);
 
-  const value = useMemo(() => ({ isAuth: userName !== null, userName, login, logout }), [userName, login, logout]);
+  const value = useMemo(
+    () => ({ isAuth: userName !== null, userName, role: userName === null ? null : roleFor(userName), login, logout }),
+    [userName, login, logout],
+  );
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 

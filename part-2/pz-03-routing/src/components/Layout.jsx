@@ -1,6 +1,7 @@
-import { useEffect, useRef } from 'react';
+import { Suspense, useEffect, useRef } from 'react';
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../auth';
+import Breadcrumbs from './Breadcrumbs';
 import SiteFooter from '../shell/SiteFooter';
 import SiteHeader, { LogoContent } from '../shell/SiteHeader';
 
@@ -73,7 +74,16 @@ export default function Layout() {
         nav={items}
       />
       <main className="main" id="main" tabIndex={-1} ref={main}>
-        <Outlet />
+        <Breadcrumbs />
+        <Suspense
+          fallback={
+            <p className="empty" role="status">
+              Загрузка страницы…
+            </p>
+          }
+        >
+          <Outlet />
+        </Suspense>
       </main>
       <SiteFooter links={footerLinks} />
     </>

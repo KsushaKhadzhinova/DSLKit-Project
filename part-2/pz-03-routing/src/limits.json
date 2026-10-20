@@ -1,3 +1,4 @@
 {
-  "userName": { "minLength": 1, "maxLength": 40 }
+  "userName": { "minLength": 1, "maxLength": 40 },
+  "search": { "maxLength": 80 }
 }

@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import App from './App';
@@ -30,12 +30,12 @@ describe('static pages and navigation', () => {
     ['/catalog', 'Каталог шаблонов'],
     ['/about', 'О проекте'],
     ['/login', 'Вход'],
-  ])('renders %s', (path, heading) => {
+  ])('renders %s', async (path, heading) => {
     renderAt(path);
-    expect(screen.getByRole('heading', { level: 1, name: heading })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { level: 1, name: heading })).toBeInTheDocument();
   });
 
-  it('highlights only the active NavLink', () => {
+  it('highlights only the active NavLink', async () => {
     renderAt('/catalog/2');
     expect(menu().getByRole('link', { name: 'Каталог' })).toHaveClass('nav__link');
     expect(menu().getByRole('link', { name: 'Каталог' })).toHaveAttribute('aria-current', 'page');
@@ -54,7 +54,7 @@ describe('static pages and navigation', () => {
     renderAt('/');
     expect(document.title).toBe('Главная — DSLKit');
     await user.click(menu().getByRole('link', { name: 'Каталог' }));
-    expect(document.title).toBe('Каталог шаблонов — DSLKit');
+    await waitFor(() => expect(document.title).toBe('Каталог шаблонов — DSLKit'));
   });
 });
 
@@ -62,11 +62,11 @@ describe('dynamic route /catalog/:id', () => {
   it('shows the template with the given id and goes back', async () => {
     const user = userEvent.setup();
     renderAt('/catalog');
-    await user.click(screen.getByRole('link', { name: 'Открыть шаблон: Процесс согласования заказа' }));
+    await user.click(await screen.findByRole('link', { name: 'Открыть шаблон: Процесс согласования заказа' }));
     expect(screen.getByRole('heading', { name: 'Процесс согласования заказа' })).toBeInTheDocument();
     expect(screen.getByText('Нотация: BPMN')).toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: 'Назад' }));
-    expect(screen.getByRole('heading', { name: 'Каталог шаблонов' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Каталог шаблонов' })).toBeInTheDocument();
   });
 
   it('renders the styled 404 page in place for an unknown id', () => {
@@ -76,7 +76,7 @@ describe('dynamic route /catalog/:id', () => {
     expect(menu().getByRole('link', { name: 'Каталог' })).toBeInTheDocument();
   });
 
-  it('never turns an id from the address into markup', () => {
+  it('never turns an id from the address into markup', async () => {
     renderAt('/catalog/<img src=x onerror="window.__xss=1">');
     expect(screen.getByText('Код ошибки: 404')).toBeInTheDocument();
     expect(document.querySelector('img[src="x"]')).toBeNull();
@@ -97,7 +97,7 @@ describe('404 page', () => {
 });
 
 describe('protected route', () => {
-  it('redirects a guest from /dashboard to /login with a hint', () => {
+  it('redirects a guest from /dashboard to /login with a hint', async () => {
     renderAt('/dashboard');
     expect(screen.getByRole('heading', { name: 'Вход' })).toBeInTheDocument();
     expect(screen.getByRole('alert')).toHaveTextContent('доступна после входа');
@@ -107,8 +107,8 @@ describe('protected route', () => {
     const user = userEvent.setup();
     renderAt('/dashboard');
     await signIn(user);
-    expect(screen.getByRole('heading', { name: 'Личный кабинет' })).toBeInTheDocument();
-    expect(screen.getByText('Здравствуйте, Ксения.')).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Личный кабинет' })).toBeInTheDocument();
+    expect(await screen.findByText('Здравствуйте, Ксения.')).toBeInTheDocument();
     expect(localStorage.getItem(AUTH_KEY)).toBe('true');
 
     await user.click(menu().getByRole('link', { name: 'Выйти' }));
@@ -121,21 +121,21 @@ describe('protected route', () => {
     const user = userEvent.setup();
     renderAt('/dashboard?tab=2#top');
     await signIn(user);
-    expect(screen.getByRole('heading', { name: 'Личный кабинет' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Личный кабинет' })).toBeInTheDocument();
   });
 
   it('goes to the dashboard by default after a direct login', async () => {
     const user = userEvent.setup();
     renderAt('/login');
     await signIn(user);
-    expect(screen.getByRole('heading', { name: 'Личный кабинет' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Личный кабинет' })).toBeInTheDocument();
   });
 
-  it('keeps the signed-in state from localStorage', () => {
+  it('keeps the signed-in state from localStorage', async () => {
     localStorage.setItem(AUTH_KEY, 'true');
     localStorage.setItem(USER_KEY, 'Ксения');
     renderAt('/dashboard');
-    expect(screen.getByRole('heading', { name: 'Личный кабинет' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Личный кабинет' })).toBeInTheDocument();
   });
 
   it('does not trust a hand-written flag without a valid name', () => {
@@ -144,11 +144,11 @@ describe('protected route', () => {
     expect(screen.getByRole('heading', { name: 'Вход' })).toBeInTheDocument();
   });
 
-  it('sends a signed-in user away from /login', () => {
+  it('sends a signed-in user away from /login', async () => {
     localStorage.setItem(AUTH_KEY, 'true');
     localStorage.setItem(USER_KEY, 'Ксения');
     renderAt('/login');
-    expect(screen.getByRole('heading', { name: 'Личный кабинет' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Личный кабинет' })).toBeInTheDocument();
   });
 
   it('survives blocked storage and still signs in for the session', async () => {
@@ -161,7 +161,7 @@ describe('protected route', () => {
     });
     renderAt('/dashboard');
     await signIn(user);
-    expect(screen.getByRole('heading', { name: 'Личный кабинет' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Личный кабинет' })).toBeInTheDocument();
     set.mockRestore();
     get.mockRestore();
   });
@@ -197,7 +197,7 @@ describe('login form checks', () => {
     expect(screen.getByRole('alert')).toHaveTextContent(String(limits.userName.maxLength));
   });
 
-  it('validates by the same function for any input', () => {
+  it('validates by the same function for any input', async () => {
     expect(validateUserName('ok')).toBeNull();
     expect(validateUserName(undefined)).toMatch(/Введите/);
     expect(validateUserName('x'.repeat(5_000_000))).toContain(String(limits.userName.maxLength));
@@ -209,7 +209,7 @@ describe('login form checks', () => {
     await user.click(screen.getByLabelText('Имя пользователя'));
     await user.paste('<b id="evil">me</b>');
     await user.click(screen.getByRole('button', { name: 'Войти' }));
-    expect(screen.getByText('Здравствуйте, <b id="evil">me</b>.')).toBeInTheDocument();
+    expect(await screen.findByText('Здравствуйте, <b id="evil">me</b>.')).toBeInTheDocument();
     expect(document.getElementById('evil')).toBeNull();
   });
 });
@@ -234,12 +234,12 @@ describe('return address safety', () => {
     const user = userEvent.setup();
     renderAt({ pathname: '/login', state: { from: 'https://evil.example/' } });
     await signIn(user);
-    expect(screen.getByRole('heading', { name: 'Личный кабинет' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Личный кабинет' })).toBeInTheDocument();
   });
 });
 
 describe('accessibility helpers', () => {
-  it('has a skip link to the main content and one h1', () => {
+  it('has a skip link to the main content and one h1', async () => {
     renderAt('/');
     expect(screen.getByRole('link', { name: 'Перейти к основному содержимому' })).toHaveAttribute('href', '#main');
     expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1);
@@ -258,7 +258,7 @@ describe('accessibility helpers', () => {
     window.history.replaceState({ idx: 0 }, '');
     renderAt('/catalog/2');
     await user.click(screen.getByRole('button', { name: 'Назад' }));
-    expect(screen.getByRole('heading', { name: 'Каталог шаблонов' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Каталог шаблонов' })).toBeInTheDocument();
     window.history.replaceState(null, '');
   });
 });
