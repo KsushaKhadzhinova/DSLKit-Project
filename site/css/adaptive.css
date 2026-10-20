@@ -8,9 +8,7 @@
   .cards {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-}
 
-@media (min-width: 576px) {
   .burger__label {
     position: static;
     width: auto;

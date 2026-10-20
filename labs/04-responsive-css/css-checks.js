@@ -96,6 +96,11 @@ export const contrastPairs = (tokens, pairs, minimum = 4.5) =>
     .filter(({ ratio, required }) => ratio < required)
     .map(({ foreground, background, ratio, required }) => `${foreground} on ${background}: ${ratio.toFixed(2)} < ${required}`);
 
+export const duplicateMediaQueries = (css) => {
+  const queries = [...stripComments(css).matchAll(/@media([^{]*)\{/g)].map((match) => match[1].replace(/\s+/g, ' ').trim());
+  return [...new Set(queries.filter((query, index) => queries.indexOf(query) !== index))];
+};
+
 export const desktopFirstQueries = (css) => [...stripComments(css).matchAll(/@media[^{]*\(max-width:[^)]*\)/g)].map((match) => match[0].trim());
 
 export const colorMixWithoutFallback = (css) => {

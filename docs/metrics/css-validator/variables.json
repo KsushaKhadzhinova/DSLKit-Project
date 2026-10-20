@@ -1,0 +1,14 @@
+{
+  "cssvalidation" : {
+     "uri"       : "variables.css",
+     "checkedby" : "http://www.w3.org/2005/07/css-validator",
+     "csslevel"  : "css3",
+     "date"      : "2026-10-15T10:10:13Z",
+     "timestamp" : "1792102213819",
+     "validity"  : true,
+     "result"    : {
+		"errorcount"   : 0,
+		"warningcount" : 0
+                   }
+    }
+}

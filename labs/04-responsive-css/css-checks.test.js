@@ -6,6 +6,7 @@ import {
   contrastPairs,
   darkTokens,
   desktopFirstQueries,
+  duplicateMediaQueries,
   fibonacciProblems,
   goldenProblems,
   hardcodedColors,
@@ -157,6 +158,13 @@ test('desktopFirstQueries finds max-width media queries only', () => {
     '@media (max-width: 600px)',
   ]);
   assert.deepEqual(desktopFirstQueries('a {}'), []);
+});
+
+test('duplicateMediaQueries lists queries that appear more than once', () => {
+  assert.deepEqual(duplicateMediaQueries('@media (min-width: 576px) { a {} } @media (min-width:  576px) { b {} } @media (min-width: 768px) { a {} }'), [
+    '(min-width: 576px)',
+  ]);
+  assert.deepEqual(duplicateMediaQueries('@media print { a {} } /* @media print { a {} } */'), []);
 });
 
 test('colorMixWithoutFallback wants an earlier declaration of the same property', () => {
