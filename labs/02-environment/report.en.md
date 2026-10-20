@@ -44,7 +44,7 @@ Table 1 – Environment check results
 | README.md file | passed | — |
 | Figma design link | passed | — |
 | Remote repository | passed | https://github.com/KsushaKhadzhinova/DSLKit-Project.git |
-| Commit history | passed | 89 |
+| Commit history | passed | 116 |
 
 All checks passed.
 
