@@ -42,6 +42,10 @@ export const openRequestLog = (file = ':memory:') => {
       connect()
         .recent.all(limit)
         .map((row) => ({ ...row })),
-    close: () => db?.close(),
+    close: () => {
+      // A second close must not throw: the connection is closed once and then forgotten.
+      if (db) db.close();
+      db = null;
+    },
   };
 };
