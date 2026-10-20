@@ -1,6 +1,7 @@
 const { cleanName, cleanRoom, cleanText, limits } = require('./validate');
 const { createHistory } = require('./history');
 const { createLimiter } = require('./rate-limit');
+const { verifyToken } = require('./token');
 
 const fail = (ack, error) => {
   if (typeof ack === 'function') ack({ ok: false, error });
@@ -13,7 +14,8 @@ const succeed = (ack, data = {}) => {
 // so the "who is editing" list needs no extra queries.
 const attachSocket = (io, overrides = {}) => {
   const opts = { ...limits, ...overrides };
-  const history = createHistory(opts.historyLimit, opts.historyMaxRooms);
+  // `history` can be injected (for example the MongoDB one); the default keeps messages in memory.
+  const history = opts.history ?? createHistory(opts.historyLimit, opts.historyMaxRooms);
   const rooms = new Map();
   const online = new Map(); // socket id -> { id, username }
   let messageSeq = 0;
@@ -24,9 +26,18 @@ const attachSocket = (io, overrides = {}) => {
   const makeMessage = (user, text, extra) => ({ id: ++messageSeq, from: user.username, fromId: user.id, text, at: Date.now(), ...extra });
   const isTaken = (username) => onlineList().some((u) => u.username.toLowerCase() === username.toLowerCase());
 
-  // Handshake: the username travels in `auth`, so every later event knows who sent it.
+  // Handshake: the name comes from a signed login token (`auth.token`, issued by POST /login) or, when
+  // tokens are not required, from `auth.username`. Every later event knows who sent it.
   io.use((socket, next) => {
-    const username = cleanName(socket.handshake.auth?.username);
+    const { token, username: plain } = socket.handshake.auth ?? {};
+    let given = plain;
+    if (token !== undefined) {
+      given = verifyToken(token, opts.tokenSecret);
+      if (!given) return next(new Error('Invalid or expired token, log in again'));
+    } else if (opts.requireToken) {
+      return next(new Error('A login token is required'));
+    }
+    const username = cleanName(given);
     if (!username) return next(new Error(`A username of 1-${limits.nameMaxLength} letters, digits, dots, dashes or underscores is required`));
     if (isTaken(username)) return next(new Error('This username is already taken'));
     if (online.size >= opts.maxUsers) return next(new Error('The server is full, try again later'));
@@ -47,6 +58,13 @@ const attachSocket = (io, overrides = {}) => {
       fail(packet.at(-1), 'Too many requests, slow down');
     });
 
+    // Handlers of one socket run one after another, so a leave sent right after a join waits for the history.
+    let tail = Promise.resolve();
+    const on = (event, handler) =>
+      socket.on(event, (...args) => {
+        tail = tail.then(() => handler(...args)).catch((error) => console.error(event, error.message));
+      });
+
     socket.emit('welcome', { id: user.id, username: user.username, online: onlineList() });
     socket.broadcast.emit('user:online', { id: user.id, username: user.username, at: Date.now() });
 
@@ -60,43 +78,56 @@ const attachSocket = (io, overrides = {}) => {
       publishPresence(room);
     };
 
-    socket.on('room:join', (payload, ack) => {
+    on('room:join', async (payload, ack) => {
       const room = cleanRoom(payload?.room);
       if (!room) return fail(ack, 'Invalid room name');
       if (joined.has(room)) return fail(ack, 'Already in this room');
       if (joined.size >= opts.maxRoomsPerUser) return fail(ack, `You can be in at most ${opts.maxRoomsPerUser} rooms`);
       if ((rooms.get(room)?.size ?? 0) >= opts.maxRoomMembers) return fail(ack, 'This room is full');
+      let past;
+      try {
+        past = await history.list(room);
+      } catch (error) {
+        console.error('history unavailable:', error.message);
+        return fail(ack, 'History is unavailable, try again later');
+      }
+      if (joined.has(room) || !socket.connected) return fail(ack, 'Already in this room');
       joined.add(room);
       socket.join(room);
       if (!rooms.has(room)) rooms.set(room, new Map());
       rooms.get(room).set(socket.id, user);
       socket.to(room).emit('room:joined', { room, username: user.username, at: Date.now() });
       publishPresence(room);
-      succeed(ack, { room, history: history.list(room), users: usersOf(room) });
+      succeed(ack, { room, history: past, users: usersOf(room) });
     });
 
-    socket.on('room:leave', (payload, ack) => {
+    on('room:leave', (payload, ack) => {
       const room = cleanRoom(payload?.room);
       if (!room || !joined.has(room)) return fail(ack, 'Not in this room');
       leave(room);
       succeed(ack, { room });
     });
 
-    socket.on('chat:message', (payload, ack) => {
+    on('chat:message', async (payload, ack) => {
       const room = cleanRoom(payload?.room);
       const text = cleanText(payload?.text);
       if (!room || !joined.has(room)) return fail(ack, 'Join the room first');
       if (!text) return fail(ack, `Message must be 1-${limits.textMaxLength} characters`);
       if (!allowed()) return fail(ack, 'Too many messages, slow down');
       const message = makeMessage(user, text, { room });
-      history.add(room, message);
+      try {
+        await history.add(room, message);
+      } catch (error) {
+        console.error('message was not saved:', error.message);
+        return fail(ack, 'The message could not be saved, try again later');
+      }
       io.to(room).emit('chat:message', message);
       succeed(ack, { id: message.id });
     });
 
     // Private message by socket id, delivered only to the target and echoed to the sender.
     // The sender is always taken from the connection, never from the payload.
-    socket.on('private:message', (payload, ack) => {
+    on('private:message', (payload, ack) => {
       const text = cleanText(payload?.text);
       const target = typeof payload?.to === 'string' ? io.sockets.sockets.get(payload.to) : undefined;
       if (!target) return fail(ack, 'User not found');
@@ -108,13 +139,13 @@ const attachSocket = (io, overrides = {}) => {
       succeed(ack, { message });
     });
 
-    socket.on('typing', (payload) => {
+    on('typing', (payload) => {
       const room = cleanRoom(payload?.room);
       if (room && joined.has(room)) socket.to(room).emit('typing', { room, username: user.username, typing: Boolean(payload.typing) });
     });
 
     // "Who is editing": a user marks the diagram of a room as being edited right now.
-    socket.on('editing', (payload, ack) => {
+    on('editing', (payload, ack) => {
       const room = cleanRoom(payload?.room);
       if (!room || !joined.has(room)) return fail(ack, 'Join the room first');
       user.editing = Boolean(payload.editing);

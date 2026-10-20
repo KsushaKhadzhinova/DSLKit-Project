@@ -44,7 +44,8 @@ Table 1 – Project structure
 | `src/app.js`        | The `createServer` function: Express, static files, Socket.IO |
 | `src/socket.js`     | Handlers of all events                                        |
 | `src/validate.js`   | Checks the name, the room name and the message text           |
-| `src/history.js`    | In-memory message history, the last 50 per room               |
+| `src/history.js`    | Message history: in memory or in MongoDB (swappable store)    |
+| `src/token.js`      | Signed login token (HMAC-SHA256, expiry time)                 |
 | `src/rate-limit.js` | Message rate limit                                            |
 | `public/`           | Client: page, script and styles                               |
 | `tests/`            | Tests built on `socket.io-client`                             |
@@ -78,7 +79,9 @@ The work includes extras from the assignment and a few of its own.
 
 **Who is editing.** For each room the server keeps the list of users with an `editing` flag. Any change of the members or of the flag is sent as `presence:update`, and the client shows an editing mark next to the name.
 
-**History.** The last 50 messages of a room live in memory and reach a newcomer in the answer to `room:join`. The `history.js` module has only `add` and `list`, so it can later be replaced by MongoDB storage without touching the handlers. Database storage is not part of this lab, so the history is empty after a server restart.
+**History.** The last 50 messages of a room reach a newcomer in the answer to `room:join`. The handlers use only the `add` and `list` methods of the store and wait for them with `await`, so the store is swappable. By default the history lives in memory. When `MONGODB_URI` is set, `server.js` connects the `mongodb` driver, and `createMongoHistory` writes messages to the `messages` collection and reads the last 50 per room, so the history survives a restart. If the database is unavailable the server answers with an acknowledgement error and keeps running. The tests use a small fake collection, and a real database was not started in the tests or while preparing this report.
+
+**Token login.** `POST /login` with the body `{ "username": "..." }` returns a signed token (HMAC-SHA256, valid for one hour). The socket connects with `auth: { token }` and the name is taken from the token. The secret is read from the `TOKEN_SECRET` variable, with a default for local runs and tests. With `REQUIRE_TOKEN=1` sockets without a token are refused. Forged, foreign-secret and expired tokens are refused.
 
 **Private messages.** The `private:message` event takes the recipient `socket.id`, delivers the text to that user only and returns an acknowledgement with a copy to the sender.
 
@@ -88,7 +91,7 @@ The work includes extras from the assignment and a few of its own.
 
 ### 3.5 Verification
 
-The work is checked by automated tests: 41 tests start a real server on a free port and connect several `socket.io-client` clients over WebSocket. The scenarios are summarized in table 3. Manual checking uses two browser windows and the steps from the README file.
+The work is checked by automated tests: 69 tests start a real server on a free port and connect several `socket.io-client` clients over WebSocket. The scenarios are summarized in table 3. Manual checking uses two browser windows and the steps from the README file.
 
 Table 3 – Automated test scenarios
 
@@ -139,7 +142,7 @@ Listing of server.js is given in appendix A. Listing of app.js is given in appen
 
 ## Conclusion
 
-For DSLKit, a server on Express and Socket.IO with an HTML and JavaScript client was built. Users exchange messages in real time, get notifications about connecting, disconnecting, joining a room and leaving it, and for each diagram see the list of people and those who are editing it. On top of that the work adds an in-memory history, private messages, a typing indicator, acknowledgements and a rate limit. 41 automated tests confirm the behavior of every event. Limits are kept in `limits.json`, and every message carries a timestamp. MongoDB history storage and screenshots of two windows are not included.
+For DSLKit, a server on Express and Socket.IO with an HTML and JavaScript client was built. Users exchange messages in real time, get notifications about connecting, disconnecting, joining a room and leaving it, and for each diagram see the list of people and those who are editing it. On top of that the work adds a history with a MongoDB or in-memory store, login by a signed token, private messages, a typing indicator, acknowledgements and a rate limit. 69 automated tests confirm the behavior of every event. Limits are kept in `limits.json`, and every message carries a timestamp. A run against a real MongoDB and screenshots of two windows are not included.
 
 ## Appendix A (mandatory) Listing of server.js
 
@@ -153,14 +156,33 @@ try {
 }
 
 const port = Number(process.env.PORT) || 3000;
-const { httpServer, io } = createServer();
-
-httpServer.listen(port, () => console.log(`Server running on http://localhost:${port}`));
+// With MONGODB_URI the chat history is kept in MongoDB and survives a restart; without it, in memory.
+const start = async () => {
+  let history;
+  let client;
+  if (process.env.MONGODB_URI) {
+    const { MongoClient } = require('mongodb');
+    const { createMongoHistory } = require('./src/history');
+    client = await MongoClient.connect(process.env.MONGODB_URI, { serverSelectionTimeoutMS: 5000 });
+    history = createMongoHistory(client.db().collection('messages'));
+  }
+  if (!process.env.TOKEN_SECRET) console.warn('TOKEN_SECRET is not set, the local development secret is used');
+  const { httpServer, io } = createServer({ history });
+  httpServer.listen(port, () => console.log(`Server running on http://localhost:${port}`));
+  return { io, client };
+};
 
 // Ctrl+C and service stops close the sockets first, so clients see a clean disconnect and reconnect later.
-const stop = () => io.close(() => process.exit(0));
-process.on('SIGINT', stop);
-process.on('SIGTERM', stop);
+start()
+  .then(({ io, client }) => {
+    const stop = () => io.close(() => (client ? client.close() : Promise.resolve()).finally(() => process.exit(0)));
+    process.on('SIGINT', stop);
+    process.on('SIGTERM', stop);
+  })
+  .catch((error) => {
+    console.error('Cannot start the server:', error.message);
+    process.exit(1);
+  });
 ```
 
 ## Appendix B (mandatory) Listing of app.js
@@ -171,8 +193,9 @@ const path = require('node:path');
 const express = require('express');
 const { Server } = require('socket.io');
 const { attachSocket } = require('./socket');
-const { limits } = require('./validate');
+const { limits, cleanName } = require('./validate');
 const { parseAllowed, isOriginAllowed } = require('./origin');
+const { issueToken } = require('./token');
 
 const publicDir = path.join(__dirname, '..', 'public');
 
@@ -192,13 +215,29 @@ const securityHeaders = (req, res, next) => {
 // Builds the HTTP server with the static client and Socket.IO on top of it.
 // The server is returned unstarted so tests can listen on a free port.
 // `allowedOrigins` lists extra sites (besides the server's own address) that may open a socket.
-const createServer = ({ allowedOrigins = parseAllowed(process.env.ALLOWED_ORIGINS), setup, ...options } = {}) => {
+// The token secret comes from TOKEN_SECRET; the default below is for local runs and tests only.
+// `requireToken` (REQUIRE_TOKEN=1) refuses sockets that come without a login token.
+const DEFAULT_SECRET = 'local-development-secret-do-not-use-in-production';
+
+const createServer = ({
+  allowedOrigins = parseAllowed(process.env.ALLOWED_ORIGINS),
+  tokenSecret = process.env.TOKEN_SECRET || DEFAULT_SECRET,
+  requireToken = process.env.REQUIRE_TOKEN === '1',
+  setup,
+  ...options
+} = {}) => {
   const app = express();
   app.disable('x-powered-by');
   app.use(securityHeaders);
   app.use(express.static(publicDir));
   app.get('/limits.json', (req, res) => res.json(limits));
   app.get('/health', (req, res) => res.json({ status: 'ok' }));
+  // Login: a valid name gets a signed token that the socket handshake accepts instead of a plain name.
+  app.post('/login', express.json({ limit: '1kb' }), (req, res) => {
+    const username = cleanName(req.body?.username);
+    if (!username) return res.status(400).json({ error: `A username of 1-${limits.nameMaxLength} letters, digits, dots, dashes or underscores is required` });
+    res.json({ username, token: issueToken(username, tokenSecret) });
+  });
   setup?.(app);
 
   // 404 and 500 pages use the same styles as the rest of the site; the error text never reaches the browser.
@@ -217,7 +256,7 @@ const createServer = ({ allowedOrigins = parseAllowed(process.env.ALLOWED_ORIGIN
     allowRequest: (req, callback) => callback(null, isOriginAllowed(req.headers.origin, req.headers.host, allowedOrigins)),
     maxHttpBufferSize: limits.maxPacketBytes,
   });
-  attachSocket(io, options);
+  attachSocket(io, { ...options, tokenSecret, requireToken });
   return { app, httpServer, io };
 };
 
@@ -230,6 +269,7 @@ module.exports = { createServer };
 const { cleanName, cleanRoom, cleanText, limits } = require('./validate');
 const { createHistory } = require('./history');
 const { createLimiter } = require('./rate-limit');
+const { verifyToken } = require('./token');
 
 const fail = (ack, error) => {
   if (typeof ack === 'function') ack({ ok: false, error });
@@ -242,7 +282,8 @@ const succeed = (ack, data = {}) => {
 // so the "who is editing" list needs no extra queries.
 const attachSocket = (io, overrides = {}) => {
   const opts = { ...limits, ...overrides };
-  const history = createHistory(opts.historyLimit, opts.historyMaxRooms);
+  // `history` can be injected (for example the MongoDB one); the default keeps messages in memory.
+  const history = opts.history ?? createHistory(opts.historyLimit, opts.historyMaxRooms);
   const rooms = new Map();
   const online = new Map(); // socket id -> { id, username }
   let messageSeq = 0;
@@ -253,9 +294,18 @@ const attachSocket = (io, overrides = {}) => {
   const makeMessage = (user, text, extra) => ({ id: ++messageSeq, from: user.username, fromId: user.id, text, at: Date.now(), ...extra });
   const isTaken = (username) => onlineList().some((u) => u.username.toLowerCase() === username.toLowerCase());
 
-  // Handshake: the username travels in `auth`, so every later event knows who sent it.
+  // Handshake: the name comes from a signed login token (`auth.token`, issued by POST /login) or, when
+  // tokens are not required, from `auth.username`. Every later event knows who sent it.
   io.use((socket, next) => {
-    const username = cleanName(socket.handshake.auth?.username);
+    const { token, username: plain } = socket.handshake.auth ?? {};
+    let given = plain;
+    if (token !== undefined) {
+      given = verifyToken(token, opts.tokenSecret);
+      if (!given) return next(new Error('Invalid or expired token, log in again'));
+    } else if (opts.requireToken) {
+      return next(new Error('A login token is required'));
+    }
+    const username = cleanName(given);
     if (!username) return next(new Error(`A username of 1-${limits.nameMaxLength} letters, digits, dots, dashes or underscores is required`));
     if (isTaken(username)) return next(new Error('This username is already taken'));
     if (online.size >= opts.maxUsers) return next(new Error('The server is full, try again later'));
@@ -276,6 +326,13 @@ const attachSocket = (io, overrides = {}) => {
       fail(packet.at(-1), 'Too many requests, slow down');
     });
 
+    // Handlers of one socket run one after another, so a leave sent right after a join waits for the history.
+    let tail = Promise.resolve();
+    const on = (event, handler) =>
+      socket.on(event, (...args) => {
+        tail = tail.then(() => handler(...args)).catch((error) => console.error(event, error.message));
+      });
+
     socket.emit('welcome', { id: user.id, username: user.username, online: onlineList() });
     socket.broadcast.emit('user:online', { id: user.id, username: user.username, at: Date.now() });
 
@@ -289,43 +346,56 @@ const attachSocket = (io, overrides = {}) => {
       publishPresence(room);
     };
 
-    socket.on('room:join', (payload, ack) => {
+    on('room:join', async (payload, ack) => {
       const room = cleanRoom(payload?.room);
       if (!room) return fail(ack, 'Invalid room name');
       if (joined.has(room)) return fail(ack, 'Already in this room');
       if (joined.size >= opts.maxRoomsPerUser) return fail(ack, `You can be in at most ${opts.maxRoomsPerUser} rooms`);
       if ((rooms.get(room)?.size ?? 0) >= opts.maxRoomMembers) return fail(ack, 'This room is full');
+      let past;
+      try {
+        past = await history.list(room);
+      } catch (error) {
+        console.error('history unavailable:', error.message);
+        return fail(ack, 'History is unavailable, try again later');
+      }
+      if (joined.has(room) || !socket.connected) return fail(ack, 'Already in this room');
       joined.add(room);
       socket.join(room);
       if (!rooms.has(room)) rooms.set(room, new Map());
       rooms.get(room).set(socket.id, user);
       socket.to(room).emit('room:joined', { room, username: user.username, at: Date.now() });
       publishPresence(room);
-      succeed(ack, { room, history: history.list(room), users: usersOf(room) });
+      succeed(ack, { room, history: past, users: usersOf(room) });
     });
 
-    socket.on('room:leave', (payload, ack) => {
+    on('room:leave', (payload, ack) => {
       const room = cleanRoom(payload?.room);
       if (!room || !joined.has(room)) return fail(ack, 'Not in this room');
       leave(room);
       succeed(ack, { room });
     });
 
-    socket.on('chat:message', (payload, ack) => {
+    on('chat:message', async (payload, ack) => {
       const room = cleanRoom(payload?.room);
       const text = cleanText(payload?.text);
       if (!room || !joined.has(room)) return fail(ack, 'Join the room first');
       if (!text) return fail(ack, `Message must be 1-${limits.textMaxLength} characters`);
       if (!allowed()) return fail(ack, 'Too many messages, slow down');
       const message = makeMessage(user, text, { room });
-      history.add(room, message);
+      try {
+        await history.add(room, message);
+      } catch (error) {
+        console.error('message was not saved:', error.message);
+        return fail(ack, 'The message could not be saved, try again later');
+      }
       io.to(room).emit('chat:message', message);
       succeed(ack, { id: message.id });
     });
 
     // Private message by socket id, delivered only to the target and echoed to the sender.
     // The sender is always taken from the connection, never from the payload.
-    socket.on('private:message', (payload, ack) => {
+    on('private:message', (payload, ack) => {
       const text = cleanText(payload?.text);
       const target = typeof payload?.to === 'string' ? io.sockets.sockets.get(payload.to) : undefined;
       if (!target) return fail(ack, 'User not found');
@@ -337,13 +407,13 @@ const attachSocket = (io, overrides = {}) => {
       succeed(ack, { message });
     });
 
-    socket.on('typing', (payload) => {
+    on('typing', (payload) => {
       const room = cleanRoom(payload?.room);
       if (room && joined.has(room)) socket.to(room).emit('typing', { room, username: user.username, typing: Boolean(payload.typing) });
     });
 
     // "Who is editing": a user marks the diagram of a room as being edited right now.
-    socket.on('editing', (payload, ack) => {
+    on('editing', (payload, ack) => {
       const room = cleanRoom(payload?.room);
       if (!room || !joined.has(room)) return fail(ack, 'Join the room first');
       user.editing = Boolean(payload.editing);
@@ -391,9 +461,10 @@ module.exports = { cleanName, cleanRoom, cleanText, limits };
 ## Appendix E (mandatory) Listing of history.js
 
 ```js
-// In-memory message history, one capped list per room. A database (lab 6) can replace it
-// later: the socket handlers only use `add` and `list`. The number of rooms is capped too,
-// otherwise a client inventing room names could grow the memory without limit.
+// Message history, one capped list per room. The socket handlers only use `add` and `list` and
+// wait for both with `await`, so any store with these two methods can be plugged in: the in-memory
+// one below, or the MongoDB one. The number of rooms is capped in memory, otherwise a client
+// inventing room names could grow the memory without limit.
 const createHistory = (limit = 50, maxRooms = 200) => {
   const rooms = new Map();
   return {
@@ -411,7 +482,21 @@ const createHistory = (limit = 50, maxRooms = 200) => {
   };
 };
 
-module.exports = { createHistory };
+// History in a MongoDB collection (the object returned by `db.collection('messages')` of the
+// official driver). Only insertOne and find(...).sort(...).limit(...).toArray() are used, so tests
+// can pass a small fake collection and need no database.
+const createMongoHistory = (collection, limit = 50) => ({
+  async add(room, message) {
+    await collection.insertOne({ ...message, room });
+  },
+  async list(room) {
+    const newest = await collection.find({ room }).sort({ _id: -1 }).limit(limit).toArray();
+    // Newest first in the query, oldest first for the client; the database id stays inside.
+    return newest.reverse().map(({ _id, ...message }) => message);
+  },
+});
+
+module.exports = { createHistory, createMongoHistory };
 ```
 
 ## Appendix F (mandatory) Listing of rate-limit.js
@@ -593,7 +678,11 @@ const bind = (s) => {
     clearTimeout(typingUsers.get(username));
     typingUsers.delete(username);
     // If the "stopped" event is lost, the note disappears by itself after three seconds.
-    if (typing) typingUsers.set(username, setTimeout(() => (typingUsers.delete(username), showTyping()), 3000));
+    if (typing)
+      typingUsers.set(
+        username,
+        setTimeout(() => (typingUsers.delete(username), showTyping()), 3000),
+      );
     showTyping();
   });
   s.on('disconnect', (reason) => {
@@ -620,15 +709,23 @@ const bind = (s) => {
   });
 };
 
-$('login').addEventListener('submit', (event) => {
+$('login').addEventListener('submit', async (event) => {
   event.preventDefault();
   const username = $('username').value.trim();
   if (!username) return setText('login-error', 'Enter a name, spaces alone are not a name');
   if (!nameRe().test(username)) return setText('login-error', `Use 1-${limits.nameMaxLength} letters, digits, dots, dashes or underscores`);
   setText('login-error');
   socket?.close(); // a second submit never leaves a second connection behind
-  socket = io({ auth: { username } });
-  bind(socket);
+  try {
+    // The server signs the name into a token; the socket then proves who it is with the token.
+    const reply = await fetch('/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username }) });
+    const data = await reply.json();
+    if (!reply.ok) return setText('login-error', data.error ?? 'Login failed');
+    socket = io({ auth: { token: data.token } });
+    bind(socket);
+  } catch {
+    setText('login-error', 'The server is not reachable');
+  }
 });
 
 $('room-form').addEventListener('submit', (event) => {
@@ -680,7 +777,8 @@ $('chat-form').addEventListener('submit', (event) => {
     check('status')(reply);
     if (!reply?.ok) return;
     $('text').value = '';
-    if (reply.message) addLine({ className: 'message--private', author: `You to ${reply.message.toName} (private)`, at: reply.message.at, text: reply.message.text });
+    if (reply.message)
+      addLine({ className: 'message--private', author: `You to ${reply.message.toName} (private)`, at: reply.message.at, text: reply.message.text });
   };
   if (privateTo) socket.emit('private:message', { to: privateTo.id, text }, done);
   else socket.emit('chat:message', { room: currentRoom, text }, done);

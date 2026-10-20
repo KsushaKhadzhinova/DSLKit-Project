@@ -156,7 +156,11 @@ const bind = (s) => {
     clearTimeout(typingUsers.get(username));
     typingUsers.delete(username);
     // If the "stopped" event is lost, the note disappears by itself after three seconds.
-    if (typing) typingUsers.set(username, setTimeout(() => (typingUsers.delete(username), showTyping()), 3000));
+    if (typing)
+      typingUsers.set(
+        username,
+        setTimeout(() => (typingUsers.delete(username), showTyping()), 3000),
+      );
     showTyping();
   });
   s.on('disconnect', (reason) => {
@@ -183,15 +187,23 @@ const bind = (s) => {
   });
 };
 
-$('login').addEventListener('submit', (event) => {
+$('login').addEventListener('submit', async (event) => {
   event.preventDefault();
   const username = $('username').value.trim();
   if (!username) return setText('login-error', 'Enter a name, spaces alone are not a name');
   if (!nameRe().test(username)) return setText('login-error', `Use 1-${limits.nameMaxLength} letters, digits, dots, dashes or underscores`);
   setText('login-error');
   socket?.close(); // a second submit never leaves a second connection behind
-  socket = io({ auth: { username } });
-  bind(socket);
+  try {
+    // The server signs the name into a token; the socket then proves who it is with the token.
+    const reply = await fetch('/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username }) });
+    const data = await reply.json();
+    if (!reply.ok) return setText('login-error', data.error ?? 'Login failed');
+    socket = io({ auth: { token: data.token } });
+    bind(socket);
+  } catch {
+    setText('login-error', 'The server is not reachable');
+  }
 });
 
 $('room-form').addEventListener('submit', (event) => {
@@ -243,7 +255,8 @@ $('chat-form').addEventListener('submit', (event) => {
     check('status')(reply);
     if (!reply?.ok) return;
     $('text').value = '';
-    if (reply.message) addLine({ className: 'message--private', author: `You to ${reply.message.toName} (private)`, at: reply.message.at, text: reply.message.text });
+    if (reply.message)
+      addLine({ className: 'message--private', author: `You to ${reply.message.toName} (private)`, at: reply.message.at, text: reply.message.text });
   };
   if (privateTo) socket.emit('private:message', { to: privateTo.id, text }, done);
   else socket.emit('chat:message', { room: currentRoom, text }, done);

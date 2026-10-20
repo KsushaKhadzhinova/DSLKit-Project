@@ -3,8 +3,9 @@ const path = require('node:path');
 const express = require('express');
 const { Server } = require('socket.io');
 const { attachSocket } = require('./socket');
-const { limits } = require('./validate');
+const { limits, cleanName } = require('./validate');
 const { parseAllowed, isOriginAllowed } = require('./origin');
+const { issueToken } = require('./token');
 
 const publicDir = path.join(__dirname, '..', 'public');
 
@@ -24,13 +25,29 @@ const securityHeaders = (req, res, next) => {
 // Builds the HTTP server with the static client and Socket.IO on top of it.
 // The server is returned unstarted so tests can listen on a free port.
 // `allowedOrigins` lists extra sites (besides the server's own address) that may open a socket.
-const createServer = ({ allowedOrigins = parseAllowed(process.env.ALLOWED_ORIGINS), setup, ...options } = {}) => {
+// The token secret comes from TOKEN_SECRET; the default below is for local runs and tests only.
+// `requireToken` (REQUIRE_TOKEN=1) refuses sockets that come without a login token.
+const DEFAULT_SECRET = 'local-development-secret-do-not-use-in-production';
+
+const createServer = ({
+  allowedOrigins = parseAllowed(process.env.ALLOWED_ORIGINS),
+  tokenSecret = process.env.TOKEN_SECRET || DEFAULT_SECRET,
+  requireToken = process.env.REQUIRE_TOKEN === '1',
+  setup,
+  ...options
+} = {}) => {
   const app = express();
   app.disable('x-powered-by');
   app.use(securityHeaders);
   app.use(express.static(publicDir));
   app.get('/limits.json', (req, res) => res.json(limits));
   app.get('/health', (req, res) => res.json({ status: 'ok' }));
+  // Login: a valid name gets a signed token that the socket handshake accepts instead of a plain name.
+  app.post('/login', express.json({ limit: '1kb' }), (req, res) => {
+    const username = cleanName(req.body?.username);
+    if (!username) return res.status(400).json({ error: `A username of 1-${limits.nameMaxLength} letters, digits, dots, dashes or underscores is required` });
+    res.json({ username, token: issueToken(username, tokenSecret) });
+  });
   setup?.(app);
 
   // 404 and 500 pages use the same styles as the rest of the site; the error text never reaches the browser.
@@ -49,7 +66,7 @@ const createServer = ({ allowedOrigins = parseAllowed(process.env.ALLOWED_ORIGIN
     allowRequest: (req, callback) => callback(null, isOriginAllowed(req.headers.origin, req.headers.host, allowedOrigins)),
     maxHttpBufferSize: limits.maxPacketBytes,
   });
-  attachSocket(io, options);
+  attachSocket(io, { ...options, tokenSecret, requireToken });
   return { app, httpServer, io };
 };
 

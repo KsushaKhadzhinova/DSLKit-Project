@@ -44,7 +44,8 @@ Table 1 – Project structure
 | `src/app.js`        | The `createServer` function: Express, static files, Socket.IO |
 | `src/socket.js`     | Handlers of all events                                        |
 | `src/validate.js`   | Checks the name, the room name and the message text           |
-| `src/history.js`    | In-memory message history, the last 50 per room               |
+| `src/history.js`    | Message history: in memory or in MongoDB (swappable store)    |
+| `src/token.js`      | Signed login token (HMAC-SHA256, expiry time)                 |
 | `src/rate-limit.js` | Message rate limit                                            |
 | `public/`           | Client: page, script and styles                               |
 | `tests/`            | Tests built on `socket.io-client`                             |
@@ -78,7 +79,9 @@ The work includes extras from the assignment and a few of its own.
 
 **Who is editing.** For each room the server keeps the list of users with an `editing` flag. Any change of the members or of the flag is sent as `presence:update`, and the client shows an editing mark next to the name.
 
-**History.** The last 50 messages of a room live in memory and reach a newcomer in the answer to `room:join`. The `history.js` module has only `add` and `list`, so it can later be replaced by MongoDB storage without touching the handlers. Database storage is not part of this lab, so the history is empty after a server restart.
+**History.** The last 50 messages of a room reach a newcomer in the answer to `room:join`. The handlers use only the `add` and `list` methods of the store and wait for them with `await`, so the store is swappable. By default the history lives in memory. When `MONGODB_URI` is set, `server.js` connects the `mongodb` driver, and `createMongoHistory` writes messages to the `messages` collection and reads the last 50 per room, so the history survives a restart. If the database is unavailable the server answers with an acknowledgement error and keeps running. The tests use a small fake collection, and a real database was not started in the tests or while preparing this report.
+
+**Token login.** `POST /login` with the body `{ "username": "..." }` returns a signed token (HMAC-SHA256, valid for one hour). The socket connects with `auth: { token }` and the name is taken from the token. The secret is read from the `TOKEN_SECRET` variable, with a default for local runs and tests. With `REQUIRE_TOKEN=1` sockets without a token are refused. Forged, foreign-secret and expired tokens are refused.
 
 **Private messages.** The `private:message` event takes the recipient `socket.id`, delivers the text to that user only and returns an acknowledgement with a copy to the sender.
 
@@ -88,7 +91,7 @@ The work includes extras from the assignment and a few of its own.
 
 ### 3.5 Verification
 
-The work is checked by automated tests: 41 tests start a real server on a free port and connect several `socket.io-client` clients over WebSocket. The scenarios are summarized in table 3. Manual checking uses two browser windows and the steps from the README file.
+The work is checked by automated tests: 69 tests start a real server on a free port and connect several `socket.io-client` clients over WebSocket. The scenarios are summarized in table 3. Manual checking uses two browser windows and the steps from the README file.
 
 Table 3 – Automated test scenarios
 
@@ -153,7 +156,7 @@ Each message gets an `at` timestamp when the server receives it. The client show
 
 8. How do you save the message history in MongoDB?
 
-   A Mongoose schema with room, author, text and time. In this work the history lives in memory.
+   A Mongoose schema with room, author, text and time. In this work it is the `createMongoHistory` class over the `messages` collection (methods `insertOne` and `find`), switched on by `MONGODB_URI`, by default the history lives in memory.
 
 9. How do you send a private message to a specific user by socket.id?
 
@@ -192,7 +195,7 @@ Listing of server.js is given in appendix A. Listing of app.js is given in appen
 
 ## Conclusion
 
-For DSLKit, a server on Express and Socket.IO with an HTML and JavaScript client was built. Users exchange messages in real time, get notifications about connecting, disconnecting, joining a room and leaving it, and for each diagram see the list of people and those who are editing it. On top of that the work adds an in-memory history, private messages, a typing indicator, acknowledgements and a rate limit. 41 automated tests confirm the behavior of every event. Limits are kept in `limits.json`, and every message carries a timestamp. MongoDB history storage and screenshots of two windows are not included.
+For DSLKit, a server on Express and Socket.IO with an HTML and JavaScript client was built. Users exchange messages in real time, get notifications about connecting, disconnecting, joining a room and leaving it, and for each diagram see the list of people and those who are editing it. On top of that the work adds a history with a MongoDB or in-memory store, login by a signed token, private messages, a typing indicator, acknowledgements and a rate limit. 69 automated tests confirm the behavior of every event. Limits are kept in `limits.json`, and every message carries a timestamp. A run against a real MongoDB and screenshots of two windows are not included.
 
 ## Appendix A (mandatory) Listing of server.js
 
