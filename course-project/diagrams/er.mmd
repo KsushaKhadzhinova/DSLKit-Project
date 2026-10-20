@@ -1,0 +1,32 @@
+erDiagram
+  USERS ||--o{ DIAGRAMS : "владеет (ownerId, RESTRICT)"
+
+  USERS {
+    int id PK
+    string email UK "до 254 символов, нижний регистр"
+    string passwordHash "bcrypt, 60 символов"
+    string role "user или admin"
+    datetime createdAt
+    datetime updatedAt
+  }
+
+  DIAGRAMS {
+    int id PK
+    string title "1..80 символов"
+    string notation "UML, BPMN, ERD, DFD, IDEF0, Petri"
+    text sourceCode "1..10000 символов"
+    string priority "low, normal, high"
+    int ownerId FK
+    datetime createdAt
+    datetime updatedAt
+  }
+
+  REQUEST_LOGS {
+    int id PK
+    string method
+    string path "до 200 символов"
+    string ip
+    int status "может быть пустым"
+    datetime createdAt
+    datetime updatedAt
+  }
