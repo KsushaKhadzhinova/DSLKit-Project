@@ -335,3 +335,9 @@ select.form__input {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
+
+/* Problem and solution blocks of the prop drilling demo */
+.section > .card__title {
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+}

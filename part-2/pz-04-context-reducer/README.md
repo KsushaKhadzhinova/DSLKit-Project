@@ -6,14 +6,14 @@
 
 ## Что сделано
 
-| Требование условия                        | Реализация                                                                                                     |
-| ----------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| Показать prop drilling                    | `components/PropDrilling.jsx`: `userName` идёт через `DrillingHeader`, `Navigation`, `UserMenu` в `UserAvatar` |
-| Контекст темы                             | `context/ThemeContext.jsx`, тема пишется в `data-theme` корня, цвета переключают CSS-переменные                |
-| Контекст языка                            | `context/LanguageContext.jsx`: словарь RU и EN, функция `t(key)`, атрибут `lang` корня                         |
-| Бизнес-логика на `useReducer` и Context   | `context/FavoritesContext.jsx`: редьюсер `ADD`, `REMOVE`, `TOGGLE`, `CLEAR`, избранные шаблоны диаграмм        |
-| Доступ к состоянию и `dispatch` везде     | хуки `useTheme`, `useLanguage`, `useFavorites`, компоненты не получают их через props                          |
-| Сохранение в localStorage (рекомендовано) | `FavoritesProvider` пишет список эффектом, читает ленивым инициализатором, проверяет формат                    |
+| Требование условия                        | Реализация                                                                                                                                        |
+| ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Показать prop drilling                    | `components/PropDrilling.jsx`: `userName` идёт через `DrillingHeader`, `Navigation`, `UserMenu` в `UserAvatar`                                    |
+| Контекст темы                             | `context/ThemeContext.jsx`, тема пишется в `data-theme` корня, цвета переключают CSS-переменные                                                   |
+| Контекст языка                            | `context/LanguageContext.jsx`: словарь RU и EN, функция `t(key)`, атрибут `lang` корня                                                            |
+| Бизнес-логика на `useReducer` и Context   | `context/FavoritesContext.jsx`: редьюсер `ADD`, `REMOVE`, `TOGGLE`, `INCREMENT`, `DECREMENT`, `SET_QTY`, `CLEAR`, избранные шаблоны с количеством |
+| Доступ к состоянию и `dispatch` везде     | хуки `useTheme`, `useLanguage`, `useFavorites`, `useFavoritesDispatch`, компоненты не получают их через props                                     |
+| Сохранение в localStorage (рекомендовано) | `FavoritesProvider` пишет список эффектом, читает ленивым инициализатором, проверяет формат                                                       |
 
 ## Запуск
 
@@ -21,7 +21,7 @@
 cd part-2/pz-04-context-reducer
 npm install
 npm run dev      # http://localhost:5177
-npm test         # Vitest и React Testing Library, 19 тестов
+npm test         # Vitest и React Testing Library, 38 тестов
 npm run build
 ```
 

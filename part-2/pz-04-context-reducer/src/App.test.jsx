@@ -9,19 +9,39 @@ import ErrorBoundary from './shell/ErrorBoundary';
 
 describe('favoritesReducer', () => {
   it('adds without duplicates, removes, toggles and clears', () => {
-    expect(favoritesReducer([], { type: 'ADD', id: 1 })).toEqual([1]);
-    expect(favoritesReducer([1], { type: 'ADD', id: 1 })).toEqual([1]);
-    expect(favoritesReducer([1, 2], { type: 'REMOVE', id: 1 })).toEqual([2]);
-    expect(favoritesReducer([1], { type: 'TOGGLE', id: 2 })).toEqual([1, 2]);
-    expect(favoritesReducer([1, 2], { type: 'TOGGLE', id: 2 })).toEqual([1]);
-    expect(favoritesReducer([1, 2], { type: 'CLEAR' })).toEqual([]);
+    expect(favoritesReducer([], { type: 'ADD', id: 1 })).toEqual([{ id: 1, qty: 1 }]);
+    expect(favoritesReducer([{ id: 1, qty: 3 }], { type: 'ADD', id: 1 })).toEqual([{ id: 1, qty: 3 }]);
+    expect(
+      favoritesReducer(
+        [
+          { id: 1, qty: 1 },
+          { id: 2, qty: 1 },
+        ],
+        { type: 'REMOVE', id: 1 },
+      ),
+    ).toEqual([{ id: 2, qty: 1 }]);
+    expect(favoritesReducer([{ id: 1, qty: 1 }], { type: 'TOGGLE', id: 2 })).toEqual([
+      { id: 1, qty: 1 },
+      { id: 2, qty: 1 },
+    ]);
+    expect(
+      favoritesReducer(
+        [
+          { id: 1, qty: 1 },
+          { id: 2, qty: 1 },
+        ],
+        { type: 'TOGGLE', id: 2 },
+      ),
+    ).toEqual([{ id: 1, qty: 1 }]);
+    expect(favoritesReducer([{ id: 1, qty: 1 }], { type: 'CLEAR' })).toEqual([]);
   });
 
   it('ignores unknown actions and does not mutate the state', () => {
-    const state = [1];
+    const state = [{ id: 1, qty: 1 }];
     expect(favoritesReducer(state, { type: 'UNKNOWN' })).toBe(state);
     favoritesReducer(state, { type: 'ADD', id: 2 });
-    expect(state).toEqual([1]);
+    favoritesReducer(state, { type: 'INCREMENT', id: 1 });
+    expect(state).toEqual([{ id: 1, qty: 1 }]);
   });
 });
 
@@ -96,7 +116,7 @@ describe('favorites through useReducer and Context', () => {
     const panel = screen.getByRole('region', { name: /Избранное/ });
     expect(within(panel).getByText('Процесс согласования заказа')).toBeInTheDocument();
     expect(within(panel).getByText('Выбрано: 1')).toBeInTheDocument();
-    expect(JSON.parse(localStorage.getItem(FAVORITES_KEY))).toEqual([2]);
+    expect(JSON.parse(localStorage.getItem(FAVORITES_KEY))).toEqual([{ id: 2, qty: 1 }]);
 
     await user.click(within(panel).getByRole('button', { name: 'Убрать: Процесс согласования заказа' }));
     expect(screen.getByText('Пока ничего не выбрано.')).toBeInTheDocument();
@@ -125,7 +145,10 @@ describe('favorites through useReducer and Context', () => {
   });
 
   it('keeps only known ids, once each, from the stored list', () => {
-    expect(sanitizeFavorites([2, 2, 99, '1', null, { $ne: 1 }, 3])).toEqual([2, 3]);
+    expect(sanitizeFavorites([2, 2, 99, '1', null, { $ne: 1 }, 3])).toEqual([
+      { id: 2, qty: 1 },
+      { id: 3, qty: 1 },
+    ]);
     expect(sanitizeFavorites({ not: 'array' })).toEqual([]);
     localStorage.setItem(FAVORITES_KEY, JSON.stringify([99, 'x', 4, 4]));
     render(<App />);

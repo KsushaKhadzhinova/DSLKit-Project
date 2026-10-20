@@ -1,11 +1,12 @@
 import { TEMPLATES } from '../data/templates';
-import { useFavorites } from '../context/FavoritesContext';
+import { MAX_QTY, useFavorites, useFavoritesDispatch } from '../context/FavoritesContext';
 import { useLanguage } from '../context/LanguageContext';
 
 function TemplateCard({ template }) {
-  const { favorites, dispatch } = useFavorites();
+  const favorites = useFavorites();
+  const dispatch = useFavoritesDispatch();
   const { language, t } = useLanguage();
-  const isFavorite = favorites.includes(template.id);
+  const isFavorite = favorites.some((item) => item.id === template.id);
   const title = template.title[language];
 
   return (
@@ -48,9 +49,13 @@ export function TemplateList() {
 }
 
 export function FavoritesPanel() {
-  const { favorites, dispatch } = useFavorites();
+  const favorites = useFavorites();
+  const dispatch = useFavoritesDispatch();
   const { language, t } = useLanguage();
-  const chosen = TEMPLATES.filter((template) => favorites.includes(template.id));
+  const chosen = TEMPLATES.flatMap((template) => {
+    const item = favorites.find((entry) => entry.id === template.id);
+    return item ? [{ template, qty: item.qty }] : [];
+  });
 
   return (
     <section className="section" id="favorites" aria-labelledby="favorites-title">
@@ -65,11 +70,32 @@ export function FavoritesPanel() {
       ) : (
         <>
           <ul className="cards">
-            {chosen.map((template) => (
+            {chosen.map(({ template, qty }) => (
               <li className="cards__item" key={template.id}>
                 <article className="card">
                   <h3 className="card__title">{template.title[language]}</h3>
                   <div className="card__actions">
+                    <button
+                      type="button"
+                      className="button button--small"
+                      aria-label={`${t('decrease')}: ${template.title[language]}`}
+                      disabled={qty <= 1}
+                      onClick={() => dispatch({ type: 'DECREMENT', id: template.id })}
+                    >
+                      −
+                    </button>
+                    <output className="badge" aria-label={`${t('quantity')}: ${template.title[language]}`}>
+                      {qty}
+                    </output>
+                    <button
+                      type="button"
+                      className="button button--small"
+                      aria-label={`${t('increase')}: ${template.title[language]}`}
+                      disabled={qty >= MAX_QTY}
+                      onClick={() => dispatch({ type: 'INCREMENT', id: template.id })}
+                    >
+                      +
+                    </button>
                     <button
                       type="button"
                       className="button button--small"
