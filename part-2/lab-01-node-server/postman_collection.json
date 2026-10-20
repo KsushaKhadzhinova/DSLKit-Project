@@ -315,6 +315,90 @@
       }
     },
     {
+      "name": "Partial update -> 200 (only the sent fields change)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{ \"priority\": \"high\" }",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base}}/diagrams/1",
+          "host": [
+            "{{base}}"
+          ],
+          "path": [
+            "diagrams",
+            "1"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Empty PATCH body -> 400",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 400', () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base}}/diagrams/1",
+          "host": [
+            "{{base}}"
+          ],
+          "path": [
+            "diagrams",
+            "1"
+          ]
+        }
+      }
+    },
+    {
       "name": "Delete -> 204 (repeat it -> 404)",
       "event": [
         {

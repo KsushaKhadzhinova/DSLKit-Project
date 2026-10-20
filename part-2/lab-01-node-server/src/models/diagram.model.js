@@ -13,9 +13,17 @@ const SEED = [
 const createDiagramStore = (initial = SEED) => {
   let nextId = 1;
   let diagrams = [];
+  let lastStamp = 0;
+
+  // Creation time as an ISO string. Every record gets a strictly later value than the previous one,
+  // even when two records are created in the same millisecond, so no two records look identical.
+  const stamp = () => {
+    lastStamp = Math.max(Date.now(), lastStamp + 1);
+    return new Date(lastStamp).toISOString();
+  };
 
   const create = (fields) => {
-    const diagram = { id: nextId, ...fields };
+    const diagram = { id: nextId, ...fields, createdAt: stamp() };
     nextId += 1;
     diagrams.push(diagram);
     return diagram;
@@ -30,7 +38,15 @@ const createDiagramStore = (initial = SEED) => {
     replace: (id, fields) => {
       const index = diagrams.findIndex((d) => d.id === id);
       if (index < 0) return undefined;
-      diagrams[index] = { id, ...fields };
+      // PUT replaces the fields, the creation time stays the one of the first save.
+      diagrams[index] = { id, ...fields, createdAt: diagrams[index].createdAt };
+      return diagrams[index];
+    },
+    // PATCH changes only the sent fields, everything else keeps its value.
+    update: (id, fields) => {
+      const index = diagrams.findIndex((d) => d.id === id);
+      if (index < 0) return undefined;
+      diagrams[index] = { ...diagrams[index], ...fields };
       return diagrams[index];
     },
     remove: (id) => {
