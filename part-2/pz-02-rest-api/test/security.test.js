@@ -136,3 +136,14 @@ test('big and hostile bodies give 400 or 413 and no crash', async () => {
   assert.equal(errors.length, 0);
   await close();
 });
+
+test('GET /health answers 200 and is not counted by the rate limit', async () => {
+  const { base, close } = await start({ limit: { windowMs: 60000, max: 1 } });
+  for (let i = 0; i < 3; i += 1) {
+    const res = await fetch(`${base}/health`);
+    assert.equal(res.status, 200);
+    assert.deepEqual(await res.json(), { status: 'ok' });
+  }
+  assert.equal((await fetch(`${base}/api/users`)).status, 200);
+  await close();
+});

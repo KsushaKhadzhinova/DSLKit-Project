@@ -46,6 +46,19 @@ export const createDiagramStore = (now = Date.now) => {
       items.push(item);
       return item;
     },
+    // Edit keeps the id and the creation time, only the form fields change.
+    update: (id, { title, notation, description, code, revision }) => {
+      const item = items.find((one) => one.id === id);
+      if (!item) return undefined;
+      Object.assign(item, { title, notation, description, code, revision });
+      return item;
+    },
+    remove: (id) => {
+      const index = items.findIndex((one) => one.id === id);
+      if (index < 0) return false;
+      items.splice(index, 1);
+      return true;
+    },
   };
 };
 

@@ -17,6 +17,13 @@
   <% } %>
   <div class="page-actions">
     <a class="button button--primary" href="/<%= authQuery %>">Back to the list</a>
+    <% if (!user.guest) { %>
+      <a class="button button--tonal" href="/item/<%= item.id %>/edit<%= authQuery %>">Edit<span class="visually-hidden"> <%= item.title %></span></a>
+      <form class="inline-form" method="post" action="/item/<%= item.id %>/delete<%= authQuery %>">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+        <button class="button button--quiet" type="submit">Delete<span class="visually-hidden"> <%= item.title %></span></button>
+      </form>
+    <% } %>
   </div>
 </section>
 <%- include('partials/footer') %>

@@ -48,30 +48,65 @@ export const createApp = ({
 
   app.get('/', (req, res) => res.render('index', { title: 'Diagrams', items: store.all() }));
 
-  app.get('/item/:id', (req, res, next) => {
-    // Only plain digits are a number: Number() would also accept "0x1" or "1e0".
-    const item = /^\d{1,9}$/.test(req.params.id) ? store.find(Number(req.params.id)) : undefined;
-    return item ? res.render('item', { title: item.title, item }) : next();
-  });
+  // Only plain digits are a number: Number() would also accept "0x1" or "1e0".
+  const findItem = (req) => (/^\d{1,9}$/.test(req.params.id) ? store.find(Number(req.params.id)) : undefined);
 
-  app.get('/add', requireAuth, (req, res) => res.render('add', { title: 'Add diagram', notations: NOTATIONS, errors: {}, values: { revision: '1' } }));
+  // Adding and editing share one template, only the texts and the address differ.
+  const formView = { notations: NOTATIONS, heading: 'Add diagram', action: '/add', submit: 'Save diagram' };
+  const editView = (item) => ({ ...formView, heading: 'Edit diagram', action: `/item/${item.id}/edit`, submit: 'Save changes' });
 
-  app.post('/add', requireAuth, (req, res) => {
-    const body = req.body; // the CSRF check has already proved that the form body exists
-    // Repeated keys (arrays) must not crash: only plain strings count.
+  // Repeated keys (arrays) must not crash: only plain strings count.
+  const readForm = (body) => {
     const text = (value) => (typeof value === 'string' ? value.trim() : '');
-    const values = {
+    return {
       title: text(body.title),
       notation: text(body.notation),
       description: text(body.description),
       code: text(body.code),
       revision: text(body.revision),
     };
+  };
+
+  app.get('/item/:id', (req, res, next) => {
+    const item = findItem(req);
+    return item ? res.render('item', { title: item.title, item }) : next();
+  });
+
+  app.get('/add', requireAuth, (req, res) => res.render('add', { ...formView, title: 'Add diagram', errors: {}, values: { revision: '1' } }));
+
+  app.post('/add', requireAuth, (req, res) => {
+    const values = readForm(req.body); // the CSRF check has already proved that the form body exists
     const errors = validateDiagram(values, limits);
     if (Object.keys(errors).length) {
-      return res.status(400).render('add', { title: 'Add diagram', notations: NOTATIONS, errors, values });
+      return res.status(400).render('add', { ...formView, title: 'Add diagram', errors, values });
     }
     store.add({ ...values, revision: Number(values.revision) });
+    return res.redirect(`/${res.locals.authQuery}`);
+  });
+
+  // Edit and delete change data, so both need the simulated sign-in and the CSRF token (the delete button is a form, not a link).
+  app.get('/item/:id/edit', requireAuth, (req, res, next) => {
+    const item = findItem(req);
+    if (!item) return next();
+    return res.render('add', { ...editView(item), title: 'Edit diagram', errors: {}, values: { ...item, revision: String(item.revision) } });
+  });
+
+  app.post('/item/:id/edit', requireAuth, (req, res, next) => {
+    const item = findItem(req);
+    if (!item) return next();
+    const values = readForm(req.body);
+    const errors = validateDiagram(values, limits);
+    if (Object.keys(errors).length) {
+      return res.status(400).render('add', { ...editView(item), title: 'Edit diagram', errors, values });
+    }
+    store.update(item.id, { ...values, revision: Number(values.revision) });
+    return res.redirect(`/item/${item.id}${res.locals.authQuery}`);
+  });
+
+  app.post('/item/:id/delete', requireAuth, (req, res, next) => {
+    const item = findItem(req);
+    if (!item) return next();
+    store.remove(item.id);
     return res.redirect(`/${res.locals.authQuery}`);
   });
 

@@ -6,7 +6,7 @@
   "description": "DSLKit, practical 1: Express middleware and EJS templates",
   "scripts": {
     "start": "node src/server.js",
-    "test": "node --test --experimental-test-coverage \"test/*.test.js\""
+    "test": "node --test --experimental-test-coverage \"test/*.test.js\" report.test.mjs"
   },
   "dependencies": {
     "ejs": "^3.1.10",

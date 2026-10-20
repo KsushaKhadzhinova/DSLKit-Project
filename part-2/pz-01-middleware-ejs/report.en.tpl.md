@@ -56,10 +56,15 @@ Table 2 – Application routes
 | `GET /item/:id` | Detail page, an unknown id leads to the 404 page |
 | `GET /add` | Add form, available with `?auth=1` |
 | `POST /add` | Field validation, adding to the array and redirect to the home page, on an error status 400 and the form with the entered values |
+| `GET /item/:id/edit` | Form for editing a record with the current values, available with `?auth=1` |
+| `POST /item/:id/edit` | Field validation and update of the record, the id and the creation time stay, status 400 on an error |
+| `POST /item/:id/delete` | Deletes the record and goes to the home page, a repeated delete gives 404 |
 | `GET /login` | Hint page |
 | `GET /log` | Table of the request log, available with `?auth=1` |
 
 The templates print every value with escaping, so markup typed into the form is shown as text. Every record has a "creation time" field. It is set when the record is added and is always later than the previous one, even if two records are created in the same millisecond, so records never look identical.
+
+On the detail page a signed-in user sees the buttons "Edit" and "Delete". Editing opens the same form as adding, but filled with the current values, and checks the fields with the same rules. Deleting is a form with the `POST` method rather than a link, because a link opened with `GET` must not change data. Both forms carry the hidden `_csrf` field, without it the server answers 403, and a guest goes to the sign-in page. The id of a deleted record is never reused. Listing of the item.ejs template is given in appendix J.
 
 ### 3.5 The 500 page and the order of handlers
 
@@ -125,15 +130,25 @@ Figure 6 – The 500 error page with an explanation about the unavailable log ta
 
 ### 3.9 Automatic verification
 
-Automatic tests on the built-in `node:test` start the server on a free port and check the pages, the guest redirect, adding an item, field validation, escaping, the log table, an unavailable database, the unique creation time, both error pages, the CSRF token, the security headers, the rate limit, log escaping and huge values. The command is `npm test` in the project folder.
+Automatic tests on the built-in `node:test` start the server on a free port and check the pages, the guest redirect, adding an item, field validation, escaping, the log table, an unavailable database, the unique creation time, editing and deleting a record with the CSRF token, both error pages, the CSRF token, the security headers, the rate limit, log escaping and huge values. The command is `npm test` in the project folder.
 
 ## 4 Answers to Control Questions
 
-@@ANSWERS@@
+25. How do you protect an Express application from CSRF with middleware (in theory)?
+
+    A browser attaches cookies to a request to our site by itself, even when the form was sent by a page of another site, so a cookie alone is not enough. The middleware issues a random token and puts it into a cookie with the `HttpOnly` and `SameSite=Strict` flags and into a hidden field of every form. A request that changes data (`POST`, `PUT`, `PATCH`, `DELETE`) is accepted only when the field value matches the cookie and the `Origin` header, when present, points to this very site. A page of another site can neither read the cookie nor guess the token. The comparison uses `timingSafeEqual`. The order matters: the middleware is mounted after the form parser, because the token is in the body, and before the routes. In the work this is the `csrf` function in `security.js`, and the add, edit and delete forms carry the hidden field.
+
+26. How do you use a helper function (for example, a date formatter) in an EJS template?
+
+    The function is put into `app.locals` and becomes available in all templates, or into `res.locals` for one request, or it is passed as the second argument of `res.render()`. In the work `app.locals.formatTime` turns an ISO string such as `2026-10-01T09:00:00.000Z` into the readable "2026-10-01 09:00:00.000 UTC". In the template the call looks like this: `<%= formatTime(item.createdAt) %>`. The `<%=` tag escapes the result, and the exact machine value stays in the `datetime` attribute of the `time` element.
+
+27. Why is the static files middleware usually mounted before all routes?
+
+    A request for a style sheet or a logo should be answered at once, without passing authorization, the log, the form parser and the search through the routes. The page loads faster, and the log does not get a row for every file. If static files came after the routes, a template route or the 404 handler could grab the address of a file first. In the work `express.static` comes after the security headers, so files get them too, and before everything else. The price of this order is that static files are available without signing in, so nothing private may be put into `public`.
 
 ## Conclusion
 
-For the DSLKit project an Express application with EJS templates was built: the list of diagrams, the detail page and the add form take data from an array in memory. By the rules of the even variant the request log is written to a SQLite table, and its failure is shown with a styled 500 page. The form rejects empty and whitespace values, text that is too long and negative numbers using limits from a separate file, and every record has a unique creation time. The form is protected by a CSRF token, and the server by security headers and a rate limit. The design is taken from Part 1 of the project. Automatic tests cover all the code, and screenshots of the pages are given in the text.
+For the DSLKit project an Express application with EJS templates was built: the list of diagrams, the detail page and the add form take data from an array in memory. By the rules of the even variant the request log is written to a SQLite table, and its failure is shown with a styled 500 page. The form rejects empty and whitespace values, text that is too long and negative numbers using limits from a separate file, and every record has a unique creation time. Records can be edited and deleted with buttons on the detail page. The form is protected by a CSRF token, and the server by security headers and a rate limit. The design is taken from Part 1 of the project. Automatic tests cover all the code, and screenshots of the pages are given in the text.
 
 ## Appendix A (mandatory) Listing of the file requestLogger.js
 
@@ -170,3 +185,7 @@ For the DSLKit project an Express application with EJS templates was built: the 
 ## Appendix I (mandatory) Listing of the file security.js
 
 {{code:part-2/pz-01-middleware-ejs/src/middleware/security.js}}
+
+## Appendix J (mandatory) Listing of the template item.ejs
+
+{{code:part-2/pz-01-middleware-ejs/views/item.ejs}}
