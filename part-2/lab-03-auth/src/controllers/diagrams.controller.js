@@ -44,6 +44,14 @@ const createDiagramsController = ({ Diagram }) => ({
     return res.json(await diagram.update(req.diagramFields));
   },
 
+  // PATCH: only the sent fields change, the same owner-or-admin rule as PUT applies.
+  update: async (req, res, next) => {
+    const diagram = await Diagram.findByPk(req.diagramId);
+    if (!diagram) return next(missing(req.diagramId));
+    if (!mayChange(req.user, diagram)) return next(forbidden('Only the owner or an admin can change this diagram'));
+    return res.json(await diagram.update(req.diagramFields));
+  },
+
   remove: async (req, res, next) => {
     const diagram = await Diagram.findByPk(req.diagramId);
     if (!diagram) return next(missing(req.diagramId));

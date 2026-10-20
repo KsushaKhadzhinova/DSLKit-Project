@@ -62,13 +62,13 @@
 
 ### 3.5 Проверка
 
-Работа проверена автоматическими тестами на временной базе SQLite с настоящими миграциями и настоящими HTTP-запросами. Тесты запускают сервер на свободном порту, а bcrypt использует четыре раунда для скорости. Покрыто следующее: регистрация с нормализацией email, отсутствие хеша в ответе и проверка, что в базе лежит хеш bcrypt, а не пароль, дубликаты email в любом регистре, ошибки проверки данных, вход и содержимое токена, одинаковый ответ на неверный пароль и неизвестный email, подделанные, неподписанные, просроченные и подписанные чужим ключом токены, удаление пользователя и смена роли при старом токене, права администратора, владельца и постороннего пользователя, миграции с откатом и сид администратора. Выполнено 39 тестов. Проверка на настоящем PostgreSQL пока не выполнялась.
+Работа проверена автоматическими тестами на временной базе SQLite с настоящими миграциями и настоящими HTTP-запросами. Тесты запускают сервер на свободном порту, а bcrypt использует четыре раунда для скорости. Покрыто следующее: регистрация с нормализацией email, отсутствие хеша в ответе и проверка, что в базе лежит хеш bcrypt, а не пароль, дубликаты email в любом регистре, ошибки проверки данных, вход и содержимое токена, одинаковый ответ на неверный пароль и неизвестный email, подделанные, неподписанные, просроченные и подписанные чужим ключом токены, удаление пользователя и смена роли при старом токене, права администратора, владельца и постороннего пользователя, миграции с откатом и сид администратора. Выполнено 118 тестов приложения, включая частичное обновление `PATCH` и сбой базы. Проверка на настоящем PostgreSQL пока не выполнялась.
 
 ### 3.6 Ограничения
 
 Выход из системы не отзывает токен: он действует до истечения срока, поэтому срок выбран коротким. Число попыток входа ограничено: не более 20 запросов входа с одного адреса за 15 минут, а после 5 неудачных попыток почта блокируется на 15 минут. Счётчики хранятся в памяти процесса. Токен хранится на стороне клиента, и выбор между localStorage и cookie с флагом httpOnly делается в клиентской лабораторной работе.
 
-Листинг файла user.js приведён в приложении А. Листинг миграции создания таблицы Users приведён в приложении Б. Листинг файла auth.js приведён в приложении В. Листинг файла auth.controller.js приведён в приложении Г. Листинг файла validate-auth.js приведён в приложении Д. Листинг файла users.routes.js приведён в приложении Е. Листинг файла diagrams.controller.js приведён в приложении Ж.
+Листинг файла user.js приведён в приложении А. Листинг миграции создания таблицы Users приведён в приложении Б. Листинг файла auth.js приведён в приложении В. Листинг файла auth.controller.js приведён в приложении Г. Листинг файла validate-auth.js приведён в приложении Д. Листинг файла users.routes.js приведён в приложении Е. Листинг файла diagrams.controller.js приведён в приложении Ж. Листинг файла validate.js приведён в приложении К.
 
 Листинг файла user.js приведён в приложении А. Листинг миграции создания таблицы Users приведён в приложении Б. Листинг файла auth.js приведён в приложении В. Листинг файла auth.controller.js приведён в приложении Г. Листинг файла validate-auth.js приведён в приложении Д. Листинг файла users.routes.js приведён в приложении Е. Листинг файла diagrams.controller.js приведён в приложении Ж.
 
@@ -76,9 +76,31 @@
 
 Список принимает параметры `limit`, `offset`, `sort` и `order`. Параметр `limit` задаёт размер страницы от 1 до 100, `offset` задаёт смещение от 0 до 1000000, `sort` выбирает поле из белого списка, а `order` принимает значения `asc` и `desc`. Без параметров возвращается весь список по возрастанию `id`, поэтому клиенты прежних работ продолжают работать. Ответ остаётся массивом, а полный размер выборки приходит в заголовке `X-Total-Count`. Параметры работают вместе с параметром `search`, а заголовок `X-Total-Count` учитывает поиск и разрешён для адреса клиента через CORS. Числа читаются как строки не длиннее девяти цифр, поэтому значения `-1`, `1e9`, `0x10` и огромные числа получают ответ 400 со списком ошибок по полям. Имя поля сортировки проверяется по белому списку и не попадает в запрос к базе без проверки. Равные значения упорядочены по `id`, поэтому страницы не пересекаются. Разбор параметров вынесен в отдельный модуль, он приведён в приложении И.
 
+### 3.8 Метод PATCH
+
+Маршрут `PATCH /diagrams/:id` меняет только присланные поля. Проверка вынесена в `validatePartial`, она приведена в приложении К. Каждое присланное поле проходит то же правило, что в `POST` и `PUT`, тело без единого известного поля даёт 400, а поле владельца прислать нельзя. Права такие же, как у `PUT`: менять диаграмму может владелец или администратор, остальные получают 403. Метод `PUT` заменяет запись целиком и требует все обязательные поля, а `PATCH` оставляет пропущенные поля как есть. Поэтому `PUT` идемпотентен, а `PATCH` по определению не обязан быть таким.
+
+### 3.9 Как вызвать ответ 500 настоящим сбоем
+
+Ответ 500 вызывается сбоем базы, а не кнопкой. Для SQLite нужно запустить сервер командой `npm start`, затем во втором окне выполнить `npx sequelize-cli db:migrate:undo:all`. Таблицы исчезают под работающим сервером, и первый же запрос не может записать строку в журнал `RequestLogs`. Клиент получает 500 с телом `{ "error": "Internal server error" }`, а подробности остаются только в консоли сервера. Для PostgreSQL достаточно остановить службу базы или контейнер: запросы дают 500, а `GET /health` отвечает 503. Работу восстанавливают команды `npm run db:migrate` и `npm run db:seed`. В автоматическом тесте тот же сбой воспроизведён удалением таблицы `Diagrams` при работающем сервере.
+
+### 3.10 Ответы на контрольные вопросы
+
+9. Как ограничить количество одновременно действующих сессий для одного пользователя?
+
+   JWT без состояния сервер не помнит, поэтому нужна таблица сессий. При входе в неё пишется строка с идентификатором пользователя и уникальным номером токена `jti`, а сам номер кладётся в токен. Если у пользователя уже три активные сессии, самая старая удаляется или вход отклоняется. Middleware проверки токена дополнительно ищет `jti` в таблице, а выход и смена пароля удаляют строки. Более простой вариант это счётчик `tokenVersion` у пользователя: он входит в токен, и его увеличение отзывает все токены сразу. В этой работе ограничение сессий не реализовано, токен действует до истечения срока, поэтому срок выбран коротким.
+
+10. Как защититься от атак по подбору пароля (brute force) на уровне API?
+
+    Защита идёт слоями. Ограничитель частоты пропускает не более 20 запросов входа с одного адреса за 15 минут и не более 10 регистраций в час, и при превышении отвечает 429 с заголовком `Retry-After`. После 5 неудачных попыток для одного email вход блокируется на заданный срок, настройка `loginLockMs`. Ответ на неверный пароль и на неизвестный email одинаков, поэтому нельзя узнать, какие адреса зарегистрированы. Пароли хранятся как хеши bcrypt, которые медленно вычисляются, а требования к длине пароля сужают пространство перебора. Счётчики лежат в памяти процесса, при нескольких экземплярах сервера их переносят в общее хранилище, например Redis. Дополнительно применяют капчу и двухфакторный вход.
+
+11. Что произойдёт, если скомпрометирован секретный ключ JWT?
+
+    Тот, кто знает ключ, подпишет токен с любым пользователем и любой ролью, в том числе администратора, и сервер примет его как настоящий. Токены нельзя отличить по подписи, поэтому единственное средство это смена ключа: все выданные токены сразу перестают проходить проверку, и пользователи входят заново. В работе ключ берётся из переменной окружения, не хранится в репозитории, а слишком короткий ключ отклоняется при запуске. Ущерб ограничивает короткий срок жизни токена, всего один час. Дополнительную защиту дают ключи с идентификатором `kid` для плавной смены и алгоритм RS256, где подписывает закрытый ключ, а проверяет открытый, поэтому служба, которая только проверяет, подделать токен не может.
+
 ## Заключение
 
-В проект DSLKit добавлены пользователи с паролями в виде хешей bcrypt, регистрация, вход с токеном JWT, промежуточный обработчик проверки токена и защищённые маршруты, включая профиль текущего пользователя. Дополнительный механизм ролевой модели разделяет права администратора, владельца диаграммы и постороннего пользователя. Тесты подтверждают как успешные сценарии, так и отказы на подделанных, просроченных и чужих токенах. Остаются проверка на настоящем PostgreSQL, скриншоты запросов из Postman и ответы на контрольные вопросы, если их потребует преподаватель.
+В проект DSLKit добавлены пользователи с паролями в виде хешей bcrypt, регистрация, вход с токеном JWT, промежуточный обработчик проверки токена и защищённые маршруты, включая профиль текущего пользователя. Дополнительный механизм ролевой модели разделяет права администратора, владельца диаграммы и постороннего пользователя. Тесты подтверждают как успешные сценарии, так и отказы на подделанных, просроченных и чужих токенах. К методам добавлен частичный `PATCH` с теми же правами, что у `PUT`. Остаются проверка на настоящем PostgreSQL и скриншоты запросов из Postman.
 
 ## Приложение А (обязательное) Листинг файла user.js
 
@@ -332,9 +354,18 @@ const { allowMethods } = require('../middleware/http');
 const createUsersRouter = (controller, authenticate) => {
   const router = Router();
   const admin = [authenticate, requireRole('admin')];
-  router.route('/profile').get(authenticate, controller.profile).all(allowMethods(['GET']));
-  router.route('/users').get(...admin, controller.list).all(allowMethods(['GET']));
-  router.route('/users/:id/role').patch(...admin, parseId('userId', 'User'), validateRole, controller.setRole).all(allowMethods(['PATCH']));
+  router
+    .route('/profile')
+    .get(authenticate, controller.profile)
+    .all(allowMethods(['GET']));
+  router
+    .route('/users')
+    .get(...admin, controller.list)
+    .all(allowMethods(['GET']));
+  router
+    .route('/users/:id/role')
+    .patch(...admin, parseId('userId', 'User'), validateRole, controller.setRole)
+    .all(allowMethods(['PATCH']));
   router
     .route('/users/:id')
     .delete(...admin, parseId('userId', 'User'), controller.remove)
@@ -394,6 +425,14 @@ const createDiagramsController = ({ Diagram }) => ({
     return res.json(await diagram.update(req.diagramFields));
   },
 
+  // PATCH: only the sent fields change, the same owner-or-admin rule as PUT applies.
+  update: async (req, res, next) => {
+    const diagram = await Diagram.findByPk(req.diagramId);
+    if (!diagram) return next(missing(req.diagramId));
+    if (!mayChange(req.user, diagram)) return next(forbidden('Only the owner or an admin can change this diagram'));
+    return res.json(await diagram.update(req.diagramFields));
+  },
+
   remove: async (req, res, next) => {
     const diagram = await Diagram.findByPk(req.diagramId);
     if (!diagram) return next(missing(req.diagramId));
@@ -447,4 +486,81 @@ const parseListQuery = (query, sortable) => {
 };
 
 module.exports = { parseListQuery, MAX_LIMIT, MAX_OFFSET };
+```
+
+## Приложение К (обязательное) Листинг файла validate.js
+
+```js
+const { badRequest } = require('../errors');
+const { NOTATIONS, PRIORITIES, DEFAULT_PRIORITY, LIMITS, MAX_ID } = require('../models/diagram.constants');
+
+// Spaces of every kind plus zero-width characters (joiners, word joiner, BOM) look empty, so they count as empty.
+const INVISIBLE = /[\s​-‍⁠﻿]/g;
+// Control characters (NUL, bell, escape) are not text; a single-line field must not carry them.
+const CONTROL = /[\u0000-\u001F\u007F]/;
+
+// Text is checked after trimming, so the stored value is what was measured.
+const text =
+  (name, singleLine = false) =>
+  (v) => {
+    if (typeof v !== 'string' || v.replace(INVISIBLE, '') === '') return 'must be a non-empty string';
+    if (singleLine && CONTROL.test(v)) return 'must not contain control characters';
+    return v.trim().length <= LIMITS[name] || `must be at most ${LIMITS[name]} characters`;
+  };
+
+const checks = {
+  title: text('title', true),
+  notation: (v) => NOTATIONS.includes(v) || `must be one of ${NOTATIONS.join(', ')}`,
+  sourceCode: text('sourceCode'),
+  priority: (v) => PRIORITIES.includes(v) || `must be one of ${PRIORITIES.join(', ')}`,
+};
+
+// Builds the id check for a route param. The raw text is checked first because Number() would accept '0x1', '1e0' and ' 1'.
+const parseId =
+  (key = 'diagramId', label = 'Diagram') =>
+  (req, _res, next) => {
+    const id = Number(req.params.id);
+    // Ids above the INTEGER column range would make PostgreSQL fail with a 500, so they are rejected here.
+    if (!/^[1-9]\d*$/.test(req.params.id) || id > MAX_ID) return next(badRequest(`${label} id must be a positive integer up to ${MAX_ID}`));
+    req[key] = id;
+    return next();
+  };
+
+// POST and PUT both carry the whole diagram, so one validator serves both.
+// The owner is never taken from the body: the controller sets it from the token. The title is trimmed before saving.
+// Priority is optional and falls back to the default; unknown fields are dropped.
+const isObject = (body) => body !== null && typeof body === 'object' && !Array.isArray(body);
+
+const validateDiagram = (req, _res, next) => {
+  const body = req.body;
+  if (!isObject(body)) {
+    return next(badRequest('Request body must be a JSON object'));
+  }
+  const fields = { ...body, priority: body.priority ?? DEFAULT_PRIORITY };
+  const details = Object.entries(checks)
+    .map(([name, check]) => ({ field: name, result: check(fields[name]) }))
+    .filter(({ result }) => result !== true)
+    .map(({ field, result }) => ({ field, message: result }));
+  if (details.length > 0) return next(badRequest('Invalid diagram data', details));
+  req.diagramFields = Object.fromEntries(Object.keys(checks).map((name) => [name, name === 'title' ? fields[name].trim() : fields[name]]));
+  return next();
+};
+
+// PATCH carries only the fields to change. Each sent field gets the same check as in POST and PUT,
+// missing fields are left alone, and a body without a single known field is refused. The owner cannot be sent at all.
+const validatePartial = (req, _res, next) => {
+  const body = req.body;
+  if (!isObject(body)) return next(badRequest('Request body must be a JSON object'));
+  const names = Object.keys(checks).filter((name) => Object.hasOwn(body, name));
+  if (names.length === 0) return next(badRequest(`Send at least one of: ${Object.keys(checks).join(', ')}`));
+  const details = names
+    .map((name) => ({ field: name, result: checks[name](body[name]) }))
+    .filter(({ result }) => result !== true)
+    .map(({ field, result }) => ({ field, message: result }));
+  if (details.length > 0) return next(badRequest('Invalid diagram data', details));
+  req.diagramFields = Object.fromEntries(names.map((name) => [name, name === 'title' ? body[name].trim() : body[name]]));
+  return next();
+};
+
+module.exports = { parseId, validateDiagram, validatePartial };
 ```
