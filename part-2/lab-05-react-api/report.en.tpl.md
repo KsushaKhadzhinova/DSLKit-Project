@@ -120,6 +120,27 @@ Repository branch: 25.
 
 The React client works with the server API: it receives the list with a loading indicator and a retry button, adds, edits and deletes records with optimistic updates and rollback, puts the token into every request and searches on the server with a delayed request and cancellation, and loads the list in parts with the "Загрузить ещё" button. All calls are collected in one module, and the value limits are moved to a separate file. The work gives a ready base for integrating the client into the course project.
 
+## Answers to Control Questions
+
+{{answers}}
+1. **What is the difference between fetch and axios?** `fetch` is built in and needs no installation, but it rejects the promise only on a network failure and does not parse JSON itself. Axios parses JSON, rejects the promise for 4xx and 5xx codes, supports interceptors and timeouts, but it is an extra dependency.
+2. **How to handle the loading state?** Keep a `loading` flag in the state, set it before the request and clear it in `finally`. In the project the `useDiagrams` hook does this.
+3. **What is an optimistic update?** The interface changes before the server answers. First the record is added with a temporary identifier, then the request is sent, on success the record is replaced with the answer, on error it is removed.
+4. **How to show an error for code 500?** Catch the promise rejection, take the message from `error.response.data` or substitute a text by the code and show it with a retry button.
+5. **Why is AbortController needed?** It aborts a request when the component is unmounted or the parameters have changed, so an outdated answer does not change the state.
+6. **How to send POST with JSON?** In axios `api.post(url, object)`, while `fetch` needs the method, the `Content-Type: application/json` header and `JSON.stringify(object)` in the body.
+7. **How to handle a network error?** In axios the error has no `response` field and has the code `ERR_NETWORK`. In `fetch` the promise is rejected with a `TypeError`.
+8. **How to repeat a request after a failure?** Wrap the call in a loop of three attempts, wait a growing time between attempts and throw the last error if all attempts fail.
+9. **How to add the Authorization header in axios?** Through an interceptor: `api.interceptors.request.use((config) => { config.headers.Authorization = 'Bearer ' + token; return config; })`. In the project the token is taken from `localStorage`.
+10. **What is debounce?** A delay of the call until a pause in events. For search the request is sent 400 milliseconds after the last letter, not on every one. In the project it is the `useDebouncedValue` hook.
+11. **How to cancel a request on unmount?** Create an `AbortController` in `useEffect`, pass the `signal` to the request and call `controller.abort()` in the cleanup function of the effect. The `useDiagrams` hook is made this way.
+12. **How to imitate a server delay?** Add an artificial pause to the server answer, limit the network speed in the developer tools or intercept the request in a test browser. The screenshots of the work are taken with request interception.
+13. **How to implement infinite scroll?** Request by pages with the `limit` and `offset` parameters and load the next page when an `IntersectionObserver` sees the last element. The project loads the next page with the "Загрузить ещё" button in the same way.
+14. **How to roll back a change on error?** Save the previous value before the change, and in the error handler return it to the state and show a notice.
+15. **Which headers are needed for FormData?** The browser sets the `Content-Type` header itself together with the `multipart/form-data` boundary, so it must not be set by hand.
+16. **How to show an indicator of a background request?** Keep a separate sending flag, show the caption "Подождите…" on the button and block repeated sending. In the project a line "Сохранение на сервере…" is shown while an edit or a delete is running.
+{{/answers}}
+
 ## Appendix A (mandatory) Listing of api.js
 
 {{code:part-2/lab-05-react-api/src/api.js}}
