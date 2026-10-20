@@ -52,6 +52,18 @@ Content-Type: application/json
   "owner": "anna"
 }
 
+### Partial update -> 200 (only the sent fields change)
+PATCH {{base}}/diagrams/1
+Content-Type: application/json
+
+{ "priority": "high" }
+
+### Empty PATCH body -> 400
+PATCH {{base}}/diagrams/1
+Content-Type: application/json
+
+{}
+
 ### Delete -> 204 (repeat it -> 404)
 DELETE {{base}}/diagrams/2
 
