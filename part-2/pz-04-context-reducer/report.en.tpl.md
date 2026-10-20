@@ -68,6 +68,41 @@ Thirty-eight automated tests check the reducer as a pure function, the quantity 
 
 Prop drilling is shown on a chain of five components and removed with the theme, language and favorites contexts, and the block with the solution stands next to the problem. The business logic lives in a pure reducer, the state and `dispatch` are available in any component through the `useTheme`, `useLanguage`, `useFavorites` and `useFavoritesDispatch` hooks, and favorites persist between sessions.
 
+## Answers to Control Questions
+
+{{answers}}
+1. **What is prop drilling?** Passing data through a chain of components that do not need it. Any change of the data requires edits along the whole chain.
+2. **How to create and use the Context API?** Create `createContext`, wrap the tree in a `Provider` with a value and read the value with `useContext` in any descendant.
+3. **What is the advantage of `useReducer`?** The transition logic is collected in one pure function, it is easy to test, and updates are described by actions.
+4. **How to combine Context and `useReducer`?** Create `[state, dispatch] = useReducer(...)` in the provider and pass them in `value`. In the project `FavoritesProvider` works this way.
+5. **How to prevent extra re-renders?** Memoize the value with `useMemo`, split the contexts by purpose and use `React.memo`.
+6. **Which data suits Context?** Rarely changing global data: theme, language, user.
+7. **How to split Context into several?** Create separate contexts and nest their providers, like `ThemeProvider`, `LanguageProvider` and `FavoritesProvider`.
+8. **What is `useMemo` and how does it help?** It remembers a calculated value until the dependencies change, so the object in `value` is not created again and the consumers are not re-rendered for nothing.
+9. **How to handle in a reducer an action that depends on the state?** Read `state` inside the `case`, as in `ADD`: if the identifier is already there, return the old state.
+10. **How to save a cart to `localStorage`?** Write the state with an effect on every change and read it with the lazy initializer of `useReducer`, checking the data format.
+11. **What is the difference between `useState` and `useReducer`?** `useState` suits simple independent values, `useReducer` suits related fields and complex transitions.
+12. **How to pass `dispatch` through Context?** Put it in a context of its own and get it in the descendant: `const dispatch = useFavoritesDispatch()`.
+13. **What are actions?** Plain objects with a `type` field and data: `{ type: 'INCREMENT', id: 2 }`. The type is written as a constant or an upper-case string.
+14. **How to handle several state fields?** Keep an object and return a copy with the changed field `{ ...state, cart: ... }` or split into several reducers.
+15. **How to avoid mutation?** Return new arrays and objects: `[...state, item]` and `filter`, not `push` and field assignment.
+16. **How to subscribe to a part of the state?** Split the context into several or calculate the derived value in the component. Exact selectors need an external library.
+17. **How to use several `useReducer`?** Call the hook several times with different reducers, each has its own state and `dispatch`.
+18. **How to implement a reset?** Add a `RESET` action that returns the initial state. In the project it is `CLEAR`.
+19. **How to debug `dispatch`?** Print the `action` and the state to the console inside the reducer or wrap `dispatch` in a logging function, and use the React developer tools.
+20. **How to pass the initial state as a function?** As the third argument `useReducer(reducer, arg, init)`. In the project `useReducer(favoritesReducer, undefined, loadFavorites)`.
+21. **How to memoize the provider value?** `const value = useMemo(() => ({ favorites, dispatch }), [favorites])`. In the project the data and `dispatch` are in two contexts, and `dispatch` never changes, so only the data context needs the new value.
+22. **What is an action creator?** A function that returns an action object: `const increment = (id) => ({ type: 'INCREMENT', id })`.
+23. **How to organize authentication?** The state `{ user, status }` and the actions `LOGIN` and `LOGOUT` in the reducer, and keep the token outside the state or in a protected storage.
+24. **How to implement undo?** Keep a history `{ past, present, future }`, and the `UNDO` action moves the last state from `past` to `present`.
+25. **Can `useReducer` be used without Context?** Yes, for the local state of one component, for example a form or a counter: `const [n, dispatch] = useReducer(r, 0)`.
+26. **How does Context plus `useReducer` differ from Redux?** It is simpler and needs no dependencies for small projects, but there are no debugging tools, middleware and exact subscriptions as in Redux.
+27. **How to get only `dispatch`?** Move `dispatch` to a separate context, then the component is not re-rendered when the state changes. The project does exactly this with `useFavoritesDispatch`.
+28. **What is a thunk and how to imitate asynchronous actions?** It is a function instead of an action object. In `useReducer` the asynchronous code is run in a handler and `dispatch` is called with the result.
+29. **How to fix extra re-renders?** Split the context into two, for the data and for `dispatch`, and memoize the values. The project has the two contexts `useFavorites` and `useFavoritesDispatch`, and a test counts the renders.
+30. **How to test a reducer?** Call the function directly: `expect(reducer([], { type: 'ADD', id: 1 })).toEqual([{ id: 1, qty: 1 }])`. The tests of the project are written this way.
+{{/answers}}
+
 ## Appendix A (mandatory) Key Code Fragments
 
 ```jsx
