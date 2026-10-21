@@ -57,6 +57,84 @@ The schema of every resource sets the type, whether the field is required, the m
 
 Automatic tests start the server on a free port and check every method, the status codes, filters, sorting, paging, validation errors, the links between resources, the extra operations and the 500 response. Line and function coverage is 100 percent and branch coverage is above 98 percent. The command is `npm test` in the project folder. Manual checks in Postman or Insomnia can use the requests from `API.md`.
 
+The server is started with `npm start`, and the console message is shown in figure 1.
+
+![Server console](figures/01-server-start.png)
+
+Figure 1 – Console message after the server starts on port 3000 (process output captured as text)
+
+A browser does not send `POST`, `PUT`, `PATCH` and `DELETE` from the address bar, so the script `shots/shots.mjs` sent such requests, and the real requests and server answers are drawn on a page. Creating a user, a project and a diagram is shown in figure 2.
+
+![Creating resources](figures/08-post-create.png)
+
+Figure 2 – POST requests and the answers 201 for a user, a project and a diagram, recorded by a script (not a Postman window)
+
+The `GET /api/users` request is opened in the browser at `http://localhost:3000/api/users`, and the answer is shown in figure 3.
+
+![List of users](figures/02-users-list.png)
+
+Figure 3 – Answer to GET /api/users in a browser window: an array of users
+
+A single record at `http://localhost:3000/api/users/1` is shown in figure 4.
+
+![One user](figures/03-user-one.png)
+
+Figure 4 – Answer to GET /api/users/1 in a browser window: the object of one user
+
+A request for a missing record at `http://localhost:3000/api/users/999` gives the error shown in figure 5.
+
+![Answer 404](figures/04-user-404.png)
+
+Figure 5 – Answer to GET /api/users/999 in a browser window: JSON with the code not_found (code 404)
+
+A wrong id in the address `http://localhost:3000/api/users/abc` is refused, as in figure 6.
+
+![Answer 400](figures/05-user-400.png)
+
+Figure 6 – Answer to GET /api/users/abc in a browser window: JSON with a message about a wrong id (code 400)
+
+Search, sorting and paging work through the address parameters `?q=billing&sort=-title&page=1&limit=10`, and the result is shown in figure 7.
+
+![Search and sorting](figures/06-diagrams-search.png)
+
+Figure 7 – Answer to GET /api/diagrams with the q, sort, page and limit parameters in a browser window
+
+The additional route `GET /api/users/1/projects` returns the projects of one user, as in figure 8.
+
+![Projects of a user](figures/07-user-projects.png)
+
+Figure 8 – Answer to GET /api/users/1/projects in a browser window: the projects of the user
+
+The data validation errors, including an unknown field and a project that does not exist, are shown in figure 9.
+
+![Wrong data](figures/09-validation-400.png)
+
+Figure 9 – Answers 400 with the list of field problems, recorded by a script (not a Postman window)
+
+A partial change and a full replacement of a record are shown in figure 10.
+
+![PATCH and PUT requests](figures/10-patch-put.png)
+
+Figure 10 – PATCH and PUT requests and the server answers, recorded by a script (not a Postman window)
+
+The additional operations of a diagram are shown in figure 11: publishing again changes nothing, and the copy is created as a draft.
+
+![Publish and duplicate](figures/11-publish-duplicate.png)
+
+Figure 11 – Publish and duplicate requests and the server answers, recorded by a script (not a Postman window)
+
+Deleting a user with projects is refused, and deleting a diagram passes, as in figure 12.
+
+![Deleting](figures/12-delete-409-204.png)
+
+Figure 12 – DELETE requests: the answer 409 for a user with projects and the answer 204 for a diagram, recorded by a script (not a Postman window)
+
+The result of the `npm test` command with the number of tests and the code coverage is shown in figure 13.
+
+![Test result](figures/13-tests.png)
+
+Figure 13 – End of the npm test output: the number of passed tests and the coverage table (process output captured as text)
+
 ### 3.5 Answers to the control questions
 
 25. What are "cross-resource links" and how are they implemented in a REST API (for example, getting the orders of a user)?
