@@ -718,9 +718,23 @@ const eachPage = (title, check, subset = names) =>
   });
 
 test('the site has the landing pages in both languages, error pages and application screens', () => {
-  for (const page of ['index.html', 'en/index.html', 'thanks.html', 'privacy.html', 'errors/404.html', 'app/editor.html', 'en/app/editor.html'])
+  for (const page of [
+    'index.html',
+    'en/index.html',
+    'thanks.html',
+    'privacy.html',
+    'errors/404.html',
+    'app/editor.html',
+    'en/app/editor.html',
+    'app/dashboard.html',
+    'en/app/dashboard.html',
+    'app/settings.html',
+    'en/app/settings.html',
+    'app/welcome.html',
+    'en/app/welcome.html',
+  ])
     assert.ok(names.includes(page), page);
-  assert.equal(names.length, 16);
+  assert.equal(names.length, 19);
 });
 
 eachPage('every page has lang, title, charset and viewport', documentProblems);
@@ -763,6 +777,9 @@ test('the Russian and English versions have the same element structure', () => {
     ['index.html', 'en/index.html'],
     ['thanks.html', 'en/thanks.html'],
     ['privacy.html', 'en/privacy.html'],
+    ['app/dashboard.html', 'en/app/dashboard.html'],
+    ['app/settings.html', 'en/app/settings.html'],
+    ['app/welcome.html', 'en/app/welcome.html'],
   ])
     assert.deepEqual(parityProblems(pages[ru], pages[en]), [], ru);
 });
