@@ -1,12 +1,12 @@
 const PORTS = ['input', 'control', 'output', 'mechanism'];
-const BOX_PATTERN = /^box\s+(\S+)\s+"([^"]*)"\s*\{?\s*$/;
+const BOX_PATTERN = /^box\s+(\S+)\s+"([^"]*)"(?:\s*\{)?\s*$/;
 const PORT_PATTERN = /^(input|control|output|mechanism)\s*:\s*(.+)$/;
 const ARROW_PATTERN = /^arrow\s+(\S+?)(?:\.(\w+))?\s*->\s*(\S+?)(?:\.(\w+))?$/;
 const DIAGRAM_PATTERN = /^diagram\s+(\S+)(?:\s+"([^"]*)")?$/;
 
 // Reads the DSL shown in the editor. Lines it does not understand are reported instead of stopping the run.
 export const parseDsl = (source) => {
-  const model = { type: 'diagram', title: '', boxes: [], arrows: [], skipped: [] };
+  const model = { type: 'diagram', title: '', boxes: [], arrows: [], skipped: [], boxLines: [], arrowLines: [] };
   let box = null;
   String(source)
     .split(/\r?\n/)
@@ -20,10 +20,12 @@ export const parseDsl = (source) => {
       } else if ((match = BOX_PATTERN.exec(line))) {
         box = { id: match[1], name: match[2], ports: Object.fromEntries(PORTS.map((port) => [port, []])) };
         model.boxes.push(box);
+        model.boxLines.push(index + 1);
       } else if ((match = PORT_PATTERN.exec(line)) && box) {
         box.ports[match[1]].push(match[2].trim());
       } else if ((match = ARROW_PATTERN.exec(line))) {
         model.arrows.push({ from: match[1], fromPort: match[2] ?? '', to: match[3], toPort: match[4] ?? '' });
+        model.arrowLines.push(index + 1);
       } else if (line !== '}') {
         model.skipped.push(index + 1);
       }
@@ -68,7 +70,7 @@ export const toMermaid = (model) => {
   const name = (id) => `n${model.boxes.findIndex((box) => box.id === id)}`;
   const text = (value) => String(value).replace(/"/g, '#quot;');
   const lines = ['flowchart LR'];
-  model.boxes.forEach((box) => lines.push(`  ${name(box.id)}["${[text(`${box.id} ${box.name}`), ...detailLines(box).map(text)].join('<br/>')}"]`));
+  model.boxes.forEach((box, index) => lines.push(`  n${index}["${[text(`${box.id} ${box.name}`), ...detailLines(box).map(text)].join('<br/>')}"]`));
   knownArrows(model).forEach((arrow) => {
     const label = edgeLabel(arrow);
     lines.push(`  ${name(arrow.from)} -->${label ? `|"${text(label)}"|` : ''} ${name(arrow.to)}`);
@@ -82,7 +84,7 @@ export const toPlantUml = (model) => {
   const text = (value) => String(value).replace(/"/g, "'").replace(/\r?\n/g, ' ');
   const lines = ['@startuml', 'left to right direction'];
   if (model.title) lines.push(`title ${text(model.title)}`);
-  model.boxes.forEach((box) => lines.push(`rectangle "${[text(`${box.id} ${box.name}`), ...detailLines(box).map(text)].join('\\n')}" as ${name(box.id)}`));
+  model.boxes.forEach((box, index) => lines.push(`rectangle "${[text(`${box.id} ${box.name}`), ...detailLines(box).map(text)].join('\\n')}" as n${index}`));
   knownArrows(model).forEach((arrow) => {
     const label = edgeLabel(arrow);
     lines.push(`${name(arrow.from)} --> ${name(arrow.to)}${label ? ` : ${text(label)}` : ''}`);

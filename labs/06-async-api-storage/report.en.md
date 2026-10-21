@@ -200,6 +200,7 @@ export const createApi = ({ config = API_CONFIG, fetchImpl = globalThis.fetch?.b
         if (!isRetryable(error) || attemptNumber >= retries) throw error;
         const backoff = Math.min(config.retryDelayMs * 2 ** attemptNumber, config.maxRetryDelayMs);
         await sleep(retryAfterMs(error.response, backoff, config.maxRetryDelayMs));
+        if (signal?.aborted) throw new ApiError('Request was cancelled', { kind: 'aborted' });
         return tryOnce(attemptNumber + 1);
       }
     };
@@ -268,7 +269,7 @@ export const createCache = ({ storage = createStorage(createMemoryBackend()), tt
   return {
     get(key) {
       const entry = readAll()[key];
-      if (!isPlainObject(entry) || typeof entry.savedAt !== 'number') return null;
+      if (!isPlainObject(entry) || !Number.isFinite(entry.savedAt)) return null;
       return { data: entry.data, savedAt: entry.savedAt, expired: now() - entry.savedAt > ttlMs };
     },
     set(key, data) {
@@ -292,6 +293,7 @@ export const createHistory = ({ storage = createStorage(createMemoryBackend()), 
   return {
     list: read,
     add(entry) {
+      if (!isPlainObject(entry)) return read();
       const next = [entry, ...read().filter((item) => item.key !== entry.key)].slice(0, limit);
       storage.set(STORAGE_KEYS.history, next);
       return next;
@@ -307,14 +309,14 @@ export const createHistory = ({ storage = createStorage(createMemoryBackend()), 
 
 ```js
 const PORTS = ['input', 'control', 'output', 'mechanism'];
-const BOX_PATTERN = /^box\s+(\S+)\s+"([^"]*)"\s*\{?\s*$/;
+const BOX_PATTERN = /^box\s+(\S+)\s+"([^"]*)"(?:\s*\{)?\s*$/;
 const PORT_PATTERN = /^(input|control|output|mechanism)\s*:\s*(.+)$/;
 const ARROW_PATTERN = /^arrow\s+(\S+?)(?:\.(\w+))?\s*->\s*(\S+?)(?:\.(\w+))?$/;
 const DIAGRAM_PATTERN = /^diagram\s+(\S+)(?:\s+"([^"]*)")?$/;
 
 // Reads the DSL shown in the editor. Lines it does not understand are reported instead of stopping the run.
 export const parseDsl = (source) => {
-  const model = { type: 'diagram', title: '', boxes: [], arrows: [], skipped: [] };
+  const model = { type: 'diagram', title: '', boxes: [], arrows: [], skipped: [], boxLines: [], arrowLines: [] };
   let box = null;
   String(source)
     .split(/\r?\n/)
@@ -328,10 +330,12 @@ export const parseDsl = (source) => {
       } else if ((match = BOX_PATTERN.exec(line))) {
         box = { id: match[1], name: match[2], ports: Object.fromEntries(PORTS.map((port) => [port, []])) };
         model.boxes.push(box);
+        model.boxLines.push(index + 1);
       } else if ((match = PORT_PATTERN.exec(line)) && box) {
         box.ports[match[1]].push(match[2].trim());
       } else if ((match = ARROW_PATTERN.exec(line))) {
         model.arrows.push({ from: match[1], fromPort: match[2] ?? '', to: match[3], toPort: match[4] ?? '' });
+        model.arrowLines.push(index + 1);
       } else if (line !== '}') {
         model.skipped.push(index + 1);
       }
@@ -376,7 +380,7 @@ export const toMermaid = (model) => {
   const name = (id) => `n${model.boxes.findIndex((box) => box.id === id)}`;
   const text = (value) => String(value).replace(/"/g, '#quot;');
   const lines = ['flowchart LR'];
-  model.boxes.forEach((box) => lines.push(`  ${name(box.id)}["${[text(`${box.id} ${box.name}`), ...detailLines(box).map(text)].join('<br/>')}"]`));
+  model.boxes.forEach((box, index) => lines.push(`  n${index}["${[text(`${box.id} ${box.name}`), ...detailLines(box).map(text)].join('<br/>')}"]`));
   knownArrows(model).forEach((arrow) => {
     const label = edgeLabel(arrow);
     lines.push(`  ${name(arrow.from)} -->${label ? `|"${text(label)}"|` : ''} ${name(arrow.to)}`);
@@ -390,7 +394,7 @@ export const toPlantUml = (model) => {
   const text = (value) => String(value).replace(/"/g, "'").replace(/\r?\n/g, ' ');
   const lines = ['@startuml', 'left to right direction'];
   if (model.title) lines.push(`title ${text(model.title)}`);
-  model.boxes.forEach((box) => lines.push(`rectangle "${[text(`${box.id} ${box.name}`), ...detailLines(box).map(text)].join('\\n')}" as ${name(box.id)}`));
+  model.boxes.forEach((box, index) => lines.push(`rectangle "${[text(`${box.id} ${box.name}`), ...detailLines(box).map(text)].join('\\n')}" as n${index}`));
   knownArrows(model).forEach((arrow) => {
     const label = edgeLabel(arrow);
     lines.push(`${name(arrow.from)} --> ${name(arrow.to)}${label ? ` : ${text(label)}` : ''}`);
@@ -457,9 +461,12 @@ export const sanitizeSvg = (svgText, parser) => {
 import { renderDiagram, checkHealth } from '../api/apiService.js';
 import { API_CONFIG } from '../api/config.js';
 import { createCache, createHistory } from '../storage/localStorage.js';
-import { findEngine } from '../engines/engines.js';
-import { parseDsl, sanitizeSvg, sourceKey } from '../utils/dataParser.js';
+import { engineForFormat, findEngine } from '../engines/engines.js';
+import { notationShort, parseDiagram, pickFormat } from '../notations/index.js';
+import { ui } from '../notations/messages.js';
+import { sanitizeSvg, sourceKey } from '../utils/dataParser.js';
 import { createTranslator } from '../utils/i18n.js';
+import { showProblems } from './problems-panel.js';
 
 const MESSAGES = {
   empty: 'В редакторе нет кода диаграммы.',
@@ -509,6 +516,7 @@ export const initDiagramRunner = ({
   let controller = null;
 
   const tr = createTranslator(root);
+  const lang = root.documentElement.lang === 'en' ? 'en' : 'ru';
   const setStatus = (text) => {
     status.textContent = tr(text);
   };
@@ -528,11 +536,11 @@ export const initDiagramRunner = ({
     renderButton.textContent = tr(currentEngine().action);
   };
 
-  const show = (svgText, note) => {
+  const show = (svgText, note, engine = currentEngine()) => {
     const svg = sanitizeSvg(svgText, parser);
     if (!svg) return false;
     svg.setAttribute('role', 'img');
-    svg.setAttribute('aria-label', tr(`Диаграмма: ${tr(currentEngine().label)}`));
+    svg.setAttribute('aria-label', tr(`Диаграмма: ${tr(engine.label)}`));
     remote.replaceChildren(root.importNode(svg, true));
     remote.hidden = false;
     local?.setAttribute('hidden', '');
@@ -560,24 +568,34 @@ export const initDiagramRunner = ({
 
   const run = async ({ refresh = false } = {}) => {
     showAction();
-    const model = parseDsl(source());
-    if (model.boxes.length === 0) {
+    const model = parseDiagram(source());
+    const short = model.notation ? notationShort(model) : '?';
+    showProblems({ root, page, problems: model.problems, lang, file: page.querySelector('.editor-tabs__tab--active span')?.textContent.trim() ?? 'order.dsl' });
+    page.querySelectorAll('.editor-status__type').forEach((node) => (node.textContent = short));
+    page.querySelectorAll('[data-notation-label]').forEach((node) => (node.textContent = ui('notation', { name: short }, lang)));
+    if (model.empty) {
       setStatus(MESSAGES.empty);
       return false;
     }
-    const engine = currentEngine();
+    const wanted = currentEngine();
+    const format = wanted.type ? pickFormat(model, wanted.type) : null;
+    const engine = wanted.type && format !== wanted.type ? engineForFormat(format) : wanted;
+    const fallback = engine === wanted ? '' : ` ${ui('fallback', { label: tr(engine.label) }, lang)}`;
     const input = engine.build(model);
     controller?.abort();
     // The own engine draws in the browser: no request, no cache, and it works offline.
     if (!engine.type) {
       setBusy(false);
-      return show(input, 'Диаграмма построена собственным движком в браузере.');
+      const drawn = show(input, 'Диаграмма построена собственным движком в браузере.', engine);
+      if (!drawn) status.textContent = ui('drawFailed', {}, lang);
+      return drawn;
     }
     const key = sourceKey(`${engine.id}
 ${input}`);
     const cached = cache.get(key);
 
-    if (cached && !cached.expired && !refresh && show(cached.data, `Показана сохранённая копия от ${formatTime(cached.savedAt)}.`)) {
+    if (cached && !cached.expired && !refresh && show(cached.data, `Показана сохранённая копия от ${formatTime(cached.savedAt)}.`, engine)) {
+      status.textContent += fallback;
       setBusy(false);
       return true;
     }
@@ -591,7 +609,8 @@ ${input}`);
       if (!isOnline()) throw Object.assign(new Error('offline'), { kind: 'offline' });
       const svgText = await api.renderDiagram(input, { signal, type: engine.type });
       if (signal.aborted) throw Object.assign(new Error('cancelled'), { kind: 'aborted' });
-      if (!show(svgText, `Диаграмма получена от сервиса Kroki (${engine.type}).`)) throw Object.assign(new Error('invalid'), { kind: 'invalid' });
+      if (!show(svgText, `Диаграмма получена от сервиса Kroki (${engine.type}).`, engine)) throw Object.assign(new Error('invalid'), { kind: 'invalid' });
+      status.textContent += fallback;
       cache.set(key, svgText);
       history.add({ key, title: model.title, at: now() });
       renderHistory();
@@ -599,7 +618,7 @@ ${input}`);
     } catch (error) {
       if (error.kind !== 'aborted') {
         logger.error('DSLKit: не удалось получить диаграмму', error.kind, error.status ?? '');
-        const shown = cached && show(cached.data, `Кэшированные данные от ${formatTime(cached.savedAt)}. ${errorMessage(error)}`);
+        const shown = cached && show(cached.data, `Кэшированные данные от ${formatTime(cached.savedAt)}. ${errorMessage(error)}`, engine);
         if (!shown) setStatus(error.kind === 'offline' ? `${errorMessage(error)} Сохранённой копии этой диаграммы нет.` : errorMessage(error));
       }
     }

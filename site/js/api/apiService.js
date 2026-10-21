@@ -69,6 +69,7 @@ export const createApi = ({ config = API_CONFIG, fetchImpl = globalThis.fetch?.b
         if (!isRetryable(error) || attemptNumber >= retries) throw error;
         const backoff = Math.min(config.retryDelayMs * 2 ** attemptNumber, config.maxRetryDelayMs);
         await sleep(retryAfterMs(error.response, backoff, config.maxRetryDelayMs));
+        if (signal?.aborted) throw new ApiError('Request was cancelled', { kind: 'aborted' });
         return tryOnce(attemptNumber + 1);
       }
     };

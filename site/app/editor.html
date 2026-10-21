@@ -70,7 +70,7 @@
             <button type="button" class="button button--quiet">Проверить</button>
             <button type="button" class="button button--quiet">Форматировать</button>
             <button type="button" class="button button--quiet">Поделиться</button>
-            <button type="button" class="button button--quiet">Диаграмма: IDEF0</button>
+            <button type="button" class="button button--quiet" data-notation-label>Диаграмма: IDEF0</button>
             <button type="button" class="editor-toolbar__switch" role="switch" aria-checked="true">
               <span class="editor-toolbar__switch-track" aria-hidden="true"></span>
               <span>Автосохранение</span>
@@ -173,7 +173,7 @@
       <h2 class="editor-sidebar__heading">Шаблоны</h2>
       <ul class="templates">
         <li>
-          <button type="button" class="templates__item">
+          <button type="button" class="templates__item" data-template="idef0">
             <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
               <path d="M3 4h14v12H3zM3 8h14M8 8v8" />
             </svg>
@@ -182,7 +182,7 @@
           </button>
         </li>
         <li>
-          <button type="button" class="templates__item">
+          <button type="button" class="templates__item" data-template="dfd">
             <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
               <path d="M3 4h14v12H3zM3 8h14M8 8v8" />
             </svg>
@@ -191,7 +191,7 @@
           </button>
         </li>
         <li>
-          <button type="button" class="templates__item">
+          <button type="button" class="templates__item" data-template="erd">
             <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
               <path d="M3 4h14v12H3zM3 8h14M8 8v8" />
             </svg>
@@ -200,6 +200,7 @@
           </button>
         </li>
       </ul>
+      <select class="settings-row__select templates__select" data-notation-select aria-label="Шаблон диаграммы"></select>
     </nav>
 
     <fieldset class="editor-segmented">

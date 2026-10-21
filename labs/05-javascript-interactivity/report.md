@@ -545,6 +545,9 @@ export const initDashboard = ({ root = document, storage } = {}) => {
 ## Приложение Ж – Листинг файла editor.js
 
 ```js
+import { KEYWORDS, NOTATIONS, TEMPLATES } from '../notations/index.js';
+import { ui } from '../notations/messages.js';
+
 const VIEWS = ['code', 'canvas'];
 const KEY_STEPS = { ArrowRight: 1, ArrowLeft: -1 };
 
@@ -671,11 +674,50 @@ export const initEditor = ({ root = document, storage } = {}) => {
     if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') run(event);
   });
 
+  // Templates: the buttons and the notation list replace the code with a starter example and ask the runner to draw it.
+  const lang = root.documentElement.lang === 'en' ? 'en' : 'ru';
+  const codeLines = page.querySelector('.code__lines');
+  const codeLine = (text) => {
+    const item = root.createElement('li');
+    item.className = 'code__line';
+    const code = root.createElement('code');
+    const [, indent, word, rest] = /^(\s*)([a-z]*)(.*)$/.exec(text);
+    code.append(indent);
+    if (KEYWORDS.has(word)) {
+      const keyword = root.createElement('span');
+      keyword.className = 'code__keyword';
+      keyword.textContent = word;
+      code.append(keyword, rest);
+    } else code.append(word + rest);
+    item.append(code);
+    return item;
+  };
+  const loadTemplate = (key) => {
+    if (!codeLines || !(key in TEMPLATES)) return false;
+    codeLines.replaceChildren(...TEMPLATES[key].split('\n').map(codeLine));
+    page.dispatchEvent(new root.defaultView.CustomEvent('dslkit:run', { bubbles: true }));
+    return true;
+  };
+  page.querySelectorAll('[data-template]').forEach((button) => button.addEventListener('click', () => loadTemplate(button.dataset.template)));
+  const picker = page.querySelector('[data-notation-select]');
+  if (picker) {
+    picker.setAttribute('aria-label', ui('template', {}, lang));
+    picker.replaceChildren(
+      ...Object.entries(NOTATIONS).map(([key, notation]) => {
+        const option = root.createElement('option');
+        option.value = key;
+        option.textContent = notation.name[lang];
+        return option;
+      }),
+    );
+    picker.addEventListener('change', () => loadTemplate(picker.value));
+  }
+
   const savedTab = storage.get('editor-tab', null);
   select(Number.isInteger(savedTab) && tabs[savedTab] ? savedTab : Math.max(0, current()));
   const savedView = storage.get('editor-view', null);
   showView(VIEWS.includes(savedView) ? savedView : 'canvas');
 
-  return { select, showView, view: () => main?.dataset.view };
+  return { select, showView, loadTemplate, view: () => main?.dataset.view };
 };
 ```

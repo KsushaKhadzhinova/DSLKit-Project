@@ -1,9 +1,12 @@
 import { renderDiagram, checkHealth } from '../api/apiService.js';
 import { API_CONFIG } from '../api/config.js';
 import { createCache, createHistory } from '../storage/localStorage.js';
-import { findEngine } from '../engines/engines.js';
-import { parseDsl, sanitizeSvg, sourceKey } from '../utils/dataParser.js';
+import { engineForFormat, findEngine } from '../engines/engines.js';
+import { notationShort, parseDiagram, pickFormat } from '../notations/index.js';
+import { ui } from '../notations/messages.js';
+import { sanitizeSvg, sourceKey } from '../utils/dataParser.js';
 import { createTranslator } from '../utils/i18n.js';
+import { showProblems } from './problems-panel.js';
 
 const MESSAGES = {
   empty: 'В редакторе нет кода диаграммы.',
@@ -53,6 +56,7 @@ export const initDiagramRunner = ({
   let controller = null;
 
   const tr = createTranslator(root);
+  const lang = root.documentElement.lang === 'en' ? 'en' : 'ru';
   const setStatus = (text) => {
     status.textContent = tr(text);
   };
@@ -72,11 +76,11 @@ export const initDiagramRunner = ({
     renderButton.textContent = tr(currentEngine().action);
   };
 
-  const show = (svgText, note) => {
+  const show = (svgText, note, engine = currentEngine()) => {
     const svg = sanitizeSvg(svgText, parser);
     if (!svg) return false;
     svg.setAttribute('role', 'img');
-    svg.setAttribute('aria-label', tr(`Диаграмма: ${tr(currentEngine().label)}`));
+    svg.setAttribute('aria-label', tr(`Диаграмма: ${tr(engine.label)}`));
     remote.replaceChildren(root.importNode(svg, true));
     remote.hidden = false;
     local?.setAttribute('hidden', '');
@@ -104,24 +108,34 @@ export const initDiagramRunner = ({
 
   const run = async ({ refresh = false } = {}) => {
     showAction();
-    const model = parseDsl(source());
-    if (model.boxes.length === 0) {
+    const model = parseDiagram(source());
+    const short = model.notation ? notationShort(model) : '?';
+    showProblems({ root, page, problems: model.problems, lang, file: page.querySelector('.editor-tabs__tab--active span')?.textContent.trim() ?? 'order.dsl' });
+    page.querySelectorAll('.editor-status__type').forEach((node) => (node.textContent = short));
+    page.querySelectorAll('[data-notation-label]').forEach((node) => (node.textContent = ui('notation', { name: short }, lang)));
+    if (model.empty) {
       setStatus(MESSAGES.empty);
       return false;
     }
-    const engine = currentEngine();
+    const wanted = currentEngine();
+    const format = wanted.type ? pickFormat(model, wanted.type) : null;
+    const engine = wanted.type && format !== wanted.type ? engineForFormat(format) : wanted;
+    const fallback = engine === wanted ? '' : ` ${ui('fallback', { label: tr(engine.label) }, lang)}`;
     const input = engine.build(model);
     controller?.abort();
     // The own engine draws in the browser: no request, no cache, and it works offline.
     if (!engine.type) {
       setBusy(false);
-      return show(input, 'Диаграмма построена собственным движком в браузере.');
+      const drawn = show(input, 'Диаграмма построена собственным движком в браузере.', engine);
+      if (!drawn) status.textContent = ui('drawFailed', {}, lang);
+      return drawn;
     }
     const key = sourceKey(`${engine.id}
 ${input}`);
     const cached = cache.get(key);
 
-    if (cached && !cached.expired && !refresh && show(cached.data, `Показана сохранённая копия от ${formatTime(cached.savedAt)}.`)) {
+    if (cached && !cached.expired && !refresh && show(cached.data, `Показана сохранённая копия от ${formatTime(cached.savedAt)}.`, engine)) {
+      status.textContent += fallback;
       setBusy(false);
       return true;
     }
@@ -135,7 +149,8 @@ ${input}`);
       if (!isOnline()) throw Object.assign(new Error('offline'), { kind: 'offline' });
       const svgText = await api.renderDiagram(input, { signal, type: engine.type });
       if (signal.aborted) throw Object.assign(new Error('cancelled'), { kind: 'aborted' });
-      if (!show(svgText, `Диаграмма получена от сервиса Kroki (${engine.type}).`)) throw Object.assign(new Error('invalid'), { kind: 'invalid' });
+      if (!show(svgText, `Диаграмма получена от сервиса Kroki (${engine.type}).`, engine)) throw Object.assign(new Error('invalid'), { kind: 'invalid' });
+      status.textContent += fallback;
       cache.set(key, svgText);
       history.add({ key, title: model.title, at: now() });
       renderHistory();
@@ -143,7 +158,7 @@ ${input}`);
     } catch (error) {
       if (error.kind !== 'aborted') {
         logger.error('DSLKit: не удалось получить диаграмму', error.kind, error.status ?? '');
-        const shown = cached && show(cached.data, `Кэшированные данные от ${formatTime(cached.savedAt)}. ${errorMessage(error)}`);
+        const shown = cached && show(cached.data, `Кэшированные данные от ${formatTime(cached.savedAt)}. ${errorMessage(error)}`, engine);
         if (!shown) setStatus(error.kind === 'offline' ? `${errorMessage(error)} Сохранённой копии этой диаграммы нет.` : errorMessage(error));
       }
     }

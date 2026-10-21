@@ -1,3 +1,5 @@
+import { hasLocalRenderer, renderNotation } from '../notations/index.js';
+
 const PORTS = ['input', 'control', 'output', 'mechanism'];
 const BOX_WIDTH = 200;
 const COLUMN_GAP = 150;
@@ -7,7 +9,10 @@ const TITLE_HEIGHT = 32;
 const HEADER_HEIGHT = 44;
 const LINE_HEIGHT = 16;
 
-const escapeXml = (text) => String(text).replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
+const escapeXml = (text) =>
+  String(text)
+    .replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/g, '')
+    .replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
 
 // Longest-path layering: a box sits one column to the right of everything that feeds it; cycles stop at the last column.
 const rankBoxes = (boxes, arrows) => {
@@ -24,6 +29,7 @@ const boxLines = (box) => PORTS.filter((port) => box.ports[port].length > 0).map
 
 // The engine that runs in the browser: it lays the model out itself and returns live SVG text, so nothing is sent to a server.
 export const renderLocal = (model) => {
+  if (hasLocalRenderer(model)) return renderNotation(model);
   const arrows = model.arrows.filter(({ from, to }) => model.boxes.some((box) => box.id === from) && model.boxes.some((box) => box.id === to));
   const rank = rankBoxes(model.boxes, arrows);
   const columnTop = new Map();

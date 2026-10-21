@@ -24,7 +24,7 @@ export const createCache = ({ storage = createStorage(createMemoryBackend()), tt
   return {
     get(key) {
       const entry = readAll()[key];
-      if (!isPlainObject(entry) || typeof entry.savedAt !== 'number') return null;
+      if (!isPlainObject(entry) || !Number.isFinite(entry.savedAt)) return null;
       return { data: entry.data, savedAt: entry.savedAt, expired: now() - entry.savedAt > ttlMs };
     },
     set(key, data) {
@@ -48,6 +48,7 @@ export const createHistory = ({ storage = createStorage(createMemoryBackend()), 
   return {
     list: read,
     add(entry) {
+      if (!isPlainObject(entry)) return read();
       const next = [entry, ...read().filter((item) => item.key !== entry.key)].slice(0, limit);
       storage.set(STORAGE_KEYS.history, next);
       return next;
