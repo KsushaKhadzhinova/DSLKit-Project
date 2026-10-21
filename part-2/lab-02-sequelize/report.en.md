@@ -58,21 +58,75 @@ Table 2 – Routes and the matching Sequelize calls
 
 The run order is: `npm run db:migrate` creates the table and adds the `priority` column, `npm run db:seed` fills the database, and `npm run dev` starts the server. The check on SQLite showed that the list returns three records with `createdAt` and `updatedAt`, a replacement changes `updatedAt`, the first deletion gives 204, and the repeated one gives 404.
 
-There are 96 automated tests. Some check the HTTP routes on a temporary SQLite database with the real migrations applied, including `PATCH`, the numeric field, projects and the uniqueness error. Others check the migrations themselves: the set of columns, rolling back every migration in turn while all `CHECK` constraints stay, running the seed twice and undoing only its own rows, the model and the database refusing values outside the lists, a negative or huge number and a repeated project name. The rest check the connection settings, including certificate verification by default. The tests run the real `sequelize-cli`, so a mistake in a migration file is caught.
+There are 98 automated tests. Some check the HTTP routes on a temporary SQLite database with the real migrations applied, including `PATCH`, the numeric field, projects and the uniqueness error. Others check the migrations themselves: the set of columns, rolling back every migration in turn while all `CHECK` constraints stay, running the seed twice and undoing only its own rows, the model and the database refusing values outside the lists, a negative or huge number and a repeated project name. The rest check the connection settings, including certificate verification by default. The tests run the real `sequelize-cli`, so a mistake in a migration file is caught.
 
 Listing of config.js is given in appendix A. Listing of the model index.js is given in appendix B. Listing of diagram.js is given in appendix C. Listing of the table creation migration is given in appendix D. Listing of the priority migration is given in appendix E. Listing of the demo-diagrams.js seed is given in appendix F. Listing of diagrams.controller.js is given in appendix G. Listing of the revision migration is given in appendix I. Listing of the Projects table migration is given in appendix J. Listing of projects.controller.js is given in appendix K.
+
+The migrations and the seed are run with `npm run db:migrate` and `npm run db:seed`, and their output is shown in figure 1.
+
+![Migrations and seed](figures/01-migrate-seed.png)
+
+Figure 1 – Console output of the migrations and the seed (process output captured as text)
+
+The structure of the created tables is taken by a query to the system table `sqlite_master` of the database itself and is shown in figure 2.
+
+![Database structure](figures/02-schema.png)
+
+Figure 2 – The tables Diagrams, Projects, RequestLogs and SequelizeMeta with the CHECK constraints (result of a query to the database file captured as text)
+
+The `GET /diagrams` request is opened in the browser at `http://localhost:3000/diagrams`, and the three seeded records are shown in figure 3.
+
+![List of diagrams](figures/03-get-list.png)
+
+Figure 3 – Answer to GET /diagrams in a browser window: three seeded diagrams with the createdAt and updatedAt fields
+
+A single record at `http://localhost:3000/diagrams/1` is shown in figure 4.
+
+![One diagram](figures/04-get-one.png)
+
+Figure 4 – Answer to GET /diagrams/1 in a browser window: the object of one diagram from the database
+
+A request for a missing record at `http://localhost:3000/diagrams/99` gives the error shown in figure 5.
+
+![Answer 404](figures/05-get-404.png)
+
+Figure 5 – Answer to GET /diagrams/99 in a browser window: JSON saying that the diagram is missing (code 404)
+
+Deleting a record and deleting it again are shown in figure 6. A browser does not send `POST`, `PUT`, `PATCH` and `DELETE` from the address bar, so the script `shots/shots.mjs` sent such requests, and the real requests and server answers are drawn on a page.
+
+![Deleting a record](figures/10-delete-204-404.png)
+
+Figure 6 – DELETE requests: the answer 204 without a body and the answer 404 on a repeat, recorded by a script (not a Postman window)
 
 ### 3.6 Paging and sorting
 
 The list accepts the `limit`, `offset`, `sort` and `order` parameters. `limit` sets the page size from 1 to 100, `offset` sets the shift from 0 to 1000000, `sort` picks a field from a whitelist and `order` takes `asc` or `desc`. Without parameters the whole list is returned in ascending `id` order, so the clients of the earlier works keep working. The answer stays an array and the full size of the selection comes in the `X-Total-Count` header. Numbers are read as strings of at most nine digits, so `-1`, `1e9`, `0x10` and huge numbers get a 400 answer with a list of errors by field. The sort field name is checked against the whitelist and never reaches the database query unchecked. Equal values are ordered by `id`, so pages do not overlap. Parsing of the parameters is moved to a separate module, it is given in Appendix H.
 
+The request `GET /diagrams?limit=2&offset=0&sort=title&order=desc` gives the first page of two records, as in figure 7.
+
+![A page of the list](figures/06-get-page.png)
+
+Figure 7 – Answer to GET /diagrams with the limit, offset, sort and order parameters in a browser window
+
 ### 3.7 The numeric field revision
 
 The `revision` field holds the revision number of a diagram and shows how a number travels from the database to the response. In the database the column is an `INTEGER` with the default 0 and a `CHECK` from 0 to 100000, in the model the same rule is set with the `isInt`, `min` and `max` validators, and the limit `revisionMax` lives in `limits.json`. A request is checked before the database: only a whole number from 0 to the limit is accepted. The string `"5"`, a fraction, a negative number, `null`, an array and a number above the limit get a 400 response with the `revision` field in the error list. JSON cannot hold `1e999`, it parses to infinity and the same rule rejects it, while values such as `1e20` and `9007199254740993` exceed the limit. Without the field in the body the value is 0. The list can be sorted by `revision`, and numbers compare as numbers, not as strings.
 
+The refusal to store wrong values, including a negative revision, is shown in figure 8.
+
+![Wrong data](figures/08-validation-400.png)
+
+Figure 8 – Answers 400 with the list of field problems and for a negative revision, recorded by a script (not a Postman window)
+
 ### 3.8 The PATCH method
 
 The `PATCH /diagrams/:id` route changes only the fields that are sent. The check lives in `validatePartial`: every sent field goes through the same rule as in `POST` and `PUT`, and a body without a single known field gives 400. The controller reads the record with `findByPk`, calls `diagram.update(fields)` and returns the updated record, so the model validators run too. The `PUT` method replaces the record as a whole: omitted optional fields get their defaults, and `projectId` is reset to `null`. The `PATCH` method leaves omitted fields untouched. That is why `PUT` is idempotent, while `PATCH` does not have to be by definition.
+
+Creating, replacing and partially changing a record in the database are shown in figure 9.
+
+![POST, PUT and PATCH requests](figures/07-post-put-patch.png)
+
+Figure 9 – POST, PUT and PATCH requests and the server answers, recorded by a script (not a Postman window)
 
 ### 3.9 One-to-many relation and the uniqueness error
 
@@ -90,9 +144,33 @@ Table 3 – Routes of the projects resource
 
 The project name is unique: the `name` column is created with a `UNIQUE` constraint. A repeated name breaks it, Sequelize throws `SequelizeUniqueConstraintError`, and the global handler turns it into a 409 response with the `name` field in `details`. Checking with a `findOne` query before writing is not enough, because two simultaneous requests would both pass it, so the database constraint has the last word.
 
+Creating a project, the answer 409 for a repeated name, moving a diagram into the project and listing the diagrams of the project are shown in figure 10.
+
+![Projects](figures/09-projects-409.png)
+
+Figure 10 – Requests to the projects resource, including the answer 409 for a repeated name, recorded by a script (not a Postman window)
+
 ### 3.10 How to trigger a 500 response with a real failure
 
 A 500 response is caused by a database failure, not by a button. For SQLite, start the server with `npm start`, then run `npx sequelize-cli db:migrate:undo:all` in a second window. The tables vanish under the running server, and the very first request, for example `GET /diagrams`, cannot write a row to the `RequestLogs` log. The client gets 500 with the body `{ "error": "Internal server error" }`, and the details stay only in the server console. For PostgreSQL it is enough to stop the database service or container: requests give 500, and `GET /health` answers 503. The command `npm run db:migrate` or starting the database restores the work. The same failure is reproduced in an automated test by dropping the `RequestLogs` table while the server runs.
+
+The migrations are undone with `npx sequelize-cli db:migrate:undo:all` under the running server, and the very first request to `http://localhost:3000/diagrams` gets the answer 500, as in figure 11.
+
+![Answer 500](figures/11-real-500.png)
+
+Figure 11 – Answer to GET /diagrams after a real database failure: JSON with a general message without details (code 500)
+
+The details of the failure stay only in the console of the server and are shown in figure 12.
+
+![Server console](figures/12-server-console.png)
+
+Figure 12 – Console of the server after the failure: the error about the missing table RequestLogs (process output captured as text)
+
+The result of the `npm test` command with the number of tests and the code coverage is shown in figure 13.
+
+![Test result](figures/13-tests.png)
+
+Figure 13 – End of the npm test output: the number of passed tests and the coverage table (process output captured as text)
 
 ### 3.11 Answers to the control questions
 
@@ -110,7 +188,7 @@ A 500 response is caused by a database failure, not by a button. For SQLite, sta
 
 ## Conclusion
 
-For DSLKit, the `diagrams` collection from lab 1 is moved from an array to a database through Sequelize: the `Diagram` model, a seed with three diagrams, and controllers built on ORM methods. The `Diagram` and `Project` models have a one-to-many relation, and five migrations build the schema. The `PATCH` method, the 409 response for a repeated project name and the check of a number from 0 to the limit are added. Locally the work uses SQLite, and the `DATABASE_URL` variable switches it to PostgreSQL or cloud Neon without code changes. 96 automated tests confirm the routes, the constraints, the migrations with rollback, and the seed. The work has not been run on a real PostgreSQL, and screenshots of the database structure and of Postman requests are still to be attached.
+For DSLKit, the `diagrams` collection from lab 1 is moved from an array to a database through Sequelize: the `Diagram` model, a seed with three diagrams, and controllers built on ORM methods. The `Diagram` and `Project` models have a one-to-many relation, and five migrations build the schema. The `PATCH` method, the 409 response for a repeated project name and the check of a number from 0 to the limit are added. Locally the work uses SQLite, and the `DATABASE_URL` variable switches it to PostgreSQL or cloud Neon without code changes. 98 automated tests confirm the routes, the constraints, the migrations with rollback, and the seed. The work has not been run on a real PostgreSQL, and the database structure and the requests are confirmed by browser screenshots and by an exchange recorded with a script.
 
 ## Appendix A (mandatory) Listing of config.js
 
