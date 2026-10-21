@@ -79,7 +79,7 @@ h1{font-size:18px;margin:0 0 14px}
 section{background:#fff;border:1px solid #d5d9e0;border-radius:8px;padding:14px 16px;margin-bottom:14px}
 .line{display:flex;gap:10px;align-items:center;margin-bottom:8px}
 .m{padding:2px 8px;border-radius:4px;color:#fff;font-size:12px}
-.GET{background:#2a7de1}.POST{background:#2e9e5b}.PUT{background:#d98a1b}.DELETE{background:#cf3a3a}
+.GET{background:#2a7de1}.POST{background:#2e9e5b}.PUT{background:#d98a1b}.PATCH{background:#8a5cd6}.DELETE{background:#cf3a3a}
 .url{font:13px Consolas,monospace}
 .label{font-size:12px;color:#5a6270;margin:8px 0 4px}
 pre{margin:0;background:#101521;color:#dbe4f5;padding:10px 12px;border-radius:6px;font:12.5px/1.4 Consolas,monospace;white-space:pre-wrap;word-break:break-word}
@@ -144,7 +144,36 @@ await shoot(
   panel(await exchange('GET', '/diagrams/64b7f0c2a1b2c3d4e5f60718')) + panel(await exchange('GET', '/diagrams/abc')),
 );
 
+await seed();
+const patchId = await idOf('Order processing');
+await shoot('16-patch.png', 'PATCH /diagrams/:id: частичное изменение одного поля', panel(await exchange('PATCH', `/diagrams/${patchId}`, { priority: 0 })));
+await shoot('17-sort-title.png', 'GET /diagrams?sort=title: сортировка по названию', panel(await exchange('GET', '/diagrams?sort=title')));
+await shoot('18-search.png', 'GET /diagrams?q=login: поиск по текстовому индексу', panel(await exchange('GET', '/diagrams?q=login')));
+await shoot('19-count-stats.png', 'GET /diagrams/count и GET /diagrams/stats', panel(await exchange('GET', '/diagrams/count')) + panel(await exchange('GET', '/diagrams/stats')));
+await shoot('20-pagination.png', 'GET /diagrams?limit=1&skip=1: страница списка', panel(await exchange('GET', '/diagrams?limit=1&skip=1')));
+
+// Real browser views: Chrome opens the running API itself, the shot is the browser page with the JSON answer.
+const view = browser;
+const live = await view.newPage();
+await live.setViewport({ width: 1280, height: 800 });
+const open = async (name, path) => {
+  await live.goto(base + path, { waitUntil: 'load' });
+  // Chrome shows a "Pretty-print" checkbox over JSON answers.
+  await live.click('input[type=checkbox]').catch(() => {});
+  await new Promise((resolve) => setTimeout(resolve, 300));
+  await live.screenshot({ path: join(outDir, name) });
+  console.log('saved', name);
+};
+await seed();
+await open('21-browser-list.png', '/diagrams?sort=title');
+await open('22-browser-not-found.png', '/diagrams/64b7f0c2a1b2c3d4e5f60718');
+await open('23-browser-bad-request.png', '/diagrams/abc');
+// The database is stopped for real: the connection is closed and the API answers 503 JSON.
+await mongoose.disconnect();
+await open('24-browser-503.png', '/diagrams');
+await open('25-browser-health-503.png', '/health');
+await live.close();
+
 await browser.close();
 server.close();
-await mongoose.disconnect();
 await mongod.stop();

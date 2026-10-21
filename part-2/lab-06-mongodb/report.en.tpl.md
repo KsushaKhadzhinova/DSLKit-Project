@@ -79,6 +79,161 @@ To run the project, copy `.env.example` to `.env` and set `MONGODB_URI`, run `np
 
 The routes gained partial update `PATCH /diagrams/:id`, sorting with `?sort=title` or `?sort=-priority`, a record counter (the `/diagrams/count` route and the `X-Total-Count` header of the list) and `?q=` search over a text index of the title and the source code. There are 92 automated tests. Nineteen cover the main routes: valid and invalid identifiers, creation, replacement that keeps comments, deletion, the 400, 404, 405 and 413 errors, and a 500 answer that leaks no error text. Eleven cover nested structures: the tag and owner filter, adding, editing and removing a comment, the unreachable foreign comment, schema checks at the model level, indexes and the translation of a Mongoose error into 400. Ten cover `PATCH`, sorting, the counter and the text search. Twenty-eight cover wrong user behavior: empty, truncated and non-JSON bodies, wrong types, whitespace-only values, out-of-range values, forged fields, operator injection, malformed identifiers, repeated and parallel requests and a stopped database. Another eleven cover data protection: operators such as `$ne` in the body and in query parameters, whitespace-only values, the limits from `limits.json` at the border and beyond it, the integer priority, the body size cap and the creation time of every record. The tests run on a temporary MongoDB instance through `mongodb-memory-server`, so no working database is touched. The same `npm test` command checks the build and formatting of this report. Screenshots of the Atlas cluster, Postman requests and MongoDB Compass data are not included in this version of the report.
 
+### 3.6 Demonstration
+
+All shots are made by the script `shots/shots.mjs`: it starts a temporary MongoDB and the server, performs real requests and saves the result. The request and response pages are drawn by this script from the recorded exchange data, they are not a Postman window. Shots 21–25 are taken in the Chrome browser, which opens the address of the running server itself.
+
+
+The list of three diagrams with tags and nested comments is shown in figure 1.
+
+![Diagram list](figures/01-get-list.png)
+
+Figure 1 – Request GET /diagrams and the 200 response, recorded by a script
+
+A request by the ObjectId returns one diagram, as in figure 2.
+
+![One diagram](figures/02-get-one.png)
+
+Figure 2 – Request GET /diagrams/:id and the 200 response, recorded by a script
+
+Creating a diagram returns the code 201 and the Location header, as figure 3 shows.
+
+![Diagram creation](figures/03-post-create.png)
+
+Figure 3 – Request POST /diagrams and the 201 response, recorded by a script
+
+The PUT method replaces the fields and the comment of the diagram is kept, as in figure 4.
+
+![Diagram replacement](figures/04-put-replace.png)
+
+Figure 4 – Request PUT /diagrams/:id and the 200 response, recorded by a script
+
+The PATCH method changes one field and leaves the others untouched, and the result is shown in figure 5.
+
+![Partial update](figures/16-patch.png)
+
+Figure 5 – Request PATCH /diagrams/:id with one field and the 200 response, recorded by a script
+
+The first delete returns 204 and the repeated delete of the same document returns 404, as figure 6 shows.
+
+![Diagram deletion](figures/05-delete.png)
+
+Figure 6 – Two requests DELETE /diagrams/:id and the responses 204 and 404, recorded by a script
+
+The `$push` operator adds a comment to the array, as in figure 7.
+
+![Comment addition](figures/06-comment-add.png)
+
+Figure 7 – Request POST /diagrams/:id/comments and the 201 response, recorded by a script
+
+The positional operator `$` changes the text of one array element, as figure 8 shows.
+
+![Comment edit](figures/07-comment-edit.png)
+
+Figure 8 – Request PUT /diagrams/:id/comments/:commentId and the 200 response, recorded by a script
+
+The `$pull` operator removes the element and the array in the response is empty, as in figure 9.
+
+![Comment deletion](figures/08-comment-delete.png)
+
+Figure 9 – Request DELETE /diagrams/:id/comments/:commentId and the 200 response, recorded by a script
+
+The filter by the tag array and the owner returns only matching diagrams, as in figure 10.
+
+![Filter by tag and owner](figures/09-filter-by-tag.png)
+
+Figure 10 – Request GET /diagrams?tag=shop&owner=anna and the 200 response, recorded by a script
+
+The parameter `sort=title` orders the list by title, and the result is visible in figure 11.
+
+![Sort by title](figures/17-sort-title.png)
+
+Figure 11 – Request GET /diagrams?sort=title and the 200 response, recorded by a script
+
+The parameter `q` searches the text index of the title and the source code, as in figure 12.
+
+![Text search](figures/18-search.png)
+
+Figure 12 – Request GET /diagrams?q=login and the 200 response, recorded by a script
+
+The parameters `limit` and `skip` return one page of the list, as figure 13 shows.
+
+![List page](figures/20-pagination.png)
+
+Figure 13 – Request GET /diagrams?limit=1&skip=1 and the 200 response, recorded by a script
+
+The route `/diagrams/count` returns the number of records and `/diagrams/stats` counts diagrams by notation with an aggregation, as figure 14 shows.
+
+![Counter and statistics](figures/19-count-stats.png)
+
+Figure 14 – Requests GET /diagrams/count and GET /diagrams/stats with the 200 responses, recorded by a script
+
+The raw collection document with nested tags and comments is shown in figure 15.
+
+![MongoDB document](figures/10-mongo-document.png)
+
+Figure 15 – Document of the diagrams collection read from MongoDB by a script
+
+Empty and blank strings, an unknown notation and a priority out of range give the code 400 with the list of fields, as in figure 16.
+
+![Validation errors](figures/11-validation-error.png)
+
+Figure 16 – Request POST /diagrams with invalid data and the 400 response, recorded by a script
+
+A title longer than 80 characters and 21 tags exceed the limits from `limits.json`, and the response is shown in figure 17.
+
+![Limits exceeded](figures/12-limits.png)
+
+Figure 17 – Request POST /diagrams exceeding the limits and the 400 response, recorded by a script
+
+The operators `$ne` and `$gt` in place of strings in the request body are rejected, as in figure 18.
+
+![Operators in the body](figures/13-injection-body.png)
+
+Figure 18 – Request POST /diagrams with operators in the body and the 400 response, recorded by a script
+
+The parameter `owner[$ne]` and the repeated parameter `tag` are rejected with the code 400, as in figure 19.
+
+![Operators in the parameters](figures/14-injection-query.png)
+
+Figure 19 – Two requests GET /diagrams with invalid parameters and the 400 responses, recorded by a script
+
+A valid but unknown ObjectId gives 404 and the string `abc` gives 400, as figure 20 shows.
+
+![Unknown identifier](figures/15-not-found-and-bad-id.png)
+
+Figure 20 – Two requests GET /diagrams/:id and the responses 404 and 400, recorded by a script
+
+The Chrome browser opens the address `/diagrams?sort=title` of the running server and shows the response, as in figure 21.
+
+![List in the browser](figures/21-browser-list.png)
+
+Figure 21 – Response of GET /diagrams?sort=title in a Chrome browser window
+
+An unknown identifier in the browser address gives the response 404, as in figure 22.
+
+![Response 404 in the browser](figures/22-browser-not-found.png)
+
+Figure 22 – Response of GET /diagrams/64b7f0c2a1b2c3d4e5f60718 in a Chrome browser window
+
+An invalid identifier `abc` gives the response 400, as figure 23 shows.
+
+![Response 400 in the browser](figures/23-browser-bad-request.png)
+
+Figure 23 – Response of GET /diagrams/abc in a Chrome browser window
+
+After the database connection is closed the server does not crash and answers JSON with the code 503, as in figure 24.
+
+![Response 503 without the database](figures/24-browser-503.png)
+
+Figure 24 – Response of GET /diagrams with MongoDB disconnected in a Chrome browser window
+
+The check `/health` with the stopped database returns 503 too, as in figure 25.
+
+![Health check without the database](figures/25-browser-health-503.png)
+
+Figure 25 – Response of GET /health with MongoDB disconnected in a Chrome browser window
+
 ## Answers to Control Questions
 
 {{answers}}

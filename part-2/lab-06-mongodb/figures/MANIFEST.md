@@ -17,3 +17,5 @@
 - `13-injection-body.png`: тело запроса с операторами `{"$ne": null}` и `{"$gt": ""}` вместо строк отклонено ответом 400.
 - `14-injection-query.png`: параметр `owner[$ne]=nobody` и повторяющийся параметр `tag` отклонены ответом 400.
 - `15-not-found-and-bad-id.png`: ответ 404 для корректного, но неизвестного ObjectId и ответ 400 для строки `abc`.
+- `16-patch.png` to `20-pagination.png`: PATCH, sorting, text search, counter with statistics and a list page, recorded by the script.
+- `21-browser-list.png` to `25-browser-health-503.png`: real Chrome views of the running API, including 404, 400 and the 503 JSON after the database connection is closed.
