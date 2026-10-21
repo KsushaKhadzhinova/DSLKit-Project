@@ -60,11 +60,77 @@ The new diagram appears first in the list, and the statistics line shows the rec
 
 Figure 3 – Diagram list with the new record and the statistics line
 
-After the page is reloaded the list stays the same, as figure 4 shows.
+Right after a record is added, the statistics line shows "Сохранение…", as in figure 4. After 500 ms of quiet the text changes to "Сохранено".
+
+![Autosave status](figures/09-autosave-saving.png)
+
+Figure 4 – Statistics line with the saving mark right after a change
+
+The status filter keeps only published diagrams in the list, as figure 5 shows.
+
+![Status filter](figures/04-filter-published.png)
+
+Figure 5 – List after choosing the status "Опубликованные"
+
+Choosing the sort by title puts the cards in alphabetical order, as in figure 6.
+
+![Sort by title](figures/10-sort-title.png)
+
+Figure 6 – Diagram list with the sort "По названию"
+
+The search by a part of the title keeps the matching records, and the result is visible in figure 7.
+
+![Search by title](figures/11-search.png)
+
+Figure 7 – Diagram list after the word "схема" is typed into the search field
+
+The "Изменить" button turns the title into an input and the "Сохранить" button replaces it, as in figure 8.
+
+![Edit mode](figures/12-edit-mode.png)
+
+Figure 8 – Diagram card in the title edit mode
+
+If the title is erased and Enter is pressed, a message appears under the field and the record stays unchanged, as figure 9 shows. The Esc key cancels the edit.
+
+![Edit error](figures/13-edit-error.png)
+
+Figure 9 – Error message under the edit field for an empty title
+
+After "Удалить" is pressed, the record disappears from the list and from the statistics, and figure 10 shows the result.
+
+![List after delete](figures/14-after-delete.png)
+
+Figure 10 – Diagram list after one record is deleted
+
+After the page is reloaded the list stays the same, as figure 11 shows.
 
 ![List after reload](figures/05-after-reload.png)
 
-Figure 4 – Diagram list after a page reload
+Figure 11 – Diagram list after a page reload
+
+If the list has no records, a message is shown instead of cards, as in figure 12.
+
+![Empty list](figures/15-empty-list.png)
+
+Figure 12 – The message "Диаграммы не найдены" for an empty list
+
+On a phone width of 375 pixels the layout turns into one column, as in figure 13.
+
+![Page on a phone](figures/06-list-mobile.png)
+
+Figure 13 – Application page on a screen 375 pixels wide
+
+The phone menu opens with the three bar button and is shown in figure 14.
+
+![Menu on a phone](figures/07-menu-mobile.png)
+
+Figure 14 – Opened menu on a screen 375 pixels wide
+
+The dark theme is switched on with the moon icon in the header and is shown in figure 15.
+
+![Dark theme](figures/08-list-dark.png)
+
+Figure 15 – Application page in the dark theme
 
 ### 3.9 Testing
 
