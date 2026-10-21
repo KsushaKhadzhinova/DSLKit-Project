@@ -48,47 +48,83 @@ The application uses the styles and markup of the first-part site: a sticky head
 
 ### 3.6 Demonstration
 
-The menu with the highlighted item "Каталог" and the template cards are shown in figure 1.
+The home page with the menu and the sticky header is shown in figure 1.
+
+![Home page](figures/01-home.png)
+
+Figure 1 – Home page of the application in the light theme
+
+The menu with the highlighted item "Каталог" and the template cards are shown in figure 2.
 
 ![Template catalog](figures/02-catalog.png)
 
-Figure 1 – Template catalog with the sticky header and the highlighted menu item
+Figure 2 – Template catalog with the sticky header and the highlighted menu item
 
-The dynamic route `/catalog/2` opens a template page, as figure 2 shows.
+The dynamic route `/catalog/2` opens the template card, as figure 3 shows.
 
 ![Template page](figures/03-catalog-item.png)
 
-Figure 2 – Template page opened at the address `/catalog/2`
+Figure 3 – Template page opened at the address `/catalog/2`
 
-An unknown path shows the styled 404 page, which figure 3 contains.
+The address `/catalog/999` with a missing identifier leads to the 404 page, shown in figure 4.
+
+![Unknown template](figures/04-not-found-id.png)
+
+Figure 4 – Error page 404 for an unknown template identifier
+
+For an unknown path a styled 404 page is shown, and it is visible in figure 5.
 
 ![404 page](figures/05-not-found.png)
 
-Figure 3 – The page "Ошибка 404: страница не найдена" in the site style
+Figure 5 – The page "Ошибка 404: страница не найдена" in the site style
 
-A guest who opens `/dashboard` lands on the login form with a hint, and the empty name error is visible in figure 4.
+A guest who opens `/dashboard` lands on the login form with a hint, as in figure 6.
 
-![Login form](figures/07-login-validation.png)
+![Redirect to login](figures/06-redirect-to-login.png)
 
-Figure 4 – Login form with the protected page hint and the error message
+Figure 6 – Login form with the hint "Эта страница доступна после входа"
 
-After the login the requested page is returned, and figure 5 shows it.
+The error for an empty name is visible under the field in figure 7.
+
+![Login form error](figures/07-login-validation.png)
+
+Figure 7 – Login form with the error message for an empty name
+
+After login the requested page opens, and it is visible in figure 8.
 
 ![Dashboard](figures/08-dashboard-after-login.png)
 
-Figure 5 – Dashboard after login with the greeting and the "Выйти" menu item
+Figure 8 – Dashboard after login with the greeting and the menu item "Выйти"
 
-The catalog filter is kept in the address, as in figure 6.
+The catalog filter is kept in the address, as in figure 9.
 
 ![Catalog filter](figures/12-catalog-filter.png)
 
-Figure 6 – The catalog at the link `/catalog?q=UML&sort=title` with breadcrumbs and the counter of found items
+Figure 9 – Catalog at the link `/catalog?q=UML&sort=title` with breadcrumbs and the found count
 
-A plain user sees the 403 error on the admin page, as in figure 7.
+A regular user on the administrator page sees the 403 error, as in figure 10.
 
 ![403 page](figures/13-forbidden.png)
 
-Figure 7 – The 403 page for a user without the admin role
+Figure 10 – Error page 403 for a user without the admin role
+
+On a phone width of 375 pixels the cards go in one column, as in figure 11.
+
+![Catalog on a phone](figures/09-catalog-mobile.png)
+
+Figure 11 – Template catalog on a screen 375 pixels wide
+
+The phone menu opens with the three bar button and is shown in figure 12.
+
+![Menu on a phone](figures/10-menu-mobile.png)
+
+Figure 12 – Opened menu on a screen 375 pixels wide
+
+The dark theme is switched on with the moon icon in the header and is shown in figure 13.
+
+![Catalog in the dark theme](figures/11-catalog-dark.png)
+
+Figure 13 – Template catalog in the dark theme
 
 ### 3.7 Testing
 

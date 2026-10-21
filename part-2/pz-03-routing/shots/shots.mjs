@@ -17,7 +17,7 @@ const browsers = [process.env.CHROME_PATH, 'C:/Program Files/Google/Chrome/Appli
 const executablePath = browsers.find((p) => existsSync(p));
 if (!executablePath) throw new Error('No Chrome or Edge found, set CHROME_PATH');
 
-const PORT = 5186;
+const PORT = 5176;
 const APP = `http://localhost:${PORT}`;
 const server = spawn('npx', ['vite', '--port', String(PORT), '--strictPort'], { cwd: lab, shell: true, stdio: 'ignore' });
 const pause = (ms = 400) => new Promise((resolve) => setTimeout(resolve, ms));
