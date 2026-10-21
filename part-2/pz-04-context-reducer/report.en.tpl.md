@@ -30,35 +30,59 @@ The application uses the styles and markup of the first-part site: a sticky head
 
 ### 2.6 Demonstration
 
-Diagram templates in cards with favorite buttons are shown in figure 1.
+Diagram templates in cards with the favorite buttons are shown in figure 1.
 
 ![Diagram templates](figures/01-templates.png)
 
 Figure 1 – Template cards with the "В избранное" buttons in the light theme
 
-Two chosen templates go into the "Избранное" panel, where the counter is visible, as in figure 2.
+Two chosen templates go to the "Избранное" panel, where the counter is visible, as in figure 2.
 
 ![Favorites panel](figures/02-favorites.png)
 
-Figure 2 – The "Избранное" panel with two templates and the selected counter
+Figure 2 – The "Избранное" panel with two templates and the counter of chosen items
 
-Switching the theme changes the colours of the whole page, which figure 3 shows.
+The buttons with the signs "+" and "−" change the quantity through reducer actions, and figure 3 shows the result.
+
+![Quantity in favorites](figures/08-quantity.png)
+
+Figure 3 – The "Избранное" panel with the quantity 3 for the first template
+
+After the page is reloaded the choice and the quantity are kept, as figure 4 shows.
+
+![Favorites after reload](figures/05-after-reload.png)
+
+Figure 4 – The "Избранное" panel after a page reload
+
+The theme switch changes the colors of the whole page, as figure 5 shows.
 
 ![Dark theme](figures/03-dark-theme.png)
 
-Figure 3 – The page in the dark theme with the tooltip at the switch
+Figure 5 – Page in the dark theme with the tooltip at the switch
 
-Changing the language translates the headings, the template names and the button labels, as in figure 4.
+Changing the language translates the headings, the template names and the button labels, as in figure 6.
 
 ![English language](figures/04-english.png)
 
-Figure 4 – The page after switching the language to English
+Figure 6 – Page after switching the language to English
 
-The prop drilling problem and its solution through a context stand side by side, as in figure 5.
+The prop drilling problem and its solution through the context stand side by side, as in figure 7.
 
 ![Prop drilling problem and solution](figures/06-prop-drilling.png)
 
-Figure 5 – The block with the name passed through props and the block with the same name from `UserContext`
+Figure 7 – Block with the name passed through props and the block with the same name from `UserContext`
+
+The "Очистить" button resets the list with the `CLEAR` action and the panel shows a message, as in figure 8.
+
+![Empty favorites](figures/09-cleared.png)
+
+Figure 8 – The "Избранное" panel after the list is cleared
+
+On a phone width of 375 pixels the blocks go in one column, as in figure 9.
+
+![Page on a phone](figures/07-mobile.png)
+
+Figure 9 – Application page on a screen 375 pixels wide
 
 ### 2.7 Testing
 
