@@ -128,9 +128,39 @@ The 500 page during a real failure is shown in figure 6. The server was started 
 
 Figure 6 – The 500 error page with an explanation about the unavailable log table
 
+The same form with correct values saves the record, and the home page shows the new card with its own creation time, as in figure 7.
+
+![Record after adding](figures/added.png)
+
+Figure 7 – Home page after a diagram is added through the form
+
+The «Edit» button on the detail page opens the edit form with the current field values, shown in figure 8.
+
+![Edit form](figures/edit.png)
+
+Figure 8 – Edit form of the first diagram with the current values and a new revision
+
+After the changes are saved the detail page opens with the new revision, and the creation time stays the same, as in figure 9.
+
+![Record after editing](figures/edited.png)
+
+Figure 9 – Detail page of the first diagram after editing
+
 ### 3.9 Automatic verification
 
 Automatic tests on the built-in `node:test` start the server on a free port and check the pages, the guest redirect, adding an item, field validation, escaping, the log table, an unavailable database, the unique creation time, editing and deleting a record with the CSRF token, both error pages, the CSRF token, the security headers, the rate limit, log escaping and huge values. The command is `npm test` in the project folder.
+
+The console of the server started with `npm start` and after the requests is shown in figure 10.
+
+![Server console](figures/console.png)
+
+Figure 10 – Console output of the server with the request log lines (process output captured as text)
+
+The result of the `npm test` command with the number of tests and the code coverage is shown in figure 11.
+
+![Test result](figures/tests.png)
+
+Figure 11 – End of the npm test output: the number of passed tests and the coverage table (process output captured as text)
 
 ## 4 Answers to Control Questions
 
