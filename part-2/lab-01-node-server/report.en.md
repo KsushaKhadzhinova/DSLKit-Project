@@ -79,6 +79,60 @@ Table 3 – Results of requests to the running server
 
 Listing of server.js is given in appendix A. Listing of app.js is given in appendix B. Listing of diagrams.routes.js is given in appendix C. Listing of diagrams.controller.js is given in appendix D. Listing of diagram.model.js is given in appendix E. Listing of validate.js is given in appendix F. Listing of error-handler.js is given in appendix G.
 
+The server is started with `npm start`, and the console message is shown in figure 1.
+
+![Server console](figures/01-server-start.png)
+
+Figure 1 – Console message after the server starts on port 3000 (process output captured as text)
+
+The `GET /diagrams` request is opened in the browser at `http://localhost:3000/diagrams`, and the answer with the two initial diagrams is shown in figure 2.
+
+![List of diagrams in the browser](figures/02-get-list.png)
+
+Figure 2 – Answer to GET /diagrams in a browser window: an array of two diagrams with the createdAt field
+
+A single record at `http://localhost:3000/diagrams/1` is shown in figure 3.
+
+![One diagram in the browser](figures/03-get-one.png)
+
+Figure 3 – Answer to GET /diagrams/1 in a browser window: the object of one diagram
+
+A request for a missing record at `http://localhost:3000/diagrams/99` gives the error shown in figure 4.
+
+![Answer 404](figures/04-get-404.png)
+
+Figure 4 – Answer to GET /diagrams/99 in a browser window: JSON saying that the diagram is not found (code 404)
+
+A wrong number in the address `http://localhost:3000/diagrams/abc` is refused, as in figure 5.
+
+![Answer 400](figures/05-get-400.png)
+
+Figure 5 – Answer to GET /diagrams/abc in a browser window: JSON with a message about a wrong id (code 400)
+
+A browser does not send `POST`, `PUT`, `PATCH` and `DELETE` from the address bar, so the script `shots/shots.mjs` sent them, and the real requests and server answers are drawn on a page. Creation, replacement and a partial change are shown in figure 6.
+
+![POST, PUT and PATCH requests](figures/06-post-put-patch.png)
+
+Figure 6 – POST, PUT and PATCH requests and the server answers recorded by a script (not a Postman window)
+
+The answers to wrong data and to an empty `PATCH` body are recorded the same way and shown in figure 7.
+
+![Requests with wrong data](figures/07-validation-400.png)
+
+Figure 7 – Answers 400 with the list of field problems recorded by a script (not a Postman window)
+
+Deleting a record and deleting the same record again are shown in figure 8.
+
+![Deleting a record](figures/08-delete-204-404.png)
+
+Figure 8 – DELETE requests: the answer 204 without a body and the answer 404 on a repeat, recorded by a script (not a Postman window)
+
+The result of the `npm test` command with the number of tests and the code coverage is shown in figure 9.
+
+![Test result](figures/09-tests.png)
+
+Figure 9 – End of the npm test output: the number of passed tests and the coverage table (process output captured as text)
+
 ### 3.6 Paging and sorting
 
 The list accepts the `limit`, `offset`, `sort` and `order` parameters. `limit` sets the page size from 1 to 100, `offset` sets the shift from 0 to 1000000, `sort` picks a field from a whitelist and `order` takes `asc` or `desc`. Without parameters the whole list is returned in ascending `id` order, so the clients of the earlier works keep working. The answer stays an array and the full size of the selection comes in the `X-Total-Count` header. Numbers are read as strings of at most nine digits, so `-1`, `1e9`, `0x10` and huge numbers get a 400 answer with a list of errors by field. The sort field name is checked against the whitelist and never reaches the database query unchecked. Equal values are ordered by `id`, so pages do not overlap. Parsing of the parameters is moved to a separate module, it is given in Appendix H.
@@ -99,7 +153,7 @@ The list accepts the `limit`, `offset`, `sort` and `order` parameters. `limit` s
 
 ## Conclusion
 
-For DSLKit, a REST API for the `diagrams` resource was built on Express: six routes read the list and a single record, create, replace, partially update and delete, every record has a unique creation time, and the data temporarily lives in an in-memory array. Errors are unified into one JSON shape with the codes 400, 404 and 500 through a global handler, development mode runs on `nodemon`, and automated tests confirm the behavior of every route. The split into routes, controllers and a model lets the next lab swap the array for a database without rewriting the rest of the code. Screenshots of the requests from Postman or a browser are still to be attached.
+For DSLKit, a REST API for the `diagrams` resource was built on Express: six routes read the list and a single record, create, replace, partially update and delete, every record has a unique creation time, and the data temporarily lives in an in-memory array. Errors are unified into one JSON shape with the codes 400, 404 and 500 through a global handler, development mode runs on `nodemon`, and automated tests confirm the behavior of every route. The split into routes, controllers and a model lets the next lab swap the array for a database without rewriting the rest of the code. The requests are confirmed by browser screenshots and by an exchange recorded with a script.
 
 ## Appendix A (mandatory) Listing of server.js
 
