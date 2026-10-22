@@ -28,16 +28,16 @@ Principle: each work takes the previous one and adds exactly one new idea. Lab 1
 
 | Work | Branch | Folder (`part-2/`) | Main idea | Data | Tests |
 | --- | --- | --- | --- | --- | --- |
-| Lab 1 | lab21 | lab-01-node-server | REST API on Express, layers | in-memory array | 64 |
-| Lab 2 | lab12 | lab-02-sequelize | ORM, migrations, 1:N link, 409 | SQLite or PostgreSQL | 98 |
-| Lab 3 | 23 | lab-03-auth | bcrypt, JWT, roles, brute-force defence | SQLite or PostgreSQL | 121 |
-| Lab 4 | 24 | lab-04-react-state | useState, useEffect, localStorage | localStorage | 84 |
-| Lab 5 | 25 | lab-05-react-api | axios, token, optimistic updates | the lab 3 server | 92 |
+| 67 || Lab 1 | lab21 | lab-01-node-server | REST API on Express, layers | in-memory array | 64 |
+| 101 || Lab 2 | lab12 | lab-02-sequelize | ORM, migrations, 1:N link, 409 | SQLite or PostgreSQL | 98 |
+| 125 || Lab 3 | 23 | lab-03-auth | bcrypt, JWT, roles, brute-force defence | SQLite or PostgreSQL | 121 |
+| 87 || Lab 4 | 24 | lab-04-react-state | useState, useEffect, localStorage | localStorage | 84 |
+| 100 || Lab 5 | 25 | lab-05-react-api | axios, token, optimistic updates | the lab 3 server | 92 |
 | Lab 6 | 26 | lab-06-mongodb | documents, indexes, aggregation | MongoDB | 136 |
 | Lab 7 | 27 | lab-07-websocket | Socket.IO, rooms, presence | memory or MongoDB | 90 |
-| Lab 8 | 28 | lab-08-docker | Dockerfile, Compose, Nginx, healthcheck | PostgreSQL in a container | 9 |
-| P1 | pz21 | pz-01-middleware-ejs | middleware, EJS, CSRF | array + log table | 99 |
-| P2 | pz22 | pz-02-rest-api | REST design, three linked resources | arrays | 67 |
+| 10 || Lab 8 | 28 | lab-08-docker | Dockerfile, Compose, Nginx, healthcheck | PostgreSQL in a container | 9 |
+| 101 || P1 | pz21 | pz-01-middleware-ejs | middleware, EJS, CSRF | array + log table | 99 |
+| 68 || P2 | pz22 | pz-02-rest-api | REST design, three linked resources | arrays | 67 |
 | P3 | pz23 | pz-03-routing | React Router, protected routes | localStorage (sign-in) | 86 |
 | P4 | pz24 | pz-04-context-reducer | Context, useReducer | localStorage | 59 |
 | Course project | course-project | separate | not checked | | |

@@ -84,13 +84,13 @@ The assignment has 16 questions; for variant 26 these are 9–11 (n−1, n, n+1 
 - **fetch vs axios.** axios parses JSON itself, throws on 4xx and 5xx, has interceptors and a timeout; `fetch` rejects only on a network failure.
 - **What is an optimistic update.** The UI changes before the server answers and rolls back on error.
 - **How to show an error on a 500.** Catch the rejection, show a clear text and a "Retry" button.
-- **How to retry a failed request.** The "Retry" button changes the attempt counter in the effect's dependencies; automatic retry up to three attempts with a pause is not implemented.
+- **How to retry a failed request.** The "Retry" button changes the attempt counter in the effect's dependencies; the list read is repeated up to three times with a growing pause on a network failure or a 5xx answer (`withRetry` in `api.js`), while writes and deletes are never repeated.
 - **Where to keep the token.** `localStorage` (convenient, readable by scripts) or an `HttpOnly` cookie (unreadable by scripts, but needs CSRF protection).
 
 ## 6 Write it live: rehearsal
 
-1. **Automatic retry for GET.** A `withRetry(fn, 3, delay)` function in `api.js` that repeats the request only on a network error or a 5xx answer, with a growing pause; apply it to `fetchDiagrams`.
-2. **Edit the notation in edit mode.** A `<select>` in `DiagramItem`, the notation in `changes`; `update` already sends all fields.
+1. **Automatic retry for GET.** Already done: `withRetry` in `api.js` repeats `fetchDiagrams`; be able to explain why 4xx, a cancel and writes are not repeated.
+2. **Edit the notation in edit mode.** Already done: a "New notation" `<select>` in `DiagramItem`, the notation goes into `changes`.
 3. **Sorting.** `sort` and `order` parameters in `fetchDiagrams` (the server supports them), a `<select>` next to the search; changing a parameter resets the page the same way as the search does.
 4. **Simulated server delay.** In the request interceptor `await new Promise((r) => setTimeout(r, Number(import.meta.env.VITE_API_DELAY) || 0))` to check the indicators.
 5. **A "Sign out" button.** `clearToken()` plus the `auth:logout` event the app already listens to.

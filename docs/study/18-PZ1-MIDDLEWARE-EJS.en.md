@@ -15,6 +15,7 @@ A catalogue of diagrams as plain HTML pages: a list, a record page, an add and e
 | POST | `/item/:id/delete` | "signed in" | delete |
 | GET | `/login` | everyone | "sign in" page |
 | GET | `/log` | "signed in" | latest log rows |
+| GET | `/health` | everyone | server check, not written to the log and not counted by the limit |
 
 A guest who opens a protected path is redirected to `/login`. Any failure ends on a styled 404 or 500 page, never bare text.
 

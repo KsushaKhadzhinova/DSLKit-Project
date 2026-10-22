@@ -99,7 +99,7 @@ The assignment has 16 questions; for variant 26 these are 9–11 (n−1, n, n+1 
 1. **Add Redis or pgAdmin.** A new service in `docker-compose.yml` (image, port, network, variables from `.env`); publish the pgAdmin port on `127.0.0.1` only.
 2. **Change the ports.** The assignment names ports 80 and 5000: `FRONTEND_PORT=80` and `BACKEND_PORT=5000` in `.env` and recreate the stack are enough. The defaults are 8080 and 3000 because port 80 is often taken.
 3. **A healthcheck for Nginx.** Already present through `wget`; be able to explain `interval`, `timeout`, `retries`, `start-period`.
-4. **Limit memory.** The `mem_limit: 256m` key (or `deploy.resources.limits`) on the `backend` service.
+4. **Limit memory.** Already done: `mem_limit`, `pids_limit` and log rotation on every service; be able to change the number and explain what happens on excess (the process is killed for lack of memory and `restart` brings it up again).
 5. **Restart.** Show `restart: unless-stopped` and stop a container with `docker kill`.
 6. **Recreate from scratch.** `docker compose down -v` and `docker compose up --build`: the migrations and the seed create the tables again.
 

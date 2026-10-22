@@ -96,7 +96,7 @@ For variant 26 these are questions 9–11 of 16 (n−1, n, n+1 with n=10). Full 
 1. **Role `moderator`.** Add the value to `ROLES` in `models/user.js`; it then passes `validateRole`. In the routes let `requireRole` accept several roles (pass an array and use `includes`).
 2. **Password change `PATCH /profile/password`.** Require the old password, check with `bcrypt.compare`, apply the same rules to the new one, save the new hash.
 3. **Log out everywhere.** A `tokenVersion` field on the user; the version goes into the token at login, `authenticate` compares them; logout increments the version.
-4. **Lock parameters in a file.** `loginMaxAttempts` and `loginLockMs` are already configurable through `createApp(models, settings)`; move them to `limits.json` as in labs 1–2.
+4. **Lock parameters in a file.** Already done: the number of failures, the lock time and the request limits live in `limits.json` and are read into `DEFAULTS` in `app.js`; the `createApp` settings override them.
 5. **Show a 403.** A regular user's token on `GET /users` and on someone else's diagram.
 
 ## 7 What to check by hand before the defence
