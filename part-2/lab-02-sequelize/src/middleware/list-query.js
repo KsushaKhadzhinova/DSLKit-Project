@@ -6,11 +6,12 @@ const MAX_LIMIT = 100;
 const MAX_OFFSET = 1000000;
 const ORDERS = ['asc', 'desc'];
 
-// Reads ?limit=, ?offset=, ?sort= and ?order= from req.query.
+// Reads ?limit=, ?offset=, ?sort=, ?order=, ?notation= and ?q= from req.query.
 // sortable: the field names a client may sort by (a whitelist, so a field name never reaches the database unchecked).
 // Without limit the whole list is returned (the clients of the earlier labs expect that), without sort the order is by id.
 // A bad value throws the 400 error with the list of problems, Express 5 passes it to the error handler.
-const parseListQuery = (query, sortable) => {
+// filters: { notations: allowed values of ?notation=, maxQuery: longest ?q= }. ?q= is a case-insensitive part of the title.
+const parseListQuery = (query, sortable, filters = {}) => {
   const problems = [];
   const integer = (name, min, max) => {
     const value = query[name];
@@ -31,8 +32,21 @@ const parseListQuery = (query, sortable) => {
   const order = typeof query.order === 'string' ? query.order.toLowerCase() : (query.order ?? 'asc');
   if (!ORDERS.includes(order)) problems.push({ field: 'order', message: 'order must be asc or desc' });
 
+  const { notations = [], maxQuery = 80 } = filters;
+  let notation;
+  if (query.notation !== undefined) {
+    if (typeof query.notation !== 'string' || !notations.includes(query.notation)) problems.push({ field: 'notation', message: `notation must be one of: ${notations.join(', ')}` });
+    else notation = query.notation;
+  }
+  let q;
+  if (query.q !== undefined) {
+    const text = typeof query.q === 'string' ? query.q.trim() : '';
+    if (text === '' || text.length > maxQuery) problems.push({ field: 'q', message: `q must be text of 1 to ${maxQuery} characters` });
+    else q = text.toLowerCase();
+  }
+
   if (problems.length) throw badRequest('Invalid list query', problems);
-  return { limit, offset, sort, order };
+  return { limit, offset, sort, order, notation, q };
 };
 
 module.exports = { parseListQuery, MAX_LIMIT, MAX_OFFSET };

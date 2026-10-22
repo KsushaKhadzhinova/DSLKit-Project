@@ -100,7 +100,7 @@ PostgreSQL на компьютере разработчика не устано�
 
 ### 3.6 Постраничный вывод и сортировка
 
-Список принимает параметры `limit`, `offset`, `sort` и `order`. Параметр `limit` задаёт размер страницы от 1 до 100, `offset` задаёт смещение от 0 до 1000000, `sort` выбирает поле из белого списка, а `order` принимает значения `asc` и `desc`. Без параметров возвращается весь список по возрастанию `id`, поэтому клиенты прежних работ продолжают работать. Ответ остаётся массивом, а полный размер выборки приходит в заголовке `X-Total-Count`. Числа читаются как строки не длиннее девяти цифр, поэтому значения `-1`, `1e9`, `0x10` и огромные числа получают ответ 400 со списком ошибок по полям. Имя поля сортировки проверяется по белому списку и не попадает в запрос к базе без проверки. Равные значения упорядочены по `id`, поэтому страницы не пересекаются. Разбор параметров вынесен в отдельный модуль, он приведён в приложении И.
+Список принимает параметры `limit`, `offset`, `sort` и `order`. Параметр `limit` задаёт размер страницы от 1 до 100, `offset` задаёт смещение от 0 до 1000000, `sort` выбирает поле из белого списка, а `order` принимает значения `asc` и `desc`. Без параметров возвращается весь список по возрастанию `id`, поэтому клиенты прежних работ продолжают работать. Ответ остаётся массивом, а полный размер выборки приходит в заголовке `X-Total-Count`. Числа читаются как строки не длиннее девяти цифр, поэтому значения `-1`, `1e9`, `0x10` и огромные числа получают ответ 400 со списком ошибок по полям. Имя поля сортировки проверяется по белому списку и не попадает в запрос к базе без проверки. Равные значения упорядочены по `id`, поэтому страницы не пересекаются. Разбор параметров вынесен в отдельный модуль, он приведён в приложении И. Параметр `notation` оставляет записи одной нотации, а параметр `q` ищет часть названия без учёта регистра функцией `instr` в SQLite или `strpos` в PostgreSQL, поэтому знаки процента и подчёркивания в тексте поиска остаются обычными символами. Недопустимое значение даёт ответ 400.
 
 Запрос `GET /diagrams?limit=2&offset=0&sort=title&order=desc` даёт первую страницу из двух записей, как на рисунке 7.
 
@@ -380,11 +380,22 @@ module.exports = {
 
 ```js
 const { notFound, badRequest } = require('../errors');
+const { Op, fn, col, where } = require('sequelize');
 const { parseListQuery } = require('../middleware/list-query');
+const { NOTATIONS, LIMITS } = require('../models/diagram.constants');
 
 const missing = (id) => notFound(`Diagram ${id} not found`);
 
 const SORTABLE = ['id', 'title', 'notation', 'priority', 'owner', 'revision', 'createdAt'];
+
+// A part of the title is searched with instr (SQLite) or strpos (PostgreSQL) on the lowercased title, not with LIKE,
+// so the characters % and _ in the search text are plain characters and need no escaping.
+const filterFor = (dialect, { notation, q }) => {
+  const conditions = [];
+  if (notation !== undefined) conditions.push({ notation });
+  if (q !== undefined) conditions.push(where(fn(dialect === 'sqlite' ? 'instr' : 'strpos', fn('lower', col('title')), q), { [Op.gt]: 0 }));
+  return conditions.length > 0 ? { [Op.and]: conditions } : {};
+};
 
 // Express 5 forwards a rejected promise to the error handler, so no try/catch is needed here.
 const createDiagramsController = ({ Diagram, Project }) => {
@@ -397,8 +408,9 @@ const createDiagramsController = ({ Diagram, Project }) => {
   return {
     // ?limit=&offset=&sort=&order= (see list-query.js). The answer stays an array, the full size comes in X-Total-Count.
     list: async (req, res) => {
-      const { limit, offset, sort, order } = parseListQuery(req.query, SORTABLE);
+      const { limit, offset, sort, order, notation, q } = parseListQuery(req.query, SORTABLE, { notations: NOTATIONS, maxQuery: LIMITS.title });
       const { count, rows } = await Diagram.findAndCountAll({
+        where: filterFor(Diagram.sequelize.getDialect(), { notation, q }),
         order: [
           [sort, order.toUpperCase()],
           ['id', 'ASC'],
@@ -457,11 +469,12 @@ const MAX_LIMIT = 100;
 const MAX_OFFSET = 1000000;
 const ORDERS = ['asc', 'desc'];
 
-// Reads ?limit=, ?offset=, ?sort= and ?order= from req.query.
+// Reads ?limit=, ?offset=, ?sort=, ?order=, ?notation= and ?q= from req.query.
 // sortable: the field names a client may sort by (a whitelist, so a field name never reaches the database unchecked).
 // Without limit the whole list is returned (the clients of the earlier labs expect that), without sort the order is by id.
 // A bad value throws the 400 error with the list of problems, Express 5 passes it to the error handler.
-const parseListQuery = (query, sortable) => {
+// filters: { notations: allowed values of ?notation=, maxQuery: longest ?q= }. ?q= is a case-insensitive part of the title.
+const parseListQuery = (query, sortable, filters = {}) => {
   const problems = [];
   const integer = (name, min, max) => {
     const value = query[name];
@@ -482,8 +495,21 @@ const parseListQuery = (query, sortable) => {
   const order = typeof query.order === 'string' ? query.order.toLowerCase() : (query.order ?? 'asc');
   if (!ORDERS.includes(order)) problems.push({ field: 'order', message: 'order must be asc or desc' });
 
+  const { notations = [], maxQuery = 80 } = filters;
+  let notation;
+  if (query.notation !== undefined) {
+    if (typeof query.notation !== 'string' || !notations.includes(query.notation)) problems.push({ field: 'notation', message: `notation must be one of: ${notations.join(', ')}` });
+    else notation = query.notation;
+  }
+  let q;
+  if (query.q !== undefined) {
+    const text = typeof query.q === 'string' ? query.q.trim() : '';
+    if (text === '' || text.length > maxQuery) problems.push({ field: 'q', message: `q must be text of 1 to ${maxQuery} characters` });
+    else q = text.toLowerCase();
+  }
+
   if (problems.length) throw badRequest('Invalid list query', problems);
-  return { limit, offset, sort, order };
+  return { limit, offset, sort, order, notation, q };
 };
 
 module.exports = { parseListQuery, MAX_LIMIT, MAX_OFFSET };

@@ -1,9 +1,20 @@
 const { notFound, badRequest } = require('../errors');
+const { Op, fn, col, where } = require('sequelize');
 const { parseListQuery } = require('../middleware/list-query');
+const { NOTATIONS, LIMITS } = require('../models/diagram.constants');
 
 const missing = (id) => notFound(`Diagram ${id} not found`);
 
 const SORTABLE = ['id', 'title', 'notation', 'priority', 'owner', 'revision', 'createdAt'];
+
+// A part of the title is searched with instr (SQLite) or strpos (PostgreSQL) on the lowercased title, not with LIKE,
+// so the characters % and _ in the search text are plain characters and need no escaping.
+const filterFor = (dialect, { notation, q }) => {
+  const conditions = [];
+  if (notation !== undefined) conditions.push({ notation });
+  if (q !== undefined) conditions.push(where(fn(dialect === 'sqlite' ? 'instr' : 'strpos', fn('lower', col('title')), q), { [Op.gt]: 0 }));
+  return conditions.length > 0 ? { [Op.and]: conditions } : {};
+};
 
 // Express 5 forwards a rejected promise to the error handler, so no try/catch is needed here.
 const createDiagramsController = ({ Diagram, Project }) => {
@@ -16,8 +27,9 @@ const createDiagramsController = ({ Diagram, Project }) => {
   return {
     // ?limit=&offset=&sort=&order= (see list-query.js). The answer stays an array, the full size comes in X-Total-Count.
     list: async (req, res) => {
-      const { limit, offset, sort, order } = parseListQuery(req.query, SORTABLE);
+      const { limit, offset, sort, order, notation, q } = parseListQuery(req.query, SORTABLE, { notations: NOTATIONS, maxQuery: LIMITS.title });
       const { count, rows } = await Diagram.findAndCountAll({
+        where: filterFor(Diagram.sequelize.getDialect(), { notation, q }),
         order: [
           [sort, order.toUpperCase()],
           ['id', 'ASC'],
