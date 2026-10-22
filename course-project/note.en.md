@@ -246,7 +246,7 @@ Table 6 – Security measures of the server side
 | Huge request bodies              | A limit of 100 KB, a length check of every field                                                         |
 | Common headers                   | `x-powered-by` is disabled, security headers are added                                                   |
 
-The `helmet` package is not used: the set of security headers is assembled by hand in `src/middleware/http.js` [TODO: check against the code, rephrase for item 2.2.5 of the condition or add `helmet`]. Passwords are written neither to the log nor to answers.
+The `helmet` package is not used: the set of security headers is assembled by hand in `src/middleware/http.js`. The decision is deliberate: the needed headers (content policy, no framing, `nosniff`, no cache) are written in one file and covered by tests, and no extra dependency is added. Passwords are written neither to the log nor to answers.
 
 ### 2.3 Client Side Implementation
 
@@ -309,7 +309,7 @@ The main way to run the system is Docker Compose on one machine, described above
 
 #### 2.4.4 Testing
 
-Automated tests are written for both parts. The server is tested with the built-in `node --test` runner on a temporary SQLite database with real migrations, bcrypt runs with four rounds for speed. According to the README of branch 28, the server suite has 92 tests, including checks of `/health`, paging, token security and rate limiting. The client is tested with Vitest and React Testing Library, the suite has 42 tests, among them a test that markup from a server answer is rendered as text. The Docker configuration is checked by six file checks without starting the daemon. [TODO: before the defense run `npm test` in `part-2/lab-03-auth`, `part-2/lab-05-react-api` and `part-2/lab-08-docker` and record the actual numbers and coverage. The numbers above are taken from the branch READMEs and have not been rechecked since this draft was prepared.]
+Automated tests are written for both parts. The server is tested with the built-in `node --test` runner on a temporary SQLite database with real migrations, bcrypt runs with four rounds for speed. According to the README of branch 28, the server suite has 92 tests, including checks of `/health`, paging, token security and rate limiting. The client is tested with Vitest and React Testing Library, the suite has 100 tests, among them a test that markup from a server answer is rendered as text. The Docker configuration is checked by six file checks without starting the daemon. [TODO: before the defense run `npm test` in `part-2/lab-03-auth`, `part-2/lab-05-react-api` and `part-2/lab-08-docker` and record the actual numbers and coverage. The numbers above are taken from the branch READMEs and have not been rechecked since this draft was prepared.]
 
 Manual scenarios and control examples are given in subsection 3.2. For manual API checks there is a `requests.http` file for the REST Client extension and the Postman collection `postman_collection.json`.
 
