@@ -1170,3 +1170,28 @@
 .canvas__remote svg :is(rect, polygon, ellipse, path)[fill$='E2E2F0' i] {
   fill: var(--color-secondary);
 }
+
+/* The own engine draws a light sheet with dark ink: on the canvas it takes the colours of the theme like the Kroki output */
+.canvas__remote[data-engine='local'] svg [fill$='ffffff' i] {
+  fill: var(--color-surface);
+}
+
+.canvas__remote[data-engine='local'] svg > rect:first-of-type {
+  fill: transparent;
+}
+
+.canvas__remote[data-engine='local'] svg [fill$='0f172a' i] {
+  fill: var(--color-text);
+}
+
+.canvas__remote[data-engine='local'] svg :is([fill$='475569' i], [fill$='334155' i]) {
+  fill: var(--color-text-light);
+}
+
+.canvas__remote[data-engine='local'] svg :is([stroke$='1e293b' i], [stroke$='334155' i]) {
+  stroke: var(--color-text-light);
+}
+
+.canvas__remote[data-engine='local'] svg text[stroke$='ffffff' i] {
+  stroke: var(--color-surface);
+}

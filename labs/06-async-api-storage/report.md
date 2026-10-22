@@ -534,7 +534,7 @@ export const initDiagramRunner = ({
 
   // The engine is chosen on the settings page; the footer of the editor only names the one that will draw.
   const showAction = () => {
-    if (engineLabel) engineLabel.textContent = tr(`Движок: ${currentEngine().label}`);
+    if (engineLabel) engineLabel.textContent = tr(`Движок: ${tr(currentEngine().label)}`);
   };
 
   const show = (svgText, note, engine = currentEngine()) => {
@@ -542,6 +542,7 @@ export const initDiagramRunner = ({
     if (!svg) return false;
     svg.setAttribute('role', 'img');
     svg.setAttribute('aria-label', tr(`Диаграмма: ${tr(engine.label)}`));
+    remote.dataset.engine = engine.id;
     remote.replaceChildren(root.importNode(svg, true));
     remote.hidden = false;
     local?.setAttribute('hidden', '');
