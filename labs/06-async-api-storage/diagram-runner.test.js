@@ -193,6 +193,31 @@ test('a broken SVG from the server is reported and not cached', async () => {
   assert.equal(storage.get('diagram_cache'), null);
 });
 
+test('a failure removes the drawing of the earlier run instead of leaving it next to the error', async () => {
+  let fail = false;
+  const { window, $, storage } = setup({
+    api: {
+      renderDiagram: async () => {
+        if (fail) throw new ApiError('http', 500);
+        return SVG;
+      },
+    },
+  });
+  run(window);
+  await flush();
+  assert.equal($('.canvas__remote').hidden, false);
+  assert.ok($('.canvas__remote svg'));
+  // A different source has no saved copy, so the next run really asks the server and fails.
+  storage.remove?.('diagram_cache');
+  $('.code__line code').textContent = 'box C "D"';
+  fail = true;
+  run(window);
+  await flush();
+  assert.equal($('.canvas__remote').hidden, true);
+  assert.equal($('.canvas__remote svg'), null);
+  assert.match($('.canvas__status').textContent, /500|сервер/i);
+});
+
 test('a cached copy that cannot be shown falls through to a new request', async () => {
   const storage = memory();
   const first = setup({ storage });

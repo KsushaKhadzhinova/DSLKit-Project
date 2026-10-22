@@ -621,7 +621,12 @@ ${input}`);
       if (error.kind !== 'aborted') {
         logger.error('DSLKit: не удалось получить диаграмму', error.kind, error.status ?? '');
         const shown = cached && show(cached.data, `Кэшированные данные от ${formatTime(cached.savedAt)}. ${errorMessage(error)}`, engine);
-        if (!shown) setStatus(error.kind === 'offline' ? `${errorMessage(error)} Сохранённой копии этой диаграммы нет.` : errorMessage(error));
+        if (!shown) {
+          // The drawing of an earlier run belongs to other code, so it must not stay next to this error.
+          remote.replaceChildren();
+          remote.hidden = true;
+          setStatus(error.kind === 'offline' ? `${errorMessage(error)} Сохранённой копии этой диаграммы нет.` : errorMessage(error));
+        }
       }
     }
     // A cancelled run belongs to an older request, so only the newest one may release the buttons.
