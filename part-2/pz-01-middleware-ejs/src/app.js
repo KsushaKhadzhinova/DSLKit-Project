@@ -72,6 +72,13 @@ export const createApp = ({
     return item ? res.render('item', { title: item.title, item }) : next();
   });
 
+  // The address of one record answers only to GET: another method is a mistake of the client, not a missing page.
+  app.all('/item/:id', (req, res, next) => {
+    if (req.method === 'GET' || req.method === 'HEAD') return next();
+    res.set('Allow', 'GET, HEAD');
+    return next(Object.assign(new Error('Method not allowed'), { status: 405, publicMessage: 'This address only answers GET. To change the record use its edit form.' }));
+  });
+
   app.get('/add', requireAuth, (req, res) => res.render('add', { ...formView, title: 'Add diagram', errors: {}, values: { revision: '1' } }));
 
   app.post('/add', requireAuth, (req, res) => {

@@ -299,7 +299,7 @@ export const notFound = (req, res) => {
   res.status(404).render('404', { title: 'Not found', url: req.originalUrl });
 };
 
-const HEADINGS = { 403: 'Request refused', 413: 'Request too large', 429: 'Too many requests' };
+const HEADINGS = { 403: 'Request refused', 405: 'Method not allowed', 413: 'Request too large', 429: 'Too many requests' };
 
 // Last resort when even the 500 template fails: still a styled page, never a bare text screen.
 const fallbackPage = (status) =>
@@ -404,6 +404,8 @@ export const createDiagramStore = (now = Date.now) => {
   };
 };
 
+const CONTROL = /[ -‪-‮⁦-⁩]/;
+
 const required = (label, value, max) => {
   if (value === '') return `${label} is required`;
   if (value.length > max) return `${label} must be at most ${max} characters`;
@@ -416,6 +418,8 @@ export const validateDiagram = (input, limits) => {
   const errors = {};
   const set = (field, message) => message && (errors[field] = message);
   set('title', required('Title', input.title, limits.title.maxLength));
+  // Control characters (NUL, escape) and text-direction overrides are not part of a title: they break lists and can flip the text around it.
+  if (!errors.title && CONTROL.test(input.title)) errors.title = 'Title must not contain control characters';
   set('description', required('Description', input.description, limits.description.maxLength));
   if (input.code.length > limits.code.maxLength) errors.code = `Code must be at most ${limits.code.maxLength} characters`;
   if (!NOTATIONS.includes(input.notation)) errors.notation = 'Choose a notation from the list';
@@ -556,6 +560,13 @@ export const createApp = ({
   app.get('/item/:id', (req, res, next) => {
     const item = findItem(req);
     return item ? res.render('item', { title: item.title, item }) : next();
+  });
+
+  // The address of one record answers only to GET: another method is a mistake of the client, not a missing page.
+  app.all('/item/:id', (req, res, next) => {
+    if (req.method === 'GET' || req.method === 'HEAD') return next();
+    res.set('Allow', 'GET, HEAD');
+    return next(Object.assign(new Error('Method not allowed'), { status: 405, publicMessage: 'This address only answers GET. To change the record use its edit form.' }));
   });
 
   app.get('/add', requireAuth, (req, res) => res.render('add', { ...formView, title: 'Add diagram', errors: {}, values: { revision: '1' } }));

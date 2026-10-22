@@ -4,7 +4,7 @@ export const notFound = (req, res) => {
   res.status(404).render('404', { title: 'Not found', url: req.originalUrl });
 };
 
-const HEADINGS = { 403: 'Request refused', 413: 'Request too large', 429: 'Too many requests' };
+const HEADINGS = { 403: 'Request refused', 405: 'Method not allowed', 413: 'Request too large', 429: 'Too many requests' };
 
 // Last resort when even the 500 template fails: still a styled page, never a bare text screen.
 const fallbackPage = (status) =>

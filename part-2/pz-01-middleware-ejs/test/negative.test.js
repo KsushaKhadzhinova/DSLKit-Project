@@ -84,10 +84,10 @@ withServer('DELETE on an item address without a token is refused with 403 and th
   assert.equal((await fetch(`${base}/item/1`)).status, 200);
 });
 
-withServer('a valid POST to an item address with a token answers 404, not 500', async ({ base }) => {
+withServer('a valid POST to an item address with a token answers the styled 405, not 500', async ({ base }) => {
   const res = await post(`${base}/item/1`, valid);
-  assert.equal(res.status, 404);
-  assert.match(await res.text(), /Page not found/);
+  assert.equal(res.status, 405);
+  assert.match(await res.text(), /Method not allowed/);
 });
 
 // ---------- CSRF and request bodies ----------

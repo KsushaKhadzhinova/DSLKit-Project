@@ -204,7 +204,8 @@ withServer('huge and hostile values give 400 or 413 and never a crash or a store
   assert.match(await digits.text(), /whole number from 0 to 100000/);
   assert.equal((await send({ revision: '1e999' })).status, 400);
   assert.equal((await send({ revision: '-0' })).status, 400);
-  assert.equal((await send({ title: '\u0000‮<script>alert(1)</script>' })).status, 302);
+  assert.equal((await send({ title: '\u0000‮<script>alert(1)</script>' })).status, 400);
+  assert.equal((await send({ title: '<script>alert(1)</script>' })).status, 302);
   assert.equal((await post(`${base}/add?auth=1`, { ...valid, code: 'z'.repeat(30000) })).status, 413);
   const many = Object.fromEntries(Array.from({ length: 40 }, (_, i) => [`f${i}`, 'v']));
   assert.equal((await post(`${base}/add?auth=1`, { ...valid, ...many })).status, 413);

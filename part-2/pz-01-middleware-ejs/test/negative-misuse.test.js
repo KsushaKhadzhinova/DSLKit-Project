@@ -82,7 +82,7 @@ withServer('a POST to an unknown route with a valid token answers the styled 404
   assert.equal(store.all().length, 3);
 });
 
-withServer('PUT and PATCH on an item address answer 404 and change nothing', async ({ base, store }) => {
+withServer('PUT and PATCH on an item address answer 405 with Allow and change nothing', async ({ base, store }) => {
   const before = { ...store.find(1) };
   const { cookie, token } = await session(base);
   for (const method of ['PUT', 'PATCH']) {
@@ -91,7 +91,8 @@ withServer('PUT and PATCH on an item address answer 404 and change nothing', asy
       headers: { cookie, 'content-type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams({ ...valid, _csrf: token }),
     });
-    assert.equal(res.status, 404, method);
+    assert.equal(res.status, 405, method);
+    assert.equal(res.headers.get('allow'), 'GET, HEAD');
   }
   assert.deepEqual(store.find(1), before);
 });
@@ -167,9 +168,11 @@ withServer('a title with emoji and right-to-left letters is stored and shown unc
   assert.ok((await (await fetch(`${base}/`)).text()).includes(title));
 });
 
-withServer('a title that is only a NUL byte is answered with 302 or 400, and the list still opens', async ({ base }) => {
+withServer('a title with a NUL byte or a direction override is refused with 400, and the list still opens', async ({ base }) => {
   const res = await post(`${base}/add?auth=1`, { ...valid, title: '\u0000' });
-  assert.ok([302, 400].includes(res.status), String(res.status));
+  assert.equal(res.status, 400);
+  assert.match(await res.text(), /control characters/);
+  assert.equal((await post(`${base}/add?auth=1`, { ...valid, title: 'a‮b' })).status, 400);
   assert.equal((await fetch(`${base}/`)).status, 200);
 });
 
