@@ -524,6 +524,8 @@ export const createApp = ({
   // and hand over to the error handler), the body parser and the CSRF check (the token is a form field), then the routes.
   // The two error handlers are the very last, so every failure ends on a styled page.
   app.use(securityHeaders);
+  // Liveness probe for Docker and monitoring: placed before the rate limit and the log, so probes neither use up the quota nor fill the table.
+  app.get('/health', (req, res) => res.json({ status: 'ok' }));
   app.use(express.static(dir('../public')));
   app.use((req, res, next) => {
     res.locals.path = req.path;

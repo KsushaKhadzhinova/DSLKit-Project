@@ -215,3 +215,16 @@ withServer('a burst of 25 parallel valid posts saves 20 and refuses the rest wit
   assert.equal(statuses.filter((code) => code === 302).length, 20);
   assert.equal(log.recent(100).filter((row) => row.status === 500).length, 0);
 });
+
+withServer('GET /health answers ok with security headers and writes nothing to the request log', async ({ base, log }) => {
+  const before = log.recent(100).length;
+  const res = await fetch(`${base}/health`);
+  assert.equal(res.status, 200);
+  assert.deepEqual(await res.json(), { status: 'ok' });
+  assert.ok(res.headers.get('content-security-policy'));
+  assert.equal(log.recent(100).length, before);
+});
+
+withServer('/health is not limited by the rate limit', async ({ base }) => {
+  for (let i = 0; i < 25; i += 1) assert.equal((await fetch(`${base}/health`)).status, 200);
+}, { ...loadLimits(), rateLimit: { all: { windowMs: 60000, max: 2 }, write: { windowMs: 60000, max: 2 } } });
