@@ -274,6 +274,11 @@ function usePagedList(search, onNotice) {
     fetchDiagrams(search, controller.signal, { limit: limits.pageSize, offset: 0 })
       .then((response) => {
         if (controller.signal.aborted) return;
+        // A body that is not a list (HTML from a proxy, an empty answer) is an error, it must not reach the list and crash it.
+        if (!Array.isArray(response.data)) {
+          setError('Сервер вернул неожиданный ответ. Проверьте адрес сервера');
+          return;
+        }
         localIds.current.clear();
         setItems(response.data);
         setPaging({ fetched: response.data.length, total: readTotal(response) });
