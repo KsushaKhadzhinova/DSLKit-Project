@@ -1,4 +1,4 @@
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import * as api from './api';
@@ -119,8 +119,8 @@ describe('adding', () => {
     const user = userEvent.setup();
     render(<App />);
     await screen.findByText('Order processing');
-    await user.click(screen.getByLabelText('Название'));
-    await user.paste('x'.repeat(81));
+    // maxLength stops typing and pasting, so a longer value is forced with a change event: the check must still refuse it.
+    fireEvent.change(screen.getByLabelText('Название'), { target: { value: 'x'.repeat(81) } });
     await user.type(screen.getByLabelText('Исходный код'), 'a');
     await user.click(screen.getByRole('button', { name: 'Добавить' }));
     expect(screen.getByText('Название не длиннее 80 символов')).toBeInTheDocument();
@@ -185,9 +185,7 @@ describe('editing', () => {
     const input = await edit(user, '   ');
     await user.type(input, '{Enter}');
     expect(screen.getByRole('alert')).toHaveTextContent('Введите название');
-    await user.clear(input);
-    await user.click(input);
-    await user.paste('y'.repeat(81));
+    fireEvent.change(input, { target: { value: 'y'.repeat(81) } });
     await user.click(screen.getByRole('button', { name: 'Сохранить: Order processing' }));
     expect(screen.getByRole('alert')).toHaveTextContent('Название не длиннее 80 символов');
     await user.type(input, '{Escape}');

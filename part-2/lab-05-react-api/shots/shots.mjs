@@ -1,5 +1,6 @@
 // Makes the report screenshots of lab 5: starts the lab 3 API on a temporary SQLite file and the Vite client,
 // drives the page in headless Chrome and saves PNGs to figures/. Run from the lab folder: node shots/shots.mjs
+import { randomBytes } from 'node:crypto';
 import { createRequire } from 'node:module';
 import { spawn, spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, mkdtempSync } from 'node:fs';
@@ -21,7 +22,7 @@ if (!executablePath) throw new Error('No Chrome or Edge found, set CHROME_PATH')
 
 const API = 'http://localhost:3000';
 const APP = 'http://localhost:5178';
-const env = { ...process.env, SQLITE_STORAGE: path.join(tmp, 'lab5.sqlite'), DATABASE_URL: '', JWT_SECRET: 'x'.repeat(48), PORT: '3000', CORS_ORIGIN: APP };
+const env = { ...process.env, SQLITE_STORAGE: path.join(tmp, 'lab5.sqlite'), DATABASE_URL: '', JWT_SECRET: randomBytes(48).toString('hex'), PORT: '3000', CORS_ORIGIN: APP };
 const children = [];
 const run = (cwd, cmd, args, extra = {}) => {
   const child = spawn(cmd, args, { cwd, env: { ...env, ...extra }, shell: true, stdio: 'ignore' });
@@ -125,6 +126,17 @@ mode = { delay: {}, down: true };
 await page.goto(APP, { waitUntil: 'networkidle0' });
 await pause(600);
 await shot('09-error');
+
+// More than one page of records: the list shows the first 20 and the "Загрузить ещё" button.
+mode = { delay: {}, down: false };
+for (let i = 1; i <= 22; i += 1) {
+  await post('/diagrams', { title: `Archive diagram ${i}`, notation: 'UML', sourceCode: 'a -> b', priority: 'normal' }, token);
+}
+await page.goto(APP, { waitUntil: 'networkidle0' });
+await page.waitForSelector('.cards .card');
+await page.evaluate(() => document.querySelector('.stats').scrollIntoView({ block: 'center' }));
+await pause(300);
+await page.screenshot({ path: path.join(out, '10-load-more.png') });
 
 await browser.close();
 // shell: true starts a cmd wrapper, so the whole process tree is stopped (child.kill would leave the servers running).

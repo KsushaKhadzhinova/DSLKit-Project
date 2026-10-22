@@ -49,8 +49,15 @@ api.interceptors.response.use(
 export const register = (email, password) => api.post('/auth/register', { email, password });
 export const login = (email, password) => api.post('/auth/login', { email, password });
 
-// The search text is a query parameter; the signal lets the caller cancel the request.
-export const fetchDiagrams = (search = '', signal) => api.get('/diagrams', { params: search ? { search } : undefined, signal });
+// The search text, the page size and the offset are query parameters (the server reads ?search=, ?limit= and ?offset=);
+// the signal lets the caller cancel the request. The size of the whole list comes back in the X-Total-Count header.
+export const fetchDiagrams = (search = '', signal, { limit, offset } = {}) => {
+  const params = {};
+  if (search) params.search = search;
+  if (limit !== undefined) params.limit = limit;
+  if (offset) params.offset = offset;
+  return api.get('/diagrams', { params: Object.keys(params).length > 0 ? params : undefined, signal });
+};
 export const addDiagram = (diagram) => api.post('/diagrams', diagram);
 export const updateDiagram = (id, diagram) => api.put(`/diagrams/${id}`, diagram);
 export const deleteDiagram = (id) => api.delete(`/diagrams/${id}`);

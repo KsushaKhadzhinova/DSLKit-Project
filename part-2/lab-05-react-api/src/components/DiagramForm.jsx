@@ -31,6 +31,7 @@ export default function DiagramForm({ onAdd }) {
             id="new-title"
             className="form__input"
             value={title}
+            maxLength={limits.title.maxLength}
             onChange={(e) => setTitle(e.target.value)}
             aria-invalid={errors.title ? 'true' : undefined}
             aria-describedby={errors.title ? 'new-title-error' : undefined}
@@ -51,24 +52,29 @@ export default function DiagramForm({ onAdd }) {
             ))}
           </select>
         </div>
-        <div className="form__field">
-          <label className="form__label" htmlFor="new-code">
-            Исходный код
-          </label>
-          <input
-            id="new-code"
-            className="form__input"
-            value={sourceCode}
-            onChange={(e) => setSourceCode(e.target.value)}
-            aria-invalid={errors.sourceCode ? 'true' : undefined}
-            aria-describedby={errors.sourceCode ? 'new-code-error' : undefined}
-          />
-          {errors.sourceCode && (
-            <span className="form__error" id="new-code-error">
-              {errors.sourceCode}
-            </span>
-          )}
-        </div>
+      </div>
+      <div className="form__field">
+        <label className="form__label" htmlFor="new-code">
+          Исходный код
+        </label>
+        <textarea
+          id="new-code"
+          className="form__input"
+          rows={5}
+          value={sourceCode}
+          maxLength={limits.sourceCode.maxLength}
+          onChange={(e) => setSourceCode(e.target.value)}
+          aria-invalid={errors.sourceCode ? 'true' : undefined}
+          aria-describedby={errors.sourceCode ? 'new-code-error new-code-count' : 'new-code-count'}
+        />
+        <span className="form__hint" id="new-code-count">
+          {sourceCode.length} / {limits.sourceCode.maxLength}
+        </span>
+        {errors.sourceCode && (
+          <span className="form__error" id="new-code-error">
+            {errors.sourceCode}
+          </span>
+        )}
       </div>
       <div className="form__actions">
         <button type="submit" className="button button--primary">

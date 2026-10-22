@@ -3,7 +3,9 @@ import limits from '../limits.json';
 import { formatTime } from '../utils/validation';
 
 // One record as a card: view mode, edit mode for the title (PUT) and delete (DELETE).
-export default function DiagramItem({ diagram, onUpdate, onRemove }) {
+export default function DiagramItem({ diagram, busy = false, onUpdate, onRemove }) {
+  // A new record waits for POST, a changed one for PUT: in both cases the card shows progress and cannot be changed again.
+  const working = Boolean(diagram.pending) || busy;
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(diagram.title);
   const [error, setError] = useState(null);
@@ -36,10 +38,18 @@ export default function DiagramItem({ diagram, onUpdate, onRemove }) {
 
   return (
     <li className="cards__item">
-      <article className="card" aria-busy={diagram.pending ? 'true' : undefined}>
+      <article className="card" aria-busy={working ? 'true' : undefined}>
         {editing ? (
           <div className="card__title">
-            <input className="form__input" aria-label="Новое название" value={draft} onChange={(e) => setDraft(e.target.value)} onKeyDown={handleKeyDown} autoFocus />
+            <input
+              className="form__input"
+              aria-label="Новое название"
+              value={draft}
+              maxLength={limits.title.maxLength}
+              onChange={(e) => setDraft(e.target.value)}
+              onKeyDown={handleKeyDown}
+              autoFocus
+            />
             {error && (
               <p className="form__error" role="alert">
                 {error}
@@ -51,7 +61,7 @@ export default function DiagramItem({ diagram, onUpdate, onRemove }) {
         )}
         <p className="card__meta">
           <span className="badge">{diagram.notation}</span>
-          {diagram.pending && <span className="badge badge--planned">Сохраняется…</span>}
+          {working && <span className="badge badge--planned">Сохраняется…</span>}
         </p>
         <p className="card__text">Создана: {formatTime(diagram.createdAt)}</p>
         <div className="actions">
@@ -60,11 +70,17 @@ export default function DiagramItem({ diagram, onUpdate, onRemove }) {
               Сохранить
             </button>
           ) : (
-            <button type="button" className="button" aria-label={`Изменить: ${diagram.title}`} disabled={diagram.pending} onClick={startEdit}>
+            <button type="button" className="button" aria-label={`Изменить: ${diagram.title}`} disabled={working} onClick={startEdit}>
               Изменить
             </button>
           )}
-          <button type="button" className="button button--quiet" aria-label={`Удалить: ${diagram.title}`} disabled={diagram.pending} onClick={() => onRemove(diagram.id)}>
+          <button
+            type="button"
+            className="button button--quiet"
+            aria-label={`Удалить: ${diagram.title}`}
+            disabled={working}
+            onClick={() => onRemove(diagram.id)}
+          >
             Удалить
           </button>
         </div>

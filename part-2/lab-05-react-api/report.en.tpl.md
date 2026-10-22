@@ -44,7 +44,7 @@ The `useDiagrams` hook keeps the list, the loading flag and the error, and reque
 
 Figure 2 – Loading indicator while the server answers slowly
 
-The loaded list is shown in figure 3. Every record has a "Создана" field with the exact time, so the records differ visually.
+The first request asks not for the whole list but for one page: `limit=20&offset=0`. The server gives the size of the whole list in the `X-Total-Count` header, and the hook keeps it together with the number of loaded records. The loaded list is shown in figure 3. Every record has a "Создана" field with the exact time, so the records differ visually.
 
 ![Diagram list](figures/03-list.png)
 
@@ -96,19 +96,50 @@ The client does not send a request on every letter. The `useDebouncedValue` hook
 
 Figure 9 – List after a search for the word "order"
 
-### 3.6 Input Validation
+### 3.6 Loading in Parts
 
-The form checks the values before sending. The title and the source code cannot be empty or made of spaces, the title is at most 80 characters, the source code is at most 10000, the password is from 8 to 72 bytes. The password length is counted in bytes, because the bcrypt hash on the server uses only the first 72 bytes, and a Russian letter takes two bytes. The limits are in the `limits.json` file and match the server limits. The file is shown in Appendix E, and the check functions in Appendix D. The server repeats the same check, so the client cannot be bypassed.
+The server can give the list in pages through the `limit` and `offset` parameters, so the client shows the first 20 records, the line "Показано N из M" and the "Загрузить ещё" button, as in figure 10. A click requests the next page with an offset equal to the number of records already loaded and appends it to the end of the list without a reset. While a page is loading, the button is disabled and shows "Загрузка…", so a double click sends one request. A record added in this session does not move the offset of the next page, and the deletion of a loaded record lowers it, so records are neither skipped nor doubled. If the server did not send the size of the list, the button is not shown. A change of the search text cancels the page loading for the old search, and a late answer does not overwrite the new list. A page loading error is shown as a notice, the list stays in place and the button works again.
 
-### 3.7 Testing
+![Load more](figures/10-load-more.png)
 
-The main component and its states are shown in Appendix C. The work is covered by 42 automated Vitest tests with a mocked server. The tests cover the loading and error states, retry, optimistic add, delete and edit with rollback, search with cancellation of the previous request, login and logout, the token header and the handling of code 401, a double click on delete, records with a temporary identifier, and server markup shown as plain text. The server part with CORS and search is covered by ten tests in laboratory work 3. For a manual check, start the server with `npm run dev` in the `part-2/lab-03-auth` folder and the client with the same command in the `part-2/lab-05-react-api` folder. The screenshots for figures 1–9 are taken by the `shots/shots.mjs` script.
+Figure 10 – The first page of the list with the counter and the "Загрузить ещё" button
+
+While an edit or a delete is running, the card gets the "Сохраняется…" mark and `aria-busy`, its buttons are disabled, and a line "Сохранение на сервере…" with an indicator is shown above the list and disappears after the answer.
+
+### 3.7 Input Validation
+
+The form checks the values before sending. The title and the source code cannot be empty or made of spaces, the title is at most 80 characters, the source code is at most 10000, the password is from 8 to 72 bytes. The title and source code fields have the `maxLength` attribute, the source code is typed into a multi-line field with a character counter, and the check stays in case the attribute is bypassed. The password length is counted in bytes, because the bcrypt hash on the server uses only the first 72 bytes, and a Russian letter takes two bytes. The limits are in the `limits.json` file and match the server limits. The file is shown in Appendix E, and the check functions in Appendix D. The server repeats the same check, so the client cannot be bypassed.
+
+### 3.8 Testing
+
+The main component and its states are shown in Appendix C. The work is covered by 69 automated Vitest tests with a mocked server. The tests cover the loading and error states, retry, optimistic add, delete and edit with rollback, search with cancellation of the previous request, login and logout, the token header and the handling of code 401, a double click on delete, loading in parts (a double click, a page error, a late answer of the old search, duplicates, the offset shift), the progress indicator of edit and delete, the limit and the counter of the multi-line field, records with a temporary identifier, and server markup shown as plain text. The server part with CORS and search is covered by ten tests in laboratory work 3. For a manual check, start the server with `npm run dev` in the `part-2/lab-03-auth` folder and the client with the same command in the `part-2/lab-05-react-api` folder. The screenshots for figures 1–10 are taken by the `shots/shots.mjs` script.
 
 Repository branch: 25.
 
 ## Conclusion
 
-The React client works with the server API: it receives the list with a loading indicator and a retry button, adds, edits and deletes records with optimistic updates and rollback, puts the token into every request and searches on the server with a delayed request and cancellation. All calls are collected in one module, and the value limits are moved to a separate file. The work gives a ready base for integrating the client into the course project.
+The React client works with the server API: it receives the list with a loading indicator and a retry button, adds, edits and deletes records with optimistic updates and rollback, puts the token into every request and searches on the server with a delayed request and cancellation, and loads the list in parts with the "Загрузить ещё" button. All calls are collected in one module, and the value limits are moved to a separate file. The work gives a ready base for integrating the client into the course project.
+
+## Answers to Control Questions
+
+{{answers}}
+1. **What is the difference between fetch and axios?** `fetch` is built in and needs no installation, but it rejects the promise only on a network failure and does not parse JSON itself. Axios parses JSON, rejects the promise for 4xx and 5xx codes, supports interceptors and timeouts, but it is an extra dependency.
+2. **How to handle the loading state?** Keep a `loading` flag in the state, set it before the request and clear it in `finally`. In the project the `useDiagrams` hook does this.
+3. **What is an optimistic update?** The interface changes before the server answers. First the record is added with a temporary identifier, then the request is sent, on success the record is replaced with the answer, on error it is removed.
+4. **How to show an error for code 500?** Catch the promise rejection, take the message from `error.response.data` or substitute a text by the code and show it with a retry button.
+5. **Why is AbortController needed?** It aborts a request when the component is unmounted or the parameters have changed, so an outdated answer does not change the state.
+6. **How to send POST with JSON?** In axios `api.post(url, object)`, while `fetch` needs the method, the `Content-Type: application/json` header and `JSON.stringify(object)` in the body.
+7. **How to handle a network error?** In axios the error has no `response` field and has the code `ERR_NETWORK`. In `fetch` the promise is rejected with a `TypeError`.
+8. **How to repeat a request after a failure?** Wrap the call in a loop of three attempts, wait a growing time between attempts and throw the last error if all attempts fail.
+9. **How to add the Authorization header in axios?** Through an interceptor: `api.interceptors.request.use((config) => { config.headers.Authorization = 'Bearer ' + token; return config; })`. In the project the token is taken from `localStorage`.
+10. **What is debounce?** A delay of the call until a pause in events. For search the request is sent 400 milliseconds after the last letter, not on every one. In the project it is the `useDebouncedValue` hook.
+11. **How to cancel a request on unmount?** Create an `AbortController` in `useEffect`, pass the `signal` to the request and call `controller.abort()` in the cleanup function of the effect. The `useDiagrams` hook is made this way.
+12. **How to imitate a server delay?** Add an artificial pause to the server answer, limit the network speed in the developer tools or intercept the request in a test browser. The screenshots of the work are taken with request interception.
+13. **How to implement infinite scroll?** Request by pages with the `limit` and `offset` parameters and load the next page when an `IntersectionObserver` sees the last element. The project loads the next page with the "Загрузить ещё" button in the same way.
+14. **How to roll back a change on error?** Save the previous value before the change, and in the error handler return it to the state and show a notice.
+15. **Which headers are needed for FormData?** The browser sets the `Content-Type` header itself together with the `multipart/form-data` boundary, so it must not be set by hand.
+16. **How to show an indicator of a background request?** Keep a separate sending flag, show the caption "Подождите…" on the button and block repeated sending. In the project a line "Сохранение на сервере…" is shown while an edit or a delete is running.
+{{/answers}}
 
 ## Appendix A (mandatory) Listing of api.js
 

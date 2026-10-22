@@ -44,7 +44,7 @@
 
 Рисунок 2 – Индикатор загрузки на медленном ответе сервера
 
-Загруженный список показан на рисунке 3. У каждой записи есть поле «Создана» с точным временем, поэтому записи визуально различаются.
+Первый запрос просит не весь список, а одну страницу: `limit=20&offset=0`. Размер всего списка сервер отдаёт в заголовке `X-Total-Count`, а хук хранит его вместе с числом загруженных записей. Загруженный список показан на рисунке 3. У каждой записи есть поле «Создана» с точным временем, поэтому записи визуально различаются.
 
 ![Список диаграмм](figures/03-list.png)
 
@@ -96,19 +96,29 @@
 
 Рисунок 9 – Список после поиска по слову «order»
 
-### 3.6 Проверка вводимых значений
+### 3.6 Загрузка по частям
 
-Форма проверяет значения до отправки. Название и исходный код не могут быть пустыми или состоять из пробелов, название не длиннее 80 символов, исходный код не длиннее 10000, пароль от 8 до 72 байт. Длина пароля считается в байтах, потому что хеш bcrypt на сервере учитывает только первые 72 байта, а русская буква занимает два байта. Пределы лежат в файле `limits.json` и совпадают с пределами сервера. Файл показан в приложении Д, а функции проверки в приложении Г. Сервер повторяет ту же проверку, поэтому обойти клиент не получится.
+Сервер умеет отдавать список страницами через параметры `limit` и `offset`, поэтому клиент показывает первые 20 записей, строку «Показано N из M» и кнопку «Загрузить ещё», как на рисунке 10. Нажатие запрашивает следующую страницу с отступом, равным числу уже загруженных записей, и дописывает её в конец списка без сброса. Пока страница грузится, кнопка заблокирована и показывает «Загрузка…», поэтому двойной щелчок отправляет один запрос. Запись, добавленная в этом сеансе, не сдвигает отступ следующей страницы, а удаление загруженной записи уменьшает его, поэтому записи не пропускаются и не дублируются. Если сервер не прислал размер списка, кнопка не показывается. Смена текста поиска отменяет загрузку страницы для прежнего поиска, и запоздавший ответ не затирает новый список. Ошибка загрузки страницы показывается уведомлением, список остаётся на месте, а кнопка работает снова.
 
-### 3.7 Проверка работы
+![Загрузить ещё](figures/10-load-more.png)
 
-Основной компонент и его состояния показаны в приложении В. Работа проверена 42 автоматическими тестами Vitest с имитацией сервера. Тесты покрывают состояния загрузки и ошибки, повтор, оптимистичное добавление, удаление и правку с откатом, поиск с отменой предыдущего запроса, вход и выход, заголовок с токеном и обработку кода 401, двойной щелчок по удалению, записи с временным идентификатором и вывод разметки из ответа сервера как обычного текста. Серверная часть с CORS и поиском проверена десятью тестами в лабораторной работе 3. Для ручной проверки нужно запустить сервер командой `npm run dev` в папке `part-2/lab-03-auth` и клиент той же командой в папке `part-2/lab-05-react-api`. Скриншоты рисунков 1–9 снимает скрипт `shots/shots.mjs`.
+Рисунок 10 – Первая страница списка со счётчиком и кнопкой «Загрузить ещё»
+
+Пока выполняется правка или удаление, карточка получает пометку «Сохраняется…» и `aria-busy`, её кнопки блокируются, а над списком показывается строка «Сохранение на сервере…» с индикатором, которая исчезает после ответа.
+
+### 3.7 Проверка вводимых значений
+
+Форма проверяет значения до отправки. Название и исходный код не могут быть пустыми или состоять из пробелов, название не длиннее 80 символов, исходный код не длиннее 10000, пароль от 8 до 72 байт. У полей названия и исходного кода есть атрибут `maxLength`, исходный код вводится в многострочное поле со счётчиком символов, а проверка остаётся на случай обхода атрибута. Длина пароля считается в байтах, потому что хеш bcrypt на сервере учитывает только первые 72 байта, а русская буква занимает два байта. Пределы лежат в файле `limits.json` и совпадают с пределами сервера. Файл показан в приложении Д, а функции проверки в приложении Г. Сервер повторяет ту же проверку, поэтому обойти клиент не получится.
+
+### 3.8 Проверка работы
+
+Основной компонент и его состояния показаны в приложении В. Работа проверена 69 автоматическими тестами Vitest с имитацией сервера. Тесты покрывают состояния загрузки и ошибки, повтор, оптимистичное добавление, удаление и правку с откатом, поиск с отменой предыдущего запроса, вход и выход, заголовок с токеном и обработку кода 401, двойной щелчок по удалению, загрузку по частям (двойной щелчок, ошибка страницы, запоздавший ответ прежнего поиска, дубли, смещение отступа), индикатор правки и удаления, предел и счётчик многострочного поля, записи с временным идентификатором и вывод разметки из ответа сервера как обычного текста. Серверная часть с CORS и поиском проверена десятью тестами в лабораторной работе 3. Для ручной проверки нужно запустить сервер командой `npm run dev` в папке `part-2/lab-03-auth` и клиент той же командой в папке `part-2/lab-05-react-api`. Скриншоты рисунков 1–10 снимает скрипт `shots/shots.mjs`.
 
 Ветка репозитория: 25.
 
 ## Заключение
 
-Клиент на React работает с серверным API: получает список с индикатором загрузки и кнопкой повтора, добавляет, правит и удаляет записи с оптимистичным обновлением и откатом, подставляет токен в каждый запрос и ищет на сервере с отложенным запросом и отменой. Все обращения собраны в одном модуле, а пределы значений вынесены в отдельный файл. Работа даёт готовую основу для интеграции клиента в курсовой проект.
+Клиент на React работает с серверным API: получает список с индикатором загрузки и кнопкой повтора, добавляет, правит и удаляет записи с оптимистичным обновлением и откатом, подставляет токен в каждый запрос и ищет на сервере с отложенным запросом и отменой и загружает список по частям кнопкой «Загрузить ещё». Все обращения собраны в одном модуле, а пределы значений вынесены в отдельный файл. Работа даёт готовую основу для интеграции клиента в курсовой проект.
 
 ## Ответы на контрольные вопросы
 
@@ -170,8 +180,15 @@ api.interceptors.response.use(
 export const register = (email, password) => api.post('/auth/register', { email, password });
 export const login = (email, password) => api.post('/auth/login', { email, password });
 
-// The search text is a query parameter; the signal lets the caller cancel the request.
-export const fetchDiagrams = (search = '', signal) => api.get('/diagrams', { params: search ? { search } : undefined, signal });
+// The search text, the page size and the offset are query parameters (the server reads ?search=, ?limit= and ?offset=);
+// the signal lets the caller cancel the request. The size of the whole list comes back in the X-Total-Count header.
+export const fetchDiagrams = (search = '', signal, { limit, offset } = {}) => {
+  const params = {};
+  if (search) params.search = search;
+  if (limit !== undefined) params.limit = limit;
+  if (offset) params.offset = offset;
+  return api.get('/diagrams', { params: Object.keys(params).length > 0 ? params : undefined, signal });
+};
 export const addDiagram = (diagram) => api.post('/diagrams', diagram);
 export const updateDiagram = (id, diagram) => api.put(`/diagrams/${id}`, diagram);
 export const deleteDiagram = (id) => api.delete(`/diagrams/${id}`);
@@ -257,6 +274,11 @@ function usePagedList(search, onNotice) {
     fetchDiagrams(search, controller.signal, { limit: limits.pageSize, offset: 0 })
       .then((response) => {
         if (controller.signal.aborted) return;
+        // A body that is not a list (HTML from a proxy, an empty answer) is an error, it must not reach the list and crash it.
+        if (!Array.isArray(response.data)) {
+          setError('Сервер вернул неожиданный ответ. Проверьте адрес сервера');
+          return;
+        }
         localIds.current.clear();
         setItems(response.data);
         setPaging({ fetched: response.data.length, total: readTotal(response) });
@@ -425,7 +447,8 @@ import { useDiagrams } from './hooks/useDiagrams';
 function Diagrams() {
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebouncedValue(search.trim(), limits.searchDebounceMs);
-  const { items, loading, error, notice, retry, dismissNotice, add, remove, update } = useDiagrams(debouncedSearch);
+  const { items, loading, loadingMore, error, notice, busy, syncing, hasMore, total, retry, dismissNotice, loadMore, add, remove, update } =
+    useDiagrams(debouncedSearch);
 
   return (
     <>
@@ -434,7 +457,15 @@ function Diagrams() {
         <label className="form__label" htmlFor="search">
           Поиск по названию
         </label>
-        <input id="search" className="form__input" type="search" autoComplete="off" value={search} maxLength={limits.title.maxLength} onChange={(e) => setSearch(e.target.value)} />
+        <input
+          id="search"
+          className="form__input"
+          type="search"
+          autoComplete="off"
+          value={search}
+          maxLength={limits.title.maxLength}
+          onChange={(e) => setSearch(e.target.value)}
+        />
       </div>
       {notice && (
         <div className="alert" role="alert">
@@ -463,12 +494,30 @@ function Diagrams() {
           <span className="note__text">Диаграмм не найдено.</span>
         </p>
       )}
+      {syncing > 0 && (
+        <p role="status" className="status">
+          <span className="spinner" aria-hidden="true"></span>
+          Сохранение на сервере…
+        </p>
+      )}
       {!error && (
         <ul className="cards">
           {items.map((diagram) => (
-            <DiagramItem key={diagram.id} diagram={diagram} onUpdate={update} onRemove={remove} />
+            <DiagramItem key={diagram.id} diagram={diagram} busy={busy.has(diagram.id)} onUpdate={update} onRemove={remove} />
           ))}
         </ul>
+      )}
+      {!error && !loading && total !== null && total > 0 && (
+        <p className="stats">
+          Показано {items.length} из {total}
+        </p>
+      )}
+      {!error && !loading && hasMore && (
+        <div className="actions">
+          <button type="button" className="button" disabled={loadingMore} aria-busy={loadingMore ? 'true' : undefined} onClick={loadMore}>
+            {loadingMore ? 'Загрузка…' : 'Загрузить ещё'}
+          </button>
+        </div>
       )}
     </>
   );
@@ -504,7 +553,9 @@ export default function App() {
         <div>
           <h1 className="page-title">{signedIn ? 'Диаграммы проекта' : 'Вход в DSLKit'}</h1>
           <p className="page-lead">
-            {signedIn ? 'Список хранится на сервере: запись появляется сразу, а при отказе сервера возвращается как было.' : 'Диаграммы хранятся на сервере и доступны после входа.'}
+            {signedIn
+              ? 'Список хранится на сервере: запись появляется сразу, а при отказе сервера возвращается как было.'
+              : 'Диаграммы хранятся на сервере и доступны после входа.'}
           </p>
         </div>
         {signedIn ? (
@@ -574,7 +625,8 @@ export const formatTime = (iso) => new Date(iso).toLocaleString('sv-SE');
   "sourceCode": { "minLength": 1, "maxLength": 10000 },
   "email": { "maxLength": 254 },
   "password": { "minLength": 8, "maxBytes": 72 },
-  "searchDebounceMs": 400
+  "searchDebounceMs": 400,
+  "pageSize": 20
 }
 ```
 
