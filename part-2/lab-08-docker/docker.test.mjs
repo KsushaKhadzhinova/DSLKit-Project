@@ -31,6 +31,13 @@ test('compose starts the services in order by health and keeps the data in a nam
   assert.match(compose, /pg_isready/);
 });
 
+test('every service has a memory limit, a process limit and rotated logs', () => {
+  assert.equal((compose.match(/mem_limit: /g) ?? []).length, 3);
+  assert.equal((compose.match(/pids_limit: /g) ?? []).length, 3);
+  assert.equal((compose.match(/logging: [*]logging/g) ?? []).length, 3);
+  assert.match(compose, /max-size: 10m/);
+});
+
 test('the database is only on the internal network and the backend has no extra rights', () => {
   assert.match(compose, /internal:\n {4}internal: true/);
   const db = /^ {2}db:[\s\S]*?(?=^ {2}backend:)/m.exec(compose)[0];
