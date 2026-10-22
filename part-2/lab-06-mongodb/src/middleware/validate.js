@@ -51,7 +51,7 @@ const validateDiagram = validator(diagramChecks, 'Invalid diagram data', { prior
 // PATCH carries only the fields to change: each one present is checked, at least one is required.
 const validatePatch = (req, _res, next) => {
   if (!isPlainObject(req.body)) return next(badRequest('Request body must be a JSON object'));
-  const given = Object.entries(req.body).filter(([name, v]) => name in diagramChecks && v !== undefined);
+  const given = Object.entries(req.body).filter(([name, v]) => Object.hasOwn(diagramChecks, name) && v !== undefined);
   if (given.length === 0) return next(badRequest('Send at least one of ' + Object.keys(diagramChecks).join(', ')));
   const details = given
     .map(([name, v]) => ({ field: name, result: diagramChecks[name](v) }))
@@ -75,15 +75,15 @@ const validateListQuery = (req, _res, next) => {
   const details = Object.entries(req.query)
     .filter(([name, value]) => {
       if (typeof value !== 'string') return true;
-      if (name in PAGING) return !inRange(value, PAGING[name]);
+      if (Object.hasOwn(PAGING, name)) return !inRange(value, PAGING[name]);
       if (name === 'sort') return !SORTS.includes(value);
       return !FILTERS.includes(name) || value.trim() === '' || value.length > LIMITS.owner;
     })
     .map(([field]) => ({
       field,
       message:
-        field in PAGING
-          ? `must be an integer from ${PAGING[field][0]} to ${PAGING[field][1]}`
+        Object.hasOwn(PAGING, field)
+          ?`must be an integer from ${PAGING[field][0]} to ${PAGING[field][1]}`
           : field === 'sort'
             ? `must be one of ${SORTS.join(', ')}`
             : 'must be one of owner, tag, commentAuthor, q, sort, limit, skip with a plain value',

@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const { notFound } = require('../errors');
+const { badRequest, notFound } = require('../errors');
 const { LIMITS } = require('../models/diagram.constants');
 
 const missing = (id) => notFound(`Diagram ${id} not found`);
@@ -67,10 +67,15 @@ const createDiagramsController = ({ Diagram }) => ({
     return diagram ? res.status(204).end() : next(missing(req.diagramId));
   },
 
-  // $push appends to the nested array in one atomic update.
+  // $push appends to the nested array in one atomic update. The push runs only while the array has room:
+  // update validators do not check the array length on $push, so the limit is part of the filter.
   addComment: async (req, res, next) => {
-    const diagram = await Diagram.findByIdAndUpdate(req.diagramId, { $push: { comments: req.commentFields } }, options);
-    return diagram ? res.status(201).json(diagram) : next(missing(req.diagramId));
+    // sanitizeFilter is on, so the operator is marked trusted: it is the server's own, not user input.
+    const room = { [`comments.${LIMITS.comments - 1}`]: mongoose.trusted({ $exists: false }) };
+    const diagram = await Diagram.findOneAndUpdate({ _id: req.diagramId, ...room }, { $push: { comments: req.commentFields } }, options);
+    if (diagram) return res.status(201).json(diagram);
+    const exists = await Diagram.exists({ _id: req.diagramId });
+    return exists ? next(badRequest(`A diagram holds at most ${LIMITS.comments} comments`)) : next(missing(req.diagramId));
   },
 
   // The positional operator $ updates only the array element matched by the filter.
