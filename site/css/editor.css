@@ -1121,9 +1121,13 @@
 }
 
 .canvas__remote svg .node :is(ellipse, polygon, path, rect)[stroke='black'] {
-  fill: var(--color-surface);
   stroke: var(--color-primary);
   stroke-width: 1.5;
+}
+
+/* An outline drawn over a table keeps its inside empty, otherwise it would cover the text under it */
+.canvas__remote svg .node :is(ellipse, polygon, path, rect)[stroke='black']:not([fill='none']) {
+  fill: var(--color-surface);
 }
 
 .canvas__remote svg text {
@@ -1153,4 +1157,16 @@
 
 .canvas__refresh {
   flex: 0 0 auto;
+}
+
+/* Table headers that Graphviz draws light grey follow the theme, so the text on them stays readable on the dark canvas */
+.canvas__remote svg polygon[fill$='e2e8f0' i] {
+  fill: var(--color-secondary);
+}
+
+/* PlantUML paints its default light boxes: they follow the theme too, the text on them is already themed */
+.canvas__remote svg :is(rect, polygon, ellipse, path)[fill$='F1F1F1' i],
+.canvas__remote svg :is(rect, polygon, ellipse, path)[fill$='FEFECE' i],
+.canvas__remote svg :is(rect, polygon, ellipse, path)[fill$='E2E2F0' i] {
+  fill: var(--color-secondary);
 }
