@@ -54,7 +54,7 @@ flowchart LR
 - Writing is a `useEffect` with dependencies `[key, value]`: it runs on every value change. A write error (disk full, storage blocked) is swallowed and the app keeps working in memory.
 
 ### Validation of foreign data (`validation.js`)
-`localStorage` may hold anything: a manual edit, an old format, another script. So `isDiagramList` checks the whole array: size at most `maxCount`; every record has a valid `id`, a title, a notation from the list, a boolean `published`, parsable dates; and all `id` values are unique. One corrupted record currently resets the whole list to the initial data (the owner's decision: leave as is).
+`localStorage` may hold anything: a manual edit, an old format, another script. So `isDiagramList` checks the whole array: size at most `maxCount`; every record has a valid `id`, a title, a notation from the list, a boolean `published`, parsable dates; and all `id` values are unique. If the whole list does not fit, `repairDiagramList` keeps the good records, drops damaged and repeated ones and cuts the list to the cap; if no record is usable, the initial data is used.
 
 ### Title validation
 `validateTitle` treats whitespace-only input as empty, measures the length after `trim()` and takes the limits from `limits.json`. The form is submitted through `onSubmit`, so Enter works without a separate handler, and `noValidate` turns off the browser's built-in hints in favour of our own messages with `role="alert"`.
