@@ -1195,3 +1195,16 @@
 .canvas__remote[data-engine='local'] svg text[stroke$='ffffff' i] {
   stroke: var(--color-surface);
 }
+
+/* While a drawing is rendered or the server has not answered, the whole diagram field is blurred: the old picture is not mistaken for the result */
+.canvas[aria-busy='true'] :is(.canvas__remote, .canvas__diagram) {
+  filter: blur(6px);
+  pointer-events: none;
+  user-select: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .canvas :is(.canvas__remote, .canvas__diagram) {
+    transition: filter var(--dur-snap, 0.15s) ease;
+  }
+}
