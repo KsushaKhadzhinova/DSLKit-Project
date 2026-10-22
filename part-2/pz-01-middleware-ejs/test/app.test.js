@@ -6,7 +6,7 @@ import assert from 'node:assert/strict';
 import { createApp } from '../src/app.js';
 import { createDiagramStore, validateDiagram } from '../src/data/diagrams.js';
 import { openRequestLog } from '../src/data/requestLog.js';
-import { requestLogger } from '../src/middleware/requestLogger.js';
+import { hideAuth, requestLogger } from '../src/middleware/requestLogger.js';
 import { loadLimits } from '../src/limits.js';
 import { serverError } from '../src/middleware/errorHandlers.js';
 
@@ -55,7 +55,12 @@ const post = async (url, body, { csrf = true, headers = {} } = {}) => {
     fields.set('_csrf', token);
     cookie.cookie = value;
   }
-  return fetch(url, { method: 'POST', redirect: 'manual', headers: { 'content-type': 'application/x-www-form-urlencoded', ...cookie, ...headers }, body: fields });
+  return fetch(url, {
+    method: 'POST',
+    redirect: 'manual',
+    headers: { 'content-type': 'application/x-www-form-urlencoded', ...cookie, ...headers },
+    body: fields,
+  });
 };
 
 withServer('home lists the seeded diagrams', async ({ base }) => {
@@ -285,7 +290,11 @@ withServer('every record shows its creation time on the list', async ({ base }) 
 
 withServer('missing body, repeated keys and bad JSON-like input give 400, not 500', async ({ base }) => {
   const { cookie, token } = await session(base);
-  const noBody = await fetch(`${base}/add?auth=1`, { method: 'POST', headers: { cookie, 'content-type': 'application/x-www-form-urlencoded' }, body: `_csrf=${token}` });
+  const noBody = await fetch(`${base}/add?auth=1`, {
+    method: 'POST',
+    headers: { cookie, 'content-type': 'application/x-www-form-urlencoded' },
+    body: `_csrf=${token}`,
+  });
   assert.equal(noBody.status, 400);
   assert.equal((await fetch(`${base}/add?auth=1`, { method: 'POST' })).status, 403);
   const repeated = await post(
@@ -317,4 +326,19 @@ test('a file that is not a database is rejected and the connection is closed', (
   assert.throws(() => log.start({ time: 't', method: 'GET', url: '/' }));
   assert.doesNotThrow(() => log.close());
   rmSync(dir, { recursive: true, force: true });
+});
+
+test('the sign-in flag of the imitation never reaches the request log', () => {
+  assert.equal(hideAuth('/add?auth=1'), '/add?auth=***');
+  assert.equal(hideAuth('/add?x=1&AUTH=yes&y=2'), '/add?x=1&AUTH=***&y=2');
+  assert.equal(hideAuth('/list'), '/list');
+  const lines = [];
+  const handlers = {};
+  requestLogger({ start: () => 1, finish: () => {} }, (l) => lines.push(l))(
+    { method: 'GET', originalUrl: '/add?auth=1' },
+    { statusCode: 200, on: (e, f) => (handlers[e] = f) },
+    () => {},
+  );
+  handlers.finish();
+  assert.match(lines[0], /\/add\?auth=\*\*\*/);
 });

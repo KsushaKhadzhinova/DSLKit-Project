@@ -188,12 +188,15 @@ import { safeLogText } from './security.js';
 // Writes the request into the request_log table BEFORE the route runs, so a database failure
 // reaches the error handler and the user sees the styled 500 page. Status and duration are added
 // to the same row when the response finishes.
+// The sign-in flag of the imitation must not be copied into the log, so a reader of the log cannot reuse it.
+export const hideAuth = (url) => String(url).replace(/([?&]auth=)[^&#]*/gi, '$1***');
+
 export const requestLogger =
   (log, write = console.log, urlMax = 500) =>
   (req, res, next) => {
     const startedAt = Date.now();
     // The address is user input: line breaks and control characters are escaped and the length is cut (log injection).
-    const url = safeLogText(req.originalUrl, urlMax);
+    const url = safeLogText(hideAuth(req.originalUrl), urlMax);
     let id;
     try {
       id = log.start({ time: new Date(startedAt).toISOString(), method: req.method, url });
