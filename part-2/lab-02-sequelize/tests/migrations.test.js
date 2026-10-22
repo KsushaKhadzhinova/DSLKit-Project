@@ -2,6 +2,7 @@ const { test, before, after } = require('node:test');
 const assert = require('node:assert/strict');
 const { createTempDatabase } = require('./helpers');
 const { createModels } = require('../src/models');
+const { ROWS } = require('../seed-data/diagrams');
 
 const db = createTempDatabase();
 const open = () => createModels({ dialect: 'sqlite', storage: db.storage, logging: false });
@@ -96,20 +97,21 @@ test('the seed restores a deleted demo row without duplicating the others', asyn
   await sequelize.close();
   db.cli('db:seed:all');
   ({ sequelize, Diagram } = open());
-  assert.deepEqual((await Diagram.findAll({ order: [['id', 'ASC']] })).map((d) => d.title).sort(), ['Billing schema', 'Login flow', 'Order processing']);
+  assert.deepEqual((await Diagram.findAll({ order: [['id', 'ASC']] })).map((d) => d.title).sort(), ROWS.map((row) => row.title).sort());
   await Diagram.destroy({ where: {} });
   await sequelize.close();
 });
 
-test('the seed inserts three marked diagrams, is idempotent, and undo keeps rows users created', async () => {
+test('the seed inserts the marked demo diagrams, is idempotent, and undo keeps rows users created', async () => {
   db.cli('db:seed:all');
   db.cli('db:seed:all');
   const { sequelize, Diagram } = open();
   const rows = await Diagram.findAll({ order: [['id', 'ASC']] });
   assert.deepEqual(
     rows.map((d) => d.title),
-    ['Order processing', 'Billing schema', 'Login flow'],
+    ROWS.map((row) => row.title),
   );
+  assert.ok(ROWS.length >= 30);
   assert.ok(rows.every((d) => d.owner === 'demo'));
   assert.equal(rows[0].priority, 'high');
   await Diagram.create({ title: 'Mine', notation: 'UML', sourceCode: 's', owner: 'carol' });

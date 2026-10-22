@@ -10,7 +10,7 @@ const cli = require.resolve('sequelize-cli/lib/sequelize');
 const createTempDatabase = () => {
   const dir = mkdtempSync(join(tmpdir(), 'dslkit-lab2-'));
   const storage = join(dir, 'test.sqlite');
-  const env = { ...process.env, SQLITE_STORAGE: storage, DATABASE_URL: '', ADMIN_EMAIL: 'Root@Example.com', ADMIN_PASSWORD: 'seed password 1' };
+  const env = { ...process.env, SQLITE_STORAGE: storage, DATABASE_URL: '', ADMIN_EMAIL: 'Root@Example.com', ADMIN_PASSWORD: 'seed password 1', DEMO_USER_PASSWORD: 'demo password 1' };
   return {
     storage,
     cli: (...args) => execFileSync(process.execPath, [cli, ...args], { cwd: labDir, env, encoding: 'utf8' }),
