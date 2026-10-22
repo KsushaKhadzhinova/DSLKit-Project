@@ -50,6 +50,9 @@ const createServer = ({
     if (!username) return res.status(400).json({ error: `A username of 1-${limits.nameMaxLength} letters, digits, dots, dashes or underscores is required` });
     res.json({ username, token: issueToken(username, tokenSecret) });
   });
+  // Known paths with another method answer 405 and say which methods they accept.
+  app.all('/login', (req, res) => res.set('Allow', 'POST').status(405).type('text').send('Method not allowed'));
+  app.all('/health', (req, res) => res.set('Allow', 'GET').status(405).type('text').send('Method not allowed'));
   setup?.(app);
 
   // 404 and 500 pages use the same styles as the rest of the site; the error text never reaches the browser.

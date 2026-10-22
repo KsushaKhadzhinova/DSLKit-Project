@@ -74,7 +74,7 @@ npm test        # тесты, покрытие, проверка отчётов
 | `src/rate-limit.js` | Ограничение частоты сообщений                                     |
 | `src/origin.js`     | Проверка `Origin` при подключении                                 |
 | `public/`           | Клиент: `index.html`, `client.js`, `theme.js`, `dslkit.css`, `style.css`, `404.html`, `500.html` |
-| `tests/`            | 69 тестов на `socket.io-client` (`socket.test.js`, `audit.test.js`) |
+| `tests/`            | 90 тестов на `socket.io-client` (`socket.test.js`, `audit.test.js`) |
 | `AUDIT.md`          | Результаты аудита: проблема, риск, что сделано                    |
 
 ## 5 Проверка

@@ -40,4 +40,4 @@ Open `http://localhost:3000` in two windows, log in with different names, join `
 
 ## 5 Tests
 
-`npm test` starts a real server on a free port and connects `socket.io-client` clients. 69 automated tests cover connection and refusals, presence, rooms, history (memory and the Mongo-shaped store), typing, editing, private messages, limits, token login, and wrong behavior of a user (`tests/negative.test.js`, see [`NEGATIVE-TESTS.md`](NEGATIVE-TESTS.md)). The same run checks the build and formatting of the reports.
+`npm test` starts a real server on a free port and connects `socket.io-client` clients. 90 automated tests cover connection and refusals, presence, rooms, history (memory and the Mongo-shaped store), typing, editing, private messages, limits, token login, and wrong behavior of a user (`tests/negative.test.js`, see [`NEGATIVE-TESTS.md`](NEGATIVE-TESTS.md)). The same run checks the build and formatting of the reports.
