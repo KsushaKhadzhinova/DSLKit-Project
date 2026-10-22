@@ -2,19 +2,7 @@ require('dotenv').config({ quiet: true });
 const { Diagram } = require('../src/models');
 const { connect, disconnect } = require('../src/db');
 
-const demo = [
-  {
-    title: 'Order processing',
-    notation: 'BPMN',
-    sourceCode: 'start -> check stock -> pay -> ship -> end',
-    priority: 2,
-    owner: 'anna',
-    tags: ['shop', 'process'],
-    comments: [{ author: 'boris', text: 'Add a refund branch' }],
-  },
-  { title: 'Login flow', notation: 'UML', sourceCode: 'user -> server: login', owner: 'carol', tags: ['auth'] },
-  { title: 'Customers and orders', notation: 'ERD', sourceCode: 'Customer ||--o{ Order', priority: 0, owner: 'anna', tags: ['shop', 'database'] },
-];
+const { ROWS: demo } = require('./seed-diagrams');
 
 // Replaces the demo documents by title, so the script can be run many times.
 const seed = async () => {
