@@ -31,14 +31,20 @@ export const pixels = (value) => {
   return match ? Number(match[1]) : null;
 };
 
+// Spacing tokens are written in rem so they follow the fluid root size; 1rem is 16 px at the design base.
+export const designPixels = (value) => {
+  const match = /^(-?\d+(?:\.\d+)?)rem$/.exec(value);
+  return match ? Number(match[1]) * 16 : pixels(value);
+};
+
 export const spacingProblems = (tokens) =>
   Object.entries(tokens)
     .filter(([name]) => /^--space-\d$/.test(name))
-    .filter(([, value]) => pixels(value) === null || pixels(value) % 8 !== 0)
+    .filter(([, value]) => designPixels(value) === null || designPixels(value) % 8 !== 0)
     .map(([name, value]) => `${name}: ${value} is not a multiple of 8 px`);
 
 export const fibonacciProblems = (tokens) => {
-  const steps = [1, 2, 3, 4, 5, 6].map((index) => pixels(tokens[`--space-${index}`]) / 8);
+  const steps = [1, 2, 3, 4, 5, 6].map((index) => designPixels(tokens[`--space-${index}`]) / 8);
   const wrong = [];
   for (let index = 2; index < steps.length; index += 1) {
     if (steps[index] !== steps[index - 1] + steps[index - 2]) wrong.push(`--space-${index + 1}`);
@@ -73,7 +79,9 @@ export const typeScaleProblems = (tokens) => {
 export const hardcodedColors = (css) => [...new Set(stripComments(css).match(/#[0-9a-f]{3,8}\b/gi) ?? [])];
 
 export const smallFonts = (css) =>
-  [...stripComments(css).matchAll(/font-size:\s*(\d+(?:\.\d+)?)px/g)].map((match) => Number(match[1])).filter((size) => size < 12);
+  [...stripComments(css).matchAll(/font-size:\s*(\d+(?:\.\d+)?)(px|rem)/g)]
+    .map((match) => (match[2] === 'rem' ? Number(match[1]) * 16 : Number(match[1])))
+    .filter((size) => size < 12);
 
 export const importedFiles = (css) => [...stripComments(css).matchAll(/@import\s+url\('([^']+)'\)/g)].map((match) => match[1]);
 

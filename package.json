@@ -21,7 +21,8 @@
     "lab6:report": "node tools/build.js labs/06-async-api-storage",
     "lab7:report": "node tools/build.js labs/07-react-components",
     "lab8:report": "node tools/build.js labs/08-frontend-testing",
-    "react:test": "npm --prefix react-app test"
+    "react:test": "npm --prefix react-app test",
+    "design:build": "node tools/build-design.js"
   },
   "dependencies": {
     "lodash": "^4.18.1"

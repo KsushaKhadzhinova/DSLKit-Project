@@ -94,11 +94,27 @@ Automated jsdom tests are written for every module and parse the real pages of t
 
 The commit with the implementation: https://github.com/KsushaKhadzhinova/DSLKit-Project/commit/39efd4f. The commit message: `feat: add JavaScript interactivity for a SaaS diagram editor`.
 
-## 4 Answers to Control Questions
+### 3.9 Checking in DevTools
 
-25. **Filtering.** A condition is computed for every element and `item.hidden = !matches` is set. The notation filter compares `item.dataset.status` with the chosen value.
-26. **Animation.** CSS provides the smoothness, and a script toggles a class or an attribute. In the project animations are turned off by the `prefers-reduced-motion` rule for users who are bothered by them.
-27. **A slider.** An array of slides, the index of the current one and handlers of the back and forward buttons that change the index and show the needed slide. The index is saved in LocalStorage.
+The page was checked in Chrome 155: the Elements panel shows the event handlers and the Application panel shows the saved data.
+
+The event handlers are shown in Figure 5: the click, change and keydown listeners of the notation filter button are attached to the common container, so delegation is used.
+
+![DevTools screenshot](figures/devtools-01-event-listeners.png)
+
+Figure 5 – The Elements panel, the Event Listeners tab for a filter button
+
+The console check is shown in Figure 6: getEventListeners returns the listeners of the container, and the notation list holds six cards.
+
+![DevTools screenshot](figures/devtools-02-console.png)
+
+Figure 6 – Console: the listeners of the filter container and the card count
+
+The saved state is shown in Figure 7: after the form is submitted, LocalStorage holds keys with the dslkit prefix, among them dslkit.notation-filter and dslkit.waitlist.
+
+![DevTools screenshot](figures/devtools-03-local-storage.png)
+
+Figure 7 – The Application panel: site LocalStorage
 
 ## Conclusion
 

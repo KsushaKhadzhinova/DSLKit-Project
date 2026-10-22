@@ -44,7 +44,7 @@ Table 1 – Environment check results
 | README.md file | passed | — |
 | Figma design link | passed | — |
 | Remote repository | passed | https://github.com/KsushaKhadzhinova/DSLKit-Project.git |
-| Commit history | passed | 41 |
+| Commit history | passed | 89 |
 
 All checks passed.
 
@@ -107,12 +107,6 @@ The project repository: https://github.com/KsushaKhadzhinova/DSLKit-Project. The
 ![Commit history of the main branch on GitHub](figures/github-commits.jpg)
 
 Figure 6 – Commit history of the main branch in the DSLKit-Project repository on GitHub
-
-## 4 Answers to Control Questions
-
-5. **Important VS Code settings.** Format on save, the default formatter, one line ending, the Live Server root folder and the list of recommended extensions in `.vscode`.
-6. **Why .gitignore is needed.** The file excludes service and generated data from the repository. An example for a web project: `node_modules/`, `.DS_Store`, `*.log`, `coverage/`, `.env`.
-7. **Which data to choose for later growth into a course project.** A project and repository name not tied to a work number (`DSLKit-Project`), separate `site`, `labs` and `tools` folders, and file and branch names that follow one convention.
 
 ## Conclusion
 

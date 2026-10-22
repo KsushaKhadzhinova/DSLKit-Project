@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>Редактор order.dsl — DSLKit</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body class="ed">
+    <a class="skip-link" href="#main">Перейти к основному содержимому</a>
+
+    <input class="ed-input" type="radio" name="view" id="v-code" checked />
+    <input class="ed-input" type="radio" name="view" id="v-diagram" />
+    <input class="ed-input" type="radio" name="view" id="v-problems" />
+    <input class="ed-input" type="radio" name="view" id="v-history" />
+
+    <header class="top">
+      <a class="logo" href="dashboard.html" aria-label="DSLKit: к моим проектам">
+        <svg viewBox="0 0 32 32" aria-hidden="true" focusable="false"><rect width="32" height="32" rx="8" fill="#2563eb" /><path d="M9 11l-4 5 4 5M23 11l4 5-4 5M18 9l-4 14" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+        <span>DSLKit</span>
+      </a>
+
+      <nav class="steps" aria-label="Цикл работы с диаграммой">
+        <h1 class="visually-hidden">Редактор order.dsl</h1>
+        <ol>
+          <li>
+            <button type="button" class="step step--done">
+              <span class="step__num"><svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 10l4 4 8-8" /></svg></span>
+              <span>Написать<span class="visually-hidden">, готово</span></span>
+            </button>
+          </li>
+          <li>
+            <button type="button" class="step step--current" aria-current="step">
+              <span class="step__num" aria-hidden="true">2</span>
+              <span>Проверить</span>
+            </button>
+          </li>
+          <li>
+            <button type="button" class="step" aria-disabled="true" aria-describedby="why" title="Сначала исправьте ошибки">
+              <span class="step__num" aria-hidden="true">3</span>
+              <span>Нарисовать</span>
+            </button>
+          </li>
+          <li>
+            <button type="button" class="step" aria-disabled="true" aria-describedby="why" title="Сначала нарисуйте диаграмму">
+              <span class="step__num" aria-hidden="true">4</span>
+              <span>Сохранить</span>
+            </button>
+          </li>
+        </ol>
+      </nav>
+
+      <div class="actions">
+        <button type="button" class="btn" aria-label="Поделиться" title="Поделиться">
+          <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="5" cy="10" r="2" /><circle cx="15" cy="5" r="2" /><circle cx="15" cy="15" r="2" /><path d="M7 9l6-3M7 11l6 3" /></svg>
+          <span class="share-text">Поделиться</span>
+        </button>
+        <details class="menu">
+          <summary aria-label="Ещё: раскладка, движок, автосохранение" title="Ещё">
+            <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="5" cy="10" r="1" /><circle cx="10" cy="10" r="1" /><circle cx="15" cy="10" r="1" /></svg>
+          </summary>
+          <div class="menu__panel">
+            <button type="button" class="menu__item">Автораскладка</button>
+            <button type="button" class="menu__item">Форматировать код</button>
+            <button type="button" class="menu__item">Новый файл <kbd>Ctrl+N</kbd></button>
+            <button type="button" class="menu__item">Палитра команд <kbd>Ctrl+K</kbd></button>
+            <fieldset class="menu__group">
+              <legend>Движок</legend>
+              <label class="menu__radio"><input type="radio" name="engine" checked /> Kroki (сервис)</label>
+              <label class="menu__radio"><input type="radio" name="engine" /> Локально</label>
+            </fieldset>
+            <fieldset class="menu__group">
+              <legend>Сохранение</legend>
+              <label class="menu__radio"><input type="checkbox" checked /> Автосохранение</label>
+            </fieldset>
+          </div>
+        </details>
+      </div>
+    </header>
+
+    <section class="alert" aria-label="Результат проверки" id="why">
+      <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="10" r="7" /><path d="M7 7l6 6M13 7l-6 6" /></svg>
+      <p class="alert__text" role="status">2 ошибки, 1 предупреждение <span>— диаграмму можно нарисовать после исправления</span></p>
+      <button type="button" class="btn btn--primary">Исправить</button>
+    </section>
+
+    <main id="main" class="work">
+      <nav class="tabs" aria-label="Что показать">
+        <label for="v-code">Код</label>
+        <label for="v-diagram">Диаграмма</label>
+        <label for="v-problems">Проблемы</label>
+        <label for="v-history">История</label>
+      </nav>
+
+      <section class="code-pane" aria-label="Код DSL">
+        <div class="filebar">
+          <div class="filebar__tabs" role="tablist" aria-label="Файлы">
+            <button type="button" role="tab" class="file" aria-selected="true"><span>order.dsl</span><span class="dirty" aria-hidden="true"></span><span class="visually-hidden">не сохранён</span></button>
+            <button type="button" role="tab" class="file" aria-selected="false" tabindex="-1">rules.dsl</button>
+          </div>
+          <button type="button" class="btn btn--ghost" aria-label="Отменить" title="Отменить (Ctrl+Z)">
+            <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 5L4 9l4 4" /><path d="M4 9h7a4 4 0 010 8H9" /></svg>
+          </button>
+          <button type="button" class="btn btn--ghost" aria-label="Повторить" title="Повторить (Ctrl+Y)">
+            <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 5l4 4-4 4" /><path d="M16 9H9a4 4 0 000 8h2" /></svg>
+          </button>
+        </div>
+        <ol class="code" tabindex="0" aria-label="Код order.dsl">
+          <li class="line"><code><span class="kw">diagram</span> idef0 <span class="str">"Order process"</span></code></li>
+          <li class="line"><code><span class="kw">box</span> A0 <span class="str">"Process order"</span> {</code></li>
+          <li class="line"><code> <span class="kw">input</span>: Order</code></li>
+          <li class="line line--error" id="line-4">
+            <code> <span class="kw">contro</span>: Rules</code>
+            <span class="note"><svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="10" r="7" /><path d="M7 7l6 6M13 7l-6 6" /></svg><span><b>Ошибка:</b> неизвестное свойство «contro», возможно «control»</span></span>
+          </li>
+          <li class="line"><code> <span class="kw">output</span>: Invoice</code></li>
+          <li class="line"><code>}</code></li>
+          <li class="line line--error" id="line-7">
+            <code><span class="kw">box</span> A1 <span class="str">"Ship goods"</span> {</code>
+            <span class="note"><svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="10" r="7" /><path d="M7 7l6 6M13 7l-6 6" /></svg><span><b>Ошибка:</b> не закрыт блок «A1»</span></span>
+            <span class="note note--warn"><svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 3l8 14H2z" /><path d="M10 8v4M10 14v.5" /></svg><span><b>Предупреждение:</b> у блока A1 нет выходов</span></span>
+          </li>
+          <li class="line"><code> <span class="kw">input</span>: Invoice</code></li>
+          <li class="line"><code><span class="kw">arrow</span> A0.output -&gt; A1.input</code></li>
+        </ol>
+      </section>
+
+      <section class="panel" id="p-diagram" aria-label="Диаграмма">
+        <div class="canvas">
+          <p class="stale">
+            <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 3l8 14H2z" /><path d="M10 8v4M10 14v.5" /></svg>
+            Устарела: код изменён после отрисовки
+          </p>
+          <svg role="img" focusable="false" viewBox="0 0 480 240" aria-labelledby="dt dd">
+            <title id="dt">Диаграмма IDEF0: Order process</title>
+            <desc id="dd">Блок A0 Process order получает Order, управляется Rules и выдаёт Invoice. Стрелка Invoice ведёт к блоку A1 Ship goods.</desc>
+            <rect class="d-box" x="24" y="40" width="190" height="80" rx="4" />
+            <text class="d-code" x="119" y="76" text-anchor="middle">A0</text>
+            <text class="d-name" x="119" y="102" text-anchor="middle">Process order</text>
+            <rect class="d-box" x="266" y="130" width="190" height="80" rx="4" />
+            <text class="d-code" x="361" y="166" text-anchor="middle">A1</text>
+            <text class="d-name" x="361" y="192" text-anchor="middle">Ship goods</text>
+            <path class="d-arrow" d="M214 80H240V170H258" />
+            <path class="d-head" d="M266 170L256 164V176Z" />
+            <text class="d-label" x="150" y="150">Invoice</text>
+          </svg>
+          <div class="zoom">
+            <button type="button" class="btn btn--ghost" aria-label="Уменьшить" title="Уменьшить"><svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 10h12" /></svg></button>
+            <button type="button" class="btn btn--ghost" aria-label="Увеличить" title="Увеличить"><svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 4v12M4 10h12" /></svg></button>
+            <button type="button" class="btn btn--ghost" aria-label="Вписать в экран" title="Вписать в экран"><svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8V4h4M12 4h4v4M16 12v4h-4M8 16H4v-4" /></svg></button>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel" id="p-problems" aria-label="Проблемы">
+        <h2 class="visually-hidden">Проблемы</h2>
+        <ul class="list">
+          <li class="list__item list__item--error">
+            <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="10" r="7" /><path d="M7 7l6 6M13 7l-6 6" /></svg>
+            <div class="list__body"><span><span class="list__kind">Ошибка.</span> Неизвестное свойство «contro». Возможно, вы имели в виду «control»?</span><a class="list__loc" href="#line-4">order.dsl:4</a></div>
+          </li>
+          <li class="list__item list__item--error">
+            <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="10" r="7" /><path d="M7 7l6 6M13 7l-6 6" /></svg>
+            <div class="list__body"><span><span class="list__kind">Ошибка.</span> Не закрыт блок «A1»</span><a class="list__loc" href="#line-7">order.dsl:7</a></div>
+          </li>
+          <li class="list__item list__item--warn">
+            <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 3l8 14H2z" /><path d="M10 8v4M10 14v.5" /></svg>
+            <div class="list__body"><span><span class="list__kind">Предупреждение.</span> У блока A1 нет выходов</span><a class="list__loc" href="#line-7">order.dsl:7</a></div>
+          </li>
+        </ul>
+      </section>
+
+      <section class="panel" id="p-history" aria-label="История запусков">
+        <h2 class="visually-hidden">История запусков</h2>
+        <ul class="list">
+          <li class="list__item list__item--error">
+            <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="10" r="7" /><path d="M7 7l6 6M13 7l-6 6" /></svg>
+            <div class="list__body"><span class="list__kind">14:32, Kroki: проверка не пройдена</span><span class="list__meta">Сегодня, order.dsl</span></div>
+          </li>
+          <li class="list__item list__item--ok">
+            <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="10" r="7" /><path d="M6.5 10l2.5 2.5 4.5-5" /></svg>
+            <div class="list__body"><span class="list__kind">14:20, Kroki: диаграмма нарисована</span><span class="list__meta">Сегодня, order.dsl</span></div>
+          </li>
+          <li class="list__item list__item--ok">
+            <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="10" r="7" /><path d="M6.5 10l2.5 2.5 4.5-5" /></svg>
+            <div class="list__body"><span class="list__kind">13:58, локально: диаграмма нарисована</span><span class="list__meta">Сегодня, rules.dsl</span></div>
+          </li>
+        </ul>
+      </section>
+    </main>
+
+    <footer class="status">
+      <span class="status__ok"><svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 10l4 4 8-8" /></svg>Kroki доступен</span>
+      <span class="status__quota" id="quota">Бета: 3 из 5 <progress value="3" max="5" aria-labelledby="quota">3 из 5</progress></span>
+      <span class="status__autosave">Автосохранение вкл</span>
+      <span class="status__cursor" style="margin-left:auto">IDEF0 · стр. 4, стлб. 12</span>
+    </footer>
+  </body>
+</html>

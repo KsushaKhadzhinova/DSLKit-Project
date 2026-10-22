@@ -316,13 +316,7 @@ test('the page starts a run on its own when it opens', async () => {
   assert.equal($('.canvas__remote').hidden, false);
 });
 
-test('the engine list offers three Kroki engines and the own engine', () => {
-  const { document } = setup();
-  assert.deepEqual(
-    [...document.querySelectorAll('.canvas__engine option')].map((option) => option.value),
-    ['graphviz', 'mermaid', 'plantuml', 'local'],
-  );
-});
+const useEngine = (storage, engine) => storage.set('settings', { 'diagram-engine': engine });
 
 test('each Kroki engine sends its own text type to its own endpoint', async () => {
   for (const [engine, pattern] of [
@@ -330,8 +324,9 @@ test('each Kroki engine sends its own text type to its own endpoint', async () =
     ['mermaid', /^flowchart LR/],
     ['plantuml', /^@startuml/],
   ]) {
-    const { window, api, $ } = setup();
-    $('.canvas__engine').value = engine;
+    const storage = memory();
+    useEngine(storage, engine);
+    const { window, api, $ } = setup({ storage });
     click(window, $('.canvas__render'));
     await flush();
     const [source, options] = api.renderDiagram.mock.calls[0].arguments;
@@ -340,9 +335,20 @@ test('each Kroki engine sends its own text type to its own endpoint', async () =
   }
 });
 
+test('the render button names the engine that will draw the diagram', async () => {
+  const storage = memory();
+  const { window, $ } = setup({ storage });
+  assert.equal($('.canvas__render').textContent, 'Нарисовать через Kroki');
+  useEngine(storage, 'local');
+  click(window, $('.canvas__render'));
+  await flush();
+  assert.equal($('.canvas__render').textContent, 'Нарисовать в браузере');
+});
+
 test('the own engine draws live SVG in the browser without any request, even offline', async () => {
-  const { window, api, $, document } = setup({ online: false });
-  $('.canvas__engine').value = 'local';
+  const storage = memory();
+  useEngine(storage, 'local');
+  const { window, api, $, document } = setup({ online: false, storage });
   click(window, $('.canvas__render'));
   await flush();
   assert.equal(api.renderDiagram.mock.callCount(), 0);
@@ -353,29 +359,33 @@ test('the own engine draws live SVG in the browser without any request, even off
   assert.equal($('.canvas').getAttribute('aria-busy'), 'false');
 });
 
-test('changing the engine saves the choice and redraws', async () => {
+test('the engine is read from the settings on every run', async () => {
   const { window, api, $, storage } = setup();
-  $('.canvas__engine').value = 'mermaid';
-  $('.canvas__engine').dispatchEvent(new window.Event('change', { bubbles: true }));
+  click(window, $('.canvas__render'));
   await flush();
-  assert.equal(storage.get('diagram_engine'), 'mermaid');
-  assert.equal(api.renderDiagram.mock.callCount(), 1);
+  useEngine(storage, 'mermaid');
+  click(window, $('.canvas__render'));
+  await flush();
+  assert.equal(api.renderDiagram.mock.calls[0].arguments[1].type, 'graphviz');
+  assert.equal(api.renderDiagram.mock.calls[1].arguments[1].type, 'mermaid');
 });
 
-test('the saved engine is restored and an unknown saved value is ignored', () => {
-  const storage = memory();
-  storage.set('diagram_engine', 'plantuml');
-  assert.equal(setup({ storage }).$('.canvas__engine').value, 'plantuml');
-  const other = memory();
-  other.set('diagram_engine', 'nonsense');
-  assert.equal(setup({ storage: other }).$('.canvas__engine').value, 'graphviz');
+test('an unknown or broken engine setting falls back to Graphviz', async () => {
+  for (const saved of [{ 'diagram-engine': 'nonsense' }, 'broken', null]) {
+    const storage = memory();
+    storage.set('settings', saved);
+    const { window, api, $ } = setup({ storage });
+    click(window, $('.canvas__render'));
+    await flush();
+    assert.equal(api.renderDiagram.mock.calls[0].arguments[1].type, 'graphviz');
+  }
 });
 
 test('the same code is cached separately for every engine', async () => {
-  const { window, api, $ } = setup();
+  const { window, api, $, storage } = setup();
   click(window, $('.canvas__render'));
   await flush();
-  $('.canvas__engine').value = 'mermaid';
+  useEngine(storage, 'mermaid');
   click(window, $('.canvas__render'));
   await flush();
   assert.equal(api.renderDiagram.mock.callCount(), 2);
@@ -400,9 +410,9 @@ test('a response that arrives after a newer cached view is dropped', async () =>
     storage,
     api: { renderDiagram: () => new Promise((resolve) => (release = resolve)) },
   });
-  second.$('.canvas__engine').value = 'mermaid';
+  useEngine(storage, 'mermaid');
   click(second.window, second.$('.canvas__render'));
-  second.$('.canvas__engine').value = 'graphviz';
+  useEngine(storage, 'graphviz');
   click(second.window, second.$('.canvas__render'));
   release(SVG);
   await flush();

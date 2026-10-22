@@ -51,7 +51,7 @@ Table 1 – Semantic tags of the home page
 
 ### 3.4 Heading Hierarchy
 
-Every page has one first-level heading. On the home page it reads "Write code, get a diagram", sections get second-level headings, and cards and steps get third-level headings. No level is skipped, and an automated test confirms it for all 15 pages of the site.
+Every page has one first-level heading. On the home page it reads "Write code, get a diagram", sections get second-level headings, and cards and steps get third-level headings. No level is skipped, and an automated test confirms it for all 16 pages of the site.
 
 ### 3.5 Accessibility
 
@@ -106,21 +106,6 @@ Project files live in `site` (pages, styles, scripts, images, layouts), `labs` (
 ### 3.12 Committing the Changes
 
 The work is done in the branch `feature/semantic-markup`. The commit: https://github.com/KsushaKhadzhinova/DSLKit-Project/commit/a2b85e0. The commit message: `feat: add semantic HTML markup with Schema.org for a SaaS diagram editor`.
-
-## 4 Answers to Control Questions
-
-{{answers}}
-1. **Tags used.** The home page has 15 semantic tags: `header` (logo and menu), `nav` (navigation), `main` (main content), `section` (sections), `article` (cards and plans), `aside` (pricing note), `footer`, `figure` and `figcaption` (editor image with a caption), `time`, `address`, `details` and `summary`, `fieldset` and `legend`.
-2. **Heading hierarchy.** Screen readers build a table of contents from headings, and search engines judge the topic structure. The home page has one `h1`, sections get `h2`, cards and steps get `h3`, and no level is skipped.
-3. **Microdata.** `SoftwareApplication` (name, category, system, address, description, image, offer), `Offer` (price, currency, availability) and `FAQPage` with questions and answers are applied. Search engines get a machine-readable description of the product and its terms.
-4. **The alt attribute.** The alternative text serves screen reader users and covers failed image loads. A meaningful image is described with a sentence ("The DSLKit editor: DSL code on the left, an IDEF0 diagram on the right"), and a decorative one gets an empty `alt`.
-5. **Validation errors.** The validator reported a section without a heading on the settings page, and local checks found links to non-existent identifiers. The section became a `div` and the links got correct targets. Valid markup is processed identically by browsers and is easier to maintain.
-6. **Section and article.** The `section` element groups a thematic part and needs a heading, for example Pricing. The `article` element is self-contained and can live outside the page, for example a notation card or a plan.
-7. **Figure.** The `figure` element ties an illustration to its `figcaption`, and screen readers treat them as one unit. A plain `div` with an image creates no such link.
-8. **Skip link.** It is the first link on the page and leads to the main content, so a keyboard user skips the header and menu. On the site it is `<a class="skip-link" href="#main">` and the `main` element with the identifier `main`.
-9. **Checking without publishing.** The code can be pasted as a snippet into the Schema.org validator or the Rich Results Test, and pages can be checked locally with the W3C validator through text input.
-10. **Suitable Schema.org types.** `SoftwareApplication` or `WebApplication` with `Offer` for plans and `FAQPage` for questions fit a service. `SoftwareApplication` is chosen because the page presents a software product and its terms of use.
-{{/answers}}
 
 ## Conclusion
 

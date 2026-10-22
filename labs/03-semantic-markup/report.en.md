@@ -51,7 +51,7 @@ Table 1 – Semantic tags of the home page
 
 ### 3.4 Heading Hierarchy
 
-Every page has one first-level heading. On the home page it reads "Write code, get a diagram", sections get second-level headings, and cards and steps get third-level headings. No level is skipped, and an automated test confirms it for all 15 pages of the site.
+Every page has one first-level heading. On the home page it reads "Write code, get a diagram", sections get second-level headings, and cards and steps get third-level headings. No level is skipped, and an automated test confirms it for all 16 pages of the site.
 
 ### 3.5 Accessibility
 
@@ -107,12 +107,6 @@ Project files live in `site` (pages, styles, scripts, images, layouts), `labs` (
 
 The work is done in the branch `feature/semantic-markup`. The commit: https://github.com/KsushaKhadzhinova/DSLKit-Project/commit/a2b85e0. The commit message: `feat: add semantic HTML markup with Schema.org for a SaaS diagram editor`.
 
-## 4 Answers to Control Questions
-
-5. **Validation errors.** The validator reported a section without a heading on the settings page, and local checks found links to non-existent identifiers. The section became a `div` and the links got correct targets. Valid markup is processed identically by browsers and is easier to maintain.
-6. **Section and article.** The `section` element groups a thematic part and needs a heading, for example Pricing. The `article` element is self-contained and can live outside the page, for example a notation card or a plan.
-7. **Figure.** The `figure` element ties an illustration to its `figcaption`, and screen readers treat them as one unit. A plain `div` with an image creates no such link.
-
 ## Conclusion
 
 Semantic markup is created for the DSLKit home page and the related pages: Russian and English versions, error pages, the privacy policy and the signup confirmation. The pages use 15 semantic tags, keep the heading hierarchy and accessibility requirements, and carry SoftwareApplication, Offer and FAQPage microdata. The W3C and Schema.org validators found no errors, and automated tests check the markup on every page. The Rich Results Test is postponed until the site is published.
@@ -163,7 +157,27 @@ Semantic markup is created for the DSLKit home page and the related pages: Russi
         <div class="header__tools">
           <a class="header__lang" href="en/" hreflang="en" lang="en">English</a>
           <input class="theme__input" type="checkbox" id="theme-toggle" />
-          <label class="theme__button" for="theme-toggle">Тёмная тема</label>
+          <label class="theme__button" for="theme-toggle" title="Тёмная тема"
+            ><svg class="theme__icon theme__icon--moon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">
+              <path
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"
+              /></svg
+            ><svg class="theme__icon theme__icon--sun" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">
+              <circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2" />
+              <path
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"
+              /></svg
+            ><span class="theme__label">Тёмная тема</span></label
+          >
           <a class="button button--primary header__cta" href="#waitlist">В бету</a>
         </div>
       </div>
@@ -181,11 +195,11 @@ Semantic markup is created for the DSLKit home page and the related pages: Russi
             Веб-редактор диаграмм как кода: опишите схему текстом на DSL, а DSLKit проверит её по правилам нотации и нарисует.
           </p>
           <div class="hero__cta">
-            <a class="button button--hero" href="app/editor.html">Создать диаграмму</a>
+            <a class="button button--primary button--hero" href="app/editor.html">Создать диаграмму</a>
             <p class="hero__cta-note">Откроется редактор: слева код, справа диаграмма</p>
           </div>
           <p class="hero__actions">
-            <a class="button button--primary" href="#waitlist">Записаться в бету</a>
+            <a class="button" href="#waitlist">Записаться в бету</a>
             <a class="button" href="#how">Как это работает</a>
           </p>
           <p class="hero__note" itemprop="offers" itemscope itemtype="https://schema.org/Offer">
@@ -681,7 +695,10 @@ import {
 } from './site-checks.js';
 
 const SITE = join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'site');
-const walk = (dir) => readdirSync(dir).flatMap((name) => (statSync(join(dir, name)).isDirectory() ? walk(join(dir, name)) : [join(dir, name)]));
+const walk = (dir) =>
+  readdirSync(dir)
+    .filter((name) => name !== 'design')
+    .flatMap((name) => (statSync(join(dir, name)).isDirectory() ? walk(join(dir, name)) : [join(dir, name)]));
 const files = walk(SITE);
 const pages = Object.fromEntries(
   files.filter((file) => file.endsWith('.html')).map((file) => [relative(SITE, file).replaceAll('\\', '/'), parse(readFileSync(file, 'utf8'))]),
@@ -695,9 +712,9 @@ const eachPage = (title, check, subset = names) =>
   });
 
 test('the site has the landing pages in both languages, error pages and application screens', () => {
-  for (const page of ['index.html', 'en/index.html', 'thanks.html', 'privacy.html', 'errors/404.html', 'app/editor.html'])
+  for (const page of ['index.html', 'en/index.html', 'thanks.html', 'privacy.html', 'errors/404.html', 'app/editor.html', 'en/app/editor.html'])
     assert.ok(names.includes(page), page);
-  assert.equal(names.length, 15);
+  assert.equal(names.length, 16);
 });
 
 eachPage('every page has lang, title, charset and viewport', documentProblems);

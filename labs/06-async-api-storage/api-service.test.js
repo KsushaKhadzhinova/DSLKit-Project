@@ -128,6 +128,14 @@ test('a request that takes too long is cancelled and reported as a timeout', asy
   assert.equal(error.kind, 'timeout');
 });
 
+test('a timeout is final and is not retried, so the wait stays within one time limit', async () => {
+  const fetchImpl = mock.fn(hangUntilAbort);
+  const { api } = setup(fetchImpl);
+  const error = await failure(api.fetchData('/slow', { timeoutMs: 5 }));
+  assert.equal(error.kind, 'timeout');
+  assert.equal(fetchImpl.mock.callCount(), 1);
+});
+
 test('the caller can cancel a request and it is not retried', async () => {
   const controller = new AbortController();
   const fetchImpl = mock.fn(hangUntilAbort);

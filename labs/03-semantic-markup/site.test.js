@@ -22,7 +22,10 @@ import {
 } from './site-checks.js';
 
 const SITE = join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'site');
-const walk = (dir) => readdirSync(dir).flatMap((name) => (statSync(join(dir, name)).isDirectory() ? walk(join(dir, name)) : [join(dir, name)]));
+const walk = (dir) =>
+  readdirSync(dir)
+    .filter((name) => name !== 'design')
+    .flatMap((name) => (statSync(join(dir, name)).isDirectory() ? walk(join(dir, name)) : [join(dir, name)]));
 const files = walk(SITE);
 const pages = Object.fromEntries(
   files.filter((file) => file.endsWith('.html')).map((file) => [relative(SITE, file).replaceAll('\\', '/'), parse(readFileSync(file, 'utf8'))]),
@@ -36,9 +39,9 @@ const eachPage = (title, check, subset = names) =>
   });
 
 test('the site has the landing pages in both languages, error pages and application screens', () => {
-  for (const page of ['index.html', 'en/index.html', 'thanks.html', 'privacy.html', 'errors/404.html', 'app/editor.html'])
+  for (const page of ['index.html', 'en/index.html', 'thanks.html', 'privacy.html', 'errors/404.html', 'app/editor.html', 'en/app/editor.html'])
     assert.ok(names.includes(page), page);
-  assert.equal(names.length, 15);
+  assert.equal(names.length, 16);
 });
 
 eachPage('every page has lang, title, charset and viewport', documentProblems);

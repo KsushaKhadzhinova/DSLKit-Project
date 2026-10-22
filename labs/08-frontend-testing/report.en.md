@@ -54,33 +54,36 @@ Table 2 – Resources loaded by the built application
 | `assets/index.js` | 227 KB | 72 KB |
 | `assets/index.css` | 4.2 KB | 1.4 KB |
 
-Screenshots of the Sources panel with a breakpoint and of React DevTools remain a task for the owner: they need manual work in a browser.
+Screenshots of the Sources panel with a breakpoint are given in section 3.8.
 
 ### 3.5 Performance Analysis with Lighthouse
 
-The audit is run on the built application for desktop. Before the improvements Lighthouse found a broken heading order (notation cards came right after the level-one heading), an invalid `robots.txt` file and a missing `llms.txt`. The result before the improvements is shown in figure 1.
+The audit is run on the built application for desktop. Before the improvements Lighthouse found a broken heading order (notation cards came right after the level-one heading), an invalid `robots.txt` file, a missing `llms.txt` and a 404 error for the `favicon.ico` icon. The result before the improvements is shown in figure 1.
 
 ![Lighthouse report before the improvements](figures/lighthouse-before.jpg)
 
-Figure 1 – Lighthouse before the improvements: accessibility 98, SEO 91
+Figure 1 – Lighthouse before the improvements: performance 100, accessibility 98, best practices 96, SEO 91
 
-Three improvements are made. Notation cards get the heading level `h2` through a new prop `headingLevel`, and a correct `robots.txt` and a file `llms.txt` are added to the folder `public`. The result after the improvements is shown in figure 2, and the comparison of metrics is given in table 3.
+Four improvements are made. Notation cards get the heading level `h2` through a new prop `headingLevel`, and a correct `robots.txt`, a file `llms.txt` and an icon `favicon.svg` linked in `index.html` are added to the folder `public`. The result after the improvements is shown in figure 2, and the comparison of metrics is given in table 3.
 
 ![Lighthouse report after the improvements](figures/lighthouse-after.jpg)
 
-Figure 2 – Lighthouse after the improvements: accessibility 100, best practices 100, SEO 100
+Figure 2 – Lighthouse after the improvements: all four categories 100
 
 Table 3 – Metrics before and after the improvements
 
 | Metric | Before | After |
 |---|---|---|
+| Performance | 100 | 100 |
 | Accessibility | 98 | 100 |
-| Best practices | 100 | 100 |
+| Best practices | 96 | 100 |
 | SEO | 91 | 100 |
-| LCP, ms | 186 | 165 |
+| FCP, ms | 347 | 352 |
+| LCP, ms | 347 | 352 |
 | CLS | 0.00 | 0.00 |
+| TBT, ms | 0 | 0 |
 
-LCP and CLS are measured by a performance trace on a local server without network throttling, so the absolute values are small, and the LCP difference is within the measurement error.
+FCP, LCP, CLS and TBT are taken from the same Lighthouse 13.5.0 reports (desktop profile, local server without network throttling), so the absolute values are small, and the FCP and LCP difference is within the measurement error.
 
 ### 3.6 Code Coverage
 
@@ -94,11 +97,39 @@ Figure 3 – Istanbul report: 100 percent coverage in all folders
 
 The commit with the implementation: https://github.com/KsushaKhadzhinova/DSLKit-Project/commit/d8a95d7. The commit message: `feat: add unit tests, component tests, and performance audit with Lighthouse`.
 
-## 4 Answers to Control Questions
+### 3.8 Debugging in DevTools
 
-10. **Uncovered places.** The `lcov-report` report highlights unexecuted lines and branches. For conditional branches, tests are added for an empty list, a missing title, a private project and a free plan.
-11. **getBy and queryBy.** `getBy` throws an error if the element is missing and suits checking presence. `queryBy` returns `null`, so it is used to check absence: `expect(screen.queryByRole('heading')).not.toBeInTheDocument()`.
-12. **A list through props.** A mock array is passed, then the number of elements and their content are checked: `expect(screen.getAllByRole('listitem')).toHaveLength(mockNotations.length)`, and the headings are compared with the array.
+Debugging was done in Chrome 155 on the development server.
+
+The breakpoint is shown in Figure 4: in helpers.js it stands on the first line of the pluralizeFiles function.
+
+![DevTools screenshot](figures/devtools-01-sources-breakpoint.png)
+
+Figure 4 – The Sources panel: a breakpoint in helpers.js
+
+The pause is shown in Figure 5: the Scope area holds the count parameter with the value 4 and the call stack lists the chain from main.jsx to ProjectCard.
+
+![DevTools screenshot](figures/devtools-02-sources-paused.png)
+
+Figure 5 – The Sources panel: a pause on the breakpoint, the Scope and Call Stack areas
+
+The Step Over action is shown in Figure 6: line 22 is executed and the Scope area gets the variable lastTwo with the value 4.
+
+![DevTools screenshot](figures/devtools-03-sources-step-over.png)
+
+Figure 6 – The Sources panel: the Step Over action
+
+The Step Into action is shown in Figure 7: the debugger moves to the next line of the function and shows the new variable values.
+
+![DevTools screenshot](figures/devtools-04-sources-step-into.png)
+
+Figure 7 – The Sources panel: the Step Into action
+
+The console is shown in Figure 8: the handler output is marked with the file name and the line, for example App.jsx:21.
+
+![DevTools screenshot](figures/devtools-05-console.png)
+
+Figure 8 – The application console
 
 ## Conclusion
 

@@ -1,8 +1,9 @@
 import { renderDiagram, checkHealth } from '../api/apiService.js';
 import { API_CONFIG } from '../api/config.js';
 import { createCache, createHistory } from '../storage/localStorage.js';
-import { ENGINES, findEngine } from '../engines/engines.js';
+import { findEngine } from '../engines/engines.js';
 import { parseDsl, sanitizeSvg, sourceKey } from '../utils/dataParser.js';
+import { createTranslator } from '../utils/i18n.js';
 
 const MESSAGES = {
   empty: 'В редакторе нет кода диаграммы.',
@@ -45,15 +46,15 @@ export const initDiagramRunner = ({
   const local = page.querySelector('.canvas__diagram');
   const service = page.querySelector('.canvas__service');
   const historyList = page.querySelector('.canvas__history');
-  const engineSelect = page.querySelector('.canvas__engine');
   const canvas = page.querySelector('.canvas');
   const parser = new root.defaultView.DOMParser();
   const cache = createCache({ storage, ttlMs: API_CONFIG.cacheTtlMs, now });
   const history = createHistory({ storage });
   let controller = null;
 
+  const tr = createTranslator(root);
   const setStatus = (text) => {
-    status.textContent = text;
+    status.textContent = tr(text);
   };
   const setBusy = (busy) => {
     canvas.setAttribute('aria-busy', String(busy));
@@ -61,13 +62,21 @@ export const initDiagramRunner = ({
 
   const source = () => [...page.querySelectorAll('.code__line code')].map((line) => line.textContent).join('\n');
 
-  const currentEngine = () => findEngine(engineSelect?.value);
+  // The engine is chosen on the settings page and read again on every run.
+  const currentEngine = () => {
+    const saved = storage.get('settings', {});
+    return findEngine(saved !== null && typeof saved === 'object' ? saved['diagram-engine'] : undefined);
+  };
+
+  const showAction = () => {
+    renderButton.textContent = tr(currentEngine().action);
+  };
 
   const show = (svgText, note) => {
     const svg = sanitizeSvg(svgText, parser);
     if (!svg) return false;
     svg.setAttribute('role', 'img');
-    svg.setAttribute('aria-label', `Диаграмма: ${currentEngine().label}`);
+    svg.setAttribute('aria-label', tr(`Диаграмма: ${tr(currentEngine().label)}`));
     remote.replaceChildren(root.importNode(svg, true));
     remote.hidden = false;
     local?.setAttribute('hidden', '');
@@ -85,7 +94,7 @@ export const initDiagramRunner = ({
         button.type = 'button';
         button.className = 'button button--quiet canvas__history-item';
         button.dataset.key = entry.key;
-        button.textContent = `${entry.title || 'Без названия'} · ${formatTime(entry.at)}`;
+        button.textContent = `${entry.title || tr('Без названия')} · ${formatTime(entry.at)}`;
         item.append(button);
         return item;
       }),
@@ -94,6 +103,7 @@ export const initDiagramRunner = ({
   };
 
   const run = async ({ refresh = false } = {}) => {
+    showAction();
     const model = parseDsl(source());
     if (model.boxes.length === 0) {
       setStatus(MESSAGES.empty);
@@ -145,14 +155,6 @@ ${input}`);
   renderButton.addEventListener('click', () => run());
   refreshButton?.addEventListener('click', () => run({ refresh: true }));
   page.addEventListener('dslkit:run', () => run());
-  if (engineSelect) {
-    const saved = storage.get('diagram_engine', null);
-    if (ENGINES.some((engine) => engine.id === saved)) engineSelect.value = saved;
-    engineSelect.addEventListener('change', () => {
-      storage.set('diagram_engine', engineSelect.value);
-      run();
-    });
-  }
   historyList?.addEventListener('click', (event) => {
     const button = event.target.closest('.canvas__history-item');
     if (!button) return;
@@ -167,13 +169,14 @@ ${input}`);
     Promise.resolve()
       .then(() => api.checkHealth())
       .then(() => {
-        service.textContent = 'Сервис Kroki доступен';
+        service.textContent = tr('Сервис Kroki доступен');
       })
       .catch(() => {
-        service.textContent = 'Сервис Kroki недоступен, будут использованы сохранённые копии';
+        service.textContent = tr('Сервис Kroki недоступен, будут использованы сохранённые копии');
       });
   }
 
+  showAction();
   renderHistory();
   if (autoRun) run();
   return { run, cache, history };

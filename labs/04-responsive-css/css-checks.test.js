@@ -13,6 +13,7 @@ import {
   lightTokens,
   mediaBreakpoints,
   missingVariables,
+  designPixels,
   pixels,
   selectorClasses,
   smallFonts,
@@ -81,11 +82,17 @@ test('pixels parses px values only', () => {
   assert.equal(pixels('1rem'), null);
 });
 
+test('designPixels reads px and rem', () => {
+  assert.equal(designPixels('1.5rem'), 24);
+  assert.equal(designPixels('8px'), 8);
+  assert.equal(designPixels('1em'), null);
+});
+
 test('spacing tokens must be multiples of 8 px', () => {
   assert.deepEqual(spacingProblems(lightTokens(LIGHT)), []);
-  assert.deepEqual(spacingProblems({ '--space-1': '12px', '--space-2': '1rem', '--other': '5px' }), [
+  assert.deepEqual(spacingProblems({ '--space-1': '12px', '--space-2': '1.25rem', '--other': '5px' }), [
     '--space-1: 12px is not a multiple of 8 px',
-    '--space-2: 1rem is not a multiple of 8 px',
+    '--space-2: 1.25rem is not a multiple of 8 px',
   ]);
 });
 
@@ -119,8 +126,11 @@ test('hardcodedColors finds hex colours outside comments', () => {
   assert.deepEqual(hardcodedColors('a { color: red }'), []);
 });
 
-test('smallFonts finds pixel font sizes under 12', () => {
-  assert.deepEqual(smallFonts('a { font-size: 11px } b { font-size: 12px } c { font-size: 9.5px } d { font-size: 1rem }'), [11, 9.5]);
+test('smallFonts finds px and rem font sizes under 12 px', () => {
+  assert.deepEqual(
+    smallFonts('a { font-size: 11px } b { font-size: 12px } c { font-size: 9.5px } d { font-size: 1rem } e { font-size: 0.5rem }'),
+    [11, 9.5, 8],
+  );
 });
 
 test('importedFiles and mediaBreakpoints read @import and @media rules', () => {

@@ -3,7 +3,6 @@ import { createMemoryBackend, createStorage, getStorage } from '../utils/storage
 export const STORAGE_KEYS = {
   diagramCache: 'diagram_cache',
   history: 'run_history',
-  favorites: 'favorites',
 };
 
 const MAX_CACHE_ENTRIES = 20;

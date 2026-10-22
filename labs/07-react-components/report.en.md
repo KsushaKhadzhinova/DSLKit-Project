@@ -37,7 +37,11 @@ Table 1 – Components of the DSLKit application
 
 ### 3.2 Base Components and Composition
 
-The base components `Button`, `Card` and `Badge` know nothing about the subject area. `Button` takes a variant, a handler and the other attributes through the `...props` operator. `Card` shows an optional title and inserts `children` into the block. Subject components are built from them: `NotationCard` consists of `Card` and `Badge`, and `ProjectCard` adds `Button`. This hierarchy is shown in appendices A and B.
+The base components `Button`, `Card` and `Badge` know nothing about the subject area. `Button` takes a variant, a handler and the other attributes through the `...props` operator. `Card` shows an optional title and inserts `children` into the block. Subject components are built from them: `NotationCard` consists of `Card` and `Badge`, and `ProjectCard` adds `Button`. The component hierarchy is shown in figure 1, and the border colour marks the folder group.
+
+![Component hierarchy of the DSLKit application](figures/component-hierarchy.svg)
+
+Figure 1 – Component hierarchy: the root `App` includes layout and subject components, and they are built from base ones
 
 ### 3.3 Props, Lists and Conditional Rendering
 
@@ -49,23 +53,23 @@ The folder `data` holds three arrays: six notations, eight projects and three pl
 
 ### 3.5 Styling and Checking on Different Screens
 
-CSS modules are created for the components, and the shared golden-ratio tokens, sizes and colours live in `index.css`. The card grid changes the number of columns at 576 and 1024 pixels following the mobile-first principle. The result on a 375 pixel screen is shown in figure 1.
+CSS modules are created for the components, and the shared golden-ratio tokens, sizes and colours live in `index.css`. The card grid changes the number of columns at 576 and 1024 pixels following the mobile-first principle. The result on a 375 pixel screen is shown in figure 2.
 
 ![The application on a 375 pixel screen](figures/mobile-375.jpg)
 
-Figure 1 – Mobile version: cards go in one column and the header wraps
+Figure 2 – Mobile version: cards go in one column and the header wraps
 
-On a 768 pixel tablet the cards take two columns, as shown in figure 2.
+On a 768 pixel tablet the cards take two columns, as shown in figure 3.
 
 ![The application on a 768 pixel screen](figures/tablet-768.jpg)
 
-Figure 2 – Tablet: two columns of cards
+Figure 3 – Tablet: two columns of cards
 
-On a 1280 pixel screen the cards take three columns, as shown in figure 3.
+On a 1280 pixel screen the cards take three columns, as shown in figure 4.
 
 ![The application on a 1280 pixel screen](figures/desktop-1280.jpg)
 
-Figure 3 – Desktop: three columns of cards
+Figure 4 – Desktop: three columns of cards
 
 ### 3.6 Testing
 
@@ -75,11 +79,27 @@ An automated test reads the source files and checks the folder structure, the nu
 
 The commit with the implementation: https://github.com/KsushaKhadzhinova/DSLKit-Project/commit/f4a22b1. The commit message: `feat(react): add the DSLKit component library with mock data, props and CSS modules on Vite`.
 
-## 4 Answers to Control Questions
+### 3.8 Checking in DevTools
 
-5. **React, Vue and Angular.** By learning curve Vue is the easiest, then React, and Angular is harder because of TypeScript and many concepts. By performance all three use efficient updates, and the differences show only in large interfaces. By ecosystem React has the widest one, Angular has much built in, and Vue sits in the middle.
-6. **Pure components.** A component as a pure function always returns the same result for the same `props` and changes no outside data. This lets React safely skip needless renders and makes tests simpler.
-7. **JavaScript in JSX.** An expression is written in curly braces: `Updated {formatDate(project.updated)}`. Function calls, conditions with `&&` and the ternary operator are allowed inside, but not the statements `if` and `for`.
+The application was opened in Chrome 155 and the component tree is shown by the React DevTools interface version 6.1.5.
+
+The component tree is shown in Figure 5: App holds Header, NotationList and ProjectList, and the selected notation card shows its props, its parent and the file with the line number.
+
+![DevTools screenshot](figures/devtools-01-components.png)
+
+Figure 5 – React DevTools: the component tree and the props of NotationCard
+
+The props of a project card are shown in Figure 6: the onOpen function and the project object come down from ProjectList.
+
+![DevTools screenshot](figures/devtools-02-project-card.png)
+
+Figure 6 – React DevTools: the props of ProjectCard
+
+The handler stubs are shown in Figure 7: clicking the buttons prints the project table, the chosen plan and the chosen notation to the console.
+
+![DevTools screenshot](figures/devtools-03-console.png)
+
+Figure 7 – Console: the output of the handler stubs
 
 ## Conclusion
 

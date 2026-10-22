@@ -30,7 +30,7 @@ The project topic belongs to the SaaS direction, so a service of that type is ch
 
 ### 3.2 Method
 
-The page was loaded in Chromium 156 on Windows with an empty cache and without cookies. The log was recorded in the HAR format, as with the Export HAR item on the Network tab. Two runs covered the regular network and Fast 3G emulation (562.5 ms latency, 1.6 Mbit/s download, 750 Kbit/s upload, as in the Chrome DevTools preset). Fast 3G was chosen instead of Slow 3G because the assignment allows both and the load size is 6.37 MB.
+The page was loaded in Google Chrome 155 on Windows with an empty cache and without cookies. The log was recorded in the HAR format, as with the Export HAR item on the Network tab. Two runs covered the regular network and Fast 3G emulation (562.5 ms latency, 1.6 Mbit/s download, 750 Kbit/s upload, as in the Chrome DevTools preset). Fast 3G was chosen instead of Slow 3G because the assignment allows both and the load size is 6.40 MiB.
 
 The log files are attached to the work: `labs/01-network/data/draw-io-normal.har` for the regular network and `labs/01-network/data/draw-io-fast3g.har` for Fast 3G. The analysis was made by the program from appendices A, B and C, its tests are described in appendix D. The page after loading is shown in Figure 1.
 
@@ -49,10 +49,10 @@ Table 1 – Page load summary
 | Metric | Value |
 |---|---|
 | Requests | 17 |
-| Transferred, MB | 6.37 |
+| Transferred, MiB | 6.40 |
 | Document protocol | HTTP/2.0 |
-| DOMContentLoaded, ms | 3408 |
-| onLoad, ms | 4393 |
+| DOMContentLoaded, ms | 337 |
+| onLoad, ms | 1423 |
 
 Table 2 – Number of requests by resource type
 
@@ -78,8 +78,11 @@ Table 4 – Request headers
 |---|---|---|
 | `accept` | text/html,application/xhtml+xml,application/xml;q=0.9,image/jxl,image/avif,im... | Content types the client is ready to accept |
 | `accept-encoding` | gzip, deflate, br, zstd | Supported response compression algorithms |
+| `accept-language` | en-US,en;q=0.9 | — |
+| `cache-control` | no-cache | Resource caching rules |
+| `pragma` | no-cache | — |
 | `priority` | u=0, i | Resource loading priority (HTTP/2, HTTP/3) |
-| `sec-ch-ua` | "Not:A-Brand";v="8", "Chromium";v="156", "HeadlessChrome";v="156" | Browser name and version (Client Hints) |
+| `sec-ch-ua` | "Google Chrome";v="155", "Chromium";v="155", "Not(A:Brand";v="24" | Browser name and version (Client Hints) |
 | `sec-ch-ua-mobile` | ?0 | Mobile device flag |
 | `sec-ch-ua-platform` | "Windows" | Client operating system |
 | `sec-fetch-dest` | document | Request destination (document, script, image) |
@@ -94,21 +97,20 @@ Table 5 – Response headers
 | Header | Value | Purpose |
 |---|---|---|
 | `access-control-allow-origin` | * | Origins allowed for cross-origin access (CORS) |
-| `age` | 340 | Seconds the response stayed in a CDN or proxy cache |
+| `age` | 1 | Seconds the response stayed in a CDN or proxy cache |
 | `cache-control` | public, max-age=600 | Resource caching rules |
 | `cf-cache-status` | DYNAMIC | Cloudflare cache status (HIT, MISS) |
-| `cf-ray` | a4909c8d8b81508e-WAW | Request identifier inside the Cloudflare network |
+| `cf-ray` | a4a9cecadfee2d19-WAW | Request identifier inside the Cloudflare network |
 | `content-encoding` | br | Compression applied to the response body |
 | `content-security-policy` | default-src 'self'; script-src https://www.dropbox.com https://api.trello.com... | Allowed sources of page resources (XSS protection) |
 | `content-type` | text/html | Content type and encoding |
-| `date` | Sun, 11 Oct 2026 20:28:29 GMT | Time the server produced the response |
-| `expires` | Sun, 11 Oct 2026 20:32:49 GMT | Date after which the response is considered stale |
+| `date` | Wed, 14 Oct 2026 21:51:51 GMT | Time the server produced the response |
+| `expires` | Wed, 14 Oct 2026 22:01:50 GMT | Date after which the response is considered stale |
 | `permissions-policy` | microphone=() | Page access to browser features (camera, geolocation) |
 | `referrer-policy` | strict-origin | Which part of the address to send in Referer |
 | `server` | cloudflare | Server or CDN software |
 | `strict-transport-security` | max-age=31536000; includeSubDomains | Requires opening the site over HTTPS only (HSTS) |
-| `vary` | accept-encoding | Request headers the cached response depends on |
-| `x-cloud-trace-context` | 5ef89efa3007bd5c0781a36430c141df | Request trace identifier in Google Cloud |
+| `x-cloud-trace-context` | f8b2f570d45c3d950f603df4bd6b39d9 | Request trace identifier in Google Cloud |
 | `x-content-type-options` | nosniff | Forbids content type sniffing (nosniff) |
 | `x-xss-protection` | 1; mode=block | Legacy browser XSS filter |
 
@@ -117,14 +119,14 @@ Table 6 – Request phases from the Timing tab
 | Phase | Time |
 |---|---|
 | Queued/Stalled | — |
-| DNS Lookup | 511 ms |
-| Initial connection | 48 ms |
-| SSL | 32 ms |
+| DNS Lookup | 38 ms |
+| Initial connection | 39 ms |
+| SSL | 25 ms |
 | Request sent | 0 ms |
-| Waiting (TTFB) | 48 ms |
-| Content Download | 4 ms |
+| Waiting (TTFB) | 81 ms |
+| Content Download | 2 ms |
 
-Longest phase: DNS Lookup.
+Longest phase: Waiting (TTFB).
 
 #### 3.3.3 Request: script, https://app.diagrams.net/js/bootstrap.js
 
@@ -140,9 +142,12 @@ Table 8 – Request headers
 |---|---|---|
 | `accept` | */* | Content types the client is ready to accept |
 | `accept-encoding` | gzip, deflate, br, zstd | Supported response compression algorithms |
+| `accept-language` | en-US,en;q=0.9 | — |
+| `cache-control` | no-cache | Resource caching rules |
+| `pragma` | no-cache | — |
 | `priority` | u=1 | Resource loading priority (HTTP/2, HTTP/3) |
 | `referer` | https://app.diagrams.net/ | Address of the page that issued the request |
-| `sec-ch-ua` | "Not:A-Brand";v="8", "Chromium";v="156", "HeadlessChrome";v="156" | Browser name and version (Client Hints) |
+| `sec-ch-ua` | "Google Chrome";v="155", "Chromium";v="155", "Not(A:Brand";v="24" | Browser name and version (Client Hints) |
 | `sec-ch-ua-mobile` | ?0 | Mobile device flag |
 | `sec-ch-ua-platform` | "Windows" | Client operating system |
 | `sec-fetch-dest` | script | Request destination (document, script, image) |
@@ -155,20 +160,20 @@ Table 9 – Response headers
 | Header | Value | Purpose |
 |---|---|---|
 | `access-control-allow-origin` | * | Origins allowed for cross-origin access (CORS) |
-| `age` | 0 | Seconds the response stayed in a CDN or proxy cache |
+| `age` | 268 | Seconds the response stayed in a CDN or proxy cache |
 | `cache-control` | public, max-age=86400 | Resource caching rules |
 | `cf-cache-status` | HIT | Cloudflare cache status (HIT, MISS) |
-| `cf-ray` | a4909c8dfce2508e-WAW | Request identifier inside the Cloudflare network |
+| `cf-ray` | a4a9cecb894f2d19-WAW | Request identifier inside the Cloudflare network |
 | `content-encoding` | br | Compression applied to the response body |
 | `content-type` | text/javascript | Content type and encoding |
-| `date` | Sun, 11 Oct 2026 20:28:29 GMT | Time the server produced the response |
-| `etag` | W/"SyJN0w" | Resource version identifier for conditional requests |
-| `expires` | Mon, 12 Oct 2026 20:28:29 GMT | Date after which the response is considered stale |
+| `date` | Wed, 14 Oct 2026 21:51:51 GMT | Time the server produced the response |
+| `etag` | W/"sWt9Ig" | Resource version identifier for conditional requests |
+| `expires` | Thu, 15 Oct 2026 21:51:51 GMT | Date after which the response is considered stale |
 | `referrer-policy` | strict-origin | Which part of the address to send in Referer |
 | `server` | cloudflare | Server or CDN software |
 | `strict-transport-security` | max-age=31536000; includeSubDomains | Requires opening the site over HTTPS only (HSTS) |
 | `vary` | accept-encoding | Request headers the cached response depends on |
-| `x-cloud-trace-context` | e456fac535de7f926bc773a79dd11a37 | Request trace identifier in Google Cloud |
+| `x-cloud-trace-context` | 4ce5a37ac1ec327aeb976b774fbdd4b2 | Request trace identifier in Google Cloud |
 | `x-content-type-options` | nosniff | Forbids content type sniffing (nosniff) |
 | `x-xss-protection` | 1; mode=block | Legacy browser XSS filter |
 
@@ -181,8 +186,8 @@ Table 10 – Request phases from the Timing tab
 | Initial connection | — |
 | SSL | — |
 | Request sent | 0 ms |
-| Waiting (TTFB) | 26 ms |
-| Content Download | 8 ms |
+| Waiting (TTFB) | 28 ms |
+| Content Download | 10 ms |
 
 Longest phase: Waiting (TTFB).
 
@@ -200,9 +205,12 @@ Table 12 – Request headers
 |---|---|---|
 | `accept` | */* | Content types the client is ready to accept |
 | `accept-encoding` | gzip, deflate, br, zstd | Supported response compression algorithms |
+| `accept-language` | en-US,en;q=0.9 | — |
+| `cache-control` | no-cache | Resource caching rules |
+| `pragma` | no-cache | — |
 | `priority` | u=1, i | Resource loading priority (HTTP/2, HTTP/3) |
 | `referer` | https://app.diagrams.net/ | Address of the page that issued the request |
-| `sec-ch-ua` | "Not:A-Brand";v="8", "Chromium";v="156", "HeadlessChrome";v="156" | Browser name and version (Client Hints) |
+| `sec-ch-ua` | "Google Chrome";v="155", "Chromium";v="155", "Not(A:Brand";v="24" | Browser name and version (Client Hints) |
 | `sec-ch-ua-mobile` | ?0 | Mobile device flag |
 | `sec-ch-ua-platform` | "Windows" | Client operating system |
 | `sec-fetch-dest` | empty | Request destination (document, script, image) |
@@ -215,20 +223,20 @@ Table 13 – Response headers
 | Header | Value | Purpose |
 |---|---|---|
 | `access-control-allow-origin` | * | Origins allowed for cross-origin access (CORS) |
-| `age` | 119 | Seconds the response stayed in a CDN or proxy cache |
+| `age` | 285 | Seconds the response stayed in a CDN or proxy cache |
 | `cache-control` | public, max-age=2592000 | Resource caching rules |
 | `cf-cache-status` | HIT | Cloudflare cache status (HIT, MISS) |
-| `cf-ray` | a4909c946a69508e-WAW | Request identifier inside the Cloudflare network |
+| `cf-ray` | a4a9ced29c112d19-WAW | Request identifier inside the Cloudflare network |
 | `content-encoding` | br | Compression applied to the response body |
 | `content-type` | text/plain | Content type and encoding |
-| `date` | Sun, 11 Oct 2026 20:28:30 GMT | Time the server produced the response |
-| `etag` | W/"SyJN0w" | Resource version identifier for conditional requests |
-| `expires` | Wed, 11 Nov 2026 20:28:30 GMT | Date after which the response is considered stale |
+| `date` | Wed, 14 Oct 2026 21:51:52 GMT | Time the server produced the response |
+| `etag` | W/"sWt9Ig" | Resource version identifier for conditional requests |
+| `expires` | Sat, 14 Nov 2026 21:51:52 GMT | Date after which the response is considered stale |
 | `referrer-policy` | strict-origin | Which part of the address to send in Referer |
 | `server` | cloudflare | Server or CDN software |
 | `strict-transport-security` | max-age=31536000; includeSubDomains | Requires opening the site over HTTPS only (HSTS) |
 | `vary` | accept-encoding | Request headers the cached response depends on |
-| `x-cloud-trace-context` | 5b8b613ae9d740fe8c756a3058aeecb6 | Request trace identifier in Google Cloud |
+| `x-cloud-trace-context` | ee94d72a0d25ec88c0f012c96fff1718 | Request trace identifier in Google Cloud |
 | `x-content-type-options` | nosniff | Forbids content type sniffing (nosniff) |
 | `x-xss-protection` | 1; mode=block | Legacy browser XSS filter |
 
@@ -242,7 +250,7 @@ Table 14 – Request phases from the Timing tab
 | SSL | — |
 | Request sent | 0 ms |
 | Waiting (TTFB) | 24 ms |
-| Content Download | 7 ms |
+| Content Download | 14 ms |
 
 Longest phase: Waiting (TTFB).
 
@@ -253,7 +261,7 @@ Table 15 – Caching parameters
 | Resource | Cache-Control | ETag | Last-Modified | max-age |
 |---|---|---|---|---|
 | https://app.diagrams.net/ | public, max-age=600 | — | — | 600 |
-| https://app.diagrams.net/js/stencils.min.js | public, max-age=2592000 | W/"SyJN0w" | — | 2592000 |
+| https://app.diagrams.net/js/stencils.min.js | public, max-age=2592000 | W/"sWt9Ig" | — | 2592000 |
 
 #### 3.3.6 Document security
 
@@ -277,10 +285,10 @@ Table 17 – Comparison of load metrics
 | Metric | Regular network | Fast 3G |
 |---|---|---|
 | Requests | 17 | 17 |
-| Transferred, MB | 6.37 | 6.37 |
-| DOMContentLoaded, ms | 3408 | 1412 |
-| onLoad, ms | 4393 | 14565 |
-| Document TTFB, ms | 48 | 584 |
+| Transferred, MiB | 6.40 | 6.40 |
+| DOMContentLoaded, ms | 337 | 1508 |
+| onLoad, ms | 1423 | 15168 |
+| Document TTFB, ms | 81 | 582 |
 
 ### 3.4 Graphical Presentation of Results
 
@@ -310,7 +318,7 @@ Figure 5 – Load time and TTFB on the regular network and on Fast 3G
 
 ### 3.5 Interpretation of Results
 
-**Overview.** The page needed 17 requests with a total size of 6.37 MB over HTTP/2 and finished loading in 4.4 s (onLoad). Scripts account for 8 requests and 6.31 MB, the heaviest being `stencils.min.js` (2.78 MiB), `app.min.js` (2.08 MiB) and `extensions.min.js` (1.13 MiB). All requests used the GET method, 16 of them finished with code 200 and one (the `log.diagrams.net` ping) with code 204.
+**Overview.** The page needed 17 requests with a total size of 6.40 MiB over HTTP/2 and finished loading in 1.4 s (onLoad). Scripts account for 8 requests and 6.34 MiB, the heaviest being `stencils.min.js` (2.78 MiB), `app.min.js` (2.11 MiB) and `extensions.min.js` (1.14 MiB). All requests used the GET method, 16 of them finished with code 200 and one (the `log.diagrams.net` ping) with code 204.
 
 **Caching.** The HTML document is cached for 10 minutes (`max-age=600`) and has no ETag or Last-Modified, so after expiry the browser downloads the whole page again. Static resources such as `stencils.min.js` are cached for 30 days (`max-age=2592000`) and have the weak ETag `W/"SyJN0w"`. The same ETag on different files shows that it is bound to the build version. There is no 304 response in the log because the browser cache was empty.
 
@@ -318,21 +326,73 @@ Figure 5 – Load time and TTFB on the regular network and on Fast 3G
 
 **Security.** The document has `Content-Security-Policy`, `Strict-Transport-Security: max-age=31536000; includeSubDomains`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin` and `Permissions-Policy`. The `X-Frame-Options` header is absent. Protection against embedding in foreign frames can be set with the CSP directive `frame-ancestors`, but it is not visible in the clipped header value.
 
-**Document timing.** The longest phase is DNS Lookup (511 ms, a cold name lookup), followed by Initial connection 48 ms, SSL 32 ms, TTFB 48 ms and Content Download 4 ms. The server answered quickly and most of the time went to name resolution and the secure connection setup.
+**Document timing.** The longest phase is TTFB (81 ms), followed by Initial connection 39 ms (it includes SSL 25 ms), DNS Lookup 38 ms and Content Download 2 ms. The server answered quickly and a noticeable part of the time went to name resolution and the secure connection setup.
 
-**Network emulation.** Under Fast 3G the full load time grew from 4393 to 14565 ms (3.3 times) and the document TTFB from 48 to 584 ms (12 times) because of the 562.5 ms channel latency. The slowest requests turned out to be `stencils.min.js` (23.5 s), `extensions.min.js` (14.2 s) and `app.min.js` (12.4 s). The data volume did not change, so the slowdown comes from bandwidth and latency rather than server load. DOMContentLoaded in the regular run (3408 ms) turned out higher than under Fast 3G (1412 ms). These are single measurements with a different DNS cache state, so repeated runs are needed for conclusions.
+**Network emulation.** Under Fast 3G the full load time grew from 1423 to 15168 ms (10.7 times) and the document TTFB from 81 to 582 ms (7.2 times) because of the 562.5 ms channel latency. The slowest requests turned out to be `stencils.min.js` (24.4 s), `extensions.min.js` (14.9 s) and `app.min.js` (12.9 s). The data volume did not change, so the slowdown comes from bandwidth and latency rather than server load. DOMContentLoaded grew from 337 to 1508 ms. These are single measurements, so repeated runs are needed for conclusions.
 
 **Filtering by type.** `script` has the most requests (8), followed by `stylesheet` (3), `xhr` (3), `image` (2) and `document` (1). Scripts lead by volume. The log is saved in the HAR format.
 
-## 4 Answers to Control Questions
+### 3.6 Working with the DevTools Panels
 
-9. **Effect of a slow connection.** The document TTFB grew from 48 to 584 ms and the page load time from 4.4 to 14.6 s. Channel latency increases TTFB of every request and low bandwidth increases Content Download of large files: `stencils.min.js` loaded for 23.5 s.
-10. **Why a filter is needed.** It keeps only the selected types on the panel (Doc, CSS, JS, XHR, Img, Font), which simplifies finding heavy and redundant resources. The work used the types document (1), stylesheet (3), script (8), xhr (3) and image (2).
-11. **What a CDN is and how to detect it.** A content delivery network keeps copies of resources on servers near the user. Signs: `server: cloudflare`, `cf-ray`, `cf-cache-status: HIT` for static files (served from the CDN cache) and `DYNAMIC` for the HTML document, which is not cached at the edge.
+The page was opened in Chrome 155 and the Network tab recorded requests with the cache disabled. In Chrome 155 the former Fast 3G profile is called Slow 4G: 562.5 ms latency, 1.6 Mbit/s download and 750 Kbit/s upload. It was used for the second measurement.
+
+The overall view of the Network tab is shown in Figure 6: a list of 68 requests, the time scale and the summary line with 6.7 MB and a load time of 1.10 s.
+
+![DevTools screenshot](figures/devtools-01-network.png)
+
+Figure 6 – The Network tab after the page loaded with the cache disabled
+
+Filtering by the JS type is shown in Figure 7: only scripts remain in the list.
+
+![DevTools screenshot](figures/devtools-02-filter-js.png)
+
+Figure 7 – Filtering requests by the JS type
+
+The headers of the main document are shown in Figure 8: general information and response headers, among them Cache-Control, Content-Security-Policy, Strict-Transport-Security and X-Content-Type-Options.
+
+![DevTools screenshot](figures/devtools-03-headers-response.png)
+
+Figure 8 – Document request headers: general information and response headers
+
+The request headers are shown in Figure 9: User-Agent, Sec-CH-UA, Sec-CH-UA-Platform and Accept-Language.
+
+![DevTools screenshot](figures/devtools-04-headers-request.png)
+
+Figure 9 – Request headers of the document
+
+The request phases are shown in Figure 10 on the Timing tab.
+
+![DevTools screenshot](figures/devtools-05-timing.png)
+
+Figure 10 – The Timing tab of a single request
+
+The security state is shown in Figure 11: a valid certificate, TLS 1.3 and all resources served securely.
+
+![DevTools screenshot](figures/devtools-06-security.png)
+
+Figure 11 – The Security panel
+
+The cookie storage is shown in Figure 12: no cookies are set on the first visit.
+
+![DevTools screenshot](figures/devtools-07-cookies.png)
+
+Figure 12 – The Application panel, Cookies section
+
+The list of network emulation profiles is shown in Figure 13.
+
+![DevTools screenshot](figures/devtools-08-throttling-menu.png)
+
+Figure 13 – Network emulation profiles in DevTools
+
+The load with the Slow 4G profile is shown in Figure 14: the full load took 15.16 s and the slowest request was stencils.min.js (24.48 s).
+
+![DevTools screenshot](figures/devtools-09-slow-4g-load.png)
+
+Figure 14 – Page load with the Slow 4G profile
 
 ## Conclusion
 
-The draw.io site uses HTTPS and HTTP/2, serves static resources through the Cloudflare CDN with a 30 day cache, sets no cookies on the first visit and builds its protection on CSP, HSTS and `nosniff`. Most of the page weight, 6.37 MB, comes from scripts (99 percent), so on a slow connection the load time grows 3.3 times, from 4.4 to 14.6 s. For DSLKit this means that heavy libraries (shapes, a WebAssembly core) must be cached for a long time, loaded lazily and compressed, while the HTML document should stay light.
+The draw.io site uses HTTPS and HTTP/2, serves static resources through the Cloudflare CDN with a 30 day cache, sets no cookies on the first visit and builds its protection on CSP, HSTS and `nosniff`. Most of the page weight, 6.40 MiB, comes from scripts (99 percent), so on a slow connection the load time grows 10.7 times, from 1.4 to 15.2 s. For DSLKit this means that heavy libraries (shapes, a WebAssembly core) must be cached for a long time, loaded lazily and compressed, while the HTML document should stay light.
 
 ## Appendix A – Listing of analyze-har.js
 
@@ -586,7 +646,7 @@ test('summary of the recorded draw.io load', () => {
   assert.equal(s.requests, 17);
   assert.deepEqual(s.types, { document: 1, stylesheet: 3, script: 8, xhr: 3, image: 2 });
   assert.equal(s.protocol, 'HTTP/2.0');
-  assert.equal(s.onLoad, 4393);
+  assert.equal(s.onLoad, 1423);
   assert.ok(s.bytes > 6e6);
 });
 

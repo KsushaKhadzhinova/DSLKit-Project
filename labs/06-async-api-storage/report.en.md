@@ -31,7 +31,7 @@ Table 1 – Structure of the API integration code in the DSLKit project
 | `js/storage/localStorage.js` | Read and write wrappers, a cache with a lifetime, the run history |
 | `js/utils/dataParser.js` | DSL parsing, DOT building, cache key, SVG cleaning |
 | `js/engines/engines.js`, `js/engines/local-engine.js` | The list of generation engines and the own engine that draws in the browser |
-| `js/components/diagram-runner.js` | Engine choice, buttons, loading indicator, error messages, offline mode |
+| `js/components/diagram-runner.js` | Engine choice from the settings, buttons, loading indicator, error messages, offline mode |
 | `js/script.js` | Entry point that starts the component together with the others |
 
 ### 3.2 Request Service
@@ -48,11 +48,11 @@ The diagram cache keeps the save time together with the data, so the lifetime of
 
 The module `dataParser.js` reads the code from the editor: the `diagram` header, `box` blocks with the ports `input`, `control`, `output`, `mechanism`, and `arrow` lines. Unknown lines do not stop a run and go to a list of skipped lines. The model is turned into Graphviz DOT text with quotes, backslashes and line breaks escaped. The server response is treated as untrusted, so before showing it the tags `script`, `foreignObject`, `style`, `use`, `image` and animations, the `on*` attributes, unsafe styles and every `href` link except internal and `http(s)` ones are removed from the SVG. Before a link is checked, control characters are stripped from it because browsers ignore them.
 
-Generation is not limited to a picture from a server. The list of engines is shown in table 1: three engines work through Kroki (Graphviz, Mermaid, PlantUML), and the own engine `local-engine.js` places the boxes in columns itself, draws arrows, labels and tooltips, and returns live SVG with separate `g`, `rect` and `text` elements. It sends no requests, so it works without the internet. For the other engines the same model is turned into DOT, Mermaid and PlantUML text, and the chosen engine is saved in LocalStorage.
+Generation is not limited to a picture from a server. The engine is chosen on the settings page (the field "Diagram generation engine") and read again on every run. Three engines work through Kroki (Graphviz, Mermaid, PlantUML), and the own engine `local-engine.js` places the boxes in columns itself, draws arrows, labels and tooltips, and returns live SVG with separate `g`, `rect` and `text` elements. It sends no requests, so it works without the internet. For the other engines the same model is turned into DOT, Mermaid and PlantUML text, and the choice is kept in the site settings in LocalStorage.
 
 ### 3.5 Interface Integration
 
-The editor canvas gets the buttons "Draw with Kroki" and "Refresh from server", a status line with `aria-live`, a line about service availability and a list of the last runs. While a request runs, the canvas has `aria-busy` and the status line shows the loading text; the buttons stay available so keyboard focus is not lost, and a new run cancels the previous request. The page starts a diagram by itself when it opens, and the engine list redraws it when the value changes. A successful result is shown in figure 1.
+The editor canvas gets the buttons "Draw with Kroki" and "Refresh from server", a status line with `aria-live`, a line about service availability and a list of the last runs. While a request runs, the canvas has `aria-busy` and the status line shows the loading text; the buttons stay available so keyboard focus is not lost, and a new run cancels the previous request. The page starts a diagram by itself when it opens, and a new engine chosen in the settings is applied from the next run. A successful result is shown in figure 1.
 
 ![Diagram received from Kroki](figures/kroki-diagram.jpg)
 
@@ -78,11 +78,33 @@ Automated tests are written for the request service, the storage, the data parsi
 
 The commit with the implementation: https://github.com/KsushaKhadzhinova/DSLKit-Project/commit/2102742. The commit message: `feat: integrate external API, caching and localStorage for SaaS diagram editor`.
 
-## 4 Answers to Control Questions
+### 3.9 Checking in DevTools
 
-25. **Rate limiting.** It is a limit on the number of requests per unit of time on the server side. The client accounts for it with a cache, cancelling extra requests, retrying with a pause and showing a message on code 429.
-26. **Protection from duplicates.** Active requests are kept in a `Map` under a key made of the method, the address and the body, and a repeated call gets the same Promise. After completion the entry is removed, and requests with an abort signal are not merged.
-27. **Parameters in the query string.** Parameters are assembled by `URLSearchParams`, for example `/items?q=order&sort=name&page=2&limit=20`. In `fetchData` they are passed as a `params` object and encoded automatically.
+The work was checked in Chrome 155: requests in the Network tab and storage in the Application panel. The storage keys are named after the data (`diagram_cache`, `run_history`) instead of `cached_products` and `search_history` from the assignment example, because the project stores diagrams, not products.
+
+The request to the service is shown in Figure 3: the POST method to kroki.io/graphviz/svg, status 200 and the response type image/svg+xml.
+
+![DevTools screenshot](figures/devtools-01-kroki-request.png)
+
+Figure 3 – The Network tab: the request to Kroki
+
+The sent request body is shown in Figure 4: it is the DOT text built from the DSL.
+
+![DevTools screenshot](figures/devtools-02-kroki-payload.png)
+
+Figure 4 – The Payload tab: the DOT text sent to Kroki
+
+The storage is shown in Figure 5: the diagram cache dslkit.diagram_cache and the run log dslkit.run_history, as well as the editor tab and view.
+
+![DevTools screenshot](figures/devtools-03-local-storage.png)
+
+Figure 5 – The Application panel: the editor LocalStorage
+
+The error state is shown in Figure 6: with the service unavailable and an empty cache the editor reports the problem and keeps the work area.
+
+![DevTools screenshot](figures/error-no-cache.png)
+
+Figure 6 – The editor with the service unavailable and an empty cache
 
 ## Conclusion
 
@@ -120,7 +142,7 @@ export class ApiError extends Error {
 
 const defaultSleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-const isRetryable = (error) => error.kind === 'network' || error.kind === 'timeout' || error.status === 429 || (error.status !== null && error.status >= 500);
+const isRetryable = (error) => error.kind === 'network' || error.status === 429 || (error.status !== null && error.status >= 500);
 
 const retryAfterMs = (response, fallback, max) => {
   const seconds = Number(response?.headers?.get?.('Retry-After'));
@@ -163,7 +185,7 @@ export const createApi = ({ config = API_CONFIG, fetchImpl = globalThis.fetch?.b
     return response;
   };
 
-  // Retries network failures, timeouts, 429 and 5xx up to `retries` times with exponential backoff.
+  // Retries network failures, 429 and 5xx (a timeout is final, it already took the whole time limit) up to `retries` times with exponential backoff.
   const send = async (path, { method = 'GET', body, headers = {}, signal, timeoutMs = config.timeoutMs, retries = config.retries, parse = 'text' } = {}) => {
     const url = `${config.baseUrl}${path}`;
     const tryOnce = async (attemptNumber) => {
@@ -225,7 +247,6 @@ import { createMemoryBackend, createStorage, getStorage } from '../utils/storage
 export const STORAGE_KEYS = {
   diagramCache: 'diagram_cache',
   history: 'run_history',
-  favorites: 'favorites',
 };
 
 const MAX_CACHE_ENTRIES = 20;
@@ -436,8 +457,9 @@ export const sanitizeSvg = (svgText, parser) => {
 import { renderDiagram, checkHealth } from '../api/apiService.js';
 import { API_CONFIG } from '../api/config.js';
 import { createCache, createHistory } from '../storage/localStorage.js';
-import { ENGINES, findEngine } from '../engines/engines.js';
+import { findEngine } from '../engines/engines.js';
 import { parseDsl, sanitizeSvg, sourceKey } from '../utils/dataParser.js';
+import { createTranslator } from '../utils/i18n.js';
 
 const MESSAGES = {
   empty: 'В редакторе нет кода диаграммы.',
@@ -480,15 +502,15 @@ export const initDiagramRunner = ({
   const local = page.querySelector('.canvas__diagram');
   const service = page.querySelector('.canvas__service');
   const historyList = page.querySelector('.canvas__history');
-  const engineSelect = page.querySelector('.canvas__engine');
   const canvas = page.querySelector('.canvas');
   const parser = new root.defaultView.DOMParser();
   const cache = createCache({ storage, ttlMs: API_CONFIG.cacheTtlMs, now });
   const history = createHistory({ storage });
   let controller = null;
 
+  const tr = createTranslator(root);
   const setStatus = (text) => {
-    status.textContent = text;
+    status.textContent = tr(text);
   };
   const setBusy = (busy) => {
     canvas.setAttribute('aria-busy', String(busy));
@@ -496,13 +518,21 @@ export const initDiagramRunner = ({
 
   const source = () => [...page.querySelectorAll('.code__line code')].map((line) => line.textContent).join('\n');
 
-  const currentEngine = () => findEngine(engineSelect?.value);
+  // The engine is chosen on the settings page and read again on every run.
+  const currentEngine = () => {
+    const saved = storage.get('settings', {});
+    return findEngine(saved !== null && typeof saved === 'object' ? saved['diagram-engine'] : undefined);
+  };
+
+  const showAction = () => {
+    renderButton.textContent = tr(currentEngine().action);
+  };
 
   const show = (svgText, note) => {
     const svg = sanitizeSvg(svgText, parser);
     if (!svg) return false;
     svg.setAttribute('role', 'img');
-    svg.setAttribute('aria-label', `Диаграмма: ${currentEngine().label}`);
+    svg.setAttribute('aria-label', tr(`Диаграмма: ${tr(currentEngine().label)}`));
     remote.replaceChildren(root.importNode(svg, true));
     remote.hidden = false;
     local?.setAttribute('hidden', '');
@@ -520,7 +550,7 @@ export const initDiagramRunner = ({
         button.type = 'button';
         button.className = 'button button--quiet canvas__history-item';
         button.dataset.key = entry.key;
-        button.textContent = `${entry.title || 'Без названия'} · ${formatTime(entry.at)}`;
+        button.textContent = `${entry.title || tr('Без названия')} · ${formatTime(entry.at)}`;
         item.append(button);
         return item;
       }),
@@ -529,6 +559,7 @@ export const initDiagramRunner = ({
   };
 
   const run = async ({ refresh = false } = {}) => {
+    showAction();
     const model = parseDsl(source());
     if (model.boxes.length === 0) {
       setStatus(MESSAGES.empty);
@@ -580,14 +611,6 @@ ${input}`);
   renderButton.addEventListener('click', () => run());
   refreshButton?.addEventListener('click', () => run({ refresh: true }));
   page.addEventListener('dslkit:run', () => run());
-  if (engineSelect) {
-    const saved = storage.get('diagram_engine', null);
-    if (ENGINES.some((engine) => engine.id === saved)) engineSelect.value = saved;
-    engineSelect.addEventListener('change', () => {
-      storage.set('diagram_engine', engineSelect.value);
-      run();
-    });
-  }
   historyList?.addEventListener('click', (event) => {
     const button = event.target.closest('.canvas__history-item');
     if (!button) return;
@@ -602,13 +625,14 @@ ${input}`);
     Promise.resolve()
       .then(() => api.checkHealth())
       .then(() => {
-        service.textContent = 'Сервис Kroki доступен';
+        service.textContent = tr('Сервис Kroki доступен');
       })
       .catch(() => {
-        service.textContent = 'Сервис Kroki недоступен, будут использованы сохранённые копии';
+        service.textContent = tr('Сервис Kroki недоступен, будут использованы сохранённые копии');
       });
   }
 
+  showAction();
   renderHistory();
   if (autoRun) run();
   return { run, cache, history };

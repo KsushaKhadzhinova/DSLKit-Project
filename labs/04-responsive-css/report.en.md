@@ -110,12 +110,6 @@ All style files passed the W3C CSS validator without errors, and the HTML pages 
 
 The work is done in the branch `feature/responsive-layout`. The commit with the implementation: https://github.com/KsushaKhadzhinova/DSLKit-Project/commit/eb70a59. The commit message: `feat: implement responsive layout according to Figma design`.
 
-## 4 Answers to Control Questions
-
-5. **Difficulties when moving the design.** Figma layouts are static and carry no states, so hover, focus and error states had to be designed independently. The Fibonacci spacing scale resolved the differences from the 8 pixel grid.
-6. **Media queries.** The rule `@media (min-width: 768px) { .nav { display: block; } }` shows the menu on wide screens. Queries switch styles on by a condition, so one markup works on different devices.
-7. **Fluid grids.** Percentages are computed from the parent width, while the `fr` unit divides the remaining free space between columns. The value `1fr 1.618fr` sets the hero columns without computing percentages.
-
 ## Conclusion
 
 The styles of the DSLKit project are split into files following the BEM methodology and built mobile first. Three page states, a burger menu without JavaScript, Flexbox and Grid layouts, CSS variables and a dark theme are implemented. The golden ratio is built into the size scale, the spacing and the columns, and automated tests prevent any drift from it. What remains is to check the page in Firefox, Edge and Safari on real devices.
@@ -134,7 +128,6 @@ The styles of the DSLKit project are split into files following the BEM methodol
   --color-primary: #2563eb;
   --color-on-primary: #ffffff;
   --color-primary-text: #1d4ed8;
-  --color-cta-end: #7c3aed;
   --color-diagram-paper: #ffffff;
   --color-secondary: #e8efff;
   --color-accent: #16a34a;
@@ -170,25 +163,27 @@ The styles of the DSLKit project are split into files following the BEM methodol
   --columns-golden: 1fr 1.618fr;
   --columns-golden-reverse: 1.618fr 1fr;
 
+  /* Smallest readable text: the golden step, but never below 14 px (WCAG and the interface rules). */
+  --text-small: max(var(--step--1), 0.875rem, 14px);
   --line-body: var(--phi);
   --line-heading: 1.15;
 
-  --space-1: 8px;
-  --space-2: 16px;
-  --space-3: 24px;
-  --space-4: 40px;
-  --space-5: 64px;
-  --space-6: 104px;
+  --space-1: 0.5rem;
+  --space-2: 1rem;
+  --space-3: 1.5rem;
+  --space-4: 2.5rem;
+  --space-5: 4rem;
+  --space-6: 6.5rem;
 
-  --radius-small: 8px;
-  --radius-medium: 16px;
-  --radius-large: 24px;
+  --radius-small: 0.5rem;
+  --radius-medium: 1rem;
+  --radius-large: 1.5rem;
 
   --container: 1200px;
   --measure: 62ch;
-  --header-height: 64px;
-  --target-size: 48px;
-  --target-size-small: 32px;
+  --header-height: 4rem;
+  --target-size: max(3rem, 48px);
+  --target-size-small: max(2.75rem, 44px);
   --focus-ring: 0 0 0 3px var(--color-background), 0 0 0 5px var(--color-primary);
 
   --breakpoint-small: 576px;
@@ -197,7 +192,7 @@ The styles of the DSLKit project are split into files following the BEM methodol
 
   /* Names required by the lab assignment; they alias the golden-ratio scales above. */
   --font-family-main: var(--font-sans);
-  --font-size-base: 16px;
+  --font-size-base: 1rem;
   --font-size-h1: var(--step-5);
   --font-size-h2: var(--step-4);
   --spacing-small: var(--space-1);
@@ -270,6 +265,8 @@ The styles of the DSLKit project are split into files following the BEM methodol
 }
 
 html {
+  /* Fluid root size: 15 px on a phone, about 17 px at 1280 px, 18 px at the largest screens. Every rem value follows it, so type, spacing and controls grow together. */
+  font-size: clamp(0.9375rem, 0.875rem + 0.25vw, 1.125rem);
   overflow-x: clip;
   scroll-padding-top: calc(var(--header-height) + var(--space-2));
   -webkit-text-size-adjust: 100%;
@@ -356,24 +353,24 @@ address {
 }
 
 small {
-  font-size: var(--step--1);
+  font-size: var(--text-small);
 }
 
 code,
 kbd,
 pre {
   font-family: var(--font-mono);
-  font-size: 0.92em;
+  font-size: var(--text-small);
   font-feature-settings: 'zero';
 }
 
 kbd {
-  padding: 2px 6px;
+  padding: 0.125rem 0.375rem;
   border: 1px solid var(--color-border-strong);
-  border-radius: 4px;
+  border-radius: var(--radius-small);
   background: var(--color-surface);
   color: var(--color-text-light);
-  font-size: var(--step--1);
+  font-size: var(--text-small);
   line-height: 1.2;
 }
 
@@ -441,18 +438,18 @@ time {
 
 .icon {
   flex: none;
-  width: 20px;
-  height: 20px;
+  width: 1.25rem;
+  height: 1.25rem;
 }
 
 .badge {
   display: inline-flex;
   align-items: center;
-  padding: 2px var(--space-1);
-  border-radius: 999px;
+  padding: 0.125rem var(--space-1);
+  border-radius: 62.4375rem;
   background: var(--color-secondary);
   color: var(--color-link);
-  font-size: var(--step--1);
+  font-size: var(--text-small);
   font-weight: 600;
   line-height: 1.4;
   white-space: nowrap;
@@ -558,8 +555,8 @@ label > span {
 }
 
 .header__logo-image {
-  width: 32px;
-  height: 32px;
+  width: 2rem;
+  height: 2rem;
 }
 
 .header__logo-text {
@@ -599,9 +596,9 @@ label > span {
 .burger__icon::before,
 .burger__icon::after {
   display: block;
-  width: 18px;
-  height: 2px;
-  border-radius: 2px;
+  width: 1.125rem;
+  height: 0.125rem;
+  border-radius: 0.125rem;
   background: currentColor;
   transition: transform 200ms ease;
 }
@@ -622,7 +619,7 @@ label > span {
 }
 
 .burger__icon::after {
-  top: 6px;
+  top: 0.375rem;
 }
 
 .burger__input:checked + .burger__button .burger__icon {
@@ -702,7 +699,7 @@ label > span {
   min-height: var(--target-size-small);
   padding: 0 var(--space-1);
   color: var(--color-text-light);
-  font-size: var(--step--1);
+  font-size: var(--text-small);
   font-weight: 600;
   text-decoration: none;
 }
@@ -723,10 +720,12 @@ label > span {
 .theme__button {
   display: inline-flex;
   align-items: center;
-  min-height: var(--target-size-small);
-  padding: 0 var(--space-1);
+  justify-content: center;
+  width: var(--target-size);
+  height: var(--target-size);
+  padding: 0;
   border: 1px solid var(--color-border-strong);
-  border-radius: 999px;
+  border-radius: 62.4375rem;
   color: var(--color-text-light);
   cursor: pointer;
   font-size: 0.75rem;
@@ -752,11 +751,33 @@ label > span {
   color: var(--color-text);
 }
 
+.theme__icon {
+  flex: none;
+}
+
+.theme__label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.theme__icon--sun,
+.theme__input:checked + .theme__button .theme__icon--moon {
+  display: none;
+}
+
+.theme__input:checked + .theme__button .theme__icon--sun {
+  display: block;
+}
+
 .header__cta {
   display: none;
   min-height: var(--target-size-small);
   padding: 0 var(--space-2);
-  font-size: var(--step--1);
+  font-size: var(--text-small);
 }
 ```
 
@@ -796,7 +817,11 @@ label > span {
   z-index: -1;
   background:
     radial-gradient(ellipse 55% 70% at 78% 18%, var(--color-glow), transparent 70%),
-    radial-gradient(ellipse 40% 50% at 8% 0%, var(--color-glow), transparent 70%);
+    radial-gradient(ellipse 40% 50% at 8% 0%, var(--color-glow), transparent 70%), radial-gradient(circle, var(--color-border) 1.4px, transparent 1.6px);
+  background-size:
+    auto,
+    auto,
+    24px 24px;
 }
 
 .hero__content {
@@ -809,19 +834,19 @@ label > span {
   display: inline-flex;
   align-items: center;
   gap: var(--space-1);
-  padding: 4px var(--space-2);
+  padding: 0.25rem var(--space-2);
   border: 1px solid var(--color-border);
-  border-radius: 999px;
+  border-radius: 62.4375rem;
   background: var(--color-surface);
   color: var(--color-text-light);
-  font-size: var(--step--1);
+  font-size: var(--text-small);
   font-weight: 600;
 }
 
 .hero__badge::before {
   content: '';
-  width: 8px;
-  height: 8px;
+  width: 0.5rem;
+  height: 0.5rem;
   border-radius: 50%;
   background: var(--color-accent);
   box-shadow: 0 0 0 4px var(--color-glow);
@@ -842,21 +867,13 @@ label > span {
 .hero__cta {
   display: grid;
   gap: var(--space-2);
-  justify-items: stretch;
-  width: 100%;
-  padding: var(--space-3);
-  border-radius: var(--radius-large);
-  background: var(--color-primary);
-  background: linear-gradient(135deg, var(--color-primary), var(--color-cta-end));
-  box-shadow: var(--shadow-large);
-  color: var(--color-on-primary);
+  justify-items: start;
 }
 
 .hero__cta-note {
   margin: 0;
-  color: var(--color-on-primary);
-  font-size: var(--step--1);
-  text-align: center;
+  color: var(--color-text-light);
+  font-size: var(--text-small);
 }
 
 .hero__actions {
@@ -871,7 +888,7 @@ label > span {
 
 .hero__note {
   color: var(--color-muted);
-  font-size: var(--step--1);
+  font-size: var(--text-small);
 }
 
 .hero__facts {
@@ -885,7 +902,7 @@ label > span {
 
 .hero__fact {
   display: grid;
-  gap: 4px;
+  gap: 0.25rem;
 }
 
 .hero__fact-value {
@@ -898,7 +915,7 @@ label > span {
 
 .hero__fact-label {
   color: var(--color-text-light);
-  font-size: var(--step--1);
+  font-size: var(--text-small);
 }
 
 .hero__figure {
@@ -916,7 +933,7 @@ label > span {
 
 .hero__caption {
   color: var(--color-muted);
-  font-size: var(--step--1);
+  font-size: var(--text-small);
   text-align: center;
 }
 
@@ -978,7 +995,7 @@ label > span {
 .footer__link {
   display: inline-flex;
   align-items: center;
-  min-height: 24px;
+  min-height: 1.5rem;
   color: var(--color-text-light);
   text-decoration: none;
 }
@@ -991,7 +1008,7 @@ label > span {
 .footer__address,
 .footer__copy {
   color: var(--color-muted);
-  font-size: var(--step--1);
+  font-size: var(--text-small);
 }
 ```
 
@@ -1017,11 +1034,6 @@ label > span {
     height: auto;
     overflow: visible;
     clip-path: none;
-  }
-
-  .theme__button {
-    padding: 0 var(--space-2);
-    font-size: var(--step--1);
   }
 }
 
@@ -1062,7 +1074,7 @@ label > span {
   .nav__link {
     min-height: var(--target-size-small);
     padding: 0 var(--space-1);
-    font-size: var(--step--1);
+    font-size: var(--text-small);
   }
 
   .hero__facts {
@@ -1108,6 +1120,65 @@ label > span {
   .cards {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
+}
+
+/* Touch targets: every control is at least 44 x 44 px (WCAG 2.5.8 asks 24 px, the interface rules of the project ask 44 px). */
+.header__logo,
+.nav__link,
+.footer__link,
+.card__link,
+.template-card__link,
+.project-card__link,
+.app-topbar__logo,
+.editor-toolbar__logo,
+.canvas__engine-link,
+.problems__location {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--target-size-small);
+}
+
+.filter__chip,
+.app-topbar__new,
+.app-topbar__search-input,
+.sort__select,
+.settings-row__select,
+.editor-tabs__tab,
+.problems__tab,
+.editor-segmented__button,
+.canvas__history-item,
+.button {
+  min-height: var(--target-size-small);
+}
+
+.app-topbar__avatar,
+.app-topbar__search-button,
+.project-card__menu,
+.editor-activity__button,
+.editor-tabs__close,
+.button--icon {
+  min-width: var(--target-size-small);
+  min-height: var(--target-size-small);
+}
+
+.form__checkbox {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.app-topbar__logo {
+  min-width: var(--target-size-small);
+  justify-content: center;
+}
+
+.problems__location {
+  align-self: center;
+  min-width: var(--target-size-small);
+  justify-content: center;
+}
+
+.template-card__link {
+  min-width: var(--target-size-small);
 }
 ```
 

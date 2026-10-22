@@ -9,7 +9,6 @@
   --color-primary: #2563eb;
   --color-on-primary: #ffffff;
   --color-primary-text: #1d4ed8;
-  --color-cta-end: #7c3aed;
   --color-diagram-paper: #ffffff;
   --color-secondary: #e8efff;
   --color-accent: #16a34a;
@@ -45,25 +44,27 @@
   --columns-golden: 1fr 1.618fr;
   --columns-golden-reverse: 1.618fr 1fr;
 
+  /* Smallest readable text: the golden step, but never below 14 px (WCAG and the interface rules). */
+  --text-small: max(var(--step--1), 0.875rem, 14px);
   --line-body: var(--phi);
   --line-heading: 1.15;
 
-  --space-1: 8px;
-  --space-2: 16px;
-  --space-3: 24px;
-  --space-4: 40px;
-  --space-5: 64px;
-  --space-6: 104px;
+  --space-1: 0.5rem;
+  --space-2: 1rem;
+  --space-3: 1.5rem;
+  --space-4: 2.5rem;
+  --space-5: 4rem;
+  --space-6: 6.5rem;
 
-  --radius-small: 8px;
-  --radius-medium: 16px;
-  --radius-large: 24px;
+  --radius-small: 0.5rem;
+  --radius-medium: 1rem;
+  --radius-large: 1.5rem;
 
   --container: 1200px;
   --measure: 62ch;
-  --header-height: 64px;
-  --target-size: 48px;
-  --target-size-small: 32px;
+  --header-height: 4rem;
+  --target-size: max(3rem, 48px);
+  --target-size-small: max(2.75rem, 44px);
   --focus-ring: 0 0 0 3px var(--color-background), 0 0 0 5px var(--color-primary);
 
   --breakpoint-small: 576px;
@@ -72,7 +73,7 @@
 
   /* Names required by the lab assignment; they alias the golden-ratio scales above. */
   --font-family-main: var(--font-sans);
-  --font-size-base: 16px;
+  --font-size-base: 1rem;
   --font-size-h1: var(--step-5);
   --font-size-h2: var(--step-4);
   --spacing-small: var(--space-1);

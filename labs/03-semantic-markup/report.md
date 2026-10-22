@@ -51,7 +51,7 @@
 
 ### 3.4 Иерархия заголовков
 
-Каждая страница содержит один заголовок первого уровня. На главной это «Пишите код — получайте диаграмму», секции получают заголовки второго уровня, карточки и шаги заголовки третьего. Пропусков уровней нет, это проверяет автоматический тест для всех 15 страниц сайта.
+Каждая страница содержит один заголовок первого уровня. На главной это «Пишите код — получайте диаграмму», секции получают заголовки второго уровня, карточки и шаги заголовки третьего. Пропусков уровней нет, это проверяет автоматический тест для всех 16 страниц сайта.
 
 ### 3.5 Доступность
 
@@ -107,12 +107,6 @@
 
 Работа выполнена в ветке `feature/semantic-markup`. Коммит: https://github.com/KsushaKhadzhinova/DSLKit-Project/commit/a2b85e0. Сообщение коммита: `feat: add semantic HTML markup with Schema.org for a SaaS diagram editor`.
 
-## 4 Ответы на контрольные вопросы
-
-5. **Ошибки валидации.** Валидатор показал замечание о секции без заголовка на странице настроек, а локальные проверки нашли ссылки на несуществующие идентификаторы. Секция заменена на `div`, ссылки исправлены. Валидная разметка одинаково обрабатывается браузерами и проще поддерживается.
-6. **Section и article.** Элемент `section` объединяет тематический раздел и требует заголовка, например «Тарифы». Элемент `article` самостоятелен и может существовать вне страницы, например карточка нотации или тариф.
-7. **Figure.** Элемент `figure` связывает иллюстрацию с подписью `figcaption`, и программы чтения с экрана воспринимают их как единое целое. Обычный `div` с изображением такой связи не создаёт.
-
 ## Заключение
 
 Создана семантическая разметка главной страницы DSLKit и сопутствующих страниц: русская и английская версии, страницы ошибок, политика и подтверждение записи. Использовано 15 семантических тегов, соблюдены иерархия заголовков и требования доступности, добавлена микроразметка SoftwareApplication, Offer и FAQPage. Валидаторы W3C и Schema.org не нашли ошибок, автоматические тесты проверяют разметку на всех страницах. Проверка в Rich Results Test отложена до публикации сайта.
@@ -163,7 +157,27 @@
         <div class="header__tools">
           <a class="header__lang" href="en/" hreflang="en" lang="en">English</a>
           <input class="theme__input" type="checkbox" id="theme-toggle" />
-          <label class="theme__button" for="theme-toggle">Тёмная тема</label>
+          <label class="theme__button" for="theme-toggle" title="Тёмная тема"
+            ><svg class="theme__icon theme__icon--moon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">
+              <path
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"
+              /></svg
+            ><svg class="theme__icon theme__icon--sun" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">
+              <circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2" />
+              <path
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"
+              /></svg
+            ><span class="theme__label">Тёмная тема</span></label
+          >
           <a class="button button--primary header__cta" href="#waitlist">В бету</a>
         </div>
       </div>
@@ -181,11 +195,11 @@
             Веб-редактор диаграмм как кода: опишите схему текстом на DSL, а DSLKit проверит её по правилам нотации и нарисует.
           </p>
           <div class="hero__cta">
-            <a class="button button--hero" href="app/editor.html">Создать диаграмму</a>
+            <a class="button button--primary button--hero" href="app/editor.html">Создать диаграмму</a>
             <p class="hero__cta-note">Откроется редактор: слева код, справа диаграмма</p>
           </div>
           <p class="hero__actions">
-            <a class="button button--primary" href="#waitlist">Записаться в бету</a>
+            <a class="button" href="#waitlist">Записаться в бету</a>
             <a class="button" href="#how">Как это работает</a>
           </p>
           <p class="hero__note" itemprop="offers" itemscope itemtype="https://schema.org/Offer">
@@ -681,7 +695,10 @@ import {
 } from './site-checks.js';
 
 const SITE = join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'site');
-const walk = (dir) => readdirSync(dir).flatMap((name) => (statSync(join(dir, name)).isDirectory() ? walk(join(dir, name)) : [join(dir, name)]));
+const walk = (dir) =>
+  readdirSync(dir)
+    .filter((name) => name !== 'design')
+    .flatMap((name) => (statSync(join(dir, name)).isDirectory() ? walk(join(dir, name)) : [join(dir, name)]));
 const files = walk(SITE);
 const pages = Object.fromEntries(
   files.filter((file) => file.endsWith('.html')).map((file) => [relative(SITE, file).replaceAll('\\', '/'), parse(readFileSync(file, 'utf8'))]),
@@ -695,9 +712,9 @@ const eachPage = (title, check, subset = names) =>
   });
 
 test('the site has the landing pages in both languages, error pages and application screens', () => {
-  for (const page of ['index.html', 'en/index.html', 'thanks.html', 'privacy.html', 'errors/404.html', 'app/editor.html'])
+  for (const page of ['index.html', 'en/index.html', 'thanks.html', 'privacy.html', 'errors/404.html', 'app/editor.html', 'en/app/editor.html'])
     assert.ok(names.includes(page), page);
-  assert.equal(names.length, 15);
+  assert.equal(names.length, 16);
 });
 
 eachPage('every page has lang, title, charset and viewport', documentProblems);
