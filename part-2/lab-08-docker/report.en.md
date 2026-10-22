@@ -176,7 +176,6 @@ services:
       DATABASE_URL: postgres://${POSTGRES_USER:-dslkit}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-dslkit}
       JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env, at least 32 random characters}
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-1h}
-      CORS_ORIGIN: http://localhost:${FRONTEND_PORT:-8080}
       ADMIN_EMAIL: ${ADMIN_EMAIL:-}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
       # Exactly one reverse proxy (Nginx) stands in front, so the rate limit sees the real client address.
@@ -222,19 +221,26 @@ volumes:
 ## Appendix D (mandatory) Listing of the nginx.conf file
 
 ```conf
+limit_req_zone $binary_remote_addr zone=api:10m rate=10r/s;
+
 server {
   listen 8080;
   server_name _;
+  server_tokens off;
+  # The API only takes small JSON bodies, and one address cannot flood it.
+  client_max_body_size 100k;
   root /usr/share/nginx/html;
   index index.html;
 
   add_header X-Content-Type-Options "nosniff" always;
   add_header X-Frame-Options "DENY" always;
   add_header Referrer-Policy "no-referrer" always;
+  add_header Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'" always;
 
   # Reverse proxy: /api/health becomes /health on the backend service, found by its name in the compose network.
   location /api/ {
     proxy_pass http://backend:3000/;
+    limit_req zone=api burst=20 nodelay;
     proxy_set_header Host $host;
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     proxy_set_header X-Forwarded-Proto $scheme;

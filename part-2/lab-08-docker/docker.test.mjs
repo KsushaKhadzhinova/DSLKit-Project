@@ -48,6 +48,14 @@ test('secrets come from .env, the example file holds no values and a mirror pref
   assert.match(backend, /^ARG REGISTRY=$/m);
 });
 
+test('Nginx hides its version, limits bodies and requests and sends a strict content security policy', () => {
+  assert.match(nginx, /server_tokens off;/);
+  assert.match(nginx, /client_max_body_size 100k;/);
+  assert.match(nginx, /limit_req zone=api/);
+  assert.match(nginx, /Content-Security-Policy "default-src 'self'; script-src 'self'/);
+  assert.doesNotMatch(nginx, /unsafe-inline/);
+});
+
 test('Nginx serves the single-page application and proxies /api to the backend service by name', () => {
   assert.match(nginx, /location \/api\/ \{\s*proxy_pass http:\/\/backend:3000\/;/);
   assert.match(nginx, /try_files \$uri \/index\.html/);
