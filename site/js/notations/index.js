@@ -4,6 +4,7 @@ import { parseHeader, problem, sourceLines } from './common.js';
 import { erGenerators, erd, idef1, idef1x, renderEr } from './er.js';
 import { dag, graphNotation, parseGraphTheory } from './graphs.js';
 import { parseIdef0 } from './idef0.js';
+import { renderIdef0 } from './idef0-render.js';
 import { generators as sequenceGenerators, parseSequence, render as renderSequence } from './sequence.js';
 import { activity, bpmn, dfd, gostFlow, idef3, petri, state, usecase } from './specs.js';
 import { communication, component, composite, deployment, idef5, object, overview, packages, profile } from './specs-uml.js';
@@ -33,7 +34,7 @@ export const NOTATIONS = {
   idef0: entry('IDEF0', 'IDEF0 — функциональное моделирование', 'IDEF0 — function modelling', {
     parse: (lines, header, source) => parseIdef0(source),
     generators: { graphviz: toDot, mermaid: toMermaid, plantuml: toPlantUml },
-    render: null,
+    render: renderIdef0,
   }),
   idef1: entry('IDEF1', 'IDEF1 — информационное моделирование', 'IDEF1 — information modelling', { parse: idef1, generators: erGenerators, render: renderEr }),
   idef1x: entry('IDEF1X', 'IDEF1X — моделирование данных', 'IDEF1X — data modelling', { parse: idef1x, generators: erGenerators, render: renderEr }),
@@ -126,8 +127,8 @@ export const pickFormat = (model, wanted) => {
 
 export const generate = (model, format) => NOTATIONS[keyOf(model)].generators[pickFormat(model, format)](model);
 
-// Notations other than IDEF0 are drawn by their own renderer; IDEF0 keeps the original box renderer.
-export const hasLocalRenderer = (model) => NOTATIONS[keyOf(model)].render !== null;
+// Parsed diagrams are drawn by the renderer of their notation; a bare legacy IDEF0 model keeps the original box renderer.
+export const hasLocalRenderer = (model) => model.notation !== undefined;
 export const renderNotation = (model) => NOTATIONS[keyOf(model)].render(model);
 
 export const notationName = (model, lang) => NOTATIONS[keyOf(model)].name[lang === 'en' ? 'en' : 'ru'];
