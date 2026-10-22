@@ -37,7 +37,7 @@ test('a preflight request from the allowed origin answers 204 with methods and h
   const { res } = await app.call('OPTIONS', '/diagrams/1', { headers: { Origin: ORIGIN, 'Access-Control-Request-Method': 'PUT' } });
   assert.equal(res.status, 204);
   assert.equal(res.headers.get('access-control-allow-origin'), ORIGIN);
-  assert.equal(res.headers.get('access-control-allow-methods'), 'GET, POST, PUT, DELETE, OPTIONS');
+  assert.equal(res.headers.get('access-control-allow-methods'), 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
   assert.equal(res.headers.get('access-control-allow-headers'), 'Content-Type, Authorization');
 });
 

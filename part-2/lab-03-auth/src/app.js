@@ -21,13 +21,13 @@ const DEFAULTS = {
   // Origin of the React client of lab 5 that may call the API.
   corsOrigin: 'http://localhost:5178',
   // Failed logins per email before it is locked, and for how long.
-  loginMaxAttempts: 5,
-  loginLockMs: 15 * MINUTE,
+  loginMaxAttempts: LIMITS.loginMaxAttempts,
+  loginLockMs: LIMITS.loginLockMinutes * MINUTE,
   // Requests per client address in a window: login and registration are limited separately.
-  loginRateMax: 20,
-  loginRateWindowMs: 15 * MINUTE,
-  registerRateMax: 10,
-  registerRateWindowMs: 60 * MINUTE,
+  loginRateMax: LIMITS.loginRateMax,
+  loginRateWindowMs: LIMITS.loginRateWindowMinutes * MINUTE,
+  registerRateMax: LIMITS.registerRateMax,
+  registerRateWindowMs: LIMITS.registerRateWindowMinutes * MINUTE,
 };
 
 // settings: { jwtSecret, jwtExpiresIn?, bcryptRounds?, login*/register* limits?, trustProxy?, corsOrigin? }

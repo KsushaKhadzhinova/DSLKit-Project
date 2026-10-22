@@ -2,5 +2,7 @@
   "title": 80,
   "owner": 60,
   "sourceCode": 10000,
+  "projectName": 80,
+  "revisionMax": 100000,
   "bodyBytes": "100kb"
 }

@@ -168,6 +168,31 @@ describe('editing', () => {
     expect(api.updateDiagram).toHaveBeenCalledWith(1, { title: 'Checkout', notation: 'UML', sourceCode: 'a -> b', priority: 'normal' });
   });
 
+  it('changes the notation in the edit mode and sends it with the whole record', async () => {
+    const user = userEvent.setup();
+    api.updateDiagram.mockResolvedValue({ data: { ...record(1, 'Order processing'), notation: 'ERD' } });
+    render(<App />);
+    await screen.findByText('Order processing');
+    await user.click(screen.getByRole('button', { name: 'Изменить: Order processing' }));
+    await user.selectOptions(screen.getByLabelText('Новая нотация'), 'ERD');
+    await user.click(screen.getByRole('button', { name: 'Сохранить: Order processing' }));
+    await waitFor(() => expect(api.updateDiagram).toHaveBeenCalledWith(1, { title: 'Order processing', notation: 'ERD', sourceCode: 'a -> b', priority: 'normal' }));
+  });
+
+  it('sends nothing when neither the title nor the notation changed, and Escape drops a changed notation', async () => {
+    const user = userEvent.setup();
+    render(<App />);
+    await screen.findByText('Order processing');
+    await user.click(screen.getByRole('button', { name: 'Изменить: Order processing' }));
+    await user.click(screen.getByRole('button', { name: 'Сохранить: Order processing' }));
+    expect(api.updateDiagram).not.toHaveBeenCalled();
+    await user.click(screen.getByRole('button', { name: 'Изменить: Order processing' }));
+    await user.selectOptions(screen.getByLabelText('Новая нотация'), 'DFD');
+    await user.keyboard('{Escape}');
+    await user.click(screen.getByRole('button', { name: 'Изменить: Order processing' }));
+    expect(screen.getByLabelText('Новая нотация')).toHaveValue('UML');
+  });
+
   it('restores the old title and shows a notice when the server refuses', async () => {
     const user = userEvent.setup();
     api.updateDiagram.mockRejectedValue(serverError(500, undefined));

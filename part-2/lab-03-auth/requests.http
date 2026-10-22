@@ -52,6 +52,20 @@ Authorization: Bearer {{token}}
 
 { "title": "Login flow", "notation": "UML", "sourceCode": "user -> server", "priority": "low" }
 
+### Partial update of my diagram -> 200 (only the sent fields change; replace 1 with an id of yours)
+PATCH {{base}}/diagrams/1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{ "priority": "high" }
+
+### Empty PATCH body -> 400
+PATCH {{base}}/diagrams/1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{}
+
 ### List diagrams -> 200
 GET {{base}}/diagrams
 Authorization: Bearer {{token}}

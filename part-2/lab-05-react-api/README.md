@@ -44,7 +44,7 @@ cd part-2/lab-05-react-api
 cp .env.example .env     # VITE_API_URL=http://localhost:3000
 npm install
 npm run dev              # http://localhost:5178
-npm test                 # Vitest и React Testing Library (42 теста) и проверка отчётов
+npm test                 # Vitest и React Testing Library (92 теста) и проверка отчётов
 npm run build            # сборка в dist/
 npm run shots            # скриншоты рисунков 1–9 в figures/ (нужен Chrome или Edge, сервер и клиент поднимаются сами)
 ```
@@ -82,4 +82,4 @@ shots/shots.mjs               скриншоты для отчёта (puppeteer-
 
 ## English summary
 
-Lab 5 of DSLKit, branch 25. A React + Vite client uses the lab 3 API: list with loading and error states and a retry button, optimistic add, delete and edit with rollback, JWT in an axios interceptor, server search with debounce and request cancellation as the extra feature. The look is the Part 1 stylesheet (`src/dslkit.css`). Run the lab 3 server (`npm run dev`), then `npm run dev` here (port 5178). `npm test` runs 42 Vitest tests and the report checks. The English report is `report.en.tpl.md`.
+Lab 5 of DSLKit, branch 25. A React + Vite client uses the lab 3 API: list with loading and error states and a retry button, optimistic add, delete and edit with rollback, JWT in an axios interceptor, server search with debounce and request cancellation as the extra feature. The look is the Part 1 stylesheet (`src/dslkit.css`). Run the lab 3 server (`npm run dev`), then `npm run dev` here (port 5178). `npm test` runs 92 Vitest tests and the report checks. The English report is `report.en.tpl.md`.

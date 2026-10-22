@@ -106,6 +106,10 @@ Figure 10 – The first page of the list with the counter and the "Загруз�
 
 While an edit or a delete is running, the card gets the "Сохраняется…" mark and `aria-busy`, its buttons are disabled, and a line "Сохранение на сервере…" with an indicator is shown above the list and disappears after the answer.
 
+The list read is repeated up to three times with a growing pause when the network is down or the server answers 5xx. A 4xx answer and a cancelled request are not repeated, and write and delete requests are never repeated, so a record is not created twice. In the edit mode of a card the notation can be changed too, and the whole record goes to the server.
+
+The main `App` component is kept short: it only chooses between the login form and the list. The login state is moved into the `useSession` hook, the list screen into the `DiagramsScreen` component, and the repeated parts into the small `Alert`, `Progress`, `SearchField` and `LoadMore` components.
+
 ### 3.7 Input Validation
 
 The form checks the values before sending. The title and the source code cannot be empty or made of spaces, the title is at most 80 characters, the source code is at most 10000, the password is from 8 to 72 bytes. The title and source code fields have the `maxLength` attribute, the source code is typed into a multi-line field with a character counter, and the check stays in case the attribute is bypassed. The password length is counted in bytes, because the bcrypt hash on the server uses only the first 72 bytes, and a Russian letter takes two bytes. The limits are in the `limits.json` file and match the server limits. The file is shown in Appendix E, and the check functions in Appendix D. The server repeats the same check, so the client cannot be bypassed.
@@ -130,6 +134,7 @@ The React client works with the server API: it receives the list with a loading 
 
 ```js
 import axios from 'axios';
+import limits from './limits.json';
 
 export const TOKEN_KEY = 'token';
 
@@ -187,8 +192,33 @@ export const fetchDiagrams = (search = '', signal, { limit, offset } = {}) => {
   if (search) params.search = search;
   if (limit !== undefined) params.limit = limit;
   if (offset) params.offset = offset;
-  return api.get('/diagrams', { params: Object.keys(params).length > 0 ? params : undefined, signal });
+  return withRetry(() => api.get('/diagrams', { params: Object.keys(params).length > 0 ? params : undefined, signal }), signal);
 };
+// A read is safe to repeat, so it is tried again when the network fails or the server answers 5xx, with a growing pause.
+// A 4xx answer or a cancelled request is final: repeating would give the same result or work against the user.
+export const retryOptions = { attempts: limits.retry.attempts, delayMs: limits.retry.delayMs };
+const isRetryable = (error) => (error.response ? error.response.status >= 500 : !axios.isCancel(error));
+const pause = (ms, signal) =>
+  new Promise((resolve, reject) => {
+    if (signal?.aborted) return reject(signal.reason);
+    const timer = setTimeout(resolve, ms);
+    signal?.addEventListener('abort', () => {
+      clearTimeout(timer);
+      reject(signal.reason);
+    });
+    return undefined;
+  });
+export const withRetry = async (request, signal) => {
+  for (let attempt = 1; ; attempt += 1) {
+    try {
+      return await request();
+    } catch (error) {
+      if (attempt >= retryOptions.attempts || !isRetryable(error) || signal?.aborted) throw error;
+      await pause(retryOptions.delayMs * attempt, signal);
+    }
+  }
+};
+
 export const addDiagram = (diagram) => api.post('/diagrams', diagram);
 export const updateDiagram = (id, diagram) => api.put(`/diagrams/${id}`, diagram);
 export const deleteDiagram = (id) => api.delete(`/diagrams/${id}`);
@@ -432,116 +462,20 @@ export function useDiagrams(search) {
 ## Appendix C (mandatory) Listing of App.jsx
 
 ```jsx
-import { useEffect, useState } from 'react';
-import { clearToken, getToken } from './api';
 import AuthForm from './components/AuthForm';
-import DiagramForm from './components/DiagramForm';
-import DiagramItem from './components/DiagramItem';
+import DiagramsScreen from './components/DiagramsScreen';
 import Footer from './components/Footer';
 import Header from './components/Header';
-import limits from './limits.json';
-import { useDebouncedValue } from './hooks/useDebouncedValue';
-import { useDiagrams } from './hooks/useDiagrams';
+import { useSession } from './hooks/useSession';
 
-// The list screen is separate so the hook runs only for a signed-in user.
-function Diagrams() {
-  const [search, setSearch] = useState('');
-  const debouncedSearch = useDebouncedValue(search.trim(), limits.searchDebounceMs);
-  const { items, loading, loadingMore, error, notice, busy, syncing, hasMore, total, retry, dismissNotice, loadMore, add, remove, update } =
-    useDiagrams(debouncedSearch);
-
-  return (
-    <>
-      <DiagramForm onAdd={add} />
-      <div className="form__field toolbar">
-        <label className="form__label" htmlFor="search">
-          Поиск по названию
-        </label>
-        <input
-          id="search"
-          className="form__input"
-          type="search"
-          autoComplete="off"
-          value={search}
-          maxLength={limits.title.maxLength}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-      </div>
-      {notice && (
-        <div className="alert" role="alert">
-          <p className="alert__text">{notice}</p>
-          <button type="button" className="button button--quiet" onClick={dismissNotice}>
-            Закрыть
-          </button>
-        </div>
-      )}
-      {loading && (
-        <p role="status" className="status">
-          <span className="spinner" aria-hidden="true"></span>
-          Загрузка…
-        </p>
-      )}
-      {error && !loading && (
-        <div role="alert" className="alert">
-          <p className="alert__text">{error}</p>
-          <button type="button" className="button" onClick={retry}>
-            Повторить
-          </button>
-        </div>
-      )}
-      {!loading && !error && items.length === 0 && (
-        <p className="note">
-          <span className="note__text">Диаграмм не найдено.</span>
-        </p>
-      )}
-      {syncing > 0 && (
-        <p role="status" className="status">
-          <span className="spinner" aria-hidden="true"></span>
-          Сохранение на сервере…
-        </p>
-      )}
-      {!error && (
-        <ul className="cards">
-          {items.map((diagram) => (
-            <DiagramItem key={diagram.id} diagram={diagram} busy={busy.has(diagram.id)} onUpdate={update} onRemove={remove} />
-          ))}
-        </ul>
-      )}
-      {!error && !loading && total !== null && total > 0 && (
-        <p className="stats">
-          Показано {items.length} из {total}
-        </p>
-      )}
-      {!error && !loading && hasMore && (
-        <div className="actions">
-          <button type="button" className="button" disabled={loadingMore} aria-busy={loadingMore ? 'true' : undefined} onClick={loadMore}>
-            {loadingMore ? 'Загрузка…' : 'Загрузить ещё'}
-          </button>
-        </div>
-      )}
-    </>
-  );
-}
+const TEXTS = {
+  in: { title: 'Диаграммы проекта', lead: 'Список хранится на сервере: запись появляется сразу, а при отказе сервера возвращается как было.' },
+  out: { title: 'Вход в DSLKit', lead: 'Диаграммы хранятся на сервере и доступны после входа.' },
+};
 
 export default function App() {
-  const [signedIn, setSignedIn] = useState(() => Boolean(getToken()));
-  const [expired, setExpired] = useState(false);
-
-  // api.js sends this event when the server answers 401 for the saved token.
-  useEffect(() => {
-    const handleLogout = () => {
-      setSignedIn(false);
-      setExpired(true);
-    };
-    window.addEventListener('auth:logout', handleLogout);
-    return () => window.removeEventListener('auth:logout', handleLogout);
-  }, []);
-
-  const logout = () => {
-    clearToken();
-    setExpired(false);
-    setSignedIn(false);
-  };
+  const { signedIn, expired, logout, loggedIn } = useSession();
+  const text = signedIn ? TEXTS.in : TEXTS.out;
 
   return (
     <div className="page">
@@ -551,24 +485,10 @@ export default function App() {
       <Header signedIn={signedIn} onLogout={logout} />
       <main className="main" id="main">
         <div>
-          <h1 className="page-title">{signedIn ? 'Диаграммы проекта' : 'Вход в DSLKit'}</h1>
-          <p className="page-lead">
-            {signedIn
-              ? 'Список хранится на сервере: запись появляется сразу, а при отказе сервера возвращается как было.'
-              : 'Диаграммы хранятся на сервере и доступны после входа.'}
-          </p>
+          <h1 className="page-title">{text.title}</h1>
+          <p className="page-lead">{text.lead}</p>
         </div>
-        {signedIn ? (
-          <Diagrams />
-        ) : (
-          <AuthForm
-            notice={expired ? 'Сессия истекла. Войдите снова.' : undefined}
-            onLoggedIn={() => {
-              setExpired(false);
-              setSignedIn(true);
-            }}
-          />
-        )}
+        {signedIn ? <DiagramsScreen /> : <AuthForm notice={expired ? 'Сессия истекла. Войдите снова.' : undefined} onLoggedIn={loggedIn} />}
       </main>
       <Footer />
     </div>
@@ -621,12 +541,27 @@ export const formatTime = (iso) => new Date(iso).toLocaleString('sv-SE');
 
 ```json
 {
-  "title": { "minLength": 1, "maxLength": 80 },
-  "sourceCode": { "minLength": 1, "maxLength": 10000 },
-  "email": { "maxLength": 254 },
-  "password": { "minLength": 8, "maxBytes": 72 },
+  "title": {
+    "minLength": 1,
+    "maxLength": 80
+  },
+  "sourceCode": {
+    "minLength": 1,
+    "maxLength": 10000
+  },
+  "email": {
+    "maxLength": 254
+  },
+  "password": {
+    "minLength": 8,
+    "maxBytes": 72
+  },
   "searchDebounceMs": 400,
-  "pageSize": 20
+  "pageSize": 20,
+  "retry": {
+    "attempts": 3,
+    "delayMs": 300
+  }
 }
 ```
 

@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import api, { addDiagram, deleteDiagram, errorMessage, fetchDiagrams, isCanceled, login, register, updateDiagram } from './api';
+import api, { addDiagram, deleteDiagram, errorMessage, fetchDiagrams, isCanceled, login, register, retryOptions, updateDiagram } from './api';
 
 let sent;
 const respond = (status = 200, data = {}) => {
@@ -11,6 +11,7 @@ const respond = (status = 200, data = {}) => {
 };
 
 beforeEach(() => {
+  retryOptions.delayMs = 0;
   sent = undefined;
   respond();
 });
@@ -110,5 +111,62 @@ describe('storage and odd responses', () => {
   });
   it('does not break on an HTML error page from a proxy', () => {
     expect(errorMessage({ response: { status: 502, data: '<html>Bad gateway</html>' } })).toBe('Ошибка сервера (502)');
+  });
+});
+
+describe('retry of the list request', () => {
+  const sequence = (...results) => {
+    let calls = 0;
+    api.defaults.adapter = (config) => {
+      const result = results[Math.min(calls, results.length - 1)];
+      calls += 1;
+      if (result === 'network') return Promise.reject(Object.assign(new Error('Network Error'), { config, isAxiosError: true }));
+      const response = { data: [], status: result, statusText: '', headers: {}, config };
+      return result < 400 ? Promise.resolve(response) : Promise.reject(Object.assign(new Error('fail'), { config, response, isAxiosError: true }));
+    };
+    return () => calls;
+  };
+
+  it('tries again after a 5xx answer and after a network failure, then succeeds', async () => {
+    const calls = sequence(503, 'network', 200);
+    await expect(fetchDiagrams()).resolves.toMatchObject({ status: 200 });
+    expect(calls()).toBe(3);
+  });
+
+  it('gives up after the allowed number of attempts and reports the last error', async () => {
+    const calls = sequence(500);
+    await expect(fetchDiagrams()).rejects.toMatchObject({ response: { status: 500 } });
+    expect(calls()).toBe(retryOptions.attempts);
+  });
+
+  it('does not repeat a 4xx answer', async () => {
+    const calls = sequence(404, 200);
+    await expect(fetchDiagrams()).rejects.toMatchObject({ response: { status: 404 } });
+    expect(calls()).toBe(1);
+  });
+
+  it('does not repeat a cancelled request', async () => {
+    const controller = new AbortController();
+    const calls = sequence('network', 200);
+    controller.abort();
+    await expect(fetchDiagrams('', controller.signal)).rejects.toBeTruthy();
+    expect(calls()).toBeLessThanOrEqual(1);
+  });
+
+  it('stops waiting between attempts when the request is cancelled', async () => {
+    retryOptions.delayMs = 5000;
+    const controller = new AbortController();
+    const calls = sequence(500, 200);
+    const result = fetchDiagrams('', controller.signal);
+    setTimeout(() => controller.abort(), 20);
+    await expect(result).rejects.toBeTruthy();
+    expect(calls()).toBe(1);
+  });
+
+  it('writes and deletes are never repeated', async () => {
+    const calls = sequence(500);
+    await expect(addDiagram({ title: 'a' })).rejects.toBeTruthy();
+    await expect(deleteDiagram(1)).rejects.toBeTruthy();
+    expect(calls()).toBe(2);
   });
 });

@@ -1,5 +1,5 @@
 const { Router } = require('express');
-const { parseId, validateDiagram } = require('../middleware/validate');
+const { parseId, validateDiagram, validatePartial } = require('../middleware/validate');
 const { allowMethods } = require('../middleware/http');
 
 // The token is checked per method, so 405 and OPTIONS answers do not need one.
@@ -14,8 +14,9 @@ const createDiagramsRouter = (controller, authenticate) => {
     .route('/:id')
     .get(authenticate, parseId(), controller.get)
     .put(authenticate, parseId(), validateDiagram, controller.replace)
+    .patch(authenticate, parseId(), validatePartial, controller.update)
     .delete(authenticate, parseId(), controller.remove)
-    .all(allowMethods(['GET', 'PUT', 'DELETE']));
+    .all(allowMethods(['GET', 'PUT', 'PATCH', 'DELETE']));
   return router;
 };
 

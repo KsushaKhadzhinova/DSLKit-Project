@@ -1,4 +1,5 @@
 import axios from 'axios';
+import limits from './limits.json';
 
 export const TOKEN_KEY = 'token';
 
@@ -56,8 +57,33 @@ export const fetchDiagrams = (search = '', signal, { limit, offset } = {}) => {
   if (search) params.search = search;
   if (limit !== undefined) params.limit = limit;
   if (offset) params.offset = offset;
-  return api.get('/diagrams', { params: Object.keys(params).length > 0 ? params : undefined, signal });
+  return withRetry(() => api.get('/diagrams', { params: Object.keys(params).length > 0 ? params : undefined, signal }), signal);
 };
+// A read is safe to repeat, so it is tried again when the network fails or the server answers 5xx, with a growing pause.
+// A 4xx answer or a cancelled request is final: repeating would give the same result or work against the user.
+export const retryOptions = { attempts: limits.retry.attempts, delayMs: limits.retry.delayMs };
+const isRetryable = (error) => (error.response ? error.response.status >= 500 : !axios.isCancel(error));
+const pause = (ms, signal) =>
+  new Promise((resolve, reject) => {
+    if (signal?.aborted) return reject(signal.reason);
+    const timer = setTimeout(resolve, ms);
+    signal?.addEventListener('abort', () => {
+      clearTimeout(timer);
+      reject(signal.reason);
+    });
+    return undefined;
+  });
+export const withRetry = async (request, signal) => {
+  for (let attempt = 1; ; attempt += 1) {
+    try {
+      return await request();
+    } catch (error) {
+      if (attempt >= retryOptions.attempts || !isRetryable(error) || signal?.aborted) throw error;
+      await pause(retryOptions.delayMs * attempt, signal);
+    }
+  }
+};
+
 export const addDiagram = (diagram) => api.post('/diagrams', diagram);
 export const updateDiagram = (id, diagram) => api.put(`/diagrams/${id}`, diagram);
 export const deleteDiagram = (id) => api.delete(`/diagrams/${id}`);
