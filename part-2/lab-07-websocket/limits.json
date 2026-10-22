@@ -9,6 +9,7 @@
   "eventRateMax": 40,
   "eventRateWindowMs": 2000,
   "maxUsers": 200,
+  "maxPerAddress": 20,
   "maxRoomsPerUser": 5,
   "maxRoomMembers": 50,
   "maxPacketBytes": 10000

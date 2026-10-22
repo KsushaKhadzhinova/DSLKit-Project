@@ -213,6 +213,29 @@ test('the server refuses new users when it is full', async () => {
   await assert.rejects(join('two', base), /full/);
 });
 
+test('one address cannot take more than its share of connections, and the place is free again after a disconnect', async () => {
+  const { url: base } = await listen({ maxPerAddress: 2 });
+  const { socket: first } = await join('one', base);
+  await join('two', base);
+  await assert.rejects(join('three', base), /Too many connections from your address/);
+  first.close();
+  await new Promise((resolve) => setTimeout(resolve, 100));
+  await join('three', base);
+});
+
+test('a production server refuses to start with the built-in token secret', () => {
+  const saved = { env: process.env.NODE_ENV, secret: process.env.TOKEN_SECRET };
+  process.env.NODE_ENV = 'production';
+  delete process.env.TOKEN_SECRET;
+  try {
+    assert.throws(() => createServer(), /TOKEN_SECRET is required/);
+    assert.doesNotThrow(() => createServer({ tokenSecret: 'a-real-secret-of-some-length-0123456789' }).io.close());
+  } finally {
+    process.env.NODE_ENV = saved.env;
+    if (saved.secret !== undefined) process.env.TOKEN_SECRET = saved.secret;
+  }
+});
+
 test('history keeps a limited number of rooms and drops the least recently used one', () => {
   const history = createHistory(5, 2);
   history.add('a', 1);

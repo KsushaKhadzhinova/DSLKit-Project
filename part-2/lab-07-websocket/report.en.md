@@ -226,6 +226,8 @@ const createServer = ({
   setup,
   ...options
 } = {}) => {
+  // The built-in secret is public, so a production server must get its own.
+  if (process.env.NODE_ENV === 'production' && tokenSecret === DEFAULT_SECRET) throw new Error('TOKEN_SECRET is required when NODE_ENV is production');
   const app = express();
   app.disable('x-powered-by');
   app.use(securityHeaders);
@@ -285,6 +287,7 @@ const createHub = (io, opts) => {
   const history = opts.history ?? createHistory(opts.historyLimit, opts.historyMaxRooms);
   const rooms = new Map();
   const online = new Map(); // socket id -> { id, username }
+  const perAddress = new Map(); // client address -> number of open sockets
   let messageSeq = 0;
   const usersOf = (room) => [...(rooms.get(room)?.values() ?? [])];
   const onlineList = () => [...online.values()];
@@ -298,6 +301,7 @@ const createHub = (io, opts) => {
     onlineList,
     publishPresence: (room) => io.to(room).emit('presence:update', { room, users: usersOf(room) }),
     makeMessage: (user, text, extra) => ({ id: ++messageSeq, from: user.username, fromId: user.id, text, at: Date.now(), ...extra }),
+    perAddress,
     isTaken: (username) => onlineList().some((u) => u.username.toLowerCase() === username.toLowerCase()),
   };
 };
@@ -318,6 +322,8 @@ const createHandshake = (hub) => (socket, next) => {
   if (!username) return next(new Error(`A username of 1-${limits.nameMaxLength} letters, digits, dots, dashes or underscores is required`));
   if (hub.isTaken(username)) return next(new Error('This username is already taken'));
   if (hub.online.size >= opts.maxUsers) return next(new Error('The server is full, try again later'));
+  // One client cannot take all the places of the server.
+  if ((hub.perAddress.get(socket.handshake.address) ?? 0) >= opts.maxPerAddress) return next(new Error('Too many connections from your address'));
   socket.data.username = username;
   next();
 };
@@ -429,6 +435,8 @@ const handleConnection = (hub, socket) => {
   const conn = { socket, user, joined: new Set(), allowed: createLimiter(opts.rateMax, opts.rateWindowMs) };
   const eventAllowed = createLimiter(opts.eventRateMax, opts.eventRateWindowMs);
   hub.online.set(socket.id, { id: user.id, username: user.username });
+  const address = socket.handshake.address;
+  hub.perAddress.set(address, (hub.perAddress.get(address) ?? 0) + 1);
 
   // Flood guard for every event (join, typing, editing...); chat messages have their own, stricter limit.
   socket.use((packet, next) => {
@@ -459,6 +467,9 @@ const handleConnection = (hub, socket) => {
   socket.on('disconnect', () => {
     [...conn.joined].forEach(roomActions.leave);
     hub.online.delete(socket.id);
+    const left = (hub.perAddress.get(address) ?? 1) - 1;
+    if (left > 0) hub.perAddress.set(address, left);
+    else hub.perAddress.delete(address);
     socket.broadcast.emit('user:offline', { id: user.id, username: user.username, at: Date.now() });
   });
 };

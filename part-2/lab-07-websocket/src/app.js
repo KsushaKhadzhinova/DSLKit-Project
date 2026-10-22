@@ -36,6 +36,8 @@ const createServer = ({
   setup,
   ...options
 } = {}) => {
+  // The built-in secret is public, so a production server must get its own.
+  if (process.env.NODE_ENV === 'production' && tokenSecret === DEFAULT_SECRET) throw new Error('TOKEN_SECRET is required when NODE_ENV is production');
   const app = express();
   app.disable('x-powered-by');
   app.use(securityHeaders);
