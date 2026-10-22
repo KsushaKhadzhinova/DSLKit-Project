@@ -6,7 +6,7 @@ import limits from './limits.json';
 import ErrorBoundary from './shell/ErrorBoundary';
 import { THEME_KEY, readTheme } from './shell/theme';
 import { newId, uniqueCreatedAt } from './utils/diagrams';
-import { canAddMore, formatTime, isDiagramList, validateTitle } from './utils/validation';
+import { canAddMore, formatTime, isDiagramList, repairDiagramList, validateTitle } from './utils/validation';
 
 const items = () => within(screen.getByRole('list', { name: 'Диаграммы' })).getAllByRole('listitem');
 const sample = { id: 'a', title: 'Схема', notation: 'UML', published: false, createdAt: '2026-10-16T12:30:05', updatedAt: '2026-10-16' };
@@ -60,6 +60,19 @@ describe('storage shape and time format', () => {
     expect(isDiagramList([sample, { ...sample }])).toBe(false);
     const many = Array.from({ length: limits.diagrams.maxCount + 1 }, (_, i) => ({ ...sample, id: i }));
     expect(isDiagramList(many)).toBe(false);
+  });
+
+  it('repair keeps the good records and drops bad, repeated and surplus ones', () => {
+    const second = { ...sample, id: 'b' };
+    expect(repairDiagramList([sample, { id: 'x' }, null, { ...sample }, second])).toEqual([sample, second]);
+    const many = Array.from({ length: limits.diagrams.maxCount + 5 }, (_, i) => ({ ...sample, id: i }));
+    expect(repairDiagramList(many)).toHaveLength(limits.diagrams.maxCount);
+  });
+
+  it('repair gives null when nothing can be saved', () => {
+    expect(repairDiagramList({})).toBeNull();
+    expect(repairDiagramList([null, { id: 1 }])).toBeNull();
+    expect(repairDiagramList([])).toBeNull();
   });
 
   it('formats time as date and time', () => {

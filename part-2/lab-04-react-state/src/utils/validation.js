@@ -32,3 +32,16 @@ const isDiagram = (d) =>
 // localStorage can hold anything (edited by hand, an old format, another script): trust only a well-formed list.
 export const isDiagramList = (value) =>
   Array.isArray(value) && value.length <= limits.diagrams.maxCount && value.every(isDiagram) && new Set(value.map((d) => d.id)).size === value.length;
+
+// A list with some bad records is not thrown away: the good records stay, bad ones, repeated ids and records over the cap are dropped.
+// Nothing usable (not a list, or no record passes) gives null, then the initial data is used.
+export const repairDiagramList = (value) => {
+  if (!Array.isArray(value)) return null;
+  const seen = new Set();
+  const good = value.filter((d) => {
+    if (!isDiagram(d) || seen.has(d.id)) return false;
+    seen.add(d.id);
+    return true;
+  });
+  return good.length > 0 ? good.slice(0, limits.diagrams.maxCount) : null;
+};

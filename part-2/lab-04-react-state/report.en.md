@@ -34,7 +34,7 @@ The form and the edit mode check the diagram title before saving. A value made o
 
 ### 3.6 Resistance to Foreign Data
 
-The content of `localStorage` can be edited by hand or left over from an older version. The `isDiagramList` function accepts only a list in which every record has a valid title, a known notation, a boolean status and correct dates, and the identifiers are unique. On any rejection the initial set is used. Titles are rendered as text, so markup inside a title is never executed. The identifier is created with `crypto.randomUUID`, and a fallback is used on an address without a secure context. The `ErrorBoundary` component shows the 500 page in the site style instead of a blank screen when rendering fails.
+The content of `localStorage` can be edited by hand or left over from an older version. The `isDiagramList` function accepts only a list in which every record has a valid title, a known notation, a boolean status and correct dates, and the identifiers are unique. If the whole list does not fit, the `repairDiagramList` function keeps only the good records, drops damaged and repeated ones and cuts the list to the cap. If no record is usable, the initial set is used. Titles are rendered as text, so markup inside a title is never executed. The identifier is created with `crypto.randomUUID`, and a fallback is used on an address without a secure context. The `ErrorBoundary` component shows the 500 page in the site style instead of a blank screen when rendering fails.
 
 ### 3.7 Appearance
 

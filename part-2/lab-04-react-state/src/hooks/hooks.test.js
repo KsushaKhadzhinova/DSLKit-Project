@@ -35,6 +35,14 @@ describe('useLocalStorage validation and errors', () => {
     expect(result.current[0]).toEqual([]);
   });
 
+  it('repair keeps what can be saved from rejected data and null falls back to the initial value', () => {
+    localStorage.setItem('k', JSON.stringify([1, 'x', 2]));
+    const keep = renderHook(() => useLocalStorage('k', [], (v) => v.every(Number.isInteger), (v) => v.filter(Number.isInteger)));
+    expect(keep.result.current[0]).toEqual([1, 2]);
+    const none = renderHook(() => useLocalStorage('k', ['start'], () => false, () => null));
+    expect(none.result.current[0]).toEqual(['start']);
+  });
+
   it('does not throw when setItem fails', () => {
     const spy = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
       throw new Error('QuotaExceededError');

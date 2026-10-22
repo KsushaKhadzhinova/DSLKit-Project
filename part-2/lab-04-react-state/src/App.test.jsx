@@ -99,6 +99,14 @@ describe('App', () => {
     expect(items()).toHaveLength(INITIAL_DIAGRAMS.length);
   });
 
+  it('keeps the good records when only one stored record is damaged', () => {
+    const [first, second, third] = INITIAL_DIAGRAMS;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify([first, { ...second, title: '' }, third]));
+    render(<App />);
+    expect(items()).toHaveLength(2);
+    expect(titles()).toEqual(expect.arrayContaining([first.title, third.title]));
+  });
+
   it('keeps working when localStorage rejects writes', async () => {
     const user = userEvent.setup();
     const spy = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {

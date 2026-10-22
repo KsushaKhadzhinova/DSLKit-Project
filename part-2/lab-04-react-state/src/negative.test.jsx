@@ -178,11 +178,11 @@ describe('damaged or blocked localStorage', () => {
     expect(titles().sort()).toEqual(INITIAL_DIAGRAMS.map((d) => d.title).sort());
   });
 
-  it('starts with the initial list when the stored list is over the limit', () => {
+  it('cuts a stored list that is over the limit to the cap', () => {
     const many = Array.from({ length: limits.diagrams.maxCount + 1 }, (_, i) => ({ ...sample, id: i }));
     localStorage.setItem(STORAGE_KEY, JSON.stringify(many));
     render(<App />);
-    expect(items()).toHaveLength(INITIAL_DIAGRAMS.length);
+    expect(items()).toHaveLength(limits.diagrams.maxCount);
   });
 
   it('renders the page when reading storage throws', () => {

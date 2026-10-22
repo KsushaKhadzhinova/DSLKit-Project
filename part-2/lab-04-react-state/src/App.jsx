@@ -10,7 +10,7 @@ import { ThemeProvider } from './shell/theme';
 import SiteFooter from './shell/SiteFooter';
 import SiteHeader, { LogoContent } from './shell/SiteHeader';
 import { filterDiagrams, getStats, newId, sortDiagrams, uniqueCreatedAt } from './utils/diagrams';
-import { canAddMore, isDiagramList } from './utils/validation';
+import { canAddMore, isDiagramList, repairDiagramList } from './utils/validation';
 
 export const STORAGE_KEY = 'dslkit.diagrams';
 
@@ -47,7 +47,7 @@ const FOOTER_LINKS = (
 );
 
 export default function App() {
-  const [diagrams, setDiagrams] = useLocalStorage(STORAGE_KEY, INITIAL_DIAGRAMS, isDiagramList);
+  const [diagrams, setDiagrams] = useLocalStorage(STORAGE_KEY, INITIAL_DIAGRAMS, isDiagramList, repairDiagramList);
   const [query, setQuery] = useState('');
   const [status, setStatus] = useState('all');
   const [sortBy, setSortBy] = useState('date');
