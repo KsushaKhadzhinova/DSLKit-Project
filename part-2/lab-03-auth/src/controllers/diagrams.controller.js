@@ -22,7 +22,15 @@ const createDiagramsController = ({ Diagram }) => ({
     const term = (search ?? '').trim();
     const where = term ? { title: { [Op.like]: `%${term}%` } } : undefined;
     const { limit, offset, sort, order } = parseListQuery(req.query, SORTABLE);
-    const { count, rows } = await Diagram.findAndCountAll({ where, order: [[sort, order.toUpperCase()], ['id', 'ASC']], limit, offset });
+    const { count, rows } = await Diagram.findAndCountAll({
+      where,
+      order: [
+        [sort, order.toUpperCase()],
+        ['id', 'ASC'],
+      ],
+      limit,
+      offset,
+    });
     res.set('X-Total-Count', String(count));
     return res.json(rows);
   },

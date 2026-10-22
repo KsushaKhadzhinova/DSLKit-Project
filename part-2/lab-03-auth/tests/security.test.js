@@ -25,7 +25,15 @@ test('the JWT secret must be long and not a repeated pattern, the lifetime short
   for (const bad of ['', 'abc', '0', '-5', '1y', '25h', '2d', 0, NaN, '1.5h', undefined]) {
     assert.throws(() => checkJwtSettings({ jwtSecret: SECRET, jwtExpiresIn: bad }), /jwtExpiresIn/, String(bad));
   }
-  for (const [good, seconds] of [['15m', 900], ['1h', 3600], ['24h', 86400], ['1d', 86400], [3600, 3600], ['90', 90], ['30s', 30]]) {
+  for (const [good, seconds] of [
+    ['15m', 900],
+    ['1h', 3600],
+    ['24h', 86400],
+    ['1d', 86400],
+    [3600, 3600],
+    ['90', 90],
+    ['30s', 30],
+  ]) {
     assert.equal(checkJwtSettings({ jwtSecret: SECRET, jwtExpiresIn: good }), seconds, String(good));
   }
   assert.equal(lifetimeSeconds('nonsense'), NaN);
@@ -39,7 +47,10 @@ test('createApp applies the same checks, so a weak setup cannot start the server
 test('the token is HS256, carries issuer, subject and an expiry, and no password data', async () => {
   const { body } = await app.call('POST', '/auth/register', creds('tok@example.com'));
   const login = await app.call('POST', '/auth/login', creds('tok@example.com'));
-  const [header, payload] = login.body.token.split('.').slice(0, 2).map((part) => JSON.parse(Buffer.from(part, 'base64url')));
+  const [header, payload] = login.body.token
+    .split('.')
+    .slice(0, 2)
+    .map((part) => JSON.parse(Buffer.from(part, 'base64url')));
   assert.deepEqual(header, { alg: 'HS256', typ: 'JWT' });
   assert.equal(payload.iss, 'dslkit');
   assert.equal(payload.sub, String(body.id));
@@ -123,7 +134,10 @@ test('a user cannot raise their own role through the body of any request', async
   const token = await app.tokenFor('sneaky@example.com');
   const me = await app.models.User.findOne({ where: { email: 'sneaky@example.com' } });
   assert.equal((await app.call('PATCH', `/users/${me.id}/role`, { token, body: { role: 'admin' } })).res.status, 403);
-  assert.equal((await app.call('POST', '/diagrams', { token, body: { title: 't', notation: 'UML', sourceCode: 's', ownerId: 1, role: 'admin' } })).body.ownerId, me.id);
+  assert.equal(
+    (await app.call('POST', '/diagrams', { token, body: { title: 't', notation: 'UML', sourceCode: 's', ownerId: 1, role: 'admin' } })).body.ownerId,
+    me.id,
+  );
   assert.equal((await app.models.User.findByPk(me.id)).role, 'user');
 });
 
@@ -228,6 +242,24 @@ test('the limiter and the login guard keep their memory bounded', () => {
   // The oldest entries were dropped, the newest are still locked.
   assert.equal(guard.retryAfter('user0@example.com'), 0);
   assert.ok(guard.retryAfter('user24999@example.com') > 0);
+});
+
+test('failed logins from one address do not lock the account for the owner on another address', async () => {
+  const strict = await startServer({ loginMaxAttempts: 3, loginLockMs: 60000, trustProxy: true });
+  const from = (ip) => ({ 'x-forwarded-for': ip });
+  try {
+    await strict.call('POST', '/auth/register', creds('owner@example.com'));
+    for (let i = 0; i < 3; i += 1) {
+      const wrong = await strict.call('POST', '/auth/login', { ...creds('owner@example.com', 'wrong password'), headers: from('203.0.113.9') });
+      assert.equal(wrong.res.status, 401);
+    }
+    const attacker = await strict.call('POST', '/auth/login', { ...creds('owner@example.com'), headers: from('203.0.113.9') });
+    assert.equal(attacker.res.status, 429);
+    const owner = await strict.call('POST', '/auth/login', { ...creds('owner@example.com'), headers: from('198.51.100.7') });
+    assert.equal(owner.res.status, 200);
+  } finally {
+    await strict.close();
+  }
 });
 
 test('too many login requests from one address answer 429', async () => {
