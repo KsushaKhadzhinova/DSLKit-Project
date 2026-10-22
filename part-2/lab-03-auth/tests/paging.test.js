@@ -42,7 +42,20 @@ test('sort and order arrange the list', async () => {
 });
 
 test('bad or huge values and unknown fields get 400 with the list of problems', async () => {
-  const bad = ['?limit=0', '?limit=101', '?limit=abc', '?limit=-1', '?limit=1e9', '?limit=99999999999999999999', '?offset=-1', '?offset=2000000', '?sort=passwordHash', '?sort=title;drop', '?order=up', '?limit=1&limit=2'];
+  const bad = [
+    '?limit=0',
+    '?limit=101',
+    '?limit=abc',
+    '?limit=-1',
+    '?limit=1e9',
+    '?limit=99999999999999999999',
+    '?offset=-1',
+    '?offset=2000000',
+    '?sort=passwordHash',
+    '?sort=title;drop',
+    '?order=up',
+    '?limit=1&limit=2',
+  ];
   for (const query of bad) {
     const { res, body } = await get(query);
     assert.equal(res.status, 400, query);
