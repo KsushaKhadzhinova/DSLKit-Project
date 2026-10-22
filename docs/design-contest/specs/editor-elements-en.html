@@ -1,0 +1,47 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>Editor elements: sizes, labels and tooltips</title><style>
+body{background:#fff;color-scheme:light;font:16px/1.5 Inter,system-ui,sans-serif;margin:2rem auto;max-width:72rem;padding:0 1rem;color:#1c1f2e}
+table{border-collapse:collapse;width:100%}th,td{border:1px solid #dde1e9;padding:.35rem .6rem;text-align:left}th{background:#e8efff}
+.ok{color:#15803d;font-weight:600}.low{color:#b45309;font-weight:600}code{font-size:.85em}</style>
+<h1>Editor elements: sizes, labels and tooltips</h1><p>Sizes are measured on a 1440 by 900 pixel screen. A touch target is at least 44 by 44 pixels (WCAG 2.2, 2.5.8 and 2.5.5).</p>
+<table><thead><tr><th>Element</th><th>Class</th><th>Label or tooltip</th><th>Width, px</th><th>Height, px</th><th>44 px target</th></tr></thead><tbody><tr><td>a</td><td><code>editor-toolbar__logo</code></td><td>DSLKit</td><td>88</td><td>48</td><td class="ok">yes</td></tr>
+<tr><td>button</td><td><code>button</code></td><td>Run</td><td>96</td><td>48</td><td class="ok">yes</td></tr>
+<tr><td>button</td><td><code>button</code></td><td>Undo</td><td>48</td><td>48</td><td class="ok">yes</td></tr>
+<tr><td>button</td><td><code>button</code></td><td>Redo</td><td>48</td><td>48</td><td class="ok">yes</td></tr>
+<tr><td>button</td><td><code>button</code></td><td>Save (Ctrl+S)</td><td>48</td><td>48</td><td class="ok">yes</td></tr>
+<tr><td>summary</td><td><code>button</code></td><td>More actions</td><td>48</td><td>48</td><td class="ok">yes</td></tr>
+<tr><td>button</td><td><code>button</code></td><td>Check</td><td>244</td><td>48</td><td class="ok">yes</td></tr>
+<tr><td>button</td><td><code>button</code></td><td>Format</td><td>244</td><td>48</td><td class="ok">yes</td></tr>
+<tr><td>button</td><td><code>button</code></td><td>Share</td><td>244</td><td>48</td><td class="ok">yes</td></tr>
+<tr><td>button</td><td><code>button</code></td><td>Diagram: IDEF0</td><td>244</td><td>48</td><td class="ok">yes</td></tr>
+<tr><td>button</td><td><code>button</code></td><td>Auto layout</td><td>244</td><td>48</td><td class="ok">yes</td></tr>
+<tr><td>button</td><td><code>button</code></td><td>Refresh from the server</td><td>244</td><td>48</td><td class="ok">yes</td></tr>
+<tr><td>button</td><td><code>editor-toolbar__switch</code></td><td>Autosave</td><td>244</td><td>48</td><td class="ok">yes</td></tr>
+<tr><td>button</td><td><code>button</code></td><td>Theme</td><td>244</td><td>48</td><td class="ok">yes</td></tr>
+<tr><td>button</td><td><code>editor-activity__button</code></td><td>Files</td><td>48</td><td>48</td><td class="ok">yes</td></tr>
+<tr><td>button</td><td><code>editor-activity__button</code></td><td>Search</td><td>48</td><td>48</td><td class="ok">yes</td></tr>
+<tr><td>button</td><td><code>editor-activity__button</code></td><td>Git</td><td>48</td><td>48</td><td class="ok">yes</td></tr>
+<tr><td>button</td><td><code>editor-activity__button</code></td><td>AI assistant</td><td>48</td><td>48</td><td class="ok">yes</td></tr>
+<tr><td>a</td><td><code>editor-activity__button</code></td><td>Settings</td><td>48</td><td>48</td><td class="ok">yes</td></tr>
+<tr><td>button</td><td><code>file-tree__item</code></td><td>order.dsl</td><td>239</td><td>48</td><td class="ok">yes</td></tr>
+<tr><td>button</td><td><code>file-tree__item</code></td><td>rules.dsl</td><td>239</td><td>48</td><td class="ok">yes</td></tr>
+<tr><td>button</td><td><code>file-tree__item</code></td><td>invoice.dsl</td><td>239</td><td>48</td><td class="ok">yes</td></tr>
+<tr><td>button</td><td><code>templates__item</code></td><td>IDEF0 beta</td><td>239</td><td>48</td><td class="ok">yes</td></tr>
+<tr><td>button</td><td><code>templates__item</code></td><td>DFD beta</td><td>239</td><td>48</td><td class="ok">yes</td></tr>
+<tr><td>button</td><td><code>templates__item</code></td><td>ERD beta</td><td>239</td><td>48</td><td class="ok">yes</td></tr>
+<tr><td>select</td><td><code>settings-row__select</code></td><td>Diagram template</td><td>239</td><td>48</td><td class="ok">yes</td></tr>
+<tr><td>button</td><td><code>editor-tabs__tab</code></td><td>order.dsl unsaved</td><td>113</td><td>48</td><td class="ok">yes</td></tr>
+<tr><td>button</td><td><code>editor-tabs__tab</code></td><td>rules.dsl</td><td>90</td><td>48</td><td class="ok">yes</td></tr>
+<tr><td>button</td><td><code>editor-tabs__close</code></td><td>Close file order.dsl</td><td>48</td><td>48</td><td class="ok">yes</td></tr>
+<tr><td>button</td><td><code>button</code></td><td>Order process · 2026-10-22 16:03</td><td>283</td><td>48</td><td class="ok">yes</td></tr>
+<tr><td>button</td><td><code>button</code></td><td>Zoom in</td><td>48</td><td>48</td><td class="ok">yes</td></tr>
+<tr><td>button</td><td><code>button</code></td><td>Zoom out</td><td>48</td><td>48</td><td class="ok">yes</td></tr>
+<tr><td>button</td><td><code>button</code></td><td>Fit the diagram to the screen</td><td>48</td><td>48</td><td class="ok">yes</td></tr>
+<tr><td>button</td><td><code>problems__tab</code></td><td>Problems: 3</td><td>75</td><td>48</td><td class="ok">yes</td></tr>
+<tr><td>button</td><td><code>problems__tab</code></td><td>AI assistant</td><td>59</td><td>48</td><td class="ok">yes</td></tr>
+<tr><td>button</td><td><code>problems__tab</code></td><td>Output</td><td>59</td><td>48</td><td class="ok">yes</td></tr>
+<tr><td>button</td><td><code>problems__tab</code></td><td>Versions</td><td>59</td><td>48</td><td class="ok">yes</td></tr>
+<tr><td>a</td><td><code>problems__location</code></td><td>order.dsl:2</td><td>595</td><td>48</td><td class="ok">yes</td></tr>
+<tr><td>a</td><td><code>problems__location</code></td><td>order.dsl:2</td><td>528</td><td>48</td><td class="ok">yes</td></tr>
+<tr><td>a</td><td><code>problems__location</code></td><td>order.dsl:4</td><td>827</td><td>48</td><td class="ok">yes</td></tr>
+<tr><td>a</td><td><code>problems__location</code></td><td>order.dsl:7</td><td>599</td><td>48</td><td class="ok">yes</td></tr>
+<tr><td>a</td><td><code>problems__location</code></td><td>order.dsl:7</td><td>595</td><td>48</td><td class="ok">yes</td></tr></tbody></table></html>
