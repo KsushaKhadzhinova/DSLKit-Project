@@ -106,6 +106,8 @@ Figure 10 – The first page of the list with the counter and the "Загруз�
 
 While an edit or a delete is running, the card gets the "Сохраняется…" mark and `aria-busy`, its buttons are disabled, and a line "Сохранение на сервере…" with an indicator is shown above the list and disappears after the answer.
 
+The list read is repeated up to three times with a growing pause when the network is down or the server answers 5xx. A 4xx answer and a cancelled request are not repeated, and write and delete requests are never repeated, so a record is not created twice. In the edit mode of a card the notation can be changed too, and the whole record goes to the server.
+
 ### 3.7 Input Validation
 
 The form checks the values before sending. The title and the source code cannot be empty or made of spaces, the title is at most 80 characters, the source code is at most 10000, the password is from 8 to 72 bytes. The title and source code fields have the `maxLength` attribute, the source code is typed into a multi-line field with a character counter, and the check stays in case the attribute is bypassed. The password length is counted in bytes, because the bcrypt hash on the server uses only the first 72 bytes, and a Russian letter takes two bytes. The limits are in the `limits.json` file and match the server limits. The file is shown in Appendix E, and the check functions in Appendix D. The server repeats the same check, so the client cannot be bypassed.

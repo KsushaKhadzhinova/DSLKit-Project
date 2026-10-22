@@ -106,6 +106,8 @@
 
 Пока выполняется правка или удаление, карточка получает пометку «Сохраняется…» и `aria-busy`, её кнопки блокируются, а над списком показывается строка «Сохранение на сервере…» с индикатором, которая исчезает после ответа.
 
+Чтение списка повторяется до трёх раз с нарастающей паузой, если сеть недоступна или сервер ответил кодом 5xx. Ответ 4xx и отменённый запрос не повторяются, а запросы на запись и удаление не повторяются никогда, чтобы не создать запись дважды. В режиме правки карточки можно изменить и нотацию, на сервер уходит запись целиком.
+
 ### 3.7 Проверка вводимых значений
 
 Форма проверяет значения до отправки. Название и исходный код не могут быть пустыми или состоять из пробелов, название не длиннее 80 символов, исходный код не длиннее 10000, пароль от 8 до 72 байт. У полей названия и исходного кода есть атрибут `maxLength`, исходный код вводится в многострочное поле со счётчиком символов, а проверка остаётся на случай обхода атрибута. Длина пароля считается в байтах, потому что хеш bcrypt на сервере учитывает только первые 72 байта, а русская буква занимает два байта. Пределы лежат в файле `limits.json` и совпадают с пределами сервера. Файл показан в приложении Д, а функции проверки в приложении Г. Сервер повторяет ту же проверку, поэтому обойти клиент не получится.
@@ -130,6 +132,7 @@
 
 ```js
 import axios from 'axios';
+import limits from './limits.json';
 
 export const TOKEN_KEY = 'token';
 
@@ -187,8 +190,33 @@ export const fetchDiagrams = (search = '', signal, { limit, offset } = {}) => {
   if (search) params.search = search;
   if (limit !== undefined) params.limit = limit;
   if (offset) params.offset = offset;
-  return api.get('/diagrams', { params: Object.keys(params).length > 0 ? params : undefined, signal });
+  return withRetry(() => api.get('/diagrams', { params: Object.keys(params).length > 0 ? params : undefined, signal }), signal);
 };
+// A read is safe to repeat, so it is tried again when the network fails or the server answers 5xx, with a growing pause.
+// A 4xx answer or a cancelled request is final: repeating would give the same result or work against the user.
+export const retryOptions = { attempts: limits.retry.attempts, delayMs: limits.retry.delayMs };
+const isRetryable = (error) => (error.response ? error.response.status >= 500 : !axios.isCancel(error));
+const pause = (ms, signal) =>
+  new Promise((resolve, reject) => {
+    if (signal?.aborted) return reject(signal.reason);
+    const timer = setTimeout(resolve, ms);
+    signal?.addEventListener('abort', () => {
+      clearTimeout(timer);
+      reject(signal.reason);
+    });
+    return undefined;
+  });
+export const withRetry = async (request, signal) => {
+  for (let attempt = 1; ; attempt += 1) {
+    try {
+      return await request();
+    } catch (error) {
+      if (attempt >= retryOptions.attempts || !isRetryable(error) || signal?.aborted) throw error;
+      await pause(retryOptions.delayMs * attempt, signal);
+    }
+  }
+};
+
 export const addDiagram = (diagram) => api.post('/diagrams', diagram);
 export const updateDiagram = (id, diagram) => api.put(`/diagrams/${id}`, diagram);
 export const deleteDiagram = (id) => api.delete(`/diagrams/${id}`);
@@ -621,12 +649,27 @@ export const formatTime = (iso) => new Date(iso).toLocaleString('sv-SE');
 
 ```json
 {
-  "title": { "minLength": 1, "maxLength": 80 },
-  "sourceCode": { "minLength": 1, "maxLength": 10000 },
-  "email": { "maxLength": 254 },
-  "password": { "minLength": 8, "maxBytes": 72 },
+  "title": {
+    "minLength": 1,
+    "maxLength": 80
+  },
+  "sourceCode": {
+    "minLength": 1,
+    "maxLength": 10000
+  },
+  "email": {
+    "maxLength": 254
+  },
+  "password": {
+    "minLength": 8,
+    "maxBytes": 72
+  },
   "searchDebounceMs": 400,
-  "pageSize": 20
+  "pageSize": 20,
+  "retry": {
+    "attempts": 3,
+    "delayMs": 300
+  }
 }
 ```
 
