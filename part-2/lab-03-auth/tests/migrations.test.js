@@ -3,6 +3,7 @@ const assert = require('node:assert/strict');
 const { createTempDatabase } = require('./helpers');
 const bcrypt = require('bcrypt');
 const { createModels } = require('../src/models');
+const { ROWS } = require('../seed-data/diagrams');
 
 const db = createTempDatabase();
 const open = () => createModels({ dialect: 'sqlite', storage: db.storage, logging: false });
@@ -94,16 +95,22 @@ test('CHECK constraints reject bad rows even when the model is bypassed', async 
   await sequelize.close();
 });
 
-test('the seeds insert three diagrams and an admin with a hashed password, and can be undone', async () => {
+test('the seeds insert the demo diagrams, an admin and demo users with hashed passwords, and can be undone', async () => {
   db.cli('db:seed:all');
   const { sequelize, Diagram, User } = open();
   const rows = await Diagram.findAll({ order: [['id', 'ASC']] });
   assert.deepEqual(
     rows.map((d) => d.title),
-    ['Order processing', 'Billing schema', 'Login flow'],
+    ROWS.map((row) => row.title),
   );
   assert.equal(rows[0].priority, 'high');
-  const admin = await User.findOne();
+  assert.ok(ROWS.length >= 30);
+  assert.deepEqual([...new Set(rows.map((d) => d.notation))].sort(), ['BPMN', 'DFD', 'ERD', 'IDEF0', 'Petri', 'UML']);
+  assert.equal(new Set(rows.map((d) => d.ownerId)).size, 5);
+  assert.equal(await User.count({ where: { role: 'user' } }), 4);
+  const demo = await User.findOne({ where: { email: 'alice@example.test' } });
+  assert.equal(await bcrypt.compare('demo password 1', demo.passwordHash), true);
+  const admin = await User.findOne({ where: { role: 'admin' } });
   assert.deepEqual({ email: admin.email, role: admin.role }, { email: 'root@example.com', role: 'admin' });
   assert.equal(await bcrypt.compare('seed password 1', admin.passwordHash), true);
   await sequelize.close();
@@ -130,8 +137,8 @@ test('the seeds are idempotent per row: a deleted demo diagram comes back, nothi
   db.cli('db:seed:all');
   db.cli('db:seed:all');
   ({ sequelize, Diagram, User } = open());
-  assert.deepEqual((await Diagram.findAll()).map((d) => d.title).sort(), ['Billing schema', 'Login flow', 'Order processing']);
-  assert.equal(await User.count(), 1);
+  assert.deepEqual((await Diagram.findAll()).map((d) => d.title).sort(), ROWS.map((row) => row.title).sort());
+  assert.equal(await User.count(), 5);
   await sequelize.close();
   db.cli('db:seed:undo:all');
 });
