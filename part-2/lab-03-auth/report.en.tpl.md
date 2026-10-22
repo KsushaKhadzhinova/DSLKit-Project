@@ -168,6 +168,14 @@ Figure 12 – Console of the server after the failure: the error about the missi
 
     Whoever knows the key can sign a token for any user and any role, an administrator included, and the server accepts it as genuine. Tokens cannot be told apart by signature, so the only remedy is to change the key: every issued token stops passing the check at once, and users log in again. In the work the key comes from an environment variable, is not stored in the repository, and a key that is too short is refused at startup. The damage is limited by the short token lifetime of one hour. Keys with a `kid` identifier for a smooth change and the RS256 algorithm add protection: the private key signs and the public key verifies, so a service that only verifies cannot forge a token.
 
+### 3.11 Architecture and trade-offs
+
+A security layer is added to the layers of the second lab: the token check, the role check and the rate limiters stand as separate middleware before the controllers. Controllers do not know how a token is checked, they receive a ready user in `req.user`. This follows the dependency rule from Martin's Clean Architecture: details such as the JWT library sit in the outer layer, while the business rule "a record can be changed by its owner or an admin" is written as one function `mayChange` and is checked by a simple test.
+
+The main trade-off concerns state. A JWT is not stored on the server, which makes scaling simpler, but a token cannot be revoked before it expires. So the lifetime is short and the role is read from the database on every request, and a deleted user loses access at once. The login attempt counters live in process memory. This is fast and simple, but with several server instances the counters are not shared. The decision is recorded in the report, and a production system would move the counters to a shared store. In Fowler's Patterns of Enterprise Application Architecture this is the usual price of choosing between simplicity and distributed state.
+
+Sources: Martin R. Clean Architecture: A Craftsman's Guide to Software Structure and Design. Prentice Hall, 2017. Fowler M. Patterns of Enterprise Application Architecture. Addison-Wesley, 2002. Fowler M. Refactoring: Improving the Design of Existing Code, 2nd ed. Addison-Wesley, 2018.
+
 ## Conclusion
 
 DSLKit now has users with bcrypt password hashes, registration, login with a JWT token, a token-checking middleware and protected routes, including the profile of the current user. The additional role-based mechanism separates the rights of an administrator, a diagram owner and an outsider. The tests confirm both the successful scenarios and the rejections of tampered, expired and foreign tokens. A run on a real PostgreSQL is still to be done. The requests are confirmed by browser screenshots and by an exchange recorded with a script. The methods now include a partial `PATCH` with the same rights as `PUT`.
