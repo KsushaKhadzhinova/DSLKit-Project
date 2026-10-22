@@ -174,22 +174,27 @@ const sizeOf = (node) => {
 
 const left = (x, y, value, weight) => `<text x="${x}" y="${y}" dy="0.35em" font-size="12" font-weight="${weight}" fill="${INK}">${escapeXml(value)}</text>`;
 
-const draw = (item) => {
+// A category circle: two letters inside, a second line under it when the category is complete.
+const drawCategory = (item) => {
   const { node, x, y, w, h } = item;
-  if (node.links) {
-    const double = node.complete ? `<path d="M${x + 2} ${y + h + 4}H${x + w - 2}M${x + 2} ${y + h + 7}H${x + w - 2}" stroke="${INK}" stroke-width="1.2"/>` : '';
-    return `<circle cx="${item.cx}" cy="${item.cy}" r="${w / 2}" fill="#ffffff" stroke="${INK}" stroke-width="1.5"/>${text(item.cx, item.cy, [node.label.slice(0, 2)], 11, 700, INK)}${double}`;
-  }
+  const double = node.complete ? `<path d="M${x + 2} ${y + h + 4}H${x + w - 2}M${x + 2} ${y + h + 7}H${x + w - 2}" stroke="${INK}" stroke-width="1.2"/>` : '';
+  return `<circle cx="${item.cx}" cy="${item.cy}" r="${w / 2}" fill="#ffffff" stroke="${INK}" stroke-width="1.5"/>${text(item.cx, item.cy, [node.label.slice(0, 2)], 11, 700, INK)}${double}`;
+};
+
+// An entity: the key attributes first (bold), a divider, then the rest.
+const drawEntity = (item) => {
+  const { node, x, y, w, h } = item;
   const keys = keysOf(node);
   const rest = node.attrs.filter((attr) => !attr.pk);
-  const ordered = [...keys, ...rest];
-  const rows = ordered.map((attr, index) => left(x + 10, y + HEAD + 6 + index * ROW + ROW / 2, rowText(attr), attr.pk ? 700 : 400)).join('');
+  const rows = [...keys, ...rest].map((attr, index) => left(x + 10, y + HEAD + 6 + index * ROW + ROW / 2, rowText(attr), attr.pk ? 700 : 400)).join('');
   const divider = keys.length > 0 && rest.length > 0 ? `<path d="M${x} ${y + HEAD + 6 + keys.length * ROW}H${x + w}" stroke="${INK}" stroke-width="1.2"/>` : '';
   return (
     `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${node.dependent ? 14 : 0}" fill="#ffffff" stroke="${INK}" stroke-width="1.5"/>` +
     `<path d="M${x} ${y + HEAD}H${x + w}" stroke="${MUTED}" stroke-width="1"/>${text(item.cx, y + HEAD / 2, [node.label], 13, 700, '#0f172a')}${rows}${divider}`
   );
 };
+
+const draw = (item) => (item.node.links ? drawCategory(item) : drawEntity(item));
 
 const lookOf = (edge) => (edge.fromEnd ? { start: ENDS[edge.fromEnd].marker, end: ENDS[edge.toEnd].marker, dash: edge.dashed } : {});
 

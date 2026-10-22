@@ -191,21 +191,29 @@ const sizeOf = (cls) => {
   };
 };
 
+// One line of a compartment: attribute or method, vertically centred in its row.
+const memberRow = (member, x, top, index) =>
+  `<text x="${x + 8}" y="${top + index * ROW + ROW / 2}" dy="0.35em" font-size="12" fill="${INK}">${escapeXml(signature(member))}</text>`;
+
+// The name (and the stereotype above it) of a class.
+const classTitle = (cls, cx, y) => {
+  const head = stereotype(cls) ? 2 : 1;
+  return `${stereotype(cls) ? text(cx, y + 11, [stereotype(cls)], 11, 400, MUTED) : ''}${text(cx, y + (head - 1) * 20 + 14, [cls.label], 13, 700, '#0f172a')}`;
+};
+
 const drawClass = (item) => {
   const { node: cls, x, y, w, cx } = item;
   const head = stereotype(cls) ? 2 : 1;
   const first = y + head * 20 + 6;
   const attrs = attrsOf(cls);
   const second = first + Math.max(attrs.length, 1) * ROW;
-  const row = (member, index, top) =>
-    `<text x="${x + 8}" y="${top + index * ROW + ROW / 2}" dy="0.35em" font-size="12" fill="${INK}">${escapeXml(signature(member))}</text>`;
   return (
     `<rect x="${x}" y="${y}" width="${w}" height="${item.h}" fill="#ffffff" stroke="${INK}" stroke-width="1.5"/>` +
-    `${stereotype(cls) ? text(cx, y + 11, [stereotype(cls)], 11, 400, MUTED) : ''}${text(cx, y + (head - 1) * 20 + 14, [cls.label], 13, 700, '#0f172a')}` +
+    classTitle(cls, cx, y) +
     `<path d="M${x} ${first}H${x + w}M${x} ${second}H${x + w}" stroke="${INK}" stroke-width="1"/>` +
-    attrs.map((member, index) => row(member, index, first)).join('') +
+    attrs.map((member, index) => memberRow(member, x, first, index)).join('') +
     methodsOf(cls)
-      .map((member, index) => row(member, index, second))
+      .map((member, index) => memberRow(member, x, second, index))
       .join('')
   );
 };
