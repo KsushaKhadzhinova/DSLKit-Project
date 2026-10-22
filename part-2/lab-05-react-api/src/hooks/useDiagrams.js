@@ -10,31 +10,11 @@ const readTotal = (response) => {
   return Number.isInteger(value) && value >= 0 ? value : null;
 };
 
-// Owns the server state of the list: loading, error, the items, the pages and the optimistic changes.
-export function useDiagrams(search) {
-  const [items, setItems] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
-  const [error, setError] = useState(null);
-  const [notice, setNotice] = useState(null);
-  const [attempt, setAttempt] = useState(0);
-  // fetched: how many records of the server list are loaded (the offset of the next page), total: the size of the whole list.
-  const [paging, setPaging] = useState({ fetched: 0, total: null });
-  // Ids of records with a PUT or DELETE in flight, shown as a progress indicator.
+// Ids of records with a PUT or DELETE in flight, shown as a progress indicator.
+// A second delete or edit of the same record is ignored until the first one ends.
+function useBusyIds() {
   const [busy, setBusy] = useState(() => new Set());
-  const tempCounter = useRef(0);
-  // The latest values for the handlers, so a fast second click never works with an old copy.
-  const itemsRef = useRef(items);
-  itemsRef.current = items;
-  const pagingRef = useRef(paging);
-  pagingRef.current = paging;
-  // Ids with a request in flight: a second delete or edit of the same record is ignored until the first one ends.
   const busyIds = useRef(new Set());
-  // Records added in this session: they are not part of the loaded pages, so they do not move the offset of the next page.
-  const localIds = useRef(new Set());
-  const moreController = useRef(null);
-  const loadingMoreRef = useRef(false);
-
   const markBusy = (id) => {
     busyIds.current.add(id);
     setBusy(new Set(busyIds.current));
@@ -43,10 +23,32 @@ export function useDiagrams(search) {
     busyIds.current.delete(id);
     setBusy(new Set(busyIds.current));
   };
+  return { busy, isBusy: (id) => busyIds.current.has(id), markBusy, unmarkBusy };
+}
+
+// Loads the list page by page: the first page for a search text, then "load more".
+// The request is cancelled when the search text changes, on retry and when the component unmounts.
+// A page that is being loaded for the old search is cancelled too, so its answer never reaches the new list.
+function usePagedList(search, onNotice) {
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [error, setError] = useState(null);
+  const [attempt, setAttempt] = useState(0);
+  // fetched: how many records of the server list are loaded (the offset of the next page), total: the size of the whole list.
+  const [paging, setPaging] = useState({ fetched: 0, total: null });
+  // The latest values for the handlers, so a fast second click never works with an old copy.
+  const itemsRef = useRef(items);
+  itemsRef.current = items;
+  const pagingRef = useRef(paging);
+  pagingRef.current = paging;
+  // Records added in this session: they are not part of the loaded pages, so they do not move the offset of the next page.
+  const localIds = useRef(new Set());
+  const moreController = useRef(null);
+  const loadingMoreRef = useRef(false);
+
   const changeTotal = (delta) => setPaging((current) => (current.total === null ? current : { ...current, total: Math.max(0, current.total + delta) }));
 
-  // The request is cancelled when the search text changes, on retry and when the component unmounts.
-  // A page that is being loaded for the old search is cancelled too, so its answer never reaches the new list.
   useEffect(() => {
     const controller = new AbortController();
     setLoading(true);
@@ -73,7 +75,6 @@ export function useDiagrams(search) {
   }, [search, attempt]);
 
   const retry = useCallback(() => setAttempt((n) => n + 1), []);
-  const dismissNotice = useCallback(() => setNotice(null), []);
 
   // "Load more": the next page is appended, the records already on the screen are never doubled.
   // A second click while a page is loading is ignored.
@@ -95,14 +96,27 @@ export function useDiagrams(search) {
       });
       setPaging({ fetched: fetched + loaded.length, total: readTotal(response) ?? total });
     } catch (failure) {
-      if (!isCanceled(failure) && !controller.signal.aborted) setNotice(`Не удалось загрузить ещё. ${errorMessage(failure)}`);
+      if (!isCanceled(failure) && !controller.signal.aborted) onNotice(`Не удалось загрузить ещё. ${errorMessage(failure)}`);
     } finally {
       if (!controller.signal.aborted) {
         loadingMoreRef.current = false;
         setLoadingMore(false);
       }
     }
-  }, [search]);
+  }, [search, onNotice]);
+
+  return { items, setItems, itemsRef, paging, setPaging, changeTotal, localIds, loading, loadingMore, error, retry, loadMore };
+}
+
+// Owns the server state of the list: the pages plus the optimistic add, delete and edit.
+export function useDiagrams(search) {
+  const [notice, setNotice] = useState(null);
+  const tempCounter = useRef(0);
+  const { busy, isBusy, markBusy, unmarkBusy } = useBusyIds();
+  const list = usePagedList(search, setNotice);
+  const { items, setItems, itemsRef, paging, setPaging, changeTotal, localIds } = list;
+
+  const dismissNotice = useCallback(() => setNotice(null), []);
 
   // Optimistic add: the item appears at once with a temporary id, the real record replaces it on success.
   const add = useCallback(async (fields) => {
@@ -127,7 +141,7 @@ export function useDiagrams(search) {
   // A record that is still being created (temporary id) or already being changed is skipped.
   const remove = useCallback(async (id) => {
     const index = itemsRef.current.findIndex((item) => item.id === id);
-    if (index < 0 || isTemporary(id) || busyIds.current.has(id)) return;
+    if (index < 0 || isTemporary(id) || isBusy(id)) return;
     const removed = itemsRef.current[index];
     const wasLocal = localIds.current.delete(id);
     markBusy(id);
@@ -153,7 +167,7 @@ export function useDiagrams(search) {
   // Optimistic edit: PUT replaces the whole record, so the server gets all fields; the old record comes back on failure.
   const update = useCallback(async (id, changes) => {
     const previous = itemsRef.current.find((item) => item.id === id);
-    if (!previous || isTemporary(id) || busyIds.current.has(id)) return false;
+    if (!previous || isTemporary(id) || isBusy(id)) return false;
     const { title, notation, sourceCode, priority } = { ...previous, ...changes };
     markBusy(id);
     setItems((current) => current.map((item) => (item.id === id ? { ...item, ...changes } : item)));
@@ -174,5 +188,21 @@ export function useDiagrams(search) {
   // Requests that are still running in the background: shown as one progress line for edits, deletes and adds.
   const syncing = busy.size + items.filter((item) => item.pending).length;
 
-  return { items, loading, loadingMore, error, notice, busy, syncing, hasMore, total: paging.total, retry, dismissNotice, loadMore, add, remove, update };
+  return {
+    items,
+    loading: list.loading,
+    loadingMore: list.loadingMore,
+    error: list.error,
+    notice,
+    busy,
+    syncing,
+    hasMore,
+    total: paging.total,
+    retry: list.retry,
+    dismissNotice,
+    loadMore: list.loadMore,
+    add,
+    remove,
+    update,
+  };
 }
