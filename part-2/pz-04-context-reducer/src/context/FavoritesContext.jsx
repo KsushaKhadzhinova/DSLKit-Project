@@ -14,14 +14,20 @@ export function clampQty(value) {
 
 const changeQty = (state, id, next) => state.map((item) => (item.id === id ? { ...item, qty: clampQty(next(item.qty)) } : item));
 
+const isTemplateId = (id) => TEMPLATES.some((template) => template.id === id);
+
 // State is an array of { id, qty }. Every action returns a new array and never mutates the old one.
-export function favoritesReducer(state, action) {
-  switch (action.type) {
+// A missing action, a null state and an id that is not a template are ignored instead of stored.
+export function favoritesReducer(current, action) {
+  const state = Array.isArray(current) ? current : [];
+  switch (action?.type) {
     case 'ADD':
-      return state.some((item) => item.id === action.id) ? state : [...state, { id: action.id, qty: 1 }];
+      if (!isTemplateId(action.id) || state.some((item) => item.id === action.id)) return state;
+      return [...state, { id: action.id, qty: 1 }];
     case 'REMOVE':
       return state.filter((item) => item.id !== action.id);
     case 'TOGGLE':
+      if (!isTemplateId(action.id)) return state;
       return state.some((item) => item.id === action.id) ? state.filter((item) => item.id !== action.id) : [...state, { id: action.id, qty: 1 }];
     case 'INCREMENT':
       return changeQty(state, action.id, (qty) => qty + 1);
@@ -84,5 +90,11 @@ export function FavoritesProvider({ children }) {
   );
 }
 
-export const useFavorites = () => useContext(FavoritesStateContext);
-export const useFavoritesDispatch = () => useContext(FavoritesDispatchContext);
+// Outside FavoritesProvider there is no value to read: fail with a message that names the provider.
+const insideProvider = (value, hook) => {
+  if (value === null) throw new Error(`${hook} must be used inside FavoritesProvider`);
+  return value;
+};
+
+export const useFavorites = () => insideProvider(useContext(FavoritesStateContext), 'useFavorites');
+export const useFavoritesDispatch = () => insideProvider(useContext(FavoritesDispatchContext), 'useFavoritesDispatch');

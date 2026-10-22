@@ -100,4 +100,9 @@ export function LanguageProvider({ children }) {
   return <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>;
 }
 
-export const useLanguage = () => useContext(LanguageContext);
+// Outside the provider there is no value to read: fail with a message that names the provider.
+export const useLanguage = () => {
+  const value = useContext(LanguageContext);
+  if (value === null) throw new Error('useLanguage must be used inside LanguageProvider');
+  return value;
+};
