@@ -355,14 +355,10 @@ module.exports = {
 ## Appendix F (mandatory) Listing of the demo-diagrams.js seed
 
 ```js
+const { ROWS } = require('../seed-data/diagrams');
+
 // Every seeded row has this owner, so the seed can tell its rows from the ones users created.
 const MARKER = 'demo';
-
-const ROWS = [
-  { title: 'Order processing', notation: 'BPMN', sourceCode: 'start -> check -> pay -> ship', priority: 'high' },
-  { title: 'Billing schema', notation: 'ERD', sourceCode: 'entity Invoice { id; total }', priority: 'normal' },
-  { title: 'Login flow', notation: 'UML', sourceCode: 'user -> server: login', priority: 'low' },
-];
 
 // Idempotent per row: a row that is already there is left alone, a deleted one comes back, nothing is duplicated.
 module.exports = {
