@@ -12,6 +12,12 @@ const NAV = [
   { to: '/dashboard', label: 'Кабинет' },
 ];
 
+// A double click on the sign-in or sign-out link acts once: the first click already changes the link,
+// so the second click would land on the new link (sign-in after sign-out) and send the user to the login page.
+const ignoreRepeatClick = (event) => {
+  if (event.detail > 1) event.preventDefault();
+};
+
 export default function Layout() {
   const { isAuth } = useAuth();
   const { pathname } = useLocation();
@@ -38,7 +44,7 @@ export default function Layout() {
         </li>
       ))}
       <li className="nav__item">
-        <NavLink className="nav__link" to={isAuth ? '/logout' : '/login'}>
+        <NavLink className="nav__link" to={isAuth ? '/logout' : '/login'} onClick={ignoreRepeatClick}>
           {isAuth ? 'Выйти' : 'Войти'}
         </NavLink>
       </li>
