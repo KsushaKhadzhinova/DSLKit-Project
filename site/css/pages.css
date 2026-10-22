@@ -67,9 +67,14 @@
   font-weight: 600;
 }
 
+.error {
+  margin-inline: var(--space-2);
+}
+
+/* The way home sits right under the explanation, full width on a phone */
 .error .button {
-  justify-self: start;
-  margin-top: var(--space-1);
+  justify-self: stretch;
+  margin-block: var(--space-1);
 }
 
 /* Privacy policy: a readable column of text */

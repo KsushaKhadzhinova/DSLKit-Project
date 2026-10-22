@@ -40,11 +40,11 @@ export const initDiagramRunner = ({
   autoRun = true,
 } = {}) => {
   const page = root.querySelector('.app-page--editor');
-  const renderButton = page?.querySelector('.canvas__render');
-  if (!renderButton) return null;
+  const status = page?.querySelector('.canvas__status');
+  if (!status) return null;
+  const engineLabel = page.querySelector('.editor-status__engine');
 
   const refreshButton = page.querySelector('.canvas__refresh');
-  const status = page.querySelector('.canvas__status');
   const remote = page.querySelector('.canvas__remote');
   const local = page.querySelector('.canvas__diagram');
   const service = page.querySelector('.canvas__service');
@@ -72,8 +72,9 @@ export const initDiagramRunner = ({
     return findEngine(saved !== null && typeof saved === 'object' ? saved['diagram-engine'] : undefined);
   };
 
+  // The engine is chosen on the settings page; the footer of the editor only names the one that will draw.
   const showAction = () => {
-    renderButton.textContent = tr(currentEngine().action);
+    if (engineLabel) engineLabel.textContent = tr(`Движок: ${currentEngine().label}`);
   };
 
   const show = (svgText, note, engine = currentEngine()) => {
@@ -167,7 +168,6 @@ ${input}`);
     return succeeded;
   };
 
-  renderButton.addEventListener('click', () => run());
   refreshButton?.addEventListener('click', () => run({ refresh: true }));
   page.addEventListener('dslkit:run', () => run());
   historyList?.addEventListener('click', (event) => {

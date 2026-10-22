@@ -9,6 +9,8 @@ import { createMemoryBackend, createStorage } from '../../site/js/utils/storage.
 const html = readFileSync('site/app/editor.html', 'utf8');
 const SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><script>alert(1)</script><rect width="5" height="5"/></svg>';
 const memory = () => createStorage(createMemoryBackend());
+// The Run button of the editor announces the run with this event, the runner listens to it on the page.
+const run = (window) => window.document.querySelector('.app-page--editor').dispatchEvent(new window.CustomEvent('dslkit:run', { bubbles: true }));
 const flush = () => new Promise((resolve) => setTimeout(resolve, 0));
 const click = (window, element) => element.dispatchEvent(new window.MouseEvent('click', { bubbles: true }));
 
@@ -26,7 +28,7 @@ const setup = ({ api = {}, storage = memory(), online = true, time = 1_700_000_0
   return { window, document: window.document, runner, api: fullApi, logger, storage, clock, $ };
 };
 
-test('a page without the render button returns null', () => {
+test('a page without the status line returns null', () => {
   const window = new JSDOM('<!doctype html><html><body><main class="app-page--editor"></main></body></html>').window;
   assert.equal(initDiagramRunner({ root: window.document, storage: memory() }), null);
   assert.equal(initDiagramRunner({ root: new JSDOM('<!doctype html><html><body></body></html>').window.document, storage: memory() }), null);
@@ -47,9 +49,9 @@ test('the service status shows that Kroki is reachable or not', async () => {
   assert.match(bad.$('.canvas__service').textContent, /недоступен/);
 });
 
-test('the render button sends DOT built from the editor code and shows a sanitized SVG', async () => {
+test('a run sends DOT built from the editor code and shows a sanitized SVG', async () => {
   const { window, api, $, document } = setup();
-  click(window, $('.canvas__render'));
+  run(window);
   await flush();
   const dot = api.renderDiagram.mock.calls[0].arguments[0];
   assert.match(dot, /^digraph diagram/);
@@ -67,7 +69,7 @@ test('the render button sends DOT built from the editor code and shows a sanitiz
 test('the loader is shown while the request is running', async () => {
   let release;
   const { window, $ } = setup({ api: { renderDiagram: () => new Promise((resolve) => (release = resolve)) } });
-  click(window, $('.canvas__render'));
+  run(window);
   assert.equal($('.canvas').getAttribute('aria-busy'), 'true');
   assert.match($('.canvas__status').textContent, /Загрузка/);
   release(SVG);
@@ -77,9 +79,9 @@ test('the loader is shown while the request is running', async () => {
 
 test('a second run with the same code uses the saved copy and the refresh button asks the server again', async () => {
   const { window, api, $ } = setup();
-  click(window, $('.canvas__render'));
+  run(window);
   await flush();
-  click(window, $('.canvas__render'));
+  run(window);
   await flush();
   assert.equal(api.renderDiagram.mock.callCount(), 1);
   assert.match($('.canvas__status').textContent, /сохранённая копия/);
@@ -90,10 +92,10 @@ test('a second run with the same code uses the saved copy and the refresh button
 
 test('an expired copy is requested again', async () => {
   const { window, api, $, clock } = setup();
-  click(window, $('.canvas__render'));
+  run(window);
   await flush();
   clock.time += 25 * 60 * 60 * 1000;
-  click(window, $('.canvas__render'));
+  run(window);
   await flush();
   assert.equal(api.renderDiagram.mock.callCount(), 2);
 });
@@ -123,7 +125,7 @@ test('without a saved copy each failure shows its own message and is logged', as
         },
       },
     });
-    click(window, $('.canvas__render'));
+    run(window);
     await flush();
     assert.match($('.canvas__status').textContent, pattern);
     assert.equal(logger.error.mock.callCount(), 1);
@@ -139,14 +141,14 @@ test('an error without a status is logged with an empty status', async () => {
       },
     },
   });
-  click(window, $('.canvas__render'));
+  run(window);
   await flush();
   assert.deepEqual(logger.error.mock.calls[0].arguments.slice(1), ['network', '']);
 });
 
 test('offline without a saved copy shows the offline message and sends nothing', async () => {
   const { window, api, $ } = setup({ online: false });
-  click(window, $('.canvas__render'));
+  run(window);
   await flush();
   assert.match($('.canvas__status').textContent, /Нет соединения с интернетом\. Сохранённой копии/);
   assert.equal(api.renderDiagram.mock.callCount(), 0);
@@ -155,7 +157,7 @@ test('offline without a saved copy shows the offline message and sends nothing',
 test('offline with a saved copy shows it labelled as cached data', async () => {
   const storage = memory();
   const first = setup({ storage });
-  click(first.window, first.$('.canvas__render'));
+  run(first.window);
   await flush();
   const second = setup({ storage, online: false });
   click(second.window, second.$('.canvas__refresh'));
@@ -167,7 +169,7 @@ test('offline with a saved copy shows it labelled as cached data', async () => {
 test('a server failure with an expired copy still shows the old copy as cached data', async () => {
   const storage = memory();
   const first = setup({ storage });
-  click(first.window, first.$('.canvas__render'));
+  run(first.window);
   await flush();
   const second = setup({
     storage,
@@ -178,14 +180,14 @@ test('a server failure with an expired copy still shows the old copy as cached d
       },
     },
   });
-  click(second.window, second.$('.canvas__render'));
+  run(second.window);
   await flush();
   assert.match(second.$('.canvas__status').textContent, /Кэшированные данные/);
 });
 
 test('a broken SVG from the server is reported and not cached', async () => {
   const { window, $, storage } = setup({ api: { renderDiagram: async () => '<svg><g></svg>' } });
-  click(window, $('.canvas__render'));
+  run(window);
   await flush();
   assert.match($('.canvas__status').textContent, /неожиданный ответ/);
   assert.equal(storage.get('diagram_cache'), null);
@@ -194,13 +196,13 @@ test('a broken SVG from the server is reported and not cached', async () => {
 test('a cached copy that cannot be shown falls through to a new request', async () => {
   const storage = memory();
   const first = setup({ storage });
-  click(first.window, first.$('.canvas__render'));
+  run(first.window);
   await flush();
   const entries = storage.get('diagram_cache');
   for (const key of Object.keys(entries)) entries[key].data = '<svg><g></svg>';
   storage.set('diagram_cache', entries);
   const second = setup({ storage });
-  click(second.window, second.$('.canvas__render'));
+  run(second.window);
   await flush();
   assert.equal(second.api.renderDiagram.mock.callCount(), 1);
 });
@@ -208,7 +210,7 @@ test('a cached copy that cannot be shown falls through to a new request', async 
 test('an empty editor is not sent', async () => {
   const { window, $, api, document } = setup();
   document.querySelectorAll('.code__line code').forEach((line) => (line.textContent = ''));
-  click(window, $('.canvas__render'));
+  run(window);
   await flush();
   assert.match($('.canvas__status').textContent, /нет кода/);
   assert.equal(api.renderDiagram.mock.callCount(), 0);
@@ -240,7 +242,7 @@ test('a newer run cancels the previous request and the cancelled one stays silen
 
 test('a history item shows its saved copy and an unknown item does nothing', async () => {
   const { window, $, document, clock } = setup();
-  click(window, $('.canvas__render'));
+  run(window);
   await flush();
   $('.canvas__remote').replaceChildren();
   click(window, $('.canvas__history-item'));
@@ -258,14 +260,14 @@ test('the history shows a placeholder title for diagrams without a name', async 
   const { window, $, document } = setup();
   document.querySelector('.code__line code').textContent = 'diagram idef0';
   document.querySelectorAll('.code__line code')[1].textContent = 'box A0 "Only"';
-  click(window, $('.canvas__render'));
+  run(window);
   await flush();
   assert.match($('.canvas__history-item').textContent, /^Без названия/);
 });
 
 test('the runner works on a page without the optional elements', async () => {
   const window = new JSDOM(
-    `<!doctype html><html><body><main class="app-page--editor"><div class="canvas"><button class="canvas__render"></button><p class="canvas__status"></p><div class="canvas__remote" hidden></div></div><ol><li class="code__line"><code>box A "B"</code></li></ol></main></body></html>`,
+    `<!doctype html><html><body><main class="app-page--editor"><div class="canvas"><p class="canvas__status"></p><div class="canvas__remote" hidden></div></div><ol><li class="code__line"><code>box A "B"</code></li></ol></main></body></html>`,
     { url: 'http://localhost/' },
   ).window;
   const api = { renderDiagram: async () => SVG, checkHealth: async () => ({}) };
@@ -327,7 +329,7 @@ test('each Kroki engine sends its own text type to its own endpoint', async () =
     const storage = memory();
     useEngine(storage, engine);
     const { window, api, $ } = setup({ storage });
-    click(window, $('.canvas__render'));
+    run(window);
     await flush();
     const [source, options] = api.renderDiagram.mock.calls[0].arguments;
     assert.match(source, pattern);
@@ -335,21 +337,21 @@ test('each Kroki engine sends its own text type to its own endpoint', async () =
   }
 });
 
-test('the render button names the engine that will draw the diagram', async () => {
+test('the footer names the engine that will draw the diagram', async () => {
   const storage = memory();
   const { window, $ } = setup({ storage });
-  assert.equal($('.canvas__render').textContent, 'Нарисовать через Kroki');
+  assert.equal($('.editor-status__engine').textContent, 'Движок: Kroki · Graphviz');
   useEngine(storage, 'local');
-  click(window, $('.canvas__render'));
+  run(window);
   await flush();
-  assert.equal($('.canvas__render').textContent, 'Нарисовать в браузере');
+  assert.equal($('.editor-status__engine').textContent, 'Движок: Собственный движок (в браузере)');
 });
 
 test('the own engine draws live SVG in the browser without any request, even offline', async () => {
   const storage = memory();
   useEngine(storage, 'local');
   const { window, api, $, document } = setup({ online: false, storage });
-  click(window, $('.canvas__render'));
+  run(window);
   await flush();
   assert.equal(api.renderDiagram.mock.callCount(), 0);
   assert.match($('.canvas__status').textContent, /собственным движком/);
@@ -361,10 +363,10 @@ test('the own engine draws live SVG in the browser without any request, even off
 
 test('the engine is read from the settings on every run', async () => {
   const { window, api, $, storage } = setup();
-  click(window, $('.canvas__render'));
+  run(window);
   await flush();
   useEngine(storage, 'mermaid');
-  click(window, $('.canvas__render'));
+  run(window);
   await flush();
   assert.equal(api.renderDiagram.mock.calls[0].arguments[1].type, 'graphviz');
   assert.equal(api.renderDiagram.mock.calls[1].arguments[1].type, 'mermaid');
@@ -375,7 +377,7 @@ test('an unknown or broken engine setting falls back to Graphviz', async () => {
     const storage = memory();
     storage.set('settings', saved);
     const { window, api, $ } = setup({ storage });
-    click(window, $('.canvas__render'));
+    run(window);
     await flush();
     assert.equal(api.renderDiagram.mock.calls[0].arguments[1].type, 'graphviz');
   }
@@ -383,17 +385,17 @@ test('an unknown or broken engine setting falls back to Graphviz', async () => {
 
 test('the same code is cached separately for every engine', async () => {
   const { window, api, $, storage } = setup();
-  click(window, $('.canvas__render'));
+  run(window);
   await flush();
   useEngine(storage, 'mermaid');
-  click(window, $('.canvas__render'));
+  run(window);
   await flush();
   assert.equal(api.renderDiagram.mock.callCount(), 2);
 });
 
 test('a history item whose cached copy is gone says so', async () => {
   const { window, $, storage } = setup();
-  click(window, $('.canvas__render'));
+  run(window);
   await flush();
   storage.remove('diagram_cache');
   click(window, $('.canvas__history-item'));
@@ -403,7 +405,7 @@ test('a history item whose cached copy is gone says so', async () => {
 test('a response that arrives after a newer cached view is dropped', async () => {
   const storage = memory();
   const first = setup({ storage });
-  click(first.window, first.$('.canvas__render'));
+  run(first.window);
   await flush();
   let release;
   const second = setup({
@@ -411,9 +413,9 @@ test('a response that arrives after a newer cached view is dropped', async () =>
     api: { renderDiagram: () => new Promise((resolve) => (release = resolve)) },
   });
   useEngine(storage, 'mermaid');
-  click(second.window, second.$('.canvas__render'));
+  run(second.window);
   useEngine(storage, 'graphviz');
-  click(second.window, second.$('.canvas__render'));
+  run(second.window);
   release(SVG);
   await flush();
   assert.match(second.$('.canvas__status').textContent, /сохранённая копия/);

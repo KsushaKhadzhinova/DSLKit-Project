@@ -52,7 +52,7 @@ Generation is not limited to a picture from a server. The engine is chosen on th
 
 ### 3.5 Interface Integration
 
-The editor canvas gets the buttons "Draw with Kroki" and "Refresh from server", a status line with `aria-live`, a line about service availability and a list of the last runs. While a request runs, the canvas has `aria-busy` and the status line shows the loading text; the buttons stay available so keyboard focus is not lost, and a new run cancels the previous request. The page starts a diagram by itself when it opens, and a new engine chosen in the settings is applied from the next run. A successful result is shown in figure 1.
+A single "Run" button in the editor header starts a drawing, and the item "Refresh from the server" sits in the "⋯" menu. The rendering engine is chosen on the settings page, and its name is shown in the status bar at the bottom of the editor. The canvas gets a status line with `aria-live`, a line about service availability and a list of the last runs. While a request runs, the canvas has `aria-busy` and the status line shows the loading text; the buttons stay available so keyboard focus is not lost, and a new run cancels the previous request. The page starts a diagram by itself when it opens, and a new engine chosen in the settings is applied from the next run. A successful result is shown in figure 1.
 
 ![Diagram received from Kroki](figures/kroki-diagram.jpg)
 

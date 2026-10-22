@@ -16,7 +16,9 @@
       <h1 class="visually-hidden">Editor order.dsl</h1>
 
       <div class="editor-toolbar__row">
-        <a class="editor-toolbar__logo" href="../../app/dashboard.html">DSLKit</a>
+        <a class="editor-toolbar__logo" href="../../app/dashboard.html"
+          ><img class="app-topbar__logo-image" src="../../images/logo.svg" alt="" width="24" height="24" /><span class="app-topbar__logo-text">DSLKit</span></a
+        >
 
         <div class="editor-toolbar__run">
           <button
@@ -71,6 +73,8 @@
             <button type="button" class="button button--quiet">Format</button>
             <button type="button" class="button button--quiet">Share</button>
             <button type="button" class="button button--quiet" data-notation-label>Diagram: IDEF0</button>
+            <button type="button" class="button button--quiet">Auto layout</button>
+            <button type="button" class="button button--quiet canvas__refresh">Refresh from the server</button>
             <button type="button" class="editor-toolbar__switch" role="switch" aria-checked="true">
               <span class="editor-toolbar__switch-track" aria-hidden="true"></span>
               <span>Autosave</span>
@@ -284,24 +288,9 @@
 
         <div class="canvas__toolbar">
           <nav class="canvas__breadcrumb" aria-label="Diagram path">A-0 › A0</nav>
-          <button type="button" class="button button--primary canvas__render">Draw with Kroki</button>
-          <details class="editor-menu canvas__menu">
-            <summary class="button button--icon editor-menu__summary" aria-label="More diagram actions" data-tip="More diagram actions">
-              <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
-                <circle cx="4" cy="10" r="1.5" />
-                <circle cx="10" cy="10" r="1.5" />
-                <circle cx="16" cy="10" r="1.5" />
-              </svg>
-            </summary>
-            <div class="editor-menu__panel">
-              <button type="button" class="button button--quiet">Auto layout</button>
-              <button type="button" class="button button--quiet canvas__refresh">Refresh from the server</button>
-              <a class="canvas__engine-link" href="../../app/settings.html#diagram-engine">Engine: in settings</a>
-            </div>
-          </details>
         </div>
 
-        <p class="canvas__status" role="status" aria-live="polite">Press “Draw with Kroki” to get the diagram from the external service.</p>
+        <p class="canvas__status" role="status" aria-live="polite">Press “Run” to redraw the diagram with the selected engine.</p>
         <p class="canvas__service"></p>
         <ul class="canvas__history" aria-label="Recent runs" hidden></ul>
         <div class="canvas__remote" hidden></div>
@@ -477,6 +466,7 @@
 
     <footer class="editor-status">
       <span class="editor-status__type">IDEF0</span>
+      <span class="editor-status__engine" title="Selected rendering engine">Engine: Kroki · Graphviz</span>
       <span class="editor-status__problems">
         <span aria-hidden="true">⊗</span> 2<span class="visually-hidden"> errors</span> <span aria-hidden="true">⚠</span> 1<span class="visually-hidden">
           warning</span

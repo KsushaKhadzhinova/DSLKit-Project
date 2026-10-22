@@ -1,6 +1,14 @@
 /* Mobile first: the base styles describe a phone, wider screens add to them.
    Breakpoints: 576, 768 and 1024 px. */
 @media (min-width: 576px) {
+  .error {
+    margin-inline: auto;
+  }
+
+  .error .button {
+    justify-self: start;
+  }
+
   .hero__actions .button {
     flex: 0 0 auto;
   }

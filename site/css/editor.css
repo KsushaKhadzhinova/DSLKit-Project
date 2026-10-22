@@ -491,16 +491,6 @@
   display: none;
 }
 
-.canvas__engine-link {
-  color: var(--color-link);
-  font-size: var(--text-small);
-}
-
-.canvas__render,
-.canvas__refresh {
-  flex: 0 0 auto;
-}
-
 .canvas__history-item {
   min-height: var(--target-size-small);
   font-size: var(--text-small);
@@ -1004,22 +994,13 @@
 }
 
 .editor-menu__panel .button,
-.editor-menu__panel .editor-toolbar__switch,
-.editor-menu__panel .canvas__engine-link {
+.editor-menu__panel .editor-toolbar__switch {
   display: flex;
   align-items: center;
   justify-content: flex-start;
   width: 100%;
   min-height: var(--target-size-small);
   padding: 0 var(--space-2);
-}
-
-.canvas__render {
-  margin-left: auto;
-}
-
-.canvas__menu {
-  margin-left: 0;
 }
 
 /* Interface rules: 44 px targets, text from 14 px, proportions from the golden ratio */
@@ -1077,8 +1058,7 @@
 }
 
 .canvas__zoom [data-tip]::after,
-.editor-toolbar__row .editor-menu__summary[data-tip]::after,
-.canvas__menu .editor-menu__summary[data-tip]::after {
+.editor-toolbar__row .editor-menu__summary[data-tip]::after {
   top: 50%;
   right: calc(100% + 0.5rem);
   left: auto;
@@ -1158,4 +1138,19 @@
 .templates__select {
   width: 100%;
   margin-top: var(--space-1);
+}
+
+/* Logo as on the other application screens, and the engine named in the status bar */
+.editor-toolbar__logo {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.editor-status__engine {
+  color: var(--color-text-light);
+}
+
+.canvas__refresh {
+  flex: 0 0 auto;
 }

@@ -52,7 +52,7 @@
 
 ### 3.5 Интеграция с интерфейсом
 
-На холсте редактора добавлены кнопки «Нарисовать через Kroki» и «Обновить с сервера», строка состояния с `aria-live`, строка о доступности сервиса и список последних запусков. Пока идёт запрос, на холсте стоит `aria-busy`, а в строке состояния показан текст загрузки; кнопки остаются доступными, чтобы фокус клавиатуры не терялся, а новый запуск отменяет предыдущий запрос. Страница сама запускает диаграмму при открытии, а новый движок, выбранный в настройках, применяется со следующего запуска. Успешный результат показан на рисунке 1.
+Запуск идёт одной кнопкой «Запустить» в шапке редактора, а пункт «Обновить с сервера» лежит в меню «⋯». Движок отрисовки выбирается на странице настроек, а его название выводится в строке состояния внизу редактора. На холсте добавлены строка состояния с `aria-live`, строка о доступности сервиса и список последних запусков. Пока идёт запрос, на холсте стоит `aria-busy`, а в строке состояния показан текст загрузки; кнопки остаются доступными, чтобы фокус клавиатуры не терялся, а новый запуск отменяет предыдущий запрос. Страница сама запускает диаграмму при открытии, а новый движок, выбранный в настройках, применяется со следующего запуска. Успешный результат показан на рисунке 1.
 
 ![Диаграмма, полученная от Kroki](figures/kroki-diagram.jpg)
 
@@ -500,11 +500,11 @@ export const initDiagramRunner = ({
   autoRun = true,
 } = {}) => {
   const page = root.querySelector('.app-page--editor');
-  const renderButton = page?.querySelector('.canvas__render');
-  if (!renderButton) return null;
+  const status = page?.querySelector('.canvas__status');
+  if (!status) return null;
+  const engineLabel = page.querySelector('.editor-status__engine');
 
   const refreshButton = page.querySelector('.canvas__refresh');
-  const status = page.querySelector('.canvas__status');
   const remote = page.querySelector('.canvas__remote');
   const local = page.querySelector('.canvas__diagram');
   const service = page.querySelector('.canvas__service');
@@ -532,8 +532,9 @@ export const initDiagramRunner = ({
     return findEngine(saved !== null && typeof saved === 'object' ? saved['diagram-engine'] : undefined);
   };
 
+  // The engine is chosen on the settings page; the footer of the editor only names the one that will draw.
   const showAction = () => {
-    renderButton.textContent = tr(currentEngine().action);
+    if (engineLabel) engineLabel.textContent = tr(`Движок: ${currentEngine().label}`);
   };
 
   const show = (svgText, note, engine = currentEngine()) => {
@@ -627,7 +628,6 @@ ${input}`);
     return succeeded;
   };
 
-  renderButton.addEventListener('click', () => run());
   refreshButton?.addEventListener('click', () => run({ refresh: true }));
   page.addEventListener('dslkit:run', () => run());
   historyList?.addEventListener('click', (event) => {

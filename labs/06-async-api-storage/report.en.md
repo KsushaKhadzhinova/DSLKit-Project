@@ -52,7 +52,7 @@ Generation is not limited to a picture from a server. The engine is chosen on th
 
 ### 3.5 Interface Integration
 
-The editor canvas gets the buttons "Draw with Kroki" and "Refresh from server", a status line with `aria-live`, a line about service availability and a list of the last runs. While a request runs, the canvas has `aria-busy` and the status line shows the loading text; the buttons stay available so keyboard focus is not lost, and a new run cancels the previous request. The page starts a diagram by itself when it opens, and a new engine chosen in the settings is applied from the next run. A successful result is shown in figure 1.
+A single "Run" button in the editor header starts a drawing, and the item "Refresh from the server" sits in the "⋯" menu. The rendering engine is chosen on the settings page, and its name is shown in the status bar at the bottom of the editor. The canvas gets a status line with `aria-live`, a line about service availability and a list of the last runs. While a request runs, the canvas has `aria-busy` and the status line shows the loading text; the buttons stay available so keyboard focus is not lost, and a new run cancels the previous request. The page starts a diagram by itself when it opens, and a new engine chosen in the settings is applied from the next run. A successful result is shown in figure 1.
 
 ![Diagram received from Kroki](figures/kroki-diagram.jpg)
 
@@ -500,11 +500,11 @@ export const initDiagramRunner = ({
   autoRun = true,
 } = {}) => {
   const page = root.querySelector('.app-page--editor');
-  const renderButton = page?.querySelector('.canvas__render');
-  if (!renderButton) return null;
+  const status = page?.querySelector('.canvas__status');
+  if (!status) return null;
+  const engineLabel = page.querySelector('.editor-status__engine');
 
   const refreshButton = page.querySelector('.canvas__refresh');
-  const status = page.querySelector('.canvas__status');
   const remote = page.querySelector('.canvas__remote');
   const local = page.querySelector('.canvas__diagram');
   const service = page.querySelector('.canvas__service');
@@ -532,8 +532,9 @@ export const initDiagramRunner = ({
     return findEngine(saved !== null && typeof saved === 'object' ? saved['diagram-engine'] : undefined);
   };
 
+  // The engine is chosen on the settings page; the footer of the editor only names the one that will draw.
   const showAction = () => {
-    renderButton.textContent = tr(currentEngine().action);
+    if (engineLabel) engineLabel.textContent = tr(`Движок: ${currentEngine().label}`);
   };
 
   const show = (svgText, note, engine = currentEngine()) => {
@@ -627,7 +628,6 @@ ${input}`);
     return succeeded;
   };
 
-  renderButton.addEventListener('click', () => run());
   refreshButton?.addEventListener('click', () => run({ refresh: true }));
   page.addEventListener('dslkit:run', () => run());
   historyList?.addEventListener('click', (event) => {
