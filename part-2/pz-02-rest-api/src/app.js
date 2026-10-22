@@ -75,6 +75,8 @@ export const createApp = ({ stores = createStores(), writeError = console.error,
       label: 'User',
       collection: users,
       schema: schemas.users,
+      // The email is personal data: the list shows id, name and role, the email only comes with one user.
+      hiddenInList: ['email'],
       hooks: {
         check: (data, current) => {
           const taken = data.email !== undefined && users.all().some((user) => user !== current && user.email.toLowerCase() === data.email.toLowerCase());

@@ -299,3 +299,18 @@ withApi('a user without projects gets an empty list and a deleted project disapp
   await call('DELETE', `/projects/${project.id}`);
   assert.equal((await call('GET', `/users/${user.id}/projects`)).json.meta.total, 0);
 });
+
+withApi('the user list hides the email and cannot be filtered or searched by it, one user shows it', async ({ call }) => {
+  const list = await call('GET', '/users');
+  assert.equal(list.status, 200);
+  assert.ok(list.json.data.length > 0);
+  for (const user of list.json.data) {
+    assert.equal(Object.hasOwn(user, 'email'), false);
+    assert.ok(user.name && user.role);
+  }
+  // A filter or search by the hidden field is ignored, so it cannot be used to find out which emails exist.
+  assert.equal((await call('GET', '/users?email=ada@example.com')).json.meta.total, list.json.meta.total);
+  assert.equal((await call('GET', '/users?q=ada@example')).json.meta.total, 0);
+  const one = await call('GET', '/users/1');
+  assert.equal(one.json.email, 'ada@example.com');
+});

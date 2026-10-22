@@ -233,6 +233,8 @@ export const createApp = ({ stores = createStores(), writeError = console.error,
       label: 'User',
       collection: users,
       schema: schemas.users,
+      // The email is personal data: the list shows id, name and role, the email only comes with one user.
+      hiddenInList: ['email'],
       hooks: {
         check: (data, current) => {
           const taken = data.email !== undefined && users.all().some((user) => user !== current && user.email.toLowerCase() === data.email.toLowerCase());
@@ -349,13 +351,14 @@ const parsePositive = (raw, name, fallback, max = Number.MAX_SAFE_INTEGER) => {
 };
 
 // Filtering by any schema field (?status=draft), search (?q=text), sorting (?sort=-title), pagination (?page=2&limit=10).
-export const listItems = (items, schema, query) => {
+// hidden: fields that never appear in a list and cannot be used to filter or search it (otherwise ?email= would reveal them).
+export const listItems = (items, schema, query, hidden = []) => {
   const page = parsePositive(query.page, 'page', 1);
   const limit = parsePositive(query.limit, 'limit', 20, 100);
-  let result = items.filter((item) => Object.keys(schema).every((field) => query[field] === undefined || String(item[field]) === String(query[field])));
+  let result = items.filter((item) => Object.keys(schema).every((field) => hidden.includes(field) || query[field] === undefined || String(item[field]) === String(query[field])));
   if (query.q !== undefined) {
     const needle = String(query.q).toLowerCase();
-    const textFields = Object.keys(schema).filter((field) => schema[field].type === 'string');
+    const textFields = Object.keys(schema).filter((field) => schema[field].type === 'string' && !hidden.includes(field));
     result = result.filter((item) =>
       textFields.some((field) =>
         String(item[field] ?? '')
@@ -371,7 +374,8 @@ export const listItems = (items, schema, query) => {
     result = [...result].sort((a, b) => (a[field] > b[field] ? 1 : a[field] < b[field] ? -1 : 0) * (desc ? -1 : 1));
   }
   const total = result.length;
-  return { data: result.slice((page - 1) * limit, page * limit), meta: { page, limit, total } };
+  const data = result.slice((page - 1) * limit, page * limit).map((item) => Object.fromEntries(Object.entries(item).filter(([field]) => !hidden.includes(field))));
+  return { data, meta: { page, limit, total } };
 };
 
 // Builds the six standard routes for one resource.
@@ -379,7 +383,7 @@ export const listItems = (items, schema, query) => {
 // and may throw a conflict; current is the record being changed, undefined on create.
 //
 // hooks.beforeRemove(item) may throw.
-export const createResourceRouter = ({ label, collection, schema, hooks = {} }) => {
+export const createResourceRouter = ({ label, collection, schema, hooks = {}, hiddenInList = [] }) => {
   const router = Router();
   const body = (req, partial, current) => {
     const input = trimStrings(schema, req.body);
@@ -395,7 +399,7 @@ export const createResourceRouter = ({ label, collection, schema, hooks = {} }) 
     return item;
   };
 
-  router.get('/', (req, res) => res.json(listItems(collection.all(), schema, req.query)));
+  router.get('/', (req, res) => res.json(listItems(collection.all(), schema, req.query, hiddenInList)));
   router.get('/:id', (req, res) => res.json(load(req)));
   router.post('/', (req, res) => {
     const item = collection.create(body(req, false));
