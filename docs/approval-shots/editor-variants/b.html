@@ -1,0 +1,24 @@
+<!doctype html><meta charset="utf-8"><link rel="stylesheet" href="base.css"><title>B</title>
+<div class="top">
+  <span class="logo"><i>&lt;/&gt;</i>DSLKit</span>
+  <div class="tabs" style="margin-left:24px"><button class="on">Код + холст</button><button>Только код</button><button>Только холст</button></div>
+  <span class="sp"></span>
+  <span class="mut">Сохранено 21:29</span><button class="primary">▶ Запустить</button><button class="ghost icon" aria-label="Профиль" style="border-radius:50%;background:var(--sec);color:#1d4ed8">KX</button>
+</div>
+<div class="work" style="grid-template-columns:1fr 1.618fr 320px">
+  <div style="display:grid;grid-template-rows:auto 1fr;min-height:0;border-right:1px solid var(--bd)">
+    <div style="display:flex;gap:8px;padding:8px 16px;background:var(--surf);border-bottom:1px solid var(--bd)"><button class="ghost" style="background:var(--sec);color:#1d4ed8">order.dsl ●</button><button class="ghost">rules.dsl</button></div>
+    <div class="code">
+      <div><b>1</b><span class="kw">diagram</span> idef0 <span class="st">"Order process"</span></div><div><b>2</b><span class="kw">box</span> A0 <span class="st">"Process order"</span> {</div><div><b>3</b>  input: Order</div>
+      <div class="bad"><b>4</b>  <u>contro</u>: Rules</div><div><b>5</b>  output: Invoice</div><div><b>6</b>}</div><div><b>7</b><span class="kw">box</span> A1 <span class="st">"Ship goods"</span> {</div><div><b>8</b>  input: Invoice</div><div><b>9</b>arrow A0.output → A1.input</div>
+    </div>
+  </div>
+  <div class="canvas"><div style="display:flex;gap:64px;align-items:center"><div class="node">A0<br><span class="mut">Process order</span></div><div class="node">A1<br><span class="mut">Ship goods</span></div></div>
+    <div style="position:absolute;bottom:16px;left:50%;transform:translateX(-50%);display:flex;gap:8px;background:var(--surf);padding:6px;border-radius:12px;box-shadow:var(--shadow)"><button class="icon ghost">＋</button><button class="icon ghost">－</button><button class="icon ghost">⛶</button></div></div>
+  <aside class="panel"><div class="tabs"><button class="on">Проблемы 3</button><button>Файлы</button><button>AI</button></div>
+    <div class="issue" style="flex-direction:column;align-items:flex-start;gap:8px"><strong class="err">Ошибка · строка 4</strong><span>Неизвестное свойство «contro». Вы имели в виду «control»?</span><button class="primary" style="min-height:40px">Исправить</button></div>
+    <div class="issue" style="flex-direction:column;align-items:flex-start;gap:4px"><strong class="err">Ошибка · строка 7</strong><span>Не закрыт блок «A1»</span></div>
+    <div class="mut" style="margin-top:16px">Бета: 3 из 5 диаграмм сегодня</div>
+  </aside>
+</div>
+<div class="status"><span>IDEF0</span><span class="sp"></span><span>Автосохранение вкл</span><span>стр. 4, стлб. 12</span></div>

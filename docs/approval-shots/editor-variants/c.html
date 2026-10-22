@@ -1,0 +1,22 @@
+<!doctype html><meta charset="utf-8"><link rel="stylesheet" href="base.css"><title>C</title>
+<div class="top">
+  <span class="logo"><i>&lt;/&gt;</i>DSLKit</span>
+  <button class="ghost" style="width:min(420px,40vw);justify-content:space-between;border:1px solid var(--bd);background:var(--bg);color:var(--mut);margin-left:24px"><span>🔍 Команды и файлы</span><span class="chip" style="font-size:12px">Ctrl K</span></button>
+  <span class="sp"></span><button class="primary">▶ Запустить</button><button class="ghost icon" aria-label="Тема">☼</button><button class="ghost icon" aria-label="Профиль" style="border-radius:50%;background:var(--sec);color:#1d4ed8">KX</button>
+</div>
+<div style="display:flex;align-items:center;gap:8px;padding:8px 24px;background:var(--surf);border-bottom:1px solid var(--bd)">
+  <strong>order.dsl</strong><span class="chip">IDEF0</span><span class="sp"></span>
+  <div class="tabs"><button class="on">Код</button><button>Холст</button><button>Разделить</button></div>
+  <span style="width:1px;height:24px;background:var(--bd);margin:0 8px"></span>
+  <button class="ghost icon" aria-label="Отменить">↶</button><button class="ghost icon" aria-label="Повторить">↷</button><button class="ghost">Поделиться</button><button>Сохранить</button>
+</div>
+<div class="work" style="grid-template-columns:1fr 1.618fr">
+  <div class="code">
+    <div><b>1</b><span class="kw">diagram</span> idef0 <span class="st">"Order process"</span></div><div><b>2</b><span class="kw">box</span> A0 <span class="st">"Process order"</span> {</div><div><b>3</b>  input: Order</div>
+    <div class="bad"><b>4</b>  <u>contro</u>: Rules   <span style="color:#f38ba8;font-family:var(--font)">⊗ Вы имели в виду «control»?  <u style="text-decoration:none;color:#89b4fa">Исправить</u></span></div><div><b>5</b>  output: Invoice</div><div><b>6</b>}</div><div class="bad"><b>7</b><span class="kw">box</span> A1 <span class="st">"Ship goods"</span> {   <span style="color:#f38ba8;font-family:var(--font)">⊗ Не закрыт блок</span></div><div><b>8</b>  input: Invoice</div>
+  </div>
+  <div class="canvas"><div style="display:flex;gap:64px;align-items:center"><div class="node">A0<br><span class="mut">Process order</span></div><div class="node">A1<br><span class="mut">Ship goods</span></div></div>
+    <div style="position:absolute;top:16px;left:16px;color:var(--mut);font-size:14px">Kroki · обновлено 21:29</div>
+    <div style="position:absolute;bottom:16px;right:16px;display:flex;gap:8px"><button class="icon">＋</button><button class="icon">－</button><button class="icon">⛶</button></div></div>
+</div>
+<div class="status"><span class="err">⊗ 2 ошибки</span><span style="color:var(--warn)">⚠ 1 предупреждение</span><span class="sp"></span><span>Сохранено автоматически</span><span>стр. 4, стлб. 12</span></div>

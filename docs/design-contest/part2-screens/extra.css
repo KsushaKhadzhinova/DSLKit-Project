@@ -1,0 +1,90 @@
+/* Part 2 additions: only what Part 1 has no class for. Tokens and components come from site/css. */
+.app-topbar__tools { display: flex; align-items: center; gap: var(--space-1); margin-left: auto; }
+.app-topbar__avatar { text-decoration: none; }
+.page > .app-topbar { grid-column: auto; }
+
+/* Auth: intro and form in the golden ratio 1 : 1.618 */
+.auth { display: grid; flex: 1; align-content: start; gap: var(--space-4); width: 100%; max-width: var(--container); padding: var(--space-4) var(--space-2); margin-inline: auto; }
+.auth__intro { display: grid; align-content: start; gap: var(--space-2); }
+.auth__title { font-size: var(--step-4); line-height: var(--line-heading); letter-spacing: -0.02em; }
+.auth__lead { max-width: var(--measure); color: var(--color-text-light); }
+.auth .form { max-width: none; }
+.auth__switch { color: var(--color-text-light); }
+
+/* Banner and inline messages */
+.alert { display: flex; align-items: flex-start; gap: var(--space-1); padding: var(--space-2); border: 1px solid var(--color-error); border-left-width: 4px; border-radius: var(--radius-small); background: var(--color-surface); color: var(--color-text); font-weight: 600; }
+.alert .icon { margin-top: 0.125rem; color: var(--color-error); }
+.alert--warning { border-color: var(--color-warning); }
+.alert--warning .icon { color: var(--color-warning); }
+.alert--info { border-color: var(--color-primary); }
+.alert--info .icon { color: var(--color-primary-text); }
+.button--danger { border-color: var(--color-error); background: var(--color-error); color: #fff; }
+.button--danger:hover { filter: brightness(1.1); }
+.button--link-danger { color: var(--color-error); }
+
+/* Profile */
+.panel { display: grid; gap: var(--space-3); padding: var(--space-3); border: 1px solid var(--color-border); border-radius: var(--radius-large); background: var(--color-surface); box-shadow: var(--shadow-small); }
+.panel + .panel { margin-top: var(--space-3); }
+.panel__title { font-size: var(--step-1); }
+.facts { display: grid; gap: var(--space-2); margin: 0; }
+.facts__row { display: grid; gap: 0.25rem; }
+.facts dt { color: var(--color-muted); font-size: var(--text-small); }
+.facts dd { margin: 0; font-weight: 600; overflow-wrap: anywhere; }
+.page-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-2); margin-bottom: var(--space-3); }
+.page-head__title { font-size: var(--step-3); line-height: var(--line-heading); }
+.profile-grid { display: grid; gap: var(--space-3); align-items: start; }
+.profile-grid .panel + .panel { margin-top: 0; }
+
+/* Users table: stacked cards on a phone, table from 768 px */
+.table { width: 100%; border-collapse: collapse; }
+.table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.table tr { display: grid; gap: 0.25rem; padding: var(--space-2); border-bottom: 1px solid var(--color-border); }
+.table td { display: grid; gap: 0.125rem; min-width: 0; }
+.table td::before { content: attr(data-label); color: var(--color-muted); font-size: var(--text-small); }
+.table td:first-child { font-weight: 600; overflow-wrap: anywhere; }
+.table__actions { display: flex; flex-wrap: wrap; gap: var(--space-1); padding-top: var(--space-1); }
+.table [data-tip]::after { right: 0; left: auto; transform: none; }
+.table-wrap { border: 1px solid var(--color-border); border-radius: var(--radius-large); background: var(--color-surface); box-shadow: var(--shadow-small); }
+.table tr:last-child { border-bottom: 0; }
+.modal--static { position: static; width: 100%; max-width: 28rem; margin: 0; box-shadow: var(--shadow-large); color: var(--color-text); }
+.section-note { margin: var(--space-4) 0 var(--space-2); font-size: var(--step-1); }
+
+/* Session states */
+.states { display: grid; gap: var(--space-3); align-items: stretch; }
+.state { display: grid; align-content: start; gap: var(--space-2); padding: var(--space-3); border: 1px solid var(--color-border); border-radius: var(--radius-large); background: var(--color-surface); box-shadow: var(--shadow-small); }
+.state__code { color: var(--color-muted); font-size: var(--text-small); font-weight: 600; }
+.state__title { font-size: var(--step-2); line-height: var(--line-heading); }
+.state__text { color: var(--color-text-light); }
+.state__actions { align-self: end; }
+.state .button { justify-self: start; }
+
+@media (min-width: 576px) {
+  .facts__row { grid-template-columns: var(--columns-golden); gap: var(--space-2); }
+}
+@media (min-width: 768px) {
+  .table thead { position: static; width: auto; height: auto; overflow: visible; clip-path: none; }
+  .table th { padding: var(--space-2); color: var(--color-muted); font-size: var(--text-small); font-weight: 600; text-align: left; border-bottom: 1px solid var(--color-border); }
+  .table tr { display: table-row; padding: 0; }
+  .table td { display: table-cell; padding: var(--space-2); vertical-align: middle; }
+  .table td::before { content: none; }
+  .table td:first-child { font-weight: 600; }
+  .table__actions { justify-content: flex-end; padding: 0; flex-wrap: nowrap; }
+  .table th:last-child { text-align: right; }
+  .auth { grid-template-columns: var(--columns-golden); gap: var(--space-5); padding: var(--space-5) var(--space-3); align-items: start; }
+  .profile-grid { grid-template-columns: var(--columns-golden-reverse); }
+}
+@media (min-width: 1024px) {
+  .states { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+.form--plain { padding: var(--space-2) 0 0; border: 0; box-shadow: none; max-width: none; background: none; }
+.alert--error { border-color: var(--color-error); }
+@media (min-width: 768px) { .auth--wide { grid-template-columns: minmax(0, 1fr); gap: var(--space-4); } }
+.auth .form__submit { width: 100%; }
+.panel .faq__item { border: 0; }
+.panel > .button { justify-self: start; }
+.state { display: flex; flex-direction: column; }
+.state__actions { margin-top: auto; padding-top: var(--space-1); }
+.table td .badge { justify-self: start; }
+.state__actions { align-self: flex-start; }
+.app-topbar__avatar[data-tip]::after { right: 0; left: auto; transform: none; }
+.table td::before { font-weight: 400; }

@@ -1,0 +1,23 @@
+<!doctype html><meta charset="utf-8"><link rel="stylesheet" href="base.css"><title>A</title>
+<div class="top">
+  <span class="logo"><i>&lt;/&gt;</i>DSLKit</span>
+  <span class="mut">Мои проекты /</span><strong>order.dsl</strong><span class="chip">IDEF0</span><span class="mut">● не сохранено</span>
+  <span class="sp"></span>
+  <button class="ghost icon" aria-label="Отменить">↶</button><button class="ghost icon" aria-label="Повторить">↷</button>
+  <button>Сохранить</button><button class="primary">▶ Запустить</button><button class="ghost icon" aria-label="Ещё">⋯</button>
+</div>
+<div class="work" style="grid-template-columns:64px 1fr 1.618fr">
+  <div class="rail"><button class="icon on">📁</button><button class="icon ghost">🔍</button><button class="icon ghost">⎇</button><button class="icon ghost">✦</button></div>
+  <div style="display:grid;grid-template-rows:1fr auto;min-height:0">
+    <div class="code">
+      <div><b>1</b><span class="kw">diagram</span> idef0 <span class="st">"Order process"</span></div><div><b>2</b><span class="kw">box</span> A0 <span class="st">"Process order"</span> {</div><div><b>3</b>  input: Order</div>
+      <div class="bad"><b>4</b>  <u>contro</u>: Rules</div><div><b>5</b>  output: Invoice</div><div><b>6</b>}</div><div><b>7</b><span class="kw">box</span> A1 <span class="st">"Ship goods"</span> {</div><div><b>8</b>  input: Invoice</div><div><b>9</b>arrow A0.output → A1.input</div>
+    </div>
+    <div class="drawer" style="padding:12px 16px"><div class="issue" style="margin:0"><span class="err">⊗</span><span style="flex:1">Строка 4: неизвестное свойство «contro». Вы имели в виду «control»?</span><button class="primary" style="min-height:36px">Исправить</button></div><div class="mut" style="margin-top:8px">Ещё 2 проблемы · <a href="#">показать все</a></div></div>
+  </div>
+  <div class="canvas"><div class="tabs" style="position:absolute;top:16px;right:16px"><button class="on">Kroki</button><button>Локально</button></div>
+    <div style="display:flex;gap:64px;align-items:center"><div class="node">A0<br><span class="mut">Process order</span></div><div class="node">A1<br><span class="mut">Ship goods</span></div></div>
+    <div style="position:absolute;bottom:16px;right:16px;display:flex;gap:8px"><button class="icon">＋</button><button class="icon">－</button><button class="icon">⛶</button></div>
+  </div>
+</div>
+<div class="status"><span class="err">⊗ 2</span><span style="color:var(--warn)">⚠ 1</span><span>main</span><span class="sp"></span><span>Автосохранение вкл</span><span>стр. 4, стлб. 12</span></div>
