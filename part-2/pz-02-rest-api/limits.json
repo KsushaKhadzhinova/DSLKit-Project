@@ -1,0 +1,12 @@
+{
+  "userName": 60,
+  "userEmail": 120,
+  "projectName": 80,
+  "projectDescription": 500,
+  "diagramTitle": 80,
+  "diagramCode": 10000,
+  "idMax": 2147483647,
+  "bodyBytes": "100kb",
+  "rateWindowMs": 60000,
+  "rateMax": 300
+}

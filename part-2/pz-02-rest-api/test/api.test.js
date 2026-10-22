@@ -314,3 +314,14 @@ withApi('the user list hides the email and cannot be filtered or searched by it,
   const one = await call('GET', '/users/1');
   assert.equal(one.json.email, 'ada@example.com');
 });
+
+test('the limits of the schemas come from limits.json', async () => {
+  const { LIMITS } = await import('../src/app.js');
+  assert.equal(schemas.users.name.max, LIMITS.userName);
+  assert.equal(schemas.users.email.max, LIMITS.userEmail);
+  assert.equal(schemas.projects.name.max, LIMITS.projectName);
+  assert.equal(schemas.projects.description.max, LIMITS.projectDescription);
+  assert.equal(schemas.diagrams.title.max, LIMITS.diagramTitle);
+  assert.equal(schemas.diagrams.code.max, LIMITS.diagramCode);
+  assert.equal(schemas.projects.ownerId.max, LIMITS.idMax);
+});

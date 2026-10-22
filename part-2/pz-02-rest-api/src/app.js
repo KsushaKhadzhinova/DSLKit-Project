@@ -1,28 +1,32 @@
+import { readFileSync } from 'node:fs';
 import express from 'express';
 import { ApiError, errorBody, notFound } from './errors.js';
 import { createResourceRouter, listItems, methodsOnly, parseId } from './resource.js';
 import { logSafe, rateLimit, securityHeaders } from './security.js';
 import { createStores } from './store.js';
 
+// All sizes live in limits.json, not in the code.
+export const LIMITS = JSON.parse(readFileSync(new URL('../limits.json', import.meta.url), 'utf8'));
+
 export const NOTATIONS = ['UML', 'BPMN', 'ERD', 'DFD', 'IDEF0', 'Petri'];
 
-const ID = { type: 'integer', required: true, min: 1, max: 2147483647 };
+const ID = { type: 'integer', required: true, min: 1, max: LIMITS.idMax };
 
 export const schemas = {
   users: {
-    name: { type: 'string', required: true, max: 60 },
-    email: { type: 'string', required: true, max: 120, pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/ },
+    name: { type: 'string', required: true, max: LIMITS.userName },
+    email: { type: 'string', required: true, max: LIMITS.userEmail, pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/ },
     role: { type: 'string', enum: ['owner', 'editor', 'viewer'], default: 'viewer' },
   },
   projects: {
-    name: { type: 'string', required: true, max: 80 },
-    description: { type: 'string', max: 500, default: '' },
+    name: { type: 'string', required: true, max: LIMITS.projectName },
+    description: { type: 'string', max: LIMITS.projectDescription, default: '' },
     ownerId: ID,
   },
   diagrams: {
-    title: { type: 'string', required: true, max: 80 },
+    title: { type: 'string', required: true, max: LIMITS.diagramTitle },
     notation: { type: 'string', enum: NOTATIONS, required: true },
-    code: { type: 'string', max: 10000, default: '' },
+    code: { type: 'string', max: LIMITS.diagramCode, default: '' },
     projectId: ID,
     status: { type: 'string', enum: ['draft', 'published'], default: 'draft' },
   },
@@ -38,7 +42,7 @@ const missingReference = (field, collection, value) =>
 
 const conflict = (message) => new ApiError(409, 'conflict', message);
 
-export const createApp = ({ stores = createStores(), writeError = console.error, limit = { windowMs: 60000, max: 300 }, now = Date.now } = {}) => {
+export const createApp = ({ stores = createStores(), writeError = console.error, limit = { windowMs: LIMITS.rateWindowMs, max: LIMITS.rateMax }, now = Date.now } = {}) => {
   const { users, projects, diagrams } = stores;
   const app = express();
   app.disable('x-powered-by');
@@ -47,7 +51,7 @@ export const createApp = ({ stores = createStores(), writeError = console.error,
   app.get('/health', (req, res) => res.json({ status: 'ok' }));
   // Refused before the body is read, so a flood costs little.
   app.use(rateLimit({ ...limit, now }));
-  app.use(express.json({ limit: '100kb' }));
+  app.use(express.json({ limit: LIMITS.bodyBytes }));
   // A body that express.json did not read (another Content-Type) is refused with 415, not taken as a missing body.
   app.use((req, res, next) => {
     const hasBody = Number(req.headers['content-length'] ?? 0) > 0 || req.headers['transfer-encoding'] !== undefined;
@@ -126,7 +130,7 @@ export const createApp = ({ stores = createStores(), writeError = console.error,
   api.post('/diagrams/:id/publish', (req, res) => res.json(diagrams.update(diagram(req), { status: 'published' })));
   api.post('/diagrams/:id/duplicate', (req, res) => {
     const { id, createdAt, ...rest } = diagram(req);
-    res.status(201).json(diagrams.create({ ...rest, title: `${rest.title} (copy)`.slice(0, 80), status: 'draft' }));
+    res.status(201).json(diagrams.create({ ...rest, title: `${rest.title} (copy)`.slice(0, LIMITS.diagramTitle), status: 'draft' }));
   });
   api.all('/diagrams/:id/publish', methodsOnly('POST'));
   api.all('/diagrams/:id/duplicate', methodsOnly('POST'));
