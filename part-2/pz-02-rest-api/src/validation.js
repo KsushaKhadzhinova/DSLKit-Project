@@ -8,7 +8,9 @@ const checkField = (name, rule, value) => {
   if (rule.type === 'string') {
     if (typeof value !== 'string') return `${name} must be a string`;
     if (rule.required && value.trim() === '') return `${name} must not be empty`;
-    if (rule.max && value.length > rule.max) return `${name} must be at most ${rule.max} characters`;
+    if (value.includes('\u0000')) return `${name} must not contain NUL characters`;
+    // Counted by code points, so an emoji is one character as the user sees it, not two UTF-16 units.
+    if (rule.max && [...value].length > rule.max) return `${name} must be at most ${rule.max} characters`;
     if (rule.pattern && !rule.pattern.test(value)) return `${name} has an invalid format`;
   }
   if (rule.enum && !rule.enum.includes(value)) return `${name} must be one of: ${rule.enum.join(', ')}`;

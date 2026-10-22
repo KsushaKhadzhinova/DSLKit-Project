@@ -206,6 +206,12 @@ export const createApp = ({ stores = createStores(), writeError = console.error,
   // Refused before the body is read, so a flood costs little.
   app.use(rateLimit({ ...limit, now }));
   app.use(express.json({ limit: '100kb' }));
+  // A body that express.json did not read (another Content-Type) is refused with 415, not taken as a missing body.
+  app.use((req, res, next) => {
+    const hasBody = Number(req.headers['content-length'] ?? 0) > 0 || req.headers['transfer-encoding'] !== undefined;
+    if (hasBody && req.body === undefined) return next(new ApiError(415, 'unsupported_media_type', 'Content-Type must be application/json'));
+    return next();
+  });
 
   const api = express.Router();
   // Link between resources: the projects that belong to one user. It is mounted before the standard router so it wins over /:id.
@@ -428,7 +434,9 @@ const checkField = (name, rule, value) => {
   if (rule.type === 'string') {
     if (typeof value !== 'string') return `${name} must be a string`;
     if (rule.required && value.trim() === '') return `${name} must not be empty`;
-    if (rule.max && value.length > rule.max) return `${name} must be at most ${rule.max} characters`;
+    if (value.includes('\u0000')) return `${name} must not contain NUL characters`;
+    // Counted by code points, so an emoji is one character as the user sees it, not two UTF-16 units.
+    if (rule.max && [...value].length > rule.max) return `${name} must be at most ${rule.max} characters`;
     if (rule.pattern && !rule.pattern.test(value)) return `${name} has an invalid format`;
   }
   if (rule.enum && !rule.enum.includes(value)) return `${name} must be one of: ${rule.enum.join(', ')}`;

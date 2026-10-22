@@ -48,6 +48,12 @@ export const createApp = ({ stores = createStores(), writeError = console.error,
   // Refused before the body is read, so a flood costs little.
   app.use(rateLimit({ ...limit, now }));
   app.use(express.json({ limit: '100kb' }));
+  // A body that express.json did not read (another Content-Type) is refused with 415, not taken as a missing body.
+  app.use((req, res, next) => {
+    const hasBody = Number(req.headers['content-length'] ?? 0) > 0 || req.headers['transfer-encoding'] !== undefined;
+    if (hasBody && req.body === undefined) return next(new ApiError(415, 'unsupported_media_type', 'Content-Type must be application/json'));
+    return next();
+  });
 
   const api = express.Router();
   // Link between resources: the projects that belong to one user. It is mounted before the standard router so it wins over /:id.
