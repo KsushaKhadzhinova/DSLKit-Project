@@ -74,7 +74,8 @@ test('CHECK constraints reject bad rows even when the model is bypassed', async 
   const { sequelize } = open();
   const q = (sql, replacements) => sequelize.query(sql, { replacements });
   const now = "datetime('now')";
-  const user = (email, hash, role) => q(`INSERT INTO Users (email, passwordHash, role, createdAt, updatedAt) VALUES (?, ?, ?, ${now}, ${now})`, [email, hash, role]);
+  const user = (email, hash, role) =>
+    q(`INSERT INTO Users (email, passwordHash, role, createdAt, updatedAt) VALUES (?, ?, ?, ${now}, ${now})`, [email, hash, role]);
   await assert.rejects(user('Upper@Example.com', 'h', 'user'), isCheckViolation);
   await assert.rejects(user('a@b.co', 'h', 'root'), isCheckViolation);
   await assert.rejects(user('a@b.co', '', 'user'), isCheckViolation);
@@ -82,7 +83,11 @@ test('CHECK constraints reject bad rows even when the model is bypassed', async 
   await user('owner@example.com', 'h', 'user');
   const [{ id }] = await sequelize.query("SELECT id FROM Users WHERE email = 'owner@example.com'", { type: 'SELECT' });
   const diagram = (title, source, owner = id) =>
-    q(`INSERT INTO Diagrams (title, notation, sourceCode, priority, ownerId, createdAt, updatedAt) VALUES (?, 'UML', ?, 'low', ?, ${now}, ${now})`, [title, source, owner]);
+    q(`INSERT INTO Diagrams (title, notation, sourceCode, priority, ownerId, createdAt, updatedAt) VALUES (?, 'UML', ?, 'low', ?, ${now}, ${now})`, [
+      title,
+      source,
+      owner,
+    ]);
   await assert.rejects(diagram('   ', 's'), isCheckViolation);
   await assert.rejects(diagram('t', ''), isCheckViolation);
   await assert.rejects(diagram('x'.repeat(81), 's'), isCheckViolation);

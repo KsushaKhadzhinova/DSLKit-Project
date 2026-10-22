@@ -232,15 +232,17 @@ const createAuthController = ({ User }, { jwtSecret, jwtExpiresIn, bcryptRounds 
     login: async (req, res, next) => {
       const { email, password } = req.credentials;
       // A locked email is refused before the password is looked at, so guessing cannot continue and the answer does not depend on the account.
-      const wait = loginGuard.retryAfter(email);
+      // The counter is kept per address and email: someone elsewhere cannot lock the account of the real owner.
+      const guardKey = `${req.ip}|${email}`;
+      const wait = loginGuard.retryAfter(guardKey);
       if (wait > 0) return next(tooManyRequests('Too many failed logins, try again later', wait));
       const user = await User.findOne({ where: { email } });
       const matches = await bcrypt.compare(password, user ? user.passwordHash : dummyHash);
       if (!user || !matches) {
-        loginGuard.fail(email);
+        loginGuard.fail(guardKey);
         return next(unauthorized('Invalid email or password'));
       }
-      loginGuard.succeed(email);
+      loginGuard.succeed(guardKey);
       // The role in the token is only a hint for the client: the server asks the database on every request.
       const token = jwt.sign({ id: user.id, email: user.email, role: user.role }, jwtSecret, {
         algorithm: 'HS256',
@@ -332,9 +334,18 @@ const { allowMethods } = require('../middleware/http');
 const createUsersRouter = (controller, authenticate) => {
   const router = Router();
   const admin = [authenticate, requireRole('admin')];
-  router.route('/profile').get(authenticate, controller.profile).all(allowMethods(['GET']));
-  router.route('/users').get(...admin, controller.list).all(allowMethods(['GET']));
-  router.route('/users/:id/role').patch(...admin, parseId('userId', 'User'), validateRole, controller.setRole).all(allowMethods(['PATCH']));
+  router
+    .route('/profile')
+    .get(authenticate, controller.profile)
+    .all(allowMethods(['GET']));
+  router
+    .route('/users')
+    .get(...admin, controller.list)
+    .all(allowMethods(['GET']));
+  router
+    .route('/users/:id/role')
+    .patch(...admin, parseId('userId', 'User'), validateRole, controller.setRole)
+    .all(allowMethods(['PATCH']));
   router
     .route('/users/:id')
     .delete(...admin, parseId('userId', 'User'), controller.remove)
@@ -372,7 +383,15 @@ const createDiagramsController = ({ Diagram }) => ({
     const term = (search ?? '').trim();
     const where = term ? { title: { [Op.like]: `%${term}%` } } : undefined;
     const { limit, offset, sort, order } = parseListQuery(req.query, SORTABLE);
-    const { count, rows } = await Diagram.findAndCountAll({ where, order: [[sort, order.toUpperCase()], ['id', 'ASC']], limit, offset });
+    const { count, rows } = await Diagram.findAndCountAll({
+      where,
+      order: [
+        [sort, order.toUpperCase()],
+        ['id', 'ASC'],
+      ],
+      limit,
+      offset,
+    });
     res.set('X-Total-Count', String(count));
     return res.json(rows);
   },

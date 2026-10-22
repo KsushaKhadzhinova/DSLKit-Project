@@ -33,11 +33,11 @@ const createRateLimiter = ({ windowMs, max, now = Date.now }) => {
   };
 };
 
-// Counts failed logins per email (known or not, so the answer never shows which emails exist).
-// After maxAttempts failures the email is locked for lockMs, even for the right password.
+// Counts failed logins per key (the controller passes address and email, known or not, so the answer never shows which emails exist).
+// After maxAttempts failures the key is locked for lockMs, even for the right password.
 const createLoginGuard = ({ maxAttempts, lockMs, now = Date.now }) => {
   const failures = new Map();
-  const key = (email) => String(email).slice(0, 254);
+  const key = (email) => String(email).slice(0, 320);
   const expiry = (entry) => entry.lockedUntil ?? entry.lastFailure + lockMs;
   return {
     // Seconds to wait, 0 if the login may be tried.
