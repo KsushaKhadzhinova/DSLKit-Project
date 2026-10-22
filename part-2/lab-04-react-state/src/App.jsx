@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import DiagramFilters from './components/DiagramFilters';
 import DiagramForm from './components/DiagramForm';
 import DiagramItem from './components/DiagramItem';
@@ -50,6 +50,7 @@ export default function App() {
   const [diagrams, setDiagrams] = useLocalStorage(STORAGE_KEY, INITIAL_DIAGRAMS, isDiagramList, repairDiagramList);
   const [query, setQuery] = useState('');
   const [status, setStatus] = useState('all');
+  const [notation, setNotation] = useState('all');
   const [sortBy, setSortBy] = useState('date');
   const autosave = useAutosaveStatus(diagrams);
 
@@ -64,11 +65,12 @@ export default function App() {
         ? [...prev, { id: newId(), title, notation, published: false, createdAt: uniqueCreatedAt(prev), updatedAt: today() }]
         : prev,
     );
-  const deleteDiagram = (id) => setDiagrams((prev) => prev.filter((d) => d.id !== id));
-  const renameDiagram = (id, title) => setDiagrams((prev) => prev.map((d) => (d.id === id ? { ...d, title, updatedAt: today() } : d)));
-  const togglePublished = (id) => setDiagrams((prev) => prev.map((d) => (d.id === id ? { ...d, published: !d.published, updatedAt: today() } : d)));
+  // The handlers keep the same identity between renders (setDiagrams is stable), so the memoized cards are not redrawn for nothing.
+  const deleteDiagram = useCallback((id) => setDiagrams((prev) => prev.filter((d) => d.id !== id)), [setDiagrams]);
+  const renameDiagram = useCallback((id, title) => setDiagrams((prev) => prev.map((d) => (d.id === id ? { ...d, title, updatedAt: today() } : d))), [setDiagrams]);
+  const togglePublished = useCallback((id) => setDiagrams((prev) => prev.map((d) => (d.id === id ? { ...d, published: !d.published, updatedAt: today() } : d))), [setDiagrams]);
 
-  const visible = sortDiagrams(filterDiagrams(diagrams, { query, status }), sortBy);
+  const visible = useMemo(() => sortDiagrams(filterDiagrams(diagrams, { query, status, notation }), sortBy), [diagrams, query, status, notation, sortBy]);
 
   return (
     <ThemeProvider>
@@ -98,7 +100,7 @@ export default function App() {
           <h2 className="section__title" id="list-title">
             Список диаграмм
           </h2>
-          <DiagramFilters query={query} status={status} sortBy={sortBy} onQuery={setQuery} onStatus={setStatus} onSort={setSortBy} />
+          <DiagramFilters query={query} status={status} notation={notation} sortBy={sortBy} onQuery={setQuery} onStatus={setStatus} onNotation={setNotation} onSort={setSortBy} />
           <StatsBar stats={getStats(diagrams)} autosave={autosave} />
           {visible.length === 0 ? (
             <p className="empty">Диаграммы не найдены.</p>

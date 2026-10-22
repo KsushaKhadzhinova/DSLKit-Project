@@ -33,6 +33,7 @@ export default function DiagramForm({ onAdd, full = false }) {
             onChange={(e) => setTitle(e.target.value)}
             placeholder="Например, схема оплаты"
             autoComplete="off"
+            maxLength={limits.title.maxLength}
             aria-invalid={error ? 'true' : undefined}
             aria-describedby={error ? `${id}-error` : `${id}-hint`}
           />

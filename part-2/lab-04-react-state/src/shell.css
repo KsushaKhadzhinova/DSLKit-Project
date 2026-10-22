@@ -332,3 +332,16 @@ select.form__input {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
+
+/* The filter row has four fields: two columns on a tablet, four on a desktop. */
+@media (min-width: 640px) {
+  .form__row--4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .form__row--4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}

@@ -2,6 +2,7 @@ import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import App, { STORAGE_KEY } from './App';
 import { INITIAL_DIAGRAMS } from './data/initialDiagrams';
+import limits from './limits.json';
 
 // Only the diagram cards: the header and the footer have list items too.
 const items = () => within(screen.getByRole('list', { name: 'Диаграммы' })).getAllByRole('listitem');
@@ -97,6 +98,24 @@ describe('App', () => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({ broken: true }));
     render(<App />);
     expect(items()).toHaveLength(INITIAL_DIAGRAMS.length);
+  });
+
+  it('filters the list by notation', async () => {
+    const user = userEvent.setup();
+    render(<App />);
+    const wanted = INITIAL_DIAGRAMS[0];
+    await user.selectOptions(screen.getByLabelText('Фильтр по нотации'), wanted.notation);
+    expect(titles().length).toBeGreaterThan(0);
+    expect(titles()).toContain(wanted.title);
+    expect(titles().length).toBe(INITIAL_DIAGRAMS.filter((d) => d.notation === wanted.notation).length);
+  });
+
+  it('limits the length of the title in the add form and in the rename field', async () => {
+    const user = userEvent.setup();
+    render(<App />);
+    expect(screen.getByLabelText(/Название диаграммы/)).toHaveAttribute('maxlength', String(limits.title.maxLength));
+    await user.click(screen.getAllByRole('button', { name: /^Изменить/ })[0]);
+    expect(screen.getByLabelText('Новое название')).toHaveAttribute('maxlength', String(limits.title.maxLength));
   });
 
   it('keeps the good records when only one stored record is damaged', () => {

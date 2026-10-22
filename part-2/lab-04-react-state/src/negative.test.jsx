@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import App, { STORAGE_KEY } from './App';
 import { INITIAL_DIAGRAMS } from './data/initialDiagrams';
@@ -34,7 +34,8 @@ describe('negative actions in the add form', () => {
     const user = userEvent.setup();
     render(<App />);
     await user.click(titleInput());
-    await user.paste('x'.repeat(100_000));
+    // maxlength stops typing, so the over-limit value is set directly to reach the validation.
+    fireEvent.change(document.activeElement, { target: { value: 'x'.repeat(100_000) } });
     await user.click(screen.getByRole('button', { name: 'Добавить' }));
     expect(screen.getByRole('alert')).toHaveTextContent(String(limits.title.maxLength));
     expect(items()).toHaveLength(INITIAL_DIAGRAMS.length);
@@ -45,7 +46,8 @@ describe('negative actions in the add form', () => {
     const user = userEvent.setup();
     render(<App />);
     await user.click(titleInput());
-    await user.paste('y'.repeat(limits.title.maxLength + 1));
+    // maxlength stops typing, so the over-limit value is set directly to reach the validation.
+    fireEvent.change(document.activeElement, { target: { value: 'y'.repeat(limits.title.maxLength + 1) } });
     await user.keyboard('{Enter}');
     expect(screen.getByRole('alert')).toHaveTextContent(String(limits.title.maxLength));
     expect(items()).toHaveLength(INITIAL_DIAGRAMS.length);
@@ -55,7 +57,8 @@ describe('negative actions in the add form', () => {
     const user = userEvent.setup();
     render(<App />);
     await user.click(titleInput());
-    await user.paste(`  ${'z'.repeat(limits.title.maxLength)}  `);
+    // maxlength stops typing, so the over-limit value is set directly to reach the validation.
+    fireEvent.change(document.activeElement, { target: { value: `  ${'z'.repeat(limits.title.maxLength)}  ` } });
     await user.keyboard('{Enter}');
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
     expect(titles()).toContain('z'.repeat(limits.title.maxLength));
@@ -123,7 +126,8 @@ describe('negative actions in the list', () => {
     await user.click(within(row).getByRole('button', { name: /^Изменить/ }));
     await user.clear(screen.getByLabelText('Новое название'));
     await user.click(screen.getByLabelText('Новое название'));
-    await user.paste('w'.repeat(100_000));
+    // maxlength stops typing, so the over-limit value is set directly to reach the validation.
+    fireEvent.change(document.activeElement, { target: { value: 'w'.repeat(100_000) } });
     await user.keyboard('{Enter}');
     expect(within(row).getByRole('alert')).toHaveTextContent(String(limits.title.maxLength));
     await user.keyboard('{Escape}');

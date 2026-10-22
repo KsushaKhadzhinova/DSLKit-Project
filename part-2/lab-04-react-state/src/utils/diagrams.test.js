@@ -7,6 +7,13 @@ const data = [
 ];
 
 describe('filterDiagrams', () => {
+  it('filters by notation and keeps everything for all', () => {
+    expect(filterDiagrams(data, { query: '', status: 'all', notation: 'ERD' }).map((d) => d.id)).toEqual([2]);
+    expect(filterDiagrams(data, { query: '', status: 'all', notation: 'all' })).toHaveLength(3);
+    expect(filterDiagrams(data, { query: '', status: 'all' })).toHaveLength(3);
+    expect(filterDiagrams(data, { query: 'beta', status: 'all', notation: 'ERD' })).toEqual([]);
+  });
+
   it('matches the title ignoring case and surrounding spaces', () => {
     expect(filterDiagrams(data, { query: '  ALP ', status: 'all' }).map((d) => d.id)).toEqual([2]);
   });

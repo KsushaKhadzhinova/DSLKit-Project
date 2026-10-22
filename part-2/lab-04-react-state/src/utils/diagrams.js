@@ -1,9 +1,10 @@
-export function filterDiagrams(diagrams, { query, status }) {
+export function filterDiagrams(diagrams, { query, status, notation = 'all' }) {
   const needle = query.trim().toLowerCase();
   return diagrams.filter((d) => {
     const matchesQuery = d.title.toLowerCase().includes(needle);
     const matchesStatus = status === 'all' || (status === 'published') === d.published;
-    return matchesQuery && matchesStatus;
+    const matchesNotation = notation === 'all' || d.notation === notation;
+    return matchesQuery && matchesStatus && matchesNotation;
   });
 }
 

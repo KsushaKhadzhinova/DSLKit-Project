@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import App, { STORAGE_KEY } from './App';
 import { INITIAL_DIAGRAMS } from './data/initialDiagrams';
@@ -101,7 +101,8 @@ describe('forms show validation errors', () => {
     const user = userEvent.setup();
     render(<App />);
     await user.click(screen.getByLabelText(/Название диаграммы/));
-    await user.paste('x'.repeat(limits.title.maxLength + 1));
+    // maxlength stops typing, so the over-limit value is set directly to reach the validation.
+    fireEvent.change(document.activeElement, { target: { value: 'x'.repeat(limits.title.maxLength + 1) } });
     await user.click(screen.getByRole('button', { name: 'Добавить' }));
     expect(screen.getByRole('alert')).toHaveTextContent(String(limits.title.maxLength));
   });

@@ -1,10 +1,11 @@
 import { useId } from 'react';
+import { NOTATIONS } from '../data/initialDiagrams';
 
-export default function DiagramFilters({ query, status, sortBy, onQuery, onStatus, onSort }) {
+export default function DiagramFilters({ query, status, notation = 'all', sortBy, onQuery, onStatus, onNotation = () => {}, onSort }) {
   const id = useId();
   return (
     <div className="form form--inline" role="search" aria-label="Поиск и фильтры">
-      <div className="form__row form__row--3">
+      <div className="form__row form__row--4">
         <div className="form__field">
           <label className="form__label" htmlFor={`${id}-q`}>
             Поиск
@@ -19,6 +20,17 @@ export default function DiagramFilters({ query, status, sortBy, onQuery, onStatu
             <option value="all">Все</option>
             <option value="published">Опубликованные</option>
             <option value="draft">Черновики</option>
+          </select>
+        </div>
+        <div className="form__field">
+          <label className="form__label" htmlFor={`${id}-n`}>
+            Фильтр по нотации
+          </label>
+          <select id={`${id}-n`} className="form__input" value={notation} onChange={(e) => onNotation(e.target.value)}>
+            <option value="all">Все</option>
+            {NOTATIONS.map((n) => (
+              <option key={n}>{n}</option>
+            ))}
           </select>
         </div>
         <div className="form__field">

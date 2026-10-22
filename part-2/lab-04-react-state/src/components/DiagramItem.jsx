@@ -1,7 +1,9 @@
-import { useId, useState } from 'react';
+import { memo, useId, useState } from 'react';
+import limits from '../limits.json';
 import { formatTime, validateTitle } from '../utils/validation';
 
-export default function DiagramItem({ diagram, onToggle, onRename, onDelete }) {
+// memo: a card is drawn again only when its own record changes, not when another card or the filters change.
+function DiagramItem({ diagram, onToggle, onRename, onDelete }) {
   const id = useId();
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(diagram.title);
@@ -39,6 +41,7 @@ export default function DiagramItem({ diagram, onToggle, onRename, onDelete }) {
             <input
               className="form__input"
               aria-label="Новое название"
+              maxLength={limits.title.maxLength}
               aria-invalid={error ? 'true' : undefined}
               aria-describedby={error ? `${id}-error` : undefined}
               value={draft}
@@ -86,3 +89,5 @@ export default function DiagramItem({ diagram, onToggle, onRename, onDelete }) {
     </li>
   );
 }
+
+export default memo(DiagramItem);
