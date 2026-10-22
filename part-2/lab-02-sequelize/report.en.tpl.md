@@ -186,6 +186,14 @@ Figure 13 – End of the npm test output: the number of passed tests and the cov
 
    Uniqueness is set with a `UNIQUE` constraint in the migration and `unique: true` in the model. A violation raises `SequelizeUniqueConstraintError`, whose `errors[0].path` holds the field name. It is caught in the error handler and answered with 409 Conflict rather than 500, because the fault is a repeated value, not the database. In the work `POST /projects` answers this way for a name that is already taken. A preliminary `findOne` does not replace the constraint: another request can slip in between the check and the write.
 
+### 3.12 Architecture and trade-offs
+
+The work repeats the layers of the first lab and adds a data access layer: Sequelize models and migrations. The controller works with models and writes no SQL, and the database schema changes only through migrations. Fowler calls this approach Data Mapper in Patterns of Enterprise Application Architecture: a domain object does not know how it is stored. The dependency rule from Martin's Clean Architecture is not fully kept. The controller depends on Sequelize because it uses its search and count methods. The domain could be fully separated by a repository layer, but for two entities it would double the number of files, so it was not done.
+
+The trade-off is deliberate. Integrity rules live on two levels: the check in code gives a clear 400 answer, while the `CHECK`, `UNIQUE` and foreign key constraints in the database protect the data even when a write bypasses the API. Duplicating the rules is justified here because each level has its own job. The limits live in `limits.json` and are copied into the migrations as a snapshot, so an old migration does not change with the code. The request log is a separate middleware, so it can be turned off without touching the routes.
+
+Sources: Martin R. Clean Architecture: A Craftsman's Guide to Software Structure and Design. Prentice Hall, 2017. Fowler M. Patterns of Enterprise Application Architecture. Addison-Wesley, 2002. Fowler M. Refactoring: Improving the Design of Existing Code, 2nd ed. Addison-Wesley, 2018.
+
 ## Conclusion
 
 For DSLKit, the `diagrams` collection from lab 1 is moved from an array to a database through Sequelize: the `Diagram` model, a seed with three diagrams, and controllers built on ORM methods. The `Diagram` and `Project` models have a one-to-many relation, and five migrations build the schema. The `PATCH` method, the 409 response for a repeated project name and the check of a number from 0 to the limit are added. Locally the work uses SQLite, and the `DATABASE_URL` variable switches it to PostgreSQL or cloud Neon without code changes. 98 automated tests confirm the routes, the constraints, the migrations with rollback, and the seed. The work has not been run on a real PostgreSQL, and the database structure and the requests are confirmed by browser screenshots and by an exchange recorded with a script.
