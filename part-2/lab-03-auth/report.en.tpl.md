@@ -26,6 +26,30 @@ The `POST /auth/register` route lowercases the email, checks its format and the 
 
 The `POST /auth/login` route finds the user, compares the password with the hash and issues a token signed with HS256 and a lifetime from the `JWT_EXPIRES_IN` variable, one hour by default. The payload holds `id`, `email` and `role`. A wrong password and an unknown email get the same 401 response, and when the user does not exist the server compares the password with a spare hash, so the response time does not reveal whether an account exists. The `JWT_SECRET` secret is required and must have at least 32 characters, otherwise the server does not start. Only the `.env.example` template is committed.
 
+The migrations and the seed are run with `npm run db:migrate` and `npm run db:seed`, and the first administrator comes from environment variables made at start. The output is shown in figure 1.
+
+![Migrations and seed](figures/01-migrate-seed.png)
+
+Figure 1 – Console output of the migrations and the seed (process output captured as text)
+
+The server is started with `npm start`, and the console message is shown in figure 2.
+
+![Server console](figures/02-server-start.png)
+
+Figure 2 – Console message after the server starts on port 3000 (process output captured as text)
+
+A browser does not send `POST`, `PUT`, `PATCH` and `DELETE` from the address bar, so the script `shots/shots.mjs` sent such requests, and the real requests and server answers are drawn on a page. Registration, the refusal for a repeated address and the refusal for a weak password are shown in figure 3.
+
+![Registration](figures/03-register.png)
+
+Figure 3 – Registration requests and the answers 201, 409 and 400, recorded by a script (not a Postman window)
+
+Login with a correct and with a wrong password is shown in figure 4.
+
+![Login](figures/04-login.png)
+
+Figure 4 – Login requests: the answer 200 with a token and the answer 401 for a wrong password, recorded by a script (not a Postman window)
+
 ### 3.3 Middleware and protected routes
 
 The `authenticate` middleware reads the `Authorization` header, checks the `Bearer` scheme, verifies the signature and the expiry, and accepts only the HS256 algorithm, so tokens with the `none` algorithm or HS512 are rejected. Then it reads the user from the database and puts `id`, `email` and `role` into `req.user`. Reading from the database is deliberate: a deleted account and a changed role take effect at once instead of after the old token expires. The price is one extra query per protected call.
@@ -41,6 +65,18 @@ Table 1 – Responses of protected routes for different tokens
 | Lifetime ended                                              | 401    | Token expired         |
 | User deleted                                                | 401    | User no longer exists |
 | Valid token                                                 | 200    | requested data        |
+
+Access to the profile with a valid token, without a token and with a changed token is shown in figure 5.
+
+![Protected route](figures/05-profile-401.png)
+
+Figure 5 – GET /profile requests: the answer 200 for a valid token and the answers 401 without a token and with a changed token, recorded by a script (not a Postman window)
+
+The address `http://localhost:3000/profile` opened in the browser without the `Authorization` header gives the answer shown in figure 6.
+
+![Answer 401 in the browser](figures/06-browser-401.png)
+
+Figure 6 – Answer to GET /profile in a browser window without a token: JSON saying that the token is missing (code 401)
 
 ### 3.4 Additional mechanism: roles
 
@@ -60,9 +96,27 @@ Table 2 – Routes and access rights
 
 An administrator cannot change their own role or delete themselves, so the system never ends up without administrators. The first administrator is created by a seed from the `ADMIN_EMAIL` and `ADMIN_PASSWORD` variables, so no password is stored in the repository. If the variables are not set, the seed is skipped.
 
+Creating a diagram by a signed-in user, a partial change and the refusal for an empty body are shown in figure 7.
+
+![Diagrams of the owner](figures/07-diagrams-patch.png)
+
+Figure 7 – POST and PATCH requests with the owner token and the answers 201, 200 and 400, recorded by a script (not a Postman window)
+
+The rights of the owner, of an outsider and of the administrator are shown in figure 8.
+
+![Roles](figures/08-roles-403.png)
+
+Figure 8 – Answers 403 for an outsider and the answer 200 for the administrator, recorded by a script (not a Postman window)
+
 ### 3.5 Verification
 
 The work is verified by automated tests on a temporary SQLite database with the real migrations and real HTTP requests. The tests start the server on a free port, and bcrypt uses four rounds for speed. They cover: registration with email normalization, no hash in the response and a check that the database holds a bcrypt hash rather than the password, duplicate emails in any letter case, data validation errors, login and the token contents, the same response for a wrong password and an unknown email, tampered, unsigned, expired and foreign-signed tokens, user deletion and a role change with an old token, the rights of an administrator, an owner and an outsider, migrations with rollback and the admin seed. There are 118 application tests, including the partial update with `PATCH` and a database failure. A run on a real PostgreSQL has not been done yet.
+
+The result of the `npm test` command with the number of tests and the code coverage is shown in figure 9.
+
+![Test result](figures/09-tests.png)
+
+Figure 9 – End of the npm test output: the number of passed tests and the coverage table (process output captured as text)
 
 ### 3.6 Limitations
 
@@ -72,7 +126,13 @@ Listing of user.js is given in appendix A. Listing of the Users table migration 
 
 ### 3.7 Paging and sorting
 
-The list accepts the `limit`, `offset`, `sort` and `order` parameters. `limit` sets the page size from 1 to 100, `offset` sets the shift from 0 to 1000000, `sort` picks a field from a whitelist and `order` takes `asc` or `desc`. Without parameters the whole list is returned in ascending `id` order, so the clients of the earlier works keep working. The answer stays an array and the full size of the selection comes in the `X-Total-Count` header. The parameters work together with `search`, and `X-Total-Count` counts the search result and is exposed to the client origin through CORS. Numbers are read as strings of at most nine digits, so `-1`, `1e9`, `0x10` and huge numbers get a 400 answer with a list of errors by field. The sort field name is checked against the whitelist and never reaches the database query unchecked. Equal values are ordered by `id`, so pages do not overlap. Parsing of the parameters is moved to a separate module, it is given in Appendix H.
+The list accepts the `limit`, `offset`, `sort` and `order` parameters. `limit` sets the page size from 1 to 100, `offset` sets the shift from 0 to 1000000, `sort` picks a field from a whitelist and `order` takes `asc` or `desc`. Without parameters the whole list is returned in ascending `id` order, so the clients of the earlier works keep working. The answer stays an array and the full size of the selection comes in the `X-Total-Count` header. Numbers are read as strings of at most nine digits, so `-1`, `1e9`, `0x10` and huge numbers get a 400 answer with a list of errors by field. The sort field name is checked against the whitelist and never reaches the database query unchecked. Equal values are ordered by `id`, so pages do not overlap. Parsing of the parameters is moved to a separate module, it is given in Appendix H. The `notation` parameter keeps the records of one notation, and the `q` parameter searches a part of the title ignoring case with `instr` in SQLite or `strpos` in PostgreSQL. An invalid value gives 400. The number of failed logins before the lock, the lock time and the request limits for login and registration live in `limits.json`, not in the code.
+
+The request `GET /diagrams?limit=2&offset=0&sort=title&order=desc` with a token returns a page of two records, as in figure 10.
+
+![A page of the list](figures/10-paging.png)
+
+Figure 10 – A list request with the limit, offset, sort and order parameters, recorded by a script (not a Postman window)
 
 ### 3.8 The PATCH method
 
@@ -81,6 +141,18 @@ The `PATCH /diagrams/:id` route changes only the fields that are sent. The check
 ### 3.9 How to trigger a 500 response with a real failure
 
 A 500 response is caused by a database failure, not by a button. For SQLite, start the server with `npm start`, then run `npx sequelize-cli db:migrate:undo:all` in a second window. The tables vanish under the running server, and the very first request cannot write a row to the `RequestLogs` log. The client gets 500 with the body `{ "error": "Internal server error" }`, and the details stay only in the server console. For PostgreSQL it is enough to stop the database service or container: requests give 500, and `GET /health` answers 503. The commands `npm run db:migrate` and `npm run db:seed` restore the work. The same failure is reproduced in an automated test by dropping the `Diagrams` table while the server runs.
+
+The migrations are undone with `npx sequelize-cli db:migrate:undo:all` under the running server, and the very first request to `http://localhost:3000/diagrams` gets the answer 500, as in figure 11.
+
+![Answer 500](figures/11-real-500.png)
+
+Figure 11 – Answer to GET /diagrams after a real database failure: JSON with a general message without details (code 500)
+
+The details of the failure stay only in the console of the server and are shown in figure 12.
+
+![Server console](figures/12-server-console.png)
+
+Figure 12 – Console of the server after the failure: the error about the missing table RequestLogs (process output captured as text)
 
 ### 3.10 Answers to the control questions
 
@@ -96,9 +168,17 @@ A 500 response is caused by a database failure, not by a button. For SQLite, sta
 
     Whoever knows the key can sign a token for any user and any role, an administrator included, and the server accepts it as genuine. Tokens cannot be told apart by signature, so the only remedy is to change the key: every issued token stops passing the check at once, and users log in again. In the work the key comes from an environment variable, is not stored in the repository, and a key that is too short is refused at startup. The damage is limited by the short token lifetime of one hour. Keys with a `kid` identifier for a smooth change and the RS256 algorithm add protection: the private key signs and the public key verifies, so a service that only verifies cannot forge a token.
 
+### 3.11 Architecture and trade-offs
+
+A security layer is added to the layers of the second lab: the token check, the role check and the rate limiters stand as separate middleware before the controllers. Controllers do not know how a token is checked, they receive a ready user in `req.user`. This follows the dependency rule from Martin's Clean Architecture: details such as the JWT library sit in the outer layer, while the business rule "a record can be changed by its owner or an admin" is written as one function `mayChange` and is checked by a simple test.
+
+The main trade-off concerns state. A JWT is not stored on the server, which makes scaling simpler, but a token cannot be revoked before it expires. So the lifetime is short and the role is read from the database on every request, and a deleted user loses access at once. The login attempt counters live in process memory. This is fast and simple, but with several server instances the counters are not shared. The decision is recorded in the report, and a production system would move the counters to a shared store. In Fowler's Patterns of Enterprise Application Architecture this is the usual price of choosing between simplicity and distributed state.
+
+Sources: Martin R. Clean Architecture: A Craftsman's Guide to Software Structure and Design. Prentice Hall, 2017. Fowler M. Patterns of Enterprise Application Architecture. Addison-Wesley, 2002. Fowler M. Refactoring: Improving the Design of Existing Code, 2nd ed. Addison-Wesley, 2018.
+
 ## Conclusion
 
-DSLKit now has users with bcrypt password hashes, registration, login with a JWT token, a token-checking middleware and protected routes, including the profile of the current user. The additional role-based mechanism separates the rights of an administrator, a diagram owner and an outsider. The tests confirm both the successful scenarios and the rejections of tampered, expired and foreign tokens. A run on a real PostgreSQL, and screenshots of Postman requests are still to be done. The methods now include a partial `PATCH` with the same rights as `PUT`.
+DSLKit now has users with bcrypt password hashes, registration, login with a JWT token, a token-checking middleware and protected routes, including the profile of the current user. The additional role-based mechanism separates the rights of an administrator, a diagram owner and an outsider. The tests confirm both the successful scenarios and the rejections of tampered, expired and foreign tokens. A run on a real PostgreSQL is still to be done. The requests are confirmed by browser screenshots and by an exchange recorded with a script. The methods now include a partial `PATCH` with the same rights as `PUT`.
 
 ## Appendix A (mandatory) Listing of user.js
 

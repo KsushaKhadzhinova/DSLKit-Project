@@ -1,0 +1,568 @@
+{
+  "info": {
+    "name": "DSLKit lab-01-node-server",
+    "description": "Generated from requests.http by tools/make-postman.js. Start the server first.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base",
+      "value": "http://localhost:3000"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health check -> 200",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base}}/health",
+          "host": [
+            "{{base}}"
+          ],
+          "path": [
+            "health"
+          ]
+        }
+      }
+    },
+    {
+      "name": "List all diagrams -> 200",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base}}/diagrams",
+          "host": [
+            "{{base}}"
+          ],
+          "path": [
+            "diagrams"
+          ]
+        }
+      }
+    },
+    {
+      "name": "One diagram -> 200",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base}}/diagrams/1",
+          "host": [
+            "{{base}}"
+          ],
+          "path": [
+            "diagrams",
+            "1"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Missing diagram -> 404",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 404', () => pm.response.to.have.status(404));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base}}/diagrams/999",
+          "host": [
+            "{{base}}"
+          ],
+          "path": [
+            "diagrams",
+            "999"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Bad id -> 400",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 400', () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base}}/diagrams/abc",
+          "host": [
+            "{{base}}"
+          ],
+          "path": [
+            "diagrams",
+            "abc"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Create -> 201 + Location",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 201', () => pm.response.to.have.status(201));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Login flow\",\n  \"notation\": \"UML\",\n  \"sourceCode\": \"user -> server\",\n  \"priority\": \"normal\",\n  \"owner\": \"carol\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base}}/diagrams",
+          "host": [
+            "{{base}}"
+          ],
+          "path": [
+            "diagrams"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Invalid data -> 400 with details",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 400', () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{ \"title\": \"\", \"notation\": \"XYZ\" }",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base}}/diagrams",
+          "host": [
+            "{{base}}"
+          ],
+          "path": [
+            "diagrams"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Malformed JSON -> 400",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 400', () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{ \"title\":",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base}}/diagrams",
+          "host": [
+            "{{base}}"
+          ],
+          "path": [
+            "diagrams"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Replace -> 200",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Order processing v2\",\n  \"notation\": \"BPMN\",\n  \"sourceCode\": \"start -> check -> pay -> ship\",\n  \"priority\": \"low\",\n  \"owner\": \"anna\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base}}/diagrams/1",
+          "host": [
+            "{{base}}"
+          ],
+          "path": [
+            "diagrams",
+            "1"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Partial update -> 200 (only the sent fields change)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{ \"priority\": \"high\" }",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base}}/diagrams/1",
+          "host": [
+            "{{base}}"
+          ],
+          "path": [
+            "diagrams",
+            "1"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Empty PATCH body -> 400",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 400', () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base}}/diagrams/1",
+          "host": [
+            "{{base}}"
+          ],
+          "path": [
+            "diagrams",
+            "1"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Delete -> 204 (repeat it -> 404)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 204', () => pm.response.to.have.status(204));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{base}}/diagrams/2",
+          "host": [
+            "{{base}}"
+          ],
+          "path": [
+            "diagrams",
+            "2"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Unknown route -> 404",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 404', () => pm.response.to.have.status(404));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base}}/projects",
+          "host": [
+            "{{base}}"
+          ],
+          "path": [
+            "projects"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Page 2 of size 5, sorted by title descending -> 200 (X-Total-Count has the full size)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base}}/diagrams?limit=5&offset=5&sort=title&order=desc",
+          "host": [
+            "{{base}}"
+          ],
+          "path": [
+            "diagrams"
+          ],
+          "query": [
+            {
+              "key": "limit",
+              "value": "5"
+            },
+            {
+              "key": "offset",
+              "value": "5"
+            },
+            {
+              "key": "sort",
+              "value": "title"
+            },
+            {
+              "key": "order",
+              "value": "desc"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Page size over 100 -> 400",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 400', () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base}}/diagrams?limit=1000",
+          "host": [
+            "{{base}}"
+          ],
+          "path": [
+            "diagrams"
+          ],
+          "query": [
+            {
+              "key": "limit",
+              "value": "1000"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Unknown sort field -> 400",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 400', () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base}}/diagrams?sort=password",
+          "host": [
+            "{{base}}"
+          ],
+          "path": [
+            "diagrams"
+          ],
+          "query": [
+            {
+              "key": "sort",
+              "value": "password"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

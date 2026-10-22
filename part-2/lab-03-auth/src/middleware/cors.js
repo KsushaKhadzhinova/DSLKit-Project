@@ -16,7 +16,7 @@ const createCors = (origin) => {
     }
     if (req.method !== 'OPTIONS' || !req.get('Access-Control-Request-Method')) return next();
     if (allowed) {
-      res.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+      res.set('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
       res.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
       res.set('Access-Control-Max-Age', '600');
     }

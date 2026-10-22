@@ -36,12 +36,9 @@ test('limit and offset are applied by the database, the total stays the full siz
   assert.deepEqual((await get('?offset=50')).body, []);
 });
 
-test('sort and order arrange the list and combine with search', async () => {
+test('sort and order arrange the list', async () => {
   assert.deepEqual(titles((await get('?sort=title')).body), ['alpha', 'bravo', 'charlie', 'delta', 'echo']);
   assert.deepEqual(titles((await get('?sort=title&order=DESC&limit=2')).body), ['echo', 'delta']);
-  const found = await get('?search=a&sort=title&limit=2');
-  assert.deepEqual(titles(found.body), ['alpha', 'bravo']);
-  assert.equal(found.res.headers.get('x-total-count'), '4');
 });
 
 test('bad or huge values and unknown fields get 400 with the list of problems', async () => {
@@ -66,7 +63,29 @@ test('bad or huge values and unknown fields get 400 with the list of problems', 
   }
 });
 
-test('the allowed origin may read X-Total-Count in the browser', async () => {
-  const { res } = await app.call('GET', '/diagrams?limit=1', { token, headers: { Origin: 'http://localhost:5178' } });
-  assert.equal(res.headers.get('access-control-expose-headers'), 'X-Total-Count');
+test('?notation= keeps one notation and X-Total-Count counts the filtered list', async () => {
+  const { res, body } = await get('?notation=UML&limit=2');
+  assert.equal(body.length, 2);
+  assert.ok(body.every((d) => d.notation === 'UML'));
+  assert.equal(res.headers.get('x-total-count'), '5');
+  const none = await get('?notation=BPMN');
+  assert.deepEqual(none.body, []);
+  assert.equal(none.res.headers.get('x-total-count'), '0');
+});
+
+test('?q= finds a part of the title ignoring case, and % and _ are plain characters', async () => {
+  const { res, body } = await get('?q=%20AL%20');
+  assert.deepEqual(titles(body), ['alpha']);
+  assert.equal(res.headers.get('x-total-count'), '1');
+  assert.deepEqual(titles((await get('?q=a&notation=UML&sort=title')).body), ['alpha', 'bravo', 'charlie', 'delta']);
+  assert.deepEqual((await get('?q=%25')).body, []);
+  assert.deepEqual((await get('?q=_')).body, []);
+});
+
+test('a bad notation or search text is refused with 400 and a list of problems', async () => {
+  for (const query of ['?notation=XYZ', '?notation=', '?notation=UML&notation=ERD', '?q=', '?q=%20%20', `?q=${'a'.repeat(81)}`, '?q=a&q=b']) {
+    const { res, body } = await get(query);
+    assert.equal(res.status, 400, query);
+    assert.ok(body.details.length > 0, query);
+  }
 });

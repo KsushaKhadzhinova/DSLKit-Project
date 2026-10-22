@@ -1,29 +1,38 @@
-const { Op } = require('sequelize');
 const { notFound, forbidden, badRequest } = require('../errors');
-const { LIMITS } = require('../models/diagram.constants');
+const { Op, fn, col, where } = require('sequelize');
 const { parseListQuery } = require('../middleware/list-query');
+const { NOTATIONS, LIMITS } = require('../models/diagram.constants');
 
 const missing = (id) => notFound(`Diagram ${id} not found`);
 
 const SORTABLE = ['id', 'title', 'notation', 'priority', 'ownerId', 'createdAt'];
+
+// A part of the title is searched with instr (SQLite) or strpos (PostgreSQL) on the lowercased title, not with LIKE,
+// so the characters % and _ in the search text are plain characters and need no escaping.
+const filterFor = (dialect, { notation, q }) => {
+  const conditions = [];
+  if (notation !== undefined) conditions.push({ notation });
+  if (q !== undefined) conditions.push(where(fn(dialect === 'sqlite' ? 'instr' : 'strpos', fn('lower', col('title')), q), { [Op.gt]: 0 }));
+  return conditions.length > 0 ? { [Op.and]: conditions } : {};
+};
 
 // Only the owner or an admin may change or delete a diagram.
 const mayChange = (user, diagram) => user.role === 'admin' || diagram.ownerId === user.id;
 
 // Express 5 forwards a rejected promise to the error handler, so no try/catch is needed here.
 const createDiagramsController = ({ Diagram }) => ({
-  // ?search=text keeps diagrams whose title contains the text. The value is a bound parameter, so it cannot change the query.
   // ?limit=&offset=&sort=&order= (see list-query.js) page and sort the result, the answer stays an array and X-Total-Count holds the full size.
   list: async (req, res, next) => {
-    const { search } = req.query;
+    // The client of lab 5 sends the search text as ?search=. It means the same as ?q=, but a blank text keeps every diagram.
+    const { search, ...rest } = req.query;
     if (search !== undefined && (typeof search !== 'string' || search.trim().length > LIMITS.title)) {
       return next(badRequest(`search must be a string of at most ${LIMITS.title} characters`));
     }
     const term = (search ?? '').trim();
-    const where = term ? { title: { [Op.like]: `%${term}%` } } : undefined;
-    const { limit, offset, sort, order } = parseListQuery(req.query, SORTABLE);
+    const query = term && rest.q === undefined ? { ...rest, q: term } : rest;
+    const { limit, offset, sort, order, notation, q } = parseListQuery(query, SORTABLE, { notations: NOTATIONS, maxQuery: LIMITS.title });
     const { count, rows } = await Diagram.findAndCountAll({
-      where,
+      where: filterFor(Diagram.sequelize.getDialect(), { notation, q }),
       order: [
         [sort, order.toUpperCase()],
         ['id', 'ASC'],

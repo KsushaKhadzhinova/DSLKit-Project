@@ -65,3 +65,10 @@ test('in production the database needs TLS with certificate checks', () => {
   assert.equal(load({ ...url, DATABASE_SSL: 'true' }).dialectOptions.ssl.rejectUnauthorized, true);
   assert.equal(load({ NODE_ENV: 'production' }).dialect, 'sqlite');
 });
+
+test('the login lock and the rate limits come from limits.json', () => {
+  const LIMITS = require('../limits.json');
+  assert.ok(LIMITS.loginMaxAttempts > 0 && LIMITS.loginLockMinutes > 0);
+  assert.ok(LIMITS.loginRateMax > 0 && LIMITS.loginRateWindowMinutes > 0);
+  assert.ok(LIMITS.registerRateMax > 0 && LIMITS.registerRateWindowMinutes > 0);
+});

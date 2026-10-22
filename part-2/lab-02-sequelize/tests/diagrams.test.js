@@ -76,7 +76,7 @@ test('POST /diagrams creates a diagram, answers 201 with Location', async () => 
   assert.equal(res.headers.get('location'), `/diagrams/${body.id}`);
   assert.deepEqual(
     { ...body, id: undefined, createdAt: undefined, updatedAt: undefined },
-    { ...valid, id: undefined, createdAt: undefined, updatedAt: undefined },
+    { ...valid, revision: 0, projectId: null, id: undefined, createdAt: undefined, updatedAt: undefined },
   );
   assert.equal((await models.Diagram.findByPk(body.id)).title, 'Login flow');
 });
@@ -118,7 +118,7 @@ test('PUT /diagrams/:id replaces the whole diagram', async () => {
   const id = await firstId();
   const { res, body } = await call('PUT', `/diagrams/${id}`, valid);
   assert.equal(res.status, 200);
-  assert.deepEqual({ ...body, createdAt: undefined, updatedAt: undefined }, { id, ...valid, createdAt: undefined, updatedAt: undefined });
+  assert.deepEqual({ ...body, createdAt: undefined, updatedAt: undefined }, { id, ...valid, revision: 0, projectId: null, createdAt: undefined, updatedAt: undefined });
   assert.equal(await models.Diagram.count(), 1);
 });
 
@@ -139,9 +139,9 @@ test('DELETE /diagrams/:id answers 204, then 404 for the same id', async () => {
 });
 
 test('an unknown route answers 404 as JSON', async () => {
-  const { res, body } = await call('GET', '/projects');
+  const { res, body } = await call('GET', '/tickets');
   assert.equal(res.status, 404);
-  assert.equal(body.error, 'Route GET /projects not found');
+  assert.equal(body.error, 'Route GET /tickets not found');
 });
 
 test('an unexpected failure answers 500 without leaking the message', async (t) => {
@@ -167,7 +167,7 @@ test('PUT stores the new state, which GET then returns', async () => {
   const id = await firstId();
   await call('PUT', `/diagrams/${id}`, valid);
   const { body } = await call('GET', `/diagrams/${id}`);
-  assert.deepEqual({ ...body, createdAt: undefined, updatedAt: undefined }, { id, ...valid, createdAt: undefined, updatedAt: undefined });
+  assert.deepEqual({ ...body, createdAt: undefined, updatedAt: undefined }, { id, ...valid, revision: 0, projectId: null, createdAt: undefined, updatedAt: undefined });
 });
 
 test('a body over the size limit answers 413', async () => {
@@ -178,8 +178,8 @@ test('a body over the size limit answers 413', async () => {
 
 test('unsupported methods answer 405 with an Allow header', async () => {
   for (const [method, path, allow] of [
-    ['PATCH', '/diagrams/1', 'GET, PUT, DELETE, HEAD, OPTIONS'],
-    ['POST', '/diagrams/1', 'GET, PUT, DELETE, HEAD, OPTIONS'],
+    ['PATCH', '/diagrams', 'GET, POST, HEAD, OPTIONS'],
+    ['POST', '/diagrams/1', 'GET, PUT, PATCH, DELETE, HEAD, OPTIONS'],
     ['DELETE', '/diagrams', 'GET, POST, HEAD, OPTIONS'],
     ['PUT', '/diagrams', 'GET, POST, HEAD, OPTIONS'],
   ]) {

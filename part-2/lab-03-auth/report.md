@@ -26,6 +26,30 @@
 
 Маршрут `POST /auth/login` находит пользователя, сравнивает пароль с хешем и выдаёт токен, подписанный алгоритмом HS256, со сроком жизни из переменной `JWT_EXPIRES_IN`, по умолчанию один час. В нагрузку входят `id`, `email` и `role`. Для неверного пароля и для неизвестного email сервер возвращает одинаковый ответ 401, а при отсутствии пользователя сравнивает пароль с запасным хешем, чтобы время ответа не выдавало существование учётной записи. Секрет `JWT_SECRET` обязателен и должен содержать не меньше 32 символов, иначе сервер не запускается. В репозитории лежит только образец `.env.example`.
 
+Миграции и сид выполнены командами `npm run db:migrate` и `npm run db:seed`, первый администратор взят из переменных окружения, созданных при запуске. Вывод показан на рисунке 1.
+
+![Миграции и сид](figures/01-migrate-seed.png)
+
+Рисунок 1 – Вывод миграций и сида в консоли (вывод процессов, снятый как текст)
+
+Сервер запущен командой `npm start`, сообщение консоли показано на рисунке 2.
+
+![Консоль сервера](figures/02-server-start.png)
+
+Рисунок 2 – Сообщение консоли после запуска сервера на порту 3000 (вывод процесса, снятый как текст)
+
+Браузер не отправляет запросы `POST`, `PUT`, `PATCH` и `DELETE` из адресной строки, поэтому такие запросы отправил скрипт `shots/shots.mjs`, а настоящие запросы и ответы сервера выведены на странице. Регистрация, отказ при повторе адреса и отказ при слабом пароле показаны на рисунке 3.
+
+![Регистрация](figures/03-register.png)
+
+Рисунок 3 – Запросы регистрации и ответы 201, 409 и 400, записанные скриптом (не окно Postman)
+
+Вход с верным и неверным паролем показан на рисунке 4.
+
+![Вход](figures/04-login.png)
+
+Рисунок 4 – Запросы входа: ответ 200 с токеном и ответ 401 при неверном пароле, записанные скриптом (не окно Postman)
+
 ### 3.3 Промежуточный обработчик и защищённые маршруты
 
 Обработчик `authenticate` читает заголовок `Authorization`, проверяет схему `Bearer`, проверяет подпись и срок токена и принимает только алгоритм HS256, поэтому токены с алгоритмом `none` или HS512 отклоняются. Затем он читает пользователя из базы и кладёт в `req.user` значения `id`, `email` и `role`. Чтение из базы выбрано сознательно: удалённая учётная запись и изменённая роль начинают действовать сразу, а не после истечения старого токена. Цена решения один дополнительный запрос на каждый защищённый вызов.
@@ -41,6 +65,18 @@
 | Срок жизни истёк                                          | 401 | Token expired         |
 | Пользователь удалён                                       | 401 | User no longer exists |
 | Верный токен                                              | 200 | данные запроса        |
+
+Доступ к профилю с верным токеном, без токена и с изменённым токеном показан на рисунке 5.
+
+![Защищённый маршрут](figures/05-profile-401.png)
+
+Рисунок 5 – Запросы GET /profile: ответ 200 с верным токеном и ответы 401 без токена и с изменённым токеном, записанные скриптом (не окно Postman)
+
+Адрес `http://localhost:3000/profile`, открытый в браузере без заголовка `Authorization`, даёт ответ, показанный на рисунке 6.
+
+![Ответ 401 в браузере](figures/06-browser-401.png)
+
+Рисунок 6 – Ответ GET /profile в окне браузера без токена: JSON с сообщением об отсутствии токена (код 401)
 
 ### 3.4 Дополнительный механизм: роли
 
@@ -60,9 +96,27 @@
 
 Администратор не может изменить собственную роль или удалить себя, чтобы система не осталась без администраторов. Первый администратор создаётся сидом из переменных `ADMIN_EMAIL` и `ADMIN_PASSWORD`, поэтому пароль не хранится в репозитории. Если переменные не заданы, сид пропускается.
 
+Создание диаграммы вошедшим пользователем, частичное изменение и отказ при пустом теле показаны на рисунке 7.
+
+![Диаграммы владельца](figures/07-diagrams-patch.png)
+
+Рисунок 7 – Запросы POST и PATCH с токеном владельца и ответы 201, 200 и 400, записанные скриптом (не окно Postman)
+
+Права владельца, постороннего пользователя и администратора показаны на рисунке 8.
+
+![Роли](figures/08-roles-403.png)
+
+Рисунок 8 – Ответы 403 постороннему пользователю и ответ 200 администратору, записанные скриптом (не окно Postman)
+
 ### 3.5 Проверка
 
 Работа проверена автоматическими тестами на временной базе SQLite с настоящими миграциями и настоящими HTTP-запросами. Тесты запускают сервер на свободном порту, а bcrypt использует четыре раунда для скорости. Покрыто следующее: регистрация с нормализацией email, отсутствие хеша в ответе и проверка, что в базе лежит хеш bcrypt, а не пароль, дубликаты email в любом регистре, ошибки проверки данных, вход и содержимое токена, одинаковый ответ на неверный пароль и неизвестный email, подделанные, неподписанные, просроченные и подписанные чужим ключом токены, удаление пользователя и смена роли при старом токене, права администратора, владельца и постороннего пользователя, миграции с откатом и сид администратора. Выполнено 118 тестов приложения, включая частичное обновление `PATCH` и сбой базы. Проверка на настоящем PostgreSQL пока не выполнялась.
+
+Результат команды `npm test` с числом тестов и покрытием кода показан на рисунке 9.
+
+![Результат тестов](figures/09-tests.png)
+
+Рисунок 9 – Конец вывода команды npm test: число пройденных тестов и таблица покрытия (вывод процесса, снятый как текст)
 
 ### 3.6 Ограничения
 
@@ -70,11 +124,15 @@
 
 Листинг файла user.js приведён в приложении А. Листинг миграции создания таблицы Users приведён в приложении Б. Листинг файла auth.js приведён в приложении В. Листинг файла auth.controller.js приведён в приложении Г. Листинг файла validate-auth.js приведён в приложении Д. Листинг файла users.routes.js приведён в приложении Е. Листинг файла diagrams.controller.js приведён в приложении Ж. Листинг файла validate.js приведён в приложении К.
 
-Листинг файла user.js приведён в приложении А. Листинг миграции создания таблицы Users приведён в приложении Б. Листинг файла auth.js приведён в приложении В. Листинг файла auth.controller.js приведён в приложении Г. Листинг файла validate-auth.js приведён в приложении Д. Листинг файла users.routes.js приведён в приложении Е. Листинг файла diagrams.controller.js приведён в приложении Ж.
-
 ### 3.7 Постраничный вывод и сортировка
 
-Список принимает параметры `limit`, `offset`, `sort` и `order`. Параметр `limit` задаёт размер страницы от 1 до 100, `offset` задаёт смещение от 0 до 1000000, `sort` выбирает поле из белого списка, а `order` принимает значения `asc` и `desc`. Без параметров возвращается весь список по возрастанию `id`, поэтому клиенты прежних работ продолжают работать. Ответ остаётся массивом, а полный размер выборки приходит в заголовке `X-Total-Count`. Параметры работают вместе с параметром `search`, а заголовок `X-Total-Count` учитывает поиск и разрешён для адреса клиента через CORS. Числа читаются как строки не длиннее девяти цифр, поэтому значения `-1`, `1e9`, `0x10` и огромные числа получают ответ 400 со списком ошибок по полям. Имя поля сортировки проверяется по белому списку и не попадает в запрос к базе без проверки. Равные значения упорядочены по `id`, поэтому страницы не пересекаются. Разбор параметров вынесен в отдельный модуль, он приведён в приложении И.
+Список принимает параметры `limit`, `offset`, `sort` и `order`. Параметр `limit` задаёт размер страницы от 1 до 100, `offset` задаёт смещение от 0 до 1000000, `sort` выбирает поле из белого списка, а `order` принимает значения `asc` и `desc`. Без параметров возвращается весь список по возрастанию `id`, поэтому клиенты прежних работ продолжают работать. Ответ остаётся массивом, а полный размер выборки приходит в заголовке `X-Total-Count`. Числа читаются как строки не длиннее девяти цифр, поэтому значения `-1`, `1e9`, `0x10` и огромные числа получают ответ 400 со списком ошибок по полям. Имя поля сортировки проверяется по белому списку и не попадает в запрос к базе без проверки. Равные значения упорядочены по `id`, поэтому страницы не пересекаются. Разбор параметров вынесен в отдельный модуль, он приведён в приложении И. Параметр `notation` оставляет записи одной нотации, а параметр `q` ищет часть названия без учёта регистра функцией `instr` в SQLite или `strpos` в PostgreSQL. Недопустимое значение даёт ответ 400. Число неудачных входов до блокировки, срок блокировки и пределы запросов на вход и регистрацию лежат в файле `limits.json`, а не в коде.
+
+Запрос `GET /diagrams?limit=2&offset=0&sort=title&order=desc` с токеном возвращает страницу из двух записей, как на рисунке 10.
+
+![Страница списка](figures/10-paging.png)
+
+Рисунок 10 – Запрос списка с параметрами limit, offset, sort и order, записанные скриптом (не окно Postman)
 
 ### 3.8 Метод PATCH
 
@@ -83,6 +141,18 @@
 ### 3.9 Как вызвать ответ 500 настоящим сбоем
 
 Ответ 500 вызывается сбоем базы, а не кнопкой. Для SQLite нужно запустить сервер командой `npm start`, затем во втором окне выполнить `npx sequelize-cli db:migrate:undo:all`. Таблицы исчезают под работающим сервером, и первый же запрос не может записать строку в журнал `RequestLogs`. Клиент получает 500 с телом `{ "error": "Internal server error" }`, а подробности остаются только в консоли сервера. Для PostgreSQL достаточно остановить службу базы или контейнер: запросы дают 500, а `GET /health` отвечает 503. Работу восстанавливают команды `npm run db:migrate` и `npm run db:seed`. В автоматическом тесте тот же сбой воспроизведён удалением таблицы `Diagrams` при работающем сервере.
+
+Миграции откатаны командой `npx sequelize-cli db:migrate:undo:all` под работающим сервером, и первый же запрос `http://localhost:3000/diagrams` получает ответ 500, как на рисунке 11.
+
+![Ответ 500](figures/11-real-500.png)
+
+Рисунок 11 – Ответ GET /diagrams после настоящего сбоя базы: JSON с общим сообщением без подробностей (код 500)
+
+Подробности сбоя остаются только в консоли сервера и показаны на рисунке 12.
+
+![Консоль сервера](figures/12-server-console.png)
+
+Рисунок 12 – Консоль сервера после сбоя: ошибка отсутствия таблицы RequestLogs (вывод процесса, снятый как текст)
 
 ### 3.10 Ответы на контрольные вопросы
 
@@ -98,9 +168,17 @@
 
     Тот, кто знает ключ, подпишет токен с любым пользователем и любой ролью, в том числе администратора, и сервер примет его как настоящий. Токены нельзя отличить по подписи, поэтому единственное средство это смена ключа: все выданные токены сразу перестают проходить проверку, и пользователи входят заново. В работе ключ берётся из переменной окружения, не хранится в репозитории, а слишком короткий ключ отклоняется при запуске. Ущерб ограничивает короткий срок жизни токена, всего один час. Дополнительную защиту дают ключи с идентификатором `kid` для плавной смены и алгоритм RS256, где подписывает закрытый ключ, а проверяет открытый, поэтому служба, которая только проверяет, подделать токен не может.
 
+### 3.11 Архитектура и компромиссы
+
+К слоям второй лабораторной добавлен слой безопасности: проверка токена, проверка роли и ограничители частоты стоят отдельными промежуточными обработчиками перед контроллерами. Контроллеры не знают, как проверяется токен, они получают готового пользователя в `req.user`. Это следует правилу зависимостей из «Чистой архитектуры» Мартина: детали, например библиотека JWT, лежат во внешнем слое, а бизнес-правило «менять запись может владелец или администратор» записано одной функцией `mayChange` и проверяется простым тестом.
+
+Главный компромисс связан с состоянием. Токен JWT не хранится на сервере, это упрощает масштабирование, но токен нельзя отозвать до истечения срока. Поэтому срок выбран коротким, а роль берётся из базы при каждом запросе, и удалённый пользователь теряет доступ сразу. Счётчики попыток входа лежат в памяти процесса. Это быстро и просто, но при нескольких экземплярах сервера счётчики не общие. Решение зафиксировано в отчёте, а для боевой системы счётчики переносят в общее хранилище. По Фаулеру («Шаблоны корпоративных приложений») это обычная цена выбора между простотой и распределённым состоянием.
+
+Источники: Мартин Р. Чистая архитектура. Искусство разработки программного обеспечения. СПб.: Питер, 2018. Фаулер М. Шаблоны корпоративных приложений. М.: Вильямс, 2016. Фаулер М. Рефакторинг. Улучшение существующего кода. 2-е изд. СПб.: Питер, 2019.
+
 ## Заключение
 
-В проект DSLKit добавлены пользователи с паролями в виде хешей bcrypt, регистрация, вход с токеном JWT, промежуточный обработчик проверки токена и защищённые маршруты, включая профиль текущего пользователя. Дополнительный механизм ролевой модели разделяет права администратора, владельца диаграммы и постороннего пользователя. Тесты подтверждают как успешные сценарии, так и отказы на подделанных, просроченных и чужих токенах. К методам добавлен частичный `PATCH` с теми же правами, что у `PUT`. Остаются проверка на настоящем PostgreSQL и скриншоты запросов из Postman.
+В проект DSLKit добавлены пользователи с паролями в виде хешей bcrypt, регистрация, вход с токеном JWT, промежуточный обработчик проверки токена и защищённые маршруты, включая профиль текущего пользователя. Дополнительный механизм ролевой модели разделяет права администратора, владельца диаграммы и постороннего пользователя. Тесты подтверждают как успешные сценарии, так и отказы на подделанных, просроченных и чужих токенах. К методам добавлен частичный `PATCH` с теми же правами, что у `PUT`. Остаётся проверка на настоящем PostgreSQL. Запросы подтверждены снимками браузера и записью обмена, снятой скриптом.
 
 ## Приложение А (обязательное) Листинг файла user.js
 
@@ -215,6 +293,8 @@ const createAuthenticate =
     } catch (error) {
       return next(unauthorized(error.name === 'TokenExpiredError' ? 'Token expired' : 'Invalid token'));
     }
+    // A signed token without a usable integer id cannot name a user; it is refused like any other bad token.
+    if (!Number.isSafeInteger(payload.id)) return next(unauthorized('Invalid token'));
     const user = await User.findByPk(payload.id);
     if (!user) return next(unauthorized('User no longer exists'));
     req.user = { id: user.id, email: user.email, role: user.role };
@@ -295,7 +375,10 @@ const MAX_PASSWORD_BYTES = LIMITS.passwordMaxBytes;
 const objectBody = (body) => body !== null && typeof body === 'object' && !Array.isArray(body);
 const normalizeEmail = (email) => (typeof email === 'string' ? email.trim().toLowerCase() : email);
 
-const validEmail = (email) => typeof email === 'string' && email.length <= LIMITS.email && EMAIL.test(email);
+// Control characters (NUL, tab, escape) are not part of an address; NUL also breaks the SQL text of a query.
+const CONTROL = /[\u0000-\u001F\u007F]/;
+
+const validEmail = (email) => typeof email === 'string' && email.length <= LIMITS.email && EMAIL.test(email) && !CONTROL.test(email);
 
 const passwordProblem = (password) => {
   if (typeof password !== 'string') return 'must be a string';
@@ -327,7 +410,9 @@ const validateLogin = (req, _res, next) => {
     return reject(next, [{ field: 'email, password', message: 'both are required strings' }]);
   }
   // A value longer than any stored one cannot match an account, so it gets the usual answer without hashing it.
-  if (email.length > LIMITS.email || Buffer.byteLength(password) > MAX_PASSWORD_BYTES) return next(unauthorized('Invalid email or password'));
+  if (email.length > LIMITS.email || CONTROL.test(email) || Buffer.byteLength(password) > MAX_PASSWORD_BYTES) {
+    return next(unauthorized('Invalid email or password'));
+  }
   req.credentials = { email: normalizeEmail(email), password };
   return next();
 };
@@ -381,32 +466,41 @@ module.exports = { createUsersRouter };
 ## Приложение Ж (обязательное) Листинг файла diagrams.controller.js
 
 ```js
-const { Op } = require('sequelize');
 const { notFound, forbidden, badRequest } = require('../errors');
-const { LIMITS } = require('../models/diagram.constants');
+const { Op, fn, col, where } = require('sequelize');
 const { parseListQuery } = require('../middleware/list-query');
+const { NOTATIONS, LIMITS } = require('../models/diagram.constants');
 
 const missing = (id) => notFound(`Diagram ${id} not found`);
 
 const SORTABLE = ['id', 'title', 'notation', 'priority', 'ownerId', 'createdAt'];
+
+// A part of the title is searched with instr (SQLite) or strpos (PostgreSQL) on the lowercased title, not with LIKE,
+// so the characters % and _ in the search text are plain characters and need no escaping.
+const filterFor = (dialect, { notation, q }) => {
+  const conditions = [];
+  if (notation !== undefined) conditions.push({ notation });
+  if (q !== undefined) conditions.push(where(fn(dialect === 'sqlite' ? 'instr' : 'strpos', fn('lower', col('title')), q), { [Op.gt]: 0 }));
+  return conditions.length > 0 ? { [Op.and]: conditions } : {};
+};
 
 // Only the owner or an admin may change or delete a diagram.
 const mayChange = (user, diagram) => user.role === 'admin' || diagram.ownerId === user.id;
 
 // Express 5 forwards a rejected promise to the error handler, so no try/catch is needed here.
 const createDiagramsController = ({ Diagram }) => ({
-  // ?search=text keeps diagrams whose title contains the text. The value is a bound parameter, so it cannot change the query.
   // ?limit=&offset=&sort=&order= (see list-query.js) page and sort the result, the answer stays an array and X-Total-Count holds the full size.
   list: async (req, res, next) => {
-    const { search } = req.query;
+    // The client of lab 5 sends the search text as ?search=. It means the same as ?q=, but a blank text keeps every diagram.
+    const { search, ...rest } = req.query;
     if (search !== undefined && (typeof search !== 'string' || search.trim().length > LIMITS.title)) {
       return next(badRequest(`search must be a string of at most ${LIMITS.title} characters`));
     }
     const term = (search ?? '').trim();
-    const where = term ? { title: { [Op.like]: `%${term}%` } } : undefined;
-    const { limit, offset, sort, order } = parseListQuery(req.query, SORTABLE);
+    const query = term && rest.q === undefined ? { ...rest, q: term } : rest;
+    const { limit, offset, sort, order, notation, q } = parseListQuery(query, SORTABLE, { notations: NOTATIONS, maxQuery: LIMITS.title });
     const { count, rows } = await Diagram.findAndCountAll({
-      where,
+      where: filterFor(Diagram.sequelize.getDialect(), { notation, q }),
       order: [
         [sort, order.toUpperCase()],
         ['id', 'ASC'],
@@ -466,11 +560,12 @@ const MAX_LIMIT = 100;
 const MAX_OFFSET = 1000000;
 const ORDERS = ['asc', 'desc'];
 
-// Reads ?limit=, ?offset=, ?sort= and ?order= from req.query.
+// Reads ?limit=, ?offset=, ?sort=, ?order=, ?notation= and ?q= from req.query.
 // sortable: the field names a client may sort by (a whitelist, so a field name never reaches the database unchecked).
 // Without limit the whole list is returned (the clients of the earlier labs expect that), without sort the order is by id.
 // A bad value throws the 400 error with the list of problems, Express 5 passes it to the error handler.
-const parseListQuery = (query, sortable) => {
+// filters: { notations: allowed values of ?notation=, maxQuery: longest ?q= }. ?q= is a case-insensitive part of the title.
+const parseListQuery = (query, sortable, filters = {}) => {
   const problems = [];
   const integer = (name, min, max) => {
     const value = query[name];
@@ -491,8 +586,21 @@ const parseListQuery = (query, sortable) => {
   const order = typeof query.order === 'string' ? query.order.toLowerCase() : (query.order ?? 'asc');
   if (!ORDERS.includes(order)) problems.push({ field: 'order', message: 'order must be asc or desc' });
 
+  const { notations = [], maxQuery = 80 } = filters;
+  let notation;
+  if (query.notation !== undefined) {
+    if (typeof query.notation !== 'string' || !notations.includes(query.notation)) problems.push({ field: 'notation', message: `notation must be one of: ${notations.join(', ')}` });
+    else notation = query.notation;
+  }
+  let q;
+  if (query.q !== undefined) {
+    const text = typeof query.q === 'string' ? query.q.trim() : '';
+    if (text === '' || text.length > maxQuery) problems.push({ field: 'q', message: `q must be text of 1 to ${maxQuery} characters` });
+    else q = text.toLowerCase();
+  }
+
   if (problems.length) throw badRequest('Invalid list query', problems);
-  return { limit, offset, sort, order };
+  return { limit, offset, sort, order, notation, q };
 };
 
 module.exports = { parseListQuery, MAX_LIMIT, MAX_OFFSET };

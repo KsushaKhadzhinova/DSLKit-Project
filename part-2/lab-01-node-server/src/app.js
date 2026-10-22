@@ -10,6 +10,8 @@ const createApp = (store = createDiagramStore()) => {
   const app = express();
   app.disable('x-powered-by');
   app.use(securityHeaders);
+  // Liveness probe for Docker and load balancers.
+  app.get('/health', (req, res) => res.json({ status: 'ok' }));
   // The limit is set explicitly (limits.json), so it does not change with the library default.
   app.use(express.json({ limit: LIMITS.bodyBytes }));
   app.use(requireJson);
