@@ -16,7 +16,7 @@ To learn how to connect a relational database to a Node.js application, use the 
 
 ### 3.1 Database
 
-PostgreSQL is not installed on the developer machine, and installing system software is not required for a study project, so SQLite is used for local runs: the database file creates itself. The choice is made in `config/config.js`. If the `DATABASE_URL` variable is set, PostgreSQL is used (with `DATABASE_SSL=true` TLS is enabled for Neon and Supabase and the server certificate is verified, and verification can only be switched off with `DATABASE_SSL_REJECT_UNAUTHORIZED=false`), otherwise SQLite with the file from `SQLITE_STORAGE`. Migrations, the model and controllers do not depend on the dialect. The work has not been run against a real PostgreSQL: SQLite and the PostgreSQL settings are tested, and the rest relies on Sequelize hiding dialect differences. A template of the variables is in `.env.example`, and the real `.env` is not committed.
+PostgreSQL is the main database of the work. A local server is started with `docker compose up -d db` from the file `docker-compose.yml`, and the connection string lives in the variable `DATABASE_URL` of the `.env` file. The choice is made by the file `config/config.js`. If the variable `DATABASE_URL` is set, PostgreSQL is used (with `DATABASE_SSL=true` TLS is turned on for Neon and Supabase with a check of the server certificate, and the check can only be turned off by the variable `DATABASE_SSL_REJECT_UNAUTHORIZED=false`). If only the variable `SQLITE_STORAGE` is set, a SQLite file is used, which is how the automatic tests work on a temporary database. If nothing is set, the commands say what must be set. Migrations, the model and the controllers do not depend on the dialect. The migrations and the seed ran on a real PostgreSQL 16 in a container: the tables are created with `CHECK` constraints and foreign keys, and the list, the filter and the search answer the same as on SQLite. The sample of variables is in `.env.example`, and `.env` itself is not committed.
 
 ### 3.2 Installation and setup
 
@@ -206,15 +206,19 @@ const { readFileSync } = require('node:fs');
 try {
   process.loadEnvFile();
 } catch {
-  // .env is optional, defaults apply
+  // .env is optional, the settings may come from the environment
 }
 
-// DATABASE_URL selects PostgreSQL, otherwise a local SQLite file is used.
+// PostgreSQL is the database of the work: DATABASE_URL points to it (a local one from docker-compose.yml, Neon, Supabase).
+// SQLITE_STORAGE selects a SQLite file instead, the tests use it with a temporary file so that they need no server.
 // With DATABASE_SSL=true the server certificate is verified; only DATABASE_SSL_REJECT_UNAUTHORIZED=false turns that off.
 // DATABASE_SSL_CA is a path to a PEM file with the certificate authority, the safe way to trust a private or self-signed server.
 const fromEnv = () => {
   const { DATABASE_URL, DATABASE_SSL, DATABASE_SSL_REJECT_UNAUTHORIZED, DATABASE_SSL_CA, SQLITE_STORAGE, NODE_ENV } = process.env;
-  if (!DATABASE_URL) return { dialect: 'sqlite', storage: SQLITE_STORAGE || './dev.sqlite', logging: false };
+  if (!DATABASE_URL) {
+    if (SQLITE_STORAGE) return { dialect: 'sqlite', storage: SQLITE_STORAGE, logging: false };
+    throw new Error('DATABASE_URL is not set: copy .env.example to .env and start the database (docker compose up -d db), or set SQLITE_STORAGE to use a SQLite file');
+  }
   if (NODE_ENV === 'production' && (DATABASE_SSL !== 'true' || DATABASE_SSL_REJECT_UNAUTHORIZED === 'false')) {
     throw new Error('In production DATABASE_SSL=true is required and certificate checks cannot be turned off, use DATABASE_SSL_CA instead');
   }
@@ -226,8 +230,19 @@ const fromEnv = () => {
   };
 };
 
-// One config for every environment: tests override SQLITE_STORAGE.
-module.exports = { development: fromEnv(), test: fromEnv(), production: fromEnv() };
+// The settings are read when a block is asked for, so a missing setting is reported where the database is needed
+// and not at the moment this file is loaded. The same block serves every environment, the tests set SQLITE_STORAGE.
+module.exports = {
+  get development() {
+    return fromEnv();
+  },
+  get test() {
+    return fromEnv();
+  },
+  get production() {
+    return fromEnv();
+  },
+};
 ```
 
 ## Appendix B (mandatory) Listing of the model index.js

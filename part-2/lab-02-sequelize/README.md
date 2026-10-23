@@ -2,16 +2,17 @@
 
 Проект DSLKit (диаграммы как код, SaaS). Условие: `materials/text/part-2/Модуль 01…/37. Лабораторная работа 2…`. Работа продолжает [лабораторную работу 1](../lab-01-node-server): те же маршруты `/diagrams`, но вместо массива в памяти данные хранит база через Sequelize. Отчёты: [`report.md`](report.md) на русском, [`report.en.md`](report.en.md) на английском (шаблоны `report.tpl.md`, `report.en.tpl.md`; сборка `node tools/build.js part-2/lab-02-sequelize` из корня репозитория).
 
-## 1 База данных: SQLite или PostgreSQL
+## 1 База данных: PostgreSQL
 
-PostgreSQL на этой машине не установлен, поэтому по умолчанию работа использует **SQLite** (файл `dev.sqlite`, ничего ставить не нужно). Код один и тот же: Sequelize выбирает драйвер по настройкам из `config/config.js`.
+Работа использует **PostgreSQL**. Код один и тот же для любой базы: Sequelize выбирает драйвер по настройкам. Для SQLite остаётся только режим тестов, чтобы они не требовали сервера.
 
-| Режим                      | Как включить                                                                                                                                                                                                                          |
-| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| SQLite (по умолчанию)      | Ничего не делать; файл задаёт `SQLITE_STORAGE` (по умолчанию `./dev.sqlite`)                                                                                                                                                          |
-| PostgreSQL, Neon, Supabase | В `.env` задать `DATABASE_URL=postgres://user:password@host:5432/dslkit`; для Neon и Supabase добавить `DATABASE_SSL=true` (сертификат сервера проверяется; отключить проверку можно только `DATABASE_SSL_REJECT_UNAUTHORIZED=false`) |
+| Режим | Как включить |
+| --- | --- |
+| Локальный PostgreSQL в контейнере (основной) | `docker compose up -d db`, затем в `.env` задать пароль `POSTGRES_PASSWORD` и строку `DATABASE_URL=postgres://dslkit:<пароль>@localhost:5432/dslkit` |
+| Neon, Supabase, другой PostgreSQL | В `.env` задать `DATABASE_URL`; для Neon и Supabase добавить `DATABASE_SSL=true` (сертификат проверяется, отключить проверку можно только `DATABASE_SSL_REJECT_UNAUTHORIZED=false`, а лучше указать центр сертификации в `DATABASE_SSL_CA`) |
+| SQLite (тесты и быстрая проверка) | Задать `SQLITE_STORAGE=./dev.sqlite` и не задавать `DATABASE_URL`; тесты делают это сами с временным файлом |
 
-Пример для локального PostgreSQL: создайте базу и пользователя (`createdb dslkit`), запишите строку подключения в `.env` (файл не попадает в репозиторий) и выполните те же команды `npm run db:migrate` и `npm run db:seed`. Работа с настоящим PostgreSQL **не проверялась**: проверены SQLite и сборка настроек для PostgreSQL. Чтобы перейти на PostgreSQL или Neon, достаточно задать `DATABASE_URL` и выполнить `npm run db:migrate`; код менять не нужно.
+Без `DATABASE_URL` и `SQLITE_STORAGE` сервер и команды миграций сообщают, что нужно задать. Пароль и строку подключения держите только в `.env` (файл не попадает в репозиторий).
 
 ## 2 Запуск
 
