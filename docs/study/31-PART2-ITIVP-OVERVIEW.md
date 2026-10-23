@@ -29,18 +29,18 @@ flowchart TD
 | Работа | Ветка | Папка (`part-2/`) | Главная идея | Данные | Тесты |
 | --- | --- | --- | --- | --- | --- |
 | ЛР1 | lab21 | lab-01-node-server | REST API на Express, слои | массив в памяти | 67 |
-| 101 || ЛР2 | lab12 | lab-02-sequelize | ORM, миграции, связь 1:N, 409 | SQLite или PostgreSQL | 98 |
-| 125 || ЛР3 | 23 | lab-03-auth | bcrypt, JWT, роли, защита от подбора | SQLite или PostgreSQL | 121 |
-| 87 || ЛР4 | 24 | lab-04-react-state | useState, useEffect, localStorage | localStorage | 84 |
-| 100 || ЛР5 | 25 | lab-05-react-api | axios, токен, оптимистичные обновления | сервер ЛР3 | 92 |
+| ЛР2 | lab12 | lab-02-sequelize | ORM, миграции, связь 1:N, 409 | SQLite или PostgreSQL | 102 |
+| ЛР3 | 23 | lab-03-auth | bcrypt, JWT, роли, защита от подбора | SQLite или PostgreSQL | 126 |
+| ЛР4 | 24 | lab-04-react-state | useState, useEffect, localStorage | localStorage | 87 |
+| ЛР5 | 25 | lab-05-react-api | axios, токен, оптимистичные обновления | сервер ЛР3 | 100 клиент, 135 сервер |
 | ЛР6 | 26 | lab-06-mongodb | документы, индексы, агрегации | MongoDB | 136 |
-| ЛР7 | 27 | lab-07-websocket | Socket.IO, комнаты, присутствие | память или MongoDB | 90 |
-| 10 || ЛР8 | 28 | lab-08-docker | Dockerfile, Compose, Nginx, healthcheck | PostgreSQL в контейнере | 9 |
-| 101 || ПЗ1 | pz21 | pz-01-middleware-ejs | middleware, EJS, CSRF | массив + таблица журнала | 99 |
-| 68 || ПЗ2 | pz22 | pz-02-rest-api | проектирование REST, три связанных ресурса | массивы | 67 |
-| ПЗ3 | pz23 | pz-03-routing | React Router, защищённые маршруты | localStorage (вход) | 86 |
-| ПЗ4 | pz24 | pz-04-context-reducer | Context, useReducer | localStorage | 59 |
-| Курсовой | course-project | отдельно | не проверялся | | |
+| ЛР7 | 27 | lab-07-websocket | Socket.IO, комнаты, присутствие | память или MongoDB | 93 |
+| ЛР8 | 28 | lab-08-docker | Dockerfile, Compose, Nginx, healthcheck | PostgreSQL в контейнере | 11 |
+| ПЗ1 | pz21 | pz-01-middleware-ejs | middleware, EJS, CSRF | массив + таблица журнала | 103 |
+| ПЗ2 | pz22 | pz-02-rest-api | проектирование REST, три связанных ресурса | массивы | 69 |
+| ПЗ3 | pz23 | pz-03-routing | React Router, защищённые маршруты | localStorage (вход) | 91 (два варианта) |
+| ПЗ4 | pz24 | pz-04-context-reducer | Context, useReducer | localStorage | 65 |
+| Курсовой | course-project | отдельно | записка, карточки защиты, шпаргалка | | |
 
 (Число тестов взято из последних прогонов `npm test`; в числах ЛР6, ЛР1, ЛР4, ПЗ1, ПЗ2 учтены тесты отчётов.)
 
