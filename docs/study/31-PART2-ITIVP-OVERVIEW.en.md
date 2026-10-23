@@ -32,7 +32,7 @@ Principle: each work takes the previous one and adds exactly one new idea. Lab 1
 | Lab 2 | lab12 | lab-02-sequelize | ORM, migrations, 1:N link, 409 | SQLite or PostgreSQL | 102 |
 | Lab 3 | 23 | lab-03-auth | bcrypt, JWT, roles, brute-force defence | SQLite or PostgreSQL | 126 |
 | Lab 4 | 24 | lab-04-react-state | useState, useEffect, localStorage | localStorage | 87 |
-| Lab 5 | 25 | lab-05-react-api | axios, token, optimistic updates | the lab 3 server | 100 client, 135 server |
+| Lab 5 | 25 | lab-05-react-api | axios, token, optimistic updates | the lab 3 server | 100 client, 136 server |
 | Lab 6 | 26 | lab-06-mongodb | documents, indexes, aggregation | MongoDB | 136 |
 | Lab 7 | 27 | lab-07-websocket | Socket.IO, rooms, presence | memory or MongoDB | 93 |
 | Lab 8 | 28 | lab-08-docker | Dockerfile, Compose, Nginx, healthcheck | PostgreSQL in a container | 11 |

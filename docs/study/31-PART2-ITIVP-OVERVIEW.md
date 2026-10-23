@@ -32,7 +32,7 @@ flowchart TD
 | ЛР2 | lab12 | lab-02-sequelize | ORM, миграции, связь 1:N, 409 | SQLite или PostgreSQL | 102 |
 | ЛР3 | 23 | lab-03-auth | bcrypt, JWT, роли, защита от подбора | SQLite или PostgreSQL | 126 |
 | ЛР4 | 24 | lab-04-react-state | useState, useEffect, localStorage | localStorage | 87 |
-| ЛР5 | 25 | lab-05-react-api | axios, токен, оптимистичные обновления | сервер ЛР3 | 100 клиент, 135 сервер |
+| ЛР5 | 25 | lab-05-react-api | axios, токен, оптимистичные обновления | сервер ЛР3 | 100 клиент, 136 сервер |
 | ЛР6 | 26 | lab-06-mongodb | документы, индексы, агрегации | MongoDB | 136 |
 | ЛР7 | 27 | lab-07-websocket | Socket.IO, комнаты, присутствие | память или MongoDB | 93 |
 | ЛР8 | 28 | lab-08-docker | Dockerfile, Compose, Nginx, healthcheck | PostgreSQL в контейнере | 11 |

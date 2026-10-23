@@ -47,7 +47,7 @@ State as of 23 October 2026.
 | Lab 2 Sequelize | `lab12` | `lab-02-sequelize` | 102 |
 | Lab 3 Authentication | `23` | `lab-03-auth` | 126 |
 | Lab 4 React state | `24` | `lab-04-react-state` | 87 |
-| Lab 5 React and a server | `25` | `lab-05-react-api` (+ the server `lab-03-auth` with CORS and search) | 100 client, 135 server |
+| Lab 5 React and a server | `25` | `lab-05-react-api` (+ the server `lab-03-auth` with CORS and search) | 100 client, 136 server |
 | Lab 6 MongoDB | `26` | `lab-06-mongodb` | 136 |
 | Lab 7 WebSocket | `27` | `lab-07-websocket` | 93 |
 | Lab 8 Docker | `28` | `lab-08-docker` (+ copies of labs 1–5 from branch 25) | 11 |

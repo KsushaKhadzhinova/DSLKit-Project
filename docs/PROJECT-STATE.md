@@ -47,7 +47,7 @@
 | ЛР2 Sequelize | `lab12` | `lab-02-sequelize` | 102 |
 | ЛР3 Аутентификация | `23` | `lab-03-auth` | 126 |
 | ЛР4 Состояние React | `24` | `lab-04-react-state` | 87 |
-| ЛР5 React и сервер | `25` | `lab-05-react-api` (+ сервер `lab-03-auth` с CORS и поиском) | 100 клиент, 135 сервер |
+| ЛР5 React и сервер | `25` | `lab-05-react-api` (+ сервер `lab-03-auth` с CORS и поиском) | 100 клиент, 136 сервер |
 | ЛР6 MongoDB | `26` | `lab-06-mongodb` | 136 |
 | ЛР7 WebSocket | `27` | `lab-07-websocket` | 93 |
 | ЛР8 Docker | `28` | `lab-08-docker` (+ копии ЛР1–ЛР5 из ветки 25) | 11 |
