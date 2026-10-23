@@ -72,3 +72,7 @@ npm test                 # тесты
 - SQLite: запустите `npm start`, во втором окне выполните `npx sequelize-cli db:migrate:undo:all`. Таблицы исчезают под работающим сервером, первый же запрос (`GET /diagrams`) не может записать строку в `RequestLogs` и получает 500 с телом `{ "error": "Internal server error" }`, подробности только в консоли сервера (`GET /health` при SQLite остаётся 200). Вернуть работу: `npm run db:migrate`.
 - PostgreSQL (Neon, Supabase или локальный): остановите службу или контейнер базы, запросы дают 500, а `GET /health` отвечает 503.
 - Запуск при недоступной базе (`SQLITE_STORAGE=/нет/такого/каталога/db.sqlite npm start`) завершается с кодом 1 и сообщением, сервер не поднимается.
+
+## Проверка стиля
+
+`npm run lint` запускает ESLint. Конфигурация лежит в `eslint.config.js`.
