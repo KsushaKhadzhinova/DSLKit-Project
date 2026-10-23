@@ -20,7 +20,7 @@ for (const [size, file, fill] of ICONS) {
   await page.setViewport({ width: size, height: size });
   const inner = Math.round(size * fill);
   await page.setContent(
-    `<body style="margin:0;background:${fill < 1 ? BACKGROUND : 'transparent'};display:grid;place-items:center;width:${size}px;height:${size}px">${logo.replace('width="32" height="32"', `width="${inner}" height="${inner}"`)}</body>`,
+    `<body style="margin:0;background:${fill < 1 ? BACKGROUND : 'transparent'};display:grid;place-items:center;width:${size}px;height:${size}px">${logo.replace(/ width="32" height="32"/, ` width="${inner}" height="${inner}"`)}</body>`,
   );
   await page.screenshot({ path: new URL(`../site/images/icons/${file}`, import.meta.url).pathname.slice(1), omitBackground: fill === 1 });
 }

@@ -17,6 +17,7 @@ const SHELL = [
   'js/script.js',
   'images/favicon.svg',
   'images/logo.svg',
+  'images/logo-editor.svg',
   'manifest.webmanifest',
 ];
 
