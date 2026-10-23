@@ -1295,3 +1295,7 @@
   outline: 3px solid var(--color-primary);
   outline-offset: 3px;
 }
+
+.editor-import__file {
+  display: none;
+}
