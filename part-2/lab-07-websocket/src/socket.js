@@ -2,6 +2,7 @@ const { cleanName, cleanRoom, cleanText, limits } = require('./validate');
 const { createHistory } = require('./history');
 const { createLimiter } = require('./rate-limit');
 const { verifyToken } = require('./token');
+const { emitLight } = require('./slow-clients');
 
 const fail = (ack, error) => {
   if (typeof ack === 'function') ack({ ok: false, error });
@@ -114,7 +115,7 @@ const createRoomActions = (hub, conn) => {
 
   const typing = (payload) => {
     const room = cleanRoom(payload?.room);
-    if (room && joined.has(room)) socket.to(room).emit('typing', { room, username: user.username, typing: Boolean(payload.typing) });
+    if (room && joined.has(room)) emitLight(io, room, socket.id, 'typing', { room, username: user.username, typing: Boolean(payload.typing) }, opts.slowQueueMax);
   };
 
   return { leave, join, leaveRoom, editing, typing };

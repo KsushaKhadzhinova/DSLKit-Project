@@ -184,7 +184,7 @@ A token check in `io.use` during the handshake.
 
 15. How do you pause sending on a slow connection?
 
-Acknowledgements and `socket.volatile`.
+Acknowledgements and `socket.volatile`. The work does exactly this for the "is typing" mark: the `emitLight` function in `src/slow-clients.js` looks at the length of the connection packet queue (`socket.conn.writeBuffer`), does not send the event to a client whose queue is longer than `slowQueueMax` from `limits.json`, and sends it to the others as `volatile`, so the packet is lost if a client is not ready. Chat messages and the participant list stay reliable and wait for acknowledgements.
 
 16. What is the difference between socket.emit, io.emit and socket.broadcast.emit?
 

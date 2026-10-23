@@ -12,5 +12,6 @@
   "maxPerAddress": 20,
   "maxRoomsPerUser": 5,
   "maxRoomMembers": 50,
-  "maxPacketBytes": 10000
+  "maxPacketBytes": 10000,
+  "slowQueueMax": 20
 }

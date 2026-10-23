@@ -184,7 +184,7 @@
 
 15. Как реализовать паузу при медленном соединении?
 
-Через acknowledgement и `socket.volatile`.
+Через acknowledgement и `socket.volatile`. В работе так и сделано для отметки «печатает»: функция `emitLight` из файла `src/slow-clients.js` смотрит длину очереди пакетов соединения (`socket.conn.writeBuffer`), не отправляет событие клиенту с очередью длиннее `slowQueueMax` из `limits.json` и шлёт остальным как `volatile`, то есть пакет теряется, если клиент не готов. Сообщения чата и список участников остаются надёжными и ждут подтверждения.
 
 16. В чём разница между socket.emit, io.emit и socket.broadcast.emit?
 
