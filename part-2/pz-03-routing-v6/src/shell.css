@@ -1,0 +1,374 @@
+/* Rules of the Part 1 site that dslkit.css (tokens, base, components, header, footer) does not carry:
+   the responsive header from adaptive.css, the error card from pages.css, tooltips from editor.css
+   and a few page rules built from the same tokens. Mobile first, breakpoints 576, 768 and 1024 px. */
+
+/* The smallest text of the interface is 14 px at a 16 px root, as in the editor of Part 1. */
+:root {
+  --step--1: 0.875rem;
+}
+
+/* Page frame: the root element plays the role of body.page in Part 1 */
+.page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  overflow-x: clip;
+}
+
+.main {
+  flex: 1;
+  width: 100%;
+  max-width: calc(var(--container) + var(--space-3) * 2);
+  padding-inline: var(--space-3);
+  margin-inline: auto;
+}
+
+/* The content is focused by script after a route change; a ring around the whole page would only be noise. */
+.main:focus,
+.main:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+.note {
+  margin-block: var(--space-3);
+}
+
+.page-head {
+  display: grid;
+  gap: var(--space-2);
+  padding-block: var(--space-4) var(--space-3);
+}
+
+.page__title {
+  font-size: clamp(var(--step-3), 1rem + 3.2vw, var(--step-5));
+  font-weight: 800;
+  letter-spacing: -0.035em;
+}
+
+.page-head__lead {
+  max-width: var(--measure);
+  color: var(--color-text-light);
+  font-size: var(--step-1);
+}
+
+.section {
+  padding-block: var(--space-3);
+}
+
+.section__title {
+  margin-bottom: var(--space-2);
+  font-size: var(--step-3);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.section__lead {
+  max-width: var(--measure);
+  margin-bottom: var(--space-3);
+  color: var(--color-text-light);
+}
+
+/* Shared navigation items and footer navigation */
+.nav__item,
+.footer__item {
+  display: flex;
+  align-items: center;
+}
+
+.footer__nav {
+  display: block;
+}
+
+.nav__link[aria-current='page'] {
+  background: var(--color-secondary);
+  color: var(--color-link);
+}
+
+.header__lang {
+  display: inline-flex;
+  min-height: var(--target-size);
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+/* Tooltips for icon controls: shown on hover and on keyboard focus */
+[data-tip] {
+  position: relative;
+}
+
+[data-tip]::after {
+  content: attr(data-tip);
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  z-index: 30;
+  padding: 0.375rem 0.625rem;
+  border-radius: var(--radius-small);
+  background: var(--color-text);
+  color: var(--color-background);
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.3;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 120ms ease;
+}
+
+[data-tip]:hover::after,
+[data-tip]:focus-visible::after,
+.theme__input:focus-visible + .theme__button[data-tip]::after {
+  opacity: 1;
+}
+
+/* Forms: one row of fields on wider screens */
+.form--inline {
+  max-width: none;
+}
+
+.form__row {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.form__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.form__label--spacer {
+  display: none;
+}
+
+select.form__input {
+  appearance: auto;
+}
+
+.button--danger {
+  color: var(--color-error);
+}
+
+.button--small {
+  min-height: var(--target-size);
+  padding: 0 var(--space-2);
+}
+
+.cards__item--wide {
+  grid-column: 1 / -1;
+}
+
+.card__title {
+  overflow-wrap: anywhere;
+}
+
+.card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  margin-top: auto;
+  padding-top: var(--space-1);
+}
+
+.stats {
+  margin-block: var(--space-3);
+  color: var(--color-text-light);
+}
+
+.empty {
+  padding: var(--space-4);
+  border: 1px dashed var(--color-border-strong);
+  border-radius: var(--radius-medium);
+  color: var(--color-text-light);
+  text-align: center;
+}
+
+.prose {
+  display: grid;
+  gap: var(--space-2);
+  max-width: var(--measure);
+  color: var(--color-text-light);
+}
+
+/* Error pages (404 and 500): the card of errors/404.html */
+.error {
+  display: grid;
+  gap: var(--space-2);
+  max-width: calc(var(--measure) + var(--space-5));
+  margin: var(--space-5) auto 0;
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-large);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-small);
+}
+
+.error__code {
+  justify-self: start;
+  padding: 0.125rem var(--space-2);
+  border-radius: 62.4375rem;
+  background: var(--color-secondary);
+  color: var(--color-link);
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  font-weight: 600;
+}
+
+.error__title {
+  font-size: var(--step-4);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.error__text {
+  color: var(--color-text-light);
+}
+
+.error__list {
+  display: grid;
+  gap: var(--space-1);
+  padding-left: var(--space-3);
+  color: var(--color-text-light);
+  list-style: disc;
+}
+
+.error__list li::marker {
+  color: var(--color-primary);
+}
+
+.error .button {
+  justify-self: start;
+  margin-top: var(--space-1);
+}
+
+@media (min-width: 576px) {
+  .burger__label {
+    position: static;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    clip-path: none;
+  }
+
+  .cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .form__row--3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 768px) {
+  .header__inner {
+    grid-template-columns: auto 1fr auto;
+  }
+
+  .burger__input,
+  .burger__button {
+    display: none;
+  }
+
+  .header__tools {
+    grid-column: auto;
+    grid-row: auto;
+  }
+
+  .nav {
+    display: block;
+    grid-column: auto;
+    grid-row: auto;
+    padding-bottom: 0;
+  }
+
+  .nav__list {
+    flex-flow: row wrap;
+    gap: 0;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .nav__link {
+    min-height: var(--target-size);
+    padding: 0 var(--space-1);
+    font-size: var(--step--1);
+  }
+
+  .form {
+    padding: var(--space-4);
+  }
+
+  .form__label--spacer {
+    display: block;
+  }
+
+  .form__row--add {
+    grid-template-columns: 2fr 1fr auto;
+    align-items: start;
+  }
+
+  .form__row--3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .header__inner {
+    gap: var(--space-3);
+  }
+
+  .nav__list {
+    gap: var(--space-1);
+  }
+
+  .nav__link {
+    padding: 0 var(--space-2);
+  }
+
+  .cards {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* Breadcrumbs: Главная / Каталог / Шаблон, the links are tall enough to hit */
+.breadcrumbs {
+  margin-bottom: var(--space-3);
+}
+
+.breadcrumbs__list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  color: var(--color-text-light);
+}
+
+.breadcrumbs__item + .breadcrumbs__item::before {
+  content: '/';
+  margin-right: var(--space-1);
+}
+
+.breadcrumbs__item a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--target-size-small);
+}
+
+/* Catalog search and sort */
+.catalog-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: end;
+  margin-bottom: var(--space-3);
+}
+
+.catalog-tools .form__field {
+  flex: 1 1 14rem;
+}
