@@ -373,8 +373,9 @@ const { badRequest } = require('../errors');
 const { NOTATIONS, PRIORITIES, DEFAULT_PRIORITY, LIMITS } = require('../models/diagram.model');
 
 // Spaces of every kind plus zero-width characters (joiners, word joiner, BOM) look empty, so they count as empty.
-const INVISIBLE = /[\s​-‍⁠﻿]/g;
+const INVISIBLE = /[\s\u200B-\u200D\u2060\uFEFF]/g;
 // Control characters (NUL, bell, escape) are not text; a single-line field must not carry them.
+// eslint-disable-next-line no-control-regex
 const CONTROL = /[\u0000-\u001F\u007F]/;
 
 // Text is checked after trimming, so a value of spaces is empty and the stored value is what was measured.
