@@ -24,7 +24,10 @@ export const initSourceAutosave = ({
   const lang = root.documentElement.lang === 'en' ? 'en' : 'ru';
 
   const saved = storage.get(SOURCE_KEY, null);
-  if (typeof saved === 'string' && saved.trim() !== '' && saved !== readCode(codeLines)) showCode(root, codeLines, saved);
+  if (typeof saved === 'string' && saved.trim() !== '' && saved !== readCode(codeLines)) {
+    showCode(root, codeLines, saved);
+    onSaved();
+  }
 
   let timer = null;
   const save = () => {

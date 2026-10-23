@@ -132,6 +132,7 @@ import { initExport } from './components/export-menu.js';
 import { initNotationFilter } from './components/notation-filter.js';
 import { initSettings } from './components/settings.js';
 import { initTheme } from './components/theme.js';
+import { initTour } from './components/tour.js';
 import { initWaitlistForm } from './components/waitlist-form.js';
 import { getStorage } from './utils/storage.js';
 
@@ -145,6 +146,7 @@ export const COMPONENTS = [
   initSettings,
   initEditor,
   initExport,
+  initTour,
   initDiagramRunner,
 ];
 

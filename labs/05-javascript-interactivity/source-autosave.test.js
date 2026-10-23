@@ -104,6 +104,7 @@ test('the saved code comes back when the page is opened again', () => {
   storage.set('editor-source', 'diagram graph "Back"\nnode A "One"');
   const { document } = setup({ storage });
   assert.equal(code(document), 'diagram graph "Back"\nnode A "One"');
+  assert.equal(document.querySelector('.editor-tabs__dot, .editor-topbar__dot'), null, 'restored code counts as saved');
 });
 
 test('a damaged, blank or unchanged saved value leaves the page as it is', () => {

@@ -1254,3 +1254,44 @@
     transition: filter var(--dur-snap, 0.15s) ease;
   }
 }
+
+/* Tour of the editor: a card in the corner and an outline around the part it talks about */
+.tour {
+  position: fixed;
+  right: var(--space-2);
+  bottom: var(--space-2);
+  z-index: 50;
+  width: min(92vw, 22rem);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-large);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-large);
+}
+
+.tour__title {
+  margin: 0 0 var(--space-2);
+  font-size: 1.15rem;
+}
+
+.tour__text {
+  margin: 0 0 var(--space-3);
+}
+
+.tour__count {
+  margin: 0 0 var(--space-3);
+  color: var(--color-text-light);
+  font-size: var(--text-small);
+}
+
+.tour__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+
+.tour__target {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 3px;
+}
