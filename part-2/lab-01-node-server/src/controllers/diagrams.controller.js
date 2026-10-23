@@ -1,5 +1,6 @@
 const { notFound } = require('../errors');
 const { parseListQuery } = require('../middleware/list-query');
+const { NOTATIONS, LIMITS } = require('../models/diagram.model');
 
 const missing = (id) => notFound(`Diagram ${id} not found`);
 
@@ -12,10 +13,13 @@ const byField = (sort, order) => (a, b) => {
 };
 
 const createDiagramsController = (store) => ({
-  // ?limit=&offset=&sort=&order= (see list-query.js). The answer stays an array, the full size comes in X-Total-Count.
+  // ?limit=&offset=&sort=&order=&notation=&q= (see list-query.js). The answer stays an array, the size of the filtered list comes in X-Total-Count.
   list: (req, res) => {
-    const { limit, offset, sort, order } = parseListQuery(req.query, SORTABLE);
-    const all = [...store.findAll()].sort(byField(sort, order));
+    const { limit, offset, sort, order, notation, q } = parseListQuery(req.query, SORTABLE, { notations: NOTATIONS, maxQuery: LIMITS.title });
+    const all = store
+      .findAll()
+      .filter((d) => (notation === undefined || d.notation === notation) && (q === undefined || d.title.toLowerCase().includes(q)))
+      .sort(byField(sort, order));
     res.set('X-Total-Count', String(all.length));
     res.json(all.slice(offset, limit === undefined ? undefined : offset + limit));
   },

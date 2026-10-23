@@ -19,9 +19,14 @@ const load = (env) => {
   }
 };
 
-test('without DATABASE_URL the config uses a SQLite file', () => {
-  assert.deepEqual(load({}), { dialect: 'sqlite', storage: './dev.sqlite', logging: false });
-  assert.equal(load({ SQLITE_STORAGE: './other.sqlite' }).storage, './other.sqlite');
+test('without any database setting the config says what to set', () => {
+  assert.throws(() => load({}), /DATABASE_URL is not set/);
+  assert.throws(() => load({ DATABASE_URL: '', SQLITE_STORAGE: '' }), /SQLITE_STORAGE/);
+});
+
+test('SQLITE_STORAGE alone selects a SQLite file, DATABASE_URL wins when both are set', () => {
+  assert.deepEqual(load({ SQLITE_STORAGE: './other.sqlite' }), { dialect: 'sqlite', storage: './other.sqlite', logging: false });
+  assert.equal(load({ SQLITE_STORAGE: './other.sqlite', DATABASE_URL: 'postgres://u:p@localhost:5432/db' }).dialect, 'postgres');
 });
 
 test('with DATABASE_URL the config uses PostgreSQL without TLS options', () => {
@@ -63,5 +68,5 @@ test('in production the database needs TLS with certificate checks', () => {
   assert.throws(() => load(url), /DATABASE_SSL=true is required/);
   assert.throws(() => load({ ...url, DATABASE_SSL: 'true', DATABASE_SSL_REJECT_UNAUTHORIZED: 'false' }), /cannot be turned off/);
   assert.equal(load({ ...url, DATABASE_SSL: 'true' }).dialectOptions.ssl.rejectUnauthorized, true);
-  assert.equal(load({ NODE_ENV: 'production' }).dialect, 'sqlite');
+  assert.equal(load({ NODE_ENV: 'production', SQLITE_STORAGE: './x.sqlite' }).dialect, 'sqlite');
 });

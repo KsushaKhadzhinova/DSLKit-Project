@@ -78,3 +78,6 @@ GET {{base}}/diagrams?limit=1000
 
 ### Unknown sort field -> 400
 GET {{base}}/diagrams?sort=password
+
+### Filter by notation and search by a part of the title (X-Total-Count counts the filtered list)
+GET http://localhost:3000/diagrams?notation=BPMN&q=order&sort=title&limit=10

@@ -16,7 +16,7 @@ To learn how to connect a relational database to a Node.js application, use the 
 
 ### 3.1 Database
 
-PostgreSQL is not installed on the developer machine, and installing system software is not required for a study project, so SQLite is used for local runs: the database file creates itself. The choice is made in `config/config.js`. If the `DATABASE_URL` variable is set, PostgreSQL is used (with `DATABASE_SSL=true` TLS is enabled for Neon and Supabase and the server certificate is verified, and verification can only be switched off with `DATABASE_SSL_REJECT_UNAUTHORIZED=false`), otherwise SQLite with the file from `SQLITE_STORAGE`. Migrations, the model and controllers do not depend on the dialect. The work has not been run against a real PostgreSQL: SQLite and the PostgreSQL settings are tested, and the rest relies on Sequelize hiding dialect differences. A template of the variables is in `.env.example`, and the real `.env` is not committed.
+PostgreSQL is the main database of the work. A local server is started with `docker compose up -d db` from the file `docker-compose.yml`, and the connection string lives in the variable `DATABASE_URL` of the `.env` file. The choice is made by the file `config/config.js`. If the variable `DATABASE_URL` is set, PostgreSQL is used (with `DATABASE_SSL=true` TLS is turned on for Neon and Supabase with a check of the server certificate, and the check can only be turned off by the variable `DATABASE_SSL_REJECT_UNAUTHORIZED=false`). If only the variable `SQLITE_STORAGE` is set, a SQLite file is used, which is how the automatic tests work on a temporary database. If nothing is set, the commands say what must be set. Migrations, the model and the controllers do not depend on the dialect. The migrations and the seed ran on a real PostgreSQL 16 in a container: the tables are created with `CHECK` constraints and foreign keys, and the list, the filter and the search answer the same as on SQLite. The sample of variables is in `.env.example`, and `.env` itself is not committed.
 
 ### 3.2 Installation and setup
 
@@ -100,7 +100,7 @@ Figure 6 – DELETE requests: the answer 204 without a body and the answer 404 o
 
 ### 3.6 Paging and sorting
 
-The list accepts the `limit`, `offset`, `sort` and `order` parameters. `limit` sets the page size from 1 to 100, `offset` sets the shift from 0 to 1000000, `sort` picks a field from a whitelist and `order` takes `asc` or `desc`. Without parameters the whole list is returned in ascending `id` order, so the clients of the earlier works keep working. The answer stays an array and the full size of the selection comes in the `X-Total-Count` header. Numbers are read as strings of at most nine digits, so `-1`, `1e9`, `0x10` and huge numbers get a 400 answer with a list of errors by field. The sort field name is checked against the whitelist and never reaches the database query unchecked. Equal values are ordered by `id`, so pages do not overlap. Parsing of the parameters is moved to a separate module, it is given in Appendix H.
+The list accepts the `limit`, `offset`, `sort` and `order` parameters. `limit` sets the page size from 1 to 100, `offset` sets the shift from 0 to 1000000, `sort` picks a field from a whitelist and `order` takes `asc` or `desc`. Without parameters the whole list is returned in ascending `id` order, so the clients of the earlier works keep working. The answer stays an array and the full size of the selection comes in the `X-Total-Count` header. Numbers are read as strings of at most nine digits, so `-1`, `1e9`, `0x10` and huge numbers get a 400 answer with a list of errors by field. The sort field name is checked against the whitelist and never reaches the database query unchecked. Equal values are ordered by `id`, so pages do not overlap. Parsing of the parameters is moved to a separate module, it is given in Appendix H. The `notation` parameter keeps the records of one notation, and the `q` parameter searches a part of the title ignoring case with `instr` in SQLite or `strpos` in PostgreSQL, so percent and underscore signs in the search text stay plain characters. An invalid value gives 400.
 
 The request `GET /diagrams?limit=2&offset=0&sort=title&order=desc` gives the first page of two records, as in figure 7.
 
@@ -186,6 +186,14 @@ Figure 13 – End of the npm test output: the number of passed tests and the cov
 
    Uniqueness is set with a `UNIQUE` constraint in the migration and `unique: true` in the model. A violation raises `SequelizeUniqueConstraintError`, whose `errors[0].path` holds the field name. It is caught in the error handler and answered with 409 Conflict rather than 500, because the fault is a repeated value, not the database. In the work `POST /projects` answers this way for a name that is already taken. A preliminary `findOne` does not replace the constraint: another request can slip in between the check and the write.
 
+### 3.12 Architecture and trade-offs
+
+The work repeats the layers of the first lab and adds a data access layer: Sequelize models and migrations. The controller works with models and writes no SQL, and the database schema changes only through migrations. Fowler calls this approach Data Mapper in Patterns of Enterprise Application Architecture: a domain object does not know how it is stored. The dependency rule from Martin's Clean Architecture is not fully kept. The controller depends on Sequelize because it uses its search and count methods. The domain could be fully separated by a repository layer, but for two entities it would double the number of files, so it was not done.
+
+The trade-off is deliberate. Integrity rules live on two levels: the check in code gives a clear 400 answer, while the `CHECK`, `UNIQUE` and foreign key constraints in the database protect the data even when a write bypasses the API. Duplicating the rules is justified here because each level has its own job. The limits live in `limits.json` and are copied into the migrations as a snapshot, so an old migration does not change with the code. The request log is a separate middleware, so it can be turned off without touching the routes.
+
+Sources: Martin R. Clean Architecture: A Craftsman's Guide to Software Structure and Design. Prentice Hall, 2017. Fowler M. Patterns of Enterprise Application Architecture. Addison-Wesley, 2002. Fowler M. Refactoring: Improving the Design of Existing Code, 2nd ed. Addison-Wesley, 2018.
+
 ## Conclusion
 
 For DSLKit, the `diagrams` collection from lab 1 is moved from an array to a database through Sequelize: the `Diagram` model, a seed with three diagrams, and controllers built on ORM methods. The `Diagram` and `Project` models have a one-to-many relation, and five migrations build the schema. The `PATCH` method, the 409 response for a repeated project name and the check of a number from 0 to the limit are added. Locally the work uses SQLite, and the `DATABASE_URL` variable switches it to PostgreSQL or cloud Neon without code changes. 98 automated tests confirm the routes, the constraints, the migrations with rollback, and the seed. The work has not been run on a real PostgreSQL, and the database structure and the requests are confirmed by browser screenshots and by an exchange recorded with a script.
@@ -198,15 +206,19 @@ const { readFileSync } = require('node:fs');
 try {
   process.loadEnvFile();
 } catch {
-  // .env is optional, defaults apply
+  // .env is optional, the settings may come from the environment
 }
 
-// DATABASE_URL selects PostgreSQL, otherwise a local SQLite file is used.
+// PostgreSQL is the database of the work: DATABASE_URL points to it (a local one from docker-compose.yml, Neon, Supabase).
+// SQLITE_STORAGE selects a SQLite file instead, the tests use it with a temporary file so that they need no server.
 // With DATABASE_SSL=true the server certificate is verified; only DATABASE_SSL_REJECT_UNAUTHORIZED=false turns that off.
 // DATABASE_SSL_CA is a path to a PEM file with the certificate authority, the safe way to trust a private or self-signed server.
 const fromEnv = () => {
   const { DATABASE_URL, DATABASE_SSL, DATABASE_SSL_REJECT_UNAUTHORIZED, DATABASE_SSL_CA, SQLITE_STORAGE, NODE_ENV } = process.env;
-  if (!DATABASE_URL) return { dialect: 'sqlite', storage: SQLITE_STORAGE || './dev.sqlite', logging: false };
+  if (!DATABASE_URL) {
+    if (SQLITE_STORAGE) return { dialect: 'sqlite', storage: SQLITE_STORAGE, logging: false };
+    throw new Error('DATABASE_URL is not set: copy .env.example to .env and start the database (docker compose up -d db), or set SQLITE_STORAGE to use a SQLite file');
+  }
   if (NODE_ENV === 'production' && (DATABASE_SSL !== 'true' || DATABASE_SSL_REJECT_UNAUTHORIZED === 'false')) {
     throw new Error('In production DATABASE_SSL=true is required and certificate checks cannot be turned off, use DATABASE_SSL_CA instead');
   }
@@ -218,8 +230,19 @@ const fromEnv = () => {
   };
 };
 
-// One config for every environment: tests override SQLITE_STORAGE.
-module.exports = { development: fromEnv(), test: fromEnv(), production: fromEnv() };
+// The settings are read when a block is asked for, so a missing setting is reported where the database is needed
+// and not at the moment this file is loaded. The same block serves every environment, the tests set SQLITE_STORAGE.
+module.exports = {
+  get development() {
+    return fromEnv();
+  },
+  get test() {
+    return fromEnv();
+  },
+  get production() {
+    return fromEnv();
+  },
+};
 ```
 
 ## Appendix B (mandatory) Listing of the model index.js
@@ -380,11 +403,22 @@ module.exports = {
 
 ```js
 const { notFound, badRequest } = require('../errors');
+const { Op, fn, col, where } = require('sequelize');
 const { parseListQuery } = require('../middleware/list-query');
+const { NOTATIONS, LIMITS } = require('../models/diagram.constants');
 
 const missing = (id) => notFound(`Diagram ${id} not found`);
 
 const SORTABLE = ['id', 'title', 'notation', 'priority', 'owner', 'revision', 'createdAt'];
+
+// A part of the title is searched with instr (SQLite) or strpos (PostgreSQL) on the lowercased title, not with LIKE,
+// so the characters % and _ in the search text are plain characters and need no escaping.
+const filterFor = (dialect, { notation, q }) => {
+  const conditions = [];
+  if (notation !== undefined) conditions.push({ notation });
+  if (q !== undefined) conditions.push(where(fn(dialect === 'sqlite' ? 'instr' : 'strpos', fn('lower', col('title')), q), { [Op.gt]: 0 }));
+  return conditions.length > 0 ? { [Op.and]: conditions } : {};
+};
 
 // Express 5 forwards a rejected promise to the error handler, so no try/catch is needed here.
 const createDiagramsController = ({ Diagram, Project }) => {
@@ -397,8 +431,9 @@ const createDiagramsController = ({ Diagram, Project }) => {
   return {
     // ?limit=&offset=&sort=&order= (see list-query.js). The answer stays an array, the full size comes in X-Total-Count.
     list: async (req, res) => {
-      const { limit, offset, sort, order } = parseListQuery(req.query, SORTABLE);
+      const { limit, offset, sort, order, notation, q } = parseListQuery(req.query, SORTABLE, { notations: NOTATIONS, maxQuery: LIMITS.title });
       const { count, rows } = await Diagram.findAndCountAll({
+        where: filterFor(Diagram.sequelize.getDialect(), { notation, q }),
         order: [
           [sort, order.toUpperCase()],
           ['id', 'ASC'],
@@ -457,11 +492,12 @@ const MAX_LIMIT = 100;
 const MAX_OFFSET = 1000000;
 const ORDERS = ['asc', 'desc'];
 
-// Reads ?limit=, ?offset=, ?sort= and ?order= from req.query.
+// Reads ?limit=, ?offset=, ?sort=, ?order=, ?notation= and ?q= from req.query.
 // sortable: the field names a client may sort by (a whitelist, so a field name never reaches the database unchecked).
 // Without limit the whole list is returned (the clients of the earlier labs expect that), without sort the order is by id.
 // A bad value throws the 400 error with the list of problems, Express 5 passes it to the error handler.
-const parseListQuery = (query, sortable) => {
+// filters: { notations: allowed values of ?notation=, maxQuery: longest ?q= }. ?q= is a case-insensitive part of the title.
+const parseListQuery = (query, sortable, filters = {}) => {
   const problems = [];
   const integer = (name, min, max) => {
     const value = query[name];
@@ -482,8 +518,21 @@ const parseListQuery = (query, sortable) => {
   const order = typeof query.order === 'string' ? query.order.toLowerCase() : (query.order ?? 'asc');
   if (!ORDERS.includes(order)) problems.push({ field: 'order', message: 'order must be asc or desc' });
 
+  const { notations = [], maxQuery = 80 } = filters;
+  let notation;
+  if (query.notation !== undefined) {
+    if (typeof query.notation !== 'string' || !notations.includes(query.notation)) problems.push({ field: 'notation', message: `notation must be one of: ${notations.join(', ')}` });
+    else notation = query.notation;
+  }
+  let q;
+  if (query.q !== undefined) {
+    const text = typeof query.q === 'string' ? query.q.trim() : '';
+    if (text === '' || text.length > maxQuery) problems.push({ field: 'q', message: `q must be text of 1 to ${maxQuery} characters` });
+    else q = text.toLowerCase();
+  }
+
   if (problems.length) throw badRequest('Invalid list query', problems);
-  return { limit, offset, sort, order };
+  return { limit, offset, sort, order, notation, q };
 };
 
 module.exports = { parseListQuery, MAX_LIMIT, MAX_OFFSET };

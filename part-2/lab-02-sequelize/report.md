@@ -16,7 +16,7 @@
 
 ### 3.1 База данных
 
-PostgreSQL на компьютере разработчика не установлен, а ставить системное программное обеспечение для учебной работы не требуется, поэтому для локального запуска выбран SQLite: файл базы создаётся сам. Выбор делает файл `config/config.js`. Если задана переменная `DATABASE_URL`, используется PostgreSQL (при `DATABASE_SSL=true` включается TLS для Neon и Supabase с проверкой сертификата сервера, отключить проверку можно только переменной `DATABASE_SSL_REJECT_UNAUTHORIZED=false`), иначе SQLite с файлом из `SQLITE_STORAGE`. Миграции, модель и контроллеры от диалекта не зависят. Работа с настоящим PostgreSQL не проверялась: проверены SQLite и сборка настроек для PostgreSQL, а остальное опирается на то, что Sequelize скрывает различия диалектов. Образец переменных лежит в `.env.example`, сам `.env` в репозиторий не попадает.
+Основной базой работы выбран PostgreSQL. Локальный сервер поднимается командой `docker compose up -d db` из файла `docker-compose.yml`, строка подключения лежит в переменной `DATABASE_URL` файла `.env`. Выбор делает файл `config/config.js`. Если задана переменная `DATABASE_URL`, используется PostgreSQL (при `DATABASE_SSL=true` включается TLS для Neon и Supabase с проверкой сертификата сервера, отключить проверку можно только переменной `DATABASE_SSL_REJECT_UNAUTHORIZED=false`). Если задана только переменная `SQLITE_STORAGE`, используется файл SQLite, так работают автоматические тесты на временной базе. Если не задано ничего, команды сообщают, что нужно задать. Миграции, модель и контроллеры от диалекта не зависят. Миграции и сид выполнены на настоящем PostgreSQL 16 в контейнере: таблицы создаются с ограничениями `CHECK` и внешними ключами, список, фильтр и поиск отвечают так же, как на SQLite. Образец переменных лежит в `.env.example`, сам `.env` в репозиторий не попадает.
 
 ### 3.2 Установка и настройка
 
@@ -100,7 +100,7 @@ PostgreSQL на компьютере разработчика не устано�
 
 ### 3.6 Постраничный вывод и сортировка
 
-Список принимает параметры `limit`, `offset`, `sort` и `order`. Параметр `limit` задаёт размер страницы от 1 до 100, `offset` задаёт смещение от 0 до 1000000, `sort` выбирает поле из белого списка, а `order` принимает значения `asc` и `desc`. Без параметров возвращается весь список по возрастанию `id`, поэтому клиенты прежних работ продолжают работать. Ответ остаётся массивом, а полный размер выборки приходит в заголовке `X-Total-Count`. Числа читаются как строки не длиннее девяти цифр, поэтому значения `-1`, `1e9`, `0x10` и огромные числа получают ответ 400 со списком ошибок по полям. Имя поля сортировки проверяется по белому списку и не попадает в запрос к базе без проверки. Равные значения упорядочены по `id`, поэтому страницы не пересекаются. Разбор параметров вынесен в отдельный модуль, он приведён в приложении И.
+Список принимает параметры `limit`, `offset`, `sort` и `order`. Параметр `limit` задаёт размер страницы от 1 до 100, `offset` задаёт смещение от 0 до 1000000, `sort` выбирает поле из белого списка, а `order` принимает значения `asc` и `desc`. Без параметров возвращается весь список по возрастанию `id`, поэтому клиенты прежних работ продолжают работать. Ответ остаётся массивом, а полный размер выборки приходит в заголовке `X-Total-Count`. Числа читаются как строки не длиннее девяти цифр, поэтому значения `-1`, `1e9`, `0x10` и огромные числа получают ответ 400 со списком ошибок по полям. Имя поля сортировки проверяется по белому списку и не попадает в запрос к базе без проверки. Равные значения упорядочены по `id`, поэтому страницы не пересекаются. Разбор параметров вынесен в отдельный модуль, он приведён в приложении И. Параметр `notation` оставляет записи одной нотации, а параметр `q` ищет часть названия без учёта регистра функцией `instr` в SQLite или `strpos` в PostgreSQL, поэтому знаки процента и подчёркивания в тексте поиска остаются обычными символами. Недопустимое значение даёт ответ 400.
 
 Запрос `GET /diagrams?limit=2&offset=0&sort=title&order=desc` даёт первую страницу из двух записей, как на рисунке 7.
 
@@ -186,6 +186,14 @@ PostgreSQL на компьютере разработчика не устано�
 
    Уникальность задаётся ограничением `UNIQUE` в миграции и `unique: true` в модели. Нарушение приводит к исключению `SequelizeUniqueConstraintError`, у которого в `errors[0].path` лежит имя поля. Его ловят в обработчике и отвечают 409 Conflict, а не 500, потому что виновата не база, а повторное значение. В работе так отвечает `POST /projects` с уже занятым именем. Предварительный `findOne` не заменяет ограничение: между проверкой и записью может вклиниться другой запрос.
 
+### 3.12 Архитектура и компромиссы
+
+Работа повторяет слои первой лабораторной и добавляет слой доступа к данным: модели Sequelize и миграции. Контроллер работает с моделями и не пишет SQL, а схема базы меняется только миграциями. Фаулер называет такой подход «Data Mapper» в книге «Шаблоны корпоративных приложений»: объект предметной области не знает, как он хранится. Правило зависимостей из «Чистой архитектуры» Мартина соблюдено не полностью. Контроллер зависит от Sequelize, потому что использует его методы поиска и подсчёта. Полностью отделить предметную область можно было бы слоем репозиториев, но для двух сущностей он удвоил бы число файлов, поэтому от него отказались.
+
+Компромисс выбран осознанно. Ограничения целостности лежат на двух уровнях: проверка в коде даёт понятный ответ 400, а ограничения `CHECK`, `UNIQUE` и внешний ключ в базе защищают данные, даже если запись идёт в обход API. Дублирование правил здесь оправдано, потому что у каждого уровня своя задача. Пределы вынесены в `limits.json` и копируются в миграции как снимок, чтобы старая миграция не менялась вместе с кодом. Журнал запросов написан отдельным промежуточным обработчиком, поэтому его можно отключить, не затрагивая маршруты.
+
+Источники: Мартин Р. Чистая архитектура. Искусство разработки программного обеспечения. СПб.: Питер, 2018. Фаулер М. Шаблоны корпоративных приложений. М.: Вильямс, 2016. Фаулер М. Рефакторинг. Улучшение существующего кода. 2-е изд. СПб.: Питер, 2019.
+
 ## Заключение
 
 Для проекта DSLKit коллекция `diagrams` из лабораторной работы 1 переведена с массива на базу данных через Sequelize: модели `Diagram` и `Project` со связью один-ко-многим, пять миграций для таблицы, поля `priority`, журнала запросов, числового поля `revision` и проектов, сид с тремя диаграммами и контроллеры на методах ORM. Добавлены метод `PATCH`, ответ 409 при повторном имени проекта и проверка числа от 0 до предела. Локально работа использует SQLite, а переменная `DATABASE_URL` переключает её на PostgreSQL или облачный Neon без изменения кода. 98 автоматических тестов подтверждают маршруты, ограничения, миграции с откатом и сид. Запуск на настоящем PostgreSQL не проверялся, структура базы и запросы подтверждены снимками браузера и записью обмена, снятой скриптом.
@@ -198,15 +206,19 @@ const { readFileSync } = require('node:fs');
 try {
   process.loadEnvFile();
 } catch {
-  // .env is optional, defaults apply
+  // .env is optional, the settings may come from the environment
 }
 
-// DATABASE_URL selects PostgreSQL, otherwise a local SQLite file is used.
+// PostgreSQL is the database of the work: DATABASE_URL points to it (a local one from docker-compose.yml, Neon, Supabase).
+// SQLITE_STORAGE selects a SQLite file instead, the tests use it with a temporary file so that they need no server.
 // With DATABASE_SSL=true the server certificate is verified; only DATABASE_SSL_REJECT_UNAUTHORIZED=false turns that off.
 // DATABASE_SSL_CA is a path to a PEM file with the certificate authority, the safe way to trust a private or self-signed server.
 const fromEnv = () => {
   const { DATABASE_URL, DATABASE_SSL, DATABASE_SSL_REJECT_UNAUTHORIZED, DATABASE_SSL_CA, SQLITE_STORAGE, NODE_ENV } = process.env;
-  if (!DATABASE_URL) return { dialect: 'sqlite', storage: SQLITE_STORAGE || './dev.sqlite', logging: false };
+  if (!DATABASE_URL) {
+    if (SQLITE_STORAGE) return { dialect: 'sqlite', storage: SQLITE_STORAGE, logging: false };
+    throw new Error('DATABASE_URL is not set: copy .env.example to .env and start the database (docker compose up -d db), or set SQLITE_STORAGE to use a SQLite file');
+  }
   if (NODE_ENV === 'production' && (DATABASE_SSL !== 'true' || DATABASE_SSL_REJECT_UNAUTHORIZED === 'false')) {
     throw new Error('In production DATABASE_SSL=true is required and certificate checks cannot be turned off, use DATABASE_SSL_CA instead');
   }
@@ -218,8 +230,19 @@ const fromEnv = () => {
   };
 };
 
-// One config for every environment: tests override SQLITE_STORAGE.
-module.exports = { development: fromEnv(), test: fromEnv(), production: fromEnv() };
+// The settings are read when a block is asked for, so a missing setting is reported where the database is needed
+// and not at the moment this file is loaded. The same block serves every environment, the tests set SQLITE_STORAGE.
+module.exports = {
+  get development() {
+    return fromEnv();
+  },
+  get test() {
+    return fromEnv();
+  },
+  get production() {
+    return fromEnv();
+  },
+};
 ```
 
 ## Приложение Б (обязательное) Листинг файла index.js модели
@@ -380,11 +403,22 @@ module.exports = {
 
 ```js
 const { notFound, badRequest } = require('../errors');
+const { Op, fn, col, where } = require('sequelize');
 const { parseListQuery } = require('../middleware/list-query');
+const { NOTATIONS, LIMITS } = require('../models/diagram.constants');
 
 const missing = (id) => notFound(`Diagram ${id} not found`);
 
 const SORTABLE = ['id', 'title', 'notation', 'priority', 'owner', 'revision', 'createdAt'];
+
+// A part of the title is searched with instr (SQLite) or strpos (PostgreSQL) on the lowercased title, not with LIKE,
+// so the characters % and _ in the search text are plain characters and need no escaping.
+const filterFor = (dialect, { notation, q }) => {
+  const conditions = [];
+  if (notation !== undefined) conditions.push({ notation });
+  if (q !== undefined) conditions.push(where(fn(dialect === 'sqlite' ? 'instr' : 'strpos', fn('lower', col('title')), q), { [Op.gt]: 0 }));
+  return conditions.length > 0 ? { [Op.and]: conditions } : {};
+};
 
 // Express 5 forwards a rejected promise to the error handler, so no try/catch is needed here.
 const createDiagramsController = ({ Diagram, Project }) => {
@@ -397,8 +431,9 @@ const createDiagramsController = ({ Diagram, Project }) => {
   return {
     // ?limit=&offset=&sort=&order= (see list-query.js). The answer stays an array, the full size comes in X-Total-Count.
     list: async (req, res) => {
-      const { limit, offset, sort, order } = parseListQuery(req.query, SORTABLE);
+      const { limit, offset, sort, order, notation, q } = parseListQuery(req.query, SORTABLE, { notations: NOTATIONS, maxQuery: LIMITS.title });
       const { count, rows } = await Diagram.findAndCountAll({
+        where: filterFor(Diagram.sequelize.getDialect(), { notation, q }),
         order: [
           [sort, order.toUpperCase()],
           ['id', 'ASC'],
@@ -457,11 +492,12 @@ const MAX_LIMIT = 100;
 const MAX_OFFSET = 1000000;
 const ORDERS = ['asc', 'desc'];
 
-// Reads ?limit=, ?offset=, ?sort= and ?order= from req.query.
+// Reads ?limit=, ?offset=, ?sort=, ?order=, ?notation= and ?q= from req.query.
 // sortable: the field names a client may sort by (a whitelist, so a field name never reaches the database unchecked).
 // Without limit the whole list is returned (the clients of the earlier labs expect that), without sort the order is by id.
 // A bad value throws the 400 error with the list of problems, Express 5 passes it to the error handler.
-const parseListQuery = (query, sortable) => {
+// filters: { notations: allowed values of ?notation=, maxQuery: longest ?q= }. ?q= is a case-insensitive part of the title.
+const parseListQuery = (query, sortable, filters = {}) => {
   const problems = [];
   const integer = (name, min, max) => {
     const value = query[name];
@@ -482,8 +518,21 @@ const parseListQuery = (query, sortable) => {
   const order = typeof query.order === 'string' ? query.order.toLowerCase() : (query.order ?? 'asc');
   if (!ORDERS.includes(order)) problems.push({ field: 'order', message: 'order must be asc or desc' });
 
+  const { notations = [], maxQuery = 80 } = filters;
+  let notation;
+  if (query.notation !== undefined) {
+    if (typeof query.notation !== 'string' || !notations.includes(query.notation)) problems.push({ field: 'notation', message: `notation must be one of: ${notations.join(', ')}` });
+    else notation = query.notation;
+  }
+  let q;
+  if (query.q !== undefined) {
+    const text = typeof query.q === 'string' ? query.q.trim() : '';
+    if (text === '' || text.length > maxQuery) problems.push({ field: 'q', message: `q must be text of 1 to ${maxQuery} characters` });
+    else q = text.toLowerCase();
+  }
+
   if (problems.length) throw badRequest('Invalid list query', problems);
-  return { limit, offset, sort, order };
+  return { limit, offset, sort, order, notation, q };
 };
 
 module.exports = { parseListQuery, MAX_LIMIT, MAX_OFFSET };

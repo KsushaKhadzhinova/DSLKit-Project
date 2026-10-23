@@ -135,9 +135,9 @@ Figure 9 – End of the npm test output: the number of passed tests and the cove
 
 ### 3.6 Paging and sorting
 
-The list accepts the `limit`, `offset`, `sort` and `order` parameters. `limit` sets the page size from 1 to 100, `offset` sets the shift from 0 to 1000000, `sort` picks a field from a whitelist and `order` takes `asc` or `desc`. Without parameters the whole list is returned in ascending `id` order, so the clients of the earlier works keep working. The answer stays an array and the full size of the selection comes in the `X-Total-Count` header. Numbers are read as strings of at most nine digits, so `-1`, `1e9`, `0x10` and huge numbers get a 400 answer with a list of errors by field. The sort field name is checked against the whitelist and never reaches the database query unchecked. Equal values are ordered by `id`, so pages do not overlap. Parsing of the parameters is moved to a separate module, it is given in Appendix H.
+The list accepts the `limit`, `offset`, `sort` and `order` parameters. `limit` sets the page size from 1 to 100, `offset` sets the shift from 0 to 1000000, `sort` picks a field from a whitelist and `order` takes `asc` or `desc`. Without parameters the whole list is returned in ascending `id` order, so the clients of the earlier works keep working. The answer stays an array and the full size of the selection comes in the `X-Total-Count` header. Numbers are read as strings of at most nine digits, so `-1`, `1e9`, `0x10` and huge numbers get a 400 answer with a list of errors by field. The sort field name is checked against the whitelist and never reaches the database query unchecked. Equal values are ordered by `id`, so pages do not overlap. Parsing of the parameters is moved to a separate module, it is given in Appendix H. The `notation` parameter keeps the records of one notation, and the `q` parameter searches a part of the title ignoring case. An invalid value gives 400, and the `X-Total-Count` header counts the filtered list.
 
-### 3.8 Answers to the control questions
+### 3.7 Answers to the control questions
 
 9. What advantages does nodemon give during development?
 
@@ -150,6 +150,14 @@ The list accepts the `limit`, `offset`, `sort` and `order` parameters. `limit` s
 11. How can CORS support be added to your application? (In theory)
 
     Under the same-origin policy a browser does not hand a page the response of a server on another origin, that is another scheme, domain or port, unless the server allows it explicitly. The permission comes from the `Access-Control-Allow-Origin` header with the client address. For methods such as `PUT` or for the header `Content-Type: application/json`, the browser first sends a preflight `OPTIONS` request, and the server answers 204 with the headers `Access-Control-Allow-Methods` and `Access-Control-Allow-Headers`. In Express the `cors` package does this, or a handler of ten lines mounted before the routes. A wildcard cannot be combined with cookies, and the list of allowed origins is better read from an environment variable. In this lab the client and the server share one address for now, so CORS is not enabled.
+
+### 3.8 Architecture and trade-offs
+
+The code is split into layers: routes connect a path to a function, the controller decides what to answer, the model keeps the data, and the middleware checks the input and turns errors into one response. Dependencies point one way. A route knows the controller, the controller knows the store, and the store knows nothing about HTTP. This is the dependency rule from Robert Martin's Clean Architecture: inner layers do not depend on outer ones, so the array can be replaced by a database without touching the routes. The store is passed to `createApp` as a parameter, and the tests give it a fresh one for every check.
+
+The trade-off is that for a teaching resource of one entity this layout gives more files than needed. A controller of six functions could be written right in the routes. The layers are justified by the next lab, where the array is replaced by a database. In Fowler's Patterns of Enterprise Application Architecture this is a split into layers with a separate data access layer. There are almost no business rules here, so a separate service layer was not introduced, to avoid complexity with no benefit. Checks live in small functions and the limits live in `limits.json`. This is a technique from Fowler's Refactoring: replace a magic number with a named constant.
+
+Sources: Martin R. Clean Architecture: A Craftsman's Guide to Software Structure and Design. Prentice Hall, 2017. Fowler M. Patterns of Enterprise Application Architecture. Addison-Wesley, 2002. Fowler M. Refactoring: Improving the Design of Existing Code, 2nd ed. Addison-Wesley, 2018.
 
 ## Conclusion
 
