@@ -74,6 +74,11 @@
             <button type="button" class="button button--quiet">Share</button>
             <button type="button" class="button button--quiet" data-notation-label>Diagram: IDEF0</button>
             <button type="button" class="button button--quiet">Auto layout</button>
+            <button type="button" class="button button--quiet" data-export="svg">Export SVG</button>
+            <button type="button" class="button button--quiet" data-export="png">Export PNG</button>
+            <button type="button" class="button button--quiet" data-export="jpeg">Export JPEG</button>
+            <button type="button" class="button button--quiet" data-export="drawio">Export draw.io</button>
+            <button type="button" class="button button--quiet" data-export="html">Export HTML</button>
             <button type="button" class="button button--quiet canvas__refresh">Refresh from the server</button>
             <button type="button" class="editor-toolbar__switch" role="switch" aria-checked="true">
               <span class="editor-toolbar__switch-track" aria-hidden="true"></span>
@@ -473,6 +478,7 @@
         >
       </span>
       <span class="editor-status__branch"><span aria-hidden="true">⎇</span> main</span>
+      <span class="editor-status__saved" role="status" aria-live="polite"></span>
       <span class="editor-status__cursor">Autosave: on · line 4, col. 12</span>
     </footer>
 

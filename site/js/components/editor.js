@@ -1,5 +1,7 @@
-import { KEYWORDS, NOTATIONS, TEMPLATES } from '../notations/index.js';
+import { NOTATIONS, TEMPLATES } from '../notations/index.js';
 import { ui } from '../notations/messages.js';
+import { showCode } from './code-lines.js';
+import { initSourceAutosave } from './source-autosave.js';
 
 const VIEWS = ['code', 'canvas'];
 const KEY_STEPS = { ArrowRight: 1, ArrowLeft: -1 };
@@ -94,6 +96,7 @@ const initCloseDialog = ({ page, root, tabs, tabsApi }) => {
     else if (dialog.returnValue === 'discard') discard();
     dialog.returnValue = '';
   });
+  return { markSaved };
 };
 
 const initAutosave = ({ page, settings }) => {
@@ -148,30 +151,13 @@ const initRun = ({ page, root }) => {
   });
 };
 
-// One line of code as the editor draws it: indentation, an optional keyword span, the rest.
-const createCodeLine = (root, text) => {
-  const item = root.createElement('li');
-  item.className = 'code__line';
-  const code = root.createElement('code');
-  const [, indent, word, rest] = /^(\s*)([a-z]*)(.*)$/.exec(text);
-  code.append(indent);
-  if (KEYWORDS.has(word)) {
-    const keyword = root.createElement('span');
-    keyword.className = 'code__keyword';
-    keyword.textContent = word;
-    code.append(keyword, rest);
-  } else code.append(word + rest);
-  item.append(code);
-  return item;
-};
-
 // Templates: the buttons and the notation list replace the code with a starter example and ask the runner to draw it.
 const initTemplates = ({ page, root }) => {
   const lang = root.documentElement.lang === 'en' ? 'en' : 'ru';
   const codeLines = page.querySelector('.code__lines');
   const loadTemplate = (key) => {
     if (!codeLines || !(key in TEMPLATES)) return false;
-    codeLines.replaceChildren(...TEMPLATES[key].split('\n').map((text) => createCodeLine(root, text)));
+    showCode(root, codeLines, TEMPLATES[key]);
     announceRun(page, root);
     return true;
   };
@@ -192,18 +178,19 @@ const initTemplates = ({ page, root }) => {
   return loadTemplate;
 };
 
-export const initEditor = ({ root = document, storage } = {}) => {
+export const initEditor = ({ root = document, storage, ...timing } = {}) => {
   const page = root.querySelector('.app-page--editor');
   const tabs = page ? [...page.querySelectorAll('.editor-tabs__list [role="tab"]')] : [];
   if (tabs.length === 0) return null;
 
   const settings = createSettings(storage);
   const tabsApi = initTabs({ page, root, storage, tabs });
-  initCloseDialog({ page, root, tabs, tabsApi });
+  const { markSaved } = initCloseDialog({ page, root, tabs, tabsApi });
   initAutosave({ page, settings });
   initRun({ page, root });
+  const sourceAutosave = initSourceAutosave({ page, root, storage, onSaved: markSaved, ...timing });
   const loadTemplate = initTemplates({ page, root });
   const { showView, view } = initViews({ page, storage });
 
-  return { select: tabsApi.select, showView, loadTemplate, view };
+  return { select: tabsApi.select, showView, loadTemplate, view, sourceAutosave };
 };

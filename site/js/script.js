@@ -3,6 +3,7 @@ import { initBurger } from './components/burger.js';
 import { initDashboard } from './components/dashboard.js';
 import { initDiagramRunner } from './components/diagram-runner.js';
 import { initEditor } from './components/editor.js';
+import { initExport } from './components/export-menu.js';
 import { initNotationFilter } from './components/notation-filter.js';
 import { initSettings } from './components/settings.js';
 import { initTheme } from './components/theme.js';
@@ -18,6 +19,7 @@ export const COMPONENTS = [
   initDashboard,
   initSettings,
   initEditor,
+  initExport,
   initDiagramRunner,
 ];
 

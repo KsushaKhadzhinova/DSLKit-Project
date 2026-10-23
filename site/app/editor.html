@@ -74,6 +74,11 @@
             <button type="button" class="button button--quiet">Поделиться</button>
             <button type="button" class="button button--quiet" data-notation-label>Диаграмма: IDEF0</button>
             <button type="button" class="button button--quiet">Автораскладка</button>
+            <button type="button" class="button button--quiet" data-export="svg">Экспорт SVG</button>
+            <button type="button" class="button button--quiet" data-export="png">Экспорт PNG</button>
+            <button type="button" class="button button--quiet" data-export="jpeg">Экспорт JPEG</button>
+            <button type="button" class="button button--quiet" data-export="drawio">Экспорт draw.io</button>
+            <button type="button" class="button button--quiet" data-export="html">Экспорт HTML</button>
             <button type="button" class="button button--quiet canvas__refresh">Обновить с сервера</button>
             <button type="button" class="editor-toolbar__switch" role="switch" aria-checked="true">
               <span class="editor-toolbar__switch-track" aria-hidden="true"></span>
@@ -478,6 +483,7 @@
         >
       </span>
       <span class="editor-status__branch"><span aria-hidden="true">⎇</span> main</span>
+      <span class="editor-status__saved" role="status" aria-live="polite"></span>
       <span class="editor-status__cursor">Автосохранение: вкл · стр. 4, стлб. 12</span>
     </footer>
 

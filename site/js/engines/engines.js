@@ -8,7 +8,13 @@ export const MERMAID_INIT = '%%{init: {"htmlLabels": false, "flowchart": {"htmlL
 // `type` is the Kroki endpoint; an engine without it draws in the browser and returns the SVG itself.
 export const ENGINES = [
   { id: 'graphviz', label: 'Kroki · Graphviz', type: 'graphviz', action: 'Нарисовать через Kroki', build: (model) => generate(model, 'graphviz') },
-  { id: 'mermaid', label: 'Kroki · Mermaid', type: 'mermaid', action: 'Нарисовать через Kroki', build: (model) => [MERMAID_INIT, generate(model, 'mermaid')].join('\n') },
+  {
+    id: 'mermaid',
+    label: 'Kroki · Mermaid',
+    type: 'mermaid',
+    action: 'Нарисовать через Kroki',
+    build: (model) => [MERMAID_INIT, generate(model, 'mermaid')].join('\n'),
+  },
   { id: 'plantuml', label: 'Kroki · PlantUML', type: 'plantuml', action: 'Нарисовать через Kroki', build: (model) => generate(model, 'plantuml') },
   { id: 'local', label: 'Собственный движок (в браузере)', type: null, action: 'Нарисовать в браузере', build: renderLocal },
 ];

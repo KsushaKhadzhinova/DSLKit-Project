@@ -760,6 +760,19 @@
   font-weight: 700;
 }
 
+.editor-status__saved {
+  margin-left: auto;
+  color: var(--color-text-light);
+}
+
+.editor-status__saved:empty {
+  display: none;
+}
+
+.editor-status__saved:not(:empty) + .editor-status__cursor {
+  margin-left: 0;
+}
+
 .editor-status__cursor {
   margin-left: auto;
 }
