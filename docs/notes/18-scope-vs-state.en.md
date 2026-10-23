@@ -59,7 +59,7 @@ Marks: done, partly, not started, the owner's decision.
 
 | Work | State |
 | --- | --- |
-| Part 1, labs 1–8 | done, 526 tests, 100% coverage |
+| Part 1, labs 1–8 | done, 601 tests, 100% coverage |
 | Part 2, labs 1–8, practicals 1–4 | done, each with reports in RU and EN, negative tests and a guide |
 | Course project | the note and diagrams are ready, the title page, assignment, cloud deployment, current screenshots and agreeing the topic remain |
 

@@ -42,7 +42,7 @@ State as of 23 October 2026.
 
 | Work | Branch | Folder inside `part-2/` | Tests |
 | --- | --- | --- | --- |
-| Part 1 (site, labs 1–8) | `work/part1-finish` | not applicable | 526 |
+| Part 1 (site, labs 1–8) | `work/part1-finish` | not applicable | 601 |
 | Lab 1 Express, array | `lab21` | `lab-01-node-server` | 67 |
 | Lab 2 Sequelize | `lab12` | `lab-02-sequelize` | 102 |
 | Lab 3 Authentication | `23` | `lab-03-auth` | 126 |
