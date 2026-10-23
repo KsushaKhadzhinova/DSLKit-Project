@@ -4,6 +4,7 @@ import { initDashboard } from './components/dashboard.js';
 import { initDiagramRunner } from './components/diagram-runner.js';
 import { initEditor } from './components/editor.js';
 import { initExport } from './components/export-menu.js';
+import { registerServiceWorker } from './components/pwa.js';
 import { initNotationFilter } from './components/notation-filter.js';
 import { initSettings } from './components/settings.js';
 import { initTheme } from './components/theme.js';
@@ -40,5 +41,8 @@ export const boot = (root, { components = COMPONENTS, logger = console } = {}) =
 };
 
 /* node:coverage disable */
-if (typeof document !== 'undefined') boot(document);
+if (typeof document !== 'undefined') {
+  boot(document);
+  registerServiceWorker({ navigator: document.defaultView.navigator });
+}
 /* node:coverage enable */

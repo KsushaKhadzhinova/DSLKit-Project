@@ -136,6 +136,8 @@ Semantic markup is created for the DSLKit home page and the related pages: Russi
     <link rel="alternate" hreflang="en" href="https://dslkit.io/en/" />
     <link rel="alternate" hreflang="x-default" href="https://dslkit.io/" />
     <link rel="icon" href="images/favicon.svg" type="image/svg+xml" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <meta name="theme-color" content="#2563eb" />
     <link rel="stylesheet" href="css/style.css" />
   </head>
   <body class="page">
