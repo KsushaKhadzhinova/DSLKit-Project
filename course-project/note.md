@@ -574,7 +574,27 @@ export const register = (email, password) => api.post('/auth/register', { email,
 export const login = (email, password) => api.post('/auth/login', { email, password });
 ```
 
-[TODO: добавить фрагмент хука `useDiagrams.js` (оптимистичное добавление с откатом) из `part-2/lab-05-react-api/src/hooks/useDiagrams.js` и один компонент с `useState` и `useEffect`, если преподаватель потребует пример компонента в приложении.]
+Оптимистичное добавление диаграммы из хука `useDiagrams.js` (`part-2/lab-05-react-api/src/hooks`): запись появляется сразу с временным идентификатором, при успехе заменяется ответом сервера, при ошибке убирается и показывается сообщение.
+
+```js
+const add = useCallback(async (fields) => {
+  tempCounter.current += 1;
+  const tempId = `temp-${tempCounter.current}`;
+  setItems((current) => [...current, { ...fields, id: tempId, createdAt: new Date().toISOString(), pending: true }]);
+  changeTotal(1);
+  try {
+    const { data } = await addDiagram(fields);
+    localIds.current.add(data.id);
+    setItems((current) => current.map((item) => (item.id === tempId ? data : item)));
+    return true;
+  } catch (failure) {
+    setItems((current) => current.filter((item) => item.id !== tempId));
+    changeTotal(-1);
+    setNotice(`Не удалось добавить диаграмму. ${errorMessage(failure)}`);
+    return false;
+  }
+}, []);
+```
 
 ## Приложение В (обязательное) Конфигурация Docker
 
@@ -735,7 +755,7 @@ server {
 | Неверный пароль             | `wrong password 1`                                                                         |
 | Короткий пароль             | `1234567`                                                                                  |
 
-[TODO: если нужны более полные исходные данные, добавить демо-диаграммы из сида `seeders/20261016000002-demo-diagrams.js`.]
+Демонстрационные диаграммы создаёт сид `seeders/20261016000002-demo-diagrams.js` из `seed-data/diagrams.js`: три исходные диаграммы, затем по четыре на каждую нотацию и несколько «неудобных» строк, которые пользователь мог бы ввести сам. Сид идемпотентен: существующая строка не дублируется, удалённая возвращается. Владельцами назначаются администратор и демонстрационные пользователи по очереди.
 
 ## Приложение Д (обязательное) Исходный текст диаграмм Mermaid
 
@@ -850,7 +870,7 @@ erDiagram
 
 Приложение воспроизводит рекомендации кафедры для студентов из Беларуси. Ссылка на приложение дана в подразделе 2.4.3.
 
-Хостинг клиента: Netlify или GitHub Pages. Хостинг сервера и базы: Render или Supabase. Базы данных: PostgreSQL в Supabase, Neon или Render, MongoDB в Atlas. Непрерывная интеграция: GitHub Actions. Мониторинг ошибок: GlitchTip. Веб-аналитика: Яндекс.Метрика, Plausible или Rybbit. [TODO: оставить только то, что реально используется в проекте.]
+Хостинг клиента: Netlify или GitHub Pages. Хостинг сервера и базы: Render или Supabase. Базы данных: PostgreSQL в Supabase, Neon или Render, MongoDB в Atlas. Непрерывная интеграция: GitHub Actions. Мониторинг ошибок: GlitchTip. Веб-аналитика: Яндекс.Метрика, Plausible или Rybbit. В этом проекте реально используются: Docker Compose (запуск стека), PostgreSQL 16 в контейнере, при необходимости Neon или Supabase как облачная база, GitHub (репозиторий). Остальные сервисы из рекомендаций кафедры (Netlify, Render, Atlas, GlitchTip, аналитика) в проекте не применялись.
 
 ## Приложение Ж (обязательное) Скриншоты и вывод тестов
 
