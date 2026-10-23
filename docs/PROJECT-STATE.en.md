@@ -138,6 +138,7 @@ The shooting scripts take `puppeteer-core` from `part-2/lab-07-websocket` and Ch
 | [`notes/07-possible-teacher-extras.md`](notes/07-possible-teacher-extras.md) | forecast of the teacher's extras |
 | [`notes/10-consilium-2026-10-17.md`](notes/10-consilium-2026-10-17.md) | tables of extras per work |
 | [`notes/17-plan-2026-10-22.en.md`](notes/17-plan-2026-10-22.en.md) | plan and statistics |
+| [`notes/18-scope-vs-state.en.md`](notes/18-scope-vs-state.en.md) | the project scope from the original document and how much of it is done |
 | [`study/00-RUN-GUIDE.md`](study/00-RUN-GUIDE.md) | how to run each work |
 | [`study/01-DATA-NEEDED.md`](study/01-DATA-NEEDED.md) | which data and accesses are needed from the owner |
 | [`study/02-SECURITY-AUDIT.md`](study/02-SECURITY-AUDIT.md) | security audit |

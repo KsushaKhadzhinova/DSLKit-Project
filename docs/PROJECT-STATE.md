@@ -138,6 +138,7 @@ cd part-2/lab-08-docker && docker compose up --build
 | [`notes/07-possible-teacher-extras.md`](notes/07-possible-teacher-extras.md) | прогноз допов преподавателя |
 | [`notes/10-consilium-2026-10-17.md`](notes/10-consilium-2026-10-17.md) | таблицы допов по работам |
 | [`notes/17-plan-2026-10-22.md`](notes/17-plan-2026-10-22.md) | план и статистика |
+| [`notes/18-scope-vs-state.md`](notes/18-scope-vs-state.md) | границы проекта из первоначального документа и что из них сделано |
 | [`study/00-RUN-GUIDE.md`](study/00-RUN-GUIDE.md) | запуск каждой работы |
 | [`study/01-DATA-NEEDED.md`](study/01-DATA-NEEDED.md) | какие данные и доступы нужны от владельца |
 | [`study/02-SECURITY-AUDIT.md`](study/02-SECURITY-AUDIT.md) | аудит безопасности |
