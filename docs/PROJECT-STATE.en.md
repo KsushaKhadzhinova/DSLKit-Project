@@ -118,7 +118,7 @@ The shooting scripts take `puppeteer-core` from `part-2/lab-07-websocket` and Ch
 ### Owner only
 - Postman screenshots (labs 1–3, P2, at least five operations) and the database structure (pgAdmin or DBeaver).
 - PostgreSQL for labs 2 and 3, Atlas for lab 6.
-- Docker from scratch, `docker ps`, `down` and `down -v`, Docker Hub (lab 8).
+- Docker Hub (lab 8). The build and start of the stack from scratch were checked on 23 October on this computer: three containers became healthy, `/api/health` answers `ok` through Nginx and directly, registration, login and creating a diagram through the proxy work (201, 200, and 401 without a token), data stays after `down` and `up`, and `down -v` removes the volume. Repeat the check on your machine and take a `docker ps` screenshot.
 - Checking lab 5 against the real lab 3 server.
 - Part 1: Firefox and Edge, screenshots (`notes/12-owner-screenshots.md`), the Rich Results Test, signing in to Figma to upload the mockups.
 - Course project: the title page, assignment and contents in Word, agreeing the topic, cloud deployment, current screenshots, access dates of the sources.
@@ -128,7 +128,6 @@ The shooting scripts take `puppeteer-core` from `part-2/lab-07-websocket` and Ch
 ### Can continue without the owner
 - Re-shooting the Mermaid frames when Kroki answers.
 - Refactoring round 3 and new extras from [`study/33-QUESTIONS.en.md`](study/33-QUESTIONS.en.md).
-- Checking the Docker build when Docker Desktop is running.
 
 ## 9 Where to read further
 
