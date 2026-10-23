@@ -176,6 +176,10 @@ The main trade-off concerns state. A JWT is not stored on the server, which make
 
 Sources: Martin R. Clean Architecture: A Craftsman's Guide to Software Structure and Design. Prentice Hall, 2017. Fowler M. Patterns of Enterprise Application Architecture. Addison-Wesley, 2002. Fowler M. Refactoring: Improving the Design of Existing Code, 2nd ed. Addison-Wesley, 2018.
 
+### 3.12 Database
+
+PostgreSQL is the main database. A local server is started with `docker compose up -d db`, and the connection string lives in the variable `DATABASE_URL` of the `.env` file. A SQLite file is needed only by the automatic tests. The migrations, the seed and the server ran on a real PostgreSQL 16 in a container: registration, login, creating a diagram, the notation filter and the title search work the same as on SQLite, and the user list answers 403 to an ordinary user.
+
 ## Conclusion
 
 DSLKit now has users with bcrypt password hashes, registration, login with a JWT token, a token-checking middleware and protected routes, including the profile of the current user. The additional role-based mechanism separates the rights of an administrator, a diagram owner and an outsider. The tests confirm both the successful scenarios and the rejections of tampered, expired and foreign tokens. A run on a real PostgreSQL is still to be done. The requests are confirmed by browser screenshots and by an exchange recorded with a script. The methods now include a partial `PATCH` with the same rights as `PUT`.
