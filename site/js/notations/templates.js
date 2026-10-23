@@ -338,6 +338,86 @@ flow d -> i3 "no"
 flow i2 -> m
 flow i3 -> m
 flow m -> e`,
+  mindmap: `diagram mindmap "Learning plan"
+root r "DSLKit course"
+topic server "Server"
+topic client "Client"
+topic ops "Operations"
+topic api "REST API"
+topic auth "Authentication"
+topic react "React"
+topic docker "Docker"
+branch r -> server
+branch r -> client
+branch r -> ops
+branch server -> api
+branch server -> auth
+branch client -> react
+branch ops -> docker`,
+  orgchart: `diagram orgchart "Project team"
+person head "Head of project"
+unit dev "Development"
+unit qa "Quality"
+person lead "Tech lead"
+person dev1 "Developer"
+person tester "Tester"
+leads head -> dev
+leads head -> qa
+leads dev -> lead
+leads lead -> dev1
+leads qa -> tester`,
+  c4: `diagram c4 "DSLKit context"
+person user "Diagram author"
+system dslkit "DSLKit"
+external kroki "Kroki rendering service"
+container api "REST API"
+database db "PostgreSQL"
+uses user -> dslkit "writes diagrams"
+uses dslkit -> kroki "asks to draw"
+uses dslkit -> api "calls"
+uses api -> db "reads and writes"`,
+  network: `diagram network "Office network"
+cloud net "Internet"
+router r1 "Router"
+switch sw "Switch"
+server web "Web server"
+database db "Database"
+client c1 "Laptop"
+client c2 "Phone"
+link net -> r1
+link r1 -> sw
+link sw -> web
+link web -> db
+link sw -> c1
+link sw -> c2`,
+  decision: `diagram decision "Choose a database"
+question q1 "Many users at once?"
+question q2 "Strict relations?"
+outcome sqlite "SQLite"
+outcome pg "PostgreSQL"
+outcome mongo "MongoDB"
+answer q1 -> q2 "yes"
+answer q1 -> sqlite "no"
+answer q2 -> pg "yes"
+answer q2 -> mongo "no"`,
+  epc: `diagram epc "Order handling"
+event e1 "Order received"
+function f1 "Check order"
+xor g1 "XOR"
+event e2 "Order is valid"
+event e3 "Order is invalid"
+function f2 "Ship goods"
+function f3 "Reject order"
+event e4 "Goods shipped"
+event e5 "Order rejected"
+flow e1 -> f1
+flow f1 -> g1
+flow g1 -> e2
+flow g1 -> e3
+flow e2 -> f2
+flow e3 -> f3
+flow f2 -> e4
+flow f3 -> e5`,
 };
 
 export const KEYWORDS = new Set(
@@ -347,6 +427,6 @@ export const KEYWORDS = new Set(
     'decision merge fork join initial final state object component provide require delegate depend classifier part port connect node device environment ' +
     'artifact deploy communicate package element contains import access profile metaclass stereotype message lifeline at interaction uob and or xor referent ' +
     'precedence relational objectflow kind individual isa partof instanceof relation predefined io preparation manual document connector offpage storage ' +
-    'comment note mode vertex edge path'
+    'comment note mode vertex edge path root topic branch unit person leads system external container database uses cloud router switch server client question outcome answer event function'
   ).split(' '),
 );

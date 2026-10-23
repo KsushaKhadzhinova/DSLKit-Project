@@ -243,6 +243,44 @@ export const MESSAGES = {
     ru: 'Зависимость {from} → {to} избыточна: она следует из других путей (транзитивная редукция)',
     en: 'Dependency {from} → {to} is redundant: other paths imply it (transitive reduction)',
   },
+
+  'mm-root': { ru: 'У ментальной карты должен быть ровно один корень, сейчас их {n}', en: 'A mind map needs exactly one root, there are {n}' },
+  'mm-parent': { ru: 'Ветка «{id}» подчинена нескольким веткам, а должна одной', en: 'Topic "{id}" hangs on several topics, it should hang on one' },
+  'mm-unreachable': { ru: 'Ветка «{id}» не связана с корнем', en: 'Topic "{id}" is not connected to the root' },
+  'mm-cycle': { ru: 'Ветки образуют кольцо: {path}', en: 'The topics form a loop: {path}' },
+  'org-many-bosses': { ru: 'У «{id}» несколько руководителей: проверьте структуру', en: '"{id}" has several managers: check the structure' },
+  'org-many-tops': { ru: 'Вверху структуры {n} элементов без руководителя', en: 'The top of the structure has {n} elements without a manager' },
+  'org-cycle': { ru: 'Подчинение замкнулось в кольцо: {path}', en: 'The reporting lines form a loop: {path}' },
+  'c4-unlabelled': {
+    ru: 'Связь {from} → {to} без подписи: напишите, что передаётся или зачем',
+    en: 'The relation {from} → {to} has no label: say what is sent or why',
+  },
+  'c4-database-source': {
+    ru: 'База «{id}» сама ничего не вызывает: стрелка должна идти к ней',
+    en: 'Database "{id}" calls nothing itself: the arrow should point to it',
+  },
+  'net-client-client': {
+    ru: 'Клиенты {from} и {to} соединены напрямую: обычно связь идёт через коммутатор или роутер',
+    en: 'Clients {from} and {to} are linked directly: normally a switch or a router sits between them',
+  },
+  'dt-outcome-out': { ru: 'Из исхода «{id}» не должно выходить ответов', en: 'Outcome "{id}" must have no answers going out' },
+  'dt-answer-label': {
+    ru: 'Ответ {from} → {to} без подписи: напишите, что отвечают на вопрос',
+    en: 'The answer {from} → {to} has no label: write the answer to the question',
+  },
+  'dt-branches': { ru: 'У вопроса «{id}» один ответ: нужно не меньше двух', en: 'Question "{id}" has one answer: at least two are needed' },
+  'dt-many-parents': { ru: 'В «{id}» ведёт несколько ответов, а в дереве путь один', en: 'Several answers lead to "{id}", a tree has one path' },
+  'dt-roots': {
+    ru: 'У дерева {n} начал: оставьте один вопрос без входящих ответов',
+    en: 'The tree has {n} starts: keep one question without incoming answers',
+  },
+  'dt-cycle': { ru: 'Ответы замыкаются в круг: {path}', en: 'The answers form a loop: {path}' },
+  'epc-alternate': {
+    ru: 'Между {from} и {to} два элемента одного вида ({kind}): в eEPC события и функции чередуются, между ними можно поставить коннектор',
+    en: 'Two elements of one kind ({kind}) follow each other, {from} and {to}: in eEPC events and functions alternate, a connector may sit between them',
+  },
+  'epc-start': { ru: 'Цепочка начинается с «{id}», а должна начинаться с события', en: 'The chain starts with "{id}", it must start with an event' },
+  'epc-end': { ru: 'Цепочка заканчивается на «{id}», а должна заканчиваться событием', en: 'The chain ends with "{id}", it must end with an event' },
 };
 
 // Texts of the problems panel and the status bar.

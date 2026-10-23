@@ -244,7 +244,7 @@ test('loading a template replaces the code, highlights keywords and draws the di
 test('the notation list offers every notation and loads its template in either language', async () => {
   const ru = page();
   const options = [...ru.$('[data-notation-select]').options];
-  assert.equal(options.length, 27);
+  assert.equal(options.length, 33);
   assert.match(options[0].textContent, /IDEF0/);
   ru.$('[data-notation-select]').value = 'uml-timing';
   ru.$('[data-notation-select]').dispatchEvent(new ru.window.Event('change'));

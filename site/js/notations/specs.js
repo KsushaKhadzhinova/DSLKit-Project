@@ -22,7 +22,7 @@ const ratioSize = (a, wrapAt, outline) => (node) => {
   return { lines, outline, w: h * 1.5, h };
 };
 
-const degrees = (model) => {
+export const degrees = (model) => {
   const count = new Map(model.nodes.map((node) => [node.id, { in: 0, out: 0 }]));
   model.edges.forEach((edge) => {
     count.get(edge.from).out += 1;
@@ -31,14 +31,14 @@ const degrees = (model) => {
   return count;
 };
 
-const isolated = (model, skip) => {
+export const isolated = (model, skip) => {
   const count = degrees(model);
   return model.nodes
     .filter((node) => !skip.includes(node.kind) && count.get(node.id).in + count.get(node.id).out === 0)
     .map((node) => problem(node.line, 'warning', 'isolated', { id: node.id }));
 };
 
-const kindMap = (model) => new Map(model.nodes.map((node) => [node.id, node.kind]));
+export const kindMap = (model) => new Map(model.nodes.map((node) => [node.id, node.kind]));
 
 // ---------- DFD (Yourdon / Gane-Sarson) ----------
 export const dfd = defineGraph({
