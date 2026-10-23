@@ -192,7 +192,7 @@ test('the engine registry can find the engine of a format', () => {
   assert.equal(engineForFormat('nothing'), undefined);
   const timing = parseDiagram(TEMPLATES['uml-timing']);
   assert.match(ENGINES.find((engine) => engine.id === 'graphviz').build(timing), /@startuml/);
-  assert.match(ENGINES.find((engine) => engine.id === 'mermaid').build(parseDiagram(TEMPLATES.dfd)), /^flowchart/);
+  assert.match(ENGINES.find((engine) => engine.id === 'mermaid').build(parseDiagram(TEMPLATES.dfd)), /^%%.init: .*htmlLabels.*flowchart/s);
 });
 
 // ---------- page behaviour ----------

@@ -162,9 +162,10 @@ ${input}`);
         logger.error('DSLKit: не удалось получить диаграмму', error.kind, error.status ?? '');
         const shown = cached && show(cached.data, `Кэшированные данные от ${formatTime(cached.savedAt)}. ${errorMessage(error)}`, engine);
         if (!shown) {
-          // The drawing of an earlier run belongs to other code, so it must not stay next to this error.
+          // The drawing of an earlier run and the sample drawing of the page belong to other code, so neither may stay next to this error.
           remote.replaceChildren();
           remote.hidden = true;
+          local?.setAttribute('hidden', '');
           setStatus(error.kind === 'offline' ? `${errorMessage(error)} Сохранённой копии этой диаграммы нет.` : errorMessage(error));
         }
       }

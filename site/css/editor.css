@@ -1139,6 +1139,39 @@
   background: transparent !important;
 }
 
+/* Mermaid styles its drawing with a style element, which is removed from foreign SVG, so the shapes get the colours of the application here */
+.canvas__remote[data-engine='mermaid'] svg :is(rect, polygon, circle, ellipse, path):not([fill='none']) {
+  fill: var(--color-surface);
+  stroke: var(--color-primary);
+  stroke-width: 1.5;
+}
+
+.canvas__remote[data-engine='mermaid'] svg :is(path, line, polyline)[class*='link'],
+.canvas__remote[data-engine='mermaid'] svg :is(path, line, polyline)[class*='edge'],
+.canvas__remote[data-engine='mermaid'] svg :is(path, line, polyline)[class*='line'],
+.canvas__remote[data-engine='mermaid'] svg :is(path, line, polyline)[class*='divider'],
+.canvas__remote[data-engine='mermaid'] svg :is(path, line, polyline)[class*='relation'] {
+  fill: none;
+  stroke: var(--color-text-light);
+}
+
+.canvas__remote[data-engine='mermaid'] svg line {
+  stroke: var(--color-text-light);
+  stroke-width: 1.5;
+}
+
+.canvas__remote[data-engine='mermaid'] svg marker :is(path, polygon, circle) {
+  fill: var(--color-text-light);
+  stroke: var(--color-text-light);
+}
+
+.canvas__remote[data-engine='mermaid'] svg .edgeLabel rect,
+.canvas__remote[data-engine='mermaid'] svg .labelBkg {
+  fill: var(--color-surface);
+  stroke: none;
+  opacity: 0.85;
+}
+
 .templates__select {
   width: 100%;
   margin-top: var(--space-1);

@@ -18,6 +18,12 @@ const settle = (page) =>
     .waitForFunction(() => !document.querySelector('.canvas')?.hasAttribute('aria-busy') || document.querySelector('.canvas').getAttribute('aria-busy') === 'false', { timeout: 12000 })
     .catch(() => {});
 
+const drawn = (page) =>
+  page.evaluate(() => {
+    const remote = document.querySelector('.canvas__remote');
+    return Boolean(remote && !remote.hidden && remote.querySelector('svg'));
+  });
+
 for (const [lang, path] of Object.entries(LANGS)) {
   for (const engine of ENGINES) {
     const page = await browser.newPage();
@@ -30,6 +36,11 @@ for (const [lang, path] of Object.entries(LANGS)) {
       await page.select('[data-notation-select]', notation);
       await new Promise((resolve) => setTimeout(resolve, 250));
       await settle(page);
+      // The Kroki service sometimes times out: ask again until the drawing is on the canvas (at most five more times).
+      for (let attempt = 0; attempt < 5 && !(await drawn(page)); attempt += 1) {
+        await page.evaluate(() => document.querySelector('.app-page--editor').dispatchEvent(new CustomEvent('dslkit:run', { bubbles: true })));
+        await settle(page);
+      }
       await new Promise((resolve) => setTimeout(resolve, 350));
       const base = `${out}/${lang}-${engine}-${notation}`;
       await page.mouse.move(5, 5);

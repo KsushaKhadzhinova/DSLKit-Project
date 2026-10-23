@@ -215,6 +215,7 @@ test('a failure removes the drawing of the earlier run instead of leaving it nex
   await flush();
   assert.equal($('.canvas__remote').hidden, true);
   assert.equal($('.canvas__remote svg'), null);
+  assert.equal($('.canvas__diagram').hasAttribute('hidden'), true);
   assert.match($('.canvas__status').textContent, /500|сервер/i);
 });
 
@@ -348,7 +349,7 @@ const useEngine = (storage, engine) => storage.set('settings', { 'diagram-engine
 test('each Kroki engine sends its own text type to its own endpoint', async () => {
   for (const [engine, pattern] of [
     ['graphviz', /^digraph/],
-    ['mermaid', /^flowchart LR/],
+    ['mermaid', /^%%.init: .*htmlLabels.*flowchart LR/s],
     ['plantuml', /^@startuml/],
   ]) {
     const storage = memory();
