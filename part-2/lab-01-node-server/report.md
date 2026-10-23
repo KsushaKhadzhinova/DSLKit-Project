@@ -18,7 +18,7 @@
 
 ### 3.1 Предметная область и маршруты
 
-Для DSLKit коллекцией выбрана `diagrams`. Диаграмма содержит поля `title` (название), `notation` (нотация: UML, BPMN, ERD, DFD, IDEF0 или Petri), `sourceCode` (текст диаграммы на языке DSL), `priority` (`low`, `normal` или `high`) и `owner` (владелец). Идентификатор `id` назначает сервер. Маршруты, коды ответов и примеры показаны в таблице 1.
+Для DSLKit коллекцией выбрана `diagrams`. Диаграмма содержит поля `title` (название), `notation` (нотация: UML, BPMN, ERD, DFD, IDEF0 или Petri), `sourceCode` (текст диаграммы на языке DSL), `priority` (`low`, `normal` или `high`) и `owner` (владелец). Идентификатор `id` и время создания `createdAt` назначает сервер. Маршруты, коды ответов и примеры показаны в таблице 1.
 
 Таблица 1 – Маршруты API ресурса diagrams
 
@@ -28,6 +28,7 @@
 | GET    | `/diagrams/:id` | 200, объект                                  | 400 неверный id, 404 нет диаграммы            | `GET /diagrams/1`              |
 | POST   | `/diagrams`     | 201, созданный объект и заголовок `Location` | 400 неверные данные или JSON                  | `POST /diagrams` с телом JSON  |
 | PUT    | `/diagrams/:id` | 200, обновлённый объект                      | 400 неверный id или данные, 404 нет диаграммы | `PUT /diagrams/1` с телом JSON |
+| PATCH  | `/diagrams/:id` | 200, объект с изменёнными полями             | 400 неверный id, данные или пустое тело, 404  | `PATCH /diagrams/1` с одним полем |
 | DELETE | `/diagrams/:id` | 204, тело пустое                             | 400 неверный id, 404 нет диаграммы            | `DELETE /diagrams/2`           |
 | любой  | другой путь     | нет                                          | 404 в формате JSON                            | `GET /projects`                |
 
@@ -52,15 +53,15 @@
 
 Данные хранятся в массиве внутри функции `createDiagramStore`, которая возвращает методы `findAll`, `findById`, `create`, `replace` и `remove`. Счётчик идентификаторов растёт и не использует номера удалённых записей повторно. Хранилище передаётся в `createApp` параметром, поэтому тесты получают чистые данные, а при подключении базы данных меняется только модель, но не маршруты. При запуске в хранилище лежат две учебные диаграммы.
 
-Обработчики не проверяют данные сами. Разбор адреса и тела вынесен в `validate.js`: `parseId` принимает только положительное целое число, а `validateDiagram` проверяет, что тело это объект, что `title`, `sourceCode` и `owner` непустые строки, а `notation` и `priority` входят в допустимые списки. Поле `priority` необязательно и по умолчанию равно `normal`. Лишние поля отбрасываются, поэтому клиент не может записать произвольные ключи или задать `id`. Метод `PUT` заменяет диаграмму целиком и требует те же поля, что и `POST`. Частичное обновление `PATCH` не реализовано, потому что условие его не требует.
+Обработчики не проверяют данные сами. Разбор адреса и тела вынесен в `validate.js`: `parseId` принимает только положительное целое число, а `validateDiagram` проверяет, что тело это объект, что `title`, `sourceCode` и `owner` непустые строки, а `notation` и `priority` входят в допустимые списки. Поле `priority` необязательно и по умолчанию равно `normal`. Лишние поля отбрасываются, поэтому клиент не может записать произвольные ключи или задать `id`. Метод `PUT` заменяет диаграмму целиком и требует те же поля, что и `POST`. Метод `PATCH` меняет только присланные поля и оставляет остальные прежними, причём каждое присланное поле проверяется теми же правилами, а тело без единого известного поля даёт 400. Время создания `createdAt` сервер ставит при создании записи в формате ISO 8601. Оно уникально у каждой записи: если две записи созданы в одну миллисекунду, вторая получает значение на миллисекунду позже. Клиент не может его задать, а `PUT` и `PATCH` его не меняют. По нему можно сортировать список.
 
 ### 3.4 Обработка ошибок
 
-Все ошибки возвращаются в одном формате `{ "error": "сообщение" }`, а для неверных данных добавляется массив `details` с именем поля и причиной. Обработчики сообщают об ошибке вызовом `next(error)` с объектом `HttpError`, а глобальный обработчик из `error-handler.js` превращает его в ответ. Он же переводит ошибку разбора JSON в 400 с понятным сообщением, а любой непредвиденный сбой в 500 с общим текстом: подробности пишутся в журнал сервера и не доходят до клиента. Запрос к неизвестному пути получает 404 в формате JSON, а не страницу по умолчанию. Метод, которого нет у маршрута, например `PATCH`, получает 405 с заголовком `Allow`. Идентификатор принимается только в виде десятичных цифр без ведущего нуля, поэтому значения вроде `0x1`, `1e0` и `01` дают 400. Повторное удаление уже удалённой диаграммы даёт 404, потому что ресурса больше нет.
+Все ошибки возвращаются в одном формате `{ "error": "сообщение" }`, а для неверных данных добавляется массив `details` с именем поля и причиной. Обработчики сообщают об ошибке вызовом `next(error)` с объектом `HttpError`, а глобальный обработчик из `error-handler.js` превращает его в ответ. Он же переводит ошибку разбора JSON в 400 с понятным сообщением, а любой непредвиденный сбой в 500 с общим текстом: подробности пишутся в журнал сервера и не доходят до клиента. Запрос к неизвестному пути получает 404 в формате JSON, а не страницу по умолчанию. Метод, которого нет у маршрута, например `POST` для `/diagrams/:id`, получает 405 с заголовком `Allow`. Идентификатор принимается только в виде десятичных цифр без ведущего нуля, поэтому значения вроде `0x1`, `1e0` и `01` дают 400. Повторное удаление уже удалённой диаграммы даёт 404, потому что ресурса больше нет.
 
 ### 3.5 Проверка
 
-Запросы проверены через `curl` и файл `requests.http` для расширения REST Client в VS Code, а затем зафиксированы автоматическими тестами. Тесты используют встроенный модуль `node:test` и настоящие HTTP-запросы к серверу на свободном порту. Всего 18 тестов: чтение списка и одной диаграммы, создание с проверкой заголовка `Location`, значение приоритета по умолчанию, отбрасывание лишних полей, ошибки данных, неверный и повреждённый JSON, замена, удаление с повторным удалением, запрет посторонних значений id, игнорирование id в теле запроса, превышение размера тела с кодом 413, неподдерживаемые методы с кодом 405, неизвестный маршрут и сбой с кодом 500. Результаты реальных запросов приведены в таблице 3.
+Запросы проверены через `curl` и файл `requests.http` для расширения REST Client в VS Code, а затем зафиксированы автоматическими тестами. Тесты используют встроенный модуль `node:test` и настоящие HTTP-запросы к серверу на свободном порту. Всего 64 теста: 35 в файле `diagrams.test.js` (чтение списка и одной диаграммы, время создания и его уникальность, частичное обновление `PATCH`, создание с проверкой заголовка `Location`, приоритет по умолчанию, отбрасывание лишних полей, ошибки данных, неверный и повреждённый JSON, замена, удаление с повторным удалением, запрет посторонних значений id, превышение размера тела с кодом 413, неподдерживаемые методы с кодом 405, пробельные и слишком длинные значения, тип содержимого с кодом 415, идемпотентность `PUT`, заголовки безопасности, неизвестный маршрут и сбой с кодом 500), 5 в `paging.test.js` (страницы и сортировка списка), 1 в `health.test.js` (проверка `/health`), 21 в `negative.test.js` (неверное поведение пользователя: глубокая вложенность, повторные ключи, `__proto__`, управляющие символы, огромное тело, параллельные запросы) и 2 в `report.test.mjs` (проверка текста отчёта). Результаты реальных запросов приведены в таблице 3.
 
 Таблица 3 – Результаты запросов к запущенному серверу
 
@@ -78,9 +79,89 @@
 
 Листинг файла server.js приведён в приложении А. Листинг файла app.js приведён в приложении Б. Листинг файла diagrams.routes.js приведён в приложении В. Листинг файла diagrams.controller.js приведён в приложении Г. Листинг файла diagram.model.js приведён в приложении Д. Листинг файла validate.js приведён в приложении Е. Листинг файла error-handler.js приведён в приложении Ж.
 
+Сервер запущен командой `npm start`, сообщение консоли показано на рисунке 1.
+
+![Консоль сервера](figures/01-server-start.png)
+
+Рисунок 1 – Сообщение консоли после запуска сервера на порту 3000 (вывод процесса, снятый как текст)
+
+Запрос `GET /diagrams` открыт в браузере по адресу `http://localhost:3000/diagrams`, ответ с двумя начальными диаграммами показан на рисунке 2.
+
+![Список диаграмм в браузере](figures/02-get-list.png)
+
+Рисунок 2 – Ответ GET /diagrams в окне браузера: массив из двух диаграмм с полем createdAt
+
+Одна запись по адресу `http://localhost:3000/diagrams/1` показана на рисунке 3.
+
+![Одна диаграмма в браузере](figures/03-get-one.png)
+
+Рисунок 3 – Ответ GET /diagrams/1 в окне браузера: объект одной диаграммы
+
+Запрос несуществующей записи по адресу `http://localhost:3000/diagrams/99` даёт ошибку, показанную на рисунке 4.
+
+![Ответ 404](figures/04-get-404.png)
+
+Рисунок 4 – Ответ GET /diagrams/99 в окне браузера: JSON с сообщением, что диаграмма не найдена (код 404)
+
+Неверный номер в адресе `http://localhost:3000/diagrams/abc` отклоняется, как на рисунке 5.
+
+![Ответ 400](figures/05-get-400.png)
+
+Рисунок 5 – Ответ GET /diagrams/abc в окне браузера: JSON с сообщением о неверном номере (код 400)
+
+Браузер не отправляет запросы `POST`, `PUT`, `PATCH` и `DELETE` из адресной строки, поэтому их отправил скрипт `shots/shots.mjs`, а настоящие запросы и ответы сервера выведены на странице. Создание, замена и частичное изменение показаны на рисунке 6.
+
+![Запросы POST, PUT и PATCH](figures/06-post-put-patch.png)
+
+Рисунок 6 – Запросы POST, PUT и PATCH и ответы сервера, записанные скриптом (не окно Postman)
+
+Ответы на неверные данные и пустое тело `PATCH` записаны тем же способом и показаны на рисунке 7.
+
+![Запросы с неверными данными](figures/07-validation-400.png)
+
+Рисунок 7 – Ответы 400 со списком проблем полей, записанные скриптом (не окно Postman)
+
+Удаление и повторное удаление той же записи показаны на рисунке 8.
+
+![Удаление записи](figures/08-delete-204-404.png)
+
+Рисунок 8 – Запросы DELETE: ответ 204 без тела и ответ 404 при повторе, записанные скриптом (не окно Postman)
+
+Результат команды `npm test` с числом тестов и покрытием кода показан на рисунке 9.
+
+![Результат тестов](figures/09-tests.png)
+
+Рисунок 9 – Конец вывода команды npm test: число пройденных тестов и таблица покрытия (вывод процесса, снятый как текст)
+
+### 3.6 Постраничный вывод и сортировка
+
+Список принимает параметры `limit`, `offset`, `sort` и `order`. Параметр `limit` задаёт размер страницы от 1 до 100, `offset` задаёт смещение от 0 до 1000000, `sort` выбирает поле из белого списка, а `order` принимает значения `asc` и `desc`. Без параметров возвращается весь список по возрастанию `id`, поэтому клиенты прежних работ продолжают работать. Ответ остаётся массивом, а полный размер выборки приходит в заголовке `X-Total-Count`. Числа читаются как строки не длиннее девяти цифр, поэтому значения `-1`, `1e9`, `0x10` и огромные числа получают ответ 400 со списком ошибок по полям. Имя поля сортировки проверяется по белому списку и не попадает в запрос к базе без проверки. Равные значения упорядочены по `id`, поэтому страницы не пересекаются. Разбор параметров вынесен в отдельный модуль, он приведён в приложении И. Параметр `notation` оставляет записи одной нотации, а параметр `q` ищет часть названия без учёта регистра. Недопустимое значение даёт ответ 400, а заголовок `X-Total-Count` считает отфильтрованный список.
+
+### 3.7 Ответы на контрольные вопросы
+
+9. Какие преимущества даёт использование nodemon в процессе разработки?
+
+   Nodemon следит за файлами проекта и сам перезапускает сервер после каждого сохранения, поэтому процесс не нужно останавливать и запускать вручную. Правка видна уже в следующем запросе, и цикл «изменил, проверил» становится короче. Пакет стоит как зависимость разработки и запускается командой `npm run dev`. В рабочем запуске его не применяют, там работает `npm start`, а перезапуск после сбоя берёт на себя менеджер процессов.
+
+10. В чём разница между методами PUT и PATCH? Какой из них вы реализовали и почему?
+
+    `PUT` заменяет ресурс целиком: клиент присылает все обязательные поля, а пропущенные необязательные получают значения по умолчанию. `PATCH` меняет только присланные поля, остальные остаются прежними. `PUT` идемпотентен, повтор того же запроса оставляет то же состояние. `PATCH` идемпотентным быть не обязан, например команда «увеличить на 1» при повторе меняет результат. В работе реализованы оба метода: `PUT` требуется условием, а `PATCH` добавлен для небольших правок, например смены приоритета, когда незачем пересылать весь текст диаграммы. Ни один из методов не меняет `id` и `createdAt`.
+
+11. Как можно добавить поддержку CORS в ваше приложение? (Теоретически)
+
+    По политике одного источника браузер не отдаёт странице ответ сервера с другого источника, то есть с другой схемой, доменом или портом, если сервер явно этого не разрешил. Разрешение даёт заголовок `Access-Control-Allow-Origin` с адресом клиента. Для запросов с методами вроде `PUT` или с заголовком `Content-Type: application/json` браузер сначала отправляет предварительный запрос `OPTIONS`, и сервер отвечает 204 с заголовками `Access-Control-Allow-Methods` и `Access-Control-Allow-Headers`. В Express это делает пакет `cors` или собственный обработчик из десяти строк, подключённый до маршрутов. Звёздочку нельзя сочетать с передачей cookie, а список разрешённых адресов лучше брать из переменной окружения. В этой работе клиент и сервер пока на одном адресе, поэтому CORS не включён.
+
+### 3.8 Архитектура и компромиссы
+
+Код разделён на слои: маршруты связывают адрес с функцией, контроллер решает, что ответить, модель хранит данные, а промежуточные обработчики проверяют ввод и превращают ошибки в единый ответ. Зависимости направлены в одну сторону. Маршрут знает контроллер, контроллер знает хранилище, а хранилище ничего не знает про HTTP. Это правило зависимостей из книги Роберта Мартина «Чистая архитектура»: внутренние слои не зависят от внешних, поэтому массив можно заменить базой данных, не трогая маршруты. Хранилище передаётся в `createApp` параметром, и тесты подставляют свежее для каждой проверки.
+
+Компромисс в том, что для учебного ресурса из одной сущности такая раскладка даёт больше файлов, чем нужно. Контроллер из шести функций можно было бы написать прямо в маршрутах. Слои оправданы тем, что в следующей работе массив заменяется базой данных. По Фаулеру («Шаблоны корпоративных приложений») это разделение на слои с отдельным слоем доступа к данным. Бизнес-правил в работе почти нет, поэтому отдельный слой сервисов не вводился, чтобы не усложнять код без пользы. Проверки вынесены в небольшие функции, а пределы лежат в файле `limits.json`. Так работает приём из «Рефакторинга» Фаулера: заменить «магическое число» именованной константой.
+
+Источники: Мартин Р. Чистая архитектура. Искусство разработки программного обеспечения. СПб.: Питер, 2018. Фаулер М. Шаблоны корпоративных приложений. М.: Вильямс, 2016. Фаулер М. Рефакторинг. Улучшение существующего кода. 2-е изд. СПб.: Питер, 2019.
+
 ## Заключение
 
-Для проекта DSLKit создан REST API ресурса `diagrams` на Express: пять маршрутов выполняют чтение списка и одной записи, создание, полную замену и удаление, данные временно лежат в массиве в памяти. Ошибки приводятся к единому формату JSON с кодами 400, 404 и 500 через глобальный обработчик, запуск в режиме разработки идёт через `nodemon`, а 18 автоматических тестов подтверждают поведение каждого маршрута. Структура с маршрутами, контроллерами и моделью позволит в следующей работе заменить массив базой данных без переписывания остального кода. Остаётся приложить скриншоты запросов из Postman или браузера.
+Для проекта DSLKit создан REST API ресурса `diagrams` на Express: шесть маршрутов выполняют чтение списка и одной записи, создание, полную замену, частичное обновление и удаление, у каждой записи есть уникальное время создания, данные временно лежат в массиве в памяти. Ошибки приводятся к единому формату JSON с кодами 400, 404 и 500 через глобальный обработчик, запуск в режиме разработки идёт через `nodemon`, а автоматические тесты подтверждают поведение каждого маршрута. Структура с маршрутами, контроллерами и моделью позволит в следующей работе заменить массив базой данных без переписывания остального кода. Запросы подтверждены снимками окна браузера и записью обмена, снятой скриптом.
 
 ## Приложение А (обязательное) Листинг файла server.js
 
@@ -95,7 +176,18 @@ try {
 
 const port = Number(process.env.PORT) || 3000;
 
-createApp().listen(port, () => console.log(`Server running on http://localhost:${port}`));
+const server = createApp().listen(port, () => console.log(`Server running on http://localhost:${port}`));
+
+// Graceful stop: no new connections, requests in flight finish, then the process ends. A hung connection cannot block the exit for long.
+const SHUTDOWN_GRACE_MS = 5000;
+const stop = (signal) => {
+  console.log(`${signal} received, closing the server`);
+  server.close(() => process.exit(0));
+  server.closeIdleConnections();
+  setTimeout(() => process.exit(1), SHUTDOWN_GRACE_MS).unref();
+};
+process.on('SIGINT', () => stop('SIGINT'));
+process.on('SIGTERM', () => stop('SIGTERM'));
 ```
 
 ## Приложение Б (обязательное) Листинг файла app.js
@@ -105,11 +197,19 @@ const express = require('express');
 const { createDiagramStore } = require('./models/diagram.model');
 const { createDiagramsController } = require('./controllers/diagrams.controller');
 const { createDiagramsRouter } = require('./routes/diagrams.routes');
+const { securityHeaders, requireJson } = require('./middleware/http');
+const { LIMITS } = require('./models/diagram.model');
 const { routeNotFound, errorHandler } = require('./middleware/error-handler');
 
 const createApp = (store = createDiagramStore()) => {
   const app = express();
-  app.use(express.json());
+  app.disable('x-powered-by');
+  app.use(securityHeaders);
+  // Liveness probe for Docker and load balancers.
+  app.get('/health', (req, res) => res.json({ status: 'ok' }));
+  // The limit is set explicitly (limits.json), so it does not change with the library default.
+  app.use(express.json({ limit: LIMITS.bodyBytes }));
+  app.use(requireJson);
   app.use('/diagrams', createDiagramsRouter(createDiagramsController(store)));
   app.use(routeNotFound);
   app.use(errorHandler);
@@ -123,23 +223,23 @@ module.exports = { createApp };
 
 ```js
 const { Router } = require('express');
-const { HttpError } = require('../errors');
-const { parseId, validateDiagram } = require('../middleware/validate');
-
-const methodNotAllowed = (allow) => (_req, res, next) => {
-  res.set('Allow', allow);
-  next(new HttpError(405, `Method not allowed, use ${allow}`));
-};
+const { parseId, validateDiagram, validatePartial } = require('../middleware/validate');
+const { allowMethods } = require('../middleware/http');
 
 const createDiagramsRouter = (controller) => {
   const router = Router();
-  router.route('/').get(controller.list).post(validateDiagram, controller.create).all(methodNotAllowed('GET, POST'));
+  router
+    .route('/')
+    .get(controller.list)
+    .post(validateDiagram, controller.create)
+    .all(allowMethods(['GET', 'POST']));
   router
     .route('/:id')
     .get(parseId, controller.get)
     .put(parseId, validateDiagram, controller.replace)
+    .patch(parseId, validatePartial, controller.update)
     .delete(parseId, controller.remove)
-    .all(methodNotAllowed('GET, PUT, DELETE'));
+    .all(allowMethods(['GET', 'PUT', 'PATCH', 'DELETE']));
   return router;
 };
 
@@ -150,11 +250,30 @@ module.exports = { createDiagramsRouter };
 
 ```js
 const { notFound } = require('../errors');
+const { parseListQuery } = require('../middleware/list-query');
+const { NOTATIONS, LIMITS } = require('../models/diagram.model');
 
 const missing = (id) => notFound(`Diagram ${id} not found`);
 
+const SORTABLE = ['id', 'title', 'notation', 'priority', 'owner', 'createdAt'];
+
+// Numbers compare as numbers, text with the locale rules, equal values keep the order of ids.
+const byField = (sort, order) => (a, b) => {
+  const result = typeof a[sort] === 'number' ? a[sort] - b[sort] : String(a[sort]).localeCompare(String(b[sort]));
+  return (order === 'desc' ? -result : result) || a.id - b.id;
+};
+
 const createDiagramsController = (store) => ({
-  list: (_req, res) => res.json(store.findAll()),
+  // ?limit=&offset=&sort=&order=&notation=&q= (see list-query.js). The answer stays an array, the size of the filtered list comes in X-Total-Count.
+  list: (req, res) => {
+    const { limit, offset, sort, order, notation, q } = parseListQuery(req.query, SORTABLE, { notations: NOTATIONS, maxQuery: LIMITS.title });
+    const all = store
+      .findAll()
+      .filter((d) => (notation === undefined || d.notation === notation) && (q === undefined || d.title.toLowerCase().includes(q)))
+      .sort(byField(sort, order));
+    res.set('X-Total-Count', String(all.length));
+    res.json(all.slice(offset, limit === undefined ? undefined : offset + limit));
+  },
 
   get: (req, res, next) => {
     const diagram = store.findById(req.diagramId);
@@ -171,6 +290,11 @@ const createDiagramsController = (store) => ({
     return diagram ? res.json(diagram) : next(missing(req.diagramId));
   },
 
+  update: (req, res, next) => {
+    const diagram = store.update(req.diagramId, req.diagramFields);
+    return diagram ? res.json(diagram) : next(missing(req.diagramId));
+  },
+
   remove: (req, res, next) => (store.remove(req.diagramId) ? res.status(204).end() : next(missing(req.diagramId))),
 });
 
@@ -180,6 +304,9 @@ module.exports = { createDiagramsController };
 ## Приложение Д (обязательное) Листинг файла diagram.model.js
 
 ```js
+// Length limits live in limits.json, so they are not scattered over the code.
+const LIMITS = require('../../limits.json');
+
 const NOTATIONS = ['UML', 'BPMN', 'ERD', 'DFD', 'IDEF0', 'Petri'];
 const PRIORITIES = ['low', 'normal', 'high'];
 const DEFAULT_PRIORITY = 'normal';
@@ -192,9 +319,17 @@ const SEED = [
 const createDiagramStore = (initial = SEED) => {
   let nextId = 1;
   let diagrams = [];
+  let lastStamp = 0;
+
+  // Creation time as an ISO string. Every record gets a strictly later value than the previous one,
+  // even when two records are created in the same millisecond, so no two records look identical.
+  const stamp = () => {
+    lastStamp = Math.max(Date.now(), lastStamp + 1);
+    return new Date(lastStamp).toISOString();
+  };
 
   const create = (fields) => {
-    const diagram = { id: nextId, ...fields };
+    const diagram = { id: nextId, ...fields, createdAt: stamp() };
     nextId += 1;
     diagrams.push(diagram);
     return diagram;
@@ -209,7 +344,15 @@ const createDiagramStore = (initial = SEED) => {
     replace: (id, fields) => {
       const index = diagrams.findIndex((d) => d.id === id);
       if (index < 0) return undefined;
-      diagrams[index] = { id, ...fields };
+      // PUT replaces the fields, the creation time stays the one of the first save.
+      diagrams[index] = { id, ...fields, createdAt: diagrams[index].createdAt };
+      return diagrams[index];
+    },
+    // PATCH changes only the sent fields, everything else keeps its value.
+    update: (id, fields) => {
+      const index = diagrams.findIndex((d) => d.id === id);
+      if (index < 0) return undefined;
+      diagrams[index] = { ...diagrams[index], ...fields };
       return diagrams[index];
     },
     remove: (id) => {
@@ -220,23 +363,36 @@ const createDiagramStore = (initial = SEED) => {
   };
 };
 
-module.exports = { NOTATIONS, PRIORITIES, DEFAULT_PRIORITY, createDiagramStore };
+module.exports = { NOTATIONS, PRIORITIES, DEFAULT_PRIORITY, LIMITS, createDiagramStore };
 ```
 
 ## Приложение Е (обязательное) Листинг файла validate.js
 
 ```js
 const { badRequest } = require('../errors');
-const { NOTATIONS, PRIORITIES, DEFAULT_PRIORITY } = require('../models/diagram.model');
+const { NOTATIONS, PRIORITIES, DEFAULT_PRIORITY, LIMITS } = require('../models/diagram.model');
 
-const isText = (value) => typeof value === 'string' && value.trim() !== '';
+// Spaces of every kind plus zero-width characters (joiners, word joiner, BOM) look empty, so they count as empty.
+const INVISIBLE = /[\s​-‍⁠﻿]/g;
+// Control characters (NUL, bell, escape) are not text; a single-line field must not carry them.
+const CONTROL = /[\u0000-\u001F\u007F]/;
+
+// Text is checked after trimming, so a value of spaces is empty and the stored value is what was measured.
+const text =
+  (name, singleLine = false) =>
+  (v) => {
+    if (typeof v !== 'string' || v.replace(INVISIBLE, '') === '') return 'must be a non-empty string';
+    if (singleLine && CONTROL.test(v)) return 'must not contain control characters';
+    return v.trim().length <= LIMITS[name] || `must be at most ${LIMITS[name]} characters`;
+  };
+const TRIMMED = ['title', 'owner'];
 
 const checks = {
-  title: (v) => isText(v) || 'must be a non-empty string',
+  title: text('title', true),
   notation: (v) => NOTATIONS.includes(v) || `must be one of ${NOTATIONS.join(', ')}`,
-  sourceCode: (v) => isText(v) || 'must be a non-empty string',
+  sourceCode: text('sourceCode'),
   priority: (v) => PRIORITIES.includes(v) || `must be one of ${PRIORITIES.join(', ')}`,
-  owner: (v) => isText(v) || 'must be a non-empty string',
+  owner: text('owner', true),
 };
 
 const parseId = (req, _res, next) => {
@@ -247,11 +403,13 @@ const parseId = (req, _res, next) => {
   return next();
 };
 
+const isObject = (body) => body !== null && typeof body === 'object' && !Array.isArray(body);
+
 // POST and PUT both carry the whole diagram, so one validator serves both.
 // Priority is optional and falls back to the default; unknown fields are dropped.
 const validateDiagram = (req, _res, next) => {
   const body = req.body;
-  if (typeof body !== 'object' || Array.isArray(body)) {
+  if (!isObject(body)) {
     return next(badRequest('Request body must be a JSON object'));
   }
   const fields = { ...body, priority: body.priority ?? DEFAULT_PRIORITY };
@@ -260,11 +418,27 @@ const validateDiagram = (req, _res, next) => {
     .filter(({ result }) => result !== true)
     .map(({ field, result }) => ({ field, message: result }));
   if (details.length > 0) return next(badRequest('Invalid diagram data', details));
-  req.diagramFields = Object.fromEntries(Object.keys(checks).map((name) => [name, fields[name]]));
+  req.diagramFields = Object.fromEntries(Object.keys(checks).map((name) => [name, TRIMMED.includes(name) ? fields[name].trim() : fields[name]]));
   return next();
 };
 
-module.exports = { parseId, validateDiagram };
+// PATCH carries only the fields to change. Each sent field gets the same check as in POST and PUT,
+// missing fields are left alone, and a body without a single known field is refused.
+const validatePartial = (req, _res, next) => {
+  const body = req.body;
+  if (!isObject(body)) return next(badRequest('Request body must be a JSON object'));
+  const names = Object.keys(checks).filter((name) => Object.hasOwn(body, name));
+  if (names.length === 0) return next(badRequest(`Send at least one of: ${Object.keys(checks).join(', ')}`));
+  const details = names
+    .map((name) => ({ field: name, result: checks[name](body[name]) }))
+    .filter(({ result }) => result !== true)
+    .map(({ field, result }) => ({ field, message: result }));
+  if (details.length > 0) return next(badRequest('Invalid diagram data', details));
+  req.diagramFields = Object.fromEntries(names.map((name) => [name, TRIMMED.includes(name) ? body[name].trim() : body[name]]));
+  return next();
+};
+
+module.exports = { parseId, validateDiagram, validatePartial };
 ```
 
 ## Приложение Ж (обязательное) Листинг файла error-handler.js
@@ -275,7 +449,9 @@ const { notFound } = require('../errors');
 const routeNotFound = (req, _res, next) => next(notFound(`Route ${req.method} ${req.path} not found`));
 
 // Express treats a function with four parameters as error-handling middleware.
-const errorHandler = (err, _req, res, _next) => {
+const errorHandler = (err, _req, res, next) => {
+  // Once the response has started, only Express can close the connection properly.
+  if (res.headersSent) return next(err);
   const malformedJson = err.type === 'entity.parse.failed';
   const status = malformedJson ? 400 : (err.status ?? 500);
   if (status >= 500) console.error(err);
@@ -283,8 +459,65 @@ const errorHandler = (err, _req, res, _next) => {
     error: status >= 500 ? 'Internal server error' : malformedJson ? 'Malformed JSON in request body' : err.message,
   };
   if (err.details) body.details = err.details;
-  res.status(status).json(body);
+  return res.status(status).json(body);
 };
 
 module.exports = { routeNotFound, errorHandler };
+```
+
+## Приложение И (обязательное) Листинг файла list-query.js
+
+```js
+const { badRequest } = require('../errors');
+
+// Limits of the list query. The page size is capped so one request cannot ask for the whole table,
+// and the numbers are read as short digit strings, so 1e9, -1, 0x10 or a huge value are refused with 400.
+const MAX_LIMIT = 100;
+const MAX_OFFSET = 1000000;
+const ORDERS = ['asc', 'desc'];
+
+// Reads ?limit=, ?offset=, ?sort=, ?order=, ?notation= and ?q= from req.query.
+// sortable: the field names a client may sort by (a whitelist, so a field name never reaches the database unchecked).
+// Without limit the whole list is returned (the clients of the earlier labs expect that), without sort the order is by id.
+// A bad value throws the 400 error with the list of problems, Express 5 passes it to the error handler.
+// filters: { notations: allowed values of ?notation=, maxQuery: longest ?q= }. ?q= is a case-insensitive part of the title.
+const parseListQuery = (query, sortable, filters = {}) => {
+  const problems = [];
+  const integer = (name, min, max) => {
+    const value = query[name];
+    if (value === undefined) return undefined;
+    if (typeof value !== 'string' || !/^\d{1,9}$/.test(value) || Number(value) < min || Number(value) > max) {
+      problems.push({ field: name, message: `${name} must be an integer from ${min} to ${max}` });
+      return undefined;
+    }
+    return Number(value);
+  };
+  const limit = integer('limit', 1, MAX_LIMIT);
+  const offset = integer('offset', 0, MAX_OFFSET) ?? 0;
+
+  const sort = query.sort ?? 'id';
+  if (typeof sort !== 'string' || !sortable.includes(sort)) {
+    problems.push({ field: 'sort', message: `sort must be one of: ${sortable.join(', ')}` });
+  }
+  const order = typeof query.order === 'string' ? query.order.toLowerCase() : (query.order ?? 'asc');
+  if (!ORDERS.includes(order)) problems.push({ field: 'order', message: 'order must be asc or desc' });
+
+  const { notations = [], maxQuery = 80 } = filters;
+  let notation;
+  if (query.notation !== undefined) {
+    if (typeof query.notation !== 'string' || !notations.includes(query.notation)) problems.push({ field: 'notation', message: `notation must be one of: ${notations.join(', ')}` });
+    else notation = query.notation;
+  }
+  let q;
+  if (query.q !== undefined) {
+    const text = typeof query.q === 'string' ? query.q.trim() : '';
+    if (text === '' || text.length > maxQuery) problems.push({ field: 'q', message: `q must be text of 1 to ${maxQuery} characters` });
+    else q = text.toLowerCase();
+  }
+
+  if (problems.length) throw badRequest('Invalid list query', problems);
+  return { limit, offset, sort, order, notation, q };
+};
+
+module.exports = { parseListQuery, MAX_LIMIT, MAX_OFFSET };
 ```
