@@ -26,6 +26,7 @@ export const openRequestLog = (file = ':memory:') => {
       statements = {
         insert: opened.prepare('INSERT INTO request_log (created_at, method, url) VALUES (?, ?, ?)'),
         finish: opened.prepare('UPDATE request_log SET status = ?, duration_ms = ? WHERE id = ?'),
+        clear: opened.prepare('DELETE FROM request_log'),
         recent: opened.prepare('SELECT id, created_at AS time, method, url, status, duration_ms AS ms FROM request_log ORDER BY id DESC LIMIT ?'),
       };
     } catch (error) {
@@ -38,6 +39,8 @@ export const openRequestLog = (file = ':memory:') => {
   return {
     start: ({ time, method, url }) => Number(connect().insert.run(time, method, url).lastInsertRowid),
     finish: (id, status, ms) => connect().finish.run(status, ms, id),
+    // Removes every row and returns how many were removed.
+    clear: () => Number(connect().clear.run().changes),
     recent: (limit) =>
       connect()
         .recent.all(limit)

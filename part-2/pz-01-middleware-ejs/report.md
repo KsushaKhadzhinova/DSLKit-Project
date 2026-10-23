@@ -66,6 +66,8 @@ Middleware `fakeAuth` проверяет параметр `?auth=1`. Если о
 
 На детальной странице вошедший пользователь видит кнопки «Edit» и «Delete». Изменение открывает ту же форму, что и добавление, но уже заполненную текущими значениями, и проверяет поля теми же правилами. Удаление сделано не ссылкой, а формой с методом `POST`, потому что ссылка по адресу `GET` не должна менять данные. В обеих формах стоит скрытое поле `_csrf`, без него сервер отвечает 403, а гость переходит на страницу входа. Номер записи после удаления не используется повторно. Листинг шаблона item.ejs приведён в приложении К.
 
+Страница журнала запросов содержит кнопку «Очистить журнал». Это форма с методом POST и скрытым полем CSRF, а не ссылка. Гость при такой попытке перенаправляется на страницу входа, запрос без токена получает ответ 403, а у вошедшего пользователя таблица `request_log` очищается.
+
 ### 3.5 Страница 500 и порядок обработчиков
 
 Страница 500 показывается, когда запрос завершился ошибкой сервера. Обработчик ошибок имеет четыре параметра и подключён после всех маршрутов и всех middleware, поэтому любое исключение, будь то сбой записи в журнал, ошибка маршрута или сломанное тело запроса, попадает именно в него. Обработчик записывает ошибку в журнал ошибок, выбирает код ответа и рендерит шаблон `500.ejs` в общем оформлении сайта: с шапкой, подвалом и таблицей стилей. Если у ошибки есть собственный код, например 413 для слишком большой формы, он сохраняется, а страница получает собственный заголовок, например «Request too large». Если ошибку вызвала недоступная база журнала, на странице появляется понятное пояснение. Для сбоя до имитации авторизации обработчик сам подставляет гостя, чтобы шапка отрисовалась. Если даже шаблон 500 не удалось отрисовать, отправляется запасная страница с тем же оформлением, поэтому пользователь никогда не видит голый текст на чёрном фоне. Страницу 500 вызывает настоящий сбой, а не кнопка. Чтобы показать её на защите, запустите сервер командой `DB_FILE=package.json/blocked/log.db npm start`: файл базы нельзя создать, поэтому любой запрос заканчивается страницей 500. Второй способ состоит в остановке базы во время работы сервера. Страница 404 устроена так же и подключена перед обработчиком 500. Листинг приведён в приложении Г.
@@ -249,6 +251,7 @@ export const openRequestLog = (file = ':memory:') => {
       statements = {
         insert: opened.prepare('INSERT INTO request_log (created_at, method, url) VALUES (?, ?, ?)'),
         finish: opened.prepare('UPDATE request_log SET status = ?, duration_ms = ? WHERE id = ?'),
+        clear: opened.prepare('DELETE FROM request_log'),
         recent: opened.prepare('SELECT id, created_at AS time, method, url, status, duration_ms AS ms FROM request_log ORDER BY id DESC LIMIT ?'),
       };
     } catch (error) {
@@ -261,6 +264,8 @@ export const openRequestLog = (file = ':memory:') => {
   return {
     start: ({ time, method, url }) => Number(connect().insert.run(time, method, url).lastInsertRowid),
     finish: (id, status, ms) => connect().finish.run(status, ms, id),
+    // Removes every row and returns how many were removed.
+    clear: () => Number(connect().clear.run().changes),
     recent: (limit) =>
       connect()
         .recent.all(limit)
@@ -611,6 +616,12 @@ export const createApp = ({
 
   app.get('/login', (req, res) => res.render('login', { title: 'Sign in' }));
   app.get('/log', requireAuth, (req, res) => res.render('log', { title: 'Request log', rows: log.recent(limits.logRows) }));
+
+  // Clearing the log changes data, so it needs the simulated sign-in and the CSRF token, and it is a form, not a link.
+  app.post('/log/clear', requireAuth, (req, res) => {
+    log.clear();
+    return res.redirect(`/log${res.locals.authQuery}`);
+  });
 
   app.use(notFound);
   app.use(serverError(writeError));

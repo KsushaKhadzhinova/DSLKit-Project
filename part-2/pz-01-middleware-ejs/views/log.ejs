@@ -2,6 +2,10 @@
 <section class="section" aria-labelledby="page-title">
   <h1 class="section__title" id="page-title">Request log</h1>
   <p class="section__lead">The last <%= rows.length %> rows of the <code>request_log</code> table in the database.</p>
+  <form method="post" action="/log/clear<%= authQuery %>" class="actions">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+    <button class="button button--quiet button--danger" type="submit">Clear the log</button>
+  </form>
   <div class="table-wrap">
     <table class="table">
       <thead>

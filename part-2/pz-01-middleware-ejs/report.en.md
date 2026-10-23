@@ -66,6 +66,8 @@ The templates print every value with escaping, so markup typed into the form is 
 
 On the detail page a signed-in user sees the buttons "Edit" and "Delete". Editing opens the same form as adding, but filled with the current values, and checks the fields with the same rules. Deleting is a form with the `POST` method rather than a link, because a link opened with `GET` must not change data. Both forms carry the hidden `_csrf` field, without it the server answers 403, and a guest goes to the sign-in page. The id of a deleted record is never reused. Listing of the item.ejs template is given in appendix J.
 
+The request log page has a "Clear the log" button. It is a form with the POST method and a hidden CSRF field, not a link. A guest who tries it is redirected to the login page, a request without the token gets 403, and for a signed-in user the `request_log` table is emptied.
+
 ### 3.5 The 500 page and the order of handlers
 
 The 500 page is shown when a request ends with a server error. The error handler has four parameters and is mounted after all routes and all middleware, so any exception, whether a log write failure, a route error or a broken request body, reaches it. The handler writes the error to the error log, chooses the status code and renders the `500.ejs` template in the common site design: with the header, the footer and the style sheet. When the error carries its own code, for example 413 for an oversized form, the code is kept and the page gets its own heading, for example "Request too large". When the error comes from an unavailable log database, the page shows a clear explanation. For a failure before the simulated authorization the handler supplies a guest itself so that the header can be drawn. If even the 500 template fails to render, a fallback page with the same styling is sent, so the user never sees bare text on a black background. The 500 page is caused by a real failure, not by a button. To show it at the defence, start the server with `DB_FILE=package.json/blocked/log.db npm start`: the database file cannot be created, so every request ends with the 500 page. The second way is to stop the database while the server is running. The 404 page works the same way and is mounted before the 500 handler. Appendix D holds the listing.
@@ -249,6 +251,7 @@ export const openRequestLog = (file = ':memory:') => {
       statements = {
         insert: opened.prepare('INSERT INTO request_log (created_at, method, url) VALUES (?, ?, ?)'),
         finish: opened.prepare('UPDATE request_log SET status = ?, duration_ms = ? WHERE id = ?'),
+        clear: opened.prepare('DELETE FROM request_log'),
         recent: opened.prepare('SELECT id, created_at AS time, method, url, status, duration_ms AS ms FROM request_log ORDER BY id DESC LIMIT ?'),
       };
     } catch (error) {
@@ -261,6 +264,8 @@ export const openRequestLog = (file = ':memory:') => {
   return {
     start: ({ time, method, url }) => Number(connect().insert.run(time, method, url).lastInsertRowid),
     finish: (id, status, ms) => connect().finish.run(status, ms, id),
+    // Removes every row and returns how many were removed.
+    clear: () => Number(connect().clear.run().changes),
     recent: (limit) =>
       connect()
         .recent.all(limit)
@@ -611,6 +616,12 @@ export const createApp = ({
 
   app.get('/login', (req, res) => res.render('login', { title: 'Sign in' }));
   app.get('/log', requireAuth, (req, res) => res.render('log', { title: 'Request log', rows: log.recent(limits.logRows) }));
+
+  // Clearing the log changes data, so it needs the simulated sign-in and the CSRF token, and it is a form, not a link.
+  app.post('/log/clear', requireAuth, (req, res) => {
+    log.clear();
+    return res.redirect(`/log${res.locals.authQuery}`);
+  });
 
   app.use(notFound);
   app.use(serverError(writeError));

@@ -122,6 +122,12 @@ export const createApp = ({
   app.get('/login', (req, res) => res.render('login', { title: 'Sign in' }));
   app.get('/log', requireAuth, (req, res) => res.render('log', { title: 'Request log', rows: log.recent(limits.logRows) }));
 
+  // Clearing the log changes data, so it needs the simulated sign-in and the CSRF token, and it is a form, not a link.
+  app.post('/log/clear', requireAuth, (req, res) => {
+    log.clear();
+    return res.redirect(`/log${res.locals.authQuery}`);
+  });
+
   app.use(notFound);
   app.use(serverError(writeError));
   return app;

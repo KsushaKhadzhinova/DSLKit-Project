@@ -228,3 +228,27 @@ withServer('GET /health answers ok with security headers and writes nothing to t
 withServer('/health is not limited by the rate limit', async ({ base }) => {
   for (let i = 0; i < 25; i += 1) assert.equal((await fetch(`${base}/health`)).status, 200);
 }, { ...loadLimits(), rateLimit: { all: { windowMs: 60000, max: 2 }, write: { windowMs: 60000, max: 2 } } });
+
+withServer('clearing the log needs the sign-in and the token, then empties the table', async ({ base, log }) => {
+  await fetch(`${base}/`);
+  assert.ok(log.recent(10).length > 0);
+  // A guest is sent to the login page and nothing is removed.
+  const guest = await post(`${base}/log/clear`, {}, { csrfToken: true });
+  assert.equal(guest.status, 302);
+  assert.match(guest.headers.get('location'), /\/login/);
+  assert.ok(log.recent(10).length > 0);
+  // Without the CSRF token the request is refused.
+  assert.equal((await post(`${base}/log/clear?auth=1`, {}, { csrfToken: false })).status, 403);
+  // A signed-in user with the token clears the table (the row of this very request may remain).
+  const ok = await post(`${base}/log/clear?auth=1`, {});
+  assert.equal(ok.status, 302);
+  assert.match(ok.headers.get('location'), /\/log\?auth=1/);
+  assert.ok(log.recent(10).every((row) => /log\/clear|^\/log/.test(row.url)));
+});
+
+withServer('the log page shows the clear button with a CSRF token', async ({ base }) => {
+  const html = await (await fetch(`${base}/log?auth=1`)).text();
+  assert.match(html, /action="\/log\/clear\?auth=1"/);
+  assert.match(html, /name="_csrf" value="[0-9a-f]+"/);
+  assert.match(html, /Clear the log/);
+});
