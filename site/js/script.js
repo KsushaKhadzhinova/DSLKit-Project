@@ -1,5 +1,6 @@
 import { initAccordion } from './components/accordion.js';
 import { initBurger } from './components/burger.js';
+import { initCanvasDrag } from './components/canvas-drag.js';
 import { initDashboard } from './components/dashboard.js';
 import { initDiagramRunner } from './components/diagram-runner.js';
 import { initEditor } from './components/editor.js';
@@ -25,6 +26,7 @@ export const COMPONENTS = [
   initExport,
   initImport,
   initTour,
+  initCanvasDrag,
   initDiagramRunner,
 ];
 

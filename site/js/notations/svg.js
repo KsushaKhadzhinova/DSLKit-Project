@@ -209,11 +209,40 @@ export const svgDocument = (width, height, title, body) =>
   `<rect width="${width}" height="${height}" fill="#ffffff"/>` +
   `${title ? `<text x="${MARGIN}" y="${MARGIN}" font-size="16" font-weight="700" fill="#0f172a">${escapeXml(title)}</text>` : ''}${body}</svg>`;
 
+const POSITION = /^(-?\d+(?:\.\d+)?)x(-?\d+(?:\.\d+)?)$/;
+const EDGE_OF_PAGE = 8;
+
+// The attribute pos=120x80 of a node: the place of its centre, written by the editor when a block is moved.
+export const parsePosition = (value) => {
+  const found = POSITION.exec(String(value ?? ''));
+  return found ? { x: Number(found[1]), y: Number(found[2]) } : null;
+};
+
+// A node with a position keeps it, whatever the automatic layout chose. The page grows to hold the moved nodes.
+const applyPositions = (placed, size) => {
+  let { width, height } = size;
+  placed.forEach((item) => {
+    const position = parsePosition(item.node.attrs?.pos);
+    if (!position) return;
+    item.x = Math.max(EDGE_OF_PAGE, position.x - item.w / 2);
+    item.y = Math.max(EDGE_OF_PAGE, position.y - item.h / 2);
+    item.cx = item.x + item.w / 2;
+    item.cy = item.y + item.h / 2;
+    width = Math.max(width, item.x + item.w + MARGIN);
+    height = Math.max(height, item.y + item.h + MARGIN);
+  });
+  return { width, height };
+};
+
 // size(node) -> {w, h, outline, lines}; draw(placedItem) -> SVG; style(edge) -> {start, end, dash}.
 export const renderLayout = ({ title, nodes, edges, size, draw, style, labelOf }) => {
   const known = edges.filter(({ from, to }) => nodes.some((n) => n.id === from) && nodes.some((n) => n.id === to));
-  const { placed, width, height } = layout(nodes, known, size);
-  const shapes = [...placed.values()].map((item) => `<g class="notation__node" data-id="${escapeXml(item.node.id)}">${draw(item)}</g>`).join('');
+  const laid = layout(nodes, known, size);
+  const { placed } = laid;
+  const { width, height } = applyPositions(placed, laid);
+  const shapes = [...placed.values()]
+    .map((item) => `<g class="notation__node" data-id="${escapeXml(item.node.id)}" data-cx="${round(item.cx)}" data-cy="${round(item.cy)}">${draw(item)}</g>`)
+    .join('');
   return svgDocument(width, height, title, edgeMarkup(placed, known, style, labelOf) + shapes);
 };
 

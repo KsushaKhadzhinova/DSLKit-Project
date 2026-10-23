@@ -1299,3 +1299,19 @@
 .editor-import__file {
   display: none;
 }
+
+/* Blocks of the own engine can be moved: a hand cursor, an outline for the keyboard and no scrolling while a finger drags */
+.canvas__remote .notation__node[data-cx] {
+  cursor: grab;
+  touch-action: none;
+}
+
+.canvas__remote .notation__node[data-cx]:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.canvas__remote .notation__node--dragging {
+  cursor: grabbing;
+  opacity: 0.8;
+}
