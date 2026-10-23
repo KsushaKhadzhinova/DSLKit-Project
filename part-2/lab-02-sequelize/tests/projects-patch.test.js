@@ -56,7 +56,7 @@ test('the revision defaults to 0 and is stored and returned as a number', async 
 
 test('a revision below 0, above the limit, fractional or not a number is refused with 400 everywhere', async () => {
   const id = (await makeDiagram()).id;
-  const bad = [-1, -0.5, 1.5, 100001, 1e20, 9007199254740993, '5', '', null, true, [], {}, 'abc'];
+  const bad = [-1, -0.5, 1.5, 100001, 1e20, 2 ** 53, '5', '', null, true, [], {}, 'abc'];
   for (const revision of bad) {
     for (const [method, path] of [
       ['POST', '/diagrams'],

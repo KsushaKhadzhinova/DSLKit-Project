@@ -33,7 +33,7 @@
 
 ## 3 Запуск
 
-Нужен Node.js 22 или новее. SQLite используется по умолчанию, PostgreSQL и Neon подключаются так же, как в лабораторной работе 2 (`DATABASE_URL`).
+Нужен Node.js 22 или новее. База данных PostgreSQL: локальный контейнер поднимается командой `docker compose up -d db` (пароль и `DATABASE_URL` в `.env`, образец в `.env.example`), Neon и Supabase подключаются через `DATABASE_URL` с `DATABASE_SSL=true`. SQLite остаётся только для тестов (`SQLITE_STORAGE`).
 
 ```bash
 cd part-2/lab-03-auth

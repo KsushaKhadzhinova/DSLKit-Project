@@ -135,9 +135,9 @@ Figure 9 – End of the npm test output: the number of passed tests and the cove
 
 ### 3.6 Paging and sorting
 
-The list accepts the `limit`, `offset`, `sort` and `order` parameters. `limit` sets the page size from 1 to 100, `offset` sets the shift from 0 to 1000000, `sort` picks a field from a whitelist and `order` takes `asc` or `desc`. Without parameters the whole list is returned in ascending `id` order, so the clients of the earlier works keep working. The answer stays an array and the full size of the selection comes in the `X-Total-Count` header. Numbers are read as strings of at most nine digits, so `-1`, `1e9`, `0x10` and huge numbers get a 400 answer with a list of errors by field. The sort field name is checked against the whitelist and never reaches the database query unchecked. Equal values are ordered by `id`, so pages do not overlap. Parsing of the parameters is moved to a separate module, it is given in Appendix H.
+The list accepts the `limit`, `offset`, `sort` and `order` parameters. `limit` sets the page size from 1 to 100, `offset` sets the shift from 0 to 1000000, `sort` picks a field from a whitelist and `order` takes `asc` or `desc`. Without parameters the whole list is returned in ascending `id` order, so the clients of the earlier works keep working. The answer stays an array and the full size of the selection comes in the `X-Total-Count` header. Numbers are read as strings of at most nine digits, so `-1`, `1e9`, `0x10` and huge numbers get a 400 answer with a list of errors by field. The sort field name is checked against the whitelist and never reaches the database query unchecked. Equal values are ordered by `id`, so pages do not overlap. Parsing of the parameters is moved to a separate module, it is given in Appendix H. The `notation` parameter keeps the records of one notation, and the `q` parameter searches a part of the title ignoring case. An invalid value gives 400, and the `X-Total-Count` header counts the filtered list.
 
-### 3.8 Answers to the control questions
+### 3.7 Answers to the control questions
 
 9. What advantages does nodemon give during development?
 
@@ -150,6 +150,14 @@ The list accepts the `limit`, `offset`, `sort` and `order` parameters. `limit` s
 11. How can CORS support be added to your application? (In theory)
 
     Under the same-origin policy a browser does not hand a page the response of a server on another origin, that is another scheme, domain or port, unless the server allows it explicitly. The permission comes from the `Access-Control-Allow-Origin` header with the client address. For methods such as `PUT` or for the header `Content-Type: application/json`, the browser first sends a preflight `OPTIONS` request, and the server answers 204 with the headers `Access-Control-Allow-Methods` and `Access-Control-Allow-Headers`. In Express the `cors` package does this, or a handler of ten lines mounted before the routes. A wildcard cannot be combined with cookies, and the list of allowed origins is better read from an environment variable. In this lab the client and the server share one address for now, so CORS is not enabled.
+
+### 3.8 Architecture and trade-offs
+
+The code is split into layers: routes connect a path to a function, the controller decides what to answer, the model keeps the data, and the middleware checks the input and turns errors into one response. Dependencies point one way. A route knows the controller, the controller knows the store, and the store knows nothing about HTTP. This is the dependency rule from Robert Martin's Clean Architecture: inner layers do not depend on outer ones, so the array can be replaced by a database without touching the routes. The store is passed to `createApp` as a parameter, and the tests give it a fresh one for every check.
+
+The trade-off is that for a teaching resource of one entity this layout gives more files than needed. A controller of six functions could be written right in the routes. The layers are justified by the next lab, where the array is replaced by a database. In Fowler's Patterns of Enterprise Application Architecture this is a split into layers with a separate data access layer. There are almost no business rules here, so a separate service layer was not introduced, to avoid complexity with no benefit. Checks live in small functions and the limits live in `limits.json`. This is a technique from Fowler's Refactoring: replace a magic number with a named constant.
+
+Sources: Martin R. Clean Architecture: A Craftsman's Guide to Software Structure and Design. Prentice Hall, 2017. Fowler M. Patterns of Enterprise Application Architecture. Addison-Wesley, 2002. Fowler M. Refactoring: Improving the Design of Existing Code, 2nd ed. Addison-Wesley, 2018.
 
 ## Conclusion
 
@@ -168,7 +176,18 @@ try {
 
 const port = Number(process.env.PORT) || 3000;
 
-createApp().listen(port, () => console.log(`Server running on http://localhost:${port}`));
+const server = createApp().listen(port, () => console.log(`Server running on http://localhost:${port}`));
+
+// Graceful stop: no new connections, requests in flight finish, then the process ends. A hung connection cannot block the exit for long.
+const SHUTDOWN_GRACE_MS = 5000;
+const stop = (signal) => {
+  console.log(`${signal} received, closing the server`);
+  server.close(() => process.exit(0));
+  server.closeIdleConnections();
+  setTimeout(() => process.exit(1), SHUTDOWN_GRACE_MS).unref();
+};
+process.on('SIGINT', () => stop('SIGINT'));
+process.on('SIGTERM', () => stop('SIGTERM'));
 ```
 
 ## Appendix B (mandatory) Listing of app.js
@@ -232,6 +251,7 @@ module.exports = { createDiagramsRouter };
 ```js
 const { notFound } = require('../errors');
 const { parseListQuery } = require('../middleware/list-query');
+const { NOTATIONS, LIMITS } = require('../models/diagram.model');
 
 const missing = (id) => notFound(`Diagram ${id} not found`);
 
@@ -244,10 +264,13 @@ const byField = (sort, order) => (a, b) => {
 };
 
 const createDiagramsController = (store) => ({
-  // ?limit=&offset=&sort=&order= (see list-query.js). The answer stays an array, the full size comes in X-Total-Count.
+  // ?limit=&offset=&sort=&order=&notation=&q= (see list-query.js). The answer stays an array, the size of the filtered list comes in X-Total-Count.
   list: (req, res) => {
-    const { limit, offset, sort, order } = parseListQuery(req.query, SORTABLE);
-    const all = [...store.findAll()].sort(byField(sort, order));
+    const { limit, offset, sort, order, notation, q } = parseListQuery(req.query, SORTABLE, { notations: NOTATIONS, maxQuery: LIMITS.title });
+    const all = store
+      .findAll()
+      .filter((d) => (notation === undefined || d.notation === notation) && (q === undefined || d.title.toLowerCase().includes(q)))
+      .sort(byField(sort, order));
     res.set('X-Total-Count', String(all.length));
     res.json(all.slice(offset, limit === undefined ? undefined : offset + limit));
   },
@@ -350,8 +373,9 @@ const { badRequest } = require('../errors');
 const { NOTATIONS, PRIORITIES, DEFAULT_PRIORITY, LIMITS } = require('../models/diagram.model');
 
 // Spaces of every kind plus zero-width characters (joiners, word joiner, BOM) look empty, so they count as empty.
-const INVISIBLE = /[\s​-‍⁠﻿]/g;
+const INVISIBLE = /[\s\u200B-\u200D\u2060\uFEFF]/g;
 // Control characters (NUL, bell, escape) are not text; a single-line field must not carry them.
+// eslint-disable-next-line no-control-regex
 const CONTROL = /[\u0000-\u001F\u007F]/;
 
 // Text is checked after trimming, so a value of spaces is empty and the stored value is what was measured.
@@ -453,11 +477,12 @@ const MAX_LIMIT = 100;
 const MAX_OFFSET = 1000000;
 const ORDERS = ['asc', 'desc'];
 
-// Reads ?limit=, ?offset=, ?sort= and ?order= from req.query.
+// Reads ?limit=, ?offset=, ?sort=, ?order=, ?notation= and ?q= from req.query.
 // sortable: the field names a client may sort by (a whitelist, so a field name never reaches the database unchecked).
 // Without limit the whole list is returned (the clients of the earlier labs expect that), without sort the order is by id.
 // A bad value throws the 400 error with the list of problems, Express 5 passes it to the error handler.
-const parseListQuery = (query, sortable) => {
+// filters: { notations: allowed values of ?notation=, maxQuery: longest ?q= }. ?q= is a case-insensitive part of the title.
+const parseListQuery = (query, sortable, filters = {}) => {
   const problems = [];
   const integer = (name, min, max) => {
     const value = query[name];
@@ -478,8 +503,21 @@ const parseListQuery = (query, sortable) => {
   const order = typeof query.order === 'string' ? query.order.toLowerCase() : (query.order ?? 'asc');
   if (!ORDERS.includes(order)) problems.push({ field: 'order', message: 'order must be asc or desc' });
 
+  const { notations = [], maxQuery = 80 } = filters;
+  let notation;
+  if (query.notation !== undefined) {
+    if (typeof query.notation !== 'string' || !notations.includes(query.notation)) problems.push({ field: 'notation', message: `notation must be one of: ${notations.join(', ')}` });
+    else notation = query.notation;
+  }
+  let q;
+  if (query.q !== undefined) {
+    const text = typeof query.q === 'string' ? query.q.trim() : '';
+    if (text === '' || text.length > maxQuery) problems.push({ field: 'q', message: `q must be text of 1 to ${maxQuery} characters` });
+    else q = text.toLowerCase();
+  }
+
   if (problems.length) throw badRequest('Invalid list query', problems);
-  return { limit, offset, sort, order };
+  return { limit, offset, sort, order, notation, q };
 };
 
 module.exports = { parseListQuery, MAX_LIMIT, MAX_OFFSET };

@@ -62,3 +62,28 @@ test('bad or huge values and unknown fields get 400 with the list of problems', 
     ['limit', 'sort', 'order'],
   );
 });
+
+test('?notation= keeps one notation and X-Total-Count counts the filtered list', async () => {
+  const { res, body } = await get('?notation=UML&limit=2');
+  assert.equal(body.length, 2);
+  assert.ok(body.every((d) => d.notation === 'UML'));
+  assert.equal(res.headers.get('x-total-count'), '5');
+  const none = await get('?notation=BPMN');
+  assert.deepEqual(none.body, []);
+  assert.equal(none.res.headers.get('x-total-count'), '0');
+});
+
+test('?q= finds a part of the title ignoring case and surrounding spaces', async () => {
+  const { res, body } = await get('?q=%20AL%20');
+  assert.deepEqual(titles(body), ['alpha']);
+  assert.equal(res.headers.get('x-total-count'), '1');
+  assert.deepEqual(titles((await get('?q=a&notation=UML&sort=title')).body), ['alpha', 'bravo', 'charlie', 'delta']);
+});
+
+test('a bad notation or search text is refused with 400 and a list of problems', async () => {
+  for (const query of ['?notation=XYZ', '?notation=', '?notation=UML&notation=ERD', '?q=', '?q=%20%20', `?q=${'a'.repeat(81)}`, '?q=a&q=b']) {
+    const { res, body } = await get(query);
+    assert.equal(res.status, 400, query);
+    assert.ok(body.details.length > 0, query);
+  }
+});
