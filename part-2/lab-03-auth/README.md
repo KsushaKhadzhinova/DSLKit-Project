@@ -84,3 +84,7 @@ curl -s http://localhost:3000/profile -H "Authorization: Bearer <token>"
 - SQLite: запустите `npm start`, во втором окне выполните `npx sequelize-cli db:migrate:undo:all`. Таблицы исчезают под работающим сервером, первый же запрос не может записать строку в журнал `RequestLogs` и получает 500 с телом `{ "error": "Internal server error" }`, подробности остаются только в консоли сервера. Вернуть работу: `npm run db:migrate` и `npm run db:seed`.
 - PostgreSQL (Neon, Supabase или локальный): остановите службу или контейнер базы, запросы дают 500, а `GET /health` отвечает 503.
 - Запуск при недоступной базе завершается с кодом 1 и сообщением, сервер не поднимается.
+
+## Проверка стиля
+
+`npm run lint` запускает ESLint. Конфигурация лежит в `eslint.config.js`.

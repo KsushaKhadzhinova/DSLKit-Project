@@ -606,7 +606,7 @@ const { badRequest } = require('../errors');
 const { NOTATIONS, PRIORITIES, DEFAULT_PRIORITY, LIMITS, MAX_ID } = require('../models/diagram.constants');
 
 // Spaces of every kind plus zero-width characters (joiners, word joiner, BOM) look empty, so they count as empty.
-const INVISIBLE = /[\s​-‍⁠﻿]/g;
+const INVISIBLE = /[\s\u200B-\u200D\u2060\uFEFF]/g;
 // Control characters (NUL, bell, escape) are not text; a single-line field must not carry them.
 const CONTROL = /[\u0000-\u001F\u007F]/;
 

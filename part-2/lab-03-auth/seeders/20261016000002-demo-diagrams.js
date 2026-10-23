@@ -12,7 +12,7 @@ const adminEmail = () => (process.env.ADMIN_EMAIL || '').trim().toLowerCase();
 // Diagrams need an owner: the seeded administrator and the demo users share the rows in turn, so ownership checks have data to work on.
 // Idempotent per row (owner and title): a present row is left alone, a deleted one comes back, nothing is duplicated.
 module.exports = {
-  async up(queryInterface, Sequelize) {
+  async up(queryInterface, _Sequelize) {
     const emails = [adminEmail(), ...DEMO_EMAILS].filter(Boolean);
     const owners = [];
     for (const email of emails) {
