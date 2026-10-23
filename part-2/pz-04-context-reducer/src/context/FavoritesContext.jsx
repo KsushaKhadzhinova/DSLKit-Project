@@ -1,9 +1,10 @@
-import { createContext, useContext, useEffect, useReducer } from 'react';
+import { createContext, useContext, useEffect, useMemo, useReducer } from 'react';
 import { TEMPLATES } from '../data/templates';
 import limits from '../limits.json';
 
 export const FAVORITES_KEY = 'dslkit.favorites';
 export const MAX_QTY = limits.maxQty;
+export const MAX_HISTORY = limits.maxHistory;
 
 // Quantity is always a whole number from 1 to MAX_QTY, anything else is replaced by the nearest valid value.
 export function clampQty(value) {
@@ -67,13 +68,36 @@ function loadFavorites() {
   }
 }
 
+// Undo and redo around any reducer: the state is { past, present, future }, the wrapped reducer only sees `present`.
+// An action that changes nothing (the reducer returns the same array) leaves no step in the history, a new change clears the redo steps.
+export const withHistory = (reducer, limit = MAX_HISTORY) => (state, action) => {
+  if (action?.type === 'UNDO') {
+    if (state.past.length === 0) return state;
+    return { past: state.past.slice(0, -1), present: state.past.at(-1), future: [state.present, ...state.future] };
+  }
+  if (action?.type === 'REDO') {
+    if (state.future.length === 0) return state;
+    return { past: [...state.past, state.present].slice(-limit), present: state.future[0], future: state.future.slice(1) };
+  }
+  const present = reducer(state.present, action);
+  if (present === state.present) return state;
+  return { past: [...state.past, state.present].slice(-limit), present, future: [] };
+};
+
+const favoritesWithHistory = withHistory(favoritesReducer);
+const initialHistory = () => ({ past: [], present: loadFavorites(), future: [] });
+
 // Two contexts: the data changes often, dispatch never changes.
 // A component that only sends actions subscribes to the second one and is not re-rendered when the data changes.
 const FavoritesStateContext = createContext(null);
 const FavoritesDispatchContext = createContext(null);
+// Whether undo and redo have a step: only the two buttons subscribe to it.
+const FavoritesHistoryContext = createContext(null);
 
 export function FavoritesProvider({ children }) {
-  const [favorites, dispatch] = useReducer(favoritesReducer, undefined, loadFavorites);
+  const [state, dispatch] = useReducer(favoritesWithHistory, undefined, initialHistory);
+  const favorites = state.present;
+  const history = useMemo(() => ({ canUndo: state.past.length > 0, canRedo: state.future.length > 0 }), [state.past.length, state.future.length]);
 
   useEffect(() => {
     try {
@@ -85,7 +109,9 @@ export function FavoritesProvider({ children }) {
 
   return (
     <FavoritesStateContext.Provider value={favorites}>
-      <FavoritesDispatchContext.Provider value={dispatch}>{children}</FavoritesDispatchContext.Provider>
+      <FavoritesDispatchContext.Provider value={dispatch}>
+        <FavoritesHistoryContext.Provider value={history}>{children}</FavoritesHistoryContext.Provider>
+      </FavoritesDispatchContext.Provider>
     </FavoritesStateContext.Provider>
   );
 }
@@ -97,4 +123,5 @@ const insideProvider = (value, hook) => {
 };
 
 export const useFavorites = () => insideProvider(useContext(FavoritesStateContext), 'useFavorites');
+export const useFavoritesHistory = () => insideProvider(useContext(FavoritesHistoryContext), 'useFavoritesHistory');
 export const useFavoritesDispatch = () => insideProvider(useContext(FavoritesDispatchContext), 'useFavoritesDispatch');

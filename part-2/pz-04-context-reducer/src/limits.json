@@ -1,3 +1,4 @@
 {
-  "maxQty": 99
+  "maxQty": 99,
+  "maxHistory": 20
 }

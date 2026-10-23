@@ -1,5 +1,5 @@
 import { TEMPLATES } from '../data/templates';
-import { MAX_QTY, useFavorites, useFavoritesDispatch } from '../context/FavoritesContext';
+import { MAX_QTY, useFavorites, useFavoritesDispatch, useFavoritesHistory } from '../context/FavoritesContext';
 import { useLanguage } from '../context/LanguageContext';
 
 function TemplateCard({ template }) {
@@ -52,6 +52,7 @@ export function FavoritesPanel() {
   const favorites = useFavorites();
   const dispatch = useFavoritesDispatch();
   const { language, t } = useLanguage();
+  const { canUndo, canRedo } = useFavoritesHistory();
   const chosen = TEMPLATES.flatMap((template) => {
     const item = favorites.find((entry) => entry.id === template.id);
     return item ? [{ template, qty: item.qty }] : [];
@@ -65,6 +66,14 @@ export function FavoritesPanel() {
           {t('count')}: {chosen.length}
         </span>
       </h2>
+      <p className="actions">
+        <button type="button" className="button button--small" disabled={!canUndo} onClick={() => dispatch({ type: 'UNDO' })}>
+          {t('undo')}
+        </button>
+        <button type="button" className="button button--small" disabled={!canRedo} onClick={() => dispatch({ type: 'REDO' })}>
+          {t('redo')}
+        </button>
+      </p>
       {chosen.length === 0 ? (
         <p className="empty">{t('empty')}</p>
       ) : (
