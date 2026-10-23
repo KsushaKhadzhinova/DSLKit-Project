@@ -65,6 +65,7 @@ Eight additional requirements from the task list and several security measures a
 7. **The `.dockerignore` file.** It excludes `node_modules`, tests, reports and `.env` from the build context.
 8. **Registry mirror.** For the Republic of Belarus the `REGISTRY` variable is provided: the value `mirror.gcr.io/` is put before the base image names in both Dockerfiles and in Compose. The build and the pull of the PostgreSQL image through this mirror succeeded, and in the main run the images came from Docker Hub directly. Instead of the variable, a mirror can be set for the whole Docker daemon in `daemon.json` with the key `"registry-mirrors": ["https://mirror.gcr.io", "https://dockerhub.timeweb.cloud"]`. At the last edit of the report the Docker daemon was not running on the author machine, so the stack was not started again and the figures come from the earlier run.
 9. **Resource limits and log rotation.** Every service has a memory limit (`mem_limit`), a process limit (`pids_limit`) and container log rotation (`max-size: 10m`, three files). One failing service cannot take all the memory and disk of the computer.
+10. **Optional pgAdmin and Redis.** Both services are described in `docker-compose.yml` under the profiles `tools` and `cache`, so the usual start does not raise them. The command `docker compose --profile tools up -d pgadmin` starts pgAdmin at `127.0.0.1:5050`, reachable only from this computer. Redis sits only in the internal network and opens no ports outside.
 
 The state of the stack is confirmed by figure 4: the `/health` answers through the proxy and directly, the networks and the volume of the project.
 
@@ -225,6 +226,43 @@ services:
     mem_limit: 128m
     pids_limit: 100
 
+  # Optional tools, off by default: docker compose --profile tools up -d pgadmin
+  pgadmin:
+    profiles: [tools]
+    image: ${REGISTRY:-}dpage/pgadmin4:8
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@example.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-}
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: 'False'
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      # Only this computer can open it, it is a tool for the developer.
+      - '127.0.0.1:${PGADMIN_PORT:-5050}:80'
+    networks: [internal, public]
+    logging: *logging
+    mem_limit: 512m
+    pids_limit: 200
+
+  # Optional cache, off by default: docker compose --profile cache up -d redis. The server does not use it yet.
+  redis:
+    profiles: [cache]
+    image: ${REGISTRY:-}library/redis:7-alpine
+    restart: unless-stopped
+    command: ['redis-server', '--save', '', '--appendonly', 'no']
+    networks: [internal]
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    logging: *logging
+    mem_limit: 128m
+    pids_limit: 100
+
 networks:
   # No access from outside: only the backend reaches the database.
   internal:
@@ -305,6 +343,12 @@ ADMIN_PASSWORD=
 # Ports on the host.
 FRONTEND_PORT=8080
 BACKEND_PORT=3000
+
+# Optional pgAdmin (docker compose --profile tools up -d pgadmin). Open http://localhost:5050, the server name is db.
+# The password is required for the tool to start, letters and digits.
+PGADMIN_EMAIL=admin@example.com
+PGADMIN_PASSWORD=
+PGADMIN_PORT=5050
 ```
 
 ## Appendix F (mandatory) Listing of the server app.js file with the /health route

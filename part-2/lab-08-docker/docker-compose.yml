@@ -78,6 +78,43 @@ services:
     mem_limit: 128m
     pids_limit: 100
 
+  # Optional tools, off by default: docker compose --profile tools up -d pgadmin
+  pgadmin:
+    profiles: [tools]
+    image: ${REGISTRY:-}dpage/pgadmin4:8
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@example.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-}
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: 'False'
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      # Only this computer can open it, it is a tool for the developer.
+      - '127.0.0.1:${PGADMIN_PORT:-5050}:80'
+    networks: [internal, public]
+    logging: *logging
+    mem_limit: 512m
+    pids_limit: 200
+
+  # Optional cache, off by default: docker compose --profile cache up -d redis. The server does not use it yet.
+  redis:
+    profiles: [cache]
+    image: ${REGISTRY:-}library/redis:7-alpine
+    restart: unless-stopped
+    command: ['redis-server', '--save', '', '--appendonly', 'no']
+    networks: [internal]
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    logging: *logging
+    mem_limit: 128m
+    pids_limit: 100
+
 networks:
   # No access from outside: only the backend reaches the database.
   internal:

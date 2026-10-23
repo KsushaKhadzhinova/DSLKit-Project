@@ -65,6 +65,7 @@
 7. **Файл `.dockerignore`.** Исключает `node_modules`, тесты, отчёты и `.env` из контекста сборки.
 8. **Зеркало реестра.** Для Республики Беларусь предусмотрена переменная `REGISTRY`: значение `mirror.gcr.io/` ставится перед именами базовых образов в обоих Dockerfile и в Compose. Сборка и загрузка образа PostgreSQL через это зеркало проверены, а в основном запуске образы скачивались с Docker Hub напрямую. Вместо переменной зеркало можно задать для всего демона Docker в `daemon.json` ключом `"registry-mirrors": ["https://mirror.gcr.io", "https://dockerhub.timeweb.cloud"]`. При последней правке отчёта демон Docker на компьютере автора не работал, поэтому стек повторно не запускался, а рисунки получены при прежнем запуске.
 9. **Лимиты ресурсов и ротация журналов.** У каждого сервиса заданы предел памяти (`mem_limit`), предел числа процессов (`pids_limit`) и ротация журналов контейнера (`max-size: 10m`, три файла). Один сбойный сервис не займёт всю память и диск компьютера.
+10. **Необязательные pgAdmin и Redis.** Оба сервиса описаны в `docker-compose.yml` под профилями `tools` и `cache`, поэтому обычный запуск их не поднимает. Команда `docker compose --profile tools up -d pgadmin` запускает pgAdmin на адресе `127.0.0.1:5050`, доступном только с этого компьютера. Redis стоит только во внутренней сети и портов наружу не открывает.
 
 Состояние стенда показано на рисунке 4: ответы `/health` через прокси и напрямую, сети и том проекта.
 
@@ -225,6 +226,43 @@ services:
     mem_limit: 128m
     pids_limit: 100
 
+  # Optional tools, off by default: docker compose --profile tools up -d pgadmin
+  pgadmin:
+    profiles: [tools]
+    image: ${REGISTRY:-}dpage/pgadmin4:8
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@example.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-}
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: 'False'
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      # Only this computer can open it, it is a tool for the developer.
+      - '127.0.0.1:${PGADMIN_PORT:-5050}:80'
+    networks: [internal, public]
+    logging: *logging
+    mem_limit: 512m
+    pids_limit: 200
+
+  # Optional cache, off by default: docker compose --profile cache up -d redis. The server does not use it yet.
+  redis:
+    profiles: [cache]
+    image: ${REGISTRY:-}library/redis:7-alpine
+    restart: unless-stopped
+    command: ['redis-server', '--save', '', '--appendonly', 'no']
+    networks: [internal]
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    logging: *logging
+    mem_limit: 128m
+    pids_limit: 100
+
 networks:
   # No access from outside: only the backend reaches the database.
   internal:
@@ -305,6 +343,12 @@ ADMIN_PASSWORD=
 # Ports on the host.
 FRONTEND_PORT=8080
 BACKEND_PORT=3000
+
+# Optional pgAdmin (docker compose --profile tools up -d pgadmin). Open http://localhost:5050, the server name is db.
+# The password is required for the tool to start, letters and digits.
+PGADMIN_EMAIL=admin@example.com
+PGADMIN_PASSWORD=
+PGADMIN_PORT=5050
 ```
 
 ## Приложение Е (обязательное) Листинг файла app.js сервера с маршрутом /health

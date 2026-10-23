@@ -25,16 +25,25 @@ test('the backend image installs production dependencies only, runs as the node 
 
 test('compose starts the services in order by health and keeps the data in a named volume', () => {
   assert.match(compose, /condition: service_healthy/g);
-  assert.equal((compose.match(/condition: service_healthy/g) ?? []).length, 2);
+  assert.equal((compose.match(/condition: service_healthy/g) ?? []).length, 3);
   assert.match(compose, /pgdata:\/var\/lib\/postgresql\/data/);
   assert.match(compose, /^volumes:\n {2}pgdata:/m);
   assert.match(compose, /pg_isready/);
 });
 
-test('every service has a memory limit, a process limit and rotated logs', () => {
-  assert.equal((compose.match(/mem_limit: /g) ?? []).length, 3);
-  assert.equal((compose.match(/pids_limit: /g) ?? []).length, 3);
-  assert.equal((compose.match(/logging: [*]logging/g) ?? []).length, 3);
+test('pgAdmin and Redis are optional: they sit behind profiles and the database port stays closed', () => {
+  assert.match(compose, /pgadmin:\n {4}profiles: \[tools\]/);
+  assert.match(compose, /redis:\n {4}profiles: \[cache\]/);
+  assert.match(compose, /127\.0\.0\.1:\$\{PGADMIN_PORT:-5050\}:80/);
+  const redis = /^ {2}redis:[\s\S]*?(?=^networks:)/m.exec(compose)[0];
+  assert.match(redis, /networks: \[internal\]/);
+  assert.doesNotMatch(redis, /ports:/);
+});
+
+test('every service, optional ones too, has a memory limit, a process limit and rotated logs', () => {
+  assert.equal((compose.match(/mem_limit: /g) ?? []).length, 5);
+  assert.equal((compose.match(/pids_limit: /g) ?? []).length, 5);
+  assert.equal((compose.match(/logging: [*]logging/g) ?? []).length, 5);
   assert.match(compose, /max-size: 10m/);
 });
 
