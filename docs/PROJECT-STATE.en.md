@@ -25,37 +25,37 @@ State as of 23 October 2026.
 
 ## 3 Repository map
 
-| What | Where |
-| --- | --- |
-| Part 1 site (RU in the root, EN in `site/en/`) | `site/` |
-| Part 1 labs | `labs/01-network` … `labs/08-frontend-testing` |
-| React app of Part 1 labs 7 and 8 | `react-app/` |
-| Shared tools (report build, report linter, a server for screenshots) | `tools/` |
-| Part 2 works | `part-2/<folder>/`, each in its own branch |
-| Editor mockups (432 frames), Part 2 screens, contact sheets | `docs/design-contest/` |
-| Study guides | `docs/study/` |
-| Notes, teacher requirements, forecast of extras | `docs/notes/` |
-| Project archive (overview, design tokens, A/B results) | `docs/project/` |
-| Assignments | `materials/` |
+| What                                                                 | Where                                          |
+| -------------------------------------------------------------------- | ---------------------------------------------- |
+| Part 1 site (RU in the root, EN in `site/en/`)                       | `site/`                                        |
+| Part 1 labs                                                          | `labs/01-network` … `labs/08-frontend-testing` |
+| React app of Part 1 labs 7 and 8                                     | `react-app/`                                   |
+| Shared tools (report build, report linter, a server for screenshots) | `tools/`                                       |
+| Part 2 works                                                         | `part-2/<folder>/`, each in its own branch     |
+| Editor mockups (432 frames), Part 2 screens, contact sheets          | `docs/design-contest/`                         |
+| Study guides                                                         | `docs/study/`                                  |
+| Notes, teacher requirements, forecast of extras                      | `docs/notes/`                                  |
+| Project archive (overview, design tokens, A/B results)               | `docs/project/`                                |
+| Assignments                                                          | `materials/`                                   |
 
 ### Branches
 
-| Work | Branch | Folder inside `part-2/` | Tests |
-| --- | --- | --- | --- |
-| Part 1 (site, labs 1–8) | `work/part1-finish` | not applicable | 601 |
-| Lab 1 Express, array | `lab21` | `lab-01-node-server` | 67 |
-| Lab 2 Sequelize | `lab12` | `lab-02-sequelize` | 102 |
-| Lab 3 Authentication | `23` | `lab-03-auth` | 126 |
-| Lab 4 React state | `24` | `lab-04-react-state` | 87 |
-| Lab 5 React and a server | `25` | `lab-05-react-api` (+ the server `lab-03-auth` with CORS and search) | 100 client, 136 server |
-| Lab 6 MongoDB | `26` | `lab-06-mongodb` | 136 |
-| Lab 7 WebSocket | `27` | `lab-07-websocket` | 93 |
-| Lab 8 Docker | `28` | `lab-08-docker` (+ copies of labs 1–5 from branch 25) | 11 |
-| P1 Middleware and EJS | `pz21` | `pz-01-middleware-ejs` | 103 |
-| P2 REST API | `pz22` | `pz-02-rest-api` | 69 |
-| P3 Routing | `pz23` | `pz-03-routing` | 91 |
-| P4 Context and reducer | `pz24` | `pz-04-context-reducer` | 65 |
-| Course project | `course-project` | `course-project/` (note and diagrams) | not applicable |
+| Work                     | Branch              | Folder inside `part-2/`                                              | Tests                  |
+| ------------------------ | ------------------- | -------------------------------------------------------------------- | ---------------------- |
+| Part 1 (site, labs 1–8)  | `work/part1-finish` | not applicable                                                       | 601                    |
+| Lab 1 Express, array     | `lab21`             | `lab-01-node-server`                                                 | 67                     |
+| Lab 2 Sequelize          | `lab12`             | `lab-02-sequelize`                                                   | 102                    |
+| Lab 3 Authentication     | `23`                | `lab-03-auth`                                                        | 126                    |
+| Lab 4 React state        | `24`                | `lab-04-react-state`                                                 | 87                     |
+| Lab 5 React and a server | `25`                | `lab-05-react-api` (+ the server `lab-03-auth` with CORS and search) | 100 client, 136 server |
+| Lab 6 MongoDB            | `26`                | `lab-06-mongodb`                                                     | 136                    |
+| Lab 7 WebSocket          | `27`                | `lab-07-websocket`                                                   | 93                     |
+| Lab 8 Docker             | `28`                | `lab-08-docker` (+ copies of labs 1–5 from branch 25)                | 11                     |
+| P1 Middleware and EJS    | `pz21`              | `pz-01-middleware-ejs`                                               | 103                    |
+| P2 REST API              | `pz22`              | `pz-02-rest-api`                                                     | 69                     |
+| P3 Routing               | `pz23`              | `pz-03-routing`                                                      | 91                     |
+| P4 Context and reducer   | `pz24`              | `pz-04-context-reducer`                                              | 65                     |
+| Course project           | `course-project`    | `course-project/` (note and diagrams)                                | not applicable         |
 
 Part 2 branches carry overlapping copies of earlier works (for example `25` holds labs 1–5 and `28` the same plus lab 8). The state of the "oldest" branch counts as current, and where lab 3 differs the version from branch `25` is taken (it has CORS and the `?search=` parameter).
 
@@ -78,6 +78,9 @@ Details are in the guides [`study/10`–`study/21`](study/), overviews in [`stud
 
 ## 5 Decisions taken
 
+- The site logo and favicon: the "smiling block", the editor logo: the "cursor drags a block" (`design-contest/logos/README.md`). The galleries of variants live outside `site/`.
+- The place of a block moved with the mouse is stored in the code as `pos=XxY` (one source of truth).
+- The service worker does not cache foreign addresses (Kroki).
 - On a rendering service error the canvas hides the old drawing and keeps a message and a retry button.
 - Lab 4: if one stored record is damaged, only it is dropped.
 - P2: the email is hidden in the general user list and cannot be used to filter or search.
@@ -109,6 +112,11 @@ To work with several branches at once, separate working folders are handy: `git 
 - The Kroki service sometimes answers with errors and timeouts. Mermaid frames are re-shot with `node docs/design-contest/shoot-mockups.mjs docs/design-contest/mockups "" mermaid`, then `node docs/design-contest/contact-sheets.mjs` (they need `puppeteer-core` from the lab 7 folder and Chrome).
 - Docker Desktop on this computer starts slowly (up to several minutes), and `docker desktop stop` can hang.
 
+- Two `npm test` runs at once disturb each other (shared ports and temporary databases): run them one by one.
+- The editor tour opens with an empty storage: screenshot scripts first write the key `dslkit.tour-done`.
+- `sw.js` cannot be registered in the app pane, the tests check it (`labs/05-javascript-interactivity/pwa.test.js`).
+- Create files with regular expressions with the file-writing tool, not a shell command.
+
 ## 7.1 Screenshots
 
 The shooting scripts take `puppeteer-core` from `part-2/lab-07-websocket` and Chrome from its default path. The path to `puppeteer-core` is set by the variable `LAB7_DIR`, by default `part-2/lab-07-websocket` next to the repository. The site for shooting is started with `node tools/serve.js site 5173`.
@@ -116,30 +124,35 @@ The shooting scripts take `puppeteer-core` from `part-2/lab-07-websocket` and Ch
 ## 8 What is left
 
 ### Owner only
+
 - Postman screenshots (labs 1–3, P2, at least five operations) and the database structure (pgAdmin or DBeaver).
 - PostgreSQL for labs 2 and 3, Atlas for lab 6.
 - Docker Hub (lab 8). The build and start of the stack from scratch were checked on 23 October on this computer: three containers became healthy, `/api/health` answers `ok` through Nginx and directly, registration, login and creating a diagram through the proxy work (201, 200, and 401 without a token), data stays after `down` and `up`, and `down -v` removes the volume. Repeat the check on your machine and take a `docker ps` screenshot.
 - Checking lab 5 against the real lab 3 server.
-- Part 1: Firefox and Edge, screenshots (`notes/12-owner-screenshots.md`), the Rich Results Test, signing in to Figma to upload the mockups.
+- Part 1: Firefox and Edge, screenshots (`notes/12-owner-screenshots.md`), the Rich Results Test, checking the PWA in a real Chrome. The mockups are already in Figma ("DSLKit editor mockups").
 - Course project: the title page, assignment and contents in Word, agreeing the topic, cloud deployment, current screenshots, access dates of the sources.
 - Questions for the teacher: lab 1 data in a database or an array, React Router 6 or 7 in P3, showing the 500 page in client-only works, SQLite or PostgreSQL, whether screenshots of every endpoint are needed.
 - The decision to merge the branches into `main`.
 
 ### Can continue without the owner
+
 - Re-shooting the frames if the look of the editor changes (commands in section 7). The Mermaid frames were re-shot on 23 October: labels are now plain SVG text and the colours come from the application.
 - Refactoring round 3 and new extras from [`study/33-QUESTIONS.en.md`](study/33-QUESTIONS.en.md).
 
 ## 9 Where to read further
 
-| File | Why |
-| --- | --- |
-| [`study/README.md`](study/README.md) | index of the study guides |
-| [`notes/06-teacher-requirements.md`](notes/06-teacher-requirements.md) | teacher requirements for reports and code |
-| [`notes/07-possible-teacher-extras.md`](notes/07-possible-teacher-extras.md) | forecast of the teacher's extras |
-| [`notes/10-consilium-2026-10-17.md`](notes/10-consilium-2026-10-17.md) | tables of extras per work |
-| [`notes/17-plan-2026-10-22.en.md`](notes/17-plan-2026-10-22.en.md) | plan and statistics |
-| [`notes/18-scope-vs-state.en.md`](notes/18-scope-vs-state.en.md) | the project scope from the original document and how much of it is done |
-| [`study/00-RUN-GUIDE.md`](study/00-RUN-GUIDE.md) | how to run each work |
-| [`study/01-DATA-NEEDED.md`](study/01-DATA-NEEDED.md) | which data and accesses are needed from the owner |
-| [`study/02-SECURITY-AUDIT.md`](study/02-SECURITY-AUDIT.md) | security audit |
-| [`study/03-CLEAN-CODE-REVIEW.md`](study/03-CLEAN-CODE-REVIEW.md) | clean code review |
+| File                                                                         | Why                                                                     |
+| ---------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| [`HANDOVER.en.md`](HANDOVER.en.md)                                           | where to start: the handover                                            |
+| [`study/README.md`](study/README.md)                                         | index of the study guides                                               |
+| [`study/34-EDITOR-FEATURES.en.md`](study/34-EDITOR-FEATURES.en.md)           | editor features: autosave, export, import, dragging, tour, PWA          |
+| [`design-contest/logos/README.md`](design-contest/logos/README.md)           | logos: the choice and every set                                         |
+| [`notes/06-teacher-requirements.md`](notes/06-teacher-requirements.md)       | teacher requirements for reports and code                               |
+| [`notes/07-possible-teacher-extras.md`](notes/07-possible-teacher-extras.md) | forecast of the teacher's extras                                        |
+| [`notes/10-consilium-2026-10-17.md`](notes/10-consilium-2026-10-17.md)       | tables of extras per work                                               |
+| [`notes/17-plan-2026-10-22.en.md`](notes/17-plan-2026-10-22.en.md)           | plan and statistics                                                     |
+| [`notes/18-scope-vs-state.en.md`](notes/18-scope-vs-state.en.md)             | the project scope from the original document and how much of it is done |
+| [`study/00-RUN-GUIDE.md`](study/00-RUN-GUIDE.md)                             | how to run each work                                                    |
+| [`study/01-DATA-NEEDED.md`](study/01-DATA-NEEDED.md)                         | which data and accesses are needed from the owner                       |
+| [`study/02-SECURITY-AUDIT.md`](study/02-SECURITY-AUDIT.md)                   | security audit                                                          |
+| [`study/03-CLEAN-CODE-REVIEW.md`](study/03-CLEAN-CODE-REVIEW.md)             | clean code review                                                       |
