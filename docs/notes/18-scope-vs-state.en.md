@@ -50,7 +50,7 @@ Marks: done, partly, not started, the owner's decision.
 | --- | --- |
 | No mentions of AI or co-authors in commits, code, documents | done: the history is cleaned, documents rewritten, service branches deleted; in the already published `main` the old records remain in its history |
 | Clean code and architecture, minimal point changes | done for the course works: architecture paragraphs in the reports of labs 1–3, refactoring round 2; further as needed |
-| An independent check of every stage | done as consilia and audits (`../reviews/`, `../study/02-SECURITY-AUDIT.md`) |
+| An independent check of every stage | done as consilia and audits (`../agent-reports/`, `../study/02-SECURITY-AUDIT.md`) |
 | Sources for all parts of the product | partly: a list for the course works exists, a structured document by diploma sections is not assembled |
 | Documents and copyright for going to market | not started (a licence and a privacy policy exist as a site page, SRS, ADR and name and domain checks do not) |
 | Any action on GitHub and Figma only with permission | kept |
