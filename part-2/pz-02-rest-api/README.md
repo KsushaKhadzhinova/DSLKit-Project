@@ -43,3 +43,7 @@ npm start
 ---
 
 **English.** Express 5 REST API with three resources (users, projects, diagrams), CRUD plus filter/search/sort/paging, publish and duplicate operations, schema validation, referential checks (409), one JSON error format. In-memory data. Branch `pz22`. Run `npm install && npm start` (port 3000, `PORT` overrides, `npm run dev` watches), test with `npm test`. Docs and curl examples: [`API.md`](API.md).
+
+## Проверка стиля
+
+`npm run lint` запускает ESLint. Конфигурация лежит в `eslint.config.js`.
