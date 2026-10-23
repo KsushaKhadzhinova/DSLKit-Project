@@ -18,16 +18,16 @@ Marks: done, partly, not started, the owner's decision.
 | The stack React 19, TypeScript, Vite, Monaco, elkjs, C++ in WASM | not started (the site uses HTML and JS, an own layout instead of elkjs, a JS parser) |
 | A "My projects" dashboard, a welcome screen, settings | done as prototype screens (`site/app/*.html`) |
 | Editor: tabs, templates, problems, a status bar, breadcrumbs | done as a prototype |
-| Canvas: zoom, fit, dragging with `pos` written into the code, a properties inspector | partly: zoom and fit exist, dragging and the inspector are not done |
-| Run, autosave, undo and redo | partly: Run, Undo, Redo and Save exist, an autosave indicator is shown, the one-second autosave mechanism itself was not checked |
-| Export to SVG, PNG, PlantUML, Mermaid, draw.io and others | not started as an export feature (the PlantUML and Mermaid generators exist as rendering engines) |
-| Import of PlantUML and Mermaid | not started |
+| Canvas: zoom, fit, dragging with `pos` written into the code, a properties inspector | partly: zoom and fit exist, dragging of blocks (mouse, finger, arrow keys) writes `pos=XxY` into the code and works with the own engine for notations with the shared layout, the inspector is not done |
+| Run, autosave, undo and redo | done: Run, Undo, Redo and autosave of the code after one second with a "Saved" mark and restoring on open |
+| Export to SVG, PNG, PlantUML, Mermaid, draw.io and others | done: SVG, PNG, JPEG, draw.io (the drawing sits on the page as an image, not as a set of shapes) and a self-contained HTML; PlantUML and Mermaid code is not exported as a file |
+| Import of PlantUML and Mermaid | done for flowcharts (Mermaid), sequence and state diagrams (Mermaid and PlantUML), other kinds are named as unsupported |
 | An AI panel, "Fix with AI" | not started (a button is in the mockups) |
 | Login (email, guest, external providers), limits and plans | partly: a daily beta limit is shown in the interface, there is no real login in the prototype (login is implemented in the Part 2 course works) |
 | Collaboration, Git, versions | not started |
-| PWA and offline | partly: an offline diagram cache exists, there is no manifest or service worker |
+| PWA and offline | done in code and checked by tests: manifest, icons, service worker; the app pane cannot register it, a check in a real Chrome is left to the owner |
 | Responsive layout and a mobile version | done as layout (three widths, a bottom navigation) |
-| A five-step onboarding tour | not started |
+| A five-step onboarding tour | done: opens once, again from the "Show tour" menu item |
 | Loading code or a repository and drawing automatically, Image → DSL | not started |
 | A public API, SDK, plugins | not started |
 
