@@ -126,7 +126,7 @@ The shooting scripts take `puppeteer-core` from `part-2/lab-07-websocket` and Ch
 - The decision to merge the branches into `main`.
 
 ### Can continue without the owner
-- Re-shooting the Mermaid frames when Kroki answers.
+- Re-shooting the frames if the look of the editor changes (commands in section 7). The Mermaid frames were re-shot on 23 October: labels are now plain SVG text and the colours come from the application.
 - Refactoring round 3 and new extras from [`study/33-QUESTIONS.en.md`](study/33-QUESTIONS.en.md).
 
 ## 9 Where to read further
