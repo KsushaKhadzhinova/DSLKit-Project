@@ -3,6 +3,7 @@ import express from 'express';
 import { ApiError, errorBody, notFound } from './errors.js';
 import { createResourceRouter, listItems, methodsOnly, parseId } from './resource.js';
 import { logSafe, rateLimit, securityHeaders } from './security.js';
+import { buildOpenApi } from './openapi.js';
 import { createStores } from './store.js';
 
 // All sizes live in limits.json, not in the code.
@@ -60,6 +61,8 @@ export const createApp = ({ stores = createStores(), writeError = console.error,
   });
 
   const api = express.Router();
+  // The machine-readable description of the API, built from the schemas above.
+  api.get('/openapi.json', (req, res) => res.json(buildOpenApi(schemas, { hidden: { users: ['email'] } })));
   // Link between resources: the projects that belong to one user. It is mounted before the standard router so it wins over /:id.
   api.get('/users/:id/projects', (req, res) => {
     const user = users.find(parseId(req.params.id));

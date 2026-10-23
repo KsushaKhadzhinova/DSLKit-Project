@@ -149,6 +149,10 @@
 
     В OpenAPI у каждой операции в разделе `responses` перечисляют коды, например `400`, `404` и `409`, и для каждого дают описание и схему тела. Общую схему ошибки описывают один раз в `components` и подключают ссылкой. В работе документация лежит в файле `API.md`: в таблице каждого маршрута есть столбец с возможными кодами ошибок, а раздел «Errors» показывает единый вид ответа `{ "error": { "code", "message", "details" } }` и перечисляет значения `code` с кодами состояния. Так клиент знает, какие ошибки ждать и как их разобрать.
 
+### 3.6 Описание OpenAPI
+
+Маршрут `GET /api/openapi.json` отдаёт описание API в формате OpenAPI 3.0. Оно строится из тех же схем, которые проверяют запросы, поэтому длины полей, списки допустимых значений и обязательные поля в документе совпадают с кодом. Поле `email` не предлагается как фильтр списка пользователей. Документ можно открыть в Swagger UI или импортировать в Postman.
+
 ## Заключение
 
 Для проекта DSLKit спроектирован и реализован REST API с тремя связанными ресурсами. Он поддерживает операции CRUD, фильтрацию, поиск, сортировку, страницы, публикацию и копирование диаграмм, проверяет входные данные и связи между записями и отвечает ошибками единого формата. Описание API и примеры запросов собраны в `API.md`, автоматические тесты покрывают весь код. Остаётся приложить снимки запросов из Postman и фрагменты документации.
@@ -161,6 +165,7 @@ import express from 'express';
 import { ApiError, errorBody, notFound } from './errors.js';
 import { createResourceRouter, listItems, methodsOnly, parseId } from './resource.js';
 import { logSafe, rateLimit, securityHeaders } from './security.js';
+import { buildOpenApi } from './openapi.js';
 import { createStores } from './store.js';
 
 // All sizes live in limits.json, not in the code.
@@ -218,6 +223,8 @@ export const createApp = ({ stores = createStores(), writeError = console.error,
   });
 
   const api = express.Router();
+  // The machine-readable description of the API, built from the schemas above.
+  api.get('/openapi.json', (req, res) => res.json(buildOpenApi(schemas, { hidden: { users: ['email'] } })));
   // Link between resources: the projects that belong to one user. It is mounted before the standard router so it wins over /:id.
   api.get('/users/:id/projects', (req, res) => {
     const user = users.find(parseId(req.params.id));

@@ -149,6 +149,10 @@ Figure 13 – End of the npm test output: the number of passed tests and the cov
 
     In OpenAPI each operation lists the codes in its `responses` section, for example `400`, `404` and `409`, and gives a description and a body schema for each. The common error schema is described once in `components` and attached by reference. In the work the documentation lives in `API.md`: the table of each route has a column with the possible error codes, and the "Errors" section shows the single response shape `{ "error": { "code", "message", "details" } }` and lists the `code` values with their status codes. That way a client knows which errors to expect and how to parse them.
 
+### 3.6 OpenAPI description
+
+The route `GET /api/openapi.json` returns the description of the API in the OpenAPI 3.0 format. It is built from the same schemas that validate the requests, so field lengths, lists of allowed values and required fields in the document match the code. The `email` field is not offered as a filter of the user list. The document can be opened in Swagger UI or imported into Postman.
+
 ## Conclusion
 
 For the DSLKit project a REST API with three related resources was designed and implemented. It supports CRUD operations, filtering, search, sorting, paging, publishing and copying of diagrams, validates input and the links between records, and answers with errors in one format. `API.md` holds the API description and request examples, and automatic tests cover all the code. Postman screenshots and documentation excerpts remain to be attached.
@@ -161,6 +165,7 @@ import express from 'express';
 import { ApiError, errorBody, notFound } from './errors.js';
 import { createResourceRouter, listItems, methodsOnly, parseId } from './resource.js';
 import { logSafe, rateLimit, securityHeaders } from './security.js';
+import { buildOpenApi } from './openapi.js';
 import { createStores } from './store.js';
 
 // All sizes live in limits.json, not in the code.
@@ -218,6 +223,8 @@ export const createApp = ({ stores = createStores(), writeError = console.error,
   });
 
   const api = express.Router();
+  // The machine-readable description of the API, built from the schemas above.
+  api.get('/openapi.json', (req, res) => res.json(buildOpenApi(schemas, { hidden: { users: ['email'] } })));
   // Link between resources: the projects that belong to one user. It is mounted before the standard router so it wins over /:id.
   api.get('/users/:id/projects', (req, res) => {
     const user = users.find(parseId(req.params.id));

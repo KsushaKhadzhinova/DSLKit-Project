@@ -325,3 +325,20 @@ test('the limits of the schemas come from limits.json', async () => {
   assert.equal(schemas.diagrams.code.max, LIMITS.diagramCode);
   assert.equal(schemas.projects.ownerId.max, LIMITS.idMax);
 });
+
+withApi('GET /api/openapi.json describes every route and the limits of the schemas', async ({ call }) => {
+  const { status, json: doc } = await call('GET', '/openapi.json');
+  assert.equal(status, 200);
+  assert.equal(doc.openapi, '3.0.3');
+  for (const path of ['/users', '/users/{id}', '/projects', '/projects/{id}', '/diagrams', '/diagrams/{id}', '/users/{id}/projects', '/projects/{id}/diagrams', '/diagrams/{id}/publish', '/diagrams/{id}/duplicate']) {
+    assert.ok(doc.paths[path], path);
+  }
+  assert.deepEqual(Object.keys(doc.paths['/users/{id}']), ['get', 'put', 'patch', 'delete']);
+  assert.equal(doc.components.schemas.UserInput.properties.name.maxLength, schemas.users.name.max);
+  assert.deepEqual(doc.components.schemas.DiagramInput.properties.notation.enum, schemas.diagrams.notation.enum);
+  assert.deepEqual([...doc.components.schemas.DiagramInput.required].sort(), ['notation', 'projectId', 'title']);
+  // The hidden field cannot be used to filter the user list, so the document does not offer it as a filter.
+  const userFilters = doc.paths['/users'].get.parameters.map((p) => p.name);
+  assert.ok(!userFilters.includes('email'));
+  assert.ok(userFilters.includes('role'));
+});

@@ -136,3 +136,7 @@ curl -X DELETE http://localhost:3000/api/projects/1
 ```
 
 The last call answers 409 `conflict`, "Project still has diagrams". In Postman or Insomnia, create a collection with these requests and the variable `baseUrl = http://localhost:3000/api`.
+
+## OpenAPI
+
+`GET /api/openapi.json` returns an OpenAPI 3.0 description of every route. It is built from the same schemas that validate the requests. Open it in Swagger UI or import it into Postman.
