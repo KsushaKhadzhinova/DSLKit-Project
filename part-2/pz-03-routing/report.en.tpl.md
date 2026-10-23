@@ -130,6 +130,10 @@ Figure 13 – Template catalog in the dark theme
 
 Sixty-one automated tests on `MemoryRouter` check all the pages, the catalog filter in the address (a huge and a whitespace-only query, a forged sort, markup in the query), lazy loading with the fallback message, breadcrumbs, the admin-only route (guest, user, admin, a logout in another tab), a double click on the sign-in button, the `NavLink` highlight, the dynamic route, the 404 page, the guest redirect, the return with query parameters, the name check, a forged return address, a logout in another tab, the focus move, markup rendered as text and the 500 page. The manual check is described in `README.md`.
 
+### 3.8 Addresses and hosting
+
+The app can be hosted not at the server root. A build with the variable `VITE_BASE=/dslkit/` puts the files into a sub-folder, and the `AppRouter` component takes it as `basename`. A build with the variable `VITE_ROUTER=hash` switches the app to `HashRouter`: addresses look like `/#/catalog`, and a static host needs no redirect rules to `index.html`. By default the usual `BrowserRouter` works.
+
 ## Conclusion
 
 The Vite application contains eight routes, a menu with the active item highlighted, a dynamic route handling an unknown parameter, a 404 page a protected dashboard with simulated sign-in and programmatic navigation, a catalog filter through `useSearchParams`, lazy page loading, breadcrumbs and a section for the admin role only. `react-router-dom` 7 is chosen, its API for the tasks of this work matches v6.

@@ -1,8 +1,8 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 import { AuthProvider } from './auth';
+import { AppRouter } from './router';
 import ErrorBoundary from './shell/ErrorBoundary';
 import './dslkit.css';
 import './shell.css';
@@ -10,11 +10,11 @@ import './shell.css';
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <ErrorBoundary>
-      <BrowserRouter>
+      <AppRouter>
         <AuthProvider>
           <App />
         </AuthProvider>
-      </BrowserRouter>
+      </AppRouter>
     </ErrorBoundary>
   </StrictMode>,
 );
