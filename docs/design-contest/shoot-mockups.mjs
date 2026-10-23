@@ -3,7 +3,7 @@
 // The site must be served on http://localhost:5173 (node tools/serve.js site 5173). Kroki engines need the internet.
 import { createRequire } from 'node:module';
 import { mkdirSync } from 'node:fs';
-const require = createRequire('E:/DSLKit-Project/.claude/worktrees/part2-ws-work-ee9b7b/part-2/lab-07-websocket/');
+const require = createRequire(process.env.LAB7_DIR ?? new URL('../../part-2/lab-07-websocket/', import.meta.url));
 const puppeteer = require('puppeteer-core');
 
 const out = process.argv[2] ?? 'docs/design-contest/mockups';

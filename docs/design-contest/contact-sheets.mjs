@@ -1,7 +1,7 @@
 // Contact sheets of the editor mockups: one image per language and engine with all notations.
 import { createRequire } from 'node:module';
 import { readdirSync, mkdirSync, writeFileSync } from 'node:fs';
-const require = createRequire('E:/DSLKit-Project/.claude/worktrees/part2-ws-work-ee9b7b/part-2/lab-07-websocket/');
+const require = createRequire(process.env.LAB7_DIR ?? new URL('../../part-2/lab-07-websocket/', import.meta.url));
 const puppeteer = require('puppeteer-core');
 const dir = 'E:/DSLKit-Project/docs/design-contest/mockups';
 const out = 'E:/DSLKit-Project/docs/design-contest/sheets';

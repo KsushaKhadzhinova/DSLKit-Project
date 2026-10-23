@@ -4,7 +4,7 @@
 
 ## Для продолжения работы
 
-Новому ИИ-ассистенту: сначала [`docs/AI-INSTRUCTIONS.md`](docs/AI-INSTRUCTIONS.md) и [`docs/SESSION-LOG.md`](docs/SESSION-LOG.md). Затем [`docs/CONTEXT.md`](docs/CONTEXT.md) (правила, договорённости, ловушки среды), затем [`docs/HANDOVER-LABS.md`](docs/HANDOVER-LABS.md) (статус всех лабораторных и практических, что осталось, следующий шаг). Условия работ лежат в [`materials/`](materials/README.md), архив по дизайну в [`docs/project/`](docs/project/). Актуальная ветка `main`; незавершённая работа в ветках `feature/*`.
+Состояние проекта, правила работы, карта веток и план собраны в [`docs/PROJECT-STATE.md`](docs/PROJECT-STATE.md) (английская версия `docs/PROJECT-STATE.en.md`). Разборы работ для защиты лежат в [`docs/study/`](docs/study/README.md).
 
 ## Технологии
 

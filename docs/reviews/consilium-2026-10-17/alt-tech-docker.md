@@ -1,8 +1,8 @@
 # Консилиум 2026-10-17: ЛР6 MongoDB, ЛР7 WebSocket, ЛР8 Docker (взгляд строгого преподавателя)
 
-Прочитано: условия ЛР6, ЛР7, ЛР8 (`materials/text/part-2/Модуль 03…`, `Модуль 05…`), `docs/handover/06`, `07`, `08`, код, `AUDIT.md`, `NOTES.md`, `README.md`, отчёты ЛР6 (`E:\DSLKit-Project\.claude\worktrees\part2-mongo-work-6cc76b\part-2\lab-06-mongodb`) и ЛР7 (`E:\DSLKit-Project\.claude\worktrees\part2-ws-work-ee9b7b\part-2\lab-07-websocket`). Ничего не запускалось и не менялось. Пометка **[не проверено]** значит: вывод сделан по чтению кода или чужого описания, без запуска.
+Прочитано: условия ЛР6, ЛР7, ЛР8 (`materials/text/part-2/Модуль 03…`, `Модуль 05…`), `docs/notes/06`, `07`, `08`, код, `AUDIT.md`, `NOTES.md`, `README.md`, отчёты ЛР6 (`part-2\lab-06-mongodb`) и ЛР7 (`part-2\lab-07-websocket`). Ничего не запускалось и не менялось. Пометка **[не проверено]** значит: вывод сделан по чтению кода или чужого описания, без запуска.
 
-Находка по ЛР8: в worktree `E:\DSLKit-Project\.claude\worktrees\lab28\part-2\lab-08-docker\` уже лежат `docker-compose.yml`, Dockerfile сервера и клиента, `nginx.conf`, README, отчёты, `docker.test.mjs`, 4 рисунка (файлы от 17.10, 11:45–11:52). Это работа параллельного агента, я её не запускал и не оценивал как готовую. В таблице ЛР8 считаю «нет», но в графе «Есть ли уже» указываю, что замечено в этом каталоге. Обозначение пути в таблице: `L6` = `…\part2-mongo-work-6cc76b\part-2\lab-06-mongodb`, `L7` = `…\part2-ws-work-ee9b7b\part-2\lab-07-websocket`, `L8` = `…\lab28\part-2\lab-08-docker`.
+Находка по ЛР8: в рабочей папке `part-2\lab-08-docker\` уже лежат `docker-compose.yml`, Dockerfile сервера и клиента, `nginx.conf`, README, отчёты, `docker.test.mjs`, 4 рисунка (файлы от 17.10, 11:45–11:52). Это работа, выполненная параллельно, я её не запускал и не оценивал как готовую. В таблице ЛР8 считаю «нет», но в графе «Есть ли уже» указываю, что замечено в этом каталоге. Обозначение пути в таблице: `L6` = `…\part2-mongo-work-6cc76b\part-2\lab-06-mongodb`, `L7` = `…\part2-ws-work-ee9b7b\part-2\lab-07-websocket`, `L8` = `…\lab28\part-2\lab-08-docker`.
 
 ## 1 Таблица придирок (по убыванию вероятности)
 

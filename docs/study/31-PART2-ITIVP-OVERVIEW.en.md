@@ -79,7 +79,7 @@ Principle: each work takes the previous one and adds exactly one new idea. Lab 1
 
 ## 6 Teacher extras (forecast) and their state
 
-The list is from the consilium of 17 October (`docs/handover/10-consilium-2026-10-17.md`). For the works you marked, everything important is already done or added: answers to questions n−1, n, n+1 in the reports, `createdAt` in lab 1, PATCH, a numeric field `>= 0`, the 1:N link and 409 in lab 2, a way to trigger a 500, "Edit" and "Delete" buttons in P1, `GET /api/users/:id/projects` in P2, filter, `lazy`, breadcrumbs and an admin role in P3, quantity in the reducer and context in P4, "Load more" in lab 5, `PATCH`, sorting and a counter in lab 6, history in MongoDB and a token in lab 7.
+The list is from the consilium of 17 October (`docs/notes/10-consilium-2026-10-17.md`). For the works you marked, everything important is already done or added: answers to questions n−1, n, n+1 in the reports, `createdAt` in lab 1, PATCH, a numeric field `>= 0`, the 1:N link and 409 in lab 2, a way to trigger a 500, "Edit" and "Delete" buttons in P1, `GET /api/users/:id/projects` in P2, filter, `lazy`, breadcrumbs and an admin role in P3, quantity in the reducer and context in P4, "Load more" in lab 5, `PATCH`, sorting and a counter in lab 6, history in MongoDB and a token in lab 7.
 
 ## 7 What is left for the owner
 

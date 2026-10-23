@@ -3,13 +3,13 @@
 Вариант 26 (чётный). Проверялись ЛР1–ЛР3 и ПЗ1–ПЗ2 в рабочих деревьях. Это прогноз по стилю преподавателя и условиям, а не его слова.
 
 Сокращения путей:
-- `L` = `E:\DSLKit-Project\.claude\worktrees\part2-server-labs-87ed8e\part-2\` (lab-01-node-server, lab-02-sequelize, lab-03-auth).
-- `P` = `E:\DSLKit-Project\.claude\worktrees\part2-practicals-server-dc309b\part-2\` (pz-01-middleware-ejs, pz-02-rest-api).
+- `L` = `part-2\` (lab-01-node-server, lab-02-sequelize, lab-03-auth).
+- `P` = `part-2\` (pz-01-middleware-ejs, pz-02-rest-api).
 - Условия: `E:\DSLKit-Project\materials\text\part-2\Модуль 01. Серверная разработка на Node.js\` (файлы 36–40).
 
 Что проверено чтением кода и grep, а что нет: тесты (`npm test`) и запуск с нуля я не гонял (файлы работ не менять, сервера не запускал), настоящий PostgreSQL не проверен. Такие места помечены «не проверено».
 
-Состояние `docs/handover/07-possible-teacher-extras.md` частично устарело: в ЛР1–ЛР3 уже есть `/health`, пагинация и сортировка (`src/middleware/list-query.js`), Postman-коллекции, 415, OPTIONS и HEAD. Папки `docs/defense/` (шпаргалки защиты) нет вообще.
+Состояние `docs/notes/07-possible-teacher-extras.md` частично устарело: в ЛР1–ЛР3 уже есть `/health`, пагинация и сортировка (`src/middleware/list-query.js`), Postman-коллекции, 415, OPTIONS и HEAD. Папки `docs/defense/` (шпаргалки защиты) нет вообще.
 
 ## Таблица (сортировка по вероятности)
 

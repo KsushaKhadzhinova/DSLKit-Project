@@ -3,7 +3,7 @@
 // target sizes, line height and the proportions of the main two-column layouts (golden ratio 1 : 1.618).
 import { createRequire } from 'node:module';
 import { writeFileSync } from 'node:fs';
-const require = createRequire('E:/DSLKit-Project/.claude/worktrees/part2-ws-work-ee9b7b/part-2/lab-07-websocket/');
+const require = createRequire(process.env.LAB7_DIR ?? new URL('../../part-2/lab-07-websocket/', import.meta.url));
 const puppeteer = require('puppeteer-core');
 const base = process.argv[2];
 const out = process.argv[3];

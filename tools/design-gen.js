@@ -795,7 +795,7 @@ const typography = (tokens, lang) => {
 };
 
 const REFERENCES = [
-  ['Claude / Anthropic', 'claude.ai, claude.com, anthropic.com', 'тёплая сдержанность, крупная типографика'],
+  ['Продуктовый сайт', 'сайты продуктовых компаний', 'тёплая сдержанность, крупная типографика'],
   ['Innowise', 'innowise.com', 'деловая подача, блоки услуг'],
   ['Mermaid', 'mermaid.js.org, mermaid.ai', 'код слева, схема справа'],
   ['draw.io / diagrams.net', 'drawio.com, app.diagrams.net', 'крупная кнопка «Start Diagramming»'],

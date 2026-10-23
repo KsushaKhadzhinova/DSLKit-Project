@@ -42,7 +42,7 @@ Russian version: `33-QUESTIONS.md`. Answer by number: "1 yes, 2 no, 3 option B".
 27. Delete the service local branches of the working copies (they are not published)? (default: neither published nor touched)
 28. Keep the 51 MB of mockups in Git or move them to a separate archive? (default: keep in Git, as you said)
 29. Push the Part 2 work branches one by one to separate branches on GitHub? (default: no)
-30. How to sign pull requests: with no AI marks at all? (default: yes, no marks)
+30. How to sign pull requests: only with the owner's name? (default: yes)
 
 ## E. For the teacher (questions to ask them)
 

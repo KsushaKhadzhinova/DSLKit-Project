@@ -136,7 +136,7 @@
 9. Scrollbar → тонкий overlay
 10. Hotkeys → показывать в tooltips
 
-### Batch 5 (10 вопросов из находок агентов)
+### Batch 5 (10 вопросов из находок оценщиков)
 1. Close tab dialog → нужен modal с предупреждением (P1 bug!)
 2. Run при ошибках → disabled (P2 bug!)
 3. Empty state → chooser
@@ -150,7 +150,7 @@
 
 ---
 
-## 5. Агентные оценки интерфейса (12 агентов)
+## 5. Экспертные оценки интерфейса (12 оценщиков)
 
 ### Зелёный свет (используют)
 | Агент | Оценка | SUS |
@@ -175,7 +175,7 @@
 | HR Manager | ~2/10 | ~20 |
 | PM (mix) | ~5/10 | ~45 |
 
-### Ключевые находки всех агентов
+### Ключевые находки всех оценщиков
 1. **aria-label отсутствует** на всех иконках toolbar (WCAG Level A violation!)
 2. **role="switch" + aria-checked** отсутствует на Autosave toggle
 3. **Нет видимых focus rings** → keyboard navigation сломан
@@ -205,7 +205,7 @@ scratchpad/
 - `dslkit_ab_batch4_final` — A/B тест batch 4 + icon comparison
 - `dslkit_improved_v2` — улучшенный IDE макет
 - `dslkit_autosave_toggle` — паттерн autosave toggle
-- `dslkit_agents_round3` — dashboard 12 агентов
+- `dslkit_experts_round3` — dashboard 12 оценщиков
 - `dslkit_ab_batch5` — A/B тест batch 5
 
 ---
@@ -243,7 +243,7 @@ scratchpad/
 
 ### КРИТИЧЕСКИ ВАЖНО
 - **НЕТ** AI-атрибуции в продукте или коммитах
-- **НЕТ** упоминания ИИ-инструментов в коде, комментариях, UI и документации продукта
+- **НЕТ** упоминаний инструментов разработки в коде, комментариях, UI и документации продукта
 
 ### Принципы
 - Clean Code + Clean Architecture

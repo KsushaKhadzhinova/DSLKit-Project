@@ -4,7 +4,7 @@
 import { createRequire } from 'node:module';
 import { readdirSync, mkdirSync } from 'node:fs';
 import path from 'node:path';
-const require = createRequire('E:/DSLKit-Project/.claude/worktrees/part2-ws-work-ee9b7b/part-2/lab-07-websocket/');
+const require = createRequire(process.env.LAB7_DIR ?? new URL('../../part-2/lab-07-websocket/', import.meta.url));
 const puppeteer = require('puppeteer-core');
 const dir = path.resolve(process.argv[2]);
 const out = path.join(dir, 'shots');

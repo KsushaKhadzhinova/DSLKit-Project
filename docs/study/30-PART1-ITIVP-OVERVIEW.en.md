@@ -93,8 +93,8 @@ Overall: 525 automated tests, 100% code coverage of lines, branches and function
 
 ## 5 What is left for the owner
 
-- Checks in Firefox and Edge and screenshots (`docs/handover/12-owner-screenshots.md`).
-- Google Rich Results Test (needs the site published; the assistant cannot pass a captcha).
+- Checks in Firefox and Edge and screenshots (`docs/notes/12-owner-screenshots.md`).
+- Google Rich Results Test (needs the site published; the owner passes the captcha).
 - Signing in to Figma to upload the mockups.
 - Merging the branch into `main` and pushing.
 

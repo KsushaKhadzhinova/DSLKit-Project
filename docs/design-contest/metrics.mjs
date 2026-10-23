@@ -3,7 +3,7 @@
 // Real measurements from the DOM, not opinions: they feed the A/B test report.
 import { createRequire } from 'node:module';
 import path from 'node:path';
-const require = createRequire('E:/DSLKit-Project/.claude/worktrees/part2-ws-work-ee9b7b/part-2/lab-07-websocket/');
+const require = createRequire(process.env.LAB7_DIR ?? new URL('../../part-2/lab-07-websocket/', import.meta.url));
 const puppeteer = require('puppeteer-core');
 const target = process.argv[2];
 const label = process.argv[3] || target;

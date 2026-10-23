@@ -93,8 +93,8 @@ flowchart LR
 
 ## 5 Что остаётся владельцу
 
-- Проверка в Firefox и Edge и снимки (`docs/handover/12-owner-screenshots.md`).
-- Rich Results Test Google (нужна публикация сайта, капчу ассистент не проходит).
+- Проверка в Firefox и Edge и снимки (`docs/notes/12-owner-screenshots.md`).
+- Rich Results Test Google (нужна публикация сайта, капчу проходит владелец).
 - Вход в Figma для загрузки макетов.
 - Слить ветку в `main` и запушить.
 
