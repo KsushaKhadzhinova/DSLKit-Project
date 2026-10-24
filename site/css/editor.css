@@ -832,6 +832,14 @@
 }
 
 @media (min-width: 768px) {
+  .node-panel {
+    grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  }
+
+  .node-panel__head {
+    grid-column: 1 / -1;
+  }
+
   .editor-main[data-view='code'] .canvas {
     display: grid;
   }
@@ -1323,7 +1331,7 @@
   touch-action: none;
 }
 
-.canvas__remote .notation__node[data-cx]:focus-visible {
+.canvas__remote .notation__node[tabindex]:focus-visible {
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
 }
@@ -1331,4 +1339,77 @@
 .canvas__remote .notation__node--dragging {
   cursor: grabbing;
   opacity: 0.8;
+}
+
+/* The properties panel of a chosen block: a compact form under the drawing, side by side fields on wide screens */
+.node-panel {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0 var(--space-3) var(--space-3);
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-medium);
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+.node-panel[hidden] {
+  display: none;
+}
+
+.node-panel__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.node-panel__title {
+  margin: 0;
+  font-size: var(--text-small);
+  overflow-wrap: anywhere;
+}
+
+.node-panel__field {
+  display: grid;
+  gap: var(--space-1);
+  font-size: var(--text-small);
+}
+
+.node-panel__field[hidden] {
+  display: none;
+}
+
+.node-panel__inline {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.node-panel :is(input, select) {
+  min-height: var(--target-size-small);
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-small);
+  background: var(--color-background);
+  color: var(--color-text);
+  font: inherit;
+  max-width: 100%;
+}
+
+.node-panel input[type='number'] {
+  width: 6em;
+}
+
+.node-panel input[type='color'] {
+  width: 3em;
+  padding: 0;
+}
+
+.canvas__remote .notation__node--selected {
+  filter: drop-shadow(0 0 3px var(--color-primary));
+}
+
+.canvas__remote .notation__node[tabindex] {
+  cursor: pointer;
 }

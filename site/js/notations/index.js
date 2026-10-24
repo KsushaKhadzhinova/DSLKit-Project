@@ -17,7 +17,7 @@ export { MESSAGES, formatProblem } from './messages.js';
 export { enabledTransitions, fire, initialMarking, isDeadlock } from './specs.js';
 export { KEYWORDS, TEMPLATES } from './templates.js';
 
-const fromSpec = (impl) => ({ parse: impl.parse, generators: impl.generators, render: impl.render, kinds: Object.keys(impl.spec?.nodes ?? {}) });
+const fromSpec = (impl) => ({ parse: impl.parse, generators: impl.generators, render: impl.render, kinds: Object.keys(impl.spec.nodes) });
 const entry = (short, ru, en, impl) => ({ short, name: { ru, en }, ...impl });
 
 const idef4 = (lines, header) => {
@@ -139,6 +139,9 @@ export const generate = (model, format) => NOTATIONS[keyOf(model)].generators[pi
 // Parsed diagrams are drawn by the renderer of their notation; a bare legacy IDEF0 model keeps the original box renderer.
 export const hasLocalRenderer = (model) => model.notation !== undefined;
 export const renderNotation = (model) => NOTATIONS[keyOf(model)].render(model);
+
+// The node keywords of a notation that the properties panel may offer as shapes. Empty for notations whose lines are not `keyword id "label"`.
+export const nodeKinds = (model) => NOTATIONS[keyOf(model)].kinds ?? [];
 
 export const notationName = (model, lang) => NOTATIONS[keyOf(model)].name[lang === 'en' ? 'en' : 'ru'];
 export const notationShort = (model) => NOTATIONS[keyOf(model)].short;

@@ -132,6 +132,7 @@ import { initEditor } from './components/editor.js';
 import { initExport } from './components/export-menu.js';
 import { initImport } from './components/import-menu.js';
 import { registerServiceWorker } from './components/pwa.js';
+import { initNodePanel } from './components/node-panel.js';
 import { initNotationFilter } from './components/notation-filter.js';
 import { initSettings } from './components/settings.js';
 import { initTheme } from './components/theme.js';
@@ -152,6 +153,7 @@ export const COMPONENTS = [
   initImport,
   initTour,
   initCanvasDrag,
+  initNodePanel,
   initDiagramRunner,
 ];
 

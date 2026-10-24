@@ -93,7 +93,9 @@ const render = (model) => {
   const rowY = (index) => TOP + 24 + index * ROW;
   const bottom = rowY(model.nodes.length);
 
-  const bands = model.nodes.map((node, index) => (index % 2 === 0 ? `<rect x="${MARGIN}" y="${rowY(index)}" width="${x(end) - MARGIN}" height="${ROW}" fill="#f8fafc"/>` : '')).join('');
+  const bands = model.nodes
+    .map((node, index) => (index % 2 === 0 ? `<rect x="${MARGIN}" y="${rowY(index)}" width="${x(end) - MARGIN}" height="${ROW}" fill="#f8fafc"/>` : ''))
+    .join('');
   const ticks = [];
   for (let day = 0; day <= end; day += step)
     ticks.push(

@@ -21,7 +21,8 @@ test('the Gantt chart is registered, its template is clean, it draws and exports
 });
 
 test('a task starts where the latest task it depends on ends, unless the code names a start', () => {
-  const source = 'diagram gantt\ntask a days=3\ntask b days=2\ntask c days=4\ntask d start=10 days=1\nmilestone m\ndepends a -> c\ndepends b -> c\ndepends c -> m\ndepends c -> d';
+  const source =
+    'diagram gantt\ntask a days=3\ntask b days=2\ntask c days=4\ntask d start=10 days=1\nmilestone m\ndepends a -> c\ndepends b -> c\ndepends c -> m\ndepends c -> d';
   assert.deepEqual(slotsOf(source), { a: [0, 3], b: [0, 2], c: [3, 7], d: [10, 11], m: [7, 7] });
   assert.deepEqual(slotsOf('diagram gantt\ntask a days=1.5\ntask b'), { a: [0, 1.5], b: [0, 1] }, 'a day is the default length, decimals are fine');
   assert.equal(schedule(parseDiagram('diagram gantt')).length, 0);
@@ -70,7 +71,9 @@ test('bars show progress, take the colour of the code and scale to long and shor
   const colouredMilestone = renderNotation(parseDiagram('diagram gantt\nmilestone m color=#00aa55'));
   assert.match(colouredMilestone, /fill="#00aa55"/);
   assert.doesNotMatch(renderNotation(parseDiagram('diagram gantt\ntask a color=red')), /fill="red"/, 'only hex colours are taken');
-  const long = renderNotation(parseDiagram('diagram gantt\ntask a days=900\ntask b "A very long name of a task that goes on and on and on and on and on and on and on" days=1'));
+  const long = renderNotation(
+    parseDiagram('diagram gantt\ntask a days=900\ntask b "A very long name of a task that goes on and on and on and on and on and on and on" days=1'),
+  );
   assert.match(long, /^<svg /);
   const huge = renderNotation(parseDiagram('diagram gantt\ntask a days=900000'));
   assert.match(huge, />900000</, 'the grid step grows with the plan, so the axis keeps a few lines');

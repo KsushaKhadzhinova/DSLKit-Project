@@ -309,6 +309,35 @@
         <p class="canvas__service"></p>
         <ul class="canvas__history" aria-label="Recent runs" hidden></ul>
         <div class="canvas__remote" hidden></div>
+        <form class="node-panel" aria-label="Block properties" hidden>
+          <div class="node-panel__head">
+            <h3 class="node-panel__title">Block properties: <span data-node-id></span></h3>
+            <button type="button" class="button button--quiet" data-node-close>Close</button>
+          </div>
+          <label class="node-panel__field" for="node-label">
+            <span>Label</span>
+            <input type="text" id="node-label" name="label" maxlength="200" autocomplete="off" />
+          </label>
+          <div class="node-panel__field">
+            <label for="node-color">Colour</label>
+            <span class="node-panel__inline">
+              <input type="color" id="node-color" name="color" />
+              <button type="button" class="button button--quiet" data-node-reset-colour>Reset</button>
+            </span>
+          </div>
+          <label class="node-panel__field" for="node-kind">
+            <span>Block type</span>
+            <select id="node-kind" name="kind"></select>
+          </label>
+          <div class="node-panel__field" data-node-position>
+            <label for="node-x">Position X</label>
+            <span class="node-panel__inline">
+              <input type="number" id="node-x" name="x" step="10" inputmode="numeric" />
+              <label for="node-y">Y</label>
+              <input type="number" id="node-y" name="y" step="10" inputmode="numeric" />
+            </span>
+          </div>
+        </form>
 
         <svg class="canvas__diagram" focusable="false" role="img" aria-labelledby="canvas-title canvas-desc" viewBox="0 0 480 240">
           <title id="canvas-title">IDEF0 diagram: Order process</title>

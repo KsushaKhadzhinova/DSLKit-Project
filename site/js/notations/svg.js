@@ -1,4 +1,4 @@
-import { escapeXml, textWidth, wrap } from './common.js';
+import { colorOf, escapeXml, textWidth, wrap } from './common.js';
 
 export const INK = '#1e293b';
 export const MUTED = '#475569';
@@ -235,6 +235,9 @@ const applyPositions = (placed, size) => {
   return { width, height };
 };
 
+// A node with color=#rrggbb in the code is filled with that colour instead of white.
+const tint = (markup, color) => (color === null ? markup : markup.replaceAll('fill="#ffffff"', `fill="${color}"`));
+
 // size(node) -> {w, h, outline, lines}; draw(placedItem) -> SVG; style(edge) -> {start, end, dash}.
 export const renderLayout = ({ title, nodes, edges, size, draw, style, labelOf }) => {
   const known = edges.filter(({ from, to }) => nodes.some((n) => n.id === from) && nodes.some((n) => n.id === to));
@@ -242,7 +245,10 @@ export const renderLayout = ({ title, nodes, edges, size, draw, style, labelOf }
   const { placed } = laid;
   const { width, height } = applyPositions(placed, laid);
   const shapes = [...placed.values()]
-    .map((item) => `<g class="notation__node" data-id="${escapeXml(item.node.id)}" data-cx="${round(item.cx)}" data-cy="${round(item.cy)}">${draw(item)}</g>`)
+    .map(
+      (item) =>
+        `<g class="notation__node" data-id="${escapeXml(item.node.id)}" data-cx="${round(item.cx)}" data-cy="${round(item.cy)}">${tint(draw(item), colorOf(item.node))}</g>`,
+    )
     .join('');
   return svgDocument(width, height, title, edgeMarkup(placed, known, style, labelOf) + shapes);
 };
