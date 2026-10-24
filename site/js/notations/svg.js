@@ -252,7 +252,7 @@ export const renderLayout = ({ title, nodes, edges, size, draw, style, labelOf }
 // when a/w + b/h <= 1, and an ellipse when (a/w)^2 + (b/h)^2 <= 1).
 export const fitOutline = (outline, textW, textH, minW, minH) => {
   if (outline === 'diamond') {
-    const h = Math.max(minH, 2 * textH + 24);
+    const h = Math.max(minH, 1.6 * textH + 20);
     return { w: Math.max(minW, (textW + 12) / (1 - textH / h)), h };
   }
   if (outline === 'ellipse') {
