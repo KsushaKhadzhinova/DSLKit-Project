@@ -3,7 +3,7 @@ import Badge from '../ui/Badge';
 import Button from '../ui/Button';
 import Card from '../ui/Card';
 
-// Project card with an event handler stub: the parent decides what "open" does.
+// Project card with an event handler: the parent decides what "open" does.
 function ProjectCard({ project, onOpen }) {
   return (
     <Card title={project.name}>

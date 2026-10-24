@@ -5,19 +5,6 @@ import { mockPlans } from './data/plans';
 import { mockProjects } from './data/projects';
 
 describe('App (integration of the components)', () => {
-  let log;
-  let group;
-  let table;
-
-  beforeEach(() => {
-    log = jest.spyOn(console, 'log').mockImplementation(() => {});
-    group = jest.spyOn(console, 'group').mockImplementation(() => {});
-    table = jest.spyOn(console, 'table').mockImplementation(() => {});
-    jest.spyOn(console, 'groupEnd').mockImplementation(() => {});
-  });
-
-  afterEach(() => jest.restoreAllMocks());
-
   test('renders the three sections with data from the mock arrays', () => {
     render(<App />);
     expect(screen.getByRole('heading', { level: 1, name: 'Диаграммы как код' })).toBeInTheDocument();
@@ -26,25 +13,32 @@ describe('App (integration of the components)', () => {
     expect(screen.getAllByRole('button', { name: 'Выбрать' })).toHaveLength(mockPlans.length);
   });
 
-  test('the signup button writes to the console', () => {
+  test('the signup button shows a confirmation', () => {
     render(<App />);
     fireEvent.click(screen.getByRole('button', { name: 'Записаться в бету' }));
-    expect(log).toHaveBeenCalledWith('Запись в бету');
+    expect(screen.getByRole('status')).toHaveTextContent('Вы записаны в бету');
   });
 
-  test('opening a project groups the output and prints a table', () => {
+  test('opening a project shows its name and the message can be closed', () => {
     render(<App />);
     fireEvent.click(screen.getAllByRole('button', { name: 'Открыть' })[0]);
-    expect(group).toHaveBeenCalledWith('Открыт проект: Обработка заказов');
-    expect(table).toHaveBeenCalledWith(mockProjects[0]);
+    expect(screen.getByRole('status')).toHaveTextContent('Открыт проект «Обработка заказов»');
+    fireEvent.click(screen.getByRole('button', { name: 'Закрыть' }));
+    expect(screen.getByRole('status')).toBeEmptyDOMElement();
   });
 
-  test('changing the notation and choosing a plan write to the console', () => {
+  test('changing the notation filters the list', () => {
     render(<App />);
     fireEvent.change(screen.getByLabelText('Нотация'), { target: { value: 'BPMN' } });
-    expect(log).toHaveBeenCalledWith('Выбрана нотация:', 'BPMN');
+    expect(screen.getAllByRole('button', { name: 'Открыть' })).toHaveLength(2);
+    fireEvent.change(screen.getByLabelText('Нотация'), { target: { value: 'all' } });
+    expect(screen.getAllByRole('button', { name: 'Открыть' })).toHaveLength(mockProjects.length);
+  });
+
+  test('choosing a plan shows the plan name', () => {
+    render(<App />);
     fireEvent.click(screen.getAllByRole('button', { name: 'Выбрать' })[1]);
-    expect(log).toHaveBeenCalledWith('Выбран тариф:', 'Команда');
+    expect(screen.getByRole('status')).toHaveTextContent('Выбран тариф «Команда»');
   });
 });
 

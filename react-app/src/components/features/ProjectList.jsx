@@ -1,7 +1,7 @@
 import { filterByNotation } from '../../utils/helpers';
 import ProjectCard from './ProjectCard';
 
-// The list is filtered by the `notation` prop. There is no state in this lab, so the select only sets its first value and reports changes; the next lab connects it to the list.
+// The list is filtered by the `notation` prop; the select is controlled by the parent, which keeps the state and receives changes through onFilterChange.
 function ProjectList({ projects, notation = 'all', notations = [], onOpen, onFilterChange }) {
   const visible = filterByNotation(projects, notation);
   return (
@@ -10,7 +10,7 @@ function ProjectList({ projects, notation = 'all', notations = [], onOpen, onFil
         <h2 id="projects-title">Проекты</h2>
         <div className="toolbar">
           <label htmlFor="project-filter">Нотация</label>
-          <select id="project-filter" defaultValue={notation} onChange={(event) => onFilterChange(event.target.value)}>
+          <select id="project-filter" value={notation} onChange={(event) => onFilterChange(event.target.value)}>
             <option value="all">Все</option>
             {notations.map((item) => (
               <option key={item} value={item}>

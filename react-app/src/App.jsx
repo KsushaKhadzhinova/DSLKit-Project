@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import Footer from './components/layout/Footer';
 import Header from './components/layout/Header';
 import NotationList from './components/features/NotationList';
@@ -15,17 +16,22 @@ const LINKS = [
 
 const PROJECT_NOTATIONS = [...new Set(mockProjects.map((project) => project.notation))];
 
-// Handlers are stubs for this lab: they only write to the console because the state arrives in the next lab.
-const handleSignup = () => console.log('Запись в бету');
-const handleOpen = (project) => {
-  console.group(`Открыт проект: ${project.name}`);
-  console.table(project);
-  console.groupEnd();
-};
-const handleFilter = (notation) => console.log('Выбрана нотация:', notation);
-const handleChoose = (plan) => console.log('Выбран тариф:', plan.name);
-
 function App() {
+  const [notation, setNotation] = useState('all');
+  const [message, setMessage] = useState('');
+  const [openedProject, setOpenedProject] = useState(null);
+
+  const handleSignup = () => setMessage('Вы записаны в бету. Мы напишем, когда откроем доступ.');
+  const handleOpen = (project) => {
+    setOpenedProject(project);
+    setMessage(`Открыт проект «${project.name}» (${project.notation}).`);
+  };
+  const handleChoose = (plan) => setMessage(`Выбран тариф «${plan.name}».`);
+  const handleCloseProject = () => {
+    setOpenedProject(null);
+    setMessage('');
+  };
+
   return (
     <>
       <a className="skip-link" href="#main">
@@ -33,6 +39,18 @@ function App() {
       </a>
       <Header title="DSLKit" links={LINKS} onSignup={handleSignup} />
       <main className="page" id="main">
+        <div role="status" aria-live="polite" className="notice-area">
+          {message && (
+            <p className="notice">
+              {message}{' '}
+              {openedProject && (
+                <button type="button" className="notice__close" onClick={handleCloseProject}>
+                  Закрыть
+                </button>
+              )}
+            </p>
+          )}
+        </div>
         <section id="notations" aria-labelledby="notations-title">
           <div className="section__head">
             <h1 id="notations-title">Диаграммы как код</h1>
@@ -40,7 +58,7 @@ function App() {
           <NotationList notations={mockNotations} />
         </section>
         <section id="projects" aria-labelledby="projects-title">
-          <ProjectList projects={mockProjects} notations={PROJECT_NOTATIONS} onOpen={handleOpen} onFilterChange={handleFilter} />
+          <ProjectList projects={mockProjects} notation={notation} notations={PROJECT_NOTATIONS} onOpen={handleOpen} onFilterChange={setNotation} />
         </section>
         <section id="plans" aria-labelledby="plans-title">
           <h2 id="plans-title">Тарифы</h2>
