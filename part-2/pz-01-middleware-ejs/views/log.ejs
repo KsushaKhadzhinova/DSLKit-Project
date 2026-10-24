@@ -2,6 +2,17 @@
 <section class="section" aria-labelledby="page-title">
   <h1 class="section__title" id="page-title">Request log</h1>
   <p class="section__lead">The last <%= rows.length %> rows of the <code>request_log</code> table in the database.</p>
+  <% if (exported) { %><p class="note" role="status">The log was written to the file.</p><% } %>
+  <p class="section__lead">
+    <% if (file) { %>Exported file: <%= file.size %> bytes, written <time datetime="<%= file.time %>"><%= formatTime(file.time) %></time>.<% } else { %>The log has not been exported to a file yet, or the file was deleted.<% } %>
+  </p>
+  <div class="actions">
+    <form method="post" action="/log/export<%= authQuery %>">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+      <button class="button" type="submit">Export the log to a file</button>
+    </form>
+    <a class="button button--quiet" href="/log/download<%= authQuery %>">Download the file</a>
+  </div>
   <form method="post" action="/log/clear<%= authQuery %>" class="actions">
     <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
     <button class="button button--quiet button--danger" type="submit">Clear the log</button>

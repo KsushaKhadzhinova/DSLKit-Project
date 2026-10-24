@@ -62,7 +62,8 @@ export const csrf = (req, res, next) => {
   next();
 };
 
-const tooMany = (retryAfter) => Object.assign(new Error('Too many requests'), { status: 429, retryAfter, publicMessage: `Too many requests. Try again in ${retryAfter} s.` });
+const tooMany = (retryAfter) =>
+  Object.assign(new Error('Too many requests'), { status: 429, retryAfter, publicMessage: `Too many requests. Try again in ${retryAfter} s.` });
 
 // Fixed-window rate limit per client address, kept in memory. `only` limits it to some methods.
 export const rateLimit = ({ windowMs, max, only, now = Date.now }) => {

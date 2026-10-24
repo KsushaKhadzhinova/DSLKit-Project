@@ -305,3 +305,22 @@ kbd {
   display: inline-flex;
   margin: 0;
 }
+
+/* The three parts of an error page: what it is, why it happened, how to fix it. */
+.error__heading {
+  margin-top: var(--space-2);
+  font-size: var(--step-1);
+  font-weight: 700;
+}
+
+.error__list {
+  display: grid;
+  gap: var(--space-1);
+  padding-left: var(--space-3);
+  color: var(--color-text-light);
+  list-style: disc;
+}
+
+.error__list--steps {
+  list-style: decimal;
+}

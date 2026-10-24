@@ -2,7 +2,12 @@
 <section class="error" aria-labelledby="page-title">
   <p class="error__code">Error code: 404</p>
   <h1 class="error__title" id="page-title">Page not found</h1>
-  <p class="error__text">There is no page at <code><%= url %></code>. The address may contain a typo or the record may not exist.</p>
+  <h2 class="error__heading">What this is</h2>
+  <p class="error__text">There is no page at <code><%= url %></code>. <%= what %></p>
+  <h2 class="error__heading">Why it happened</h2>
+  <ul class="error__list"><% why.forEach((item) => { %><li><%= item %></li><% }) %></ul>
+  <h2 class="error__heading">How to fix it</h2>
+  <ol class="error__list error__list--steps"><% fix.forEach((item) => { %><li><%= item %></li><% }) %></ol>
   <a class="button button--primary" href="/<%= authQuery %>">Back to the list</a>
 </section>
 <%- include('partials/footer') %>

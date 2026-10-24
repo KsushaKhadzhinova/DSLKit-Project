@@ -130,6 +130,8 @@ The 500 page during a real failure is shown in figure 6. The server was started 
 
 Figure 6 – The 500 error page with an explanation about the unavailable log table
 
+The log can be exported to a text file and downloaded. The button "Export the log to a file" writes the rows of the table through a stream (`pipeline` with `createWriteStream`) into a temporary file and renames it to the final one only when the whole file is written, so a failure in the middle does not damage the earlier file. The button "Download the file" sends the file through `createReadStream`. If the file is deleted, moved or unreadable, the person sees a page that explains what happened, why and how to fix it, not a cut connection and not an unnamed 500 error. A failure in the middle of the transfer closes the connection and is written to the console of the server, and the server goes on working. The texts of all error pages live in one catalogue, `src/errors.js`, and each page answers three questions: what it is, why it happened and how to fix it.
+
 The same form with correct values saves the record, and the home page shows the new card with its own creation time, as in figure 7.
 
 ![Record after adding](figures/added.png)
@@ -185,6 +187,7 @@ For the DSLKit project an Express application with EJS templates was built: the 
 ## Appendix A (mandatory) Listing of the file requestLogger.js
 
 ```js
+import { UserError } from '../errors.js';
 import { safeLogText } from './security.js';
 
 // Writes the request into the request_log table BEFORE the route runs, so a database failure
@@ -203,7 +206,8 @@ export const requestLogger =
     try {
       id = log.start({ time: new Date(startedAt).toISOString(), method: req.method, url });
     } catch (cause) {
-      const error = new Error('Request log write failed', { cause });
+      // The database layer already names the problem (UserError); anything else is wrapped in a plain error.
+      const error = cause instanceof UserError ? cause : new Error('Request log write failed', { cause });
       error.publicMessage = 'The request log table could not be written. Check the database file and try again.';
       return next(error);
     }
@@ -224,8 +228,9 @@ export const requestLogger =
 
 ```js
 import { DatabaseSync } from 'node:sqlite';
-import { mkdirSync } from 'node:fs';
+import { existsSync, mkdirSync } from 'node:fs';
 import { dirname } from 'node:path';
+import { UserError } from '../errors.js';
 
 const CREATE_TABLE = `
   CREATE TABLE IF NOT EXISTS request_log (
@@ -244,7 +249,8 @@ export const openRequestLog = (file = ':memory:') => {
   let statements = null;
   const connect = () => {
     if (statements) return statements;
-    if (file !== ':memory:') mkdirSync(dirname(file), { recursive: true });
+    // The folder is made only when it is missing: mkdir on the root of a drive (E:/) fails on Windows even with recursive.
+    if (file !== ':memory:' && !existsSync(dirname(file))) mkdirSync(dirname(file), { recursive: true });
     const opened = new DatabaseSync(file);
     try {
       opened.exec(CREATE_TABLE);
@@ -261,15 +267,26 @@ export const openRequestLog = (file = ':memory:') => {
     db = opened;
     return statements;
   };
+  // Any failure of the database (a deleted or locked file, a missing folder, a full disk) becomes the error page about the log database.
+  const guard =
+    (action) =>
+    (...args) => {
+      try {
+        return action(...args);
+      } catch (error) {
+        throw error instanceof UserError ? error : new UserError('log-database-unavailable', error);
+      }
+    };
   return {
-    start: ({ time, method, url }) => Number(connect().insert.run(time, method, url).lastInsertRowid),
-    finish: (id, status, ms) => connect().finish.run(status, ms, id),
+    start: guard(({ time, method, url }) => Number(connect().insert.run(time, method, url).lastInsertRowid)),
+    finish: guard((id, status, ms) => connect().finish.run(status, ms, id)),
     // Removes every row and returns how many were removed.
-    clear: () => Number(connect().clear.run().changes),
-    recent: (limit) =>
+    clear: guard(() => Number(connect().clear.run().changes)),
+    recent: guard((limit) =>
       connect()
         .recent.all(limit)
         .map((row) => ({ ...row })),
+    ),
     close: () => {
       // A second close must not throw: the connection is closed once and then forgotten.
       if (db) db.close();
@@ -298,13 +315,12 @@ export const requireAuth = (req, res, next) => (req.user.guest ? res.redirect('/
 ## Appendix D (mandatory) Listing of the file errorHandlers.js
 
 ```js
+import { CATALOG, entryFor } from '../errors.js';
 import { safeLogText } from './security.js';
 
 export const notFound = (req, res) => {
-  res.status(404).render('404', { title: 'Not found', url: req.originalUrl });
+  res.status(404).render('404', { title: 'Not found', url: req.originalUrl, ...CATALOG[404] });
 };
-
-const HEADINGS = { 403: 'Request refused', 405: 'Method not allowed', 413: 'Request too large', 429: 'Too many requests' };
 
 // Last resort when even the 500 template fails: still a styled page, never a bare text screen.
 const fallbackPage = (status) =>
@@ -321,12 +337,16 @@ export const serverError =
     if (err.retryAfter) res.set('Retry-After', String(err.retryAfter));
     // Errors from body-parser and others carry their own 4xx/5xx status.
     const status = err.status >= 400 && err.status < 600 ? err.status : 500;
-    const heading = HEADINGS[status] ?? (status >= 500 ? 'Server error' : 'Bad request');
+    // The page tells what the error is, why it happened and how to solve it (see errors.js).
+    const { heading, what, why, fix } = entryFor(err, status);
     const locals = {
       title: heading,
       heading,
       status,
       message: err.publicMessage ?? '',
+      what,
+      why,
+      fix,
       // The failure may happen before fakeAuth ran, so the page needs its own defaults.
       user: res.locals.user ?? { name: 'Guest', guest: true },
       authQuery: res.locals.authQuery ?? '',
@@ -496,6 +516,7 @@ export const validateDiagram = (input, limits) => {
 import express from 'express';
 import { fileURLToPath } from 'node:url';
 import { createDiagramStore, validateDiagram, NOTATIONS } from './data/diagrams.js';
+import { describeFile, exportLog, sendLogFile } from './data/logFile.js';
 import { openRequestLog } from './data/requestLog.js';
 import { requestLogger } from './middleware/requestLogger.js';
 import { loadLimits } from './limits.js';
@@ -506,11 +527,13 @@ import { csrf, rateLimit, securityHeaders } from './middleware/security.js';
 const dir = (path) => fileURLToPath(new URL(path, import.meta.url));
 
 const DEFAULT_DB_FILE = dir('../data/requests.db');
+const DEFAULT_LOG_FILE = dir('../data/request-log.txt');
 
 export const createApp = ({
   store = createDiagramStore(),
   limits = loadLimits(),
   log = openRequestLog(DEFAULT_DB_FILE),
+  logFile = process.env.LOG_EXPORT_FILE || DEFAULT_LOG_FILE,
   write = console.log,
   writeError = console.error,
   now = Date.now,
@@ -573,7 +596,9 @@ export const createApp = ({
   app.all('/item/:id', (req, res, next) => {
     if (req.method === 'GET' || req.method === 'HEAD') return next();
     res.set('Allow', 'GET, HEAD');
-    return next(Object.assign(new Error('Method not allowed'), { status: 405, publicMessage: 'This address only answers GET. To change the record use its edit form.' }));
+    return next(
+      Object.assign(new Error('Method not allowed'), { status: 405, publicMessage: 'This address only answers GET. To change the record use its edit form.' }),
+    );
   });
 
   app.get('/add', requireAuth, (req, res) => res.render('add', { ...formView, title: 'Add diagram', errors: {}, values: { revision: '1' } }));
@@ -615,7 +640,31 @@ export const createApp = ({
   });
 
   app.get('/login', (req, res) => res.render('login', { title: 'Sign in' }));
-  app.get('/log', requireAuth, (req, res) => res.render('log', { title: 'Request log', rows: log.recent(limits.logRows) }));
+  app.get('/log', requireAuth, async (req, res, next) => {
+    try {
+      res.render('log', { title: 'Request log', rows: log.recent(limits.logRows), file: await describeFile(logFile), exported: req.query.exported === '1' });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // The log can be written to a text file and downloaded; both steps use streams and every failure has its own page (see logFile.js and errors.js).
+  app.post('/log/export', requireAuth, async (req, res, next) => {
+    try {
+      await exportLog(log, logFile);
+      res.redirect(`/log?exported=1${res.locals.authQuery.replace('?', '&')}`);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.get('/log/download', requireAuth, async (req, res, next) => {
+    try {
+      await sendLogFile(res, logFile, writeError);
+    } catch (error) {
+      next(error);
+    }
+  });
 
   // Clearing the log changes data, so it needs the simulated sign-in and the CSRF token, and it is a form, not a link.
   app.post('/log/clear', requireAuth, (req, res) => {
@@ -696,7 +745,8 @@ export const csrf = (req, res, next) => {
   next();
 };
 
-const tooMany = (retryAfter) => Object.assign(new Error('Too many requests'), { status: 429, retryAfter, publicMessage: `Too many requests. Try again in ${retryAfter} s.` });
+const tooMany = (retryAfter) =>
+  Object.assign(new Error('Too many requests'), { status: 429, retryAfter, publicMessage: `Too many requests. Try again in ${retryAfter} s.` });
 
 // Fixed-window rate limit per client address, kept in memory. `only` limits it to some methods.
 export const rateLimit = ({ windowMs, max, only, now = Date.now }) => {

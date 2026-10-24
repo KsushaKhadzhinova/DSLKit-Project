@@ -130,6 +130,8 @@ The 500 page during a real failure is shown in figure 6. The server was started 
 
 Figure 6 – The 500 error page with an explanation about the unavailable log table
 
+The log can be exported to a text file and downloaded. The button "Export the log to a file" writes the rows of the table through a stream (`pipeline` with `createWriteStream`) into a temporary file and renames it to the final one only when the whole file is written, so a failure in the middle does not damage the earlier file. The button "Download the file" sends the file through `createReadStream`. If the file is deleted, moved or unreadable, the person sees a page that explains what happened, why and how to fix it, not a cut connection and not an unnamed 500 error. A failure in the middle of the transfer closes the connection and is written to the console of the server, and the server goes on working. The texts of all error pages live in one catalogue, `src/errors.js`, and each page answers three questions: what it is, why it happened and how to fix it.
+
 The same form with correct values saves the record, and the home page shows the new card with its own creation time, as in figure 7.
 
 ![Record after adding](figures/added.png)

@@ -1,10 +1,9 @@
+import { CATALOG, entryFor } from '../errors.js';
 import { safeLogText } from './security.js';
 
 export const notFound = (req, res) => {
-  res.status(404).render('404', { title: 'Not found', url: req.originalUrl });
+  res.status(404).render('404', { title: 'Not found', url: req.originalUrl, ...CATALOG[404] });
 };
-
-const HEADINGS = { 403: 'Request refused', 405: 'Method not allowed', 413: 'Request too large', 429: 'Too many requests' };
 
 // Last resort when even the 500 template fails: still a styled page, never a bare text screen.
 const fallbackPage = (status) =>
@@ -21,12 +20,16 @@ export const serverError =
     if (err.retryAfter) res.set('Retry-After', String(err.retryAfter));
     // Errors from body-parser and others carry their own 4xx/5xx status.
     const status = err.status >= 400 && err.status < 600 ? err.status : 500;
-    const heading = HEADINGS[status] ?? (status >= 500 ? 'Server error' : 'Bad request');
+    // The page tells what the error is, why it happened and how to solve it (see errors.js).
+    const { heading, what, why, fix } = entryFor(err, status);
     const locals = {
       title: heading,
       heading,
       status,
       message: err.publicMessage ?? '',
+      what,
+      why,
+      fix,
       // The failure may happen before fakeAuth ran, so the page needs its own defaults.
       user: res.locals.user ?? { name: 'Guest', guest: true },
       authQuery: res.locals.authQuery ?? '',

@@ -1,6 +1,7 @@
 import { DatabaseSync } from 'node:sqlite';
-import { mkdirSync } from 'node:fs';
+import { existsSync, mkdirSync } from 'node:fs';
 import { dirname } from 'node:path';
+import { UserError } from '../errors.js';
 
 const CREATE_TABLE = `
   CREATE TABLE IF NOT EXISTS request_log (
@@ -19,7 +20,8 @@ export const openRequestLog = (file = ':memory:') => {
   let statements = null;
   const connect = () => {
     if (statements) return statements;
-    if (file !== ':memory:') mkdirSync(dirname(file), { recursive: true });
+    // The folder is made only when it is missing: mkdir on the root of a drive (E:/) fails on Windows even with recursive.
+    if (file !== ':memory:' && !existsSync(dirname(file))) mkdirSync(dirname(file), { recursive: true });
     const opened = new DatabaseSync(file);
     try {
       opened.exec(CREATE_TABLE);
@@ -36,15 +38,26 @@ export const openRequestLog = (file = ':memory:') => {
     db = opened;
     return statements;
   };
+  // Any failure of the database (a deleted or locked file, a missing folder, a full disk) becomes the error page about the log database.
+  const guard =
+    (action) =>
+    (...args) => {
+      try {
+        return action(...args);
+      } catch (error) {
+        throw error instanceof UserError ? error : new UserError('log-database-unavailable', error);
+      }
+    };
   return {
-    start: ({ time, method, url }) => Number(connect().insert.run(time, method, url).lastInsertRowid),
-    finish: (id, status, ms) => connect().finish.run(status, ms, id),
+    start: guard(({ time, method, url }) => Number(connect().insert.run(time, method, url).lastInsertRowid)),
+    finish: guard((id, status, ms) => connect().finish.run(status, ms, id)),
     // Removes every row and returns how many were removed.
-    clear: () => Number(connect().clear.run().changes),
-    recent: (limit) =>
+    clear: guard(() => Number(connect().clear.run().changes)),
+    recent: guard((limit) =>
       connect()
         .recent.all(limit)
         .map((row) => ({ ...row })),
+    ),
     close: () => {
       // A second close must not throw: the connection is closed once and then forgotten.
       if (db) db.close();

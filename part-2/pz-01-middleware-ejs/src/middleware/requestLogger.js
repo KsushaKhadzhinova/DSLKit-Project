@@ -1,3 +1,4 @@
+import { UserError } from '../errors.js';
 import { safeLogText } from './security.js';
 
 // Writes the request into the request_log table BEFORE the route runs, so a database failure
@@ -16,7 +17,8 @@ export const requestLogger =
     try {
       id = log.start({ time: new Date(startedAt).toISOString(), method: req.method, url });
     } catch (cause) {
-      const error = new Error('Request log write failed', { cause });
+      // The database layer already names the problem (UserError); anything else is wrapped in a plain error.
+      const error = cause instanceof UserError ? cause : new Error('Request log write failed', { cause });
       error.publicMessage = 'The request log table could not be written. Check the database file and try again.';
       return next(error);
     }

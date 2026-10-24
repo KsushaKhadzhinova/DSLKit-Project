@@ -1,6 +1,7 @@
 import express from 'express';
 import { fileURLToPath } from 'node:url';
 import { createDiagramStore, validateDiagram, NOTATIONS } from './data/diagrams.js';
+import { describeFile, exportLog, sendLogFile } from './data/logFile.js';
 import { openRequestLog } from './data/requestLog.js';
 import { requestLogger } from './middleware/requestLogger.js';
 import { loadLimits } from './limits.js';
@@ -11,11 +12,13 @@ import { csrf, rateLimit, securityHeaders } from './middleware/security.js';
 const dir = (path) => fileURLToPath(new URL(path, import.meta.url));
 
 const DEFAULT_DB_FILE = dir('../data/requests.db');
+const DEFAULT_LOG_FILE = dir('../data/request-log.txt');
 
 export const createApp = ({
   store = createDiagramStore(),
   limits = loadLimits(),
   log = openRequestLog(DEFAULT_DB_FILE),
+  logFile = process.env.LOG_EXPORT_FILE || DEFAULT_LOG_FILE,
   write = console.log,
   writeError = console.error,
   now = Date.now,
@@ -78,7 +81,9 @@ export const createApp = ({
   app.all('/item/:id', (req, res, next) => {
     if (req.method === 'GET' || req.method === 'HEAD') return next();
     res.set('Allow', 'GET, HEAD');
-    return next(Object.assign(new Error('Method not allowed'), { status: 405, publicMessage: 'This address only answers GET. To change the record use its edit form.' }));
+    return next(
+      Object.assign(new Error('Method not allowed'), { status: 405, publicMessage: 'This address only answers GET. To change the record use its edit form.' }),
+    );
   });
 
   app.get('/add', requireAuth, (req, res) => res.render('add', { ...formView, title: 'Add diagram', errors: {}, values: { revision: '1' } }));
@@ -120,7 +125,31 @@ export const createApp = ({
   });
 
   app.get('/login', (req, res) => res.render('login', { title: 'Sign in' }));
-  app.get('/log', requireAuth, (req, res) => res.render('log', { title: 'Request log', rows: log.recent(limits.logRows) }));
+  app.get('/log', requireAuth, async (req, res, next) => {
+    try {
+      res.render('log', { title: 'Request log', rows: log.recent(limits.logRows), file: await describeFile(logFile), exported: req.query.exported === '1' });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // The log can be written to a text file and downloaded; both steps use streams and every failure has its own page (see logFile.js and errors.js).
+  app.post('/log/export', requireAuth, async (req, res, next) => {
+    try {
+      await exportLog(log, logFile);
+      res.redirect(`/log?exported=1${res.locals.authQuery.replace('?', '&')}`);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.get('/log/download', requireAuth, async (req, res, next) => {
+    try {
+      await sendLogFile(res, logFile, writeError);
+    } catch (error) {
+      next(error);
+    }
+  });
 
   // Clearing the log changes data, so it needs the simulated sign-in and the CSRF token, and it is a form, not a link.
   app.post('/log/clear', requireAuth, (req, res) => {
