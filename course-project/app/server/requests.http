@@ -89,3 +89,25 @@ Authorization: Bearer {{token}}
 ### Unknown sort field -> 400
 GET {{base}}/diagrams?sort=password
 Authorization: Bearer {{token}}
+
+### Comments of diagram 1 (paged) -> 200, X-Total-Count
+GET {{base}}/diagrams/1/comments?limit=20&offset=0
+Authorization: Bearer {{token}}
+
+### Add a comment -> 201
+POST {{base}}/diagrams/1/comments
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "text": "Looks good" }
+
+### Change a comment (author or admin) -> 200
+PATCH {{base}}/comments/1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "text": "Looks good, with one remark" }
+
+### Delete a comment (author or admin) -> 204
+DELETE {{base}}/comments/1
+Authorization: Bearer {{token}}

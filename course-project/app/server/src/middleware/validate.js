@@ -69,4 +69,24 @@ const validatePartial = (req, _res, next) => {
   return next();
 };
 
-module.exports = { parseId, validateDiagram, validatePartial };
+// A comment is multi-line text: line breaks and tabs are fine, other control characters (NUL, escape, bell) are not.
+const COMMENT_CONTROL = /[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/;
+
+const commentProblem = (v) => {
+  if (typeof v !== 'string' || v.replace(INVISIBLE, '') === '') return 'must be a non-empty string';
+  if (COMMENT_CONTROL.test(v)) return 'must not contain control characters';
+  return v.trim().length <= LIMITS.comment || `must be at most ${LIMITS.comment} characters`;
+};
+
+// POST and PATCH of a comment carry only the text. The author and the diagram come from the token and the URL,
+// so any other field in the body (authorId, diagramId, createdAt) is dropped without a word.
+const validateComment = (req, _res, next) => {
+  const body = req.body;
+  if (!isObject(body)) return next(badRequest('Request body must be a JSON object'));
+  const result = commentProblem(body.text);
+  if (result !== true) return next(badRequest('Invalid comment data', [{ field: 'text', message: result }]));
+  req.commentFields = { text: body.text.trim() };
+  return next();
+};
+
+module.exports = { parseId, validateDiagram, validatePartial, validateComment, commentProblem };

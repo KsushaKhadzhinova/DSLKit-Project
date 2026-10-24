@@ -3,9 +3,11 @@ const { createAuthenticate } = require('./middleware/auth');
 const { createAuthController } = require('./controllers/auth.controller');
 const { createUsersController } = require('./controllers/users.controller');
 const { createDiagramsController } = require('./controllers/diagrams.controller');
+const { createCommentsController } = require('./controllers/comments.controller');
 const { createAuthRouter } = require('./routes/auth.routes');
 const { createUsersRouter } = require('./routes/users.routes');
 const { createDiagramsRouter } = require('./routes/diagrams.routes');
+const { createCommentsRouter } = require('./routes/comments.routes');
 const { securityHeaders, requireJson } = require('./middleware/http');
 const { createRequestLogger } = require('./middleware/request-log');
 const { createRateLimiter, createLoginGuard } = require('./middleware/rate-limit');
@@ -18,7 +20,7 @@ const MINUTE = 60 * 1000;
 const DEFAULTS = {
   jwtExpiresIn: '1h',
   bcryptRounds: 10,
-  // Origin of the React client of lab 5 that may call the API.
+  // Origin of the React client that may call the API.
   corsOrigin: 'http://localhost:5178',
   // Failed logins per email before it is locked, and for how long.
   loginMaxAttempts: LIMITS.loginMaxAttempts,
@@ -61,6 +63,7 @@ const createApp = (models, settings) => {
   app.use(requireJson);
   app.use('/auth', createAuthRouter(createAuthController(models, config, loginGuard), limiters));
   app.use('/diagrams', createDiagramsRouter(createDiagramsController(models), authenticate));
+  app.use(createCommentsRouter(createCommentsController(models), authenticate));
   app.use(createUsersRouter(createUsersController(models), authenticate));
   app.use(routeNotFound);
   app.use(errorHandler);
