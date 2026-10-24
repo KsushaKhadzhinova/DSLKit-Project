@@ -11,6 +11,7 @@ vi.mock('./api', async (importOriginal) => ({
   fetchDiagrams: vi.fn(),
   fetchDiagram: vi.fn(),
   fetchComments: vi.fn(),
+  fetchDiagramTags: vi.fn(),
   fetchUsers: vi.fn(),
   login: vi.fn(),
   register: vi.fn(),
@@ -28,6 +29,7 @@ beforeEach(() => {
   api.fetchDiagrams.mockResolvedValue({ data: [], headers: { 'x-total-count': '0' } });
   api.fetchComments.mockResolvedValue({ data: [], headers: { 'x-total-count': '0' } });
   api.fetchDiagram.mockResolvedValue({ data: diagram });
+  api.fetchDiagramTags.mockResolvedValue({ data: [] });
   api.fetchUsers.mockResolvedValue({ data: [] });
 });
 

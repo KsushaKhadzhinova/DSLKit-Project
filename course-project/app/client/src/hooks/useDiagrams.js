@@ -30,7 +30,7 @@ function useBusyIds() {
 // Loads the list page by page: the first page for a search text, then "load more".
 // The request is cancelled when the search text changes, on retry and when the component unmounts.
 // A page that is being loaded for the old search is cancelled too, so its answer never reaches the new list.
-function usePagedList(search, onNotice) {
+function usePagedList(search, tag, onNotice) {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -59,7 +59,7 @@ function usePagedList(search, onNotice) {
     loadingMoreRef.current = false;
     setError(null);
     setErrorKind(null);
-    fetchDiagrams(search, controller.signal, { limit: limits.pageSize, offset: 0 })
+    fetchDiagrams(search, controller.signal, { limit: limits.pageSize, offset: 0, tag })
       .then((response) => {
         if (controller.signal.aborted) return;
         // A body that is not a list (HTML from a proxy, an empty answer) is an error, it must not reach the list and crash it.
@@ -85,7 +85,7 @@ function usePagedList(search, onNotice) {
       controller.abort();
       moreController.current?.abort();
     };
-  }, [search, attempt]);
+  }, [search, tag, attempt]);
 
   const retry = useCallback(() => setAttempt((n) => n + 1), []);
 
@@ -99,7 +99,7 @@ function usePagedList(search, onNotice) {
     const controller = new AbortController();
     moreController.current = controller;
     try {
-      const response = await fetchDiagrams(search, controller.signal, { limit: limits.pageSize, offset: fetched });
+      const response = await fetchDiagrams(search, controller.signal, { limit: limits.pageSize, offset: fetched, tag });
       if (controller.signal.aborted) return;
       const loaded = response.data;
       loaded.forEach((record) => localIds.current.delete(record.id));
@@ -116,17 +116,17 @@ function usePagedList(search, onNotice) {
         setLoadingMore(false);
       }
     }
-  }, [search, onNotice]);
+  }, [search, tag, onNotice]);
 
   return { items, setItems, itemsRef, paging, setPaging, changeTotal, localIds, loading, loadingMore, error, errorKind, retry, loadMore };
 }
 
 // Owns the server state of the list: the pages plus the optimistic add, delete and edit.
-export function useDiagrams(search) {
+export function useDiagrams(search, tag) {
   const [notice, setNotice] = useState(null);
   const tempCounter = useRef(0);
   const { busy, isBusy, markBusy, unmarkBusy } = useBusyIds();
-  const list = usePagedList(search, setNotice);
+  const list = usePagedList(search, tag, setNotice);
   const { items, setItems, itemsRef, paging, setPaging, changeTotal, localIds } = list;
 
   const dismissNotice = useCallback(() => setNotice(null), []);

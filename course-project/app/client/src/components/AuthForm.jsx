@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import { errorMessage, login, register, saveToken } from '../api';
 import limits from '../limits.json';
 import { validateCredentials } from '../utils/validation';

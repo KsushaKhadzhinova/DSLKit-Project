@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
-import { Link, Navigate, useLocation, useNavigate, useParams } from 'react-router-dom';
+import { Link, Navigate, useLocation, useNavigate, useParams } from 'react-router';
 import { errorMessage, fetchDiagram, isCanceled } from '../api';
 import { useAuth } from '../auth';
 import Alert from '../components/Alert';
 import AuthForm from '../components/AuthForm';
 import CommentsSection from '../components/CommentsSection';
 import DiagramsScreen from '../components/DiagramsScreen';
+import TagsSection from '../components/TagsSection';
 import ErrorHelp from '../components/ErrorHelp';
 import ErrorPage from '../components/ErrorPage';
 import Progress from '../components/Progress';
@@ -112,6 +113,7 @@ export function DiagramPage() {
           <code>{diagram.sourceCode}</code>
         </pre>
       </section>
+      <TagsSection diagramId={diagram.id} canChange={user?.role === 'admin' || user?.id === diagram.ownerId} />
       <CommentsSection diagramId={diagram.id} user={user} />
     </>
   );

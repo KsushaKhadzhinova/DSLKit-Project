@@ -18,6 +18,11 @@
     "minLength": 1,
     "maxLength": 1000
   },
+  "tag": {
+    "minLength": 1,
+    "maxLength": 30
+  },
+  "tagsPerDiagram": 10,
   "commentPageSize": 20,
   "searchDebounceMs": 400,
   "pageSize": 20,

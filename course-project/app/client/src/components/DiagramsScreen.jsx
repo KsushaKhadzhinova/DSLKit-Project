@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link, useSearchParams } from 'react-router';
 import limits from '../limits.json';
 import { useDebouncedValue } from '../hooks/useDebouncedValue';
 import { useDiagrams } from '../hooks/useDiagrams';
@@ -14,8 +15,10 @@ import SearchField from './SearchField';
 export default function DiagramsScreen() {
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebouncedValue(search.trim(), limits.searchDebounceMs);
+  // /diagrams?tag=billing shows only the diagrams with that tag; the address is the filter, so the link can be shared.
+  const tag = useSearchParams()[0].get('tag') || undefined;
   const { items, loading, loadingMore, error, errorKind, notice, busy, syncing, hasMore, total, retry, dismissNotice, loadMore, add, remove, update } =
-    useDiagrams(debouncedSearch);
+    useDiagrams(debouncedSearch, tag);
   const showList = !error;
   const settled = !error && !loading;
 
@@ -23,6 +26,14 @@ export default function DiagramsScreen() {
     <>
       <DiagramForm onAdd={add} />
       <SearchField value={search} onChange={setSearch} />
+      {tag && (
+        <p className="note">
+          <span className="note__text">Тег: {tag}. </span>
+          <Link className="link" to="/diagrams">
+            Показать все диаграммы
+          </Link>
+        </p>
+      )}
       {notice && <Alert text={notice} actionLabel="Закрыть" onAction={dismissNotice} quiet />}
       {loading && <Progress>Загрузка…</Progress>}
       {error && !loading && <Alert text={error} actionLabel="Повторить" onAction={retry} />}

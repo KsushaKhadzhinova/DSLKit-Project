@@ -10,6 +10,7 @@ vi.mock('./api', async (importOriginal) => ({
   fetchProfile: vi.fn(),
   fetchDiagram: vi.fn(),
   fetchComments: vi.fn(),
+  fetchDiagramTags: vi.fn(),
   fetchUsers: vi.fn(),
 }));
 
@@ -30,6 +31,7 @@ beforeEach(() => {
   localStorage.setItem('token', 'jwt');
   mockProfile({ id: 1, email: 'root@example.test', role: 'admin' });
   api.fetchDiagram.mockResolvedValue({ data: diagram });
+  api.fetchDiagramTags.mockResolvedValue({ data: [] });
   api.fetchComments.mockResolvedValue({ data: [comment(1, 1, 'Mine'), comment(2, 2, 'Theirs')], headers: { 'x-total-count': '2' } });
   api.fetchUsers.mockResolvedValue({ data: [user(1, 'root@example.test', 'admin'), user(2, 'alice@example.test', 'user')] });
 });

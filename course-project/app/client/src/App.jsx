@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react';
-import { Outlet, Route, Routes } from 'react-router-dom';
+import { Outlet, Route, Routes } from 'react-router';
 import { AuthProvider, useAuth } from './auth';
 import Footer from './components/Footer';
 import Header from './components/Header';

@@ -1,4 +1,4 @@
-import { Link, NavLink, useNavigate } from 'react-router-dom';
+import { Link, NavLink, useNavigate } from 'react-router';
 
 // Page header of Part 1: logo, navigation, theme switch. The burger and the theme switch are CSS-only checkboxes, as on the site.
 export default function Header({ signedIn, isAdmin = false, onLogout }) {

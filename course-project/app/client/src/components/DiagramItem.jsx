@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import limits from '../limits.json';
 import { NOTATIONS, formatTime } from '../utils/validation';
 

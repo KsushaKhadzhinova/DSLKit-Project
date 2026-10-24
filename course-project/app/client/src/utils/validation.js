@@ -44,3 +44,13 @@ export function validateComment(text) {
   if (COMMENT_CONTROL.test(text)) return 'Уберите управляющие символы';
   return null;
 }
+
+// A tag is a short label: letters, digits, spaces, - and _, starting with a letter or a digit, at most limits.tag.maxLength characters.
+// The server stores it trimmed and in lower case; this is the same rule, so a bad name is refused before the request.
+export function validateTag(name) {
+  const text = name.trim();
+  if (text.length < limits.tag.minLength) return 'Введите тег';
+  if (text.length > limits.tag.maxLength) return `Тег не длиннее ${limits.tag.maxLength} символов`;
+  if (!/^[\p{L}\p{N}][\p{L}\p{N} _-]*$/u.test(text)) return 'Тег начинается с буквы или цифры и содержит только буквы, цифры, пробел, - и _';
+  return null;
+}

@@ -9,6 +9,7 @@ vi.mock('./api', async (importOriginal) => ({
   fetchProfile: vi.fn(),
   fetchDiagram: vi.fn(),
   fetchComments: vi.fn(),
+  fetchDiagramTags: vi.fn(),
   addComment: vi.fn(),
   updateComment: vi.fn(),
   deleteComment: vi.fn(),
@@ -38,6 +39,7 @@ beforeEach(() => {
   localStorage.setItem('token', 'jwt');
   mockProfile({ id: 1, email: 'me@example.test', role: 'user' });
   api.fetchDiagram.mockResolvedValue({ data: diagram });
+  api.fetchDiagramTags.mockResolvedValue({ data: [] });
   api.fetchComments.mockResolvedValue(page([comment(1, 1, 'Mine'), comment(2, 2, 'Theirs')]));
 });
 

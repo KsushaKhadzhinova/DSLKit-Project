@@ -52,9 +52,10 @@ export const login = (email, password) => api.post('/auth/login', { email, passw
 
 // The search text, the page size and the offset are query parameters (the server reads ?search=, ?limit= and ?offset=);
 // the signal lets the caller cancel the request. The size of the whole list comes back in the X-Total-Count header.
-export const fetchDiagrams = (search = '', signal, { limit, offset } = {}) => {
+export const fetchDiagrams = (search = '', signal, { limit, offset, tag } = {}) => {
   const params = {};
   if (search) params.search = search;
+  if (tag) params.tag = tag;
   if (limit !== undefined) params.limit = limit;
   if (offset) params.offset = offset;
   return withRetry(() => api.get('/diagrams', { params: Object.keys(params).length > 0 ? params : undefined, signal }), signal);
@@ -101,6 +102,11 @@ export const fetchComments = (diagramId, signal, { limit, offset } = {}) => {
 export const addComment = (diagramId, text) => api.post(`/diagrams/${diagramId}/comments`, { text });
 export const updateComment = (id, text) => api.patch(`/comments/${id}`, { text });
 export const deleteComment = (id) => api.delete(`/comments/${id}`);
+
+// Tags of one diagram (by name, lower case). A tag is created on first use; the server allows changes to the owner and an admin.
+export const fetchDiagramTags = (diagramId, signal) => withRetry(() => api.get(`/diagrams/${diagramId}/tags`, { signal }), signal);
+export const addDiagramTag = (diagramId, name) => api.post(`/diagrams/${diagramId}/tags`, { name });
+export const removeDiagramTag = (diagramId, tagId) => api.delete(`/diagrams/${diagramId}/tags/${tagId}`);
 
 // Administration: the same endpoints that an admin used from a REST client before.
 export const fetchUsers = (signal) => withRetry(() => api.get('/users', { signal }), signal);

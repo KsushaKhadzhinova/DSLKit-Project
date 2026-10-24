@@ -1,4 +1,4 @@
-import { Link, Navigate, Outlet, useLocation } from 'react-router-dom';
+import { Link, Navigate, Outlet, useLocation } from 'react-router';
 import { useAuth } from '../auth';
 import ErrorPage from './ErrorPage';
 import Progress from './Progress';
