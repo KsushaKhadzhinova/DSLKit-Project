@@ -7,7 +7,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { once } from 'node:events';
 import { after, before, mock, test } from 'node:test';
-import { staticServer } from './server.js';
+import { SECURITY_HEADERS, staticServer } from './server.js';
 
 const root = mkdtempSync(join(tmpdir(), 'site-'));
 mkdirSync(join(root, 'errors'));
@@ -130,4 +130,27 @@ test('serve script starts the server on the requested port', async () => {
   assert.match(log.mock.calls[0].arguments[0], /^http:\/\/localhost:\d+$/);
   server.close();
   log.mock.restore();
+});
+
+test('every answer carries the security headers, also errors and HEAD requests', async () => {
+  const server = await start(staticServer(root));
+  try {
+    for (const [path, method] of [
+      ['/', 'GET'],
+      ['/style.css', 'GET'],
+      ['/missing', 'GET'],
+      ['/', 'HEAD'],
+      ['/', 'POST'],
+    ]) {
+      const { headers } = await get(server, path, method);
+      assert.match(headers['content-security-policy'], /default-src 'self'/, `${method} ${path}`);
+      assert.match(headers['content-security-policy'], /script-src 'self'(;|$)/);
+      assert.match(headers['content-security-policy'], /frame-ancestors 'none'/);
+      assert.equal(headers['x-content-type-options'], 'nosniff');
+      assert.equal(headers['x-frame-options'], 'DENY');
+    }
+    assert.doesNotMatch(SECURITY_HEADERS['Content-Security-Policy'], /unsafe-eval|script-src[^;]*unsafe-inline/);
+  } finally {
+    server.close();
+  }
 });
