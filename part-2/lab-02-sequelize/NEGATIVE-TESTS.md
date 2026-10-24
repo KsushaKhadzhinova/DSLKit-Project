@@ -35,6 +35,6 @@
 | --- | --- | --- |
 | Управляющие символы в `title` и `owner` | 201, символы сохранялись в базе | 400, «must not contain control characters». Исправлено в `src/middleware/validate.js` |
 | `title` или `owner` только из невидимых символов (U+200B и др.) | 201, запись выглядела пустой | 400, как для пустой строки. Исправлено в `src/middleware/validate.js` (`INVISIBLE`) |
+| Поиск `?q=` с символом NUL или другим управляющим (`%00`, `%07`) | 500: SQLite обрывал запрос с таким символом в тексте | 400 `q must be text of 1 to 80 characters without control characters`. Исправлено в `src/middleware/list-query.js`, найдено нагрузочным прогоном `tests/attack.test.js` и `tests/resilience.test.js` |
 
 Проверки в миграциях (`trim(...) > 0`) по-прежнему пропускают невидимые символы; API закрывает это раньше, миграции не менялись.
-| Поиск `?q=` с символом NUL или другим управляющим (`%00`, `%07`) | 500: SQLite обрывал запрос с таким символом в тексте | 400 `q must be text of 1 to 80 characters without control characters`. Исправлено в `src/middleware/list-query.js`, найдено нагрузочным прогоном `tests/attack.test.js` и `tests/resilience.test.js` |
