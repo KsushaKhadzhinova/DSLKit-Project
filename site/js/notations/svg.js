@@ -42,7 +42,8 @@ export const text = (cx, cy, lines, size, weight, fill) =>
 const strokeOf = (width) => `fill="#ffffff" stroke="${INK}" stroke-width="${width}"`;
 
 // Labels of small symbols are written below them, labels of big symbols inside.
-const caption = ({ cx, y, h, lines }) => text(cx, y + h + 12, lines, 12, 400, INK);
+// The block of lines is centred on its y, so a label of several lines is moved down by half of the extra lines to start below the symbol and not over it.
+const caption = ({ cx, y, h, lines }) => text(cx, y + h + 12 + ((lines.length - 1) * 15) / 2, lines, 12, 400, INK);
 const inside = ({ cx, cy, lines }) => text(cx, cy, lines, 12, 400, INK);
 const dots = (cx, cy, count) =>
   count > 3
