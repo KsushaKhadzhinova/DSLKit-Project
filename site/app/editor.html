@@ -41,13 +41,13 @@
         </div>
 
         <div class="editor-toolbar__group">
-          <button type="button" class="button button--icon" aria-label="Отменить" data-tip="Отменить">
+          <button type="button" class="button button--icon" data-action="undo" aria-label="Отменить" data-tip="Отменить">
             <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
               <path d="M8 5L4 9l4 4" />
               <path d="M4 9h7a4 4 0 010 8H9" />
             </svg>
           </button>
-          <button type="button" class="button button--icon" aria-label="Повторить" data-tip="Повторить">
+          <button type="button" class="button button--icon" data-action="redo" aria-label="Повторить" data-tip="Повторить">
             <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
               <path d="M12 5l4 4-4 4" />
               <path d="M16 9H9a4 4 0 000 8h2" />
@@ -55,7 +55,7 @@
           </button>
         </div>
 
-        <button type="button" class="button button--icon" aria-label="Сохранить" data-tip="Сохранить (Ctrl+S)">
+        <button type="button" class="button button--icon" data-action="save" aria-label="Сохранить" data-tip="Сохранить (Ctrl+S)">
           <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
             <path d="M4 4h10l2 2v10H4z" />
             <path d="M7 4v4h5V4M7 16v-5h6v5" />
@@ -73,11 +73,11 @@
             </svg>
           </summary>
           <div class="editor-menu__panel">
-            <button type="button" class="button button--quiet">Проверить</button>
-            <button type="button" class="button button--quiet">Форматировать</button>
-            <button type="button" class="button button--quiet">Поделиться</button>
+            <button type="button" class="button button--quiet" data-action="check">Проверить</button>
+            <button type="button" class="button button--quiet" data-action="format">Форматировать</button>
+            <button type="button" class="button button--quiet" data-action="share">Поделиться</button>
             <button type="button" class="button button--quiet" data-notation-label>Диаграмма: IDEF0</button>
-            <button type="button" class="button button--quiet">Автораскладка</button>
+            <button type="button" class="button button--quiet" data-action="layout">Автораскладка</button>
             <button type="button" class="button button--quiet" data-import="file">Импорт из файла</button>
             <button type="button" class="button button--quiet" data-import="clipboard">Импорт из буфера</button>
             <input type="file" class="editor-import__file" accept=".puml,.plantuml,.pu,.mmd,.mermaid,.md,.txt,.dsl" aria-label="Файл с диаграммой" hidden />
@@ -92,7 +92,7 @@
               <span class="editor-toolbar__switch-track" aria-hidden="true"></span>
               <span>Автосохранение</span>
             </button>
-            <button type="button" class="button button--quiet">Тема</button>
+            <button type="button" class="button button--quiet" data-action="theme">Тема</button>
           </div>
         </details>
 
@@ -100,7 +100,7 @@
       </div>
 
       <div class="editor-topbar">
-        <button type="button" class="button button--icon" aria-label="Меню" data-tip="Меню">
+        <button type="button" class="button button--icon" data-action="sidebar" aria-label="Меню" data-tip="Меню">
           <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
             <path d="M3 6h14M3 10h14M3 14h14" />
           </svg>
@@ -118,18 +118,18 @@
     </header>
 
     <nav class="editor-activity" aria-label="Панель действий">
-      <button type="button" class="editor-activity__button editor-activity__button--active" aria-label="Файлы" aria-pressed="true" data-tip="Файлы">
+      <button type="button" class="editor-activity__button editor-activity__button--active" data-panel="files" aria-label="Файлы" aria-pressed="true" data-tip="Файлы">
         <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
           <path d="M3 6h5l2 2h7v8H3z" />
         </svg>
       </button>
-      <button type="button" class="editor-activity__button" aria-label="Поиск" aria-pressed="false" data-tip="Поиск">
+      <button type="button" class="editor-activity__button" data-panel="search" aria-label="Поиск" aria-pressed="false" data-tip="Поиск">
         <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
           <circle cx="9" cy="9" r="5" />
           <path d="M13 13l4 4" />
         </svg>
       </button>
-      <button type="button" class="editor-activity__button" aria-label="Git" aria-pressed="false" data-tip="Git">
+      <button type="button" class="editor-activity__button" data-panel="git" aria-label="Git" aria-pressed="false" data-tip="Git">
         <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
           <circle cx="6" cy="5" r="2" />
           <circle cx="6" cy="15" r="2" />
@@ -137,7 +137,7 @@
           <path d="M6 7v6M14 10c0 3-4 2-8 4" />
         </svg>
       </button>
-      <button type="button" class="editor-activity__button" aria-label="AI-помощник" aria-pressed="false" data-tip="AI-помощник">
+      <button type="button" class="editor-activity__button" data-panel="ai" aria-label="AI-помощник" aria-pressed="false" data-tip="AI-помощник">
         <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
           <path d="M10 3l1.6 4.4L16 9l-4.4 1.6L10 15l-1.6-4.4L4 9l4.4-1.6z" />
         </svg>
@@ -154,7 +154,7 @@
       <h2 class="editor-sidebar__heading">Проводник</h2>
       <ul class="file-tree">
         <li>
-          <button type="button" class="file-tree__item file-tree__item--active" aria-current="true">
+          <button type="button" class="file-tree__item file-tree__item--active" data-file="order" aria-current="true">
             <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
               <path d="M5 3h7l3 3v11H5z" />
               <path d="M12 3v3h3" />
@@ -163,7 +163,7 @@
           </button>
         </li>
         <li>
-          <button type="button" class="file-tree__item">
+          <button type="button" class="file-tree__item" data-file="rules">
             <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
               <path d="M5 3h7l3 3v11H5z" />
               <path d="M12 3v3h3" />
@@ -172,7 +172,7 @@
           </button>
         </li>
         <li>
-          <button type="button" class="file-tree__item">
+          <button type="button" class="file-tree__item" data-file="invoice">
             <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
               <path d="M5 3h7l3 3v11H5z" />
               <path d="M12 3v3h3" />
@@ -327,15 +327,15 @@
         </svg>
 
         <div class="canvas__zoom">
-          <button type="button" class="button button--icon" aria-label="Увеличить" data-tip="Увеличить">
+          <button type="button" class="button button--icon" data-action="zoom-in" aria-label="Увеличить" data-tip="Увеличить">
             <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
               <path d="M10 4v12M4 10h12" />
             </svg>
           </button>
-          <button type="button" class="button button--icon" aria-label="Уменьшить" data-tip="Уменьшить">
+          <button type="button" class="button button--icon" data-action="zoom-out" aria-label="Уменьшить" data-tip="Уменьшить">
             <span aria-hidden="true">−</span>
           </button>
-          <button type="button" class="button button--icon" aria-label="Вписать диаграмму в экран" data-tip="Вписать диаграмму в экран">
+          <button type="button" class="button button--icon" data-action="zoom-fit" aria-label="Вписать диаграмму в экран" data-tip="Вписать диаграмму в экран">
             <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
               <path d="M4 8V4h4M12 4h4v4M16 12v4h-4M8 16H4v-4" />
             </svg>
@@ -348,24 +348,24 @@
       <h2 class="visually-hidden">Проблемы</h2>
 
       <div class="problems__tabs">
-        <button type="button" class="problems__tab problems__tab--active" aria-pressed="true" aria-label="Проблемы: 3" data-tip="Проблемы: 3">
+        <button type="button" class="problems__tab problems__tab--active" data-problems-tab="problems" aria-pressed="true" aria-label="Проблемы: 3" data-tip="Проблемы: 3">
           <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
             <path d="M10 3l8 14H2z" />
             <path d="M10 8v4M10 14v.5" /></svg
           ><span class="problems__count">3</span>
         </button>
-        <button type="button" class="problems__tab" aria-pressed="false" aria-label="AI-помощник" data-tip="AI-помощник">
+        <button type="button" class="problems__tab" data-problems-tab="ai" aria-pressed="false" aria-label="AI-помощник" data-tip="AI-помощник">
           <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
             <path d="M10 3l1.6 4.4L16 9l-4.4 1.6L10 15l-1.6-4.4L4 9l4.4-1.6z" />
           </svg>
         </button>
-        <button type="button" class="problems__tab" aria-pressed="false" aria-label="Вывод" data-tip="Вывод">
+        <button type="button" class="problems__tab" data-problems-tab="output" aria-pressed="false" aria-label="Вывод" data-tip="Вывод">
           <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
             <path d="M3 4h14v12H3z" />
             <path d="M6 8l3 2-3 2M11 12h3" />
           </svg>
         </button>
-        <button type="button" class="problems__tab" aria-pressed="false" aria-label="Версии" data-tip="Версии">
+        <button type="button" class="problems__tab" data-problems-tab="versions" aria-pressed="false" aria-label="Версии" data-tip="Версии">
           <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
             <circle cx="10" cy="10" r="7" />
             <path d="M10 6v4l3 2" />
@@ -445,7 +445,7 @@
       <button
         type="button"
         class="button button--icon"
-        aria-label="Показать ошибки"
+        aria-label="Показать ошибки" data-action="problems"
         aria-expanded="false"
         aria-controls="problems-panel"
         data-tip="Показать ошибки"
@@ -467,7 +467,7 @@
         </svg>
         <span>Холст</span>
       </button>
-      <button type="button" class="editor-bottom-nav__item" aria-pressed="false">
+      <button type="button" class="editor-bottom-nav__item" aria-pressed="false" data-action="sidebar">
         <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
           <path d="M3 6h5l2 2h7v8H3z" />
         </svg>

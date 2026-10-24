@@ -30,9 +30,10 @@ export const initSourceAutosave = ({
   }
 
   let timer = null;
-  const save = () => {
+  // The Save button and Ctrl+S save at once, whatever the switch says; the timer saves only when the switch is on.
+  const save = ({ force = false } = {}) => {
     timer = null;
-    if (switchButton && switchButton.getAttribute('aria-checked') !== 'true') return false;
+    if (!force && switchButton && switchButton.getAttribute('aria-checked') !== 'true') return false;
     storage.set(SOURCE_KEY, readCode(codeLines));
     if (note) note.textContent = `${lang === 'en' ? 'Saved' : 'Сохранено'} ${clock(now())}`;
     onSaved();
@@ -42,6 +43,7 @@ export const initSourceAutosave = ({
     if (timer !== null) clearTimer(timer);
     timer = setTimer(save, delay);
   };
+  page.addEventListener('dslkit:save', () => save({ force: true }));
   new root.defaultView.MutationObserver(schedule).observe(codeLines, { childList: true, subtree: true, characterData: true });
   return { save, pending: () => timer !== null };
 };

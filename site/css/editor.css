@@ -1332,3 +1332,17 @@
   cursor: grabbing;
   opacity: 0.8;
 }
+
+/* Buttons wired by editor-actions.js: the explorer opened with the menu button and the zoom of the drawing */
+.editor-sidebar.editor-sidebar--open {
+  display: grid;
+}
+
+.canvas__remote[data-zoom] svg {
+  max-width: none;
+  zoom: var(--canvas-zoom, 1);
+}
+
+.problems--open {
+  outline: 2px solid var(--color-error);
+}

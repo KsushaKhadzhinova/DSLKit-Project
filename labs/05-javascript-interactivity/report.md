@@ -129,6 +129,7 @@ import { initCanvasDrag } from './components/canvas-drag.js';
 import { initDashboard } from './components/dashboard.js';
 import { initDiagramRunner } from './components/diagram-runner.js';
 import { initEditor } from './components/editor.js';
+import { initEditorActions } from './components/editor-actions.js';
 import { initExport } from './components/export-menu.js';
 import { initImport } from './components/import-menu.js';
 import { registerServiceWorker } from './components/pwa.js';
@@ -148,6 +149,7 @@ export const COMPONENTS = [
   initDashboard,
   initSettings,
   initEditor,
+  initEditorActions,
   initExport,
   initImport,
   initTour,
