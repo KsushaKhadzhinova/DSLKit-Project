@@ -2,7 +2,7 @@ import { act, fireEvent, render, screen, waitFor, within } from '@testing-librar
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import * as api from './api';
-import App from './App';
+import { mockProfile, renderApp } from './testUtils';
 
 vi.mock('./api', async (importOriginal) => ({
   ...(await importOriginal()),
@@ -11,6 +11,7 @@ vi.mock('./api', async (importOriginal) => ({
   updateDiagram: vi.fn(),
   deleteDiagram: vi.fn(),
   login: vi.fn(),
+  fetchProfile: vi.fn(),
   register: vi.fn(),
 }));
 
@@ -38,6 +39,7 @@ const fillCredentials = async (user, password = 'correct horse 42') => {
 
 beforeEach(() => {
   vi.resetAllMocks();
+  mockProfile();
   localStorage.setItem('token', 'jwt');
   api.fetchDiagrams.mockResolvedValue({ data: initial });
 });
@@ -45,7 +47,7 @@ beforeEach(() => {
 describe('empty and oversized input', () => {
   it('shows field errors and sends nothing for an empty form', async () => {
     const user = userEvent.setup();
-    render(<App />);
+    renderApp();
     await screen.findByText('Order processing');
     await user.click(screen.getByRole('button', { name: 'Добавить' }));
     expect(screen.getByText('Введите название')).toBeInTheDocument();
@@ -55,7 +57,7 @@ describe('empty and oversized input', () => {
 
   it('shows field errors and sends nothing for a form of tabs and spaces', async () => {
     const user = userEvent.setup();
-    render(<App />);
+    renderApp();
     await screen.findByText('Order processing');
     fireEvent.change(screen.getByLabelText('Название'), { target: { value: ' \t \t ' } });
     fireEvent.change(screen.getByLabelText('Исходный код'), { target: { value: '\t \t' } });
@@ -68,7 +70,7 @@ describe('empty and oversized input', () => {
   it('cuts a 100000-character title paste to 80 characters before sending', async () => {
     const user = userEvent.setup();
     api.addDiagram.mockReturnValue(deferred().promise);
-    render(<App />);
+    renderApp();
     await screen.findByText('Order processing');
     const title = screen.getByLabelText('Название');
     await user.click(title);
@@ -81,7 +83,7 @@ describe('empty and oversized input', () => {
 
   it('refuses a 100000-character source code with a message and sends nothing', async () => {
     const user = userEvent.setup();
-    render(<App />);
+    renderApp();
     await screen.findByText('Order processing');
     await user.type(screen.getByLabelText('Название'), 'Draft');
     fireEvent.change(screen.getByLabelText('Исходный код'), { target: { value: 'a'.repeat(100000) } });
@@ -95,7 +97,7 @@ describe('repeated actions', () => {
   it('sends one POST for a double click on the add button', async () => {
     const user = userEvent.setup();
     api.addDiagram.mockReturnValue(deferred().promise);
-    render(<App />);
+    renderApp();
     await screen.findByText('Order processing');
     await fillNew(user);
     await user.dblClick(screen.getByRole('button', { name: 'Добавить' }));
@@ -105,7 +107,7 @@ describe('repeated actions', () => {
   it('sends one POST for a double Enter in the title field', async () => {
     const user = userEvent.setup();
     api.addDiagram.mockReturnValue(deferred().promise);
-    render(<App />);
+    renderApp();
     await screen.findByText('Order processing');
     await fillNew(user, 'Draft');
     await user.click(screen.getByLabelText('Название'));
@@ -116,7 +118,7 @@ describe('repeated actions', () => {
   it('sends one DELETE for a double Enter on the delete button', async () => {
     const user = userEvent.setup();
     api.deleteDiagram.mockReturnValue(deferred().promise);
-    render(<App />);
+    renderApp();
     await screen.findByText('Order processing');
     screen.getByRole('button', { name: 'Удалить: Order processing' }).focus();
     await user.keyboard('{Enter}{Enter}');
@@ -129,7 +131,7 @@ describe('repeated actions', () => {
     localStorage.clear();
     const pending = deferred();
     api.login.mockReturnValue(pending.promise);
-    render(<App />);
+    renderApp();
     await fillCredentials(user);
     await user.dblClick(screen.getByRole('button', { name: 'Войти' }));
     expect(api.login).toHaveBeenCalledTimes(1);
@@ -146,7 +148,7 @@ describe('repeated actions', () => {
       if (search === 'ord') return fast.promise;
       return Promise.resolve({ data: initial });
     });
-    render(<App />);
+    renderApp();
     await screen.findByText('Order processing');
     const search = screen.getByLabelText('Поиск по названию');
     await user.type(search, 'b');
@@ -166,7 +168,7 @@ describe('repeated actions', () => {
 
   it('cancels the rename with Escape and keeps the old title', async () => {
     const user = userEvent.setup();
-    render(<App />);
+    renderApp();
     await screen.findByText('Order processing');
     await user.click(screen.getByRole('button', { name: 'Изменить: Order processing' }));
     await user.type(screen.getByLabelText('Новое название'), ' changed{Escape}');
@@ -180,7 +182,7 @@ describe('server answers', () => {
   it('shows a notice and removes the new item when the server is unavailable on add', async () => {
     const user = userEvent.setup();
     api.addDiagram.mockRejectedValue(networkError());
-    render(<App />);
+    renderApp();
     await screen.findByText('Order processing');
     await fillNew(user);
     await user.click(screen.getByRole('button', { name: 'Добавить' }));
@@ -191,7 +193,7 @@ describe('server answers', () => {
   it('shows the status and a retry button when the list answers 500', async () => {
     const user = userEvent.setup();
     api.fetchDiagrams.mockRejectedValueOnce(serverError(500, undefined));
-    render(<App />);
+    renderApp();
     expect(await screen.findByText('Ошибка сервера (500)')).toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: 'Повторить' }));
     expect(await screen.findByText('Order processing')).toBeInTheDocument();
@@ -206,7 +208,7 @@ describe('server answers', () => {
       Promise.reject(Object.assign(new Error('fail'), { config, response: { status: 401, statusText: '', data: { error: 'Invalid token' }, headers: {}, config }, isAxiosError: true }));
     api.addDiagram.mockImplementation((diagram) => real.addDiagram(diagram));
     try {
-      render(<App />);
+      renderApp();
       await screen.findByText('Order processing');
       await fillNew(user);
       await user.click(screen.getByRole('button', { name: 'Добавить' }));
@@ -221,7 +223,7 @@ describe('server answers', () => {
   it('shows the 403 status and removes the new item when the server refuses the add', async () => {
     const user = userEvent.setup();
     api.addDiagram.mockRejectedValue(serverError(403, undefined));
-    render(<App />);
+    renderApp();
     await screen.findByText('Order processing');
     await fillNew(user);
     await user.click(screen.getByRole('button', { name: 'Добавить' }));
@@ -232,7 +234,7 @@ describe('server answers', () => {
   it('shows the 404 message and restores the old title when the record is gone on edit', async () => {
     const user = userEvent.setup();
     api.updateDiagram.mockRejectedValue(serverError(404, 'Diagram 1 not found'));
-    render(<App />);
+    renderApp();
     await screen.findByText('Order processing');
     await user.click(screen.getByRole('button', { name: 'Изменить: Order processing' }));
     await user.clear(screen.getByLabelText('Новое название'));
@@ -243,20 +245,20 @@ describe('server answers', () => {
 
   it('shows an error instead of crashing when the server answers HTML', async () => {
     api.fetchDiagrams.mockResolvedValue({ data: '<!DOCTYPE html><html><body>Bad gateway</body></html>' });
-    render(<App />);
+    renderApp();
     expect(await screen.findByText('Сервер вернул неожиданный ответ. Проверьте адрес сервера')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Повторить' })).toBeInTheDocument();
   });
 
   it('shows an error instead of crashing when the server answers an empty body', async () => {
     api.fetchDiagrams.mockResolvedValue({ data: '' });
-    render(<App />);
+    renderApp();
     expect(await screen.findByText('Сервер вернул неожиданный ответ. Проверьте адрес сервера')).toBeInTheDocument();
   });
 
   it('shows a timeout message when the server does not answer in time', async () => {
     api.fetchDiagrams.mockRejectedValue(Object.assign(new Error('timeout of 8000ms exceeded'), { code: 'ECONNABORTED' }));
-    render(<App />);
+    renderApp();
     expect(await screen.findByText('Сервер не ответил вовремя')).toBeInTheDocument();
   });
 
@@ -264,7 +266,7 @@ describe('server answers', () => {
     const user = userEvent.setup();
     localStorage.clear();
     api.login.mockRejectedValue(networkError());
-    render(<App />);
+    renderApp();
     await fillCredentials(user);
     await user.click(screen.getByRole('button', { name: 'Войти' }));
     expect(await screen.findByRole('alert')).toHaveTextContent('Сервер недоступен. Проверьте, что он запущен');
@@ -275,7 +277,7 @@ describe('server answers', () => {
     const user = userEvent.setup();
     localStorage.clear();
     api.login.mockRejectedValue(serverError(401, 'Invalid email or password'));
-    render(<App />);
+    renderApp();
     await fillCredentials(user, 'wrong password 1');
     await user.click(screen.getByRole('button', { name: 'Войти' }));
     expect(await screen.findByRole('alert')).toHaveTextContent('Invalid email or password');
@@ -288,7 +290,7 @@ describe('markup and storage', () => {
   it('shows markup from the data as plain text and runs no script', async () => {
     const hostile = { ...record(1, '<img src="x" onerror="window.__pwned = true">'), sourceCode: '<script>window.__pwned = true</script>' };
     api.fetchDiagrams.mockResolvedValue({ data: [hostile] });
-    const { container } = render(<App />);
+    const { container } = renderApp();
     expect(await screen.findByText('<img src="x" onerror="window.__pwned = true">')).toBeInTheDocument();
     expect(container.querySelector('img[src="x"]')).toBeNull();
     expect(container.querySelector('script')).toBeNull();
@@ -300,7 +302,7 @@ describe('markup and storage', () => {
       throw new Error('blocked');
     });
     try {
-      render(<App />);
+      renderApp();
       expect(screen.getByRole('form', { name: 'Вход' })).toBeInTheDocument();
       expect(api.fetchDiagrams).not.toHaveBeenCalled();
     } finally {
@@ -316,7 +318,7 @@ describe('markup and storage', () => {
     });
     try {
       api.login.mockResolvedValue({ data: { token: 'new-token' } });
-      render(<App />);
+      renderApp();
       await fillCredentials(user);
       await user.click(screen.getByRole('button', { name: 'Войти' }));
       expect(await screen.findByText('Order processing')).toBeInTheDocument();

@@ -1,12 +1,19 @@
+import { Link, NavLink, useNavigate } from 'react-router-dom';
+
 // Page header of Part 1: logo, navigation, theme switch. The burger and the theme switch are CSS-only checkboxes, as on the site.
-export default function Header({ signedIn, onLogout }) {
+export default function Header({ signedIn, isAdmin = false, onLogout }) {
+  const navigate = useNavigate();
+  const leave = () => {
+    onLogout();
+    navigate('/login');
+  };
   return (
     <header className="header">
       <div className="header__inner">
-        <a className="header__logo" href="/">
+        <Link className="header__logo" to="/">
           <img className="header__logo-image" src="/logo.svg" alt="" width="32" height="32" />
           <span className="header__logo-text">DSLKit</span>
-        </a>
+        </Link>
         <input className="burger__input" type="checkbox" id="burger-toggle" aria-label="Открыть меню" />
         <label className="burger__button" htmlFor="burger-toggle">
           <span className="burger__label">Меню</span>
@@ -14,17 +21,39 @@ export default function Header({ signedIn, onLogout }) {
         </label>
         <nav className="nav" aria-label="Основная навигация">
           <ul className="nav__list">
-            <li className="nav__item">
-              <a className="nav__link" href="#main" aria-current="page">
-                Диаграммы
-              </a>
-            </li>
-            {signedIn && (
-              <li className="nav__item">
-                <button type="button" className="nav__link" onClick={onLogout}>
-                  Выйти
-                </button>
-              </li>
+            {signedIn ? (
+              <>
+                <li className="nav__item">
+                  <NavLink className="nav__link" to="/diagrams">
+                    Диаграммы
+                  </NavLink>
+                </li>
+                {isAdmin && (
+                  <li className="nav__item">
+                    <NavLink className="nav__link" to="/admin">
+                      Администрирование
+                    </NavLink>
+                  </li>
+                )}
+                <li className="nav__item">
+                  <button type="button" className="nav__link" onClick={leave}>
+                    Выйти
+                  </button>
+                </li>
+              </>
+            ) : (
+              <>
+                <li className="nav__item">
+                  <NavLink className="nav__link" to="/login">
+                    Вход
+                  </NavLink>
+                </li>
+                <li className="nav__item">
+                  <NavLink className="nav__link" to="/register">
+                    Регистрация
+                  </NavLink>
+                </li>
+              </>
             )}
           </ul>
         </nav>

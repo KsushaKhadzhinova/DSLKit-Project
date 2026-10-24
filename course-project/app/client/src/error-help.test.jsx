@@ -1,13 +1,14 @@
 import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import * as api from './api';
-import App from './App';
+import { mockProfile, renderApp } from './testUtils';
 import ErrorBoundary from './components/ErrorBoundary';
 import { ERRORS, kindOfCrash, kindOfFailure } from './errorCatalog';
 
 vi.mock('./api', async (importOriginal) => ({
   ...(await importOriginal()),
   fetchDiagrams: vi.fn(),
+  fetchProfile: vi.fn(),
 }));
 
 const serverError = (status) => Object.assign(new Error('fail'), { response: { status, data: { error: 'x' } } });
@@ -15,6 +16,7 @@ const networkError = () => Object.assign(new Error('Network Error'), { code: 'ER
 
 beforeEach(() => {
   vi.resetAllMocks();
+  mockProfile();
   localStorage.setItem('token', 'jwt');
 });
 
@@ -25,7 +27,7 @@ describe('a failed load explains the error in three parts', () => {
     [500, 'Ошибка 500'],
   ])('status %s shows what it is, why it happened and how to solve it', async (status, title) => {
     api.fetchDiagrams.mockRejectedValue(serverError(status));
-    render(<App />);
+    renderApp();
     expect(await screen.findByText(new RegExp(title))).toBeInTheDocument();
     for (const heading of ['Что это', 'Почему так вышло', 'Как это исправить']) {
       expect(screen.getByRole('heading', { level: 3, name: heading })).toBeInTheDocument();
@@ -35,20 +37,20 @@ describe('a failed load explains the error in three parts', () => {
 
   it('no answer from the server shows the network explanation', async () => {
     api.fetchDiagrams.mockRejectedValue(networkError());
-    render(<App />);
+    renderApp();
     expect(await screen.findByText('Нет связи с сервером')).toBeInTheDocument();
     expect(screen.getAllByText(/CORS/).length).toBeGreaterThan(0);
   });
 
   it('a body that is not a list is explained as a connection problem', async () => {
     api.fetchDiagrams.mockResolvedValue({ data: '<html>proxy</html>' });
-    render(<App />);
+    renderApp();
     expect(await screen.findByText('Нет связи с сервером')).toBeInTheDocument();
   });
 
   it('an answer such as 400 keeps only its own message, without a generic explanation', async () => {
     api.fetchDiagrams.mockRejectedValue(serverError(400));
-    render(<App />);
+    renderApp();
     expect(await screen.findByRole('alert')).toHaveTextContent('x');
     expect(screen.queryByText('Что это')).not.toBeInTheDocument();
   });

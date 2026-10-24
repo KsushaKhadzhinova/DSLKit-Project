@@ -88,6 +88,25 @@ export const addDiagram = (diagram) => api.post('/diagrams', diagram);
 export const updateDiagram = (id, diagram) => api.put(`/diagrams/${id}`, diagram);
 export const deleteDiagram = (id) => api.delete(`/diagrams/${id}`);
 
+export const fetchProfile = () => api.get('/profile');
+export const fetchDiagram = (id, signal) => withRetry(() => api.get(`/diagrams/${id}`, { signal }), signal);
+
+// Comments of one diagram, oldest first; the size of the whole list comes back in X-Total-Count, like for diagrams.
+export const fetchComments = (diagramId, signal, { limit, offset } = {}) => {
+  const params = {};
+  if (limit !== undefined) params.limit = limit;
+  if (offset) params.offset = offset;
+  return withRetry(() => api.get(`/diagrams/${diagramId}/comments`, { params: Object.keys(params).length > 0 ? params : undefined, signal }), signal);
+};
+export const addComment = (diagramId, text) => api.post(`/diagrams/${diagramId}/comments`, { text });
+export const updateComment = (id, text) => api.patch(`/comments/${id}`, { text });
+export const deleteComment = (id) => api.delete(`/comments/${id}`);
+
+// Administration: the same endpoints that an admin used from a REST client before.
+export const fetchUsers = (signal) => withRetry(() => api.get('/users', { signal }), signal);
+export const setUserRole = (id, role) => api.patch(`/users/${id}/role`, { role });
+export const deleteUser = (id) => api.delete(`/users/${id}`);
+
 export const isCanceled = (error) => axios.isCancel(error);
 
 // A text for the user: the server message when there is one, a clear text when the server is unreachable.

@@ -2,7 +2,7 @@ import { fireEvent, render, screen, waitFor, within } from '@testing-library/rea
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import * as api from './api';
-import App from './App';
+import { mockProfile, renderApp } from './testUtils';
 import limits from './limits.json';
 
 vi.mock('./api', async (importOriginal) => ({
@@ -12,6 +12,7 @@ vi.mock('./api', async (importOriginal) => ({
   updateDiagram: vi.fn(),
   deleteDiagram: vi.fn(),
   login: vi.fn(),
+  fetchProfile: vi.fn(),
   register: vi.fn(),
 }));
 
@@ -43,13 +44,14 @@ const SIZE = limits.pageSize;
 
 beforeEach(() => {
   vi.resetAllMocks();
+  mockProfile();
   localStorage.setItem('token', 'jwt');
 });
 
 describe('load more', () => {
   it('asks for the first page with the limit and shows the counter and the button', async () => {
     api.fetchDiagrams.mockResolvedValue(reply(page(1, SIZE), 45));
-    render(<App />);
+    renderApp();
     expect(await screen.findByText('Diagram 1')).toBeInTheDocument();
     expect(api.fetchDiagrams.mock.calls[0][0]).toBe('');
     expect(api.fetchDiagrams.mock.calls[0][2]).toEqual({ limit: SIZE, offset: 0 });
@@ -60,7 +62,7 @@ describe('load more', () => {
   it('appends the next page from the right offset and hides the button after the last page', async () => {
     const user = userEvent.setup();
     api.fetchDiagrams.mockResolvedValueOnce(reply(page(1, SIZE), 25)).mockResolvedValueOnce(reply(page(SIZE + 1, 5), 25));
-    render(<App />);
+    renderApp();
     await screen.findByText('Diagram 1');
     await user.click(screen.getByRole('button', { name: 'Загрузить ещё' }));
     await screen.findByText(`Diagram ${SIZE + 5}`);
@@ -74,7 +76,7 @@ describe('load more', () => {
     const user = userEvent.setup();
     const next = deferred();
     api.fetchDiagrams.mockResolvedValueOnce(reply(page(1, SIZE), 40)).mockReturnValueOnce(next.promise);
-    render(<App />);
+    renderApp();
     await screen.findByText('Diagram 1');
     await user.dblClick(screen.getByRole('button', { name: 'Загрузить ещё' }));
     expect(api.fetchDiagrams).toHaveBeenCalledTimes(2);
@@ -92,7 +94,7 @@ describe('load more', () => {
       .mockResolvedValueOnce(reply(page(1, SIZE), 40))
       .mockRejectedValueOnce(serverError(500, undefined))
       .mockResolvedValueOnce(reply(page(SIZE + 1, SIZE), 40));
-    render(<App />);
+    renderApp();
     await screen.findByText('Diagram 1');
     await user.click(screen.getByRole('button', { name: 'Загрузить ещё' }));
     expect(await screen.findByText(/Не удалось загрузить ещё. Ошибка сервера \(500\)/)).toBeInTheDocument();
@@ -106,7 +108,7 @@ describe('load more', () => {
     const user = userEvent.setup();
     const stale = deferred();
     api.fetchDiagrams.mockResolvedValueOnce(reply(page(1, SIZE), 40)).mockReturnValueOnce(stale.promise);
-    render(<App />);
+    renderApp();
     await screen.findByText('Diagram 1');
     await user.click(screen.getByRole('button', { name: 'Загрузить ещё' }));
     const staleSignal = api.fetchDiagrams.mock.calls[1][1];
@@ -123,7 +125,7 @@ describe('load more', () => {
   it('starts again from offset 0 for a new search', async () => {
     const user = userEvent.setup();
     api.fetchDiagrams.mockResolvedValueOnce(reply(page(1, SIZE), 40));
-    render(<App />);
+    renderApp();
     await screen.findByText('Diagram 1');
     api.fetchDiagrams.mockResolvedValue(reply(page(1, SIZE), 30));
     await user.type(screen.getByLabelText('Поиск по названию'), 'd');
@@ -136,7 +138,7 @@ describe('load more', () => {
     const user = userEvent.setup();
     api.addDiagram.mockResolvedValue({ data: record(500, 'Mine') });
     api.fetchDiagrams.mockResolvedValueOnce(reply(page(1, SIZE), 40)).mockResolvedValueOnce(reply([...page(SIZE + 1, SIZE - 1), record(500, 'Mine')], 41));
-    render(<App />);
+    renderApp();
     await screen.findByText('Diagram 1');
     await user.type(screen.getByLabelText('Название'), 'Mine');
     await user.type(screen.getByLabelText('Исходный код'), 'a');
@@ -153,7 +155,7 @@ describe('load more', () => {
     const user = userEvent.setup();
     api.deleteDiagram.mockResolvedValue({});
     api.fetchDiagrams.mockResolvedValueOnce(reply(page(1, SIZE), 40)).mockResolvedValueOnce(reply(page(SIZE, SIZE), 39));
-    render(<App />);
+    renderApp();
     await screen.findByText('Diagram 1');
     await user.click(screen.getByRole('button', { name: 'Удалить: Diagram 1' }));
     await waitFor(() => expect(screen.getByText(`Показано ${SIZE - 1} из 39`)).toBeInTheDocument());
@@ -166,7 +168,7 @@ describe('load more', () => {
     const user = userEvent.setup();
     api.deleteDiagram.mockRejectedValue(serverError(403, 'Only the owner can delete'));
     api.fetchDiagrams.mockResolvedValue(reply(page(1, SIZE), 40));
-    render(<App />);
+    renderApp();
     await screen.findByText('Diagram 1');
     await user.click(screen.getByRole('button', { name: 'Удалить: Diagram 1' }));
     expect(await screen.findByText(/Only the owner can delete/)).toBeInTheDocument();
@@ -182,21 +184,21 @@ describe('load more', () => {
     ['a fractional header', '2.5'],
   ])('shows no button when the server total is unknown (%s)', async (_name, value) => {
     api.fetchDiagrams.mockResolvedValue({ data: page(1, SIZE), headers: value === undefined ? {} : { 'x-total-count': value } });
-    render(<App />);
+    renderApp();
     await screen.findByText('Diagram 1');
     expect(screen.queryByRole('button', { name: 'Загрузить ещё' })).not.toBeInTheDocument();
   });
 
   it('shows no counter and no button for an empty list', async () => {
     api.fetchDiagrams.mockResolvedValue(reply([], 0));
-    render(<App />);
+    renderApp();
     expect(await screen.findByText('Диаграмм не найдено.')).toBeInTheDocument();
     expect(screen.queryByText(/Показано/)).not.toBeInTheDocument();
   });
 
   it('shows markup in a title from the server as text', async () => {
     api.fetchDiagrams.mockResolvedValue(reply([record(1, '<img id="x" src=x onerror=alert(1)>')], 1));
-    render(<App />);
+    renderApp();
     expect(await screen.findByText('<img id="x" src=x onerror=alert(1)>')).toBeInTheDocument();
     expect(document.getElementById('x')).toBeNull();
   });
@@ -208,7 +210,7 @@ describe('counter while a record is being added', () => {
     const pending = deferred();
     api.fetchDiagrams.mockResolvedValue(reply(page(1, 3), 3));
     api.addDiagram.mockReturnValueOnce(pending.promise);
-    render(<App />);
+    renderApp();
     await screen.findByText('Diagram 1');
     await user.type(screen.getByLabelText('Название'), 'Fresh');
     await user.type(screen.getByLabelText('Исходный код'), 'a');
@@ -228,7 +230,7 @@ describe('progress of edit and delete', () => {
     const user = userEvent.setup();
     const pending = deferred();
     api.updateDiagram.mockReturnValue(pending.promise);
-    render(<App />);
+    renderApp();
     await screen.findByText('Diagram 1');
     await user.click(screen.getByRole('button', { name: 'Изменить: Diagram 1' }));
     const input = screen.getByLabelText('Новое название');
@@ -250,7 +252,7 @@ describe('progress of edit and delete', () => {
     const user = userEvent.setup();
     const pending = deferred();
     api.deleteDiagram.mockReturnValue(pending.promise);
-    render(<App />);
+    renderApp();
     await screen.findByText('Diagram 1');
     await user.click(screen.getByRole('button', { name: 'Удалить: Diagram 1' }));
     expect(screen.getByText('Сохранение на сервере…')).toHaveAttribute('role', 'status');
@@ -261,7 +263,7 @@ describe('progress of edit and delete', () => {
   it('removes the progress marks when the PUT fails and brings the old title back', async () => {
     const user = userEvent.setup();
     api.updateDiagram.mockRejectedValue(serverError(500, undefined));
-    render(<App />);
+    renderApp();
     await screen.findByText('Diagram 1');
     await user.click(screen.getByRole('button', { name: 'Изменить: Diagram 1' }));
     const input = screen.getByLabelText('Новое название');
@@ -275,7 +277,7 @@ describe('progress of edit and delete', () => {
   it('sends one PUT when the save button is double clicked', async () => {
     const user = userEvent.setup();
     api.updateDiagram.mockReturnValue(deferred().promise);
-    render(<App />);
+    renderApp();
     await screen.findByText('Diagram 1');
     await user.click(screen.getByRole('button', { name: 'Изменить: Diagram 1' }));
     const input = screen.getByLabelText('Новое название');
@@ -293,7 +295,7 @@ describe('limits in the forms', () => {
 
   it('has maxLength on the title of the new diagram and of the edit field', async () => {
     const user = userEvent.setup();
-    render(<App />);
+    renderApp();
     await screen.findByText('Diagram 1');
     expect(screen.getByLabelText('Название')).toHaveAttribute('maxlength', String(limits.title.maxLength));
     await user.click(screen.getByRole('button', { name: 'Изменить: Diagram 1' }));
@@ -302,7 +304,7 @@ describe('limits in the forms', () => {
 
   it('cuts a pasted title at the limit', async () => {
     const user = userEvent.setup();
-    render(<App />);
+    renderApp();
     await screen.findByText('Diagram 1');
     await user.click(screen.getByLabelText('Название'));
     await user.paste('t'.repeat(500));
@@ -311,7 +313,7 @@ describe('limits in the forms', () => {
 
   it('uses a multi-line field for the source code with a limit and a counter', async () => {
     const user = userEvent.setup();
-    render(<App />);
+    renderApp();
     await screen.findByText('Diagram 1');
     const code = screen.getByLabelText('Исходный код');
     expect(code.tagName).toBe('TEXTAREA');
@@ -324,7 +326,7 @@ describe('limits in the forms', () => {
 
   it('refuses a source code above the limit even when it is forced past maxLength', async () => {
     const user = userEvent.setup();
-    render(<App />);
+    renderApp();
     await screen.findByText('Diagram 1');
     await user.type(screen.getByLabelText('Название'), 'Big');
     fireEvent.change(screen.getByLabelText('Исходный код'), { target: { value: 'z'.repeat(limits.sourceCode.maxLength + 1) } });
@@ -335,7 +337,7 @@ describe('limits in the forms', () => {
 
   it('does not hang on a huge pasted code and still refuses a whitespace-only one', async () => {
     const user = userEvent.setup();
-    render(<App />);
+    renderApp();
     await screen.findByText('Diagram 1');
     const code = screen.getByLabelText('Исходный код');
     await user.click(code);
@@ -350,7 +352,7 @@ describe('limits in the forms', () => {
   it('keeps a multi-line source code as typed when it is sent', async () => {
     const user = userEvent.setup();
     api.addDiagram.mockResolvedValue({ data: record(2, 'Multi') });
-    render(<App />);
+    renderApp();
     await screen.findByText('Diagram 1');
     await user.type(screen.getByLabelText('Название'), 'Multi');
     await user.type(screen.getByLabelText('Исходный код'), 'a -> b{Enter}b -> c');

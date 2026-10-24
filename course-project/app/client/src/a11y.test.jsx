@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event';
 import axe from 'axe-core';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import * as api from './api';
-import App from './App';
+import { mockProfile, renderApp } from './testUtils';
 import ErrorBoundary from './components/ErrorBoundary';
 
 vi.mock('./api', async (importOriginal) => ({
@@ -11,6 +11,7 @@ vi.mock('./api', async (importOriginal) => ({
   fetchDiagrams: vi.fn(),
   addDiagram: vi.fn(),
   login: vi.fn(),
+  fetchProfile: vi.fn(),
   register: vi.fn(),
 }));
 
@@ -26,13 +27,14 @@ const serverError = (status) => Object.assign(new Error('fail'), { response: { s
 
 beforeEach(() => {
   vi.resetAllMocks();
+  mockProfile();
   localStorage.clear();
 });
 
 describe('accessibility (axe-core)', () => {
   it('the login form and the registration form have no violations, also with an error', async () => {
     const user = userEvent.setup();
-    render(<App />);
+    renderApp();
     expect(await audit()).toEqual([]);
     await user.click(screen.getByRole('button', { name: /Регистрация|Зарегистрироваться|Войти/ }));
     expect(await audit()).toEqual([]);
@@ -41,13 +43,13 @@ describe('accessibility (axe-core)', () => {
   it('the list screen has no violations with records, with none, and while loading', async () => {
     localStorage.setItem('token', 'jwt');
     api.fetchDiagrams.mockResolvedValue({ data: [record(1, 'Order processing'), record(2, 'Billing schema')], headers: { 'x-total-count': '2' } });
-    const { unmount } = render(<App />);
+    const { unmount } = renderApp();
     expect(await audit()).toEqual([]);
     await screen.findByText('Order processing');
     expect(await audit()).toEqual([]);
     unmount();
     api.fetchDiagrams.mockResolvedValue({ data: [], headers: { 'x-total-count': '0' } });
-    render(<App />);
+    renderApp();
     await screen.findByText('Диаграмм не найдено.');
     expect(await audit()).toEqual([]);
   });
@@ -55,7 +57,7 @@ describe('accessibility (axe-core)', () => {
   it.each([401, 403, 404, 500, 0])('the explained load error %s has no violations', async (status) => {
     localStorage.setItem('token', 'jwt');
     api.fetchDiagrams.mockRejectedValue(status === 0 ? Object.assign(new Error('Network Error'), { code: 'ERR_NETWORK' }) : serverError(status));
-    render(<App />);
+    renderApp();
     await screen.findByRole('button', { name: 'Повторить' });
     expect(await audit()).toEqual([]);
   });

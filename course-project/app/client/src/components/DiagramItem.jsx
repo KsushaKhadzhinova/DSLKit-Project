@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import limits from '../limits.json';
 import { NOTATIONS, formatTime } from '../utils/validation';
 
@@ -69,7 +70,9 @@ export default function DiagramItem({ diagram, busy = false, onUpdate, onRemove 
             )}
           </div>
         ) : (
-          <h2 className="card__title">{diagram.title}</h2>
+          <h2 className="card__title">
+            {working ? diagram.title : <Link className="card__link" to={`/diagrams/${diagram.id}`}>{diagram.title}</Link>}
+          </h2>
         )}
         <p className="card__meta">
           <span className="badge">{diagram.notation}</span>

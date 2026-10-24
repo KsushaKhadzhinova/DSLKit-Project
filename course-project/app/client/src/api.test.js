@@ -170,3 +170,38 @@ describe('retry of the list request', () => {
     expect(calls()).toBe(2);
   });
 });
+
+describe('requests of the course project', () => {
+  it('reads the profile, one diagram and the comments of a diagram with the token', async () => {
+    localStorage.setItem('token', 'abc');
+    const { fetchComments, fetchDiagram, fetchProfile } = await import('./api');
+    await fetchProfile();
+    expect([sent.method, sent.url]).toEqual(['get', '/profile']);
+    await fetchDiagram(7);
+    expect(sent.url).toBe('/diagrams/7');
+    await fetchComments(7, undefined, { limit: 20, offset: 40 });
+    expect(sent.url).toBe('/diagrams/7/comments');
+    expect(sent.params).toEqual({ limit: 20, offset: 40 });
+    expect(sent.headers.Authorization).toBe('Bearer abc');
+  });
+
+  it('sends the text of a comment alone: no author, no diagram id in the body', async () => {
+    const { addComment, deleteComment, updateComment } = await import('./api');
+    await addComment(7, 'Hello');
+    expect([sent.method, sent.url, JSON.parse(sent.data)]).toEqual(['post', '/diagrams/7/comments', { text: 'Hello' }]);
+    await updateComment(5, 'Changed');
+    expect([sent.method, sent.url, JSON.parse(sent.data)]).toEqual(['patch', '/comments/5', { text: 'Changed' }]);
+    await deleteComment(5);
+    expect([sent.method, sent.url]).toEqual(['delete', '/comments/5']);
+  });
+
+  it('uses the administration endpoints of the server', async () => {
+    const { deleteUser, fetchUsers, setUserRole } = await import('./api');
+    await fetchUsers();
+    expect([sent.method, sent.url]).toEqual(['get', '/users']);
+    await setUserRole(3, 'admin');
+    expect([sent.method, sent.url, JSON.parse(sent.data)]).toEqual(['patch', '/users/3/role', { role: 'admin' }]);
+    await deleteUser(3);
+    expect([sent.method, sent.url]).toEqual(['delete', '/users/3']);
+  });
+});

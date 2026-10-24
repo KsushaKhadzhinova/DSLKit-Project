@@ -34,3 +34,13 @@ export function validateCredentials({ email, password }) {
 
 // "2026-10-16 12:30:05" in local time, the same look in every locale; every record shows its own creation time.
 export const formatTime = (iso) => new Date(iso).toLocaleString('sv-SE');
+
+// A comment is multi-line text: line breaks and tabs are fine, other control characters (NUL, escape) are not, the same rule as on the server.
+const COMMENT_CONTROL = /[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/;
+export function validateComment(text) {
+  const length = text.trim().length;
+  if (length < limits.comment.minLength) return 'Введите комментарий';
+  if (length > limits.comment.maxLength) return `Комментарий не длиннее ${limits.comment.maxLength} символов`;
+  if (COMMENT_CONTROL.test(text)) return 'Уберите управляющие символы';
+  return null;
+}

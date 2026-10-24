@@ -1,11 +1,12 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { errorMessage, login, register, saveToken } from '../api';
 import limits from '../limits.json';
 import { validateCredentials } from '../utils/validation';
 
-// Sign in or register; after a successful login the JWT is saved and the interceptor in api.js sends it.
-export default function AuthForm({ onLoggedIn, notice }) {
-  const [mode, setMode] = useState('login');
+// Sign in (/login) or register (/register); after a successful login the JWT is saved and the interceptor in api.js sends it.
+// The page decides the mode, so the address in the browser always matches the form.
+export default function AuthForm({ mode = 'login', onLoggedIn, notice }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState({});
@@ -95,9 +96,9 @@ export default function AuthForm({ onLoggedIn, notice }) {
         <button type="submit" className="button button--primary" disabled={busy}>
           {busy ? 'Подождите…' : isLogin ? 'Войти' : 'Зарегистрироваться'}
         </button>
-        <button type="button" className="button button--quiet" onClick={() => setMode(isLogin ? 'register' : 'login')}>
+        <Link className="button button--quiet" to={isLogin ? '/register' : '/login'}>
           {isLogin ? 'Нужна регистрация' : 'Уже есть аккаунт'}
-        </button>
+        </Link>
       </div>
     </form>
   );

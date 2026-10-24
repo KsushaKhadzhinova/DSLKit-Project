@@ -18,7 +18,7 @@ export default function Footer() {
             hello@dslkit.io
           </a>
         </address>
-        <p className="footer__copy">DSLKit, лабораторная работа 5: клиент React и серверный API</p>
+        <p className="footer__copy">DSLKit, курсовой проект: клиент React и серверный API</p>
       </div>
     </footer>
   );
