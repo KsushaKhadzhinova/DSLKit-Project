@@ -228,6 +228,8 @@ const createServer = ({
 } = {}) => {
   // The built-in secret is public, so a production server must get its own.
   if (process.env.NODE_ENV === 'production' && tokenSecret === DEFAULT_SECRET) throw new Error('TOKEN_SECRET is required when NODE_ENV is production');
+  // A short secret can be guessed offline from one token, so production needs at least 32 characters (the same rule as the JWT secret of lab 3).
+  if (process.env.NODE_ENV === 'production' && String(tokenSecret).length < 32) throw new Error('TOKEN_SECRET must be at least 32 characters when NODE_ENV is production');
   const app = express();
   app.disable('x-powered-by');
   app.use(securityHeaders);
