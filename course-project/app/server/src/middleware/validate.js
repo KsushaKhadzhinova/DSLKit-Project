@@ -24,11 +24,12 @@ const checks = {
 
 // Builds the id check for a route param. The raw text is checked first because Number() would accept '0x1', '1e0' and ' 1'.
 const parseId =
-  (key = 'diagramId', label = 'Diagram') =>
+  (key = 'diagramId', label = 'Diagram', param = 'id') =>
   (req, _res, next) => {
-    const id = Number(req.params.id);
+    const raw = req.params[param];
+    const id = Number(raw);
     // Ids above the INTEGER column range would make PostgreSQL fail with a 500, so they are rejected here.
-    if (!/^[1-9]\d*$/.test(req.params.id) || id > MAX_ID) return next(badRequest(`${label} id must be a positive integer up to ${MAX_ID}`));
+    if (!/^[1-9]\d*$/.test(raw) || id > MAX_ID) return next(badRequest(`${label} id must be a positive integer up to ${MAX_ID}`));
     req[key] = id;
     return next();
   };
@@ -89,4 +90,27 @@ const validateComment = (req, _res, next) => {
   return next();
 };
 
-module.exports = { parseId, validateDiagram, validatePartial, validateComment, commentProblem };
+// A tag name is a short label: letters, digits, spaces, hyphens and underscores, starting with a letter or a digit.
+// It is stored trimmed and in lower case, so "Billing" and "billing " are the same tag.
+const TAG_SHAPE = /^[\p{L}\p{N}][\p{L}\p{N} _-]*$/u;
+
+const tagProblem = (v) => {
+  if (typeof v !== 'string' || v.replace(INVISIBLE, '') === '') return 'must be a non-empty string';
+  const name = v.trim();
+  if (name.length > LIMITS.tag) return `must be at most ${LIMITS.tag} characters`;
+  return TAG_SHAPE.test(name) || 'must start with a letter or a digit and contain only letters, digits, spaces, - and _';
+};
+
+const normalizeTag = (v) => v.trim().replace(/\s+/g, ' ').toLowerCase();
+
+// POST /diagrams/:id/tags carries only the name. A tag is created on first use, so the body has nothing else to send.
+const validateTag = (req, _res, next) => {
+  const body = req.body;
+  if (!isObject(body)) return next(badRequest('Request body must be a JSON object'));
+  const result = tagProblem(body.name);
+  if (result !== true) return next(badRequest('Invalid tag data', [{ field: 'name', message: result }]));
+  req.tagFields = { name: normalizeTag(body.name) };
+  return next();
+};
+
+module.exports = { parseId, validateDiagram, validatePartial, validateComment, commentProblem, validateTag, tagProblem, normalizeTag };

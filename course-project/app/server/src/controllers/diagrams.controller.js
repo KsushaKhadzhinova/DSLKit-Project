@@ -2,6 +2,7 @@ const { notFound, forbidden, badRequest } = require('../errors');
 const { Op, fn, col, where } = require('sequelize');
 const { parseListQuery } = require('../middleware/list-query');
 const { NOTATIONS, LIMITS } = require('../models/diagram.constants');
+const { tagProblem, normalizeTag } = require('../middleware/validate');
 
 const missing = (id) => notFound(`Diagram ${id} not found`);
 
@@ -20,19 +21,27 @@ const filterFor = (dialect, { notation, q }) => {
 const mayChange = (user, diagram) => user.role === 'admin' || diagram.ownerId === user.id;
 
 // Express 5 forwards a rejected promise to the error handler, so no try/catch is needed here.
-const createDiagramsController = ({ Diagram }) => ({
+const createDiagramsController = ({ Diagram, Tag, DiagramTag }) => ({
   // ?limit=&offset=&sort=&order= (see list-query.js) page and sort the result, the answer stays an array and X-Total-Count holds the full size.
   list: async (req, res, next) => {
     // The client of lab 5 sends the search text as ?search=. It means the same as ?q=, but a blank text keeps every diagram.
-    const { search, ...rest } = req.query;
+    const { search, tag, ...rest } = req.query;
     if (search !== undefined && (typeof search !== 'string' || search.trim().length > LIMITS.title)) {
       return next(badRequest(`search must be a string of at most ${LIMITS.title} characters`));
     }
     const term = (search ?? '').trim();
     const query = term && rest.q === undefined ? { ...rest, q: term } : rest;
     const { limit, offset, sort, order, notation, q } = parseListQuery(query, SORTABLE, { notations: NOTATIONS, maxQuery: LIMITS.title });
+    // ?tag= keeps only the diagrams that carry the tag (by name); an unknown tag gives an empty list.
+    let tagged;
+    if (tag !== undefined) {
+      const problem = tagProblem(tag);
+      if (problem !== true) return next(badRequest('Invalid list query', [{ field: 'tag', message: problem }]));
+      const found = await Tag.findOne({ where: { name: normalizeTag(tag) } });
+      tagged = found ? (await DiagramTag.findAll({ where: { tagId: found.id }, attributes: ['diagramId'], raw: true })).map((row) => row.diagramId) : [];
+    }
     const { count, rows } = await Diagram.findAndCountAll({
-      where: filterFor(Diagram.sequelize.getDialect(), { notation, q }),
+      where: { ...filterFor(Diagram.sequelize.getDialect(), { notation, q }), ...(tagged && { id: tagged }) },
       order: [
         [sort, order.toUpperCase()],
         ['id', 'ASC'],

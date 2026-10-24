@@ -2,6 +2,8 @@
   "title": 80,
   "sourceCode": 10000,
   "comment": 1000,
+  "tag": 30,
+  "tagsPerDiagram": 10,
   "email": 254,
   "passwordMin": 8,
   "passwordMaxBytes": 72,

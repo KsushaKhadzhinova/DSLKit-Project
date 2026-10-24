@@ -3,6 +3,7 @@ const { defineDiagram } = require('./diagram');
 const { defineUser } = require('./user');
 const { defineRequestLog } = require('./request-log');
 const { defineComment } = require('./comment');
+const { defineTag, defineDiagramTag } = require('./tag');
 const allConfigs = require('../../config/config');
 
 // Builds the connection from config/config.js; NODE_ENV picks the block.
@@ -20,7 +21,12 @@ const createModels = (config = allConfigs[process.env.NODE_ENV || 'development']
   Comment.belongsTo(Diagram, { foreignKey: 'diagramId', onDelete: 'CASCADE' });
   User.hasMany(Comment, { foreignKey: 'authorId', onDelete: 'CASCADE' });
   Comment.belongsTo(User, { foreignKey: 'authorId', onDelete: 'CASCADE' });
-  return { sequelize, Diagram, User, Comment, RequestLog: defineRequestLog(sequelize) };
+  // Tags: many-to-many through DiagramTags, both keys cascade, so a deleted diagram or tag removes only the link rows.
+  const Tag = defineTag(sequelize);
+  const DiagramTag = defineDiagramTag(sequelize);
+  Diagram.belongsToMany(Tag, { through: DiagramTag, foreignKey: 'diagramId', otherKey: 'tagId', onDelete: 'CASCADE' });
+  Tag.belongsToMany(Diagram, { through: DiagramTag, foreignKey: 'tagId', otherKey: 'diagramId', onDelete: 'CASCADE' });
+  return { sequelize, Diagram, User, Comment, Tag, DiagramTag, RequestLog: defineRequestLog(sequelize) };
 };
 
 module.exports = { createModels };

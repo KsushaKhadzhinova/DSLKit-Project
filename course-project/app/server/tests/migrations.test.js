@@ -33,9 +33,16 @@ const tableSql = async (sequelize, table) => (await sequelize.query(`SELECT sql 
 // Sequelize wraps the SQLite error, the original message still names the CHECK or the foreign key.
 const isCheckViolation = (error) => /CHECK constraint/i.test(error.original?.message ?? '');
 
-test('undoing migrations one by one drops the comments, then the log table, then the priority column, and keeps every CHECK and the foreign key rule', async () => {
+test('undoing migrations one by one drops the tags, then the comments, then the log table, then the priority column, and keeps every CHECK and the foreign key rule', async () => {
   db.cli('db:migrate:undo');
   let { sequelize } = open();
+  assert.equal(await tableSql(sequelize, 'Tags'), undefined);
+  assert.equal(await tableSql(sequelize, 'DiagramTags'), undefined);
+  assert.notEqual(await tableSql(sequelize, 'Comments'), undefined);
+  await sequelize.close();
+
+  db.cli('db:migrate:undo');
+  ({ sequelize } = open());
   assert.equal(await tableSql(sequelize, 'Comments'), undefined);
   assert.notEqual(await tableSql(sequelize, 'RequestLogs'), undefined);
   await sequelize.close();
@@ -63,6 +70,7 @@ test('undoing migrations one by one drops the comments, then the log table, then
   assert.equal((await columns(sequelize)).includes('priority'), true);
   assert.notEqual(await tableSql(sequelize, 'RequestLogs'), undefined);
   assert.notEqual(await tableSql(sequelize, 'Comments'), undefined);
+  assert.notEqual(await tableSql(sequelize, 'Tags'), undefined);
   await sequelize.close();
 });
 
@@ -73,7 +81,7 @@ test('undoing all migrations leaves an empty database and migrating again works 
   await sequelize.close();
   db.cli('db:migrate');
   ({ sequelize } = open());
-  assert.deepEqual((await sequelize.getQueryInterface().showAllTables()).sort(), ['Comments', 'Diagrams', 'RequestLogs', 'SequelizeMeta', 'Users']);
+  assert.deepEqual((await sequelize.getQueryInterface().showAllTables()).sort(), ['Comments', 'DiagramTags', 'Diagrams', 'RequestLogs', 'SequelizeMeta', 'Tags', 'Users']);
   await sequelize.close();
 });
 
