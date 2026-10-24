@@ -1,15 +1,16 @@
 import { Component } from 'react';
 import logoUrl from '../assets/logo.svg';
 import ErrorPage from './ErrorPage';
+import { kindOfError } from './errorCatalog';
 import SiteFooter from './SiteFooter';
 
 // Page 500: shown when rendering throws. A class component is required for error boundaries.
 // It sits outside the router and the providers, so it uses a plain link and only the logo in the header, as errors/500.html does.
 export default class ErrorBoundary extends Component {
-  state = { failed: false };
+  state = { failed: false, kind: '500' };
 
-  static getDerivedStateFromError() {
-    return { failed: true };
+  static getDerivedStateFromError(error) {
+    return { failed: true, kind: kindOfError(error) };
   }
 
   componentDidCatch(error) {
@@ -30,14 +31,9 @@ export default class ErrorBoundary extends Component {
           </div>
         </header>
         <main className="main" id="main">
-          <ErrorPage
-            code="500"
-            title="Ошибка 500: что-то пошло не так"
-            text="Приложение столкнулось с внутренней ошибкой и не смогло показать страницу. Причина на нашей стороне, сохранённые данные не потеряны."
-            hints={['Обновите страницу.', 'Вернитесь на главную и откройте нужный раздел заново.']}
-          >
+          <ErrorPage kind={this.state.kind}>
             <button type="button" className="button button--primary" onClick={() => window.location.reload()}>
-              Обновить страницу
+              {this.state.kind === 'network' ? 'Повторить' : 'Обновить страницу'}
             </button>
           </ErrorPage>
         </main>

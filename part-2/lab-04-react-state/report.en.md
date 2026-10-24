@@ -134,6 +134,8 @@ Figure 15 – Application page in the dark theme
 
 ### 3.9 Testing
 
+This work has no server and no routes, so the pages 401, 403 and 404 are not needed, and for the errors of the application itself there are two pages built from the catalogue of texts `src/shell/errorCatalog.js`. The 500 page is shown when an unexpected error occurs while rendering, and the "No connection to the server" page with a retry button is shown when a part of the code could not be downloaded. Each answers three questions: what the error is, why it happened and how to solve it. The technical text of the error goes to the console only and never reaches the page.
+
 Fifty-five automated tests check the pure functions, both hooks and the application behaviour: adding, deleting, editing with Enter and Esc, status switching, filters, sorting, list restoring, whitespace and huge values, unique creation time, broken storage data, markup rendered as text, the theme switch and the 500 page. The manual check is described in `README.md`, the content of `localStorage` is viewed in the Application tab of the developer tools.
 
 ## Conclusion
