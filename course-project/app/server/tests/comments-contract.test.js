@@ -12,7 +12,7 @@ const clientFields = () => {
   if (!existsSync(componentsDir)) return null;
   const files = readdirSync(componentsDir).filter((f) => /^Comment.*\.jsx$/.test(f));
   const fields = new Set();
-  for (const file of files) for (const match of readFileSync(join(componentsDir, file), 'utf8').matchAll(/\bcomment\.([a-zA-Z]+)\b/g)) fields.add(match[1]);
+  for (const file of files) for (const match of readFileSync(join(componentsDir, file), 'utf8').matchAll(/(?<!limits\.)\bcomment\.([a-zA-Z]+)\b/g)) fields.add(match[1]);
   fields.delete('pending');
   return [...fields];
 };
