@@ -1,4 +1,4 @@
-import { escapeXml, wrap } from './common.js';
+import { escapeXml, textWidth, wrap } from './common.js';
 import { INK, MUTED, layout, svgDocument, text } from './svg.js';
 
 const STUB = 56;
@@ -60,7 +60,7 @@ const sizeOfBox = (node, slots) => {
   return {
     lines,
     outline: 'box',
-    w: Math.max(190, Math.max(...lines.map((line) => line.length)) * 7 + 40, (Math.max(mine.control.length, mine.mechanism.length) + 1) * 70),
+    w: Math.max(190, Math.max(...lines.map((line) => textWidth(line))) + 40, (Math.max(mine.control.length, mine.mechanism.length) + 1) * 70),
     h: Math.max(110, lines.length * 18 + 60, (side + 1) * 26),
   };
 };

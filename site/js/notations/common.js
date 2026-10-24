@@ -26,6 +26,23 @@ export const parseHeader = (text) => {
   return match ? { notation: match[1].toLowerCase(), kind: (match[2] ?? '').toLowerCase(), title: unquote(match[3] ?? '') } : null;
 };
 
+// The width of a line of text in pixels, from the widths of letters in a typical sans-serif face (Helvetica, Arial), in units of the font size.
+// The earlier rule of seven pixels for every character was too narrow for capitals and wide letters (W, M, Ж, Ш) and too wide for narrow ones (i, l, t),
+// so a label could run over the edge of its shape or leave it half empty.
+const NARROW = new Set([...` .,:;!|'\`ijlI`]);
+const SLIM = new Set([...'()[]{}-/\\trf']);
+const WIDE = new Set([...'mwMWЖШЩЮЫжшщюы']);
+export const textWidth = (line, size = 12) =>
+  [...String(line)].reduce((sum, char) => {
+    let em = 0.55;
+    if (NARROW.has(char)) em = 0.28;
+    else if (SLIM.has(char)) em = 0.34;
+    else if (WIDE.has(char)) em = 0.84;
+    else if (/[0-9]/.test(char)) em = 0.56;
+    else if (char !== char.toLowerCase()) em = 0.68;
+    return sum + em * size;
+  }, 0);
+
 // Greedy word wrap that keeps explicit line breaks.
 export const wrap = (text, width) =>
   String(text)

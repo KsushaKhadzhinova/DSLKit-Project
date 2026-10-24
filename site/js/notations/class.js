@@ -1,4 +1,4 @@
-import { ID, STR, escapeXml, findCycle, problem, quoteDot, unquote } from './common.js';
+import { ID, STR, escapeXml, findCycle, problem, quoteDot, textWidth, unquote } from './common.js';
 import { INK, MUTED, renderLayout, text } from './svg.js';
 
 const CLASS = new RegExp(`^(class|abstract class|interface)\\s+(${ID})(?:\\s+${STR})?\\s*(\\{)?\\s*$`);
@@ -186,7 +186,7 @@ const sizeOf = (cls) => {
   return {
     lines: rows,
     outline: 'box',
-    w: Math.max(...[cls.label, stereotype(cls), ...rows].map((row) => row.length), 10) * 7 + 28,
+    w: Math.ceil(Math.max(...[cls.label, stereotype(cls), ...rows].map((row) => textWidth(row)), 70) + 28),
     h: head * 20 + 12 + (Math.max(attrsOf(cls).length, 1) + Math.max(methodsOf(cls).length, 1)) * ROW,
   };
 };
