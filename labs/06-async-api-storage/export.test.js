@@ -2,7 +2,9 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
 import { JSDOM } from 'jsdom';
+import { showCode } from '../../site/js/components/code-lines.js';
 import { initExport } from '../../site/js/components/export-menu.js';
+import { TEMPLATES } from '../../site/js/notations/index.js';
 import { drawioFile, fileName, htmlFile, rasterize, serializeSvg, sizeOf } from '../../site/js/utils/exporters.js';
 
 const editorHtml = readFileSync('site/app/editor.html', 'utf8');
@@ -204,7 +206,7 @@ test('the buttons of the menu start the export and the English page speaks Engli
   context.document.querySelector('[data-export="svg"]').click();
   await new Promise((resolve) => setTimeout(resolve, 0));
   assert.equal(context.saved.length, 1);
-  assert.equal(context.document.querySelectorAll('[data-export]').length, 5);
+  assert.equal(context.document.querySelectorAll('[data-export]').length, 7);
   const english = editor(editorHtmlEn);
   english.remote.hidden = true;
   await english.api.exportAs('svg');
@@ -212,7 +214,7 @@ test('the buttons of the menu start the export and the English page speaks Engli
   draw(english);
   await english.api.exportAs('svg');
   assert.match(english.status.textContent, /^File .*\.svg saved\.$/);
-  assert.equal(english.document.querySelectorAll('[data-export]').length, 5);
+  assert.equal(english.document.querySelectorAll('[data-export]').length, 7);
 });
 
 test('the file is handed to the browser as a download link', () => {
@@ -250,4 +252,40 @@ test('the export works on a page without a status line', async () => {
   window.document.querySelector('.canvas__remote').replaceChildren(svgOf(window));
   assert.equal(await api.exportAs('svg'), true);
   assert.deepEqual(saved, ['a.svg']);
+});
+
+const withCode = (context, source) => showCode(context.document, context.document.querySelector('.code__lines'), source);
+const textOf = (blob) => blob.text();
+
+test('flowcharts, sequence and state diagrams are exported as Mermaid and PlantUML files that the importer reads back', async () => {
+  const context = editor();
+  withCode(context, TEMPLATES['uml-sequence']);
+  assert.equal(await context.api.exportAs('plantuml'), true, 'no drawing is needed for a text file');
+  assert.match(context.saved.at(-1).name, /\.puml$/);
+  assert.match(await textOf(context.saved.at(-1).blob), /^@startuml[\s\S]*@enduml\n$/);
+  assert.equal(await context.api.exportAs('mermaid'), true);
+  assert.match(context.saved.at(-1).name, /\.mmd$/);
+  assert.match(await textOf(context.saved.at(-1).blob), /^sequenceDiagram/);
+  withCode(context, TEMPLATES['uml-state']);
+  assert.equal(await context.api.exportAs('mermaid'), true);
+  assert.match(await textOf(context.saved.at(-1).blob), /^stateDiagram-v2/);
+  withCode(context, TEMPLATES.graph);
+  assert.equal(await context.api.exportAs('mermaid'), true);
+  assert.match(await textOf(context.saved.at(-1).blob), /^flowchart/);
+  assert.match(context.status.textContent, /сохранён/);
+});
+
+test('a notation without a reverse mapping, or a format it lacks, is refused with an explanation', async () => {
+  const context = editor();
+  withCode(context, TEMPLATES.bpmn);
+  assert.equal(await context.api.exportAs('mermaid'), false);
+  assert.match(context.status.textContent, /нельзя выгрузить/);
+  withCode(context, TEMPLATES.graph);
+  assert.equal(await context.api.exportAs('plantuml'), false, 'a graph has no PlantUML form');
+  assert.equal(context.saved.length, 0);
+  const english = editor(editorHtmlEn);
+  withCode(english, TEMPLATES.erd);
+  assert.equal(await english.api.exportAs('plantuml'), false);
+  assert.match(english.status.textContent, /cannot be exported/);
+  english.document.querySelector('[data-export="mermaid"]').click();
 });

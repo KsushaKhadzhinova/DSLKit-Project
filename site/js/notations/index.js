@@ -140,3 +140,9 @@ export const renderNotation = (model) => NOTATIONS[keyOf(model)].render(model);
 
 export const notationName = (model, lang) => NOTATIONS[keyOf(model)].name[lang === 'en' ? 'en' : 'ru'];
 export const notationShort = (model) => NOTATIONS[keyOf(model)].short;
+
+// The notations whose code can be handed to other tools as PlantUML or Mermaid text: the same three kinds the importer reads back.
+const SOURCE_EXPORT = { graph: ['mermaid'], 'uml-sequence': ['mermaid', 'plantuml'], 'uml-state': ['mermaid', 'plantuml'] };
+
+// The text of the diagram in the wanted language, or null when the notation has no faithful reverse mapping in it.
+export const sourceExport = (model, format) => (SOURCE_EXPORT[keyOf(model)]?.includes(format) ? NOTATIONS[keyOf(model)].generators[format](model) : null);

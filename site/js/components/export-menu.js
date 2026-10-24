@@ -1,4 +1,4 @@
-import { parseDiagram } from '../notations/index.js';
+import { parseDiagram, sourceExport } from '../notations/index.js';
 import { drawioFile, fileName, htmlFile, rasterize, serializeSvg, sizeOf } from '../utils/exporters.js';
 import { readCode } from './code-lines.js';
 
@@ -7,8 +7,14 @@ const TEXT = {
     none: 'Нет диаграммы для экспорта: сначала нажмите «Запустить».',
     saved: (name) => `Файл ${name} сохранён.`,
     failed: 'Не удалось подготовить файл. Попробуйте ещё раз.',
+    unsupported: 'Код этой диаграммы нельзя выгрузить в этот язык: он доступен для блок-схем (Graph), диаграмм последовательности и состояний.',
   },
-  en: { none: 'There is no diagram to export: press Run first.', saved: (name) => `File ${name} saved.`, failed: 'The file could not be prepared. Try again.' },
+  en: {
+    none: 'There is no diagram to export: press Run first.',
+    saved: (name) => `File ${name} saved.`,
+    failed: 'The file could not be prepared. Try again.',
+    unsupported: 'The code of this diagram cannot be exported to this language: it works for flowcharts (Graph), sequence and state diagrams.',
+  },
 };
 
 // The browser downloads a file when a link to a temporary address of the data is clicked.
@@ -23,7 +29,17 @@ const download = (root) => (blob, name) => {
   URL.revokeObjectURL(link.href);
 };
 
+// Text formats are made from the code, not from the drawing: they need no diagram on the canvas, but the notation must have a reverse mapping.
+const textFile =
+  (format) =>
+  ({ model, window }) => {
+    const text = sourceExport(model, format);
+    return text === null ? null : new window.Blob([`${text}\n`], { type: 'text/plain;charset=utf-8' });
+  };
+
 const FORMATS = {
+  plantuml: { extension: 'puml', text: true, make: textFile('plantuml') },
+  mermaid: { extension: 'mmd', text: true, make: textFile('mermaid') },
   svg: { extension: 'svg', make: ({ svg, window }) => new window.Blob([serializeSvg(svg, window)], { type: 'image/svg+xml' }) },
   png: { extension: 'png', make: ({ svg, window }) => rasterize({ svg, window, type: 'image/png' }) },
   jpeg: { extension: 'jpg', make: ({ svg, window }) => rasterize({ svg, window, type: 'image/jpeg' }) },
@@ -52,14 +68,19 @@ export const initExport = ({ root = document, save = download(root) } = {}) => {
 
   const exportAs = async (format) => {
     const svg = page.querySelector('.canvas__remote:not([hidden]) svg');
-    if (!svg || !(format in FORMATS)) {
+    if (!(format in FORMATS) || (!svg && !FORMATS[format].text)) {
       say(TEXT[lang].none);
       return false;
     }
     const source = readCode(page.querySelector('.code__lines'));
-    const { title } = parseDiagram(source);
+    const model = parseDiagram(source);
+    const { title } = model;
     try {
-      const blob = await FORMATS[format].make({ svg, window: root.defaultView, title, source, lang });
+      const blob = await FORMATS[format].make({ svg, window: root.defaultView, title, source, lang, model });
+      if (blob === null) {
+        say(TEXT[lang].unsupported);
+        return false;
+      }
       const name = fileName(title, FORMATS[format].extension);
       save(blob, name);
       say(TEXT[lang].saved(name));
