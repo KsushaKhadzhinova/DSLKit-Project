@@ -235,6 +235,26 @@ select.form__input {
   list-style: disc;
 }
 
+.error__heading {
+  margin-top: var(--space-2);
+  font-size: var(--step-1);
+  font-weight: 700;
+}
+
+.error__list--steps {
+  list-style: decimal;
+}
+
+.error-details {
+  margin-top: var(--space-2);
+  color: var(--color-text-light);
+}
+
+.error-details summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+
 .error__list li::marker {
   color: var(--color-primary);
 }

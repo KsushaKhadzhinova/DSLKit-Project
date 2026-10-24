@@ -78,6 +78,8 @@ For an unknown path a styled 404 page is shown, and it is visible in figure 5.
 
 Figure 5 – The page "Ошибка 404: страница не найдена" in the site style
 
+The error pages are built from one catalogue of texts, `src/shell/errorCatalog.js`, and each answers three questions: what the error is, why it happened and how to solve it. This is how 404 (no such page), 403 (the role is not enough), 500 (a failure while showing a page) and the "No connection to the server" page work, and the error boundary shows the last one when a piece of code could not be downloaded. Error 401 is explained on the sign-in form: a guest whom `PrivateRoute` sent to `/login` sees a folded block "Error 401: why am I here and what to do".
+
 A guest who opens `/dashboard` lands on the login form with a hint, as in figure 6.
 
 ![Redirect to login](figures/06-redirect-to-login.png)

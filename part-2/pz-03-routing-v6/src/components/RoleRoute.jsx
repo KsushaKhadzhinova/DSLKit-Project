@@ -6,12 +6,7 @@ import { usePageTitle } from '../usePageTitle';
 export function Forbidden() {
   usePageTitle('Доступ запрещён');
   return (
-    <ErrorPage
-      code="403"
-      title="Ошибка 403: доступ запрещён"
-      text="Эта страница доступна только роли администратора. Вы вошли под обычной ролью."
-      hints={['Вернитесь в личный кабинет.', 'Войдите под именем admin, чтобы открыть раздел администратора.']}
-    >
+    <ErrorPage kind="403">
       <Link className="button button--primary" to="/dashboard">
         В личный кабинет
       </Link>

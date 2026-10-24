@@ -3,7 +3,7 @@ import { Link, Navigate, useLocation, useNavigate, useParams } from 'react-route
 import { safeReturnPath, useAuth, validateUserName } from '../auth';
 import { findTemplate } from '../data/templates';
 import limits from '../limits.json';
-import ErrorPage from '../shell/ErrorPage';
+import ErrorPage, { ErrorDetails } from '../shell/ErrorPage';
 import { usePageTitle } from '../usePageTitle';
 import PageHead from './PageHead';
 
@@ -102,6 +102,7 @@ export function Login() {
           <p className="note__text" role="alert">
             Эта страница доступна после входа.
           </p>
+          <ErrorDetails kind="401" summary="Ошибка 401: почему я здесь и что делать" />
         </div>
       )}
       <form className="form" onSubmit={handleSubmit} noValidate>
@@ -139,16 +140,7 @@ export function Login() {
 export function NotFound() {
   usePageTitle('Страница не найдена');
   return (
-    <ErrorPage
-      code="404"
-      title="Ошибка 404: страница не найдена"
-      text="По этому адресу нет страницы DSLKit. Возможно, в адресе есть опечатка, страница была переименована или перенесена, либо ссылка, по которой вы пришли, устарела."
-      hints={[
-        'Проверьте адрес в строке браузера: написание слов, регистр букв и наклонные черты между разделами.',
-        'Вернитесь на предыдущую страницу и перейдите по ссылке из меню или нижней навигации.',
-        'Откройте главную страницу и найдите нужный раздел.',
-      ]}
-    >
+    <ErrorPage kind="404">
       <Link className="button button--primary" to="/">
         На главную
       </Link>
