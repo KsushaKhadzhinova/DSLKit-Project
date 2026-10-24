@@ -559,6 +559,8 @@ const { badRequest } = require('../errors');
 const MAX_LIMIT = 100;
 const MAX_OFFSET = 1000000;
 const ORDERS = ['asc', 'desc'];
+// A control character such as NUL cannot be in a title, and some databases fail on it inside a query text, so the search refuses it.
+const CONTROL = /[\u0000-\u001f\u007f-\u009f]/;
 
 // Reads ?limit=, ?offset=, ?sort=, ?order=, ?notation= and ?q= from req.query.
 // sortable: the field names a client may sort by (a whitelist, so a field name never reaches the database unchecked).
@@ -595,7 +597,7 @@ const parseListQuery = (query, sortable, filters = {}) => {
   let q;
   if (query.q !== undefined) {
     const text = typeof query.q === 'string' ? query.q.trim() : '';
-    if (text === '' || text.length > maxQuery) problems.push({ field: 'q', message: `q must be text of 1 to ${maxQuery} characters` });
+    if (text === '' || text.length > maxQuery || CONTROL.test(text)) problems.push({ field: 'q', message: `q must be text of 1 to ${maxQuery} characters without control characters` });
     else q = text.toLowerCase();
   }
 
