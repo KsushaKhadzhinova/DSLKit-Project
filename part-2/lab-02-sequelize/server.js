@@ -1,5 +1,6 @@
 const { createApp } = require('./src/app');
 const { createModels } = require('./src/models');
+const { startLogRetention } = require('./src/middleware/request-log');
 
 const port = Number(process.env.PORT) || 3000;
 const models = createModels();
@@ -8,6 +9,8 @@ models.sequelize
   .authenticate()
   .then(() => {
     const server = createApp(models).listen(port, () => console.log(`Server running on http://localhost:${port}`));
+    // The request log holds client addresses, so rows older than 30 days are deleted (at the start and every hour).
+    startLogRetention(models);
     // Graceful stop: no new connections, requests in flight finish, the database connection closes, then the process ends.
     const SHUTDOWN_GRACE_MS = 5000;
     const stop = (signal) => {
