@@ -1,4 +1,4 @@
-import { escapeXml, wrap } from './common.js';
+import { escapeXml, textWidth, wrap } from './common.js';
 
 export const INK = '#1e293b';
 export const MUTED = '#475569';
@@ -247,14 +247,26 @@ export const renderLayout = ({ title, nodes, edges, size, draw, style, labelOf }
 };
 
 // Standard node sizing: label lines drive the width, minimums keep symbols recognisable.
+// The text block must lie inside the outline: a rectangle needs only a margin, but the corners of the text of a diamond or an ellipse are
+// cut by its edge, so those shapes grow until the whole block fits (a block of width a and height b fits a diamond of width w and height h
+// when a/w + b/h <= 1, and an ellipse when (a/w)^2 + (b/h)^2 <= 1).
+export const fitOutline = (outline, textW, textH, minW, minH) => {
+  if (outline === 'diamond') {
+    const h = Math.max(minH, 2 * textH + 24);
+    return { w: Math.max(minW, (textW + 12) / (1 - textH / h)), h };
+  }
+  if (outline === 'ellipse') {
+    const h = Math.max(minH, textH * 1.7 + 16);
+    return { w: Math.max(minW, (textW + 14) / Math.sqrt(1 - (textH / h) ** 2)), h };
+  }
+  return { w: Math.max(minW, textW + 28), h: Math.max(minH, textH + 20) };
+};
+
 export const sizer = (minW, minH, outline, wrapAt) => (node) => {
   const lines = wrap(node.label, wrapAt);
-  return {
-    lines,
-    outline,
-    w: Math.max(minW, Math.max(...lines.map((line) => line.length)) * 7 + 28),
-    h: Math.max(minH, lines.length * (LINE + 3) + 20),
-  };
+  const textW = Math.max(...lines.map((line) => textWidth(line)));
+  const { w, h } = fitOutline(outline, textW, lines.length * (LINE + 3), minW, minH);
+  return { lines, outline, w: Math.ceil(w), h: Math.ceil(h) };
 };
 
 export const fixed = (w, h, outline, wrapAt) => (node) => ({ lines: wrap(node.label, wrapAt), outline, w, h });

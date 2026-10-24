@@ -1,4 +1,4 @@
-import { problem, wrap } from './common.js';
+import { problem, textWidth, wrap } from './common.js';
 import { checkFlow, defineGraph, plain } from './graph.js';
 import { fixed, sizer } from './svg.js';
 
@@ -6,19 +6,20 @@ const still = (look) => () => look;
 const ARROW = still({ end: 'arrow' });
 const DASHED = still({ end: 'arrow', dash: true });
 const LINE = still({});
-const longest = (lines) => Math.max(...lines.map((line) => line.length));
+const longest = (lines) => Math.max(...lines.map((line) => textWidth(line)));
 
 // A circle that grows with its label.
 const roundSize = (min, wrapAt) => (node) => {
   const lines = wrap(node.label, wrapAt);
-  const d = Math.max(min, longest(lines) * 7 + 30, lines.length * 18 + 30);
+  // The text block is a rectangle inscribed in the circle, so the diameter is its diagonal plus a margin.
+  const d = Math.ceil(Math.max(min, Math.hypot(longest(lines), lines.length * 15) + 16));
   return { lines, outline: 'ellipse', w: d, h: d };
 };
 
 // A symbol whose width is 1.5 times its height, as the GOST flowchart symbols are drawn.
 const ratioSize = (a, wrapAt, outline) => (node) => {
   const lines = wrap(node.label, wrapAt);
-  const h = Math.max(a, lines.length * 18 + 16, (longest(lines) * 7 + 28) / 1.5);
+  const h = Math.ceil(Math.max(a, lines.length * 18 + 16, (longest(lines) + 28) / 1.5));
   return { lines, outline, w: h * 1.5, h };
 };
 

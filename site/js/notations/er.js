@@ -1,4 +1,4 @@
-import { ID, STR, escapeXml, parseAttrs, problem, quoteDot, unquote } from './common.js';
+import { ID, STR, escapeXml, parseAttrs, problem, quoteDot, textWidth, unquote } from './common.js';
 import { INK, MUTED, renderLayout, text } from './svg.js';
 
 const ENTITY = new RegExp(`^entity\\s+(${ID})(?:\\s+${STR})?((?:\\s+[\\w-]+)*?)\\s*(\\{)?\\s*$`);
@@ -167,7 +167,7 @@ const sizeOf = (node) => {
   return {
     lines: rows,
     outline: 'box',
-    w: Math.max(node.label.length, ...rows.map((row) => row.length)) * 7 + 28,
+    w: Math.ceil(Math.max(textWidth(node.label), ...rows.map((row) => textWidth(row))) + 28),
     h: HEAD + Math.max(rows.length, 1) * ROW + 10,
   };
 };
