@@ -43,6 +43,19 @@ test('every request is written to the request log collection, control characters
   assert.ok(entry.createdAt instanceof Date);
 });
 
+test('the query string never reaches the request log, and old log rows expire after the retention period', async () => {
+  await call('GET', '/diagrams?token=secret-token-123&q=private%20search');
+  const entries = await models.RequestLog.find({}).lean();
+  const dump = JSON.stringify(entries);
+  assert.ok(!dump.includes('secret-token-123') && !dump.includes('private'), 'the query string is in the log: ' + dump);
+  assert.equal(entries[0].path, '/diagrams');
+  await models.RequestLog.init();
+  const indexes = await models.RequestLog.collection.indexes();
+  const ttl = indexes.find((index) => index.key.createdAt === 1);
+  assert.ok(ttl, 'no index on createdAt');
+  assert.equal(ttl.expireAfterSeconds, 30 * 24 * 60 * 60);
+});
+
 test('a failed log write shows 500 and does not leak the reason', async (t) => {
   t.mock.method(console, 'error', () => {});
   t.mock.method(models.RequestLog, 'create', async () => {

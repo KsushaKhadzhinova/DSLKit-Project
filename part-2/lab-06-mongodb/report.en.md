@@ -534,6 +534,7 @@ seed().catch((error) => {
   "priorityDefault": 1,
   "listLimitMax": 100,
   "listSkipMax": 100000,
-  "pathLog": 200
+  "pathLog": 200,
+  "logRetentionDays": 30
 }
 ```
