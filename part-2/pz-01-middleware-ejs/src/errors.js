@@ -97,6 +97,34 @@ export const CATALOG = {
     why: ['The folder of the file does not exist or cannot be written.', 'The disk is full or read-only.', 'Another program holds the file open.'],
     fix: ['Make sure the folder can be written, then press "Export the log to a file" again.', 'The setting LOG_EXPORT_FILE chooses the place of the file.'],
   },
+  'log-path-is-folder': {
+    status: 500,
+    heading: 'A folder stands in the place of the log file',
+    what: 'The server needs a file at this place to keep the log, and there is a folder with the same name instead, so it cannot read or write the log here.',
+    why: [
+      'Somebody created a folder with the name of the log file inside the folder of the logs.',
+      'The file was deleted or renamed and a folder was made in its place.',
+    ],
+    fix: [
+      'Delete or rename the folder that has the name of the log file, then press "Export the log to a file" again.',
+      'Or choose another place of the file with the settings LOG_EXPORT_FILE and DB_FILE.',
+    ],
+  },
+  'log-folder-access': {
+    status: 500,
+    heading: 'No access to the folder of the log',
+    what: 'The server has no right to use the folder where the log is kept, or the folder cannot be created, so the log was not read or written.',
+    why: [
+      'The rights of the folder were changed: this program may not read or write there.',
+      'A file stands in the place of a folder in the path, so the folder cannot be created.',
+      'The disk is read-only or the folder is on a drive that is not connected.',
+    ],
+    fix: [
+      'Give the program the right to read and write in the folder, or choose another folder with LOG_EXPORT_FILE and DB_FILE.',
+      'Make sure no file has the name of a folder in the path.',
+      'Then reload the page or press "Export the log to a file" again.',
+    ],
+  },
 };
 
 // An error the person should read about: the code picks the page of the catalog, the cause stays on the console.
@@ -112,3 +140,13 @@ export class UserError extends Error {
 
 // The entry for an error: its own code first, then its HTTP status, then the general 500 page.
 export const entryFor = (err, status) => CATALOG[err.userCode] ?? CATALOG[status] ?? CATALOG[status >= 500 ? 500 : 400];
+
+const NOT_A_FILE = new Set(['EISDIR']);
+const NO_ACCESS = new Set(['EACCES', 'EPERM', 'EROFS', 'ENOTDIR', 'EBUSY', 'ENOSPC']);
+
+// The code of the catalog for a system error of the file system, so the page says "no access to the folder" and not "EACCES".
+export const fileFailure = (error, fallback) => {
+  if (NOT_A_FILE.has(error?.code)) return 'log-path-is-folder';
+  if (NO_ACCESS.has(error?.code)) return error.code === 'EBUSY' || error.code === 'ENOSPC' ? fallback : 'log-folder-access';
+  return fallback;
+};

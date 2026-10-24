@@ -151,16 +151,17 @@ test('the teacher deletes the log file: the download shows a page that explains 
   }
 });
 
-test('a folder or something else in the place of the file is also "not found", never a crash', async () => {
+test('a folder in the place of the file gets its own page, never a crash', async () => {
   const app = await start();
   try {
     mkdirSync(app.logFile);
     const res = await fetch(`${app.base}/log/download?auth=1`);
     const html = await res.text();
-    assert.equal(res.status, 404);
+    assert.equal(res.status, 500);
+    assert.match(html, /A folder stands in the place of the log file/);
     threeParts(html);
     noInternals(html, app.dir);
-    assert.equal(await describeFile(app.logFile), null);
+    assert.deepEqual(await describeFile(app.logFile), { folder: true });
   } finally {
     await app.close();
   }
@@ -189,7 +190,7 @@ test('the file disappears between the check and the opening: still the page for 
     };
     await assert.rejects(
       sendLogFile(res, app.logFile, () => {}, denied),
-      (error) => error instanceof UserError && error.userCode === 'log-file-unreadable',
+      (error) => error instanceof UserError && error.userCode === 'log-folder-access',
     );
   } finally {
     await app.close();
@@ -243,7 +244,7 @@ test('an export that cannot be written keeps the old file and shows the page abo
     const res = await app.post('/log/export?auth=1', s);
     const html = await res.text();
     assert.equal(res.status, 500);
-    assert.match(html, /<h1[^>]*>The log could not be exported<\/h1>/);
+    assert.match(html, /<h1[^>]*>(The log could not be exported|A folder stands in the place of the log file)<\/h1>/);
     threeParts(html);
     noInternals(html, app.dir);
     assert.equal(readFileSync(app.logFile, 'utf8'), before, 'the old file was damaged');
@@ -252,18 +253,17 @@ test('an export that cannot be written keeps the old file and shows the page abo
   }
 });
 
-test('an export into a folder that does not exist shows the page about the export and leaves no file', async () => {
-  const app = await start({ logFile: join(tmpdir(), `pz1-missing-${process.pid}`, 'deep', 'log.txt') });
+test('an export into a folder that does not exist makes the folder and writes the file', async () => {
+  const root = join(tmpdir(), `pz1-missing-${process.pid}`);
+  const app = await start({ logFile: join(root, 'deep', 'log.txt') });
   try {
     const s = await app.session();
     const res = await app.post('/log/export?auth=1', s);
-    const html = await res.text();
-    assert.equal(res.status, 500);
-    threeParts(html);
-    assert.match(html, /folder of the file does not exist/);
-    assert.equal(existsSync(join(tmpdir(), `pz1-missing-${process.pid}`)), false);
+    assert.equal(res.status, 302);
+    assert.equal(existsSync(join(root, 'deep', 'log.txt')), true);
   } finally {
     await app.close();
+    rmSync(root, { recursive: true, force: true });
   }
 });
 

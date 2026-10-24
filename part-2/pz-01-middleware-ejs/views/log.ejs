@@ -4,7 +4,7 @@
   <p class="section__lead">The last <%= rows.length %> rows of the <code>request_log</code> table in the database.</p>
   <% if (exported) { %><p class="note" role="status">The log was written to the file.</p><% } %>
   <p class="section__lead">
-    <% if (file) { %>Exported file: <%= file.size %> bytes, written <time datetime="<%= file.time %>"><%= formatTime(file.time) %></time>.<% } else { %>The log has not been exported to a file yet, or the file was deleted.<% } %>
+    <% if (file && file.folder) { %>A folder stands in the place of the exported file: delete or rename it, then export again.<% } else if (file) { %>Exported file: <%= file.size %> bytes, written <time datetime="<%= file.time %>"><%= formatTime(file.time) %></time>.<% } else { %>The log has not been exported to a file yet, or the file was deleted.<% } %>
   </p>
   <div class="actions">
     <form method="post" action="/log/export<%= authQuery %>">

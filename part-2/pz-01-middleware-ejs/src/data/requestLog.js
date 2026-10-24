@@ -1,7 +1,7 @@
 import { DatabaseSync } from 'node:sqlite';
-import { existsSync, mkdirSync } from 'node:fs';
+import { existsSync, mkdirSync, statSync } from 'node:fs';
 import { dirname } from 'node:path';
-import { UserError } from '../errors.js';
+import { UserError, fileFailure } from '../errors.js';
 
 const CREATE_TABLE = `
   CREATE TABLE IF NOT EXISTS request_log (
@@ -22,6 +22,7 @@ export const openRequestLog = (file = ':memory:') => {
     if (statements) return statements;
     // The folder is made only when it is missing: mkdir on the root of a drive (E:/) fails on Windows even with recursive.
     if (file !== ':memory:' && !existsSync(dirname(file))) mkdirSync(dirname(file), { recursive: true });
+    if (file !== ':memory:' && existsSync(file) && statSync(file).isDirectory()) throw Object.assign(new Error('a folder stands in the place of the file'), { code: 'EISDIR' });
     const opened = new DatabaseSync(file);
     try {
       opened.exec(CREATE_TABLE);
@@ -45,7 +46,7 @@ export const openRequestLog = (file = ':memory:') => {
       try {
         return action(...args);
       } catch (error) {
-        throw error instanceof UserError ? error : new UserError('log-database-unavailable', error);
+        throw error instanceof UserError ? error : new UserError(fileFailure(error, 'log-database-unavailable'), error);
       }
     };
   return {
