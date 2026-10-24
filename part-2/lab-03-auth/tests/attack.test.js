@@ -307,3 +307,18 @@ test('an enormous number of registrations or diagrams from one client is limited
     await app.close();
   }
 });
+
+test('retest: a search text with a NUL or another control character is refused with 400 for a signed-in user, it used to answer 500', async () => {
+  const app = await startServer();
+  try {
+    const token = await app.tokenFor('search@example.test');
+    for (const q of ['%00', 'a%00b', '%07', '%1b%5b31m', '%0a']) {
+      const { res, body } = await app.call('GET', `/diagrams?q=${q}`, { token });
+      assert.equal(res.status, 400, `q=${q} gave ${res.status}`);
+      assert.equal(body.details[0].field, 'q');
+    }
+    assert.equal((await app.call('GET', '/diagrams?q=%D0%B4%D0%B8%D0%B0', { token })).res.status, 200);
+  } finally {
+    await app.close();
+  }
+});

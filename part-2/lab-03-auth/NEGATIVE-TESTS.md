@@ -54,3 +54,4 @@
 | `title` из одних невидимых символов | 201 | 400, как для пустой строки. Исправлено в `src/middleware/validate.js` (`INVISIBLE`) |
 
 Отчёты `report.md` и `report.en.md` пересобраны (`node tools/build.js part-2/lab-03-auth` из корня репозитория): в них встроены `auth.js` и `validate-auth.js`.
+| Поиск `?q=` с символом NUL или другим управляющим (`%00`, `%07`) | 500: SQLite обрывал запрос с таким символом в тексте | 400 `q must be text of 1 to 80 characters without control characters`. Исправлено в `src/middleware/list-query.js`, найдено нагрузочным прогоном `tests/attack.test.js` и `tests/resilience.test.js` |
