@@ -31,8 +31,17 @@ process.on('SIGINT', () => {
 
 // Only code lines are mutated: comments and strings are skipped by a simple scan.
 const swaps = [
-  ['===', '!=='], ['!==', '==='], ['<=', '<'], ['>=', '>'], ['&&', '||'], ['||', '&&'],
-  [' < ', ' <= '], [' > ', ' >= '], ['true', 'false'], ['false', 'true'], ['.length', '.length + 1'],
+  ['===', '!=='],
+  ['!==', '==='],
+  ['<=', '<'],
+  ['>=', '>'],
+  ['&&', '||'],
+  ['||', '&&'],
+  [' < ', ' <= '],
+  [' > ', ' >= '],
+  ['true', 'false'],
+  ['false', 'true'],
+  ['.length', '.length + 1'],
 ];
 const mutants = [];
 original.split('\n').forEach((line, index) => {
@@ -50,13 +59,14 @@ original.split('\n').forEach((line, index) => {
   }
   for (const match of code.matchAll(/\b(\d+)\b/g)) {
     const before = code.slice(0, match.index);
-    if ((before.match(/['"`]/g) ?? []).length % 2 === 0 && Number(match[1]) > 1) mutants.push({ line: index, at: match.index, from: match[1], to: String(Number(match[1]) + 1) });
+    if ((before.match(/['"`]/g) ?? []).length % 2 === 0 && Number(match[1]) > 1)
+      mutants.push({ line: index, at: match.index, from: match[1], to: String(Number(match[1]) + 1) });
   }
 });
 
 // A fixed seed picks the same sample every run.
 let seed = 42;
-const random = () => ((seed = (seed * 1664525 + 1013904223) % 4294967296) / 4294967296);
+const random = () => (seed = (seed * 1664525 + 1013904223) % 4294967296) / 4294967296;
 const sample = mutants.sort(() => random() - 0.5).slice(0, max);
 
 const env = { ...process.env };
@@ -78,7 +88,8 @@ for (const [number, mutant] of sample.entries()) {
   fs.writeFileSync(file, lines.join('\n'));
   const result = run();
   restore();
-  if (result.error && result.error.code === 'ETIMEDOUT') killed += 1; // a hang is noticed too
+  if (result.error && result.error.code === 'ETIMEDOUT')
+    killed += 1; // a hang is noticed too
   else if (result.status === 0) survivors.push({ ...mutant, text: line.trim() });
   else killed += 1;
   if (/SyntaxError/.test(`${result.stderr}${result.stdout}`)) broken += 1;
@@ -86,6 +97,8 @@ for (const [number, mutant] of sample.entries()) {
 }
 restore();
 const score = sample.length === 0 ? 100 : Math.round((killed / sample.length) * 100);
-console.log(`\n\nFile: ${path.relative(process.cwd(), file)}\nMutants tried: ${sample.length} (of ${mutants.length}), killed: ${killed}, survived: ${survivors.length}, syntax-broken: ${broken}\nMutation score: ${score} percent\n`);
+console.log(
+  `\n\nFile: ${path.relative(process.cwd(), file)}\nMutants tried: ${sample.length} (of ${mutants.length}), killed: ${killed}, survived: ${survivors.length}, syntax-broken: ${broken}\nMutation score: ${score} percent\n`,
+);
 for (const s of survivors) console.log(`  line ${s.line + 1}: "${s.from}" -> "${s.to}"   ${s.text.slice(0, 100)}`);
 process.exit(0);

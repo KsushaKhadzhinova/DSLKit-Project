@@ -22,8 +22,10 @@ const withPosition = (line, value) => {
   return parts.join('');
 };
 
-// Writes the place of a node into the code. Returns the new code, or null when the code has no such node.
+// Writes the place of a node into the code. Returns the new code, or null when the code has no such node
+// or the place is not a finite number (NaN or Infinity would be written as text and saved with the code).
 export const setNodePosition = (source, id, x, y) => {
+  if (!Number.isFinite(round(x)) || !Number.isFinite(round(y))) return null;
   const lines = String(source).split('\n');
   const index = lines.findIndex((line) => declares(line, id));
   if (index < 0) return null;
