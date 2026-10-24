@@ -26,7 +26,7 @@ git clone https://github.com/KsushaKhadzhinova/DSLKit-Project
 cd DSLKit-Project
 git checkout work/part1-finish        # Part 1: the site and labs 1–8
 npm install
-npm test                              # 608 tests, 100% coverage
+npm test                              # 648 tests, 100% coverage
 npm start                             # the site at http://localhost:5173
 ```
 
@@ -42,7 +42,8 @@ The Part 2 works live in their own branches (`lab21`, `lab12`, `23`, `24`, `25`,
 - a 5-step tour (once, then from the "Show tour" menu item);
 - PWA: manifest, icons, service worker;
 - dragging of blocks (mouse, finger, arrows): the place is written to the code as `pos=XxY`;
-- six new notations (33 in all): mind map, org chart, C4, network, decision tree, eEPC.
+- six new notations: mind map, org chart, C4, network, decision tree, eEPC;
+- a block properties panel (label, colour, type and place are written into the code), export of the code as `.puml` and `.mmd`, a Gantt chart (34 notations in all).
 
 **Part 2:** all 13 works were re-run one by one, 0 failures; PostgreSQL is the default in lab 2 and lab 3 (SQLite only for tests); the copies of labs 1–3 in branches 25, 26, 28 are updated; the branches are pushed.
 
@@ -66,7 +67,7 @@ The Part 2 works live in their own branches (`lab21`, `lab12`, `23`, `24`, `25`,
 ### Can go on without her
 
 - Rebuild the lab 3 reports in branches 25 and 28 (they still say "SQLite by default").
-- A block properties panel; export of PlantUML and Mermaid code as a file; a Gantt chart and other kinds with their own drawing.
+- Other kinds with their own drawing (after the pattern of the Gantt chart in `notations/specs-gantt.js`).
 - Uploading the new notations and the feature frames to Figma (the way is in section 7).
 - Own fonts: waiting for the owner's decision.
 - After her agreement: the fourth entity and the routes in the course project.
@@ -106,5 +107,5 @@ First agree the topic and scope with the supervisor. Then: the new stack (React 
 1. Settle the four course project questions with the owner and close the remaining `TODO` in the note.
 2. Rebuild the lab 3 reports in branches 25 and 28 if those branches are handed in.
 3. After her check merge the branches into `main`, then (with a separate "yes") clean the history.
-4. Optional: the properties panel, fonts, the Gantt chart, uploading the new frames to Figma.
+4. Optional: fonts, uploading the new frames to Figma.
 5. Diploma: a meeting with the supervisor, then a plan and the first branches.

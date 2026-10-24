@@ -1122,7 +1122,8 @@
 
 /* The status lines go under the diagram, the top of the canvas keeps only the toolbar */
 .canvas__remote,
-.canvas__diagram {
+.canvas__diagram,
+.node-panel {
   order: 1;
 }
 

@@ -77,7 +77,7 @@ test('bars show progress, take the colour of the code and scale to long and shor
   assert.match(long, /^<svg /);
   const huge = renderNotation(parseDiagram('diagram gantt\ntask a days=900000'));
   assert.match(huge, />900000</, 'the grid step grows with the plan, so the axis keeps a few lines');
-  assert.ok((huge.match(/stroke="#cbd5e1"/g) ?? []).length < 20);
+  assert.ok((huge.match(/stroke-opacity="0.5"/g) ?? []).length < 20);
   const tiny = renderNotation(parseDiagram('diagram gantt\ntask a days=0'));
   assert.match(tiny, /width="3"/, 'a task of no length is still visible');
 });

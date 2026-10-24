@@ -94,12 +94,14 @@ const render = (model) => {
   const bottom = rowY(model.nodes.length);
 
   const bands = model.nodes
-    .map((node, index) => (index % 2 === 0 ? `<rect x="${MARGIN}" y="${rowY(index)}" width="${x(end) - MARGIN}" height="${ROW}" fill="#f8fafc"/>` : ''))
+    .map((node, index) =>
+      index % 2 === 0 ? `<rect x="${MARGIN}" y="${rowY(index)}" width="${x(end) - MARGIN}" height="${ROW}" fill="#94a3b8" fill-opacity="0.12"/>` : '',
+    )
     .join('');
   const ticks = [];
   for (let day = 0; day <= end; day += step)
     ticks.push(
-      `<path d="M${x(day)} ${TOP + 14}V${bottom}" stroke="#cbd5e1" stroke-width="1"/><text x="${x(day)}" y="${TOP + 8}" text-anchor="middle" font-size="11" fill="${MUTED}">${day}</text>`,
+      `<path d="M${x(day)} ${TOP + 14}V${bottom}" stroke="#94a3b8" stroke-opacity="0.5" stroke-width="1"/><text x="${x(day)}" y="${TOP + 8}" text-anchor="middle" font-size="11" fill="${MUTED}">${day}</text>`,
     );
 
   const bars = model.nodes
@@ -113,7 +115,7 @@ const render = (model) => {
       const title = `<title>${escapeXml(node.label)}: ${slot.start}–${slot.end}</title>`;
       const label = `<text x="${MARGIN + 8}" y="${cy}" dy="0.35em" font-size="12" fill="${INK}">${escapeXml(node.label)}</text>`;
       if (node.kind === 'milestone')
-        return `<g class="notation__node" data-id="${escapeXml(node.id)}">${title}${label}<path d="M${x(slot.start)} ${cy - 10}L${x(slot.start) + 10} ${cy}L${x(slot.start)} ${cy + 10}L${x(slot.start) - 10} ${cy}Z" fill="${own ?? INK}" stroke="${own ?? INK}" stroke-width="1.5"/></g>`;
+        return `<g class="notation__node" data-id="${escapeXml(node.id)}">${title}${label}<path d="M${x(slot.start)} ${cy - 10}L${x(slot.start) + 10} ${cy}L${x(slot.start)} ${cy + 10}L${x(slot.start) - 10} ${cy}Z" fill="${own ?? '#0f172a'}" stroke="${own ?? INK}" stroke-width="1.5"/></g>`;
       const width = Math.max(node.days * perDay, 3);
       const progress = round((width * node.done) / 100);
       return (
