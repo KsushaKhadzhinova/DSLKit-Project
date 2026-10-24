@@ -1,0 +1,128 @@
+# DSLKit: React client (Nginx) + Express API + PostgreSQL. Start: docker compose up --build
+name: dslkit
+
+# Container logs rotate, so a long run cannot fill the disk of the host.
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: 10m
+    max-file: '3'
+
+services:
+  db:
+    image: ${REGISTRY:-}library/postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-dslkit}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:-dslkit}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks: [internal]
+    logging: *logging
+    mem_limit: 512m
+    pids_limit: 200
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  backend:
+    build:
+      context: ../server
+      dockerfile: ../docker/backend/Dockerfile
+      args:
+        REGISTRY: ${REGISTRY:-}
+    restart: unless-stopped
+    environment:
+      PORT: 3000
+      DATABASE_URL: postgres://${POSTGRES_USER:-dslkit}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-dslkit}
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env, at least 32 random characters}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-1h}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
+      # Exactly one reverse proxy (Nginx) stands in front, so the rate limit sees the real client address.
+      TRUST_PROXY: '1'
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      # Published for checks from the host only, the browser uses the proxy /api of the frontend.
+      - '127.0.0.1:${BACKEND_PORT:-3000}:3000'
+    read_only: true
+    tmpfs: [/tmp]
+    cap_drop: [ALL]
+    security_opt: ['no-new-privileges:true']
+    networks: [internal, public]
+    logging: *logging
+    mem_limit: 512m
+    pids_limit: 200
+
+  frontend:
+    build:
+      context: ../client
+      dockerfile: ../docker/frontend/Dockerfile
+      additional_contexts:
+        deploy: ./frontend
+      args:
+        REGISTRY: ${REGISTRY:-}
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - '${FRONTEND_PORT:-8080}:8080'
+    # nginx-unprivileged runs as a normal user on port 8080, so it needs no capability and no way to gain one.
+    cap_drop: [ALL]
+    security_opt: ['no-new-privileges:true']
+    networks: [public]
+    logging: *logging
+    mem_limit: 128m
+    pids_limit: 100
+
+  # Optional tools, off by default: docker compose --profile tools up -d pgadmin
+  pgadmin:
+    profiles: [tools]
+    image: ${REGISTRY:-}dpage/pgadmin4:8
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@example.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-}
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: 'False'
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      # Only this computer can open it, it is a tool for the developer.
+      - '127.0.0.1:${PGADMIN_PORT:-5050}:80'
+    networks: [internal, public]
+    logging: *logging
+    mem_limit: 512m
+    pids_limit: 200
+
+  # Optional cache, off by default: docker compose --profile cache up -d redis. The server does not use it yet.
+  redis:
+    profiles: [cache]
+    image: ${REGISTRY:-}library/redis:7-alpine
+    restart: unless-stopped
+    command: ['redis-server', '--save', '', '--appendonly', 'no']
+    networks: [internal]
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    logging: *logging
+    mem_limit: 128m
+    pids_limit: 100
+
+networks:
+  # No access from outside: only the backend reaches the database.
+  internal:
+    internal: true
+  public:
+
+volumes:
+  pgdata:
