@@ -80,8 +80,8 @@ test('the worker installs the shell of the site, one missing file does not stop 
   worker.dispatch('install');
   await worker.settle();
   const names = [...worker.caches.stores.keys()];
-  assert.deepEqual(names, ['dslkit-v1']);
-  const saved = [...worker.caches.stores.get('dslkit-v1').keys()];
+  assert.deepEqual(names, ['dslkit-v2']);
+  const saved = [...worker.caches.stores.get('dslkit-v2').keys()];
   assert.ok(saved.includes(`${ORIGIN}/app/editor.html`));
   assert.ok(saved.includes(`${ORIGIN}/js/script.js`));
   assert.ok(!saved.includes(`${ORIGIN}/app/welcome.html`), 'the failing file is skipped');
@@ -91,10 +91,10 @@ test('the worker installs the shell of the site, one missing file does not stop 
 test('on activation the caches of older versions are deleted and the open pages are claimed', async () => {
   const worker = load();
   worker.caches.stores.set('dslkit-v0', new Map());
-  worker.caches.stores.set('dslkit-v1', new Map());
+  worker.caches.stores.set('dslkit-v2', new Map());
   worker.dispatch('activate');
   await worker.settle();
-  assert.deepEqual([...worker.caches.stores.keys()], ['dslkit-v1']);
+  assert.deepEqual([...worker.caches.stores.keys()], ['dslkit-v2']);
   assert.equal(worker.calls.claim, 1);
 });
 
@@ -119,7 +119,7 @@ test('without a network a page comes from the kept copy, else a short message wi
   const online = load();
   await online.dispatch('fetch', { request: request('app/editor.html?x=1', { mode: 'navigate' }) }).answer;
   const worker = load({ failing: new Set(['all']) });
-  worker.caches.stores.set('dslkit-v1', new Map(online.caches.stores.get('dslkit-v1')));
+  worker.caches.stores.set('dslkit-v2', new Map(online.caches.stores.get('dslkit-v2')));
   const again = await worker.dispatch('fetch', { request: request('app/editor.html?x=2', { mode: 'navigate' }) }).answer;
   assert.equal(await textOf(again), `fresh ${ORIGIN}/app/editor.html?x=1`);
   const none = await worker.dispatch('fetch', { request: request('app/unknown.html', { mode: 'navigate' }) }).answer;
@@ -144,7 +144,7 @@ test('a kept file still works when the network is gone, a file that was never ke
   const online = load();
   await online.dispatch('fetch', { request: request('js/script.js') }).answer;
   const worker = load({ failing: new Set(['all']) });
-  worker.caches.stores.set('dslkit-v1', new Map(online.caches.stores.get('dslkit-v1')));
+  worker.caches.stores.set('dslkit-v2', new Map(online.caches.stores.get('dslkit-v2')));
   const kept = await worker.dispatch('fetch', { request: request('js/script.js') }).answer;
   assert.equal(await textOf(kept), `fresh ${ORIGIN}/js/script.js`);
   await assert.rejects(worker.dispatch('fetch', { request: request('js/other.js') }).answer, TypeError);

@@ -406,6 +406,16 @@
   font-size: var(--text-small);
 }
 
+/* When every project is hidden by the filter the mascot appears above the list; no script is needed for it */
+.project-list:not(:has(> .project-list__item:not([hidden])))::before {
+  content: '';
+  display: block;
+  width: 7.5rem;
+  height: 7.5rem;
+  margin: var(--space-3) auto var(--space-1);
+  background: url('../images/mascot.svg') center / contain no-repeat;
+}
+
 .dashboard__title {
   margin-bottom: var(--space-3);
   font-size: var(--step-3);

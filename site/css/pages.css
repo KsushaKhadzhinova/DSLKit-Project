@@ -29,6 +29,12 @@
   box-shadow: none;
 }
 
+.error__mascot {
+  justify-self: center;
+  width: 7.5rem;
+  height: auto;
+}
+
 .error__code {
   justify-self: start;
   padding: 0.125rem var(--space-2);

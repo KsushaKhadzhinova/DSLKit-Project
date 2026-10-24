@@ -6,7 +6,7 @@ const require = createRequire(process.env.LAB7_DIR ?? new URL('../part-2/lab-07-
 const puppeteer = require('puppeteer-core');
 
 const logo = readFileSync(new URL('../site/images/logo.svg', import.meta.url), 'utf8');
-const BACKGROUND = '#2563eb';
+const BACKGROUND = '#312e81';
 // size, file, how much of the square the logo fills (a maskable icon keeps the logo inside the safe zone of 80 percent)
 const ICONS = [
   [192, 'icon-192.png', 1],
