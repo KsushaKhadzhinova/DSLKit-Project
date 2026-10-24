@@ -2,17 +2,17 @@ C4Container
   title Контейнеры DSLKit (уровень 2)
 
   Person(user, "Пользователь", "Браузер")
-  Person(admin, "Администратор", "Браузер или REST-клиент")
+  Person(admin, "Администратор", "Браузер")
 
   System_Boundary(dslkit, "DSLKit, docker compose") {
-    Container(spa, "SPA", "React 19, Vite, axios", "Формы входа и регистрации, список диаграмм, оптимистичные изменения")
+    Container(spa, "SPA", "React 19, Vite, axios", "React Router 6: публичные и защищённые маршруты, список и страница диаграммы, комментарии, экран администратора")
     Container(proxy, "Веб-сервер и прокси", "Nginx unprivileged, порт 8080", "Отдаёт статику, пересылает /api/ на сервер")
-    Container(api, "REST API", "Node.js 22, Express 5, Sequelize 6, порт 3000", "Аутентификация bcrypt и JWT, роли, CRUD диаграмм, журнал запросов, /health")
-    ContainerDb(db, "База данных", "PostgreSQL 16, том pgdata", "Таблицы Users, Diagrams, RequestLogs")
+    Container(api, "REST API", "Node.js 22, Express 5, Sequelize 6, порт 3000", "Аутентификация bcrypt и JWT, роли, CRUD диаграмм и комментариев, пользователи, журнал запросов, /health")
+    ContainerDb(db, "База данных", "PostgreSQL 16, том pgdata", "Таблицы Users, Diagrams, Comments, RequestLogs")
   }
 
   Rel(user, proxy, "Открывает сайт", "HTTP 8080")
-  Rel(admin, proxy, "Вызывает /api/users", "HTTP 8080")
+  Rel(admin, proxy, "Экран администратора, /api/users", "HTTP 8080")
   Rel(proxy, spa, "Отдаёт собранные файлы", "статика")
   Rel(spa, proxy, "Запросы /api/*", "JSON, Bearer JWT")
   Rel(proxy, api, "Пересылает запросы", "HTTP, сеть public")

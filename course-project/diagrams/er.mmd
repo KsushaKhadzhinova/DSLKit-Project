@@ -1,5 +1,7 @@
 erDiagram
   USERS ||--o{ DIAGRAMS : "владеет (ownerId, RESTRICT)"
+  USERS ||--o{ COMMENTS : "пишет (authorId, CASCADE)"
+  DIAGRAMS ||--o{ COMMENTS : "содержит (diagramId, CASCADE)"
 
   USERS {
     int id PK
@@ -17,6 +19,15 @@ erDiagram
     text sourceCode "1..10000 символов"
     string priority "low, normal, high"
     int ownerId FK
+    datetime createdAt
+    datetime updatedAt
+  }
+
+  COMMENTS {
+    int id PK
+    int diagramId FK
+    int authorId FK
+    text text "1..1000 символов"
     datetime createdAt
     datetime updatedAt
   }
