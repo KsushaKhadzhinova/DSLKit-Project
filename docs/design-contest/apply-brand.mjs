@@ -128,7 +128,7 @@ const STATES = (variant, p, cssHref, fontCss) => `<!doctype html>
 
     <section class="st-state" aria-labelledby="s6">
       <h2 id="s6">Главная страница сайта</h2>
-      <picture><source media="(prefers-color-scheme: dark)" srcset="${p}assets/lockup-horizontal-dark.svg" /><img src="${p}assets/lockup-horizontal-light.svg" alt="DSLKit" height="40" /></picture>
+      <div class="st-tour"><img src="${p}assets/mark-light.svg" alt="" width="40" height="40" /><b style="font-size: 1.5rem">DSLKit</b></div>
       <h3>Диаграммы из текста</h3>
       <p>Пишете описание, получаете схему: 33 нотации, экспорт в SVG и PNG.</p>
       <div class="st-tour">${cat(p)}<a class="st-pill" href="#">Открыть редактор</a></div>
