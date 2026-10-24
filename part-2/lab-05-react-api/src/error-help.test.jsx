@@ -66,7 +66,7 @@ describe('the error pages of the boundary', () => {
       </ErrorBoundary>,
     );
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Ошибка 500');
-    expect(screen.getByRole('heading', { level: 3, name: 'Как это исправить' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 2, name: 'Как это исправить' })).toBeInTheDocument();
     expect(screen.queryByText(/secret internals/)).not.toBeInTheDocument();
   });
 

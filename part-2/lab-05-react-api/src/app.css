@@ -191,6 +191,12 @@ button.nav__link {
   text-align: center;
 }
 
+.error-page__head {
+  display: grid;
+  gap: var(--space-3);
+  justify-items: center;
+}
+
 .error-page__code {
   color: var(--color-primary-text);
   font-size: var(--step-6);

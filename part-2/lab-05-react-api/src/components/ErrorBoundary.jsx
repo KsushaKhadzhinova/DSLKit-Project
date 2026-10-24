@@ -19,12 +19,14 @@ export default class ErrorBoundary extends Component {
     if (!this.state.failed) return this.props.children;
     const { code, title } = ERRORS[this.state.kind];
     return (
-      <main className="error-page" role="alert">
-        <p className="error-page__code" aria-hidden="true">
-          {code}
-        </p>
-        <h1 className="page-title">{title}</h1>
-        <ErrorHelp kind={this.state.kind} />
+      <main className="error-page">
+        <div role="alert" className="error-page__head">
+          <p className="error-page__code" aria-hidden="true">
+            {code}
+          </p>
+          <h1 className="page-title">{title}</h1>
+        </div>
+        <ErrorHelp kind={this.state.kind} level={2} />
         <button type="button" className="button button--primary" onClick={() => window.location.reload()}>
           {this.state.kind === 'network' ? 'Повторить' : 'Обновить страницу'}
         </button>
