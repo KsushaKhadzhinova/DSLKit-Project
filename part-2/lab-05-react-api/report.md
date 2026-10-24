@@ -56,6 +56,8 @@
 
 Рисунок 4 – Сообщение об ошибке при недоступном сервере и кнопка повтора
 
+Под сообщением показан блок с разбором ошибки из трёх частей: что это, почему так вышло и как это исправить. Тексты лежат в одном каталоге `src/errorCatalog.js`, а страницу выбирает функция `kindOfFailure`: отсутствие ответа означает сбой сети, коды 401, 403 и 404 имеют свои описания, коды 5xx описаны как сбой на сервере. Для кодов вроде 400 и 409 общее описание не нужно, потому что сообщение сервера уже точное. Если падает сам интерфейс, граница ошибок показывает страницу 500, а если не удалось скачать кусок кода, страницу «Нет связи с сервером» с кнопкой повтора.
+
 ### 3.4 Добавление, редактирование и удаление
 
 При добавлении запись сразу появляется в списке с временным идентификатором и пометкой «Сохраняется…». Форма и список до отправки показаны на рисунке 5.
@@ -246,6 +248,7 @@ export default api;
 ```js
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { addDiagram, deleteDiagram, errorMessage, fetchDiagrams, isCanceled, updateDiagram } from '../api';
+import { kindOfFailure } from '../errorCatalog';
 import limits from '../limits.json';
 
 const isTemporary = (id) => typeof id === 'string' && id.startsWith('temp-');
@@ -280,6 +283,8 @@ function usePagedList(search, onNotice) {
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState(null);
+  // Which explained error page fits the failure (see errorCatalog.js), null when the server message is enough.
+  const [errorKind, setErrorKind] = useState(null);
   const [attempt, setAttempt] = useState(0);
   // fetched: how many records of the server list are loaded (the offset of the next page), total: the size of the whole list.
   const [paging, setPaging] = useState({ fetched: 0, total: null });
@@ -301,12 +306,14 @@ function usePagedList(search, onNotice) {
     setLoadingMore(false);
     loadingMoreRef.current = false;
     setError(null);
+    setErrorKind(null);
     fetchDiagrams(search, controller.signal, { limit: limits.pageSize, offset: 0 })
       .then((response) => {
         if (controller.signal.aborted) return;
         // A body that is not a list (HTML from a proxy, an empty answer) is an error, it must not reach the list and crash it.
         if (!Array.isArray(response.data)) {
           setError('Сервер вернул неожиданный ответ. Проверьте адрес сервера');
+          setErrorKind('network');
           return;
         }
         localIds.current.clear();
@@ -314,7 +321,10 @@ function usePagedList(search, onNotice) {
         setPaging({ fetched: response.data.length, total: readTotal(response) });
       })
       .catch((failure) => {
-        if (!isCanceled(failure) && !controller.signal.aborted) setError(errorMessage(failure));
+        if (!isCanceled(failure) && !controller.signal.aborted) {
+          setError(errorMessage(failure));
+          setErrorKind(kindOfFailure(failure));
+        }
       })
       .finally(() => {
         if (!controller.signal.aborted) setLoading(false);
@@ -356,7 +366,7 @@ function usePagedList(search, onNotice) {
     }
   }, [search, onNotice]);
 
-  return { items, setItems, itemsRef, paging, setPaging, changeTotal, localIds, loading, loadingMore, error, retry, loadMore };
+  return { items, setItems, itemsRef, paging, setPaging, changeTotal, localIds, loading, loadingMore, error, errorKind, retry, loadMore };
 }
 
 // Owns the server state of the list: the pages plus the optimistic add, delete and edit.
@@ -444,6 +454,7 @@ export function useDiagrams(search) {
     loading: list.loading,
     loadingMore: list.loadingMore,
     error: list.error,
+    errorKind: list.errorKind,
     notice,
     busy,
     syncing,

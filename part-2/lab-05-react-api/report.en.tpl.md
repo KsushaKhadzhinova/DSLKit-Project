@@ -56,6 +56,8 @@ If the server is unreachable, a message and a "Повторить" button that s
 
 Figure 4 – Error message for an unreachable server and the retry button
 
+Under the message a block explains the error in three parts: what it is, why it happened and how to solve it. The texts live in one catalogue, `src/errorCatalog.js`, and the `kindOfFailure` function picks the entry: no answer at all means a network failure, the codes 401, 403 and 404 have their own descriptions, and 5xx codes are described as a server failure. Codes such as 400 and 409 need no general description, because the server message is already exact. If the interface itself crashes, the error boundary shows the 500 page, and if a piece of code could not be downloaded, it shows the "No connection to the server" page with a retry button.
+
 ### 3.4 Adding, Editing and Deleting
 
 When a diagram is added, the record appears in the list at once with a temporary identifier and the "Сохраняется…" mark. The form and the list before sending are shown in figure 5.

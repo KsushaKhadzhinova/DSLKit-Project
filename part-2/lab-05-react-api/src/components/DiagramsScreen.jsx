@@ -4,6 +4,7 @@ import { useDebouncedValue } from '../hooks/useDebouncedValue';
 import { useDiagrams } from '../hooks/useDiagrams';
 import Alert from './Alert';
 import DiagramForm from './DiagramForm';
+import ErrorHelp from './ErrorHelp';
 import DiagramItem from './DiagramItem';
 import LoadMore from './LoadMore';
 import Progress from './Progress';
@@ -13,7 +14,7 @@ import SearchField from './SearchField';
 export default function DiagramsScreen() {
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebouncedValue(search.trim(), limits.searchDebounceMs);
-  const { items, loading, loadingMore, error, notice, busy, syncing, hasMore, total, retry, dismissNotice, loadMore, add, remove, update } =
+  const { items, loading, loadingMore, error, errorKind, notice, busy, syncing, hasMore, total, retry, dismissNotice, loadMore, add, remove, update } =
     useDiagrams(debouncedSearch);
   const showList = !error;
   const settled = !error && !loading;
@@ -25,6 +26,7 @@ export default function DiagramsScreen() {
       {notice && <Alert text={notice} actionLabel="Закрыть" onAction={dismissNotice} quiet />}
       {loading && <Progress>Загрузка…</Progress>}
       {error && !loading && <Alert text={error} actionLabel="Повторить" onAction={retry} />}
+      {error && !loading && <ErrorHelp kind={errorKind} />}
       {settled && items.length === 0 && (
         <p className="note">
           <span className="note__text">Диаграмм не найдено.</span>

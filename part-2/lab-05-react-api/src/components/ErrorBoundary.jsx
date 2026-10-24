@@ -1,24 +1,32 @@
 import { Component } from 'react';
+import { ERRORS, kindOfCrash } from '../errorCatalog';
+import ErrorHelp from './ErrorHelp';
 
-// Styled 500 page instead of a blank screen. A class component is required for error boundaries.
+// Styled error page instead of a blank screen: 500 for a crash, "no connection" when a piece of code could not be downloaded.
+// A class component is required for error boundaries. The technical text of the error goes to the console only.
 export default class ErrorBoundary extends Component {
-  state = { failed: false };
+  state = { failed: false, kind: '500' };
 
-  static getDerivedStateFromError() {
-    return { failed: true };
+  static getDerivedStateFromError(error) {
+    return { failed: true, kind: kindOfCrash(error) };
+  }
+
+  componentDidCatch(error) {
+    console.error('DSLKit: rendering failed', error);
   }
 
   render() {
     if (!this.state.failed) return this.props.children;
+    const { code, title } = ERRORS[this.state.kind];
     return (
       <main className="error-page" role="alert">
         <p className="error-page__code" aria-hidden="true">
-          500
+          {code}
         </p>
-        <h1 className="page-title">500: что-то пошло не так</h1>
-        <p className="page-lead">Приложение столкнулось с ошибкой. Обновите страницу, сохранённые диаграммы не потеряны.</p>
+        <h1 className="page-title">{title}</h1>
+        <ErrorHelp kind={this.state.kind} />
         <button type="button" className="button button--primary" onClick={() => window.location.reload()}>
-          Обновить страницу
+          {this.state.kind === 'network' ? 'Повторить' : 'Обновить страницу'}
         </button>
       </main>
     );
