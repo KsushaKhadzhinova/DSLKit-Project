@@ -280,6 +280,15 @@ export const MESSAGES = {
     en: 'Two elements of one kind ({kind}) follow each other, {from} and {to}: in eEPC events and functions alternate, a connector may sit between them',
   },
   'epc-start': { ru: 'Цепочка начинается с «{id}», а должна начинаться с события', en: 'The chain starts with "{id}", it must start with an event' },
+  'gantt-number': {
+    ru: 'У «{id}» значение {name}={value} не подходит: нужно неотрицательное число (done не больше 100)',
+    en: '"{id}" has {name}={value}: a non-negative number is needed (done is at most 100)',
+  },
+  'gantt-cycle': { ru: 'Зависимости задач замкнулись в кольцо: {path}', en: 'The task dependencies form a loop: {path}' },
+  'gantt-early': {
+    ru: '«{id}» начинается раньше, чем заканчивается «{from}» (день {day}): уберите start или сдвиньте задачу',
+    en: '"{id}" starts before "{from}" ends (day {day}): remove start or move the task',
+  },
   'epc-end': { ru: 'Цепочка заканчивается на «{id}», а должна заканчиваться событием', en: 'The chain ends with "{id}", it must end with an event' },
 };
 

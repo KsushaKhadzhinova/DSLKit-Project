@@ -7,6 +7,7 @@ import { parseIdef0 } from './idef0.js';
 import { renderIdef0 } from './idef0-render.js';
 import { generators as sequenceGenerators, parseSequence, render as renderSequence } from './sequence.js';
 import { activity, bpmn, dfd, gostFlow, idef3, petri, state, usecase } from './specs.js';
+import { gantt } from './specs-gantt.js';
 import { c4, decision, epc, mindmap, network, orgchart } from './specs-more.js';
 import { communication, component, composite, deployment, idef5, object, overview, packages, profile } from './specs-uml.js';
 import { generators as timingGenerators, parseTiming, render as renderTiming } from './timing.js';
@@ -16,7 +17,7 @@ export { MESSAGES, formatProblem } from './messages.js';
 export { enabledTransitions, fire, initialMarking, isDeadlock } from './specs.js';
 export { KEYWORDS, TEMPLATES } from './templates.js';
 
-const fromSpec = (impl) => ({ parse: impl.parse, generators: impl.generators, render: impl.render });
+const fromSpec = (impl) => ({ parse: impl.parse, generators: impl.generators, render: impl.render, kinds: Object.keys(impl.spec?.nodes ?? {}) });
 const entry = (short, ru, en, impl) => ({ short, name: { ru, en }, ...impl });
 
 const idef4 = (lines, header) => {
@@ -85,6 +86,7 @@ export const NOTATIONS = {
   network: entry('Network', 'Схема компьютерной сети', 'Network diagram', fromSpec(network)),
   decision: entry('Decision', 'Дерево решений', 'Decision tree', fromSpec(decision)),
   epc: entry('eEPC', 'eEPC — цепочка процессов по событиям', 'eEPC — event-driven process chain', fromSpec(epc)),
+  gantt: entry('Gantt', 'Диаграмма Ганта', 'Gantt chart', gantt),
 };
 
 export const NOTATION_KEYS = Object.keys(NOTATIONS);

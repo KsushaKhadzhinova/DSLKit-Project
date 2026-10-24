@@ -418,6 +418,16 @@ flow e2 -> f2
 flow e3 -> f3
 flow f2 -> e4
 flow f3 -> e5`,
+  gantt: `diagram gantt "Release plan"
+task design "Design" days=5 done=100
+task build "Build" days=10 done=40
+task test "Test" days=6
+task docs "Write docs" start=4 days=7
+milestone release "Release"
+depends design -> build
+depends build -> test
+depends test -> release
+depends docs -> release`,
 };
 
 export const KEYWORDS = new Set(
@@ -427,6 +437,6 @@ export const KEYWORDS = new Set(
     'decision merge fork join initial final state object component provide require delegate depend classifier part port connect node device environment ' +
     'artifact deploy communicate package element contains import access profile metaclass stereotype message lifeline at interaction uob and or xor referent ' +
     'precedence relational objectflow kind individual isa partof instanceof relation predefined io preparation manual document connector offpage storage ' +
-    'comment note mode vertex edge path root topic branch unit person leads system external container database uses cloud router switch server client question outcome answer event function'
+    'comment note mode vertex edge path root topic branch unit person leads system external container database uses cloud router switch server client question outcome answer event function task milestone depends'
   ).split(' '),
 );

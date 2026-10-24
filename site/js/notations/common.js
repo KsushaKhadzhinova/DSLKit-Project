@@ -8,6 +8,10 @@ export const escapeXml = (text) =>
     .replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/g, '')
     .replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
 
+// A colour written in the code (`color=#ff8800`): three or six hex digits, nothing else, so it can never break out of an SVG attribute.
+export const COLOR = /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i;
+export const colorOf = (node) => (COLOR.test(String(node.attrs?.color)) ? node.attrs.color : null);
+
 export const unquote = (text) => String(text).replace(/\\(.)/g, (_, char) => (char === 'n' ? '\n' : char));
 
 export const quoteDot = (text) => `"${String(text).replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\r?\n/g, '\\n')}"`;
