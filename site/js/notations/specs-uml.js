@@ -253,7 +253,7 @@ const barKind = {
   mermaid: ['[', ']'],
   plantuml: 'rectangle',
 };
-const rhombusKind = { shape: 'diamond', size: fixed(44, 44, 'diamond', 14), text: plain, dot: 'shape=diamond', mermaid: ['{', '}'], plantuml: 'diamond' };
+const rhombusKind = { shape: 'diamond', size: sizer(44, 44, 'diamond', 14), text: plain, dot: 'shape=diamond', mermaid: ['{', '}'], plantuml: 'diamond' };
 export const overview = defineGraph({
   notation: 'uml-overview',
   nodes: { start: 'start', end: 'end', interaction: 'interaction', decision: 'decision', merge: 'merge', fork: 'fork', join: 'join' },

@@ -220,7 +220,7 @@ const bar = {
   mermaid: ['[', ']'],
   plantuml: 'rectangle',
 };
-const rhombus = { shape: 'diamond', size: fixed(44, 44, 'diamond', 14), text: plain, dot: 'shape=diamond', mermaid: ['{', '}'], plantuml: 'diamond' };
+const rhombus = { shape: 'diamond', size: sizer(44, 44, 'diamond', 14), text: plain, dot: 'shape=diamond', mermaid: ['{', '}'], plantuml: 'diamond' };
 export const activity = defineGraph({
   notation: 'uml-activity',
   nodes: { start: 'start', end: 'end', action: 'action', decision: 'decision', merge: 'merge', fork: 'fork', join: 'join' },
