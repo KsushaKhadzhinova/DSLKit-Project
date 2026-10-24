@@ -221,6 +221,9 @@ services:
         condition: service_healthy
     ports:
       - '${FRONTEND_PORT:-8080}:8080'
+    # nginx-unprivileged runs as a normal user on port 8080, so it needs no capability and no way to gain one.
+    cap_drop: [ALL]
+    security_opt: ['no-new-privileges:true']
     networks: [public]
     logging: *logging
     mem_limit: 128m
@@ -303,10 +306,14 @@ server {
   }
 
   # Hashed build files can be cached for a long time.
+  # A location with its own add_header does not inherit the headers of the server block, so all of them are repeated here.
   location /assets/ {
     expires 1y;
     add_header Cache-Control "public, immutable";
     add_header X-Content-Type-Options "nosniff" always;
+    add_header X-Frame-Options "DENY" always;
+    add_header Referrer-Policy "no-referrer" always;
+    add_header Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'" always;
   }
 
   # Single-page application: unknown paths return index.html.

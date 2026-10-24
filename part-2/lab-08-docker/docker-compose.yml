@@ -73,6 +73,9 @@ services:
         condition: service_healthy
     ports:
       - '${FRONTEND_PORT:-8080}:8080'
+    # nginx-unprivileged runs as a normal user on port 8080, so it needs no capability and no way to gain one.
+    cap_drop: [ALL]
+    security_opt: ['no-new-privileges:true']
     networks: [public]
     logging: *logging
     mem_limit: 128m

@@ -7,6 +7,6 @@
     "up": "docker compose up --build -d",
     "down": "docker compose down",
     "shots": "node shots/shots.mjs",
-    "test": "node --test docker.test.mjs report.test.mjs"
+    "test": "node --test docker.test.mjs hardening.test.mjs report.test.mjs"
   }
 }
