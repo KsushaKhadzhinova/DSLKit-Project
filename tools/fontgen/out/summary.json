@@ -1,0 +1,30 @@
+[
+  {
+    "file": "KubikSans-Regular",
+    "glyphs": 174,
+    "ttf": 34280,
+    "woff2": 9284,
+    "ms": 745
+  },
+  {
+    "file": "KubikSans-Bold",
+    "glyphs": 174,
+    "ttf": 36620,
+    "woff2": 10076,
+    "ms": 741
+  },
+  {
+    "file": "KubikMono-Regular",
+    "glyphs": 174,
+    "ttf": 34000,
+    "woff2": 8820,
+    "ms": 606
+  },
+  {
+    "file": "KubikMono-Bold",
+    "glyphs": 174,
+    "ttf": 36004,
+    "woff2": 9444,
+    "ms": 671
+  }
+]

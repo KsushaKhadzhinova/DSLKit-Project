@@ -1,6 +1,6 @@
 // DSLKit service worker: the pages and files of the site work without a network after the first visit.
 // Only files of this site are cached. Requests to other servers, such as the Kroki diagram service, always go to the network.
-const VERSION = 'dslkit-v2';
+const VERSION = 'dslkit-v3';
 const SHELL = [
   './',
   'index.html',
@@ -14,6 +14,11 @@ const SHELL = [
   'en/app/settings.html',
   'en/app/welcome.html',
   'css/style.css',
+  'css/fonts.css',
+  'fonts/KubikSans-Regular.woff2',
+  'fonts/KubikSans-Bold.woff2',
+  'fonts/KubikMono-Regular.woff2',
+  'fonts/KubikMono-Bold.woff2',
   'js/script.js',
   'images/favicon.svg',
   'images/logo.svg',

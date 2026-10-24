@@ -238,8 +238,8 @@ The styles of the DSLKit project are split into files following the BEM methodol
   --shadow-small: 0 1px 2px rgb(28 31 46 / 0.06), 0 1px 3px rgb(28 31 46 / 0.1);
   --shadow-large: 0 8px 24px rgb(28 31 46 / 0.08), 0 24px 64px rgb(28 31 46 / 0.12);
 
-  --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  --font-mono: 'JetBrains Mono', ui-monospace, 'Cascadia Code', Consolas, 'Courier New', monospace;
+  --font-sans: 'Kubik Sans', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: 'Kubik Mono', ui-monospace, 'Cascadia Code', Consolas, 'Courier New', monospace;
 
   --step--1: calc(1rem / var(--phi-root));
   --step-0: 1rem;
@@ -1289,6 +1289,7 @@ label > span {
 
 ```css
 @import url('variables.css');
+@import url('fonts.css');
 @import url('base.css');
 @import url('components.css');
 @import url('header.css');

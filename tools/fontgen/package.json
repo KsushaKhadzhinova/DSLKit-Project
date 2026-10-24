@@ -1,0 +1,13 @@
+{
+  "name": "dslkit-fontgen",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Builds the own typefaces of DSLKit (Kubik Sans and Kubik Mono) from skeleton drawings",
+  "type": "module",
+  "license": "MIT",
+  "dependencies": {
+    "fonteditor-core": "^2.4.1",
+    "opentype.js": "^1.3.4",
+    "polygon-clipping": "^0.15.7"
+  }
+}
