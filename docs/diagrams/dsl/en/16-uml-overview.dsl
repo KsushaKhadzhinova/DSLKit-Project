@@ -1,7 +1,7 @@
 diagram uml overview "Working with the list"
 start s
 interaction i1 "Sign in"
-decision d "Token?"
+decision d "Token issued?"
 interaction i2 "List of diagrams"
 interaction i3 "Error message"
 merge m

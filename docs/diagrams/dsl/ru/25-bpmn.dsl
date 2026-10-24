@@ -3,8 +3,8 @@ start s "Нужна схема"
 task t1 "Написать код"
 task t2 "Посмотреть рисунок"
 exclusive g1 "Верно?"
-task t3 "Исправить"
 task t4 "Экспортировать"
+task t3 "Исправить"
 end e "Схема готова"
 flow s -> t1
 flow t1 -> t2

@@ -1,13 +1,11 @@
 diagram idef5 "DSLKit concepts"
-kind Diagram "Diagram"
-kind Notation "Notation"
-kind Engine "Engine"
-kind Bpmn "BPMN"
-individual order "Order handling"
 individual local "Local engine"
+kind Engine "Engine"
 process drawing "Drawing"
-isa Bpmn -> Notation
-partof Notation -> Diagram
-instanceof order -> Diagram
+individual order "Order handling"
+kind Bpmn "BPMN diagram"
+kind Diagram "Diagram"
 instanceof local -> Engine
 relation Engine -> drawing "performs"
+instanceof order -> Bpmn
+isa Bpmn -> Diagram

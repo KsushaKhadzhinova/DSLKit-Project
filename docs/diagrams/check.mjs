@@ -23,7 +23,20 @@ for (const lang of ['ru', 'en']) {
     const status = problems.length === 0 && !empty && svg.startsWith('<svg') ? 'ok' : 'PROBLEM';
     if (status !== 'ok') bad += 1;
     console.log(`${lang} ${d.id} ${expected.padEnd(18)} ${model.notation ?? 'null'}`.padEnd(48), status, svg.length, 'bytes');
-    for (const p of problems) console.log('     ', p.severity, p.code, p.line ?? '', (() => { try { return formatProblem(p, lang); } catch { return p.message ?? ''; } })());
+    for (const p of problems)
+      console.log(
+        '     ',
+        p.severity,
+        p.code,
+        p.line ?? '',
+        (() => {
+          try {
+            return formatProblem(p, lang);
+          } catch {
+            return p.message ?? '';
+          }
+        })(),
+      );
   }
 }
 console.log(bad === 0 ? 'ALL OK' : `${bad} diagrams with problems`);

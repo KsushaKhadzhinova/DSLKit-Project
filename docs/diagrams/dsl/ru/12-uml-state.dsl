@@ -1,11 +1,9 @@
 diagram uml state "Автосохранение"
 initial i
 state saved "Сохранено"
-state typing "Идёт ввод"
-state waiting "Ждём секунду"
+state editing "Правка кода"
 final off
 transition i -> saved
-transition saved -> typing "правка"
-transition typing -> waiting "пауза"
-transition waiting -> saved "1 с тишины"
+transition saved -> editing "изменение"
+transition editing -> saved "1 с без правок"
 transition saved -> off "закрытие"

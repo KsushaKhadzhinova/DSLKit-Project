@@ -169,20 +169,14 @@ connect pc -> pp "${L('проверка', 'check')}"`,
     notation: 'uml-deployment',
     title: ['UML: развёртывание в Docker', 'UML: deployment in Docker'],
     about: [
-      'Где что запущено при docker compose: три контейнера (Nginx, Node.js, PostgreSQL) и компьютер пользователя, который открывает клиент на порту 8080.',
-      'What runs where under docker compose: three containers (Nginx, Node.js, PostgreSQL) and the user computer that opens the client on port 8080.',
+      'Где что запущено при docker compose: компьютер пользователя открывает клиент на порту 8080, Nginx отдаёт сборку клиента и передаёт /api серверу Express, сервер работает с PostgreSQL, данные лежат в томе pgdata.',
+      'What runs where under docker compose: the user computer opens the client on port 8080, Nginx serves the client build and passes /api to the Express server, the server talks to PostgreSQL, the data lives in the pgdata volume.',
     ],
     source: (L) => `diagram uml deployment "${L('Развёртывание', 'Deployment')}"
 device laptop "${L('Компьютер пользователя', 'User computer')}"
-environment nginx "${L('Контейнер Nginx', 'Nginx container')}"
-environment node "${L('Контейнер Node.js', 'Node.js container')}"
-environment pg "${L('Контейнер PostgreSQL', 'PostgreSQL container')}"
-artifact dist "${L('сборка клиента', 'client build')}"
-artifact server "${L('сервер Express', 'Express server')}"
-artifact data "${L('том pgdata', 'pgdata volume')}"
-deploy dist -> nginx
-deploy server -> node
-deploy data -> pg
+environment nginx "${L('Nginx (сборка клиента)', 'Nginx (client build)')}"
+environment node "${L('Node.js (сервер Express)', 'Node.js (Express server)')}"
+environment pg "${L('PostgreSQL (том pgdata)', 'PostgreSQL (pgdata volume)')}"
 communicate laptop -> nginx "HTTP 8080"
 communicate nginx -> node "/api"
 communicate node -> pg "SQL"`,
@@ -258,19 +252,17 @@ flow a4 -> e`,
     notation: 'uml-state',
     title: ['UML: состояния сохранения кода', 'UML: states of saving the code'],
     about: [
-      'Автосохранение: после последнего изменения проходит секунда, затем код сохраняется в браузере.',
-      'Autosave: one second after the last change the code is saved in the browser.',
+      'Автосохранение: после изменения код ждёт секунду без правок и сохраняется в браузере.',
+      'Autosave: after a change the code waits one second without edits and is saved in the browser.',
     ],
     source: (L) => `diagram uml state "${L('Автосохранение', 'Autosave')}"
 initial i
 state saved "${L('Сохранено', 'Saved')}"
-state typing "${L('Идёт ввод', 'Typing')}"
-state waiting "${L('Ждём секунду', 'Waiting one second')}"
+state editing "${L('Правка кода', 'Editing the code')}"
 final off
 transition i -> saved
-transition saved -> typing "${L('правка', 'edit')}"
-transition typing -> waiting "${L('пауза', 'pause')}"
-transition waiting -> saved "${L('1 с тишины', '1 s quiet')}"
+transition saved -> editing "${L('изменение', 'change')}"
+transition editing -> saved "${L('1 с без правок', '1 s without edits')}"
 transition saved -> off "${L('закрытие', 'close')}"`,
   },
   {
@@ -343,7 +335,7 @@ at 40 note ${L('Сохранено', 'Saved')}`,
     source: (L) => `diagram uml overview "${L('Работа со списком', 'Working with the list')}"
 start s
 interaction i1 "${L('Вход', 'Sign in')}"
-decision d "${L('Токен?', 'Token?')}"
+decision d "${L('Токен выдан?', 'Token issued?')}"
 interaction i2 "${L('Список диаграмм', 'List of diagrams')}"
 interaction i3 "${L('Сообщение об ошибке', 'Error message')}"
 merge m
@@ -505,22 +497,20 @@ Controller "1" --> "1" Model : ${L('запись', 'stores')}`,
     notation: 'idef5',
     title: ['IDEF5: онтология предметной области', 'IDEF5: domain ontology'],
     about: [
-      'Понятия предметной области: диаграмма, нотация, движок; экземпляры и процесс отрисовки.',
-      'The concepts of the domain: diagram, notation, engine; individuals and the drawing process.',
+      'Понятия предметной области: диаграмма и её вид BPMN, движок отрисовки и процесс отрисовки; примеры: «Обработка заказа» и «Свой движок».',
+      'The concepts of the domain: a diagram and its BPMN kind, the drawing engine and the drawing process; examples: "Order handling" and "Local engine".',
     ],
     source: (L) => `diagram idef5 "${L('Понятия DSLKit', 'DSLKit concepts')}"
-kind Diagram "${L('Диаграмма', 'Diagram')}"
-kind Notation "${L('Нотация', 'Notation')}"
-kind Engine "${L('Движок', 'Engine')}"
-kind Bpmn "BPMN"
-individual order "${L('Обработка заказа', 'Order handling')}"
 individual local "${L('Свой движок', 'Local engine')}"
+kind Engine "${L('Движок', 'Engine')}"
 process drawing "${L('Отрисовка', 'Drawing')}"
-isa Bpmn -> Notation
-partof Notation -> Diagram
-instanceof order -> Diagram
+individual order "${L('Обработка заказа', 'Order handling')}"
+kind Bpmn "${L('Диаграмма BPMN', 'BPMN diagram')}"
+kind Diagram "${L('Диаграмма', 'Diagram')}"
 instanceof local -> Engine
-relation Engine -> drawing "${L('выполняет', 'performs')}"`,
+relation Engine -> drawing "${L('выполняет', 'performs')}"
+instanceof order -> Bpmn
+isa Bpmn -> Diagram`,
   },
   {
     id: '23',
@@ -586,8 +576,8 @@ start s "${L('Нужна схема', 'A scheme is needed')}"
 task t1 "${L('Написать код', 'Write the code')}"
 task t2 "${L('Посмотреть рисунок', 'Look at the drawing')}"
 exclusive g1 "${L('Верно?', 'Correct?')}"
-task t3 "${L('Исправить', 'Fix')}"
 task t4 "${L('Экспортировать', 'Export')}"
+task t3 "${L('Исправить', 'Fix')}"
 end e "${L('Схема готова', 'Scheme is ready')}"
 flow s -> t1
 flow t1 -> t2
@@ -776,9 +766,9 @@ link net -> kroki`,
       'A hint for the author: is a drawing needed without internet, are special formats needed, which engine fits.',
     ],
     source: (L) => `diagram decision "${L('Выбор движка', 'Choosing an engine')}"
-question q1 "${L('Без интернета?', 'Offline?')}"
-question q2 "${L('Точная раскладка?', 'Exact layout?')}"
-question q3 "${L('Последовательность?', 'Sequence?')}"
+question q1 "${L('Нужна работа без интернета?', 'Is offline work needed?')}"
+question q2 "${L('Нужна точная раскладка графа?', 'Is an exact graph layout needed?')}"
+question q3 "${L('Это диаграмма последовательности?', 'Is it a sequence diagram?')}"
 outcome local "${L('Свой движок', 'Local engine')}"
 outcome dot "Graphviz"
 outcome puml "PlantUML"

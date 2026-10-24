@@ -48,15 +48,23 @@ const measure = () => {
   // A label that lies wholly outside is a caption under a small symbol and is allowed.
   const spill = [];
   svg.querySelectorAll('g.notation__node').forEach((group) => {
-    const shape = [...group.children].find((child) => /^(rect|ellipse|circle|polygon|path)$/.test(child.localName));
+    // The body of the symbol: a front rectangle (also of a 3-D box), else an ellipse, a circle or a polygon, a path last.
+    const parts = [...group.children];
+    const shape = ['rect', 'ellipse', 'circle', 'polygon', 'path'].map((name) => parts.find((child) => child.localName === name)).find(Boolean);
     if (!shape || !shape.isPointInFill) return;
     const toSvg = svg.getScreenCTM().inverse().multiply(shape.getScreenCTM());
     const local = shape.getScreenCTM().inverse().multiply(svg.getScreenCTM());
     void toSvg;
     group.querySelectorAll('text').forEach((label) => {
-      if (label.textContent.trim() === '') return;
+      // The tiny bold tag "ref" of an interaction frame is part of the symbol, not a label of its body.
+      if (label.textContent.trim() === '' || Number(label.getAttribute('font-size')) < 11) return;
       const b = label.getBoundingClientRect();
-      const corners = [[b.left, b.top], [b.right, b.top], [b.left, b.bottom], [b.right, b.bottom]].map(([x, y]) => {
+      const corners = [
+        [b.left, b.top],
+        [b.right, b.top],
+        [b.left, b.bottom],
+        [b.right, b.bottom],
+      ].map(([x, y]) => {
         const point = svg.createSVGPoint();
         point.x = x;
         point.y = y;
@@ -66,14 +74,59 @@ const measure = () => {
         return shape.isPointInFill(p);
       });
       const inside = corners.filter(Boolean).length;
-      if (inside > 0 && inside < 4) spill.push(label.textContent.trim().slice(0, 40));
+      // The centre of the label decides whether it is a caption (centre outside the shape, allowed) or a label of the body (centre inside, all corners must be inside).
+      const centre = new DOMPoint((b.left + b.right) / 2, (b.top + b.bottom) / 2).matrixTransform(shape.getScreenCTM().inverse());
+      if (shape.isPointInFill(centre) && inside < 4) spill.push(label.textContent.trim().slice(0, 40));
+    });
+  });
+  // Labels must not be hidden behind a node, and a caption must not touch the symbol it belongs to.
+  // The test uses the real outline: the four corners and the centre of the label are asked whether they lie in the fill of the shape.
+  const bodies = [...svg.querySelectorAll('g.notation__node')]
+    .map((group) => ({
+      group,
+      body: ['rect', 'ellipse', 'circle', 'polygon', 'path'].map((name) => [...group.children].find((child) => child.localName === name)).find(Boolean),
+    }))
+    .filter(({ body }) => body && body.isPointInFill);
+  const covered = [];
+  texts.forEach((label) => {
+    if (Number(label.getAttribute('font-size')) < 11) return;
+    const r = label.getBoundingClientRect();
+    const own = label.closest('g.notation__node');
+    const points = [
+      [r.left, r.top],
+      [r.right, r.top],
+      [r.left, r.bottom],
+      [r.right, r.bottom],
+      [(r.left + r.right) / 2, (r.top + r.bottom) / 2],
+    ];
+    bodies.forEach(({ group, body }) => {
+      const inverse = body.getScreenCTM().inverse();
+      const hits = points.map(([x, y]) => body.isPointInFill(new DOMPoint(x, y).matrixTransform(inverse)));
+      if (!own && hits.some(Boolean)) covered.push(label.textContent.trim().slice(0, 40));
+      if (own === group && !hits[4] && hits.some(Boolean)) covered.push(label.textContent.trim().slice(0, 40));
     });
   });
   const tags = {};
   svg.querySelectorAll('*').forEach((n) => (tags[n.localName] = (tags[n.localName] ?? 0) + 1));
-  const bad = [...svg.querySelectorAll('*')].flatMap((n) => [...n.attributes].filter((a) => /NaN|undefined|Infinity/.test(a.value)).map((a) => `${n.localName}@${a.name}=${a.value.slice(0, 30)}`));
+  const bad = [...svg.querySelectorAll('*')].flatMap((n) =>
+    [...n.attributes].filter((a) => /NaN|undefined|Infinity/.test(a.value)).map((a) => `${n.localName}@${a.name}=${a.value.slice(0, 30)}`),
+  );
   const problems = [...document.querySelectorAll('.problems__item, .problems li, [data-problem]')].map((n) => n.textContent.trim().slice(0, 120));
-  return { drawn: true, width, height, textCount: texts.length, allText: svg.textContent.replace(/\s+/g, ''), outside, overlaps, spill, tags, bad, problems, svg: new XMLSerializer().serializeToString(svg) };
+  return {
+    drawn: true,
+    width,
+    height,
+    textCount: texts.length,
+    allText: svg.textContent.replace(/\s+/g, ''),
+    outside,
+    overlaps,
+    spill,
+    covered,
+    tags,
+    bad,
+    problems,
+    svg: new XMLSerializer().serializeToString(svg),
+  };
 };
 
 for (const lang of ['ru', 'en']) {
@@ -98,7 +151,22 @@ for (const lang of ['ru', 'en']) {
     const shown = await page.evaluate(() => [...document.querySelectorAll('.code__line code')].map((l) => l.textContent).join('\n'));
     const labels = [...new Set([...source.matchAll(/"([^"]+)"/g)].map((m) => m[1].replace(/\s+/g, '')))].filter((t) => t.length > 1);
     const missing = result.drawn ? labels.filter((t) => !result.allText.includes(t)) : labels;
-    const entry = { lang, id: d.id, notation: d.notation, drawn: result.drawn, sourceInEditor: shown.trim() === source.trim(), size: result.drawn ? `${Math.round(result.width)}x${Math.round(result.height)}` : null, texts: result.textCount, outside: result.outside, overlaps: result.overlaps, spill: result.spill, bad: result.bad, missing, problems: result.problems };
+    const entry = {
+      lang,
+      id: d.id,
+      notation: d.notation,
+      drawn: result.drawn,
+      sourceInEditor: shown.trim() === source.trim(),
+      size: result.drawn ? `${Math.round(result.width)}x${Math.round(result.height)}` : null,
+      texts: result.textCount,
+      outside: result.outside,
+      overlaps: result.overlaps,
+      spill: result.spill,
+      covered: result.covered,
+      bad: result.bad,
+      missing,
+      problems: result.problems,
+    };
     report.push(entry);
     if (result.drawn) {
       // The files are exactly what the export menu of the service gives: serializeSvg for SVG and rasterize for PNG.
@@ -118,11 +186,23 @@ for (const lang of ['ru', 'en']) {
       await (await page.$('.canvas__remote svg')).screenshot({ path: `${here}view/${lang}/${name}.png` });
     }
     await page.close();
-    const ok = entry.drawn && entry.sourceInEditor && !entry.outside.length && !entry.overlaps.length && !entry.spill.length && !entry.bad.length && !entry.missing.length;
-    console.log(`${lang} ${d.id} ${d.notation.padEnd(18)} ${ok ? 'ok     ' : 'PROBLEM'} ${entry.size ?? '-'} texts=${entry.texts}${entry.outside.length ? ` outside=${JSON.stringify(entry.outside)}` : ''}${entry.spill.length ? ` spill=${JSON.stringify(entry.spill)}` : ''}${entry.overlaps.length ? ` overlaps=${JSON.stringify(entry.overlaps.slice(0, 3))}` : ''}${entry.missing.length ? ` missing=${JSON.stringify(entry.missing)}` : ''}${entry.bad.length ? ` bad=${JSON.stringify(entry.bad)}` : ''}${entry.sourceInEditor ? '' : ' source-differs'}`);
+    const ok =
+      entry.drawn &&
+      entry.sourceInEditor &&
+      !entry.outside.length &&
+      !entry.overlaps.length &&
+      !entry.spill.length &&
+      !entry.covered.length &&
+      !entry.bad.length &&
+      !entry.missing.length;
+    console.log(
+      `${lang} ${d.id} ${d.notation.padEnd(18)} ${ok ? 'ok     ' : 'PROBLEM'} ${entry.size ?? '-'} texts=${entry.texts}${entry.outside.length ? ` outside=${JSON.stringify(entry.outside)}` : ''}${entry.covered.length ? ` covered=${JSON.stringify(entry.covered)}` : ''}${entry.spill.length ? ` spill=${JSON.stringify(entry.spill)}` : ''}${entry.overlaps.length ? ` overlaps=${JSON.stringify(entry.overlaps.slice(0, 3))}` : ''}${entry.missing.length ? ` missing=${JSON.stringify(entry.missing)}` : ''}${entry.bad.length ? ` bad=${JSON.stringify(entry.bad)}` : ''}${entry.sourceInEditor ? '' : ' source-differs'}`,
+    );
   }
 }
 await browser.close();
 writeFileSync(`${here}report.json`, `${JSON.stringify(report, null, 2)}\n`);
-const failed = report.filter((e) => !e.drawn || !e.sourceInEditor || e.outside.length || e.overlaps.length || e.spill.length || e.bad.length || e.missing.length);
+const failed = report.filter(
+  (e) => !e.drawn || !e.sourceInEditor || e.outside.length || e.overlaps.length || e.spill.length || e.covered.length || e.bad.length || e.missing.length,
+);
 console.log(failed.length === 0 ? `ALL ${report.length} OK` : `${failed.length} of ${report.length} with problems`);
