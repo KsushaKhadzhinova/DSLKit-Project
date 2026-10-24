@@ -503,7 +503,7 @@
   font-size: var(--text-small);
 }
 
-/* The loader is the pinwheel of the logo; it turns while a drawing is rendered and stands still for people who asked for less motion */
+/* The loader is a blue ring; it turns while a drawing is rendered and stands still for people who asked for less motion */
 .canvas[aria-busy='true'] .canvas__status::before {
   content: '';
   display: inline-block;
