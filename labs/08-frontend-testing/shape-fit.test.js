@@ -79,6 +79,26 @@ test('wrap and the sizer agree: no line of a wrapped label is wider than the sha
   }
 });
 
+test('a caption of several lines starts below its symbol and does not run over it', () => {
+  const source = [
+    'diagram bpmn "T"',
+    'start s "A scheme is needed for the work"',
+    'task t "Write the code"',
+    'end e "Scheme is ready and checked by the author"',
+    'flow s -> t',
+    'flow t -> e',
+  ].join('\n');
+  const svg = renderNotation(parseDiagram(source));
+  for (const id of ['s', 'e']) {
+    const group = svg.split('<g class="notation__node"').find((part) => part.startsWith(` data-id="${id}"`));
+    const circle = /<circle cx="([\d.]+)" cy="([\d.]+)" r="([\d.]+)"/.exec(group);
+    const bottom = Number(circle[2]) + Number(circle[3]);
+    const lines = [...group.matchAll(/<text [^>]*y="([\d.]+)"/g)].map((m) => Number(m[1]));
+    assert.ok(lines.length >= 2, `${id}: the label should wrap into several lines`);
+    for (const y of lines) assert.ok(y - 6 >= bottom, `${id}: a line of the caption at y=${y} touches the symbol that ends at ${bottom}`);
+  }
+});
+
 test('every starter template still draws with the new sizes: well-formed SVG, every node with a positive size, no NaN', () => {
   for (const key of NOTATION_KEYS) {
     const model = parseDiagram(TEMPLATES[key]);
