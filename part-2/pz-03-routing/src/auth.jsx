@@ -19,8 +19,11 @@ export function validateUserName(value) {
 export const roleFor = (name) => (typeof name === 'string' && name.trim().toLowerCase() === ADMIN_NAME ? 'admin' : 'user');
 
 // A return address must be a path on this site. "//host", "https://host" and "/login" itself are not followed.
+// A backslash, a space or a control character anywhere is refused too: browsers drop tabs and line breaks from an address and read a backslash as a slash,
+// so "/\t/host" or "/a\\b" could turn into "//host" (see the React Router advisory about backslashes in links).
+const UNSAFE_PATH_CHARACTER = /[\u0000- \u007f-\u009f\\]/;
 export function safeReturnPath(value, fallback = '/dashboard') {
-  if (typeof value !== 'string' || !value.startsWith('/') || value.startsWith('//') || value.startsWith('/\\')) return fallback;
+  if (typeof value !== 'string' || !value.startsWith('/') || value.startsWith('//') || UNSAFE_PATH_CHARACTER.test(value)) return fallback;
   if (value === '/login' || value.startsWith('/login?') || value.startsWith('/login#') || value === '/logout') return fallback;
   return value;
 }
