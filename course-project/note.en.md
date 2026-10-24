@@ -42,7 +42,7 @@ CI/CD – Continuous Integration / Continuous Deployment.
 
 **Relevance.** Diagrams of processes, data and architecture are needed in every development team, but ordinary graphical editors suit teamwork badly. A file with a picture cannot be compared line by line in a version control system, it is hard to check automatically and hard to change in bulk. The diagrams-as-code approach removes the problem: a diagram is described as text in a special language, the text lives in the repository next to the source code, and the picture is drawn automatically. Services of this class are in demand among developers, architects and teachers because they lower the cost of keeping diagrams up to date.
 
-The DSLKit project is conceived as a SaaS editor of diagrams as code for six notations: UML, BPMN, ERD, DFD, IDEF0 and Petri nets. The course project implements the server and client core of such a system: diagram storage with comments, user registration and login, access control, an administrator screen and deployment in containers. The visual editor with a preview was built separately in the first part of the discipline as a static site. In the course project it serves as the subject area and as the source of interface requirements.
+The DSLKit project is conceived as a SaaS editor of diagrams as code for six notations: UML, BPMN, ERD, DFD, IDEF0 and Petri nets. The course project implements the server and client core of such a system: diagram storage with comments and tags, user registration and login, access control, an administrator screen and deployment in containers. The visual editor with a preview was built separately in the first part of the discipline as a static site. In the course project it serves as the subject area and as the source of interface requirements.
 
 **Purpose.** To develop the full-featured web application "DSLKit" on a modern stack: a React client, a Node.js and Express server, a PostgreSQL relational database, JWT authentication and a Docker Compose launch.
 
@@ -66,7 +66,7 @@ The DSLKit project is conceived as a SaaS editor of diagrams as code for six not
 
 **The problem.** A developer who keeps diagrams as code faces three groups of tasks. The source text of a diagram has to be stored together with its title and notation, the data of different people has to be separated, and access has to be managed safely. Free online editors usually store data without an account or tie it to a third-party service, so the user does not control who sees the diagrams. In such services, according to the competitor review in the first part of the work, one meets unclear pricing and disabled buttons without an explanation. DSLKit avoids these defects: the account is its own, the rights are explicit, and the input limits are visible to the user and kept in one configuration file.
 
-The subject area is described by four concepts. A user is a person with an email address and a role. A diagram is a record with a title, a notation, DSL source code and a priority, and it has an owner. A comment is a short text on a diagram with an author and a time. A request is a unit of the log from which the administrator can reconstruct what happened on the server.
+The subject area is described by five concepts. A user is a person with an email address and a role. A diagram is a record with a title, a notation, DSL source code and a priority, and it has an owner. A comment is a short text on a diagram with an author and a time. A tag is a short label put on diagrams: a diagram can have several tags and one tag can be on many diagrams. A request is a unit of the log from which the administrator can reconstruct what happened on the server.
 
 **Functional requirements.** The requirements are written as user stories and collected in Table 1.
 
@@ -75,8 +75,11 @@ Table 1 – Functional requirements (FR)
 | No.  | User story                                                                          | Module         |
 | ---- | ----------------------------------------------------------------------------------- | -------------- |
 | FR1  | A guest can register with an email address and a password                           | Authentication |
+| FR16 | The owner of a diagram or an administrator can add a tag to the diagram and remove it, any user can show the diagrams with a chosen tag | Diagrams       |
 | FR2  | A registered user can log in and receive a token                                    | Authentication |
+| FR16 | The owner of a diagram or an administrator can add a tag to the diagram and remove it, any user can show the diagrams with a chosen tag | Diagrams       |
 | FR3  | A user can view their profile                                                       | Authentication |
+| FR16 | The owner of a diagram or an administrator can add a tag to the diagram and remove it, any user can show the diagrams with a chosen tag | Diagrams       |
 | FR4  | A user can view the list of diagrams and search it by title                         | Diagrams       |
 | FR5  | A user can sort the list and get it page by page                                    | Diagrams       |
 | FR6  | A user can create a diagram: title, notation, source code, priority                 | Diagrams       |
@@ -89,6 +92,7 @@ Table 1 – Functional requirements (FR)
 | FR13 | A user can read the comments on a diagram and leave their own                       | Diagrams       |
 | FR14 | The author of a comment or an administrator can edit and delete the comment         | Diagrams       |
 | FR15 | The login and registration pages are open to a guest, the others need a login and return to the requested address | Authentication |
+| FR16 | The owner of a diagram or an administrator can add a tag to the diagram and remove it, any user can show the diagrams with a chosen tag | Diagrams       |
 
 The three functional modules required by the course project condition are named in the last column of Table 1: authentication, diagrams and administration.
 
@@ -132,7 +136,7 @@ Figure 3 – C4 level 2 diagram: containers of DSLKit and the protocols between 
 
 A single entry point through Nginx has two consequences. First, for the browser the client and the server share one origin, so CORS is not needed in the container mode. Second, the server address is not baked into the built client: the build gets the value `/api`.
 
-**REST API design.** The API resources are `auth` (registration and login), `profile`, `diagrams`, `comments` and `users`. The main endpoints are collected in Table 3. All answers are JSON, errors have the form `{ "error": "...", "details": [...] }`, where `details` lists the fields with a description of the problem.
+**REST API design.** The API resources are `auth` (registration and login), `profile`, `diagrams`, `comments`, `tags` and `users`. The main endpoints are collected in Table 3. All answers are JSON, errors have the form `{ "error": "...", "details": [...] }`, where `details` lists the fields with a description of the problem.
 
 Table 3 – Main REST API endpoints
 
@@ -150,6 +154,11 @@ Table 3 – Main REST API endpoints
 | POST   | `/diagrams/:id/comments` | token           | New comment. Body `{"text"}` (1–1000 characters), the author comes from the token, answer 201 and the `Location` header, 400, 404 |
 | PATCH  | `/comments/:id`      | author or admin     | Text change, body `{"text"}`, 200, 400, 403, 404                                                                |
 | DELETE | `/comments/:id`      | author or admin     | Deletion, 204, 403, 404                                                                                         |
+| GET    | `/tags`              | token               | All tags with the number of diagrams for each. Parameters `limit`, `offset`, `sort` (`id`, `name`), `order`. Header `X-Total-Count` |
+| GET    | `/diagrams/:id/tags` | token               | Tags of a diagram in alphabetical order, 200, 400, 404                                                          |
+| POST   | `/diagrams/:id/tags` | owner or admin     | Body `{"name"}` (up to 30 characters, letters, digits, space, `-`, `_`), the name is lowercased, the tag is created on first use. Answer 201 or 200 (already set), 400 (including more than 10 tags), 403, 404 |
+| DELETE | `/diagrams/:id/tags/:tagId` | owner or admin | Remove a tag from the diagram, the tag itself stays, 204, 400, 403, 404                                          |
+| DELETE | `/tags/:id`          | admin               | Delete a tag from all diagrams, 204, 403, 404                                                                   |
 | GET    | `/users`             | admin               | List of users without hashes, 200, 403                                                                          |
 | PATCH  | `/users/:id/role`    | admin               | Role change. Body `{"role":"admin"}`, 200, 400 (own role or bad value), 404                                     |
 | DELETE | `/users/:id`         | admin               | User deletion, 204, 400 (self), 404, 409 (has diagrams)            |
@@ -159,17 +168,17 @@ An example request body for creating a diagram is `{"title":"Order","notation":"
 
 ### 1.3 Data Structure Design
 
-The database has four tables. The ER diagram is shown in Figure 4, its source text is in appendix E.
+The database has five entities and one link table, `DiagramTags`. The ER diagram is shown in Figure 4, its source text is in appendix E.
 
 ![ER diagram](diagrams/er.svg)
 
-Figure 4 – ER diagram of the database: users, diagrams, comments and the request log
+Figure 4 – ER diagram of the database: users, diagrams, comments, tags and the request log
 
-The `Users` table stores accounts: a unique lowercase email address, a password hash and the role `user` or `admin`. The `Diagrams` table stores diagrams: a title of up to 80 characters, a notation from a fixed list, source code of up to 10000 characters, a priority and the foreign key `ownerId` to `Users`. The relation is one to many: a user has many diagrams. The foreign key uses the `RESTRICT` rule, so a user cannot be deleted while diagrams belong to them. The `RequestLogs` table stores the request log: method, path, client address and the response status, which is written when the response ends. A log in a table instead of a file is required by the condition of variant 26. The `Comments` table stores comments on diagrams: a text of 1 to 1000 characters, the foreign keys `diagramId` to `Diagrams` and `authorId` to `Users`, and the creation and change times. Both keys use the `CASCADE` rule: deleting a diagram deletes its comments, deleting a user deletes the comments of that user. As for diagrams, the integrity rules are duplicated in the database: an empty text and a text longer than 1000 characters are forbidden.
+The `Users` table stores accounts: a unique lowercase email address, a password hash and the role `user` or `admin`. The `Diagrams` table stores diagrams: a title of up to 80 characters, a notation from a fixed list, source code of up to 10000 characters, a priority and the foreign key `ownerId` to `Users`. The relation is one to many: a user has many diagrams. The foreign key uses the `RESTRICT` rule, so a user cannot be deleted while diagrams belong to them. The `RequestLogs` table stores the request log: method, path, client address and the response status, which is written when the response ends. A log in a table instead of a file is required by the condition of variant 26. The `Comments` table stores comments on diagrams: a text of 1 to 1000 characters, the foreign keys `diagramId` to `Diagrams` and `authorId` to `Users`, and the creation and change times. Both keys use the `CASCADE` rule: deleting a diagram deletes its comments, deleting a user deletes the comments of that user. As for diagrams, the integrity rules are duplicated in the database: an empty text and a text longer than 1000 characters are forbidden. The `Tags` table stores tags: a unique name of up to 30 characters in lower case, and the database forbids an empty name and a name with capital letters. The many-to-many relation between diagrams and tags is the `DiagramTags` table with the composite primary key (`diagramId`, `tagId`): a diagram cannot get the same tag twice. Both foreign keys use the `CASCADE` rule, so deleting a diagram or a tag removes only the link rows, and the diagram or the tag itself stays.
 
 The integrity rules are duplicated in the database itself: a check of the allowed notation, a ban on an empty title or code made of spaces, and a limit on the title length. The table stays correct even if something writes to it bypassing the API. The tables are created by Sequelize migrations, not by `sync()`, so the schema can be rolled back and reproduced.
 
-The course project condition recommends four to six entities. The schema has four: `Users`, `Diagrams`, `Comments` and `RequestLogs`. There are three one-to-many relations: user to diagrams, user to comments and diagram to comments. The table is created by the fifth migration, which can be rolled back with `db:migrate:undo`.
+The course project condition recommends four to six entities. The schema has five: `Users`, `Diagrams`, `Comments`, `Tags` and `RequestLogs`. There are three one-to-many relations: user to diagrams, user to comments and diagram to comments. There is one many-to-many relation: diagrams to tags, through the `DiagramTags` table. The comment and tag tables are created by the fifth and the sixth migrations, which can be rolled back with `db:migrate:undo`.
 
 ## Chapter 2 Implementation of the Web Application
 
@@ -181,7 +190,7 @@ Table 4 – Technology choice and justification
 
 | Layer             | Chosen                          | Alternative            | Justification                                                                                        |
 | ----------------- | ------------------------------- | ---------------------- | ---------------------------------------------------------------------------------------------------- |
-| Client            | React 19, React Router 6, Vite, axios           | Vue, Angular           | Component approach, hooks, a large ecosystem, fast Vite build, testing with Vitest                   |
+| Client            | React 19, React Router 7, Vite, axios           | Vue, Angular           | Component approach, hooks, a large ecosystem, fast Vite build, testing with Vitest                   |
 | Server            | Node.js 22, Express 5           | NestJS, Fastify        | One language on the client and the server, a simple middleware chain, Express 5 passes a rejected promise to the error handler |
 | Database          | PostgreSQL 16                   | MongoDB                | Transactions, foreign keys and integrity constraints, needed for the user to diagrams relation       |
 | ORM               | Sequelize 6 with migrations     | Prisma, TypeORM        | Mature support of PostgreSQL and SQLite, migrations and seeds, used in lab 2                         |
@@ -204,8 +213,8 @@ Table 5 – Structure of the server side
 | -------------------- | -------------------------------------------------------------------------------- |
 | `server.js`          | Entry point: reads settings from the environment, checks the database, starts listening |
 | `src/app.js`         | Builds the Express application: middleware order and routes                      |
-| `src/models/`        | Sequelize models `User`, `Diagram`, `Comment`, `RequestLog` and constants                    |
-| `src/routes/`        | Routes `auth`, `diagrams`, `comments`, `users`                                                |
+| `src/models/`        | Sequelize models `User`, `Diagram`, `Comment`, `Tag`, `DiagramTag`, `RequestLog` and constants                    |
+| `src/routes/`        | Routes `auth`, `diagrams`, `comments`, `tags`, `users`                                                |
 | `src/controllers/`   | Handlers: all the request logic                                                  |
 | `src/middleware/`    | Token and role checks, input validation, rate limiting, CORS, log, error handling |
 | `migrations/`, `seeders/` | Database schema and initial data (the administrator from environment variables) |
@@ -227,13 +236,15 @@ The diagram controller (a fragment in appendix A) performs the CRUD operations. 
 Input validation runs before the controller (appendix A): the title and the code are required, blank values are rejected, the length is measured after trimming, the notation and the priority are matched against a list, unknown fields are dropped. The identifier in the address is checked with a strict regular expression, because `Number()` would accept the values `0x1` and `1e0`, and numbers above the `INTEGER` range would cause a PostgreSQL error and a 500 answer. The validation error answer lists the fields with an explanation.
 Comments (appendix A) are connected by a separate router: `GET` and `POST /diagrams/:id/comments`, `PATCH` and `DELETE /comments/:id`. The list is paged, oldest comments first, the total is in `X-Total-Count`. The text is checked after trimming: it is not empty, not longer than 1000 characters and has no control characters except a line break and a tab. Any signed-in user can read and write comments, the author or an administrator can edit and delete them. A missing diagram or comment gives 404, someone else's comment gives 403.
 
+Tags are connected the same way: `GET /tags`, `GET` and `POST /diagrams/:id/tags`, `DELETE /diagrams/:id/tags/:tagId` and `DELETE /tags/:id`. The tag name is trimmed, inner spaces are squeezed and letters are lowercased, so "Billing" and "billing " are one tag. A tag is created when it is first added (`findOrCreate`), adding the same name again answers 200 and changes nothing. A diagram can have at most 10 tags. The owner of a diagram or an administrator can set and remove tags, any signed-in user can read them, and only an administrator can delete a tag completely. The diagram list accepts the `tag` parameter: it finds the diagrams with that tag, and an unknown tag gives an empty list.
+
 #### 2.2.4 Authentication and Authorization
 
 The JWT scheme has four steps. The client sends the email and the password to `/auth/login`. The server compares the password with the bcrypt hash and signs a token with HS256, the issuer `dslkit`, a lifetime of 1 hour by default (at most 24 hours) and the user identifier. The client stores the token and adds the header `Authorization: Bearer <token>` to every request. On each request the server verifies the signature, the expiry and the issuer, and then reads the user from the database.
 
 The last step is important: the role in the token is only a hint and the decision is made from the database. So deleting an account and changing a role take effect at once, not when the token expires. The check accepts only HS256, so tokens with the algorithm `none` and HS512 are rejected. The code of the token middleware and of `requireRole` is in appendix A.
 
-Authorization follows the RBAC model with two roles. The owner of a diagram or an administrator can change and delete it, the author of a comment or an administrator can change and delete the comment, user management is open to the administrator only. The role at registration is always `user`, and the first administrator is created by a seed from the `ADMIN_EMAIL` and `ADMIN_PASSWORD` variables. An administrator cannot change the role of or delete themselves, so the system never stays without an administrator.
+Authorization follows the RBAC model with two roles. The owner of a diagram or an administrator can change and delete it, the author of a comment or an administrator can change and delete the comment, the tags of a diagram can be changed by its owner or an administrator, user management is open to the administrator only. The role at registration is always `user`, and the first administrator is created by a seed from the `ADMIN_EMAIL` and `ADMIN_PASSWORD` variables. An administrator cannot change the role of or delete themselves, so the system never stays without an administrator.
 
 #### 2.2.5 Error Handling and Security
 
@@ -262,11 +273,11 @@ The dependencies were checked with `npm audit --omit=dev`. There are no high or 
 
 #### 2.3.1 React Application Structure
 
-The client is in the `course-project/app/client` folder. `src/components` holds the components `Header`, `Footer`, `AuthForm`, `DiagramForm`, `DiagramItem`, `CommentsSection`, `ErrorPage`, `ErrorHelp`, `ErrorBoundary` and the route guards in `RouteGuards`. `src/pages` holds the pages: login and registration, the list and the page of a diagram, the administrator screen and the error pages. `src/hooks` holds the hooks `useDiagrams` (the list), `useComments` (the comments of a diagram) and `useUsers` (the administrator screen), `useDebouncedValue` delays the value for search, and the login state lives in `src/auth.jsx`. `src/utils` holds form validation, `safeReturnPath` and the page title, and the input limits are in `src/limits.json` and match the server ones. The API service and the interceptors are in `src/api.js`.
+The client is in the `course-project/app/client` folder. `src/components` holds the components `Header`, `Footer`, `AuthForm`, `DiagramForm`, `DiagramItem`, `CommentsSection`, `TagsSection`, `ErrorPage`, `ErrorHelp`, `ErrorBoundary` and the route guards in `RouteGuards`. `src/pages` holds the pages: login and registration, the list and the page of a diagram, the administrator screen and the error pages. `src/hooks` holds the hooks `useDiagrams` (the list), `useComments` (the comments of a diagram), `useTags` (the tags of a diagram) and `useUsers` (the administrator screen), `useDebouncedValue` delays the value for search, and the login state lives in `src/auth.jsx`. `src/utils` holds form validation, `safeReturnPath` and the page title, and the input limits are in `src/limits.json` and match the server ones. The API service and the interceptors are in `src/api.js`.
 
 #### 2.3.2 Routing
 
-Routing is built on React Router 6 (`react-router-dom` 6.30.6, the version is pinned in `package.json`). All pages share one layout (header, main content, footer), and access is split into three levels:
+Routing is built on React Router 7 (the `react-router` package 7.18.4, the version is pinned in `package.json`). In library mode version 7 uses the same `Routes` and `Route` description as version 6, and imports come from the single `react-router` package. All pages share one layout (header, main content, footer), and access is split into three levels:
 
 - public: `/login`, `/register` and the error pages `/401`, `/403` and `/500`, the root `/` leads a guest to the login and a signed-in user to the list,
 - protected (the wrapper route `RequireAuth`): `/diagrams` and `/diagrams/:id`, a guest is sent to `/login` and the whole requested address (path, query, hash) goes along in the navigation state,
@@ -328,7 +339,7 @@ The main way to run the system is Docker Compose on one machine, described above
 
 #### 2.4.4 Testing
 
-Automated tests are written for both parts. The server is tested with the built-in `node --test` runner on a temporary SQLite database with real migrations, bcrypt runs with four rounds for speed. The server suite has 209 tests: unit, functional, negative, attacks (token forgery, IDOR and a forged author of a comment, huge text, control characters), contract, load and resilience (a database failure, parallel requests, a diagram deleted while comments are written). The client is tested with Vitest and React Testing Library, the suite has 221 tests: routes (public, protected, role-based, return to the requested address, error pages), comments, the administrator screen, form validation, requests and accessibility with axe-core by the WCAG 2 A and AA rules. The Docker configuration is checked by 21 file checks without starting the daemon. The run on 24.10.2026: the server 209 of 209 tests (line coverage 100%, branches 98.27%), the client 221 of 221 (line coverage 96.33%, statements 94.13%), Docker 21 of 21.
+Automated tests are written for both parts. The server is tested with the built-in `node --test` runner on a temporary SQLite database with real migrations, bcrypt runs with four rounds for speed. The server suite has 226 tests: unit, functional, negative, attacks (token forgery, IDOR and a forged author of a comment, huge text, control characters), contract, load and resilience (a database failure, parallel requests, a diagram deleted while comments are written, tags and their link with diagrams). The client is tested with Vitest and React Testing Library, the suite has 237 tests: routes (public, protected, role-based, return to the requested address, error pages), comments, tags, the administrator screen, form validation, requests and accessibility with axe-core by the WCAG 2 A and AA rules. The Docker configuration is checked by 21 file checks without starting the daemon. The run on 24.10.2026: the server 225 of 226 tests (line coverage 100%, branches 98.27%; the load test exceeded its time limit on a busy machine and passed when run alone), the client 237 of 237 (line coverage 96.71%, statements 93.75%), Docker 21 of 21. [TODO: before submission repeat the full server run on a free machine and record 226 of 226.]
 
 Manual scenarios and control examples are given in subsection 3.2. For manual API checks there is a `requests.http` file for the REST Client extension and the Postman collection `postman_collection.json`.
 
@@ -374,6 +385,8 @@ Figure 9 – The error message for an unavailable server and the retry button
 
 **Scenario 4. Diagram page and comments.** The title of a card in the list leads to the diagram page `/diagrams/:id`: it shows the notation, the priority, the source code and the "Comments" section. The comments are shown in pages of 20 with a "Load more" button. The user writes a text of up to 1000 characters and presses "Send": an empty text is refused with a message under the field, and after the server answer the comment appears at the end of the list. On their own comments the user sees the "Edit" and "Delete" buttons, an administrator sees them on all of them. Other people's comments are signed "User No. N", one's own are signed "You". If the diagram does not exist, the 404 error page with an explanation is shown.
 
+**Scenario 5. Tags.** Under the source code of a diagram there is the "Tags" section. Each tag is a link to `/diagrams?tag=name`: the list then shows only the diagrams with that tag, with the caption "Tag: name" and a "Show all diagrams" link above it. The owner and an administrator see the "New tag" field and a "Remove" button on every tag. An empty name and a name with forbidden characters are refused with a message under the field before any request. When a diagram already has 10 tags, the field and the button are disabled with an explanation.
+
 **Scenario 5. Administration.** An administrator sees the "Administration" item in the header and opens the `/admin` screen: a table of users with the email, the role, the creation time and a "Delete" button. The role is changed with a select, the result is confirmed by a message. An attempt to change one's own role or to delete oneself is refused by the server and the screen explains the reason. Deleting needs a confirmation: a "Delete the user?" block appears with the "Cancel" button (it has the focus) and the "Delete" button. An ordinary user who opens `/admin` sees the 403 page.
 
 ### 3.2 Control Examples and Testing
@@ -412,16 +425,20 @@ Table 7 – Control examples
 | 26  | A text of 1001 characters or with a NUL character             | `POST /diagrams/:id/comments`                       | Answer 400, field `text`, nothing is written to the database     | Passed (automated tests)                 |
 | 27  | Administrator, their own identifier                           | Change their own role on the administrator screen   | The message "You cannot change your own role...", the role is unchanged | Passed (automated tests)          |
 | 28  | Administrator, a user without diagrams                        | Press "Delete" and confirm                          | A confirmation block, after "Delete" the row disappears          | Passed (automated tests)                 |
+| 29  | Owner token, a diagram, the name `  Billing  `              | `POST /diagrams/:id/tags`                           | Answer 201, the tag `billing`, the same name again answers 200 and does not duplicate the link | Passed (automated tests)          |
+| 30  | Token of an unrelated user                                    | `POST /diagrams/:id/tags`                           | Answer 403, the tags of the diagram are unchanged                | Passed (automated tests)          |
+| 31  | The name `<script>` or of 31 characters, an eleventh tag      | `POST /diagrams/:id/tags`                           | Answer 400, field `name`, nothing is written to the database     | Passed (automated tests)          |
+| 32  | A diagram with the tag `shop`, a diagram without tags         | `GET /diagrams?tag=SHOP`                            | One diagram in the answer, `X-Total-Count` is 1                  | Passed (automated tests)          |
 
 A screenshot of the test run and the `npm test` output are placed in appendix G or in the main text after the run [TODO: attach the test output with the number of passed tests and the coverage].
 
-**Conclusion on compliance with the requirements.** The functional requirements FR1 to FR15 are implemented at the API level and covered by the automated tests of the server side. All of them are available in the client interface too: FR9 to FR12 on the administrator screen, FR13 and FR14 on the diagram page, FR15 in the routing. The non-functional requirements for security and input limits are met and checked by tests. NFR6 (performance) and a part of NFR8 (accessibility) are not confirmed by measurement and need measurements. [TODO: after filling in Table 7 update the conclusion with the actual results.]
+**Conclusion on compliance with the requirements.** The functional requirements FR1 to FR16 are implemented at the API level and covered by the automated tests of the server side. All of them are available in the client interface too: FR9 to FR12 on the administrator screen, FR13, FR14 and FR16 on the diagram page and in the list, FR15 in the routing. The non-functional requirements for security and input limits are met and checked by tests. NFR6 (performance) and a part of NFR8 (accessibility) are not confirmed by measurement and need measurements. [TODO: after filling in Table 7 update the conclusion with the actual results.]
 
 ## Conclusion
 
-In the course of the work all tasks have been solved: the subject area has been analyzed and 15 functional and 9 non-functional requirements have been formulated, the architecture by the C4 model, a REST API of 16 endpoints and a data schema of four tables have been designed, and the server side with JWT authentication and a role model, a React client and a container launch of the whole stack with one command have been implemented.
+In the course of the work all tasks have been solved: the subject area has been analyzed and 16 functional and 9 non-functional requirements have been formulated, the architecture by the C4 model, a REST API of 21 endpoints and a data schema of five entities have been designed, and the server side with JWT authentication and a role model, a React client and a container launch of the whole stack with one command have been implemented.
 
-The purpose of the work, the development of the web application "DSLKit", has been achieved. The result is a working web application that starts with `docker compose up --build` and is available locally at `http://localhost:8080` [TODO: if a cloud deployment is made, give the public address]. The application implements registration and login, diagram storage with search, sorting and paging, separation of the rights of the owner and the administrator, a request log in the database and a service health check.
+The purpose of the work, the development of the web application "DSLKit", has been achieved. The result is a working web application that starts with `docker compose up --build` and is available locally at `http://localhost:8080` [TODO: if a cloud deployment is made, give the public address]. The application implements registration and login, diagram storage with search, sorting and paging, comments and tags on diagrams, separation of the rights of the owner and the administrator, a request log in the database and a service health check.
 
 Limitations of the work: there is no logout with token revocation and no refresh tokens, the rate limit counters are kept in the memory of one server instance, so scaling to several instances is not supported, and comments have no replies and no real-time updates.
 
@@ -867,6 +884,8 @@ Table 8 – Input data for the control examples
 | Comment to create           | `{"text":"I agree with the order of the steps"}`                                           |
 | Comment of 1001 characters  | a string of 1001 letters `a`                                                               |
 | Comment with a control character | the text `a`, a NUL character, the text `b`                                           |
+| Tag to add                  | `{"name":"  Billing  "}` (stored as `billing`)                                             |
+| Invalid tag                 | `<script>` or a string of 31 letters `a`                                                   |
 
 ## Appendix E (mandatory) Mermaid Source Text of the Diagrams
 
@@ -891,6 +910,8 @@ flowchart LR
     uc13("Читать комментарии к диаграмме")
     uc14("Оставить комментарий")
     uc15("Изменить или удалить свой комментарий")
+    uc17("Добавить и убрать теги своей диаграммы")
+    uc18("Отфильтровать список по тегу")
     uc9("Изменить или удалить чужую диаграмму")
     uc16("Изменить или удалить чужой комментарий")
     uc10("Открыть экран администратора: список пользователей")
@@ -908,6 +929,8 @@ flowchart LR
   user --- uc13
   user --- uc14
   user --- uc15
+  user --- uc17
+  user --- uc18
   admin --- uc9
   admin --- uc16
   admin --- uc10
@@ -938,10 +961,10 @@ C4Container
   Person(user, "Пользователь", "Браузер")
   Person(admin, "Администратор", "Браузер")
   System_Boundary(dslkit, "DSLKit, docker compose") {
-    Container(spa, "SPA", "React 19, Vite, axios", "React Router 6: публичные и защищённые маршруты, список и страница диаграммы, комментарии, экран администратора")
+    Container(spa, "SPA", "React 19, Vite, axios", "React Router 7: публичные и защищённые маршруты, список и страница диаграммы, комментарии, теги, экран администратора")
     Container(proxy, "Веб-сервер и прокси", "Nginx unprivileged, порт 8080", "Отдаёт статику, пересылает /api/ на сервер")
-    Container(api, "REST API", "Node.js 22, Express 5, Sequelize 6, порт 3000", "Аутентификация bcrypt и JWT, роли, CRUD диаграмм и комментариев, пользователи, журнал запросов, /health")
-    ContainerDb(db, "База данных", "PostgreSQL 16, том pgdata", "Таблицы Users, Diagrams, Comments, RequestLogs")
+    Container(api, "REST API", "Node.js 22, Express 5, Sequelize 6, порт 3000", "Аутентификация bcrypt и JWT, роли, CRUD диаграмм, комментариев и тегов, пользователи, журнал запросов, /health")
+    ContainerDb(db, "База данных", "PostgreSQL 16, том pgdata", "Таблицы Users, Diagrams, Comments, Tags, DiagramTags, RequestLogs")
   }
   Rel(user, proxy, "Открывает сайт", "HTTP 8080")
   Rel(admin, proxy, "Экран администратора, /api/users", "HTTP 8080")
@@ -958,6 +981,8 @@ erDiagram
   USERS ||--o{ DIAGRAMS : "владеет (ownerId, RESTRICT)"
   USERS ||--o{ COMMENTS : "пишет (authorId, CASCADE)"
   DIAGRAMS ||--o{ COMMENTS : "содержит (diagramId, CASCADE)"
+  DIAGRAMS ||--o{ DIAGRAM_TAGS : "помечена (diagramId, CASCADE)"
+  TAGS ||--o{ DIAGRAM_TAGS : "метит (tagId, CASCADE)"
   USERS {
     int id PK
     string email UK "до 254 символов, нижний регистр"
@@ -981,6 +1006,18 @@ erDiagram
     int diagramId FK
     int authorId FK
     text text "1..1000 символов"
+    datetime createdAt
+    datetime updatedAt
+  }
+  TAGS {
+    int id PK
+    string name UK "1..30 символов, нижний регистр"
+    datetime createdAt
+    datetime updatedAt
+  }
+  DIAGRAM_TAGS {
+    int diagramId PK, FK
+    int tagId PK, FK
     datetime createdAt
     datetime updatedAt
   }

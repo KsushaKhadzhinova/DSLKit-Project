@@ -2,6 +2,8 @@ erDiagram
   USERS ||--o{ DIAGRAMS : "владеет (ownerId, RESTRICT)"
   USERS ||--o{ COMMENTS : "пишет (authorId, CASCADE)"
   DIAGRAMS ||--o{ COMMENTS : "содержит (diagramId, CASCADE)"
+  DIAGRAMS ||--o{ DIAGRAM_TAGS : "помечена (diagramId, CASCADE)"
+  TAGS ||--o{ DIAGRAM_TAGS : "метит (tagId, CASCADE)"
 
   USERS {
     int id PK
@@ -28,6 +30,20 @@ erDiagram
     int diagramId FK
     int authorId FK
     text text "1..1000 символов"
+    datetime createdAt
+    datetime updatedAt
+  }
+
+  TAGS {
+    int id PK
+    string name UK "1..30 символов, нижний регистр"
+    datetime createdAt
+    datetime updatedAt
+  }
+
+  DIAGRAM_TAGS {
+    int diagramId PK, FK
+    int tagId PK, FK
     datetime createdAt
     datetime updatedAt
   }

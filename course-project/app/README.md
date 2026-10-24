@@ -4,11 +4,11 @@
 
 | Папка     | Что внутри                                                                                          |
 | --------- | --------------------------------------------------------------------------------------------------- |
-| `server/` | Express 5, Sequelize 6, PostgreSQL, JWT, роли. Сущности: `User`, `Diagram`, `Comment`, `RequestLog` |
-| `client/` | React 19, React Router 6, Vite, axios. Вход, список и страница диаграммы, комментарии, `/admin`     |
+| `server/` | Express 5, Sequelize 6, PostgreSQL, JWT, роли. Сущности: `User`, `Diagram`, `Comment`, `Tag`, `RequestLog` (связь тегов с диаграммами через `DiagramTag`) |
+| `client/` | React 19, React Router 7, Vite, axios. Вход, список и страница диаграммы, комментарии, теги, `/admin` |
 | `docker/` | `docker-compose.yml`, Dockerfile сервера и клиента, Nginx                                           |
 
-Что добавлено по сравнению с лабораторными: сущность `Comment` (миграция, модель, `GET` и `POST /diagrams/:id/comments`, `PATCH` и `DELETE /comments/:id`, сид), маршрутизация клиента, страницы ошибок 401, 403, 404, 500, экран администратора.
+Что добавлено по сравнению с лабораторными: сущность `Comment` (миграция, модель, `GET` и `POST /diagrams/:id/comments`, `PATCH` и `DELETE /comments/:id`, сид), сущность `Tag` (миграция, модели `Tag` и `DiagramTag`, `GET /tags`, `GET` и `POST /diagrams/:id/tags`, `DELETE /diagrams/:id/tags/:tagId`, `DELETE /tags/:id`, фильтр `GET /diagrams?tag=`, сид, раздел «Теги» на странице диаграммы), маршрутизация клиента, страницы ошибок 401, 403, 404, 500, экран администратора.
 
 ## Запуск в Docker
 
@@ -53,4 +53,4 @@ cd course-project/app/client && npm test
 cd course-project/app/docker && node --test docker.test.mjs hardening.test.mjs
 ```
 
-Результат на 24.10.2026: сервер 209 тестов, клиент 221, Docker 21.
+Результат на 24.10.2026: сервер 226 тестов (в полном прогоне на занятой машине нагрузочный тест `load: 600 authenticated reads` мог превысить порог 3 с, отдельно он проходит), клиент 237, Docker 21.
