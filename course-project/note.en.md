@@ -42,7 +42,7 @@ CI/CD – Continuous Integration / Continuous Deployment.
 
 **Relevance.** Diagrams of processes, data and architecture are needed in every development team, but ordinary graphical editors suit teamwork badly. A file with a picture cannot be compared line by line in a version control system, it is hard to check automatically and hard to change in bulk. The diagrams-as-code approach removes the problem: a diagram is described as text in a special language, the text lives in the repository next to the source code, and the picture is drawn automatically. Services of this class are in demand among developers, architects and teachers because they lower the cost of keeping diagrams up to date.
 
-The DSLKit project is conceived as a SaaS editor of diagrams as code for six notations: UML, BPMN, ERD, DFD, IDEF0 and Petri nets. The course project implements the server and client core of such a system: diagram storage, user registration and login, access control and deployment in containers. The visual editor with a preview was built separately in the first part of the discipline as a static site. In the course project it serves as the subject area and as the source of interface requirements.
+The DSLKit project is conceived as a SaaS editor of diagrams as code for six notations: UML, BPMN, ERD, DFD, IDEF0 and Petri nets. The course project implements the server and client core of such a system: diagram storage with comments, user registration and login, access control, an administrator screen and deployment in containers. The visual editor with a preview was built separately in the first part of the discipline as a static site. In the course project it serves as the subject area and as the source of interface requirements.
 
 **Purpose.** To develop the full-featured web application "DSLKit" on a modern stack: a React client, a Node.js and Express server, a PostgreSQL relational database, JWT authentication and a Docker Compose launch.
 
@@ -51,7 +51,7 @@ The DSLKit project is conceived as a SaaS editor of diagrams as code for six not
 1. Analyze the subject area and formulate functional and non-functional requirements.
 2. Design the architecture, the data structure and the REST API, and choose the technology stack.
 3. Implement the server side: REST API, database, authentication and authorization.
-4. Develop the client side: a React SPA with a responsive interface.
+4. Develop the client side: a React SPA with routing (public, protected and role-based routes) and a responsive interface.
 5. Integrate the parts, test them and deploy the application in containers.
 
 **Object and subject of the study.** The object is the process of developing web applications. The subject is the methods and technologies of building SPAs with React, Node.js and PostgreSQL.
@@ -66,7 +66,7 @@ The DSLKit project is conceived as a SaaS editor of diagrams as code for six not
 
 **The problem.** A developer who keeps diagrams as code faces three groups of tasks. The source text of a diagram has to be stored together with its title and notation, the data of different people has to be separated, and access has to be managed safely. Free online editors usually store data without an account or tie it to a third-party service, so the user does not control who sees the diagrams. In such services, according to the competitor review in the first part of the work, one meets unclear pricing and disabled buttons without an explanation. DSLKit avoids these defects: the account is its own, the rights are explicit, and the input limits are visible to the user and kept in one configuration file.
 
-The subject area is described by three concepts. A user is a person with an email address and a role. A diagram is a record with a title, a notation, DSL source code and a priority, and it has an owner. A request is a unit of the log from which the administrator can reconstruct what happened on the server.
+The subject area is described by four concepts. A user is a person with an email address and a role. A diagram is a record with a title, a notation, DSL source code and a priority, and it has an owner. A comment is a short text on a diagram with an author and a time. A request is a unit of the log from which the administrator can reconstruct what happened on the server.
 
 **Functional requirements.** The requirements are written as user stories and collected in Table 1.
 
@@ -83,9 +83,12 @@ Table 1 – Functional requirements (FR)
 | FR7  | A user can edit and delete their own diagram                                        | Diagrams       |
 | FR8  | A user can see a clear message on a network or server error and retry               | Diagrams       |
 | FR9  | An administrator can edit or delete any diagram                                     | Administration |
-| FR10 | An administrator can view the list of users                                         | Administration |
+| FR10 | An administrator can see the list of users on a separate screen                                         | Administration |
 | FR11 | An administrator can change the role of another user                                | Administration |
-| FR12 | An administrator can delete a user who has no diagrams                              | Administration |
+| FR12 | An administrator can delete a user after a confirmation if the user has no diagrams                              | Administration |
+| FR13 | A user can read the comments on a diagram and leave their own                       | Diagrams       |
+| FR14 | The author of a comment or an administrator can edit and delete the comment         | Diagrams       |
+| FR15 | The login and registration pages are open to a guest, the others need a login and return to the requested address | Authentication |
 
 The three functional modules required by the course project condition are named in the last column of Table 1: authentication, diagrams and administration.
 
@@ -129,7 +132,7 @@ Figure 3 – C4 level 2 diagram: containers of DSLKit and the protocols between 
 
 A single entry point through Nginx has two consequences. First, for the browser the client and the server share one origin, so CORS is not needed in the container mode. Second, the server address is not baked into the built client: the build gets the value `/api`.
 
-**REST API design.** The API resources are `auth` (registration and login), `profile`, `diagrams` and `users`. The main endpoints are collected in Table 3. All answers are JSON, errors have the form `{ "error": "...", "details": [...] }`, where `details` lists the fields with a description of the problem.
+**REST API design.** The API resources are `auth` (registration and login), `profile`, `diagrams`, `comments` and `users`. The main endpoints are collected in Table 3. All answers are JSON, errors have the form `{ "error": "...", "details": [...] }`, where `details` lists the fields with a description of the problem.
 
 Table 3 – Main REST API endpoints
 
@@ -143,26 +146,30 @@ Table 3 – Main REST API endpoints
 | POST   | `/diagrams`          | token               | Create. Body `{"title","notation","sourceCode","priority"}`, answer 201 and the `Location` header                |
 | PUT    | `/diagrams/:id`      | owner or admin      | Full replacement, 200, 400, 403, 404                                                                            |
 | DELETE | `/diagrams/:id`      | owner or admin      | Deletion, 204, 403, 404                                                                                         |
+| GET    | `/diagrams/:id/comments` | token           | Comments of a diagram, oldest first. Parameters `limit` (1–100), `offset`, `order`. Header `X-Total-Count`, the answer is an array, 404 (no such diagram) |
+| POST   | `/diagrams/:id/comments` | token           | New comment. Body `{"text"}` (1–1000 characters), the author comes from the token, answer 201 and the `Location` header, 400, 404 |
+| PATCH  | `/comments/:id`      | author or admin     | Text change, body `{"text"}`, 200, 400, 403, 404                                                                |
+| DELETE | `/comments/:id`      | author or admin     | Deletion, 204, 403, 404                                                                                         |
 | GET    | `/users`             | admin               | List of users without hashes, 200, 403                                                                          |
 | PATCH  | `/users/:id/role`    | admin               | Role change. Body `{"role":"admin"}`, 200, 400 (own role or bad value), 404                                     |
-| DELETE | `/users/:id`         | admin               | User deletion, 204, 400 (self), 404, 409 (has diagrams) [TODO: check the code against users.test.js]            |
+| DELETE | `/users/:id`         | admin               | User deletion, 204, 400 (self), 404, 409 (has diagrams)            |
 | GET    | `/health`            | everyone            | Server and database check for Docker, 200 `{"status":"ok"}` or 503                                              |
 
 An example request body for creating a diagram is `{"title":"Order","notation":"BPMN","sourceCode":"start -> pay -> ship","priority":"normal"}`. The allowed notations are UML, BPMN, ERD, DFD, IDEF0 and Petri. The allowed priorities are low, normal and high.
 
 ### 1.3 Data Structure Design
 
-The database has three tables. The ER diagram is shown in Figure 4, its source text is in appendix E.
+The database has four tables. The ER diagram is shown in Figure 4, its source text is in appendix E.
 
 ![ER diagram](diagrams/er.svg)
 
-Figure 4 – ER diagram of the database: users, diagrams and the request log
+Figure 4 – ER diagram of the database: users, diagrams, comments and the request log
 
-The `Users` table stores accounts: a unique lowercase email address, a password hash and the role `user` or `admin`. The `Diagrams` table stores diagrams: a title of up to 80 characters, a notation from a fixed list, source code of up to 10000 characters, a priority and the foreign key `ownerId` to `Users`. The relation is one to many: a user has many diagrams. The foreign key uses the `RESTRICT` rule, so a user cannot be deleted while diagrams belong to them. The `RequestLogs` table stores the request log: method, path, client address and the response status, which is written when the response ends. A log in a table instead of a file is required by the condition of variant 26.
+The `Users` table stores accounts: a unique lowercase email address, a password hash and the role `user` or `admin`. The `Diagrams` table stores diagrams: a title of up to 80 characters, a notation from a fixed list, source code of up to 10000 characters, a priority and the foreign key `ownerId` to `Users`. The relation is one to many: a user has many diagrams. The foreign key uses the `RESTRICT` rule, so a user cannot be deleted while diagrams belong to them. The `RequestLogs` table stores the request log: method, path, client address and the response status, which is written when the response ends. A log in a table instead of a file is required by the condition of variant 26. The `Comments` table stores comments on diagrams: a text of 1 to 1000 characters, the foreign keys `diagramId` to `Diagrams` and `authorId` to `Users`, and the creation and change times. Both keys use the `CASCADE` rule: deleting a diagram deletes its comments, deleting a user deletes the comments of that user. As for diagrams, the integrity rules are duplicated in the database: an empty text and a text longer than 1000 characters are forbidden.
 
 The integrity rules are duplicated in the database itself: a check of the allowed notation, a ban on an empty title or code made of spaces, and a limit on the title length. The table stays correct even if something writes to it bypassing the API. The tables are created by Sequelize migrations, not by `sync()`, so the schema can be rolled back and reproduced.
 
-The course project condition recommends four to six entities. The current schema has three. [TODO: decide with the supervisor or add a fourth entity "Comment" with a `Comments` table and foreign keys to the diagram and the author. The schema variant is in `course-project/diagrams/er-planned.mmd`. Comments on diagrams are already implemented in lab 6 on MongoDB as nested documents but are not included in the main stack.]
+The course project condition recommends four to six entities. The schema has four: `Users`, `Diagrams`, `Comments` and `RequestLogs`. There are three one-to-many relations: user to diagrams, user to comments and diagram to comments. The table is created by the fifth migration, which can be rolled back with `db:migrate:undo`.
 
 ## Chapter 2 Implementation of the Web Application
 
@@ -174,7 +181,7 @@ Table 4 – Technology choice and justification
 
 | Layer             | Chosen                          | Alternative            | Justification                                                                                        |
 | ----------------- | ------------------------------- | ---------------------- | ---------------------------------------------------------------------------------------------------- |
-| Client            | React 19, Vite, axios           | Vue, Angular           | Component approach, hooks, a large ecosystem, fast Vite build, testing with Vitest                   |
+| Client            | React 19, React Router 6, Vite, axios           | Vue, Angular           | Component approach, hooks, a large ecosystem, fast Vite build, testing with Vitest                   |
 | Server            | Node.js 22, Express 5           | NestJS, Fastify        | One language on the client and the server, a simple middleware chain, Express 5 passes a rejected promise to the error handler |
 | Database          | PostgreSQL 16                   | MongoDB                | Transactions, foreign keys and integrity constraints, needed for the user to diagrams relation       |
 | ORM               | Sequelize 6 with migrations     | Prisma, TypeORM        | Mature support of PostgreSQL and SQLite, migrations and seeds, used in lab 2                         |
@@ -183,13 +190,13 @@ Table 4 – Technology choice and justification
 | Web server        | Nginx                           | Express serves static files | Static caching, reverse proxy, non-root run in the nginx-unprivileged image                     |
 | Tools             | Git, Postman and REST Client, VS Code | –                | Version control, manual API checks, code editor                                                      |
 
-For local development and tests SQLite is used instead of PostgreSQL because it needs no installation. The connection to PostgreSQL is set through the `DATABASE_URL` variable. The check against a real PostgreSQL was done in the container stack of lab 8 [TODO: confirm by a repeated run before the defense].
+The main database of the application is PostgreSQL 16: the connection is set by the `DATABASE_URL` variable, a local instance is started by the container `docker compose up -d db`. SQLite stays only as the test mode (`SQLITE_STORAGE`), so the test suite needs no server. Work on a real PostgreSQL was checked by running the container stack of lab 8 again: migrations apply, the seed fills the tables, filters and access checks work.
 
 ### 2.2 Server Side Implementation
 
 #### 2.2.1 Project Structure and Setup
 
-The server side lives in the `part-2/lab-03-auth` folder of the repository and is split into layers, as Table 5 shows.
+The server side lives in the `course-project/app/server` folder of branch `course-app` (based on lab 3) and is split into layers, as Table 5 shows.
 
 Table 5 – Structure of the server side
 
@@ -197,8 +204,8 @@ Table 5 – Structure of the server side
 | -------------------- | -------------------------------------------------------------------------------- |
 | `server.js`          | Entry point: reads settings from the environment, checks the database, starts listening |
 | `src/app.js`         | Builds the Express application: middleware order and routes                      |
-| `src/models/`        | Sequelize models `User`, `Diagram`, `RequestLog` and constants                    |
-| `src/routes/`        | Routes `auth`, `diagrams`, `users`                                                |
+| `src/models/`        | Sequelize models `User`, `Diagram`, `Comment`, `RequestLog` and constants                    |
+| `src/routes/`        | Routes `auth`, `diagrams`, `comments`, `users`                                                |
 | `src/controllers/`   | Handlers: all the request logic                                                  |
 | `src/middleware/`    | Token and role checks, input validation, rate limiting, CORS, log, error handling |
 | `migrations/`, `seeders/` | Database schema and initial data (the administrator from environment variables) |
@@ -211,13 +218,14 @@ The middleware order in `src/app.js` matters: first CORS and security headers, t
 
 #### 2.2.2 Data Models and Database Work
 
-The diagram model describes fields and checks. A model example with comments is given in appendix A. String lengths come from `limits.json`, so a limit is changed in one place. The user model hides the password hash: the `toJSON` method returns only public fields, so even an accidental serialization of the object (an answer `res.json(user)`, a log) does not reveal the hash.
+The diagram model describes fields and checks. A model example with comments is given in appendix A. String lengths come from `limits.json`, so a limit is changed in one place. The user model hides the password hash: the `toJSON` method returns only public fields, so even an accidental serialization of the object (an answer `res.json(user)`, a log) does not reveal the hash. The comment model (appendix A) holds the text and two keys. The controller sets `diagramId` and `authorId` from the URL and the token, so a request body cannot replace the author or the diagram.
 
 #### 2.2.3 REST API Implementation
 
 The diagram controller (a fragment in appendix A) performs the CRUD operations. The list supports a substring search by title (the value is passed as a query parameter, so SQL injection is impossible), sorting only by fields from a whitelist and paging. The total number of records is returned in the `X-Total-Count` header while the body stays an array, so the clients of the earlier labs do not change. Creation takes the owner from the token, not from the request body, so the owner cannot be forged.
 
 Input validation runs before the controller (appendix A): the title and the code are required, blank values are rejected, the length is measured after trimming, the notation and the priority are matched against a list, unknown fields are dropped. The identifier in the address is checked with a strict regular expression, because `Number()` would accept the values `0x1` and `1e0`, and numbers above the `INTEGER` range would cause a PostgreSQL error and a 500 answer. The validation error answer lists the fields with an explanation.
+Comments (appendix A) are connected by a separate router: `GET` and `POST /diagrams/:id/comments`, `PATCH` and `DELETE /comments/:id`. The list is paged, oldest comments first, the total is in `X-Total-Count`. The text is checked after trimming: it is not empty, not longer than 1000 characters and has no control characters except a line break and a tab. Any signed-in user can read and write comments, the author or an administrator can edit and delete them. A missing diagram or comment gives 404, someone else's comment gives 403.
 
 #### 2.2.4 Authentication and Authorization
 
@@ -225,7 +233,7 @@ The JWT scheme has four steps. The client sends the email and the password to `/
 
 The last step is important: the role in the token is only a hint and the decision is made from the database. So deleting an account and changing a role take effect at once, not when the token expires. The check accepts only HS256, so tokens with the algorithm `none` and HS512 are rejected. The code of the token middleware and of `requireRole` is in appendix A.
 
-Authorization follows the RBAC model with two roles. The owner of a diagram or an administrator can change and delete it, user management is open to the administrator only. The role at registration is always `user`, and the first administrator is created by a seed from the `ADMIN_EMAIL` and `ADMIN_PASSWORD` variables. An administrator cannot change the role of or delete themselves, so the system never stays without an administrator.
+Authorization follows the RBAC model with two roles. The owner of a diagram or an administrator can change and delete it, the author of a comment or an administrator can change and delete the comment, user management is open to the administrator only. The role at registration is always `user`, and the first administrator is created by a seed from the `ADMIN_EMAIL` and `ADMIN_PASSWORD` variables. An administrator cannot change the role of or delete themselves, so the system never stays without an administrator.
 
 #### 2.2.5 Error Handling and Security
 
@@ -244,27 +252,38 @@ Table 6 – Security measures of the server side
 | Foreign request origin           | CORS with a single allowed address, the value `*` is forbidden, the `Vary: Origin` header                |
 | Leak of internal data            | Common error handler: on status 500 the client gets only "Internal server error"                         |
 | Huge request bodies              | A limit of 100 KB, a length check of every field                                                         |
+| Foreign comments, a forged author | The author comes from the token, not from the body, only the author or an administrator can change and delete, others get 403, extra body fields are dropped |
 | Common headers                   | `x-powered-by` is disabled, security headers are added                                                   |
 
 The `helmet` package is not used: the set of security headers is assembled by hand in `src/middleware/http.js`. The decision is deliberate: the needed headers (content policy, no framing, `nosniff`, no cache) are written in one file and covered by tests, and no extra dependency is added. Passwords are written neither to the log nor to answers.
+The dependencies were checked with `npm audit --omit=dev`. There are no high or critical vulnerabilities in the server or the client. Two moderate ones remain in the transitive dependency `uuid` of Sequelize 6 (the fix needs Sequelize 3, so it is not applied) and two moderate ones in React Router 6 (an open redirect through a backslash in `Link` and `navigate`, and deserialization in server rendering, the fix exists only in version 7). The first one is closed because the client never passes an address typed by the user to `Link` or `navigate`, and the return address goes through `safeReturnPath`. The second one does not apply, there is no server rendering.
 
 ### 2.3 Client Side Implementation
 
 #### 2.3.1 React Application Structure
 
-The client is in the `part-2/lab-05-react-api` folder. `src/components` holds the components `Header`, `Footer`, `AuthForm`, `DiagramForm`, `DiagramItem` and `ErrorBoundary`. `src/hooks` holds the hooks `useDiagrams` (list state) and `useDebouncedValue` (a delayed value for search). `src/utils` holds form validation, and the input limits live in `src/limits.json` and match the server ones. The API service and the interceptors are in `src/api.js`.
+The client is in the `course-project/app/client` folder. `src/components` holds the components `Header`, `Footer`, `AuthForm`, `DiagramForm`, `DiagramItem`, `CommentsSection`, `ErrorPage`, `ErrorHelp`, `ErrorBoundary` and the route guards in `RouteGuards`. `src/pages` holds the pages: login and registration, the list and the page of a diagram, the administrator screen and the error pages. `src/hooks` holds the hooks `useDiagrams` (the list), `useComments` (the comments of a diagram) and `useUsers` (the administrator screen), `useDebouncedValue` delays the value for search, and the login state lives in `src/auth.jsx`. `src/utils` holds form validation, `safeReturnPath` and the page title, and the input limits are in `src/limits.json` and match the server ones. The API service and the interceptors are in `src/api.js`.
 
 #### 2.3.2 Routing
 
-The client of lab 5 is a single page whose content depends on the state: while there is no token, the login and registration form is shown, after login the workspace is shown. There is no separate routing library. Separate public and protected routes with React Router are used in the practical classes of the second part [TODO: decide whether to bring React Router into the course project. If so, describe here the routes `/login`, `/register` and the protected `/diagrams`, then add tests. Item 2.3.2 of the condition requires an example of protected and public routes].
+Routing is built on React Router 6 (`react-router-dom` 6.30.6, the version is pinned in `package.json`). All pages share one layout (header, main content, footer), and access is split into three levels:
+
+- public: `/login`, `/register` and the error pages `/401`, `/403` and `/500`, the root `/` leads a guest to the login and a signed-in user to the list,
+- protected (the wrapper route `RequireAuth`): `/diagrams` and `/diagrams/:id`, a guest is sent to `/login` and the whole requested address (path, query, hash) goes along in the navigation state,
+- role-based (the wrapper `RequireRole` inside the protected ones): `/admin` for the role `admin` only, an ordinary user sees the 403 page and the request for the users is not sent.
+
+After the login the login page returns the user to the requested address. The address goes through `safeReturnPath` (appendix B): only a path on this site is allowed, addresses like `//host` and `https://host`, a backslash, spaces, control characters and the login pages themselves are refused, then the user lands on the list. The role comes from the server with `GET /profile`, not from the token: the admin page waits for the answer and shows an error page with a "Retry" button on a failure. Hiding a page on the client does not protect data, the server checks every request to `/users` itself.
+
+The pages for the errors 401, 403, 404 and 500 are built the same way: a code, a title and three parts (what it is, why it happened, how to fix it) from the catalog `errorCatalog.js`, then the actions of the page. The 404 page is shown for an unknown address, for an identifier that is not a number and for a diagram that is not on the server. A rendering error is caught by `ErrorBoundary` and shows the same 500 page. The tab title changes with the page.
 
 On the Nginx side the SPA falls back to `index.html` for unknown paths, so a direct visit by address and a page reload work.
 
 #### 2.3.3 Key Components and State
 
-The diagram list state is moved to the `useDiagrams` hook. The hook keeps the array of records, the loading and error flags, performs optimistic changes and rolls them back when the server refuses. The helper hook `useDebouncedValue` delays the search request by 400 milliseconds, so the server does not get a request for every key press. The global login state is defined by the presence of the token and by the `auth:logout` event fired on a 401 answer. Client fragments are given in appendix B.
+The diagram list state is moved to the `useDiagrams` hook. The hook keeps the array of records, the loading and error flags, performs optimistic changes and rolls them back when the server refuses. The helper hook `useDebouncedValue` delays the search request by 400 milliseconds, so the server does not get a request for every key press. The login state is held by `AuthProvider` in `src/auth.jsx`: it is defined by the presence of the token and by the `auth:logout` event raised on a 401 answer, and the role and the email are read with `GET /profile`. Client fragments are given in appendix B.
 
 The optimistic update works as follows. When a record is added, the client shows it at once with a temporary identifier `temp-N` and sends the request. If the server succeeds, the temporary record is replaced with the answer. If the server refuses, the record disappears and the user sees a message. A record with a temporary identifier cannot be deleted or changed, and while a request about a record is in progress a repeated action on it is ignored. This removes races on fast clicks.
+Comments (the `useComments` hook) and the administrator screen (the `useUsers` hook) are not optimistic: a comment is read by other people and a role is a right, so a row changes after the server answer. While a request for a comment or a user runs, its buttons are locked. Both screens have the states of loading, an error with an explanation and a "Retry" button, and an empty list. A server refusal is shown as a clear phrase: for example, an administrator trying to change their own role or to delete themselves gets a message that the system must not be left without an administrator, and deleting a user who has diagrams gets a message that the diagrams must be deleted first. Deleting a user needs a confirmation in a separate block with the focus on the "Cancel" button.
 
 #### 2.3.4 Server Communication
 
@@ -284,7 +303,7 @@ In development mode the client runs on port 5178 and calls the server on port 30
 
 #### 2.4.2 Containerization with Docker
 
-The stack is described in the `part-2/lab-08-docker` folder and has three services: `db` (PostgreSQL 16), `backend` (the server) and `frontend` (Nginx with the built client). The full files are in appendix C. The main decisions:
+The stack is described in the `course-project/app/docker` folder and has three services: `db` (PostgreSQL 16), `backend` (the server) and `frontend` (Nginx with the built client). The full files are in appendix C. The main decisions:
 
 - The server Dockerfile has two stages: the first installs only runtime dependencies with `npm ci --omit=dev`, the second copies them into a clean image. The server runs as the `node` user, not as root.
 - The client Dockerfile is multi-stage: the `builder` stage builds the Vite static files, the final image contains only Nginx without Node.js and sources. The `nginx-unprivileged` image is used, it listens on port 8080.
@@ -309,7 +328,7 @@ The main way to run the system is Docker Compose on one machine, described above
 
 #### 2.4.4 Testing
 
-Automated tests are written for both parts. The server is tested with the built-in `node --test` runner on a temporary SQLite database with real migrations, bcrypt runs with four rounds for speed. According to the README of branch 28, the server suite has 92 tests, including checks of `/health`, paging, token security and rate limiting. The client is tested with Vitest and React Testing Library, the suite has 100 tests, among them a test that markup from a server answer is rendered as text. The Docker configuration is checked by six file checks without starting the daemon. [TODO: before the defense run `npm test` in `part-2/lab-03-auth`, `part-2/lab-05-react-api` and `part-2/lab-08-docker` and record the actual numbers and coverage. The numbers above are taken from the branch READMEs and have not been rechecked since this draft was prepared.]
+Automated tests are written for both parts. The server is tested with the built-in `node --test` runner on a temporary SQLite database with real migrations, bcrypt runs with four rounds for speed. The server suite has 209 tests: unit, functional, negative, attacks (token forgery, IDOR and a forged author of a comment, huge text, control characters), contract, load and resilience (a database failure, parallel requests, a diagram deleted while comments are written). The client is tested with Vitest and React Testing Library, the suite has 221 tests: routes (public, protected, role-based, return to the requested address, error pages), comments, the administrator screen, form validation, requests and accessibility with axe-core by the WCAG 2 A and AA rules. The Docker configuration is checked by 21 file checks without starting the daemon. The run on 24.10.2026: the server 209 of 209 tests (line coverage 100%, branches 98.27%), the client 221 of 221 (line coverage 96.33%, statements 94.13%), Docker 21 of 21.
 
 Manual scenarios and control examples are given in subsection 3.2. For manual API checks there is a `requests.http` file for the REST Client extension and the Postman collection `postman_collection.json`.
 
@@ -321,15 +340,15 @@ Manual scenarios and control examples are given in subsection 3.2. For manual AP
 
 **Starting the application.** Commands for a developer:
 
-1. Clone the repository: `git clone https://github.com/KsushaKhadzhinova/DSLKit-Project`, then switch to branch `28`.
-2. Go to `part-2/lab-08-docker` and copy `.env.example` to `.env`.
+1. Clone the repository: `git clone https://github.com/KsushaKhadzhinova/DSLKit-Project`, then switch to branch `course-app`.
+2. Go to `course-project/app/docker` and copy `.env.example` to `.env`.
 3. Put into `.env` a database password of letters and digits and a `JWT_SECRET` of at least 32 random characters. The secret is generated with the command given in `.env.example`. Values are never written to the repository.
 4. Run `docker compose up --build`. After the start the application is available at `http://localhost:8080` and the server check at `http://localhost:8080/api/health`.
 5. Stop the stack with `docker compose down`. The `-v` key removes the database data too.
 
-To run without Docker, start the server in `part-2/lab-03-auth` with `npm install`, `npm run db:migrate`, `npm run dev`, and the client in `part-2/lab-05-react-api` with `npm install`, `npm run dev` (address `http://localhost:5178`).
+The project is distributed under the MIT license, the `LICENSE` file is in the repository root. To run without Docker, start the server in `course-project/app/server` with `npm install`, `npm run db:migrate`, `npm run dev`, and the client in `course-project/app/client` with `npm install`, `npm run dev` (address `http://localhost:5178`).
 
-**Scenario 1. Registration and login.** The user opens the application, sees the login form and goes to registration. They enter an email and a password of at least 8 characters and submit the form. On an error an explanation appears under the field: an empty value, a too long email, a too short password. After registration the user logs in, the token is saved and the workspace opens. The login form is shown in Figure 6.
+**Scenario 1. Registration and login.** The user opens the application, sees the login form and goes to registration. The login and registration pages have their own addresses, `/login` and `/register`. They enter an email and a password of at least 8 characters and submit the form. On an error an explanation appears under the field: an empty value, a too long email, a too short password. After registration the user logs in, the token is saved and the workspace opens. The login form is shown in Figure 6.
 
 ![Login form](screenshots/01-login.png)
 
@@ -353,7 +372,9 @@ Figure 8 – Optimistic addition: the new record is shown before the server answ
 
 Figure 9 – The error message for an unavailable server and the retry button
 
-**Scenario 4. Administration.** The current client has no administrator screen. The administrator works with the `/users` endpoints through Postman or REST Client: gets the list, changes roles and deletes users. [TODO: decide whether an administrator screen in the client is needed in the course project. A mockup "Users admin" exists in `docs/design-contest/part2-screens/`. If the screen is added, complete this scenario with a screenshot.]
+**Scenario 4. Diagram page and comments.** The title of a card in the list leads to the diagram page `/diagrams/:id`: it shows the notation, the priority, the source code and the "Comments" section. The comments are shown in pages of 20 with a "Load more" button. The user writes a text of up to 1000 characters and presses "Send": an empty text is refused with a message under the field, and after the server answer the comment appears at the end of the list. On their own comments the user sees the "Edit" and "Delete" buttons, an administrator sees them on all of them. Other people's comments are signed "User No. N", one's own are signed "You". If the diagram does not exist, the 404 error page with an explanation is shown.
+
+**Scenario 5. Administration.** An administrator sees the "Administration" item in the header and opens the `/admin` screen: a table of users with the email, the role, the creation time and a "Delete" button. The role is changed with a select, the result is confirmed by a message. An attempt to change one's own role or to delete oneself is refused by the server and the screen explains the reason. Deleting needs a confirmation: a "Delete the user?" block appears with the "Cancel" button (it has the focus) and the "Delete" button. An ordinary user who opens `/admin` sees the 403 page.
 
 ### 3.2 Control Examples and Testing
 
@@ -363,38 +384,48 @@ Table 7 – Control examples
 
 | No. | Input data                                                    | User actions                                        | Expected result                                                  | Actual result                            |
 | --- | ------------------------------------------------------------- | --------------------------------------------------- | ---------------------------------------------------------------- | ---------------------------------------- |
-| 1   | Email `alice@example.com`, a password of 8 or more characters | Submit the registration form                        | Answer 201, the user has the role `user`, no hash in the answer  | [TODO: Passed / Failed]                  |
-| 2   | The same email in another case, `ALICE@example.com`           | Register again                                      | Answer 409, message "A user with this email already exists"      | [TODO: Passed / Failed]                  |
-| 3   | A password of 7 characters                                    | Submit the registration form                        | Answer 400, `details` names the field `password`                 | [TODO: Passed / Failed]                  |
-| 4   | Correct email and password                                    | Log in                                              | Answer 200, the body has `token`, `tokenType: Bearer`, `expiresIn: 1h` | [TODO: Passed / Failed]            |
-| 5   | Correct email, wrong password                                 | Log in                                              | Answer 401 "Invalid email or password", the same as for an unknown email | [TODO: Passed / Failed]          |
-| 6   | Six wrong passwords in a row for one email                    | Repeat the login                                    | After the fifth failure the answer is 429 with `Retry-After`     | [TODO: Passed / Failed]                  |
-| 7   | A request without the `Authorization` header                  | `GET /diagrams`                                     | Answer 401 "Missing Bearer token"                                | [TODO: Passed / Failed]                  |
-| 8   | User token, title "Order", notation BPMN, code                | Create a diagram                                    | Answer 201, `Location` header, the owner is the user             | [TODO: Passed / Failed]                  |
-| 9   | A title made of spaces                                        | Create a diagram                                    | Answer 400, field `title`: a non-empty string                    | [TODO: Passed / Failed]                  |
-| 10  | A title longer than 80 characters                             | Create a diagram                                    | Answer 400, field `title`: at most 80 characters                 | [TODO: Passed / Failed]                  |
-| 11  | Two diagrams, one has the word "Order" in the title           | `GET /diagrams?search=Order`                        | One record in the answer, `X-Total-Count` equals 1               | [TODO: Passed / Failed]                  |
-| 12  | The parameter `limit=1000`                                    | `GET /diagrams?limit=1000`                          | Answer 400, field `limit`: from 1 to 100                         | [TODO: Passed / Failed]                  |
-| 13  | Token of the second user, diagram of the first                | `DELETE /diagrams/:id`                              | Answer 403, the diagram stays                                    | [TODO: Passed / Failed]                  |
-| 14  | Administrator token, the same diagram                         | `DELETE /diagrams/:id`                              | Answer 204                                                       | [TODO: Passed / Failed]                  |
-| 15  | Token of an ordinary user                                     | `GET /users`                                        | Answer 403 "Requires the admin role"                             | [TODO: Passed / Failed]                  |
-| 16  | Administrator token, the administrator own identifier         | `PATCH /users/:id/role` with the value `user`       | Answer 400, changing the own role is forbidden                   | [TODO: Passed / Failed]                  |
-| 17  | A stopped database                                            | `GET /health`                                       | Answer 503 `{"status":"unavailable"}`                            | [TODO: Passed / Failed]                  |
-| 18  | A stopped server, the workspace is open                       | Refresh the list in the client                      | An error message and the "Retry" button, Figure 9                | [TODO: Passed / Failed]                  |
+| 1   | Email `alice@example.com`, a password of 8 or more characters | Submit the registration form                        | Answer 201, the user has the role `user`, no hash in the answer  | Passed (automated tests)                  |
+| 2   | The same email in another case, `ALICE@example.com`           | Register again                                      | Answer 409, message "A user with this email already exists"      | Passed (automated tests)                  |
+| 3   | A password of 7 characters                                    | Submit the registration form                        | Answer 400, `details` names the field `password`                 | Passed (automated tests)                  |
+| 4   | Correct email and password                                    | Log in                                              | Answer 200, the body has `token`, `tokenType: Bearer`, `expiresIn: 1h` | Passed (automated tests)            |
+| 5   | Correct email, wrong password                                 | Log in                                              | Answer 401 "Invalid email or password", the same as for an unknown email | Passed (automated tests)          |
+| 6   | Six wrong passwords in a row for one email                    | Repeat the login                                    | After the fifth failure the answer is 429 with `Retry-After`     | Passed (automated tests)                  |
+| 7   | A request without the `Authorization` header                  | `GET /diagrams`                                     | Answer 401 "Missing Bearer token"                                | Passed (automated tests)                  |
+| 8   | User token, title "Order", notation BPMN, code                | Create a diagram                                    | Answer 201, `Location` header, the owner is the user             | Passed (automated tests)                  |
+| 9   | A title made of spaces                                        | Create a diagram                                    | Answer 400, field `title`: a non-empty string                    | Passed (automated tests)                  |
+| 10  | A title longer than 80 characters                             | Create a diagram                                    | Answer 400, field `title`: at most 80 characters                 | Passed (automated tests)                  |
+| 11  | Two diagrams, one has the word "Order" in the title           | `GET /diagrams?search=Order`                        | One record in the answer, `X-Total-Count` equals 1               | Passed (automated tests)                  |
+| 12  | The parameter `limit=1000`                                    | `GET /diagrams?limit=1000`                          | Answer 400, field `limit`: from 1 to 100                         | Passed (automated tests)                  |
+| 13  | Token of the second user, diagram of the first                | `DELETE /diagrams/:id`                              | Answer 403, the diagram stays                                    | Passed (automated tests)                  |
+| 14  | Administrator token, the same diagram                         | `DELETE /diagrams/:id`                              | Answer 204                                                       | Passed (automated tests)                  |
+| 15  | Token of an ordinary user                                     | `GET /users`                                        | Answer 403 "Requires the admin role"                             | Passed (automated tests)                  |
+| 16  | Administrator token, the administrator own identifier         | `PATCH /users/:id/role` with the value `user`       | Answer 400, changing the own role is forbidden                   | Passed (automated tests)                  |
+| 17  | A stopped database                                            | `GET /health`                                       | Answer 503 `{"status":"unavailable"}`                            | Passed (automated tests)                  |
+| 18  | A stopped server, the workspace is open                       | Refresh the list in the client                      | An error message and the "Retry" button, Figure 9                | Passed (automated tests)                  |
+| 19  | A guest opens the address `/diagrams/3`                       | Log in on the login page that opens                 | A redirect to `/login`, after the login `/diagrams/3` opens, not the list | Passed (automated tests)             |
+| 20  | The return address `//evil.test` in the navigation state      | Open `/login` with a token                          | A redirect to `/diagrams`, the external address is not used      | Passed (automated tests)                 |
+| 21  | Token of an ordinary user                                     | Open `/admin`                                       | The "Error 403" page, the request for the users is not sent      | Passed (automated tests)                 |
+| 22  | An unknown address `/no/such/page`                            | Open the address                                    | The "Error 404" page with three parts: what it is, why, how to fix | Passed (automated tests)               |
+| 23  | User token, an existing diagram                               | `POST /diagrams/:id/comments` with the text `  Hello  ` | Answer 201, `Location` header, the author from the token, the text without outer spaces | Passed (automated tests) |
+| 24  | Body `{"text":"x","authorId":1,"diagramId":999}`              | `POST /diagrams/:id/comments`                       | Answer 201, the author and the diagram come from the token and the URL, extra fields are dropped | Passed (automated tests) |
+| 25  | Token of the second user, someone else's comment              | `PATCH` and `DELETE /comments/:id`                  | Answer 403, the comment is unchanged                             | Passed (automated tests)                 |
+| 26  | A text of 1001 characters or with a NUL character             | `POST /diagrams/:id/comments`                       | Answer 400, field `text`, nothing is written to the database     | Passed (automated tests)                 |
+| 27  | Administrator, their own identifier                           | Change their own role on the administrator screen   | The message "You cannot change your own role...", the role is unchanged | Passed (automated tests)          |
+| 28  | Administrator, a user without diagrams                        | Press "Delete" and confirm                          | A confirmation block, after "Delete" the row disappears          | Passed (automated tests)                 |
 
 A screenshot of the test run and the `npm test` output are placed in appendix G or in the main text after the run [TODO: attach the test output with the number of passed tests and the coverage].
 
-**Conclusion on compliance with the requirements.** The functional requirements FR1 to FR12 are implemented at the API level and covered by the automated tests of the server side. Requirements FR1 to FR8 are available in the client interface too, requirements FR9 to FR12 only through a REST client. Full screenshots of all screens are collected in appendix G. The non-functional requirements on security and input limits are met and checked by tests. NFR6 (performance) and a part of NFR8 (accessibility) are not confirmed by measurement: they need measurements. [TODO: after filling in Table 7 update the conclusion with the actual results.]
+**Conclusion on compliance with the requirements.** The functional requirements FR1 to FR15 are implemented at the API level and covered by the automated tests of the server side. All of them are available in the client interface too: FR9 to FR12 on the administrator screen, FR13 and FR14 on the diagram page, FR15 in the routing. The non-functional requirements for security and input limits are met and checked by tests. NFR6 (performance) and a part of NFR8 (accessibility) are not confirmed by measurement and need measurements. [TODO: after filling in Table 7 update the conclusion with the actual results.]
 
 ## Conclusion
 
-In the course of the work all tasks have been solved: the subject area has been analyzed and 12 functional and 9 non-functional requirements have been formulated, the architecture by the C4 model, a REST API of 12 endpoints and a data schema of three tables have been designed, and the server side with JWT authentication and a role model, a React client and a container launch of the whole stack with one command have been implemented.
+In the course of the work all tasks have been solved: the subject area has been analyzed and 15 functional and 9 non-functional requirements have been formulated, the architecture by the C4 model, a REST API of 16 endpoints and a data schema of four tables have been designed, and the server side with JWT authentication and a role model, a React client and a container launch of the whole stack with one command have been implemented.
 
 The purpose of the work, the development of the web application "DSLKit", has been achieved. The result is a working web application that starts with `docker compose up --build` and is available locally at `http://localhost:8080` [TODO: if a cloud deployment is made, give the public address]. The application implements registration and login, diagram storage with search, sorting and paging, separation of the rights of the owner and the administrator, a request log in the database and a service health check.
 
-Limitations of the work: there is no logout with token revocation and no refresh tokens, the rate limit counters are kept in the memory of one server instance, so scaling to several instances is not supported, and the administrator has no screen in the client.
+Limitations of the work: there is no logout with token revocation and no refresh tokens, the rate limit counters are kept in the memory of one server instance, so scaling to several instances is not supported, and comments have no replies and no real-time updates.
 
-In the future one can add a diagram preview in the client through the Kroki service, comments on diagrams (a MongoDB prototype exists in lab 6), real-time collaborative editing (a WebSocket prototype exists in lab 7), an administrator screen, token revocation, integration with the editor from the first part of the discipline and graphical support of all six notations.
+In the future one can add a diagram preview in the client through the Kroki service, real-time collaborative editing (a WebSocket prototype exists in lab 7), token revocation, integration with the editor from the first part of the discipline and graphical support of all six notations.
 
 ## List of Sources
 
@@ -421,7 +452,7 @@ In the future one can add a diagram preview in the client through the Kroki serv
 
 ## Appendix A (mandatory) Server Side Code Fragments
 
-The appendix contains key fragments of the server side from `part-2/lab-03-auth` (repository branch `23`, carried over to branches `25` and `28`). It is referred to in subsections 2.2.2, 2.2.3 and 2.2.4.
+The appendix contains key fragments of the server side from `course-project/app/server` (repository branch `course-app`, based on lab 3). It is referred to in subsections 2.2.2, 2.2.3 and 2.2.4.
 
 The diagram model `src/models/diagram.js`:
 
@@ -540,9 +571,71 @@ router
   .all(allowMethods(['GET', 'PUT', 'DELETE']));
 ```
 
+The comment model `src/models/comment.js`:
+
+```js
+const defineComment = (sequelize) =>
+  sequelize.define('Comment', {
+    diagramId: { type: DataTypes.INTEGER, allowNull: false },
+    authorId: { type: DataTypes.INTEGER, allowNull: false },
+    text: { type: DataTypes.TEXT, allowNull: false, validate: { len: [1, LIMITS.comment] } },
+  });
+```
+
+The comment text check `src/middleware/validate.js` (fragment):
+
+```js
+// A comment is multi-line text: line breaks and tabs are fine, other control characters (NUL, escape, bell) are not.
+const COMMENT_CONTROL = /[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/;
+
+// The author and the diagram come from the token and the URL, so any other field in the body is dropped.
+const validateComment = (req, _res, next) => {
+  const result = commentProblem(req.body?.text);
+  if (result !== true) return next(badRequest('Invalid comment data', [{ field: 'text', message: result }]));
+  req.commentFields = { text: req.body.text.trim() };
+  return next();
+};
+```
+
+The comment controller `src/controllers/comments.controller.js` (fragment):
+
+```js
+// Only the author or an admin may change or delete a comment.
+const mayChange = (user, comment) => user.role === 'admin' || comment.authorId === user.id;
+
+create: async (req, res, next) => {
+  if (!(await Diagram.findByPk(req.diagramId, { attributes: ['id'] }))) return next(diagramMissing(req.diagramId));
+  const comment = await Comment.create({ ...req.commentFields, diagramId: req.diagramId, authorId: req.user.id });
+  return res.status(201).location(`/comments/${comment.id}`).json(comment);
+},
+
+remove: async (req, res, next) => {
+  const comment = await Comment.findByPk(req.commentId);
+  if (!comment) return next(commentMissing(req.commentId));
+  if (!mayChange(req.user, comment)) return next(forbidden('Only the author or an admin can delete this comment'));
+  await comment.destroy();
+  return res.status(204).end();
+},
+```
+
+The comment routes `src/routes/comments.routes.js`:
+
+```js
+router
+  .route('/diagrams/:id/comments')
+  .get(authenticate, parseId(), controller.list)
+  .post(authenticate, parseId(), validateComment, controller.create)
+  .all(allowMethods(['GET', 'POST']));
+router
+  .route('/comments/:id')
+  .patch(authenticate, parseId('commentId', 'Comment'), validateComment, controller.update)
+  .delete(authenticate, parseId('commentId', 'Comment'), controller.remove)
+  .all(allowMethods(['PATCH', 'DELETE']));
+```
+
 ## Appendix B (mandatory) Client Side Code Fragments
 
-The appendix contains client fragments from `part-2/lab-05-react-api` (branch `25`). It is referred to in subsections 2.3.3 and 2.3.4.
+The appendix contains client fragments from `course-project/app/client` (branch `course-app`). It is referred to in subsections 2.3.3 and 2.3.4. The routing fragments are at the end of the appendix and are referred to in subsection 2.3.2.
 
 The API service `src/api.js` (fragment):
 
@@ -572,11 +665,50 @@ export const register = (email, password) => api.post('/auth/register', { email,
 export const login = (email, password) => api.post('/auth/login', { email, password });
 ```
 
-[TODO: add a fragment of the `useDiagrams.js` hook (optimistic add with rollback) from `part-2/lab-05-react-api/src/hooks/useDiagrams.js` and one component with `useState` and `useEffect`, if the supervisor requires a component example in the appendix.]
+Routes `src/App.jsx` (fragment) and the guards `src/components/RouteGuards.jsx`:
+
+```jsx
+<Routes>
+  <Route element={<Layout />}>
+    <Route index element={<Home />} />
+    <Route path="login" element={<AuthPage mode="login" />} />
+    <Route path="register" element={<AuthPage mode="register" />} />
+    <Route element={<RequireAuth />}>
+      <Route path="diagrams" element={<DiagramsPage />} />
+      <Route path="diagrams/:id" element={<DiagramPage />} />
+      <Route element={<RequireRole role="admin" />}>
+        <Route path="admin" element={<AdminPage />} />
+      </Route>
+    </Route>
+    <Route path="*" element={<NotFoundPage />} />
+  </Route>
+</Routes>
+```
+
+```jsx
+export function RequireAuth() {
+  const { signedIn } = useAuth();
+  const location = useLocation();
+  const from = `${location.pathname}${location.search}${location.hash}`;
+  return signedIn ? <Outlet /> : <Navigate to="/login" replace state={{ from }} />;
+}
+```
+
+The return address check `src/utils/returnPath.js`:
+
+```js
+const UNSAFE_PATH_CHARACTER = /[\u0000- \u007f-\u009f\\]/;
+const AUTH_PAGES = /^\/(login|register|401)([?#]|$)/;
+
+export function safeReturnPath(value, fallback = '/diagrams') {
+  if (typeof value !== 'string' || !value.startsWith('/') || value.startsWith('//') || UNSAFE_PATH_CHARACTER.test(value)) return fallback;
+  return AUTH_PAGES.test(value) ? fallback : value;
+}
+```
 
 ## Appendix C (mandatory) Docker Configuration
 
-The appendix contains the launch files from `part-2/lab-08-docker` (branch `28`). It is referred to in subsection 2.4.2.
+The appendix contains the launch files from `course-project/app/docker` (branch `course-app`). It is referred to in subsection 2.4.2.
 
 The `docker-compose.yml` file:
 
@@ -602,8 +734,8 @@ services:
 
   backend:
     build:
-      context: ../lab-03-auth
-      dockerfile: ../lab-08-docker/backend/Dockerfile
+      context: ../server
+      dockerfile: ../docker/backend/Dockerfile
     restart: unless-stopped
     environment:
       PORT: 3000
@@ -624,8 +756,8 @@ services:
 
   frontend:
     build:
-      context: ../lab-05-react-api
-      dockerfile: ../lab-08-docker/frontend/Dockerfile
+      context: ../client
+      dockerfile: ../docker/frontend/Dockerfile
       additional_contexts:
         deploy: ./frontend
     restart: unless-stopped
@@ -732,6 +864,9 @@ Table 8 – Input data for the control examples
 | Title of 81 characters      | a string of 81 letters `a`                                                                 |
 | Wrong password              | `wrong password 1`                                                                         |
 | Short password              | `1234567`                                                                                  |
+| Comment to create           | `{"text":"I agree with the order of the steps"}`                                           |
+| Comment of 1001 characters  | a string of 1001 letters `a`                                                               |
+| Comment with a control character | the text `a`, a NUL character, the text `b`                                           |
 
 ## Appendix E (mandatory) Mermaid Source Text of the Diagrams
 
@@ -741,22 +876,26 @@ The use case diagram:
 
 ```mermaid
 flowchart LR
-  guest(["Guest"])
-  user(["User"])
-  admin(["Administrator"])
-  subgraph sys ["DSLKit: managing diagrams as code"]
-    uc1("Register")
-    uc2("Log in and get a token")
-    uc3("View the profile")
-    uc4("View the diagram list: search, sort, pages")
-    uc5("Open a diagram")
-    uc6("Create a diagram")
-    uc7("Edit an own diagram")
-    uc8("Delete an own diagram")
-    uc9("Edit or delete a diagram of another user")
-    uc10("View the list of users")
-    uc11("Change the role of a user")
-    uc12("Delete a user")
+  guest(["Гость"])
+  user(["Пользователь"])
+  admin(["Администратор"])
+  subgraph sys ["DSLKit: управление диаграммами как кодом"]
+    uc1("Зарегистрироваться")
+    uc2("Войти и получить токен")
+    uc3("Посмотреть профиль")
+    uc4("Просмотреть список диаграмм: поиск, сортировка, страницы")
+    uc5("Открыть диаграмму")
+    uc6("Создать диаграмму")
+    uc7("Изменить свою диаграмму")
+    uc8("Удалить свою диаграмму")
+    uc13("Читать комментарии к диаграмме")
+    uc14("Оставить комментарий")
+    uc15("Изменить или удалить свой комментарий")
+    uc9("Изменить или удалить чужую диаграмму")
+    uc16("Изменить или удалить чужой комментарий")
+    uc10("Открыть экран администратора: список пользователей")
+    uc11("Сменить роль пользователя")
+    uc12("Удалить пользователя с подтверждением")
   end
   guest --- uc1
   guest --- uc2
@@ -766,77 +905,91 @@ flowchart LR
   user --- uc6
   user --- uc7
   user --- uc8
+  user --- uc13
+  user --- uc14
+  user --- uc15
   admin --- uc9
+  admin --- uc16
   admin --- uc10
   admin --- uc11
   admin --- uc12
-  admin -. "inherits rights" .-> user
+  admin -. "наследует права" .-> user
 ```
 
 The C4 diagram, system context:
 
 ```mermaid
 C4Context
-  title DSLKit system context (level 1)
-  Person(user, "User", "Stores diagrams as code and manages them in the browser")
-  Person(admin, "Administrator", "Manages users and diagrams of other people")
-  System(dslkit, "DSLKit", "Web application: diagram storage, registration, JWT login, roles")
-  System_Ext(cloud_db, "Cloud PostgreSQL", "Neon or Supabase, optional: instead of the database container")
-  Rel(user, dslkit, "Works with diagrams", "HTTPS, browser")
-  Rel(admin, dslkit, "Manages users", "HTTPS, browser or REST client")
-  Rel(dslkit, cloud_db, "Reads and writes data", "PostgreSQL, TLS")
+  title Контекст системы DSLKit (уровень 1)
+  Person(user, "Пользователь", "Хранит диаграммы как код и управляет ими через браузер")
+  Person(admin, "Администратор", "Управляет пользователями, чужими диаграммами и комментариями")
+  System(dslkit, "DSLKit", "Веб-приложение: учёт диаграмм как кода, комментарии, регистрация, вход по JWT, роли")
+  System_Ext(cloud_db, "Облачная PostgreSQL", "Neon или Supabase, необязательно: вместо контейнера БД")
+  Rel(user, dslkit, "Работает с диаграммами", "HTTPS, браузер")
+  Rel(admin, dslkit, "Управляет пользователями", "HTTPS, браузер")
+  Rel(dslkit, cloud_db, "Читает и пишет данные", "PostgreSQL, TLS")
 ```
 
 The C4 diagram, containers:
 
 ```mermaid
 C4Container
-  title DSLKit containers (level 2)
-  Person(user, "User", "Browser")
-  Person(admin, "Administrator", "Browser or REST client")
+  title Контейнеры DSLKit (уровень 2)
+  Person(user, "Пользователь", "Браузер")
+  Person(admin, "Администратор", "Браузер")
   System_Boundary(dslkit, "DSLKit, docker compose") {
-    Container(spa, "SPA", "React 19, Vite, axios", "Login and registration forms, diagram list, optimistic changes")
-    Container(proxy, "Web server and proxy", "Nginx unprivileged, port 8080", "Serves static files, forwards /api/ to the server")
-    Container(api, "REST API", "Node.js 22, Express 5, Sequelize 6, port 3000", "bcrypt and JWT authentication, roles, diagram CRUD, request log, /health")
-    ContainerDb(db, "Database", "PostgreSQL 16, volume pgdata", "Tables Users, Diagrams, RequestLogs")
+    Container(spa, "SPA", "React 19, Vite, axios", "React Router 6: публичные и защищённые маршруты, список и страница диаграммы, комментарии, экран администратора")
+    Container(proxy, "Веб-сервер и прокси", "Nginx unprivileged, порт 8080", "Отдаёт статику, пересылает /api/ на сервер")
+    Container(api, "REST API", "Node.js 22, Express 5, Sequelize 6, порт 3000", "Аутентификация bcrypt и JWT, роли, CRUD диаграмм и комментариев, пользователи, журнал запросов, /health")
+    ContainerDb(db, "База данных", "PostgreSQL 16, том pgdata", "Таблицы Users, Diagrams, Comments, RequestLogs")
   }
-  Rel(user, proxy, "Opens the site", "HTTP 8080")
-  Rel(admin, proxy, "Calls /api/users", "HTTP 8080")
-  Rel(proxy, spa, "Serves built files", "static")
-  Rel(spa, proxy, "Requests /api/*", "JSON, Bearer JWT")
-  Rel(proxy, api, "Forwards requests", "HTTP, public network")
-  Rel(api, db, "SQL via Sequelize", "TCP 5432, internal network")
+  Rel(user, proxy, "Открывает сайт", "HTTP 8080")
+  Rel(admin, proxy, "Экран администратора, /api/users", "HTTP 8080")
+  Rel(proxy, spa, "Отдаёт собранные файлы", "статика")
+  Rel(spa, proxy, "Запросы /api/*", "JSON, Bearer JWT")
+  Rel(proxy, api, "Пересылает запросы", "HTTP, сеть public")
+  Rel(api, db, "SQL через Sequelize", "TCP 5432, сеть internal")
 ```
 
 The ER diagram:
 
 ```mermaid
 erDiagram
-  USERS ||--o{ DIAGRAMS : "owns (ownerId, RESTRICT)"
+  USERS ||--o{ DIAGRAMS : "владеет (ownerId, RESTRICT)"
+  USERS ||--o{ COMMENTS : "пишет (authorId, CASCADE)"
+  DIAGRAMS ||--o{ COMMENTS : "содержит (diagramId, CASCADE)"
   USERS {
     int id PK
-    string email UK "up to 254 characters, lowercase"
-    string passwordHash "bcrypt, 60 characters"
-    string role "user or admin"
+    string email UK "до 254 символов, нижний регистр"
+    string passwordHash "bcrypt, 60 символов"
+    string role "user или admin"
     datetime createdAt
     datetime updatedAt
   }
   DIAGRAMS {
     int id PK
-    string title "1..80 characters"
+    string title "1..80 символов"
     string notation "UML, BPMN, ERD, DFD, IDEF0, Petri"
-    text sourceCode "1..10000 characters"
+    text sourceCode "1..10000 символов"
     string priority "low, normal, high"
     int ownerId FK
+    datetime createdAt
+    datetime updatedAt
+  }
+  COMMENTS {
+    int id PK
+    int diagramId FK
+    int authorId FK
+    text text "1..1000 символов"
     datetime createdAt
     datetime updatedAt
   }
   REQUEST_LOGS {
     int id PK
     string method
-    string path "up to 200 characters"
+    string path "до 200 символов"
     string ip
-    int status "may be empty"
+    int status "может быть пустым"
     datetime createdAt
     datetime updatedAt
   }
@@ -852,4 +1005,4 @@ Client hosting: Netlify or GitHub Pages. Server and database hosting: Render or 
 
 It is referred to in subsections 3.1 and 3.2.
 
-[TODO: full screenshots of all screens, the `npm test` output of the server and the client, the `docker compose up` output and the `/api/health` page. The screenshots before the final interface look, that is Figures 5 to 9 in the text, are prepared from labs 5 and 8 and are to be replaced after the client is brought to the look of the first part of the discipline.]
+[TODO: full screenshots of all screens (including the diagram page with comments, the administrator screen with the confirmation block, and the error pages 401, 403, 404 and 500), the `npm test` output of the server and the client, the `docker compose up` output and the `/api/health` page. The screenshots before the final interface look, that is Figures 5 to 9 in the text, are prepared from labs 5 and 8 and are to be replaced after the client is brought to the look of the first part of the discipline.]

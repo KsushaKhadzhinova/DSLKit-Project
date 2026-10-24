@@ -670,7 +670,7 @@ export const register = (email, password) => api.post('/auth/register', { email,
 export const login = (email, password) => api.post('/auth/login', { email, password });
 ```
 
-Оптимистичное добавление диаграммы из хука `useDiagrams.js` (`part-2/lab-05-react-api/src/hooks`): запись появляется сразу с временным идентификатором, при успехе заменяется ответом сервера, при ошибке убирается и показывается сообщение.
+Оптимистичное добавление диаграммы из хука `useDiagrams.js` (`course-project/app/client/src/hooks`): запись появляется сразу с временным идентификатором, при успехе заменяется ответом сервера, при ошибке убирается и показывается сообщение.
 
 ```js
 const add = useCallback(async (fields) => {

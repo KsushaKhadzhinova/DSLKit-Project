@@ -42,6 +42,8 @@ services:
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-1h}
       ADMIN_EMAIL: ${ADMIN_EMAIL:-}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
+      # Optional: with it the seed also creates four demo users, demo diagrams and demo comments.
+      DEMO_USER_PASSWORD: ${DEMO_USER_PASSWORD:-}
       # Exactly one reverse proxy (Nginx) stands in front, so the rate limit sees the real client address.
       TRUST_PROXY: '1'
     depends_on:
