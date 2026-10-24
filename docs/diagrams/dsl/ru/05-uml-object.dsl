@@ -1,0 +1,6 @@
+diagram uml object "Снимок данных"
+object u1 "anna : Пользователь"
+object d1 "order : Диаграмма"
+object p1 "shop : Проект"
+link u1 -> d1 "владеет"
+link p1 -> d1 "содержит"

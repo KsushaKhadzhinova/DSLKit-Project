@@ -1,0 +1,41 @@
+[
+  {
+    "lang": "ru",
+    "id": "99",
+    "notation": "decision",
+    "drawn": true,
+    "sourceInEditor": true,
+    "size": "713x205",
+    "texts": 18,
+    "outside": [],
+    "overlaps": [],
+    "spill": [
+      "Нужна работа",
+      "без интернета?",
+      "Нужна точная",
+      "последовательности?"
+    ],
+    "bad": [],
+    "missing": [],
+    "problems": []
+  },
+  {
+    "lang": "en",
+    "id": "99",
+    "notation": "decision",
+    "drawn": true,
+    "sourceInEditor": true,
+    "size": "713x213",
+    "texts": 19,
+    "outside": [],
+    "overlaps": [],
+    "spill": [
+      "work needed?",
+      "Is an exact",
+      "diagram?"
+    ],
+    "bad": [],
+    "missing": [],
+    "problems": []
+  }
+]

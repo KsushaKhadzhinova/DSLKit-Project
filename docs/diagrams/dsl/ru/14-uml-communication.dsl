@@ -1,0 +1,8 @@
+diagram uml communication "Запрос списка"
+object c "клиент : Клиент"
+object s "сервер : Сервер"
+object d "база : База данных"
+message c -> s "1: GET /diagrams"
+message s -> d "1.1: SELECT"
+message d -> s "1.2: строки"
+message s -> c "2: массив"
