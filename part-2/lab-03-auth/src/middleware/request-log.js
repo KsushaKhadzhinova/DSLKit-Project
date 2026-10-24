@@ -29,4 +29,21 @@ const createRequestLogger =
     return next();
   };
 
-module.exports = { createRequestLogger, clean };
+// Personal data (the address of the client, the time and the path of a request) is kept for a limited time only:
+// rows older than the retention period are deleted at the start and then once an hour.
+const DEFAULT_RETENTION_DAYS = 30;
+const HOUR_MS = 60 * 60 * 1000;
+
+const purgeOldLogs = async ({ RequestLog }, days = DEFAULT_RETENTION_DAYS, now = Date.now) => {
+  const { Op } = require('sequelize');
+  return RequestLog.destroy({ where: { createdAt: { [Op.lt]: new Date(now() - days * 24 * HOUR_MS) } } });
+};
+
+// Returns the timer, so a test or a graceful stop can clear it. A failed purge is reported and tried again next hour.
+const startLogRetention = (models, days = DEFAULT_RETENTION_DAYS) => {
+  const run = () => purgeOldLogs(models, days).catch((error) => console.error('Cannot delete old request log rows:', error.message));
+  run();
+  return setInterval(run, HOUR_MS).unref();
+};
+
+module.exports = { createRequestLogger, clean, purgeOldLogs, startLogRetention };
