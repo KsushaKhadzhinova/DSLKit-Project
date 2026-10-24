@@ -52,6 +52,6 @@
 | Подписанный токен с `id` не целым (строка, `null`, объект, без `id`) | 500 от `findByPk` | 401 `Invalid token`. Исправлено в `src/middleware/auth.js` (только сервер мог такой подписать, но ответ должен быть понятным) |
 | Управляющие символы в `title` | 201, символы сохранялись | 400, «must not contain control characters». Исправлено в `src/middleware/validate.js` |
 | `title` из одних невидимых символов | 201 | 400, как для пустой строки. Исправлено в `src/middleware/validate.js` (`INVISIBLE`) |
+| Поиск `?q=` с символом NUL или другим управляющим (`%00`, `%07`) | 500: SQLite обрывал запрос с таким символом в тексте | 400 `q must be text of 1 to 80 characters without control characters`. Исправлено в `src/middleware/list-query.js`, найдено нагрузочным прогоном `tests/attack.test.js` и `tests/resilience.test.js` |
 
 Отчёты `report.md` и `report.en.md` пересобраны (`node tools/build.js part-2/lab-03-auth` из корня репозитория): в них встроены `auth.js` и `validate-auth.js`.
-| Поиск `?q=` с символом NUL или другим управляющим (`%00`, `%07`) | 500: SQLite обрывал запрос с таким символом в тексте | 400 `q must be text of 1 to 80 characters without control characters`. Исправлено в `src/middleware/list-query.js`, найдено нагрузочным прогоном `tests/attack.test.js` и `tests/resilience.test.js` |
