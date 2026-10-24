@@ -2,11 +2,11 @@ import assert from 'node:assert/strict';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, sep } from 'node:path';
 import { test } from 'node:test';
-import { mockNotations } from '../../react-app/src/data/notations.js';
-import { mockPlans } from '../../react-app/src/data/plans.js';
-import { mockProjects } from '../../react-app/src/data/projects.js';
+import { mockNotations } from './react-app/src/data/notations.js';
+import { mockPlans } from './react-app/src/data/plans.js';
+import { mockProjects } from './react-app/src/data/projects.js';
 
-const SRC = 'react-app/src';
+const SRC = 'labs/07-react-components/react-app/src';
 const walk = (dir) => readdirSync(dir).flatMap((name) => (statSync(join(dir, name)).isDirectory() ? walk(join(dir, name)) : [join(dir, name)]));
 const files = walk(SRC);
 const read = (path) => readFileSync(path, 'utf8');
@@ -78,7 +78,7 @@ test('components are styled with CSS modules and the global stylesheet', () => {
 });
 
 test('React Router is installed but not used in this lab', () => {
-  const pkg = JSON.parse(read('react-app/package.json'));
+  const pkg = JSON.parse(read('labs/07-react-components/react-app/package.json'));
   assert.ok(pkg.dependencies['react-router-dom']);
   assert.ok(pkg.dependencies.react && pkg.dependencies['react-dom']);
   assert.ok(pkg.devDependencies.vite);

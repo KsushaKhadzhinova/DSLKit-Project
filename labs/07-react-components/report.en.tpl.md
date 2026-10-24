@@ -107,20 +107,20 @@ An application on Vite and React with ten components is created for the DSLKit p
 
 ## Appendix A – Listing of Button.jsx
 
-{{code:react-app/src/components/ui/Button.jsx}}
+{{code:labs/07-react-components/react-app/src/components/ui/Button.jsx}}
 
 ## Appendix B – Listing of Card.jsx
 
-{{code:react-app/src/components/ui/Card.jsx}}
+{{code:labs/07-react-components/react-app/src/components/ui/Card.jsx}}
 
 ## Appendix C – Listing of NotationCard.jsx
 
-{{code:react-app/src/components/features/NotationCard.jsx}}
+{{code:labs/07-react-components/react-app/src/components/features/NotationCard.jsx}}
 
 ## Appendix D – Listing of ProjectList.jsx
 
-{{code:react-app/src/components/features/ProjectList.jsx}}
+{{code:labs/07-react-components/react-app/src/components/features/ProjectList.jsx}}
 
 ## Appendix E – Listing of App.jsx
 
-{{code:react-app/src/App.jsx}}
+{{code:labs/07-react-components/react-app/src/App.jsx}}

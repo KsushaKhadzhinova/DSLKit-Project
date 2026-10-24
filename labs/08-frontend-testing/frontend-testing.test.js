@@ -46,10 +46,10 @@ test('at least three components have tests: a simple one, a composite one and on
 
 test('the components keep the lab 7 rule and use test ids where text is not enough', () => {
   for (const file of ['App.jsx', 'components/features/ProjectList.jsx', 'components/features/NotationList.jsx'])
-    assert.doesNotMatch(read(`react-app/src/${file}`), /useState|useEffect/);
-  assert.match(read('react-app/src/components/features/NotationList.jsx'), /data-testid="notation-list"/);
-  assert.match(read('react-app/src/App.jsx'), /console\.group/);
-  assert.match(read('react-app/src/App.jsx'), /console\.table/);
+    assert.doesNotMatch(read(`labs/07-react-components/react-app/src/${file}`), /useState|useEffect/);
+  assert.match(read('labs/07-react-components/react-app/src/components/features/NotationList.jsx'), /data-testid="notation-list"/);
+  assert.match(read('labs/07-react-components/react-app/src/App.jsx'), /console\.group/);
+  assert.match(read('labs/07-react-components/react-app/src/App.jsx'), /console\.table/);
 });
 
 test('Lighthouse reports exist and the audit improved after the changes', () => {

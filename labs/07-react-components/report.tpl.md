@@ -107,20 +107,20 @@
 
 ## Приложение А – Листинг файла Button.jsx
 
-{{code:react-app/src/components/ui/Button.jsx}}
+{{code:labs/07-react-components/react-app/src/components/ui/Button.jsx}}
 
 ## Приложение Б – Листинг файла Card.jsx
 
-{{code:react-app/src/components/ui/Card.jsx}}
+{{code:labs/07-react-components/react-app/src/components/ui/Card.jsx}}
 
 ## Приложение В – Листинг файла NotationCard.jsx
 
-{{code:react-app/src/components/features/NotationCard.jsx}}
+{{code:labs/07-react-components/react-app/src/components/features/NotationCard.jsx}}
 
 ## Приложение Г – Листинг файла ProjectList.jsx
 
-{{code:react-app/src/components/features/ProjectList.jsx}}
+{{code:labs/07-react-components/react-app/src/components/features/ProjectList.jsx}}
 
 ## Приложение Д – Листинг файла App.jsx
 
-{{code:react-app/src/App.jsx}}
+{{code:labs/07-react-components/react-app/src/App.jsx}}
