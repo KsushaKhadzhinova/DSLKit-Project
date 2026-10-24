@@ -88,6 +88,8 @@ Figure 9 – Application page on a screen 375 pixels wide
 
 ### 2.7 Testing
 
+This work has no server and no routes, so the pages 401, 403 and 404 are not needed, and for the errors of the application itself there are two pages built from the catalogue of texts `src/shell/errorCatalog.js`. The 500 page is shown when an unexpected error occurs while rendering, and the "No connection to the server" page with a retry button is shown when a part of the code could not be downloaded. Each answers three questions: what the error is, why it happened and how to solve it. The technical text of the error goes to the console only and never reaches the page.
+
 Thirty-eight automated tests check the reducer as a pure function, the quantity change with its limits, the split of the contexts (the number of re-renders), the prop drilling problem and its solution, a double click on the buttons, the theme and language switching, saving of the choice, adding, removing and clearing favorites, restoring after a reload, broken data, a storage write error, the prop drilling demo, markup rendered as text and the 500 page.
 
 ## Conclusion
