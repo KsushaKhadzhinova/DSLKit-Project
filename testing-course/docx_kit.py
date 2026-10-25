@@ -69,3 +69,21 @@ def shot(d, name, caption, width=16):
     p = d.add_paragraph(caption)
     p.alignment = WD_ALIGN_PARAGRAPH.CENTER
     p.runs[0].italic = True
+
+
+def use_case(d, path):
+    import json
+    rows = json.loads(Path(path).read_text(encoding="utf8"))
+    t = d.add_table(rows=0, cols=2)
+    t.style = "Table Grid"
+    for k, v in rows:
+        c = t.add_row().cells
+        c[0].text = k; c[1].text = v
+        c[0].paragraphs[0].runs[0].bold = True
+        c[0].width, c[1].width = Cm(4.2), Cm(13)
+        shade(c[0], "F2F2F2")
+        for cell in c:
+            for p in cell.paragraphs:
+                for r in p.runs:
+                    r.font.size = Pt(12)
+    d.add_paragraph()
