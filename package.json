@@ -22,6 +22,9 @@
     "lab7:report": "node tools/build.js labs/07-react-components",
     "lab8:report": "node tools/build.js labs/08-frontend-testing",
     "react:test": "npm --prefix react-app test",
+    "tc:lab2": "node testing-course/lab2/run.js",
+    "tc:lab3": "node testing-course/lab3/run.js",
+    "tc:reports": "node testing-course/lab3/run.js && node testing-course/build-reports.js",
     "design:build": "node tools/build-design.js"
   },
   "dependencies": {

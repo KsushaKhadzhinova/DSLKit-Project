@@ -1,0 +1,325 @@
+{
+  "smoke": [
+    {
+      "id": "SM-01",
+      "req": "R1",
+      "title": "Главная страница открывается (200)",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "SM-02",
+      "req": "R1",
+      "title": "Редактор открывается (200)",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "SM-03",
+      "req": "R1",
+      "title": "Панель проектов открывается (200)",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "SM-04",
+      "req": "R2",
+      "title": "Стили главной загружаются",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "SM-05",
+      "req": "R2",
+      "title": "Скрипт главной загружается",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "SM-06",
+      "req": "R3",
+      "title": "Разбор DSL возвращает 2 блока и 1 стрелку",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "SM-07",
+      "req": "R4",
+      "title": "Форма заявки есть на главной",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "SM-08",
+      "req": "R5",
+      "title": "Несуществующий адрес даёт 404",
+      "status": "Passed",
+      "note": ""
+    }
+  ],
+  "critical": [
+    {
+      "id": "CP-01",
+      "req": "R1",
+      "title": "Страница / отдаётся как HTML",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "CP-02",
+      "req": "R1",
+      "title": "Страница /privacy.html отдаётся как HTML",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "CP-03",
+      "req": "R1",
+      "title": "Страница /thanks.html отдаётся как HTML",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "CP-04",
+      "req": "R1",
+      "title": "Страница /app/dashboard.html отдаётся как HTML",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "CP-05",
+      "req": "R1",
+      "title": "Страница /app/editor.html отдаётся как HTML",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "CP-06",
+      "req": "R1",
+      "title": "Страница /app/settings.html отдаётся как HTML",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "CP-07",
+      "req": "R1",
+      "title": "Страница /app/welcome.html отдаётся как HTML",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "CP-08",
+      "req": "R1",
+      "title": "Страница /en/ отдаётся как HTML",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "CP-09",
+      "req": "R1",
+      "title": "Страница /en/privacy.html отдаётся как HTML",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "CP-10",
+      "req": "R1",
+      "title": "Страница /en/thanks.html отдаётся как HTML",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "CP-11",
+      "req": "R6",
+      "title": "Главная: lang=\"ru\", английская версия: lang=\"en\"",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "CP-12",
+      "req": "R6",
+      "title": "На каждой странице ровно один h1",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "CP-13",
+      "req": "R6",
+      "title": "У главной есть canonical и alternate",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "CP-14",
+      "req": "R6",
+      "title": "У каждой страницы есть title и meta viewport",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "CP-15",
+      "req": "R2",
+      "title": "Все локальные ссылки на ресурсы главной открываются",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "CP-16",
+      "req": "R7",
+      "title": "Нет встроенных скриптов (CSP script-src self)",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "CP-17",
+      "req": "R7",
+      "title": "Заголовок Content-Security-Policy присутствует",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "CP-18",
+      "req": "R7",
+      "title": "X-Frame-Options = DENY",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "CP-19",
+      "req": "R7",
+      "title": "X-Content-Type-Options = nosniff",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "CP-20",
+      "req": "R5",
+      "title": "POST на статику даёт 405",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "CP-21",
+      "req": "R5",
+      "title": "Выход за корень (../) не отдаёт файлы",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "CP-22",
+      "req": "R5",
+      "title": "Страница 404 оформлена как HTML сайта",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "CP-23",
+      "req": "R8",
+      "title": "Манифест PWA: корректный JSON с иконками",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "CP-24",
+      "req": "R8",
+      "title": "Service worker доступен",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "CP-25",
+      "req": "R8",
+      "title": "robots.txt и sitemap.xml доступны",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "CP-26",
+      "req": "R3",
+      "title": "parseDsl: тип и заголовок диаграммы",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "CP-27",
+      "req": "R3",
+      "title": "parseDsl: порты блока разобраны",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "CP-28",
+      "req": "R3",
+      "title": "parseDsl: неизвестная строка попадает в skipped",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "CP-29",
+      "req": "R3",
+      "title": "parseDsl: пустой ввод не падает",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "CP-30",
+      "req": "R3",
+      "title": "toDot даёт digraph с обоими блоками",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "CP-31",
+      "req": "R3",
+      "title": "toMermaid возвращает непустой текст",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "CP-32",
+      "req": "R3",
+      "title": "sourceKey: один текст даёт один ключ, разные тексты разные",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "CP-33",
+      "req": "R9",
+      "title": "Хранилище: set/get возвращает значение",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "CP-34",
+      "req": "R9",
+      "title": "Хранилище: remove и значение по умолчанию",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "CP-35",
+      "req": "R4",
+      "title": "Валидация заявки: корректные данные дают пустой список ошибок",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "CP-36",
+      "req": "R4",
+      "title": "Форма: у полей есть label и сообщения об ошибках",
+      "status": "Passed",
+      "note": ""
+    }
+  ],
+  "metrics": {
+    "total": 44,
+    "passed": 44,
+    "failed": 0,
+    "blocked": 0,
+    "executedPct": 100,
+    "passedPct": 100,
+    "defectDensity": 0,
+    "coveragePct": 100,
+    "requirements": 9
+  }
+}
