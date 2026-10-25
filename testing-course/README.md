@@ -13,6 +13,10 @@
 | `build-reports.js` | Собирает тексты отчётов из результатов и запускает report-gen |
 | `reports/lab2`, `reports/lab3` | Отчёты: `output/note.docx`, `output/note.pdf`, `output/tex/note.tex` |
 
+| `documents/` | Отдельные документы без оформления по СТП: `01-test-cases` (тест-кейсы по шаблону) и `02-checklists-and-test-report` (чек-листы и отчёт о тестировании), DOCX и PDF |
+| `screenshots.py`, `screens/` | Скриншоты тестирования сайта в Edge (Playwright) и вывода консоли |
+| `build-docs.py` | Собирает документы из `results.json` и `screens/` (python-docx) |
+
 ## Как запустить
 
 Нужны Node.js 20+ (корень проекта: `npm install` один раз).
@@ -23,6 +27,15 @@ npm run tc:lab3      # лабораторная 3: чек-листы и метр
 ```
 
 Код выхода 0, если все проверки пройдены, и 1, если есть проваленные.
+
+### Скриншоты и отдельные документы
+
+```bash
+npm start                              # сервер сайта на :5173, в отдельном терминале
+pip install playwright python-docx && playwright install msedge
+python testing-course/screenshots.py   # скрины сайта и консоли в screens/
+python testing-course/build-docs.py    # документы в documents/ (PDF делается из DOCX через Word)
+```
 
 ### Пересборка отчётов
 
