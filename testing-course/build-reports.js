@@ -48,14 +48,16 @@ toc: false
 `;
 
 const useCase = JSON.parse(readFileSync(join(root, 'use-case.json'), 'utf8'))
-  .map(([k, v]) => `**${k}.**\n\n${v.split('\n').map((l) => `- ${l}`).join('\n')}\n`)
+  .map(([k, v]) => `**${k}.**\n\n${v.split('\n').map((l) => (l.endsWith(':') ? `**${l}**` : `- ${l}`)).join('\n')}\n`)
   .join('\n');
 
 const fields = JSON.parse(readFileSync(join(root, 'fields.json'), 'utf8'));
 const fieldsMd = table('Данные формы: типы и допустимые значения', ['Поле', 'Тип', 'Обяз.', 'По умолч.', 'Допустимо', 'Недопустимо'], fields);
 const figs = [['flow', 'Блок-схема сценария UC-01'], ['states', 'Состояния поля формы при проверке'], ['components', 'Компоненты и обмен данными']];
 const figsMd = figs.map(([n, c]) => `![${c}](screenshots/${n}.png)`).join('\n\n');
-const extras = `${fieldsMd}\n## Диаграммы процесса\n\n${figsMd}\n`;
+const dbRows = JSON.parse(readFileSync(join(root, 'db.json'), 'utf8'));
+const dbMd = `${table('Структура данных заявки (сущность WaitlistEntry)', ['Поле', 'Тип, длина', 'Обязат., уникальность', 'Маска', 'По умолч.', 'Связь', 'Прав.'], dbRows.map((r) => [r[0], `${r[1].replace(/ \(.*\)/, '')}, ${r[2]}`, `${r[3].replace(/ \(.*\)/, '')}; ${r[4].split(/[ (;]/)[0] === 'Нет' ? 'не уникально' : r[4]}`, r[9], r[6], r[7].split(';')[0], r[8]]))}\nХранилище: массив JSON в LocalStorage, ключ dslkit.waitlist. Первичного ключа нет. Связь «заявка → нотация» N:1 со справочником из шести значений. Звёздочка у имени поля означает обязательное поле.\n`;
+const extras = `${dbMd}\n${fieldsMd}\n## Диаграммы процесса\n\n${figsMd}\n`;
 
 const passed2 = lab2.filter((r) => r.status === 'Passed').length;
 const kinds = { P: 'позитивный', N: 'негативный', B: 'граничный' };

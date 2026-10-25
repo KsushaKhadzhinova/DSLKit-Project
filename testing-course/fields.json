@@ -1,6 +1,6 @@
 [
  [
-  "name (#name)",
+  "name* (#name)",
   "string; input type=text",
   "Да",
   "пусто",
@@ -8,7 +8,7 @@
   "Пусто; 1 символ; 61 и более; цифры («Anna1»); знаки («Анна!»); первый символ не буква («-Анна»)"
  ],
  [
-  "email (#email)",
+  "email* (#email)",
   "string; input type=email",
   "Да",
   "пусто",
@@ -16,7 +16,7 @@
   "Пусто; без @; без зоны («anna@example»); пробелы внутри; 121 символ и более"
  ],
  [
-  "notation (#notation)",
+  "notation* (#notation)",
   "enum; select, значение string",
   "Да",
   "не выбрано",
@@ -24,7 +24,7 @@
   "Пусто (пункт «Выберите нотацию»); любое другое значение («xyz»); заглавные буквы («IDEF0»)"
  ],
  [
-  "team (#team)",
+  "team* (#team)",
   "integer; input type=number (в коде допускается и строка из цифр)",
   "Да",
   "0",
@@ -40,7 +40,7 @@
   "501 символ и более (в браузере ввод ограничен maxlength=500)"
  ],
  [
-  "consent (#consent)",
+  "consent* (#consent)",
   "boolean; checkbox",
   "Да",
   "false (снят)",

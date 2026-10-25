@@ -76,11 +76,12 @@ def rich(par, text, size=12):
     for i, line in enumerate(text.split("\n")):
         if i:
             par.add_run().add_break()
+        line = line.replace(chr(92) + "*", chr(0xe000))
         for part in re.split(r"(\*\*[^*]+\*\*|\*[^*]+\*)", line):
             if not part:
                 continue
             bold, ital = part.startswith("**"), part.startswith("*") and not part.startswith("**")
-            run = par.add_run(part.strip("*") if (bold or ital) else part)
+            run = par.add_run((part.strip("*") if (bold or ital) else part).replace(chr(0xe000), "*"))
             run.bold, run.italic = bold or None, ital or None
             run.font.size = Pt(size)
 
@@ -100,6 +101,11 @@ def use_case(d, path):
         c[0].width, c[1].width = Cm(4.2), Cm(13)
         shade(c[0], "F2F2F2")
     d.add_paragraph()
+    d.add_heading("Структура данных заявки (сущность WaitlistEntry)", 2)
+    db = json.loads((base / "db.json").read_text(encoding="utf8"))
+    db = [[r[0], f"{r[1]}, длина {r[2]}", f"{r[3]}; уникальность: {r[4]}", r[5], r[6], r[7], r[8]] for r in db]
+    table(d, ["Поле", "Тип и длина", "Обязательность, уникальность", "Маска, формат", "По умолч.", "Связь", "Правило"], db, [1.9, 2.4, 3.3, 3.6, 1.5, 3.0, 1.3])
+    d.add_paragraph("Хранилище: массив JSON в LocalStorage браузера, ключ dslkit.waitlist (префикс dslkit. задаёт createStorage). Первичного ключа и индексов нет, запись определяется позицией в массиве. Связь «заявка → нотация» N:1 со справочником NOTATIONS из шести значений (site/js/utils/validation.js). * — обязательное поле. Поле consent проверяется, но в запись не попадает.")
     d.add_heading("Данные формы: типы и допустимые значения", 2)
     fields = json.loads((base / "fields.json").read_text(encoding="utf8"))
     table(d, ["Поле", "Тип данных", "Обяза-тельно", "По умолчанию", "Допустимые значения", "Недопустимые значения"], fields, [2.6, 2.6, 1.8, 2, 4.2, 4.2])
