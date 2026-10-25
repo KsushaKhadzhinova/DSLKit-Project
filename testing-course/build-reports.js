@@ -1,4 +1,4 @@
-import { mkdirSync, writeFileSync, readFileSync, existsSync } from 'node:fs';
+import { copyFileSync, mkdirSync, writeFileSync, readFileSync, existsSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { join } from 'node:path';
@@ -21,6 +21,8 @@ const short = (v) => JSON.stringify(v, (k, x) => (typeof x === 'string' && x.len
 const write = (lab, meta, sections) => {
   const dir = join(root, 'reports', lab);
   mkdirSync(join(dir, 'content'), { recursive: true });
+  mkdirSync(join(dir, 'screenshots'), { recursive: true });
+  for (const n of ['flow', 'states', 'components']) copyFileSync(join(root, 'diagrams', `${n}.png`), join(dir, 'screenshots', `${n}.png`));
   writeFileSync(join(dir, 'meta.yaml'), meta);
   sections.sort((a, b) => Number(b.startsWith('# ЦЕЛЬ')) - Number(a.startsWith('# ЦЕЛЬ')));
   sections.forEach((text, i) => writeFileSync(join(dir, 'content', `${String(i).padStart(2, '0')}.md`), text));
@@ -49,6 +51,12 @@ const useCase = JSON.parse(readFileSync(join(root, 'use-case.json'), 'utf8'))
   .map(([k, v]) => `**${k}.**\n\n${v.split('\n').map((l) => `- ${l}`).join('\n')}\n`)
   .join('\n');
 
+const fields = JSON.parse(readFileSync(join(root, 'fields.json'), 'utf8'));
+const fieldsMd = table('Данные формы: типы и допустимые значения', ['Поле', 'Тип', 'Обяз.', 'По умолч.', 'Допустимо', 'Недопустимо'], fields);
+const figs = [['flow', 'Блок-схема сценария UC-01'], ['states', 'Состояния поля формы при проверке'], ['components', 'Компоненты и обмен данными']];
+const figsMd = figs.map(([n, c]) => `![${c}](screenshots/${n}.png)`).join('\n\n');
+const extras = `${fieldsMd}\n## Диаграммы процесса\n\n${figsMd}\n`;
+
 const passed2 = lab2.filter((r) => r.status === 'Passed').length;
 const kinds = { P: 'позитивный', N: 'негативный', B: 'граничный' };
 
@@ -72,6 +80,7 @@ write('lab2', meta('Разработка тест-кейсов'), [
 Тестируется вариант использования UC-01, описанный ниже. Проверку полей выполняет функция validateWaitlist (файл site/js/utils/validation.js), которая возвращает список неверных полей. Проект развёрнут локально командой npm start.
 
 ${useCase}
+${extras}
 Трассировка: правило П1 проверяют TC-WL-002…007, П2 008…011, П3 018, П4 012…017, П5 019 и 020, П6 021, поток A1 022.
 
 Требования к полям приведены в таблице ниже.
@@ -137,6 +146,7 @@ write('lab3', meta('Разработка чек-листов и отчёта о 
 Проверки охватывают вариант использования UC-01, связанный с требованием R4 (проверки SM-07, CP-35, CP-36); тест-кейсы к нему описаны в лабораторной работе 2.
 
 ${useCase}
+${extras}
 ## Анализ требований и модули
 
 Тестируется статический сайт DSLKit, запущенный локальным сервером tools/server.js. Требования и модули приведены в таблице ниже.

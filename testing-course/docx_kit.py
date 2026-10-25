@@ -71,19 +71,44 @@ def shot(d, name, caption, width=16):
     p.runs[0].italic = True
 
 
+def rich(par, text, size=12):
+    import re
+    for i, line in enumerate(text.split("\n")):
+        if i:
+            par.add_run().add_break()
+        for part in re.split(r"(\*\*[^*]+\*\*|\*[^*]+\*)", line):
+            if not part:
+                continue
+            bold, ital = part.startswith("**"), part.startswith("*") and not part.startswith("**")
+            run = par.add_run(part.strip("*") if (bold or ital) else part)
+            run.bold, run.italic = bold or None, ital or None
+            run.font.size = Pt(size)
+
+
 def use_case(d, path):
     import json
+    base = Path(path).parent
     rows = json.loads(Path(path).read_text(encoding="utf8"))
     t = d.add_table(rows=0, cols=2)
     t.style = "Table Grid"
     for k, v in rows:
         c = t.add_row().cells
-        c[0].text = k; c[1].text = v
-        c[0].paragraphs[0].runs[0].bold = True
+        c[0].text = ""
+        c[0].paragraphs[0].add_run(k).bold = True
+        c[0].paragraphs[0].runs[0].font.size = Pt(12)
+        rich(c[1].paragraphs[0], v)
         c[0].width, c[1].width = Cm(4.2), Cm(13)
         shade(c[0], "F2F2F2")
-        for cell in c:
-            for p in cell.paragraphs:
-                for r in p.runs:
-                    r.font.size = Pt(12)
     d.add_paragraph()
+    d.add_heading("Данные формы: типы и допустимые значения", 2)
+    fields = json.loads((base / "fields.json").read_text(encoding="utf8"))
+    table(d, ["Поле", "Тип данных", "Обяза-тельно", "По умолчанию", "Допустимые значения", "Недопустимые значения"], fields, [2.6, 2.6, 1.8, 2, 4.2, 4.2])
+    d.add_heading("Диаграммы процесса", 2)
+    for name, cap, w in (("flow", "Рис. A. Блок-схема сценария UC-01: основной поток и альтернативные потоки", 10),
+                         ("states", "Рис. B. Состояния поля формы при проверке", 16),
+                         ("components", "Рис. C. Компоненты и обмен данными при отправке заявки", 16)):
+        d.add_picture(str(base / "diagrams" / f"{name}.png"), width=Cm(w))
+        d.paragraphs[-1].alignment = WD_ALIGN_PARAGRAPH.CENTER
+        p = d.add_paragraph(cap)
+        p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        p.runs[0].italic = True
