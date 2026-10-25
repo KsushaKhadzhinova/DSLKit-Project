@@ -107,310 +107,164 @@
 *\textit{Название.}*
 
 
-– *\textit{UC-01.}\textit{ Подать заявку в лист ожидания (форма }\textit{«Записаться в бету»}* на главной странице DSLKit).
-
-
-
-*\textit{Идентификатор, версия, приоритет.}*
-
-
-– UC-01, версия 1.0, приоритет High: единственный способ оставить контакты для получения приглашения в бету.
+– *\textit{UC-01.}* Подать заявку в лист ожидания.
 
 
 
 *\textit{Система и модуль.}*
 
 
-– *\textit{Система:}\textit{ }DSLKit\textit{ — веб-приложение «Редактор диаграмм как кода: слева текст, справа диаграмма», статический сайт без серверной части (каталог }site/*);
+– *\textit{Система:}\textit{ }DSLKit\textit{ — редактор диаграмм как кода (статический сайт, }site/*);
 
-– *\textit{Модуль:}* «Лист ожидания беты» — форма заявки на главной странице (раздел «Записаться в бету»);
+– *\textit{Модуль:}* «Лист ожидания беты» — форма на главной странице;
 
-– *\textit{Ссылка на модуль:}\textit{ http://localhost:5173/\#waitlist (запуск: }npm start*);
-
-– *\textit{Ссылка на исходный код:}\textit{ https://github.com/KsushaKhadzhinova/DSLKit-Project, файлы }site/index.html\textit{ (форма }\#waitlist-form\textit{) и }site/js/components/waitlist-form.js*.
-
-
-
-*\textit{Краткое описание цели и задачи.}*
-
-
-– Посетитель оставляет имя, почту, нотацию диаграмм и размер команды, чтобы команда DSLKit прислала ему приглашение, когда откроется бета. Задача формы: принять только корректную заявку, сохранить её и показать страницу благодарности.
+– *\textit{Ссылка:}* http://localhost:5173/\#waitlist.
 
 
 
 *\textit{Основной актор.}*
 
 
-– Посетитель сайта (неавторизованный). Внешних систем и сервера в сценарии нет: заявка остаётся в браузере посетителя.
+– Посетитель сайта (без регистрации и авторизации).
 
 
 
-*\textit{Как перейти к форме.}*
+*\textit{Цель.}*
 
 
-*\textit{Форма находится на главной странице сайта в разделе }\textit{«Записаться в бету»}\textit{ (якорь }\#waitlist\textit{), доступна всем посетителям }\textit{без регистрации и авторизации}\textit{. Перейти к ней можно так:}*
-
-
-– *\textit{1.}\textit{ Шапка главной страницы, кнопка }\textit{«В бету»}\textit{ (en: «Join the beta»), }site/index.html*, строка 67;
-
-– *\textit{2.}\textit{ Первый экран, кнопка }\textit{«Записаться в бету»}*, строка 88;
-
-– *\textit{3.}\textit{ Раздел «Нотации»: шесть ссылок }\textit{«Записаться в бету: UML / BPMN / ERD / DFD / IDEF0 / сети Петри»}*, строки 127–172;
-
-– *\textit{4.}\textit{ Страницы }privacy.html\textit{ и }thanks.html\textit{: кнопка }\textit{«В бету»}\textit{ в шапке ведёт на }./\#waitlist*;
-
-– *\textit{5.}* Прямой адрес: http://localhost:5173/\#waitlist (русская версия), http://localhost:5173/en/\#waitlist (английская);
-
-– *\textit{6.}* Клавиатура: Tab до кнопки или ссылки и Enter; ссылка-якорь прокручивает страницу к форме;
-
-– *\textit{7.}\textit{ React-приложение (}react-app\textit{): кнопка }\textit{«Записаться в бету»}* в шапке (UC-04, только сообщение, заявка не сохраняется).
+– Оставить контакты, чтобы получить приглашение в бету DSLKit.
 
 
 
 *\textit{Предусловия.}*
 
 
-– 1. Открыта главная страница: русская (/) или английская (/en/);
+– 1. Открыта главная страница (\textit{/} или \textit{/en/});
 
-– 2. Раздел *\textit{«Записаться в бету»}\textit{ показан, форма пуста: список }\textit{«Нотация»}\textit{ стоит на пункте }\textit{«Выберите нотацию»}\textit{, в поле }\textit{«Размер команды»}* значение 0, флажок согласия снят;
-
-– 3. Скрипт \textit{site/js/script.js} загружен (иначе форма не работает).
+– 2. Форма пуста: нотация не выбрана, размер команды 0, согласие не отмечено.
 
 
 
-*\textit{Основной поток событий.}*
+*\textit{Основной поток.}*
 
 
-– 1. Посетитель переходит к форме одним из способов раздела «Как перейти к форме», например нажимает *\textit{«В бету»}\textit{ (или }\textit{«Записаться в бету»}\textit{); страница прокручивается к разделу }\#waitlist*;
+– 1. Посетитель нажимает *\textit{«В бету»}\textit{ в шапке (или }\textit{«Записаться в бету»}\textit{) и попадает к форме }\#waitlist*;
 
-– 2. Посетитель вводит имя в поле *\textit{«Имя\textbackslash{}}»*\textit{ (подсказка }\textit{«От 2 до 60 букв. Допустимы пробел, дефис и апостроф.»}*);
+– 2. Вводит *\textit{«Имя\textbackslash{}}»*\textit{ и }\textit{«Электронная почта\textbackslash{}}»**;
 
-– 3. Посетитель вводит адрес в поле *\textit{«Электронная почта\textbackslash{}}»*\textit{ (подсказка }\textit{«Адрес вида name@example.com. На него придёт приглашение.»}*);
+– 3. Выбирает *\textit{«Нотация\textbackslash{}}»** (IDEF0, DFD, ERD, BPMN, UML, «Сети Петри»);
 
-– 4. Посетитель выбирает нотацию в списке «Нотация\textbackslash{}\textit{»: IDEF0, DFD, ERD, BPMN, UML или }\textit{«Сети Петри»}*;
+– 4. Вводит *\textit{«Размер команды\textbackslash{}}»*\textit{ (0–500) и при желании }\textit{«Комментарий»}*;
 
-– 5. Посетитель вводит целое число в поле *\textit{«Размер команды\textbackslash{}}»*\textit{ (подсказка }\textit{«Целое число от 0 до 500. Укажите 0, если работаете один.»}*);
+– 5. Отмечает согласие\textbackslash{}\textit{ и нажимает }\textit{«Отправить»}*;
 
-– 6. Посетитель при желании вводит текст в поле *\textit{«Комментарий (по желанию)»}*;
+– 6. Система проверяет поля по таблице «Структура данных» (\textit{validateWaitlist});
 
-– 7. Посетитель отмечает флажок *\textit{«Согласен получать письма о запуске беты и с политикой конфиденциальности\textbackslash{}}»**;
+– 7. Система сохраняет заявку в \textit{LocalStorage} (ключ \textit{dslkit.waitlist});
 
-– 8. Посетитель нажимает кнопку *\textit{«Отправить»}*;
+– 8. Система открывает страницу благодарности \textit{thanks.html};
 
-– 9. Система считывает шесть полей и проверяет каждое по правилам П1–П6 из таблицы «Структура данных» (функция \textit{validateWaitlist});
-
-– 10. Система формирует запись \{name, email, notation, team, comment, createdAt\}, где name, email и comment очищены от пробелов по краям, team приведён к числу, createdAt — время в формате ISO 8601; добавляет запись в массив \textit{LocalStorage} по ключу \textit{dslkit.waitlist} и пишет в консоль *\textit{«DSLKit: заявка сохранена в LocalStorage»}* с названием нотации;
-
-– 11. Система открывает страницу благодарности \textit{thanks.html} (для английской версии en/\textit{thanks.html}) с заголовком *\textit{«Спасибо, вы в списке беты»}*;
-
-– \textbackslash{}* — обязательное поле. В интерфейсе сайта звёздочек нет, обязательность указана фразой «Все поля, кроме комментария, обязательны».
+– \textbackslash{}* — обязательное поле.
 
 
 
 *\textit{Альтернативные потоки.}*
 
 
-– *\textit{A1}\textit{. Одно или несколько полей не прошли проверку (шаг 9): под каждым неверным полем показывается красное сообщение (role=alert, например }\textit{«Имя не принято: поле пустое, короче двух символов или содержит цифры и знаки…»}\textit{), поле получает aria-invalid=true, фокус переходит на первое неверное поле в порядке имя, почта, нотация, команда, комментарий, согласие. }\textit{Заявка не сохраняется}*, страница не меняется. Поле с ошибкой перепроверяется при каждом вводе, остальные при выходе из поля. После исправления сообщение скрывается. Сценарий продолжается с шага 8;
+– *\textit{A1.}* Поле неверно (шаг 6): под полем красное сообщение, фокус на первом неверном поле, заявка не сохраняется; после исправления сообщение исчезает;
 
-– *\textit{A2}\textit{. Согласие не отмечено (шаг 9): применяется A1; сообщение }\textit{«Без согласия мы не можем отправить приглашение. Поставьте галочку, чтобы продолжить.»}*;
+– *\textit{A2.}* Повторная заявка с той же почтой: принимается как новая запись (дефект D-1);
 
-– *\textit{A3}*. Посетитель закрывает страницу или уходит со страницы до шага 8: данные не сохраняются, состояние системы не меняется;
-
-– *\textit{A4}\textit{. Повторная заявка с тем же адресом (шаг 10): }\textit{принимается как новая отдельная запись}*, сообщения о дубликате нет (дефект D-1);
-
-– *\textit{A5}\textit{. Повторное нажатие }\textit{«Отправить»}* после успешной отправки (шаг 11): игнорируется, вторая запись не создаётся (флаг submitting).
+– *\textit{A3.}* Посетитель закрыл страницу до шага 5: данные не сохраняются.
 
 
 
 *\textit{Постусловия.}*
 
 
-– Успех: массив \textit{dslkit.waitlist} в \textit{LocalStorage} длиннее на одну запись, открыта страница \textit{thanks.html} (en/\textit{thanks.html});
-
-– Ошибка проверки (A1, A2): записей не добавилось, посетитель остаётся на главной странице, введённые значения остаются в полях.
+– Успех: в \textit{LocalStorage} на одну запись больше, открыта \textit{thanks.html}. Ошибка проверки: записей не добавилось, значения остаются в полях.
 
 
 
 *\textit{Исключительные ситуации.}*
 
 
-– *\textit{E1}\textit{. Запись в }LocalStorage\textit{ не удалась (хранилище переполнено или запрещено, шаг 10): метод }storage.set\textit{ возвращает false, но система всё равно открывает страницу благодарности; }\textit{сообщения об ошибке нет}\textit{, }\textit{заявка потеряна}* (дефект D-2);
-
-– *\textit{E2}\textit{. }LocalStorage\textit{ недоступен совсем (}getStorage* использует временное хранилище в памяти): заявка живёт только до закрытия страницы, посетитель видит страницу благодарности.
+– *\textit{E1.}\textit{ Запись в }LocalStorage\textit{ не удалась: страница благодарности всё равно открывается, }\textit{заявка потеряна}*, ошибки нет (дефект D-2).
 
 
 
-*\textit{Связанные требования.}*
+*\textit{Другие точки входа.}*
+
+
+– Ссылки «Записаться в бету: UML / BPMN / …» в разделе нотаций, кнопка «В бету» на \textit{privacy.html} и \textit{thanks.html}, адрес \textit{/en/\#waitlist}.
+
+
+
+*\textit{Связанные задачи.}*
 
 
 – *\textit{R4}* — Форма заявки и валидация;
 
-– *\textit{R1}\textit{ — Доступность страниц (главная, }thanks.html\textit{, }privacy.html*);
+– *\textit{UC-00}* — Прочитать политику конфиденциальности;
 
-– *\textit{R6}* — Разметка и локализация (русская и английская версии);
+– *\textit{UC-03}* — Авторизация (в текущей версии не реализована);
 
-– *\textit{R9}* — Локальное хранилище.
+– *\textit{UC-04}* — Запись в бету из React-приложения;
 
+– *\textit{TC-WL-001…022}* — Тест-кейсы формы (лаб. 2);
 
-
-*\textit{Подзадачи.}*
-
-
-– *\textit{UC-01.1}* — Показ формы и подсказок к полям;
-
-– *\textit{UC-01.2}* — Чтение, очистка и проверка значений по П1–П6;
-
-– *\textit{UC-01.3}* — Показ ошибок, фокус и повторная проверка;
-
-– *\textit{UC-01.4}\textit{ — Сохранение заявки в }LocalStorage*;
-
-– *\textit{UC-01.5}* — Переход на страницу благодарности.
+– *\textit{SM-07, CP-35, CP-36}* — Проверки чек-листов (лаб. 3).
 
 
 
-*\textit{Связанные задачи и use case.}*
+*\textit{Скриншоты.}*
 
 
-– *\textit{UC-00}\textit{ — Прочитать политику конфиденциальности (ссылка в тексте согласия, }privacy.html*);
+– *\textit{SCR-01}* — Форма: ошибки при пустой отправке;
 
-– *\textit{UC-02}\textit{ — Выбрать нотацию на карточке и перейти к записи (ссылки }\textit{«Записаться в бету: UML»}\textit{, }\textit{«…: BPMN»}*);
+– *\textit{SCR-02}* — Форма: заполнена;
 
-– *\textit{UC-03}\textit{ — Авторизация и вход в приложение: в текущей версии }не реализована\textit{, форма и приложение (}site/app/*) работают без входа; задача на будущее, после появления серверной части;
-
-– *\textit{UC-04}\textit{ — Запись в бету из React-приложения (}react-app/src/App.jsx*, лаб. 7);
-
-– *\textit{D-1}* — Повторные заявки принимаются;
-
-– *\textit{D-2}* — Потеря заявки при сбое хранилища.
+– *\textit{SCR-03}* — Страница благодарности.
 
 
 
 *\textit{Реализация.}*
 
 
-– *\textit{IMPL-01}\textit{ — }site/index.html\textit{: разметка формы }\#waitlist-form*;
-
-– *\textit{IMPL-02}\textit{ — }site/js/components/waitlist-form.js\textit{: }initWaitlistForm*, показ ошибок, отправка;
-
-– *\textit{IMPL-03}\textit{ — }site/js/utils/validation.js\textit{: }validateWaitlist* и правила П1–П6;
-
-– *\textit{IMPL-04}\textit{ — }site/js/utils/storage.js\textit{: createStorage, }getStorage*;
-
-– *\textit{IMPL-05}\textit{ — }site/thanks.html\textit{ и }site/en/thanks.html*: страница благодарности.
-
-
-
-*\textit{Тест-кейсы и проверки.}*
-
-
-– *\textit{TC-WL-001}* — Все поля корректны;
-
-– *\textit{TC-WL-002…007}* — Имя: границы и недопустимые символы (П1);
-
-– *\textit{TC-WL-008…011}* — Почта: формат и длина (П2);
-
-– *\textit{TC-WL-012…017}* — Размер команды: границы и тип (П4);
-
-– *\textit{TC-WL-018}* — Нотация вне списка (П3);
-
-– *\textit{TC-WL-019, 020}* — Комментарий: граница 500 (П5);
-
-– *\textit{TC-WL-021}* — Согласие не дано (П6);
-
-– *\textit{TC-WL-022}* — Пустая форма (A1);
-
-– *\textit{SM-07}* — Форма заявки есть на главной;
-
-– *\textit{CP-35}* — Валидация корректной заявки;
-
-– *\textit{CP-36}* — У полей есть подписи и сообщения об ошибках.
-
-
-
-*\textit{Скриншоты интерфейса.}*
-
-
-– *\textit{SCR-01}* — Главная страница, русская версия (01-home.png);
-
-– *\textit{SCR-02}* — Главная страница, английская версия (02-home-en.png);
-
-– *\textit{SCR-03}* — Форма заявки: ошибки при пустой отправке (03-form-errors.png);
-
-– *\textit{SCR-04}* — Форма заявки: заполнена корректными данными (04-form-filled.png);
-
-– *\textit{SCR-05}* — Страница благодарности (05-form-submitted.png);
-
-– *\textit{SCR-06}\textit{ — Запись заявки в }LocalStorage* (12-uc-storage-record.png);
-
-– *\textit{SCR-07}* — Сбой записи: страница благодарности без ошибки (13-uc-storage-failure.png).
+– \textit{site/index.html} (форма \textit{\#waitlist-form}), \textit{site/js/components/waitlist-form.js}, \textit{site/js/utils/validation.js}, \textit{site/js/utils/storage.js}, \textit{site/thanks.html}.
 
 
 
 *\textit{Ссылки.}*
 
 
-*\textit{Страницы проекта (при запущенном npm start):}*
+– http://localhost:5173/\#waitlist;
 
+– http://localhost:5173/thanks.html;
 
-– http://localhost:5173/ — главная страница (русская версия);
-
-– http://localhost:5173/\#waitlist — раздел «Записаться в бету»;
-
-– http://localhost:5173/thanks.html — страница благодарности;
-
-– http://localhost:5173/privacy.html — политика конфиденциальности;
-
-– http://localhost:5173/en/ — главная страница (английская версия);
-
-– http://localhost:5173/en/thanks.html — страница благодарности (английская версия).
-
-
-
-*\textit{Репозиторий и источники:}*
-
-
-– https://github.com/KsushaKhadzhinova/DSLKit-Project — репозиторий проекта;
-
-– https://svyatoslav.biz/software\_testing\_book/ — книга «Тестирование программного обеспечения. Базовый курс»;
-
-– https://github.com/KsushaKhadzhinova/report-gen — генератор отчётов.
+– https://github.com/KsushaKhadzhinova/DSLKit-Project.
 
 
 
 \noindent Таблица 3.1 – Структура данных заявки (сущность WaitlistEntry)\par\nopagebreak
 \begin{longtable}{|>{\raggedright\arraybackslash}p{0.140\textwidth}|>{\raggedright\arraybackslash}p{0.140\textwidth}|>{\raggedright\arraybackslash}p{0.140\textwidth}|>{\raggedright\arraybackslash}p{0.140\textwidth}|>{\raggedright\arraybackslash}p{0.140\textwidth}|>{\raggedright\arraybackslash}p{0.140\textwidth}|>{\raggedright\arraybackslash}p{0.140\textwidth}|}
 \hline
-Поле & Тип, длина & Обязат., уникальность & Маска & По умолч. & Связь & Прав. \\ \hline
+Поле & Тип & Длина & Обязат. & Уник. & Маска & Связь \\ \hline
 \endhead
-name* & string, 2–60 & Да; не уникально & буквы, пробел, апостроф, дефис; первая буква & — & Связей нет & П1 \\ \hline
-email* & string, 6–120 & Да; не уникально & name@domain.zone & — & Адрес получателя приглашения & П2 \\ \hline
-notation* & enum, 3–5 & Да; не уникально & один из шести: idef0 … petri & не выбрано & FK → Notation.id (N:1), справочник NOTATIONS в validation.js & П3 \\ \hline
-team* & integer, 0–500 (до 3 цифр) & Да; не уникально & целые цифры 0–500 & 0 & Связей нет & П4 \\ \hline
-comment & string, 0–500 & Нет; не уникально & без маски & пусто & Связей нет & П5 \\ \hline
-consent* & boolean, — & Да, значение true; — & только true & false & → документ «Политика конфиденциальности» (privacy.html) & П6 \\ \hline
-createdAt & string, 24 & Да; не уникально & ISO 8601, UTC & текущее время & Связей нет & — \\ \hline
+name\textbackslash{}* (П1) & string & 2–60 & Да & Нет & буквы, пробел, апостроф, дефис; первая — буква & — \\ \hline
+email\textbackslash{}* (П2) & string & 6–120 & Да & Нет (дубликаты принимаются, D-1) & name@domain.zone & — \\ \hline
+notation\textbackslash{}* (П3) & enum & 3–5 & Да & Нет & idef0, dfd, erd, bpmn, uml, petri & → справочник Notation, N:1 \\ \hline
+team\textbackslash{}* (П4) & integer & 0–500 & Да & Нет & целое число; по умолчанию 0 & — \\ \hline
+comment (П5) & string & 0–500 & Нет & Нет & без маски & — \\ \hline
+consent\textbackslash{}* (П6) & boolean & — & Да, только true & — & флажок; в запись не сохраняется & → политика (privacy.html) \\ \hline
+createdAt & string ISO 8601 & 24 & Да, ставит система & Нет & ГГГГ-ММ-ДДTЧЧ:ММ:СС.сссZ & — \\ \hline
 \end{longtable}
 \vspace{\baselineskip}
 
-Хранилище: массив JSON в LocalStorage, ключ dslkit.waitlist. Первичного ключа нет. Связь «заявка → нотация» N:1 со справочником из шести значений. Звёздочка у имени поля означает обязательное поле.
+Хранилище: массив JSON в LocalStorage, ключ dslkit.waitlist. Первичного ключа нет. Звёздочка означает обязательное поле.
 
 
-\noindent Таблица 3.2 – Данные формы: типы и допустимые значения\par\nopagebreak
-\begin{longtable}{|>{\raggedright\arraybackslash}p{0.163\textwidth}|>{\raggedright\arraybackslash}p{0.163\textwidth}|>{\raggedright\arraybackslash}p{0.163\textwidth}|>{\raggedright\arraybackslash}p{0.163\textwidth}|>{\raggedright\arraybackslash}p{0.163\textwidth}|>{\raggedright\arraybackslash}p{0.163\textwidth}|}
-\hline
-Поле & Тип & Обяз. & По умолч. & Допустимо & Недопустимо \\ \hline
-\endhead
-name* (\#name) & string; input type=text & Да & пусто & От 2 до 60 символов; первая буква, далее буквы любого алфавита, пробел, апостроф, дефис; пробелы по краям игнорируются. Примеры: «Анна Иванова», «Ян», «O'Neil-Smith» & Пусто; 1 символ; 61 и более; цифры («Anna1»); знаки («Анна!»); первый символ не буква («-Анна») \\ \hline
-email* (\#email) & string; input type=email & Да & пусто & Вид name@domain.zone, зона не короче 2 символов, до 120 символов. Пример: anna@example.com & Пусто; без @; без зоны («anna@example»); пробелы внутри; 121 символ и более \\ \hline
-notation* (\#notation) & enum; select, значение string & Да & не выбрано & Ровно одно из: idef0, dfd, erd, bpmn, uml, petri & Пусто (пункт «Выберите нотацию»); любое другое значение («xyz»); заглавные буквы («IDEF0») \\ \hline
-team* (\#team) & integer; input type=number (в коде допускается и строка из цифр) & Да & 0 & Целое от 0 до 500 включительно. Примеры: 0, 5, 500, «12» & Меньше 0 («-1»); больше 500 («501»); дробное («2.5»); не число («abc»); пусто \\ \hline
-comment (\#comment) & string; textarea & Нет & пусто & От 0 до 500 символов (пусто допустимо) & 501 символ и более (в браузере ввод ограничен maxlength=500) \\ \hline
-consent* (\#consent) & boolean; checkbox & Да & false (снят) & true (флажок отмечен) & false (флажок снят) \\ \hline
-createdAt (формирует система) & string; время ISO 8601 (UTC) & Нет (не вводится) & текущее время в момент отправки & Строка вида 2026-10-25T12:00:00.000Z & Не вводится посетителем \\ \hline
-\end{longtable}
-\vspace{\baselineskip}
-
-\reportsection{3.2}{Диаграммы процесса}
+\reportsection{3.2}{Диаграмма и скриншоты}
 
 \begin{center}
 \includegraphics[width=\textwidth,height=0.6\textheight,keepaspectratio]{figures/fig1.png}\par
@@ -420,13 +274,19 @@ createdAt (формирует система) & string; время ISO 8601 (UTC
 
 \begin{center}
 \includegraphics[width=\textwidth,height=0.6\textheight,keepaspectratio]{figures/fig2.png}\par
-Рисунок 3.2 – Состояния поля формы при проверке
+Рисунок 3.2 – Форма: ошибки при пустой отправке
 \end{center}
 \vspace{\baselineskip}
 
 \begin{center}
 \includegraphics[width=\textwidth,height=0.6\textheight,keepaspectratio]{figures/fig3.png}\par
-Рисунок 3.3 – Компоненты и обмен данными
+Рисунок 3.3 – Форма заполнена корректными данными
+\end{center}
+\vspace{\baselineskip}
+
+\begin{center}
+\includegraphics[width=\textwidth,height=0.6\textheight,keepaspectratio]{figures/fig4.png}\par
+Рисунок 3.4 – Страница благодарности
 \end{center}
 \vspace{\baselineskip}
 
@@ -436,7 +296,7 @@ createdAt (формирует система) & string; время ISO 8601 (UTC
 Требования к полям приведены в таблице ниже.
 
 
-\noindent Таблица 3.3 – Требования к полям формы\par\nopagebreak
+\noindent Таблица 3.2 – Требования к полям формы\par\nopagebreak
 \begin{longtable}{|>{\raggedright\arraybackslash}p{0.490\textwidth}|>{\raggedright\arraybackslash}p{0.490\textwidth}|}
 \hline
 Поле & Правило \\ \hline
@@ -455,7 +315,7 @@ consent & Только true \\ \hline
 Для каждого поля выделены допустимый и недопустимые классы; границы проверяются парами «последнее допустимое и первое недопустимое» значение (таблица ниже).
 
 
-\noindent Таблица 3.4 – Классы эквивалентности и граничные значения\par\nopagebreak
+\noindent Таблица 3.3 – Классы эквивалентности и граничные значения\par\nopagebreak
 \begin{longtable}{|>{\raggedright\arraybackslash}p{0.245\textwidth}|>{\raggedright\arraybackslash}p{0.245\textwidth}|>{\raggedright\arraybackslash}p{0.245\textwidth}|>{\raggedright\arraybackslash}p{0.245\textwidth}|}
 \hline
 Поле & Допустимые & Недопустимые & Границы \\ \hline
@@ -474,7 +334,7 @@ consent & true & false, отсутствует & — \\ \hline
 Разработано 22 тест-кейсов: позитивные, негативные и граничные. Идентификаторы в таблице сокращены: полный вид TC-WL-NNN. В столбце «Данные» указаны только поля, отличающиеся от базового корректного набора (name=Анна Иванова, email=anna@example.com, notation=idef0, team=5, comment пустой, consent=true). Общие предусловия: проект запущен, форма открыта, поля пусты. Постусловие: данные не сохраняются, состояние системы не меняется. Шаги общие: 1) подать набор данных на вход проверки формы; 2) получить список неверных полей. Ожидаемый результат указан в таблице.
 
 
-\noindent Таблица 3.5 – Тест-кейсы и результаты выполнения\par\nopagebreak
+\noindent Таблица 3.4 – Тест-кейсы и результаты выполнения\par\nopagebreak
 \begin{longtable}{|>{\raggedright\arraybackslash}p{0.163\textwidth}|>{\raggedright\arraybackslash}p{0.163\textwidth}|>{\raggedright\arraybackslash}p{0.163\textwidth}|>{\raggedright\arraybackslash}p{0.163\textwidth}|>{\raggedright\arraybackslash}p{0.163\textwidth}|>{\raggedright\arraybackslash}p{0.163\textwidth}|}
 \hline
 ID & Тип, приоритет & Заголовок & Данные & Ожидаемый & Фактический \\ \hline

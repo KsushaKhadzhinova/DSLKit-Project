@@ -4,6 +4,7 @@ from docx.shared import Cm, Pt, RGBColor
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.oxml.ns import qn
 from docx.oxml import OxmlElement
+from docx.enum.section import WD_ORIENT, WD_SECTION
 
 screens = Path(__file__).parent / "screens"
 GREEN, RED = "C6EFCE", "FFC7CE"
@@ -58,7 +59,7 @@ def table(d, head, rows, widths=None, status_col=None):
         for c in row.cells:
             for p in c.paragraphs:
                 for r in p.runs:
-                    r.font.size = Pt(12)
+                    r.font.size = Pt(14)
     d.add_paragraph()
     return t
 
@@ -71,7 +72,7 @@ def shot(d, name, caption, width=16):
     p.runs[0].italic = True
 
 
-def rich(par, text, size=12):
+def rich(par, text, size=14):
     import re
     for i, line in enumerate(text.split("\n")):
         if i:
@@ -96,25 +97,29 @@ def use_case(d, path):
         c = t.add_row().cells
         c[0].text = ""
         c[0].paragraphs[0].add_run(k).bold = True
-        c[0].paragraphs[0].runs[0].font.size = Pt(12)
+        c[0].paragraphs[0].runs[0].font.size = Pt(14)
         rich(c[1].paragraphs[0], v)
         c[0].width, c[1].width = Cm(4.2), Cm(13)
         shade(c[0], "F2F2F2")
     d.add_paragraph()
+    land = d.add_section(WD_SECTION.NEW_PAGE)
+    land.orientation = WD_ORIENT.LANDSCAPE
+    land.page_width, land.page_height = land.page_height, land.page_width
     d.add_heading("Структура данных заявки (сущность WaitlistEntry)", 2)
     db = json.loads((base / "db.json").read_text(encoding="utf8"))
-    db = [[r[0], f"{r[1]}, длина {r[2]}", f"{r[3]}; уникальность: {r[4]}", r[5], r[6], r[7], r[8]] for r in db]
-    table(d, ["Поле", "Тип и длина", "Обязательность, уникальность", "Маска, формат", "По умолч.", "Связь", "Правило"], db, [1.9, 2.4, 3.3, 3.6, 1.5, 3.0, 1.3])
-    d.add_paragraph("Хранилище: массив JSON в LocalStorage браузера, ключ dslkit.waitlist (префикс dslkit. задаёт createStorage). Первичного ключа и индексов нет, запись определяется позицией в массиве. Связь «заявка → нотация» N:1 со справочником NOTATIONS из шести значений (site/js/utils/validation.js). * — обязательное поле. Поле consent проверяется, но в запись не попадает.")
-    d.add_heading("Данные формы: типы и допустимые значения", 2)
-    fields = json.loads((base / "fields.json").read_text(encoding="utf8"))
-    table(d, ["Поле", "Тип данных", "Обяза-тельно", "По умолчанию", "Допустимые значения", "Недопустимые значения"], fields, [2.6, 2.6, 1.8, 2, 4.2, 4.2])
-    d.add_heading("Диаграммы процесса", 2)
-    for name, cap, w in (("flow", "Рис. A. Блок-схема сценария UC-01: основной поток и альтернативные потоки", 10),
-                         ("states", "Рис. B. Состояния поля формы при проверке", 16),
-                         ("components", "Рис. C. Компоненты и обмен данными при отправке заявки", 16)):
-        d.add_picture(str(base / "diagrams" / f"{name}.png"), width=Cm(w))
+    table(d, ["Поле", "Тип", "Длина", "Обязательно", "Уникально", "Маска, формат", "Связь"], db, [3.7, 3.3, 2.2, 3.3, 4.2, 5.8, 3.5])
+    d.add_paragraph("Хранилище: массив JSON в LocalStorage браузера, ключ dslkit.waitlist (префикс dslkit. задаёт createStorage). Первичного ключа нет. * — обязательное поле. Точные регулярные выражения: site/js/utils/validation.js.")
+    port = d.add_section(WD_SECTION.NEW_PAGE)
+    port.orientation = WD_ORIENT.PORTRAIT
+    port.page_width, port.page_height = port.page_height, port.page_width
+    d.add_heading("Диаграмма сценария", 2)
+    d.add_picture(str(base / "diagrams" / "flow.png"), width=Cm(8))
+    d.paragraphs[-1].alignment = WD_ALIGN_PARAGRAPH.CENTER
+    d.add_paragraph("Рис. A. Блок-схема UC-01").alignment = WD_ALIGN_PARAGRAPH.CENTER
+    d.add_heading("Скриншоты интерфейса", 2)
+    for name, cap, w in (("03-form-errors.png", "SCR-01. Форма: ошибки при пустой отправке", 9),
+                         ("04-form-filled.png", "SCR-02. Форма: заполнена корректными данными", 9),
+                         ("05-form-submitted.png", "SCR-03. Страница благодарности", 13)):
+        d.add_picture(str(base / "screens" / name), width=Cm(w))
         d.paragraphs[-1].alignment = WD_ALIGN_PARAGRAPH.CENTER
-        p = d.add_paragraph(cap)
-        p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-        p.runs[0].italic = True
+        d.add_paragraph(cap).alignment = WD_ALIGN_PARAGRAPH.CENTER

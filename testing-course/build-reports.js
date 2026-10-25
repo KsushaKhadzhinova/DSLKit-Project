@@ -22,7 +22,8 @@ const write = (lab, meta, sections) => {
   const dir = join(root, 'reports', lab);
   mkdirSync(join(dir, 'content'), { recursive: true });
   mkdirSync(join(dir, 'screenshots'), { recursive: true });
-  for (const n of ['flow', 'states', 'components']) copyFileSync(join(root, 'diagrams', `${n}.png`), join(dir, 'screenshots', `${n}.png`));
+  copyFileSync(join(root, 'diagrams', 'flow.png'), join(dir, 'screenshots', 'flow.png'));
+  for (const [n, f] of [['shot-errors', '03-form-errors'], ['shot-filled', '04-form-filled'], ['shot-thanks', '05-form-submitted']]) copyFileSync(join(root, 'screens', `${f}.png`), join(dir, 'screenshots', `${n}.png`));
   writeFileSync(join(dir, 'meta.yaml'), meta);
   sections.sort((a, b) => Number(b.startsWith('# ЦЕЛЬ')) - Number(a.startsWith('# ЦЕЛЬ')));
   sections.forEach((text, i) => writeFileSync(join(dir, 'content', `${String(i).padStart(2, '0')}.md`), text));
@@ -53,11 +54,11 @@ const useCase = JSON.parse(readFileSync(join(root, 'use-case.json'), 'utf8'))
 
 const fields = JSON.parse(readFileSync(join(root, 'fields.json'), 'utf8'));
 const fieldsMd = table('Данные формы: типы и допустимые значения', ['Поле', 'Тип', 'Обяз.', 'По умолч.', 'Допустимо', 'Недопустимо'], fields);
-const figs = [['flow', 'Блок-схема сценария UC-01'], ['states', 'Состояния поля формы при проверке'], ['components', 'Компоненты и обмен данными']];
+const figs = [['flow', 'Блок-схема сценария UC-01'], ['shot-errors', 'Форма: ошибки при пустой отправке'], ['shot-filled', 'Форма заполнена корректными данными'], ['shot-thanks', 'Страница благодарности']];
 const figsMd = figs.map(([n, c]) => `![${c}](screenshots/${n}.png)`).join('\n\n');
-const dbRows = JSON.parse(readFileSync(join(root, 'db.json'), 'utf8'));
-const dbMd = `${table('Структура данных заявки (сущность WaitlistEntry)', ['Поле', 'Тип, длина', 'Обязат., уникальность', 'Маска', 'По умолч.', 'Связь', 'Прав.'], dbRows.map((r) => [r[0], `${r[1].replace(/ \(.*\)/, '')}, ${r[2]}`, `${r[3].replace(/ \(.*\)/, '')}; ${r[4].split(/[ (;]/)[0] === 'Нет' ? 'не уникально' : r[4]}`, r[9], r[6], r[7].split(';')[0], r[8]]))}\nХранилище: массив JSON в LocalStorage, ключ dslkit.waitlist. Первичного ключа нет. Связь «заявка → нотация» N:1 со справочником из шести значений. Звёздочка у имени поля означает обязательное поле.\n`;
-const extras = `${dbMd}\n${fieldsMd}\n## Диаграммы процесса\n\n${figsMd}\n`;
+const dbRows = JSON.parse(readFileSync(join(root, 'db.json'), 'utf8')).map((r) => r.map((v) => String(v).replace(/\*/g, '\\*')));
+const dbMd = `${table('Структура данных заявки (сущность WaitlistEntry)', ['Поле', 'Тип', 'Длина', 'Обязат.', 'Уник.', 'Маска', 'Связь'], dbRows)}\nХранилище: массив JSON в LocalStorage, ключ dslkit.waitlist. Первичного ключа нет. Звёздочка означает обязательное поле.\n`;
+const extras =`${dbMd}\n## Диаграмма и скриншоты\n\n${figsMd}\n`;
 
 const passed2 = lab2.filter((r) => r.status === 'Passed').length;
 const kinds = { P: 'позитивный', N: 'негативный', B: 'граничный' };
