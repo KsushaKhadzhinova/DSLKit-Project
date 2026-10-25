@@ -19,16 +19,22 @@ BASE = {"name": "Анна Иванова", "email": "anna@example.com", "notatio
 GREEN, RED = "C6EFCE", "FFC7CE"
 
 
-def new_doc(title, subtitle):
+def new_doc(title, intro):
     d = Document()
     s = d.sections[0]
     s.left_margin = s.right_margin = Cm(1.8)
     s.top_margin = s.bottom_margin = Cm(1.8)
-    d.styles["Normal"].font.name = "Calibri"
-    d.styles["Normal"].font.size = Pt(10.5)
-    d.add_heading(title, 0)
-    p = d.add_paragraph(subtitle)
-    p.runs[0].font.color.rgb = RGBColor(0x55, 0x55, 0x55)
+    for name, size in (("Normal", 14), ("Heading 1", 16), ("Heading 2", 15), ("Heading 3", 14)):
+        st = d.styles[name]
+        st.font.name = "Times New Roman"
+        st.font.size = Pt(size)
+        st.font.color.rgb = RGBColor(0, 0, 0)
+        st.element.rPr.rFonts.set(qn("w:eastAsia"), "Times New Roman")
+        for attr in ("w:asciiTheme", "w:hAnsiTheme", "w:eastAsiaTheme", "w:cstheme"):
+            st.element.rPr.rFonts.attrib.pop(qn(attr), None)
+        if name != "Normal":
+            st.font.bold = True
+    d.add_paragraph(intro)
     return d
 
 
@@ -62,7 +68,7 @@ def table(d, head, rows, widths=None, status_col=None):
         for c in row.cells:
             for p in c.paragraphs:
                 for r in p.runs:
-                    r.font.size = Pt(9)
+                    r.font.size = Pt(12)
     d.add_paragraph()
     return t
 
@@ -85,7 +91,7 @@ def diff(data):
 
 
 # ---------- Document 1: test cases ----------
-d = new_doc("Тест-кейсы: форма заявки DSLKit", "Лабораторная работа №2. Объект: форма «Записаться в бету» на главной странице, проверка validateWaitlist (site/js/utils/validation.js).")
+d = new_doc("", "Лабораторная работа №2 «Разработка тест-кейсов». В документе разработаны и выполнены тест-кейсы для формы заявки «Записаться в бету» на главной странице проекта DSLKit (проверка функции validateWaitlist): позитивные, негативные и граничные случаи с результатами выполнения и скриншотами.")
 d.add_heading("1. Область и подход", 1)
 d.add_paragraph(
     "Use case: пользователь оставляет заявку в листе ожидания. Поля: имя (2–60 букв, пробел, дефис, апостроф), email (формат, до 120 символов), "
@@ -136,7 +142,7 @@ d.save(out / "01-test-cases.docx")
 # ---------- Document 2: checklists + test report ----------
 m = lab3["metrics"]
 allc = lab3["smoke"] + lab3["critical"]
-d = new_doc("Чек-листы и отчёт о тестировании: DSLKit", "Лабораторная работа №3. Дымовой и критический чек-листы, отчёт о тестировании (Test Report).")
+d = new_doc("", "Лабораторная работа №3 «Разработка чек-листов и отчёта о тестировании». В документе составлены дымовой чек-лист и чек-лист критического пути для проекта DSLKit, показаны результаты их выполнения и оформлен отчёт о тестировании (Test Report) с метриками, покрытием требований и скриншотами.")
 d.add_heading("1. Требования и модули", 1)
 reqs = [("R1", "Доступность страниц"), ("R2", "Загрузка стилей и скриптов"), ("R3", "Разбор DSL, преобразование в DOT и Mermaid"),
         ("R4", "Форма заявки и валидация"), ("R5", "Ошибки сервера: 404, 405, обход каталогов"), ("R6", "Разметка и локализация"),
