@@ -15,6 +15,8 @@
 
 | `documents/` | Отдельные документы без оформления по СТП: `01-test-cases` (тест-кейсы по шаблону) и `02-checklists-and-test-report` (чек-листы и отчёт о тестировании), DOCX и PDF |
 | `screenshots.py`, `screens/` | Скриншоты тестирования сайта в Edge (Playwright) и вывода консоли |
+| `lab1/` | Лаба 1: `dynamic.py` проверяет Use Case в браузере, `build-doc.py` собирает документ `documents/03-lab1-…` |
+| `docx_kit.py` | Общие функции оформления DOCX |
 | `build-docs.py` | Собирает документы из `results.json` и `screens/` (python-docx) |
 
 ## Как запустить

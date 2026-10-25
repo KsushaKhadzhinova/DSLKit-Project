@@ -1,0 +1,31 @@
+{
+  "main": {
+    "url": "/thanks.html",
+    "count": 1,
+    "name": "Анна Иванова",
+    "fields": [
+      "comment",
+      "createdAt",
+      "email",
+      "name",
+      "notation",
+      "team"
+    ]
+  },
+  "empty": {
+    "url": "/",
+    "visible_errors": 4,
+    "focus": "name",
+    "records": 1
+  },
+  "fix_name": {
+    "name_error_visible": false
+  },
+  "duplicate": {
+    "count": 2
+  },
+  "storage_failure": {
+    "url": "/thanks.html",
+    "count": 0
+  }
+}
