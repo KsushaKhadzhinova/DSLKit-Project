@@ -48,7 +48,7 @@ The Part 2 works live in their own branches (`lab21`, `lab12`, `23`, `24`, `25`,
 
 **Course project:** the note is updated (PostgreSQL, test numbers 136 and 100, access dates, a hook fragment, demo data), defence cards and a five-sheet cheat sheet are ready (`course-project/defence-cards.md`, `cheat-sheet.md`).
 
-**Brand:** two marks are chosen (see [`design-contest/logos/README.md`](design-contest/logos/README.md)): the "smiling block" is the site logo and favicon, the "cursor drags a block" is the editor logo. The PWA icons are rebuilt (`tools/make-icons.mjs`).
+**Brand:** the site logo and favicon are the "smiling block", the editor logo is the "cursor drags a block" (see [`design-contest/logos/README.md`](design-contest/logos/README.md)). On 24 October a pinwheel (indigo with amber) was tried, then the blue mark came back: commit `758ee55`. The loader is a blue ring again. The cat mascot stays on the error pages and in the empty project list (`site/images/mascot.svg`). PWA icons are rebuilt with `tools/make-icons.mjs`. Variants and surveys are in `design-contest/logos/` (`final-v2` … `final-v7`, `survey`, `test-round-*`); the plan for testing the mark on a metric is `AB-TEST-PLAN.md`.
 
 **Figma:** all 432 mockups are in the file "DSLKit editor mockups" (the owner's drafts): [link](https://www.figma.com/design/75BRJFWfvp6VGatVKIqFoV/DSLKit-editor-mockups). The six new notations and the frames of the new features (`design-contest/editor-features`) are not in Figma.
 
@@ -58,7 +58,7 @@ The Part 2 works live in their own branches (`lab21`, `lab12`, `23`, `24`, `25`,
 
 - Postman screenshots (labs 1–3, practical 2) and database structure screenshots from PostgreSQL; Atlas for lab 6; Docker Hub images for lab 8.
 - A check in Firefox and Edge; installing the PWA in a real Chrome (the service worker cannot register in the app pane).
-- Questions to the teacher: React Router 7 instead of 6 in practical 3 (two variants are in the repository), an admin screen, the rest in [`study/33-QUESTIONS.en.md`](study/33-QUESTIONS.en.md).
+- React Router 7 in practical 3 is approved by the owner (settled, v7 stays). Questions to the teacher: an admin screen, the rest in [`study/33-QUESTIONS.en.md`](study/33-QUESTIONS.en.md).
 - The course project in Word: title page, assignment, table of contents, 1–2 books and articles in the sources, final screenshots of the screens.
 - Decisions on the course project: a fourth entity "Comment" (the assignment asks for 4–6, there are three), React Router in the client, an admin screen, cloud deployment.
 - Merging the branches into `main` and cleaning the history of AI traces with a force push. Do not do it without her "yes".

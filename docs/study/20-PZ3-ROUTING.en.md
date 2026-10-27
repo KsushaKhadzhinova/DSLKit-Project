@@ -100,7 +100,7 @@ The assignment has 30 questions; for variant 26 these are 25–27 (n−1, n, n+1
 - **How to pass `state` without showing it in the address.** `navigate(path, { state })` or `<Navigate state>`, read with `useLocation().state`.
 - **How to host the app not at the server root (20).** Pass `basename` to the router; not used in the work (`basename` is not set).
 - **How to warn about unsaved data on leaving (29).** `useBlocker` works only in a data router (`createBrowserRouter`); the work uses `BrowserRouter`, so this is not implemented.
-- **Version.** The assignment names React Router v6, the work has v7 (`react-router-dom` 7.x) with the same API for these tasks; the version is recorded as a question for the teacher.
+- **Version.** The assignment names React Router v6, the work has v7 (`react-router-dom` 7.x) with the same API for these tasks; the owner decided to keep v7.
 
 ## 6 Write it live: rehearsal
 

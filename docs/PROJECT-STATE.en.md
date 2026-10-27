@@ -78,7 +78,7 @@ Details are in the guides [`study/10`–`study/21`](study/), overviews in [`stud
 
 ## 5 Decisions taken
 
-- The site logo and favicon: the "smiling block", the editor logo: the "cursor drags a block" (`design-contest/logos/README.md`). The galleries of variants live outside `site/`.
+- The site logo and favicon: the "smiling block", the editor logo: the "cursor drags a block" (`design-contest/logos/README.md`). A pinwheel was tried on 24 October and rejected, the blue mark stays; the cat mascot is on the error pages and in the empty project list, the loader is a blue ring. The galleries of variants live outside `site/`.
 - The place of a block moved with the mouse is stored in the code as `pos=XxY` (one source of truth).
 - The service worker does not cache foreign addresses (Kroki).
 - On a rendering service error the canvas hides the old drawing and keeps a message and a retry button.
@@ -131,7 +131,7 @@ The shooting scripts take `puppeteer-core` from `part-2/lab-07-websocket` and Ch
 - Checking lab 5 against the real lab 3 server.
 - Part 1: Firefox and Edge, screenshots (`notes/12-owner-screenshots.md`), the Rich Results Test, checking the PWA in a real Chrome. The mockups are already in Figma ("DSLKit editor mockups").
 - Course project: the title page, assignment and contents in Word, agreeing the topic, cloud deployment, current screenshots, access dates of the sources.
-- Questions for the teacher: lab 1 data in a database or an array, React Router 6 or 7 in P3, showing the 500 page in client-only works, SQLite or PostgreSQL, whether screenshots of every endpoint are needed.
+- Questions for the teacher: lab 1 data in a database or an array, showing the 500 page in client-only works, SQLite or PostgreSQL, whether screenshots of every endpoint are needed.
 - The decision to merge the branches into `main`.
 
 ### Can continue without the owner
