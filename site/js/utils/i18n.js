@@ -11,7 +11,7 @@ const RULES = [
   [/^Загрузка диаграммы…$/, 'Loading the diagram…'],
   [/^Диаграмма построена собственным движком в браузере\.$/, 'The diagram is built by the own engine in the browser.'],
   [/^Показана сохранённая копия от (.+)\.$/, 'Showing the saved copy from $1.'],
-  [/^Диаграмма получена от сервиса Kroki \((.+)\)\.$/, 'The diagram came from the Kroki service ($1).'],
+  [/^Диаграмма готова\.$/, 'The diagram is ready.'],
   [/^Кэшированные данные от (\S+ \S+)\. (.+)$/, 'Cached data from $1. $2'],
   [/^(.+?) Сохранённой копии этой диаграммы нет\.$/, '$1 There is no saved copy of this diagram.'],
   [/^Сохранённая копия этой диаграммы уже удалена из кэша\.$/, 'The saved copy of this diagram has already been removed from the cache.'],

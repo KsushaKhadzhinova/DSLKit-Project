@@ -24,15 +24,15 @@ arrow A0 -> Missing`;
 
 const model = () => parseDsl(SAMPLE);
 
-test('the registry lists three Kroki engines and the own engine and falls back to the first', () => {
+test('the registry lists three Kroki engines and the own engine and falls back to the own engine', () => {
   assert.deepEqual(
     ENGINES.map((engine) => engine.id),
     ['graphviz', 'mermaid', 'plantuml', 'local'],
   );
   assert.equal(findEngine('local').type, null);
   assert.equal(findEngine('mermaid').type, 'mermaid');
-  assert.equal(findEngine('nonsense').id, 'graphviz');
-  assert.equal(findEngine(undefined).id, 'graphviz');
+  assert.equal(findEngine('nonsense').id, 'local');
+  assert.equal(findEngine(undefined).id, 'local');
 });
 
 test('toMermaid builds a flowchart with numbered nodes, details and labelled arrows', () => {

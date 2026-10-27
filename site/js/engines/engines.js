@@ -19,7 +19,9 @@ export const ENGINES = [
   { id: 'local', label: 'Собственный движок (в браузере)', type: null, action: 'Нарисовать в браузере', build: renderLocal },
 ];
 
-export const findEngine = (id) => ENGINES.find((engine) => engine.id === id) ?? ENGINES[0];
+// The default is the engine of the browser: it needs no network, the Kroki engines stay as a choice on the settings page.
+export const DEFAULT_ENGINE_ID = 'local';
+export const findEngine = (id) => ENGINES.find((engine) => engine.id === id) ?? ENGINES.find((engine) => engine.id === DEFAULT_ENGINE_ID);
 
 // An engine that speaks the given Kroki format, used when the chosen one cannot draw a notation.
 export const engineForFormat = (format) => ENGINES.find((engine) => engine.type === format);

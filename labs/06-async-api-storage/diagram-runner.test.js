@@ -14,7 +14,14 @@ const run = (window) => window.document.querySelector('.app-page--editor').dispa
 const flush = () => new Promise((resolve) => setTimeout(resolve, 0));
 const click = (window, element) => element.dispatchEvent(new window.MouseEvent('click', { bubbles: true }));
 
-const setup = ({ api = {}, storage = memory(), online = true, time = 1_700_000_000_000, autoRun = false } = {}) => {
+// Most tests are about the Kroki path, so the default engine of the tests is Graphviz; the real default (own engine) has its own test.
+const kroki = () => {
+  const storage = memory();
+  storage.set('settings', { 'diagram-engine': 'graphviz' });
+  return storage;
+};
+
+const setup = ({ api = {}, storage = kroki(), online = true, time = 1_700_000_000_000, autoRun = false } = {}) => {
   const window = new JSDOM(html, { url: 'http://localhost/' }).window;
   const logger = { error: mock.fn() };
   const fullApi = {
@@ -37,7 +44,7 @@ test('a page without the status line returns null', () => {
 test('the service status shows that Kroki is reachable or not', async () => {
   const good = setup();
   await flush();
-  assert.equal(good.$('.canvas__service').textContent, 'Сервис Kroki доступен');
+  assert.equal(good.$('.canvas__service').textContent, '');
   const bad = setup({
     api: {
       checkHealth: async () => {
@@ -60,7 +67,7 @@ test('a run sends DOT built from the editor code and shows a sanitized SVG', asy
   assert.equal($('.canvas__remote svg').getAttribute('role'), 'img');
   assert.equal($('.canvas__remote script'), null);
   assert.equal($('.canvas__diagram').hasAttribute('hidden'), true);
-  assert.match($('.canvas__status').textContent, /получена от сервиса Kroki/);
+  assert.match($('.canvas__status').textContent, /Диаграмма готова/);
   assert.equal($('.canvas').getAttribute('aria-busy'), 'false');
   assert.equal(document.querySelectorAll('.canvas__history-item').length, 1);
   assert.match($('.canvas__history-item').textContent, /Order process · 2023-11-14 22:13/);
@@ -155,7 +162,7 @@ test('offline without a saved copy shows the offline message and sends nothing',
 });
 
 test('offline with a saved copy shows it labelled as cached data', async () => {
-  const storage = memory();
+  const storage = kroki();
   const first = setup({ storage });
   run(first.window);
   await flush();
@@ -167,7 +174,7 @@ test('offline with a saved copy shows it labelled as cached data', async () => {
 });
 
 test('a server failure with an expired copy still shows the old copy as cached data', async () => {
-  const storage = memory();
+  const storage = kroki();
   const first = setup({ storage });
   run(first.window);
   await flush();
@@ -220,7 +227,7 @@ test('a failure removes the drawing of the earlier run instead of leaving it nex
 });
 
 test('a cached copy that cannot be shown falls through to a new request', async () => {
-  const storage = memory();
+  const storage = kroki();
   const first = setup({ storage });
   run(first.window);
   await flush();
@@ -305,7 +312,7 @@ test('the runner works on a page without the optional elements', async () => {
 test('the default api and clock are used when none are passed', async () => {
   const fetchMock = mock.method(globalThis, 'fetch', async () => ({ ok: true, status: 200, json: async () => ({}), text: async () => '' }));
   const window = new JSDOM(html, { url: 'http://localhost/' }).window;
-  const runner = initDiagramRunner({ root: window.document, storage: memory(), isOnline: () => false, autoRun: false });
+  const runner = initDiagramRunner({ root: window.document, storage: kroki(), isOnline: () => false, autoRun: false });
   assert.equal(await runner.run(), false);
   await flush();
   fetchMock.mock.restore();
@@ -315,7 +322,7 @@ test('the default online check reads navigator.onLine', async () => {
   const window = new JSDOM(html, { url: 'http://localhost/' }).window;
   const runner = initDiagramRunner({
     root: window.document,
-    storage: memory(),
+    storage: kroki(),
     api: { renderDiagram: async () => SVG, checkHealth: async () => ({}) },
     autoRun: false,
   });
@@ -327,7 +334,7 @@ test('the default logger is console', async () => {
   const error = mock.method(console, 'error', () => {});
   const runner = initDiagramRunner({
     root: window.document,
-    storage: memory(),
+    storage: kroki(),
     isOnline: () => false,
     api: { renderDiagram: async () => SVG, checkHealth: async () => ({}) },
     autoRun: false,
@@ -366,11 +373,11 @@ test('each Kroki engine sends its own text type to its own endpoint', async () =
 test('the footer names the engine that will draw the diagram', async () => {
   const storage = memory();
   const { window, $ } = setup({ storage });
-  assert.equal($('.editor-status__engine').textContent, 'Движок: Kroki · Graphviz');
-  useEngine(storage, 'local');
+  assert.equal($('.editor-status__engine').textContent, 'Собственный движок (в браузере)');
+  useEngine(storage, 'graphviz');
   run(window);
   await flush();
-  assert.equal($('.editor-status__engine').textContent, 'Движок: Собственный движок (в браузере)');
+  assert.equal($('.editor-status__engine').textContent, 'Kroki · Graphviz');
 });
 
 test('the own engine draws live SVG in the browser without any request, even offline', async () => {
@@ -380,7 +387,8 @@ test('the own engine draws live SVG in the browser without any request, even off
   run(window);
   await flush();
   assert.equal(api.renderDiagram.mock.callCount(), 0);
-  assert.match($('.canvas__status').textContent, /собственным движком/);
+  assert.equal($('.canvas__status').textContent, 'Диаграмма готова.');
+  assert.doesNotMatch($('.canvas__status').textContent, /Kroki/);
   assert.equal($('.canvas__remote').hidden, false);
   assert.equal(document.querySelectorAll('.canvas__remote .local-engine__box').length, 2);
   assert.match($('.canvas__remote svg').getAttribute('aria-label'), /Собственный движок/);
@@ -398,14 +406,15 @@ test('the engine is read from the settings on every run', async () => {
   assert.equal(api.renderDiagram.mock.calls[1].arguments[1].type, 'mermaid');
 });
 
-test('an unknown or broken engine setting falls back to Graphviz', async () => {
+test('an unknown or broken engine setting falls back to the own engine', async () => {
   for (const saved of [{ 'diagram-engine': 'nonsense' }, 'broken', null]) {
     const storage = memory();
     storage.set('settings', saved);
     const { window, api, $ } = setup({ storage });
     run(window);
     await flush();
-    assert.equal(api.renderDiagram.mock.calls[0].arguments[1].type, 'graphviz');
+    assert.equal(api.renderDiagram.mock.calls.length, 0);
+    assert.equal($('.canvas__remote').dataset.engine, 'local');
   }
 });
 
@@ -429,7 +438,7 @@ test('a history item whose cached copy is gone says so', async () => {
 });
 
 test('a response that arrives after a newer cached view is dropped', async () => {
-  const storage = memory();
+  const storage = kroki();
   const first = setup({ storage });
   run(first.window);
   await flush();

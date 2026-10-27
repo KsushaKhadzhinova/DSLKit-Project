@@ -74,7 +74,7 @@ export const initDiagramRunner = ({
 
   // The engine is chosen on the settings page; the footer of the editor only names the one that will draw.
   const showAction = () => {
-    if (engineLabel) engineLabel.textContent = tr(`Движок: ${tr(currentEngine().label)}`);
+    if (engineLabel) engineLabel.textContent = tr(currentEngine().label);
   };
 
   const show = (svgText, note, engine = currentEngine()) => {
@@ -128,7 +128,7 @@ export const initDiagramRunner = ({
     // The own engine draws in the browser: no request, no cache, and it works offline.
     if (!engine.type) {
       setBusy(false);
-      const drawn = show(input, 'Диаграмма построена собственным движком в браузере.', engine);
+      const drawn = show(input, 'Диаграмма готова.', engine);
       if (!drawn) status.textContent = ui('drawFailed', {}, lang);
       return drawn;
     }
@@ -151,7 +151,7 @@ ${input}`);
       if (!isOnline()) throw Object.assign(new Error('offline'), { kind: 'offline' });
       const svgText = await api.renderDiagram(input, { signal, type: engine.type });
       if (signal.aborted) throw Object.assign(new Error('cancelled'), { kind: 'aborted' });
-      if (!show(svgText, `Диаграмма получена от сервиса Kroki (${engine.type}).`, engine)) throw Object.assign(new Error('invalid'), { kind: 'invalid' });
+      if (!show(svgText, 'Диаграмма готова.', engine)) throw Object.assign(new Error('invalid'), { kind: 'invalid' });
       status.textContent += fallback;
       cache.set(key, svgText);
       history.add({ key, title: model.title, at: now() });
@@ -191,7 +191,7 @@ ${input}`);
     Promise.resolve()
       .then(() => api.checkHealth())
       .then(() => {
-        service.textContent = tr('Сервис Kroki доступен');
+        service.textContent = '';
       })
       .catch(() => {
         service.textContent = tr('Сервис Kroki недоступен, будут использованы сохранённые копии');

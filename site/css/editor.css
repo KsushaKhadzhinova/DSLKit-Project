@@ -1346,3 +1346,103 @@
 .problems--open {
   outline: 2px solid var(--color-error);
 }
+
+/* Drawer of the activity bar (search, Git, assistant) and the extra tabs under the code */
+.editor-tools {
+  position: fixed;
+  z-index: 30;
+  inset-block: var(--toolbar-height) var(--status-height);
+  inset-inline-start: var(--activity-width);
+  inline-size: min(22rem, calc(100vw - var(--activity-width)));
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-2);
+  overflow: auto;
+  background: var(--color-surface);
+  color: var(--color-text);
+  border-inline-end: 1px solid var(--color-border);
+  box-shadow: var(--shadow-large);
+}
+.editor-tools[hidden],
+.editor-tools [hidden],
+.problems__extra[hidden] {
+  display: none;
+}
+.editor-tools__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.editor-tools__heading {
+  margin: 0;
+  font-size: 1rem;
+}
+.editor-tools__view {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+.editor-tools__input {
+  padding: 0.5rem 0.75rem;
+  font: inherit;
+  color: inherit;
+  background: var(--color-background);
+  border: 1px solid var(--color-border-strong);
+  border-radius: 6px;
+}
+.editor-tools__list,
+.editor-tools__chat {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+.editor-tools__hit {
+  inline-size: 100%;
+  text-align: start;
+  justify-content: flex-start;
+}
+.editor-tools__commit {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 0.25rem 0.5rem;
+  align-items: center;
+  padding-block: 0.25rem;
+  border-block-end: 1px solid var(--color-border);
+}
+.editor-tools__commit-time {
+  grid-column: 1;
+  color: var(--color-muted);
+  font-size: 0.8125rem;
+}
+.editor-tools__diff {
+  max-block-size: 14rem;
+  margin: 0;
+  padding: 0.5rem;
+  overflow: auto;
+  font: 0.8125rem/1.4 var(--font-mono);
+  background: var(--color-code-background);
+  color: var(--color-code-text);
+  border-radius: 6px;
+}
+.editor-tools__message--user {
+  color: var(--color-primary-text);
+}
+.editor-tools__status,
+.editor-tools__summary,
+.editor-tools__empty {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 0.875rem;
+}
+.problems__extra {
+  padding: var(--space-1) var(--space-2);
+  overflow: auto;
+}
+.code__line--found {
+  outline: 2px solid var(--color-primary);
+  outline-offset: -2px;
+}

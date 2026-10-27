@@ -180,17 +180,6 @@ test('without the explorer the menu buttons do nothing', () => {
   assert.equal(document.querySelector('.editor-sidebar'), null);
 });
 
-test('sections that do not exist yet say so and keep the state', () => {
-  const { document, press, note } = setup();
-  press('[data-panel="search"]');
-  assert.equal(note(), 'Раздел «Поиск» появится позже.');
-  assert.equal(document.querySelector('[data-panel="search"]').getAttribute('aria-pressed'), 'false');
-  press('[data-problems-tab="output"]');
-  assert.equal(note(), 'Раздел «Вывод» появится позже.');
-  press('[data-problems-tab="problems"]');
-  assert.equal(note(), 'Раздел «Вывод» появится позже.');
-});
-
 test('the explorer opens a file as a tab and tells about a file without a tab', () => {
   const { document, press, note } = setup();
   press('[data-file="rules"]');

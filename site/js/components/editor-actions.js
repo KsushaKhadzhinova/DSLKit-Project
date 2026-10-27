@@ -20,7 +20,6 @@ const TEXTS = {
   redone: { ru: 'Изменение возвращено.', en: 'Change redone.' },
   nothingUndo: { ru: 'Отменять нечего.', en: 'Nothing to undo.' },
   nothingRedo: { ru: 'Возвращать нечего.', en: 'Nothing to redo.' },
-  soon: { ru: 'Раздел «{name}» появится позже.', en: 'The section "{name}" is coming later.' },
   noFile: { ru: 'Файл {name} пока нельзя открыть.', en: 'The file {name} cannot be opened yet.' },
 };
 
@@ -155,19 +154,11 @@ export const initEditorActions = ({ root = document, storage, clipboard = root.d
     }
   });
 
-  // The activity bar: Files opens the explorer, the sections that do not exist yet say so and keep the state.
-  const label = (button) => button.getAttribute('aria-label');
-  page.querySelectorAll('[data-panel]').forEach((button) =>
+  // The activity bar: Files opens the explorer, search, Git and the assistant are in editor-tools.js.
+  page.querySelectorAll('[data-panel="files"]').forEach((button) =>
     button.addEventListener('click', () => {
-      if (button.dataset.panel === 'files') {
-        const open = toggleSidebar();
-        button.setAttribute('aria-pressed', String(open));
-      } else say('soon', { name: label(button) });
-    }),
-  );
-  page.querySelectorAll('[data-problems-tab]').forEach((button) =>
-    button.addEventListener('click', () => {
-      if (button.dataset.problemsTab !== 'problems') say('soon', { name: label(button) });
+      const open = toggleSidebar();
+      button.setAttribute('aria-pressed', String(open));
     }),
   );
 
