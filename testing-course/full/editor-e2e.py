@@ -148,9 +148,7 @@ with sync_playwright() as p:
         ctx.grant_permissions(["clipboard-read", "clipboard-write"], origin=base)
         page.locator('[data-action="share"]').first.evaluate("e => e.click()")
         page.wait_for_timeout(300)
-        eq(page.evaluate("navigator.clipboard.readText()").replace("
-", "
-"), code())
+        eq(page.evaluate("navigator.clipboard.readText()").replace("\r\n", "\n"), code())
 
     check("E2E-15", "«Поделиться» копирует код и сообщает результат", share)
 

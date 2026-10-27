@@ -102,8 +102,8 @@
       "id": "E2E-15",
       "kind": "e2e",
       "title": "«Поделиться» копирует код и сообщает результат",
-      "status": "Failed",
-      "note": " ожидалось 'diagram erd \"Shop\"\\nentity Customer {\\n  id: int pk\\n  email: string unique\\n}\\nentity Order {\\n  id: int pk\\n  customer_id: int fk -> Customer\\n  total: decimal\\n}\\nentity Product {\\n  id: int pk\\n  name: string\\n}\\nrelationship Customer 1:N Order \"places\"\\nrelationship Order N:M Product \"contains\"', получено 'diagram erd \"Shop\"\\r\\nentity Customer {\\r\\n  id: int pk\\r\\n  email: string unique\\r\\n}\\r\\nentity Order {\\r\\n  id: int pk\\r\\n  customer_id: int fk -> Customer\\r\\n  total: decimal\\r\\n}\\r\\nentity Product {\\r\\n  id: int pk\\r\\n  name: string\\r\\n}\\r\\nrelationship Customer 1:N Order \"places\"\\r\\nrelationship Order N:M Product \"contains\"'"
+      "status": "Passed",
+      "note": ""
     },
     {
       "id": "E2E-16",

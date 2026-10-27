@@ -24,6 +24,7 @@
     "react:test": "npm --prefix react-app test",
     "tc:lab2": "node testing-course/lab2/run.js",
     "tc:lab3": "node testing-course/lab3/run.js",
+    "tc:full": "node testing-course/full/static-sec-perf.js && python testing-course/full/editor-e2e.py && python testing-course/full/build-md.py",
     "tc:reports": "node testing-course/lab3/run.js && node testing-course/build-reports.js",
     "design:build": "node tools/build-design.js"
   },
