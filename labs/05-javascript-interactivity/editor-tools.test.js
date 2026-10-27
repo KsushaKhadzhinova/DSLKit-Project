@@ -316,3 +316,27 @@ test('the panels work without the status branch, the problems panel and the acti
   window.document.querySelector('.app-page--editor').dispatchEvent(new window.CustomEvent('dslkit:run', { bubbles: true }));
   await tick();
 });
+
+test('the notation button of the menu opens the explorer and focuses the notation choice', () => {
+  const { $, press, document } = setup();
+  press('[data-notation-label]');
+  assert.ok($('.editor-sidebar').classList.contains('editor-sidebar--open'));
+  assert.equal(document.activeElement, $('[data-notation-select]'));
+});
+
+test('the notation button works on a page without the explorer', () => {
+  const window = new JSDOM(
+    '<!doctype html><html lang="ru"><body><div class="app-page app-page--editor"><button data-notation-label>x</button><ol class="code__lines"><li class="code__line"><code>diagram idef0</code></li></ol></div></body></html>',
+  ).window;
+  initEditorTools({ root: window.document, storage: memory() });
+  window.document.querySelector('[data-notation-label]').click();
+});
+
+test('opening the explorer from the activity bar closes the drawer', () => {
+  const { $, press } = setup();
+  press('[data-panel="git"]');
+  assert.equal($('.editor-tools').hidden, false);
+  press('[data-panel="files"]');
+  assert.equal($('.editor-tools').hidden, true);
+  assert.equal($('[data-panel="git"]').getAttribute('aria-pressed'), 'false');
+});

@@ -272,6 +272,8 @@ export const initEditorTools = ({ root = document, storage, now = () => Date.now
   };
   buttons.forEach((node) => node.addEventListener('click', () => open(current === node.dataset.panel ? null : node.dataset.panel)));
   closeButton.addEventListener('click', () => open(null));
+  // The explorer takes the same place as the drawer, so opening it closes the drawer.
+  page.querySelectorAll('[data-panel="files"]').forEach((node) => node.addEventListener('click', () => open(null)));
   drawer.addEventListener('keydown', (event) => {
     if (event.key === 'Escape') open(null);
   });
@@ -330,6 +332,14 @@ export const initEditorTools = ({ root = document, storage, now = () => Date.now
     open('ai');
     ask(t('fixPrompt'));
   });
+
+  // The notation button of the menu leads to the list of notations: the explorer opens and the choice gets the focus.
+  page.querySelectorAll('[data-notation-label]').forEach((node) =>
+    node.addEventListener('click', () => {
+      page.querySelector('.editor-sidebar')?.classList.add('editor-sidebar--open');
+      page.querySelector('[data-notation-select]')?.focus();
+    }),
+  );
 
   renderLog();
   return { open, selectTab, commit, ask, commits: () => commits, current: () => current };

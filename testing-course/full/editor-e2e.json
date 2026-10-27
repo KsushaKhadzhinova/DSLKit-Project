@@ -1,0 +1,152 @@
+{
+  "results": [
+    {
+      "id": "E2E-01",
+      "kind": "e2e",
+      "title": "Страница редактора открывается без ошибок в консоли",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "E2E-02",
+      "kind": "e2e",
+      "title": "Движок по умолчанию: собственный, в нижней панели просто его название",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "E2E-03",
+      "kind": "e2e",
+      "title": "На доске нет подписи про Kroki",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "E2E-04",
+      "kind": "e2e",
+      "title": "Диаграмма нарисована в браузере (SVG на доске)",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "E2E-05",
+      "kind": "e2e",
+      "title": "В примере есть ошибки, кнопка «Запустить» неактивна (aria-disabled)",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "E2E-06",
+      "kind": "e2e",
+      "title": "Кнопка «Поиск» открывает панель поиска",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "E2E-07",
+      "kind": "e2e",
+      "title": "Поиск находит, подсвечивает строку и заменяет всё; отмена возвращает",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "E2E-08",
+      "kind": "e2e",
+      "title": "Git: коммит, повторный коммит без изменений, шаблон меняет код, diff, возврат",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "E2E-09",
+      "kind": "e2e",
+      "title": "Вкладки «Версии» и «Вывод» показывают коммиты и журнал запусков",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "E2E-10",
+      "kind": "e2e",
+      "title": "AI-помощник исправляет опечатку в коде по запросу (Enter)",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "E2E-11",
+      "kind": "e2e",
+      "title": "Кнопка «Объяснить диаграмму» отвечает",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "E2E-12",
+      "kind": "e2e",
+      "title": "Помощник создаёт ERD по просьбе «создай erd»",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "E2E-13",
+      "kind": "e2e",
+      "title": "После шаблона ошибок нет, «Запустить» активна и рисует диаграмму",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "E2E-14",
+      "kind": "e2e",
+      "title": "Кнопки панели: отмена, возврат, формат, раскладка, проверка, масштаб, сохранить, меню, тема",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "E2E-15",
+      "kind": "e2e",
+      "title": "«Поделиться» копирует код и сообщает результат",
+      "status": "Failed",
+      "note": " ожидалось 'diagram erd \"Shop\"\\nentity Customer {\\n  id: int pk\\n  email: string unique\\n}\\nentity Order {\\n  id: int pk\\n  customer_id: int fk -> Customer\\n  total: decimal\\n}\\nentity Product {\\n  id: int pk\\n  name: string\\n}\\nrelationship Customer 1:N Order \"places\"\\nrelationship Order N:M Product \"contains\"', получено 'diagram erd \"Shop\"\\r\\nentity Customer {\\r\\n  id: int pk\\r\\n  email: string unique\\r\\n}\\r\\nentity Order {\\r\\n  id: int pk\\r\\n  customer_id: int fk -> Customer\\r\\n  total: decimal\\r\\n}\\r\\nentity Product {\\r\\n  id: int pk\\r\\n  name: string\\r\\n}\\r\\nrelationship Customer 1:N Order \"places\"\\r\\nrelationship Order N:M Product \"contains\"'"
+    },
+    {
+      "id": "E2E-16",
+      "kind": "e2e",
+      "title": "Три кнопки шаблонов подставляют код",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "E2E-17",
+      "kind": "e2e",
+      "title": "Вкладки файлов переключаются",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "E2E-18",
+      "kind": "e2e",
+      "title": "Кнопка «Экспорт SVG» не вызывает ошибок",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "E2E-19",
+      "kind": "e2e",
+      "title": "Нет видимых кнопок редактора без назначенного действия",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "E2E-20",
+      "kind": "e2e",
+      "title": "Мобильный вид: нижняя навигация работает, нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "E2E-21",
+      "kind": "e2e",
+      "title": "Английская версия: движок назван без слова Kroki, панель поиска открывается",
+      "status": "Passed",
+      "note": ""
+    }
+  ],
+  "console_errors": []
+}

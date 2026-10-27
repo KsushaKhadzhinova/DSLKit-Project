@@ -1,0 +1,309 @@
+{
+  "results": [
+    {
+      "id": "ST-01",
+      "kind": "static",
+      "title": "У каждой HTML-страницы есть непустой title",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ST-02",
+      "kind": "static",
+      "title": "У каждой страницы задан lang",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ST-03",
+      "kind": "static",
+      "title": "У каждой страницы есть meta viewport",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ST-04",
+      "kind": "static",
+      "title": "На каждой странице ровно один h1",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ST-05",
+      "kind": "static",
+      "title": "У всех img есть атрибут alt",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ST-06",
+      "kind": "static",
+      "title": "На страницах нет повторяющихся id",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ST-07",
+      "kind": "static",
+      "title": "Нет встроенных скриптов (кроме JSON-LD), как требует CSP",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ST-08",
+      "kind": "static",
+      "title": "Все локальные ссылки и ресурсы (href, src) существуют",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ST-09",
+      "kind": "static",
+      "title": "Синтаксис всех JS-файлов корректен (49 файлов, node --check)",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ST-10",
+      "kind": "static",
+      "title": "Для каждой русской страницы есть английская копия",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ST-11",
+      "kind": "static",
+      "title": "В английских страницах нет русского текста (локализация)",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ST-12",
+      "kind": "static",
+      "title": "В коде нет оставленных TODO и FIXME",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ST-13",
+      "kind": "static",
+      "title": "В файлах сайта нет зашитых ключей и паролей",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "SE-01",
+      "kind": "security",
+      "title": "Заголовок content-security-policy отправляется",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "SE-02",
+      "kind": "security",
+      "title": "Заголовок x-content-type-options отправляется",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "SE-03",
+      "kind": "security",
+      "title": "Заголовок x-frame-options отправляется",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "SE-04",
+      "kind": "security",
+      "title": "Заголовок referrer-policy отправляется",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "SE-05",
+      "kind": "security",
+      "title": "Заголовок permissions-policy отправляется",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "SE-06",
+      "kind": "security",
+      "title": "Заголовок cross-origin-opener-policy отправляется",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "SE-07",
+      "kind": "security",
+      "title": "CSP разрешает скрипты только с сайта и запрещает object",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "SE-08",
+      "kind": "security",
+      "title": "Сервер не раскрывает версию (нет X-Powered-By)",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "SE-09",
+      "kind": "security",
+      "title": "Выход за корень сайта закрыт: /../package.json",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "SE-10",
+      "kind": "security",
+      "title": "Выход за корень сайта закрыт: /%2e%2e/package.json",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "SE-11",
+      "kind": "security",
+      "title": "Выход за корень сайта закрыт: /..%2fpackage.json",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "SE-12",
+      "kind": "security",
+      "title": "Выход за корень сайта закрыт: /js/../../package.json",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "SE-13",
+      "kind": "security",
+      "title": "Выход за корень сайта закрыт: /%2e%2e%2f%2e%2e%2fREADME.md",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "SE-14",
+      "kind": "security",
+      "title": "Метод POST отклоняется (405)",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "SE-15",
+      "kind": "security",
+      "title": "Метод PUT отклоняется (405)",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "SE-16",
+      "kind": "security",
+      "title": "Метод DELETE отклоняется (405)",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "SE-17",
+      "kind": "security",
+      "title": "Метод PATCH отклоняется (405)",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "SE-18",
+      "kind": "security",
+      "title": "Нулевой байт в адресе даёт 4xx, сервер жив",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "SE-19",
+      "kind": "security",
+      "title": "Очень длинный адрес даёт 4xx, сервер жив",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "SE-20",
+      "kind": "security",
+      "title": "Служебные файлы (.git) недоступны",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "PF-01",
+      "kind": "performance",
+      "title": "Вес страницы / со стилями, скриптами и картинками ≤ 1500 КБ (сейчас 32 КБ)",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "PF-02",
+      "kind": "performance",
+      "title": "Вес страницы /app/editor.html со стилями, скриптами и картинками ≤ 1500 КБ (сейчас 30 КБ)",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "PF-03",
+      "kind": "performance",
+      "title": "Вес страницы /app/dashboard.html со стилями, скриптами и картинками ≤ 1500 КБ (сейчас 16 КБ)",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "PF-04",
+      "kind": "performance",
+      "title": "Вес страницы /en/ со стилями, скриптами и картинками ≤ 1500 КБ (сейчас 29 КБ)",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "PF-05",
+      "kind": "performance",
+      "title": "Ни один файл сайта не больше 500 КБ",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "PF-06",
+      "kind": "performance",
+      "title": "Редактор отдаётся быстро: p95 из 20 запросов ≤ 100 мс (сейчас 3.3 мс)",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "PF-07",
+      "kind": "performance",
+      "title": "Нагрузка: 200 параллельных запросов к главной, все 200 OK (за 303 мс)",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "PF-08",
+      "kind": "performance",
+      "title": "Для статики задан Cache-Control или ETag/Last-Modified",
+      "status": "Failed",
+      "note": "нет заголовков кэша"
+    }
+  ],
+  "perfRows": [
+    {
+      "page": "/",
+      "kb": 31.6
+    },
+    {
+      "page": "/app/editor.html",
+      "kb": 29.6
+    },
+    {
+      "page": "/app/dashboard.html",
+      "kb": 16.2
+    },
+    {
+      "page": "/en/",
+      "kb": 28.8
+    }
+  ]
+}

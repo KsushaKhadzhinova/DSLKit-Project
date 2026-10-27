@@ -1351,7 +1351,7 @@
 .editor-tools {
   position: fixed;
   z-index: 30;
-  inset-block: var(--toolbar-height) var(--status-height);
+  inset-block: var(--toolbar-height) calc(var(--status-height) + var(--problems-height));
   inset-inline-start: var(--activity-width);
   inline-size: min(22rem, calc(100vw - var(--activity-width)));
   display: flex;
