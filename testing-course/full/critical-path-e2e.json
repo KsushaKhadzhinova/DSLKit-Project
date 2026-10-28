@@ -11,8 +11,8 @@
       "id": "CP-02",
       "kind": "critical",
       "title": "Новая диаграмма начинается с корректного шаблона IDEF0, без ошибок, нарисована",
-      "status": "Failed",
-      "note": "нет блоков"
+      "status": "Passed",
+      "note": ""
     },
     {
       "id": "CP-03",
@@ -39,15 +39,15 @@
       "id": "CP-06",
       "kind": "critical",
       "title": "Блок перетаскивается мышью, положение записывается в код (pos=XxY)",
-      "status": "Failed",
-      "note": "Locator.bounding_box: Timeout 8000ms exceeded. Call log:   - waiting for locator(\".canvas__remote .notation__node[data-cx]\").first"
+      "status": "Passed",
+      "note": ""
     },
     {
       "id": "CP-07",
       "kind": "critical",
       "title": "Блок двигается стрелками с клавиатуры",
-      "status": "Failed",
-      "note": "Locator.focus: Timeout 8000ms exceeded. Call log:   - waiting for locator(\".canvas__remote .notation__node[data-cx]\").first"
+      "status": "Passed",
+      "note": ""
     },
     {
       "id": "CP-08",
@@ -74,43 +74,43 @@
       "id": "CP-11",
       "kind": "critical",
       "title": "«Мои проекты»: сохранённая диаграмма появилась первой в списке",
-      "status": "Failed",
-      "note": "первая карточка: ожидалось 'Мой заказ', получено 'Online order'"
+      "status": "Passed",
+      "note": ""
     },
     {
       "id": "CP-12",
       "kind": "critical",
       "title": "Открытие проекта из списка загружает код и рисует диаграмму",
-      "status": "Failed",
-      "note": "diagram dfd \"Online order\" entity Customer entity Bank \"Paym"
+      "status": "Passed",
+      "note": ""
     },
     {
       "id": "CP-13",
       "kind": "critical",
       "title": "Список проектов: поиск и сортировка работают с сохранёнными",
-      "status": "Failed",
-      "note": "Проектов не найдено"
+      "status": "Passed",
+      "note": ""
     },
     {
       "id": "CP-14",
       "kind": "critical",
       "title": "Меню карточки: переименование и удаление проекта",
-      "status": "Failed",
-      "note": "Locator.click: Timeout 8000ms exceeded. Call log:   - waiting for locator(\".project-list__item[data-project]\").first.locator(\".project-card__menu\")     - locator resolved to <button type=\"button\" aria-expanded=\"false\" class=\"project-card__menu\" aria-label=\"Действия с проектом Online order\">⋯</button>   - attempting click action     2 × waiting for element to be visible, enabled and stable       - element is not visible     - retrying click action"
+      "status": "Passed",
+      "note": ""
     },
     {
       "id": "CP-15",
       "kind": "critical",
       "title": "Пример из списка копируется в «Мои проекты» и открывается",
-      "status": "Failed",
-      "note": "Locator.click: Timeout 8000ms exceeded. Call log:   - waiting for locator(\".project-list__item:not([data-project])\").first.locator(\".project-card__menu\")     - locator resolved to <button type=\"button\" aria-expanded=\"false\" class=\"project-card__menu\" aria-label=\"Действия с проектом Order process\">…</button>   - attempting click action     2 × waiting for element to be visible, enabled and stable       - element is not visible     - retrying click action"
+      "status": "Passed",
+      "note": ""
     },
     {
       "id": "CP-16",
       "kind": "critical",
       "title": "Пример «Hiring flow» открывает шаблон BPMN, а не общий пример",
-      "status": "Failed",
-      "note": "Locator.click: Timeout 8000ms exceeded. Call log:   - waiting for locator(\".project-list__item:not([data-project]) .project-card__link\").nth(2)     - locator resolved to <a class=\"project-card__link\" href=\"editor.html?template=bpmn\">Hiring flow</a>   - attempting click action     2 × waiting for element to be visible, enabled and stable       - element is not visible     - retrying click action"
+      "status": "Passed",
+      "note": ""
     },
     {
       "id": "CP-17",

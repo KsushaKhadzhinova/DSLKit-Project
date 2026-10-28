@@ -9,6 +9,7 @@ base = sys.argv[1] if len(sys.argv) > 1 else "http://localhost:5173"
 out = Path(__file__).parent
 results = []
 errors = []
+PAGE = [None]
 
 
 def check(id_, title, fn):
@@ -16,6 +17,11 @@ def check(id_, title, fn):
         fn()
         results.append({"id": id_, "kind": "critical", "title": title, "status": "Passed", "note": ""})
     except Exception as e:  # noqa: BLE001
+        try:
+            (out.parent / "screens").mkdir(exist_ok=True)
+            PAGE[0].screenshot(path=str(out.parent / "screens" / f"fail-{id_}.png"))
+        except Exception:  # noqa: BLE001
+            pass
         results.append({"id": id_, "kind": "critical", "title": title, "status": "Failed", "note": " ".join(str(e).splitlines()[:8])[:600]})
 
 
@@ -33,6 +39,7 @@ with sync_playwright() as p:
     b = p.chromium.launch(channel="msedge")
     ctx = b.new_context(viewport={"width": 1366, "height": 800}, accept_downloads=True)
     page = ctx.new_page()
+    PAGE[0] = page
     page.set_default_timeout(8000)
     page.on("console", lambda m: errors.append(m.text) if m.type == "error" else None)
     page.on("pageerror", lambda e: errors.append(str(e)))
@@ -138,13 +145,15 @@ with sync_playwright() as p:
     def autosave():
         page.evaluate("document.querySelector('[data-template=\"dfd\"]').click()")
         page.wait_for_timeout(1800)
-        stored = page.evaluate("JSON.parse(localStorage.getItem(Object.keys(localStorage).find(k=>k.includes('projects')))).find(p=>true)")
-        yes(stored is not None, "проектов нет")
+        titles = page.evaluate("JSON.parse(localStorage.getItem(Object.keys(localStorage).find(k=>k.includes('projects')))).map(p=>p.title)")
+        yes(len(titles) == 1 and titles[0] != "Мой заказ", f"автосохранение не обновило проект: {titles}")
         page.evaluate("document.querySelector('[data-template=\"idef0\"]').click()")
         page.wait_for_timeout(300)
-        page.evaluate(
-            """() => { const c = document.querySelector('.code__line code'); c.textContent = 'diagram idef0 "Мой заказ"'; }"""
-        )
+        page.evaluate("""() => { const c = document.querySelector('.code__line code'); c.textContent = 'diagram idef0 "Мой заказ"'; }""")
+        page.click(".button--run")
+        page.wait_for_timeout(1800)
+        titles = page.evaluate("JSON.parse(localStorage.getItem(Object.keys(localStorage).find(k=>k.includes('projects')))).map(p=>p.title)")
+        eq(titles, ["Мой заказ"], "после возврата:")
 
     check("CP-10", "Автосохранение обновляет уже сохранённый проект", autosave)
 
