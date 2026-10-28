@@ -267,6 +267,21 @@ with sync_playwright() as p:
 
     check("CP-19", "Экспорт в SVG скачивает файл", export_download)
 
+    def waitlist():
+        page.goto(base + "/#waitlist-form")
+        page.click("#waitlist-form button[type=submit]")
+        yes(page.locator("#waitlist .form__error, #waitlist [aria-invalid=true], #waitlist .waitlist__error").count() > 0 or "обязательно" in page.inner_text("#waitlist").lower() or "укажите" in page.inner_text("#waitlist").lower(), "нет сообщений об ошибках пустой формы")
+        page.fill("#name", "Анна Иванова")
+        page.fill("#email", "anna@example.com")
+        page.select_option("#notation", index=1)
+        page.fill("#team", "5")
+        page.check("#consent")
+        page.click("#waitlist-form button[type=submit]")
+        page.wait_for_timeout(900)
+        yes("thanks" in page.url or "Спасибо" in page.inner_text("body") or "спасибо" in page.inner_text("body").lower(), page.url)
+
+    check("CP-21", "Заявка с главной: пустая форма даёт ошибки, заполненная принимается", waitlist)
+
     check("CP-20", "За весь путь в консоли нет ошибок", lambda: eq([e for e in errors if "kroki" not in e.lower() and "favicon" not in e.lower()], []))
     b.close()
 
