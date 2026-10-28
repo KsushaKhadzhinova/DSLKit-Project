@@ -41,7 +41,7 @@ NOTATIONS = ["idef0", "idef1", "idef1x", "idef3", "idef4", "idef5", "dfd", "erd"
 with sync_playwright() as p:
     b = p.chromium.launch(channel="msedge")
     ctx = b.new_context(viewport={"width": 1366, "height": 900})
-    ctx.add_init_script("try { localStorage.setItem('tour-done', 'true'); } catch (e) {}")
+    ctx.add_init_script("try { localStorage.setItem('dslkit.tour-done', 'true'); } catch (e) {}")
     page = ctx.new_page()
     PAGE[0] = page
     page.set_default_timeout(8000)

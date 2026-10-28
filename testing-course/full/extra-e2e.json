@@ -25,15 +25,15 @@
       "id": "EX-04",
       "kind": "extra",
       "title": "Переключатель языка ведёт на парную страницу и обратно",
-      "status": "Failed",
-      "note": "/app/editor.html: нет ссылки на английский"
+      "status": "Passed",
+      "note": ""
     },
     {
       "id": "EX-05",
       "kind": "extra",
       "title": "Тема переключается и запоминается после перезагрузки",
-      "status": "Failed",
-      "note": "Locator.click: Timeout 8000ms exceeded. Call log:   - waiting for locator(\".editor-menu [data-action=\\\"theme\\\"]\")     - locator resolved to <button type=\"button\" data-action=\"theme\" class=\"button button--quiet\">Тема</button>   - attempting click action"
+      "status": "Passed",
+      "note": ""
     },
     {
       "id": "EX-06",

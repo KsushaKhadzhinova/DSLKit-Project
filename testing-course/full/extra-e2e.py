@@ -26,7 +26,7 @@ def yes(v, msg):
 with sync_playwright() as p:
     b = p.chromium.launch(channel="msedge")
     ctx = b.new_context(viewport={"width": 1366, "height": 800})
-    ctx.add_init_script("try { localStorage.setItem('tour-done', 'true'); } catch (e) {}")
+    ctx.add_init_script("try { localStorage.setItem('dslkit.tour-done', 'true'); } catch (e) {}")
     page = ctx.new_page()
     page.set_default_timeout(8000)
 
@@ -81,6 +81,7 @@ with sync_playwright() as p:
         for ru, en in [("/", "/en/"), ("/app/dashboard.html", "/en/app/dashboard.html"), ("/app/editor.html", "/en/app/editor.html"), ("/app/settings.html", "/en/app/settings.html")]:
             page.goto(base + ru)
             page.wait_for_timeout(200)
+            page.evaluate("document.querySelectorAll('details').forEach(d => d.open = true)")
             link = page.locator('a[hreflang="en"]').first
             yes(link.count() == 1, f"{ru}: нет ссылки на английский")
             href = link.get_attribute("href")
@@ -88,6 +89,7 @@ with sync_playwright() as p:
             link.click()
             page.wait_for_load_state()
             yes("/en/" in page.url, f"{ru} -> {page.url}")
+            page.evaluate("document.querySelectorAll('details').forEach(d => d.open = true)")
             back = page.locator('a[hreflang="ru"]').first
             yes(back.count() == 1, f"{en}: нет ссылки на русский")
 

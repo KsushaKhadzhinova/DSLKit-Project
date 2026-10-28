@@ -25,7 +25,7 @@ with sync_playwright() as p:
     b = p.chromium.launch(channel="msedge")
     for vp_name, w, h in VIEWPORTS:
         ctx = b.new_context(viewport={"width": w, "height": h}, accept_downloads=True)
-        ctx.add_init_script("try { localStorage.setItem('tour-done', 'true'); } catch (e) {}")
+        ctx.add_init_script("try { localStorage.setItem('dslkit.tour-done', 'true'); } catch (e) {}")
         ctx.add_init_script(INIT)
         errors = []
 

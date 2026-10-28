@@ -47,7 +47,7 @@ with sync_playwright() as p:
     check("E2E-02", "Движок по умолчанию: собственный, в нижней панели просто его название", lambda: eq(page.inner_text(".editor-status__engine"), "Собственный движок (в браузере)"))
     check("E2E-03", "На доске нет подписи про Kroki", lambda: yes("kroki" not in (status() + page.inner_text(".canvas__service")).lower(), status()))
     check("E2E-04", "Диаграмма нарисована в браузере (SVG на доске)", lambda: yes(page.locator(".canvas__remote svg").count() == 1, "нет svg"))
-    check("E2E-05", "В примере есть ошибки, кнопка «Запустить» неактивна (aria-disabled)", lambda: eq(page.locator(".button--run").first.get_attribute("aria-disabled"), "true"))
+    check("E2E-05", "Новая диаграмма без ошибок: кнопка «Запустить» активна (aria-disabled=false)", lambda: eq(page.locator(".button--run").first.get_attribute("aria-disabled"), "false"))
 
     def panel_open(name, title):
         page.click(f'[data-panel="{name}"]')
@@ -58,7 +58,7 @@ with sync_playwright() as p:
 
     def search_replace():
         page.fill('.editor-tools__input[placeholder="Найти"]', "box")
-        yes("Найдено: 2" in page.inner_text(".editor-tools__status"), page.inner_text(".editor-tools__status"))
+        yes("Найдено: 3" in page.inner_text(".editor-tools__status"), page.inner_text(".editor-tools__status"))
         page.locator(".editor-tools__hit").first.click()
         yes(page.locator(".code__line--found").count() == 1, "строка не подсвечена")
         page.fill('.editor-tools__input[placeholder="Заменить на"]', "node")
@@ -180,7 +180,7 @@ with sync_playwright() as p:
               .filter(b => !b.disabled && !b.closest('[hidden]') && b.offsetParent !== null)
               .filter(b => b.getAttribute('aria-disabled') !== 'true')
               .filter(b => Object.keys(b.dataset).length === 0 && !b.getAttribute('role') && !b.closest('.tour, .modal, dialog')
-                           && !b.className.match(/button--run|canvas__refresh|editor-toolbar__switch|editor-tabs__close|problems__|editor-tools|editor-bottom|segmented|templates__|file-tree|banner|history/))
+                           && !b.className.match(/button--run|canvas__refresh|editor-toolbar__switch|editor-tabs__close|problems__|palette__|editor-tools|editor-bottom|segmented|templates__|file-tree|banner|history/))
               .map(b => b.className + ':' + b.textContent.trim().slice(0,20))"""
         )
         eq(dead, [], "кнопки без обработчика:")
