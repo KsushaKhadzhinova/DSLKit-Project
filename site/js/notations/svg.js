@@ -220,7 +220,7 @@ export const parsePosition = (value) => {
 };
 
 // A node with a position keeps it, whatever the automatic layout chose. The page grows to hold the moved nodes.
-const applyPositions = (placed, size) => {
+export const applyPositions = (placed, size) => {
   let { width, height } = size;
   placed.forEach((item) => {
     const position = parsePosition(item.node.attrs?.pos);

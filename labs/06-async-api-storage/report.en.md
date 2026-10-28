@@ -309,7 +309,7 @@ export const createHistory = ({ storage = createStorage(createMemoryBackend()), 
 
 ```js
 const PORTS = ['input', 'control', 'output', 'mechanism'];
-const BOX_PATTERN = /^box\s+(\S+)\s+"([^"]*)"(?:\s*\{)?\s*$/;
+const BOX_PATTERN = /^box\s+(\S+)\s+"([^"]*)"((?:\s+pos=\S+|\s*\{)*)\s*$/;
 const PORT_PATTERN = /^(input|control|output|mechanism)\s*:\s*(.+)$/;
 const ARROW_PATTERN = /^arrow\s+(\S+?)(?:\.(\w+))?\s*->\s*(\S+?)(?:\.(\w+))?$/;
 const DIAGRAM_PATTERN = /^diagram\s+(\S+)(?:\s+"([^"]*)")?$/;
@@ -328,7 +328,8 @@ export const parseDsl = (source) => {
         model.type = match[1];
         model.title = match[2] ?? '';
       } else if ((match = BOX_PATTERN.exec(line))) {
-        box = { id: match[1], name: match[2], ports: Object.fromEntries(PORTS.map((port) => [port, []])) };
+        const pos = /pos=(\S+)/.exec(match[3])?.[1];
+        box = { id: match[1], name: match[2], ports: Object.fromEntries(PORTS.map((port) => [port, []])), ...(pos === undefined ? {} : { pos }) };
         model.boxes.push(box);
         model.boxLines.push(index + 1);
       } else if ((match = PORT_PATTERN.exec(line)) && box) {

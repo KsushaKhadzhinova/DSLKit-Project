@@ -90,6 +90,7 @@ const idef0Rules = (model) => {
       );
   });
   model.boxes.forEach((box, index) => {
+    if (box.pos !== undefined && !POSITION.test(box.pos)) out.push(problem(model.boxLines[index], 'error', 'strict-pos', { id: box.id, value: box.pos }));
     ['input', 'control', 'output', 'mechanism'].forEach((port) => {
       const items = box.ports[port];
       if (new Set(items.map((item) => item.toLowerCase())).size !== items.length)

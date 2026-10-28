@@ -1,5 +1,5 @@
 import { escapeXml, textWidth, wrap } from './common.js';
-import { INK, MUTED, layout, svgDocument, text } from './svg.js';
+import { INK, MUTED, applyPositions, layout, svgDocument, text } from './svg.js';
 
 const STUB = 56;
 const SHIFT_X = 90;
@@ -80,8 +80,11 @@ const stubsOf = (mine, rect) =>
     .map(stubMarkup)
     .join('');
 
-const boxMarkup = ({ node, x, y, w, h, lines }, slots) =>
-  `<g class="local-engine__box" data-id="${escapeXml(node.id)}"><title>${escapeXml(`${node.id} ${node.box.name}`)}</title>` +
+const round = (value) => Math.round(value * 10) / 10;
+
+// A box can be moved: the group carries its centre, as the blocks of the other notations do.
+const boxMarkup = ({ node, x, y, w, h, lines, cx, cy }, slots) =>
+  `<g class="local-engine__box notation__node" data-id="${escapeXml(node.id)}" data-cx="${round(cx)}" data-cy="${round(cy)}"><title>${escapeXml(`${node.id} ${node.box.name}`)}</title>` +
   `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#ffffff" stroke="${INK}" stroke-width="2"/>` +
   `${text(x + w / 2, y + h / 2, lines, 13, 700, '#0f172a')}` +
   `<text x="${x + w - 6}" y="${y + h - 6}" text-anchor="end" font-size="11" fill="${MUTED}">${escapeXml(node.id)}</text>${stubsOf(slots.get(node.id), { x, y, w, h })}</g>`;
@@ -89,8 +92,10 @@ const boxMarkup = ({ node, x, y, w, h, lines }, slots) =>
 export const renderIdef0 = (model) => {
   const arrows = usableArrows(model);
   const slots = buildSlots(model, arrows);
-  const nodes = model.boxes.map((box) => ({ id: box.id, label: box.name, box }));
-  const { placed, width, height } = layout(nodes, arrows, (node) => sizeOfBox(node, slots));
+  const nodes = model.boxes.map((box) => ({ id: box.id, label: box.name, box, attrs: { pos: box.pos } }));
+  const laid = layout(nodes, arrows, (node) => sizeOfBox(node, slots));
+  const { placed } = laid;
+  const { width, height } = applyPositions(placed, laid);
   const at = (id, side, match) => {
     const list = slots.get(id)[side];
     return POINT[side](placed.get(id), list.findIndex(match), list.length);
