@@ -5,6 +5,7 @@ import { initDashboard } from './components/dashboard.js';
 import { initDiagramRunner } from './components/diagram-runner.js';
 import { initEditor } from './components/editor.js';
 import { initEditorActions } from './components/editor-actions.js';
+import { initEditorPalette } from './components/editor-palette.js';
 import { initEditorProjects } from './components/editor-projects.js';
 import { initEditorTools } from './components/editor-tools.js';
 import { initExport } from './components/export-menu.js';
@@ -29,6 +30,7 @@ export const COMPONENTS = [
   initEditorProjects,
   initEditorActions,
   initEditorTools,
+  initEditorPalette,
   initExport,
   initImport,
   initTour,

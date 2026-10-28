@@ -1446,3 +1446,56 @@
   outline: 2px solid var(--color-primary);
   outline-offset: -2px;
 }
+
+/* Palette of the elements that can be put on the board by hand */
+.palette {
+  display: grid;
+  gap: 0.25rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.palette__item {
+  inline-size: 100%;
+  justify-content: flex-start;
+  text-align: start;
+  cursor: grab;
+  touch-action: none;
+}
+.palette__connect {
+  display: grid;
+  gap: 0.25rem;
+  margin-block-start: var(--space-1);
+}
+.palette__connect[hidden],
+.palette__empty[hidden] {
+  display: none;
+}
+.palette__hint,
+.palette__message,
+.palette__empty {
+  margin: 0.25rem 0;
+  color: var(--color-muted);
+  font-size: 0.8125rem;
+}
+.palette__ghost {
+  position: fixed;
+  z-index: 60;
+  padding: 0.25rem 0.625rem;
+  color: var(--color-on-primary);
+  background: var(--color-primary);
+  border-radius: 6px;
+  box-shadow: var(--shadow-large);
+  pointer-events: none;
+}
+.canvas__remote--connect .notation__node,
+.canvas__remote--connect .local-engine__box {
+  cursor: crosshair;
+}
+.notation__node--selected rect,
+.notation__node--selected ellipse,
+.notation__node--selected polygon,
+.notation__node--selected path {
+  stroke: var(--color-primary);
+  stroke-width: 3;
+}

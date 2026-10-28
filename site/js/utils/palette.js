@@ -74,9 +74,7 @@ const NAMES = {
 
 // Elements of the notations whose statements are not plain `<keyword> <id> "Label"` lines.
 const OWN = {
-  idef0: [
-    { keyword: 'box', prefix: 'A', make: (id) => `box ${id} "${id} function" {\n input: Input\n control: Rule\n output: Output\n}` },
-  ],
+  idef0: [{ keyword: 'box', prefix: 'A', make: (id) => `box ${id} "${id} function" {\n input: Input\n control: Rule\n output: Output\n}` }],
   idef1: [{ keyword: 'entity', prefix: 'E', make: (id) => `entity ${id} {\n  id: int pk\n}` }],
   idef1x: [{ keyword: 'entity', prefix: 'E', make: (id) => `entity ${id} {\n  ${id.toLowerCase()}_id: int pk\n}` }],
   erd: [{ keyword: 'entity', prefix: 'E', make: (id) => `entity ${id} {\n  id: int pk\n}` }],
@@ -92,6 +90,9 @@ const OWN = {
   'uml-timing': [{ keyword: 'lifeline', prefix: 'line', make: (id) => `lifeline ${id} "${id}" states Low, High` }],
   graph: [{ keyword: 'vertex', prefix: 'V', make: (id) => `vertex ${id}` }],
 };
+
+// A port belongs to a part or a classifier, so it is made for the first one of the code.
+const OWNERS = /^(?:classifier|part)\s+(\S+)/m;
 
 // The ways to connect two elements, written the way the notation expects them.
 const OWN_LINKS = {
@@ -113,7 +114,10 @@ export const paletteFor = (notation) => {
     keyword,
     prefix: keyword.slice(0, 1).toUpperCase(),
     label: nameOf(keyword),
-    make: (id) => `${keyword} ${id} "${nameOf(keyword)[1]}"`,
+    make:
+      keyword === 'port'
+        ? (id, code) => `port ${id} "${nameOf(keyword)[1]}" of=${OWNERS.exec(code)?.[1] ?? id}`
+        : (id) => `${keyword} ${id} "${nameOf(keyword)[1]}"`,
   }));
 };
 
@@ -133,11 +137,18 @@ export const nextId = (code, prefix) => {
   return `${prefix}${n}`;
 };
 
+// The drawings of these notations have no blocks that stand where the code says, so a place is not written for them.
+const NO_PLACE = new Set(['uml-sequence', 'uml-timing', 'graph']);
+
 // The new element goes to the end of the code; a place on the board is written as pos=XxY.
-export const addElement = (code, item, at) => {
+// The drawing of IDEF0 is shifted inside the page, so a place taken from the page is moved back into the space of the layout.
+const ORIGIN = { idef0: { x: 90, y: 40 } };
+
+export const addElement = (code, notation, item, at) => {
   const id = nextId(code, item.prefix);
-  const text = `${code.replace(/\s+$/, '')}\n${item.make(id)}`;
-  const placed = at ? setNodePosition(text, id, at.x, at.y) : text;
+  const text = `${code.replace(/\s+$/, '')}\n${item.make(id, code)}`;
+  const origin = ORIGIN[notation] ?? { x: 0, y: 0 };
+  const placed = at && !NO_PLACE.has(notation) ? setNodePosition(text, id, at.x - origin.x, at.y - origin.y) : text;
   return { code: placed ?? text, id };
 };
 
@@ -145,10 +156,46 @@ export const connectElements = (code, link, from, to) => `${code.replace(/\s+$/,
 
 const signature = (item) => `${item.code}${JSON.stringify(item.params)}`;
 
+// A new element stands alone until it is connected, so these errors only say "not finished yet" and do not stop the adding.
+const UNFINISHED = new Set([
+  'flow-unreachable',
+  'flow-dead-end',
+  'flow-no-end',
+  'flow-no-start',
+  'idef3-junction',
+  'idef3-unpaired',
+  'idef3-no-start',
+  'mm-unreachable',
+  'dfd-miracle',
+  'dfd-black-hole',
+  'idef0-no-output',
+  'idef0-no-control',
+  'erd-no-pk',
+  'idef1-no-attrs',
+  'idef1x-fk-missing',
+  'idef1x-dependent-orphan',
+  'org-many-tops',
+  'dt-roots',
+  'dt-branches',
+  'epc-start',
+  'epc-end',
+  'epc-alternate',
+  'c4-database-source',
+  'uml-timing-states',
+  'dag-roots',
+  'gost-decision',
+  'gost-connector',
+]);
+
 // The strict gate of hand work: a change is accepted only when it adds no error that the notation reports.
 // A diagram that was already wrong stays editable, only new errors stop a change.
+// What is only unfinished (an element nobody is connected to yet) is tolerated, what is wrong is refused.
 export const gate = (before, after, lang = 'ru') => {
-  const known = new Set(parseDiagram(before).problems.filter((item) => item.severity === 'error').map(signature));
-  const added = parseDiagram(after).problems.find((item) => item.severity === 'error' && !known.has(signature(item)));
+  const known = new Set(
+    parseDiagram(before)
+      .problems.filter((item) => item.severity === 'error')
+      .map(signature),
+  );
+  const added = parseDiagram(after).problems.find((item) => item.severity === 'error' && !known.has(signature(item)) && !UNFINISHED.has(item.code));
   return added ? { ok: false, message: formatProblem(added, lang), problem: added } : { ok: true, message: '', problem: null };
 };
