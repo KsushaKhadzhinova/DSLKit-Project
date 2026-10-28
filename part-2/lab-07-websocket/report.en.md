@@ -111,6 +111,50 @@ Table 3 – Automated test scenarios
 | Private message                                 | only the target gets it, an unknown target is refused    |
 | Client files and `/health`                      | the page and an `ok` answer are served                   |
 
+### 3.5.1 Check in two browser windows
+
+The manual check was done in several browser windows, each window is a separate client (Alice, Bob, Carol). The screenshots are made by the script `shots/shots.mjs` in a real Chromium browser that connects to the running server. The steps: two clients connect, join a room, exchange messages, the rooms are checked for isolation, the editing flag, a validation error, leave and disconnect. The results are on figures 2 to 11.
+
+![Alice window: the welcome message and the notice that Bob connected](figures/01-join-notifications-alice.png)
+
+Figure 2 – Alice window: the welcome message and the notice that Bob connected
+
+![Bob window after joining the diagram room](figures/02-join-bob.png)
+
+Figure 3 – Bob window after joining the diagram room
+
+![Alice window: the message of Bob arrived in the room](figures/03-chat-alice.png)
+
+Figure 4 – Alice window: the message of Bob arrived in the room
+
+![Bob window: own and foreign messages in the room](figures/04-chat-bob.png)
+
+Figure 5 – Bob window: own and foreign messages in the room
+
+![Carol window in another room: the messages of the first room do not arrive](figures/05-room-diagram-2-carol.png)
+
+Figure 6 – Carol window in another room: the messages of the first room do not arrive
+
+![Alice window: the messages of the other room did not reach her feed](figures/06-room-diagram-1-alice-no-leak.png)
+
+Figure 7 – Alice window: the messages of the other room did not reach her feed
+
+![Bob window: the list shows who is editing the diagram](figures/07-who-is-editing-bob.png)
+
+Figure 8 – Bob window: the list shows who is editing the diagram
+
+![Bob window: a validation error for an empty message](figures/08-validation-error-bob.png)
+
+Figure 9 – Bob window: a validation error for an empty message
+
+![Alice window: the notice that Bob left the room](figures/09-leave-notification-alice.png)
+
+Figure 10 – Alice window: the notice that Bob left the room
+
+![Alice window: the notice that Bob disconnected](figures/10-disconnect-notification-alice.png)
+
+Figure 11 – Alice window: the notice that Bob disconnected
+
 ### 3.6 Input validation and limits
 
 All limits live in a separate `limits.json` file: user name length (24), room name (40), message length (500), history size (50), message rate (5 per 2 seconds) and packet size. The server reads the file at start and serves it to the client at `/limits.json`, so the client and the server use the same numbers.
