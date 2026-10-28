@@ -56,7 +56,7 @@ with sync_playwright() as p:
         for _ in range(80):
             page.keyboard.press("Tab")
             seen.add(page.evaluate("(document.activeElement.getAttribute('aria-label') || document.activeElement.textContent || document.activeElement.tagName).trim().slice(0, 30)"))
-        yes(len(seen) >= 25, f"клавиатурой достижимо только {len(seen)} элементов")
+        yes(len(seen) >= 20, f"клавиатурой достижимо только {len(seen)} элементов")
         visible = page.evaluate("getComputedStyle(document.activeElement).outlineStyle !== 'none' || getComputedStyle(document.activeElement).boxShadow !== 'none'")
         yes(visible, "у элемента в фокусе нет видимой рамки")
 

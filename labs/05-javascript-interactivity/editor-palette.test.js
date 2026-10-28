@@ -265,3 +265,18 @@ test('a block that is gone from the code says so and the Connect mode does not s
   t.remote.querySelector('[data-id="Ghost"]').dispatchEvent(key);
   assert.equal(key.defaultPrevented, false);
 });
+
+test('a block dropped on the board does not make the others jump: they keep their places', () => {
+  const t = setup();
+  const nodes = t.remote.querySelectorAll('.notation__node');
+  nodes[0].dataset.cx = '120';
+  nodes[0].dataset.cy = '80';
+  nodes[1].dataset.cx = '300';
+  nodes[1].dataset.cy = '90.5';
+  dropOn(t, 250, 330);
+  const code = t.code();
+  assert.match(code, /entity Customer pos=120x80/);
+  assert.match(code, /process 2 "Take payment" pos=300x90\.5/);
+  assert.match(code, /process P1 "Process" pos=/);
+  assert.ok(!code.includes('Bank "Payment bank" pos='));
+});

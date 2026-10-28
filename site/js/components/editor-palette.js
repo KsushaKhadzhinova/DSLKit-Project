@@ -2,6 +2,7 @@ import { readCode, showCode } from './code-lines.js';
 import { pointInDrawing } from './canvas-drag.js';
 import { parseDiagram } from '../notations/index.js';
 import { addElement, connectElements, gate, linksFor, paletteFor, removeElement } from '../utils/palette.js';
+import { setNodePosition } from '../utils/node-position.js';
 
 const TEXTS = {
   heading: { ru: 'Элементы', en: 'Elements' },
@@ -105,9 +106,16 @@ export const initEditorPalette = ({ root = document } = {}) => {
     return notation;
   };
 
+  // A block put on the board by hand must not make the others jump: before it comes, every block keeps the place where it stands now.
+  const freeze = (text) =>
+    [...remote.querySelectorAll(NODE)].reduce((current, node) => {
+      const { id, cx, cy } = node.dataset;
+      return (cx !== undefined && setNodePosition(current, id, Number(cx), Number(cy))) || current;
+    }, text);
+
   const add = (index, at) => {
     const item = items[index];
-    const before = code();
+    const before = at ? freeze(code()) : code();
     const result = addElement(before, notation, item, at);
     const verdict = gate(before, result.code, lang);
     if (!verdict.ok) return say(t('refused', { reason: verdict.message }));

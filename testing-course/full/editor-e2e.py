@@ -161,12 +161,13 @@ with sync_playwright() as p:
     check("E2E-16", "Три кнопки шаблонов подставляют код", templates)
 
     def tabs():
-        page.click("#tab-rules")
-        yes(page.locator("#rules-panel").is_visible(), "rules")
-        page.click("#tab-order")
-        yes(page.locator("#editor-panel").is_visible(), "order")
+        page.click('[data-action="save"]')
+        page.wait_for_timeout(400)
+        yes(page.locator(".file-tree__item").count() >= 1, "в проводнике нет проектов")
+        eq(page.locator(".file-tree__item--active").count(), 1, "активный проект:")
+        yes(".dsl" in page.locator(".file-tree__item--active").inner_text(), "нет имени файла")
 
-    check("E2E-17", "Вкладки файлов переключаются", tabs)
+    check("E2E-17", "Проводник показывает сохранённые проекты, открытый отмечен", tabs)
 
     def exports():
         page.locator("text=Экспорт SVG").first.evaluate("e => e.click()")
