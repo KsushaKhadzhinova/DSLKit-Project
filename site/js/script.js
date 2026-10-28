@@ -17,7 +17,9 @@ import { registerServiceWorker } from './components/pwa.js';
 import { initNotationFilter } from './components/notation-filter.js';
 import { initSettings } from './components/settings.js';
 import { initTheme } from './components/theme.js';
+import { initQuota } from './components/quota.js';
 import { initTour } from './components/tour.js';
+import { initWelcome } from './components/welcome.js';
 import { initWaitlistForm } from './components/waitlist-form.js';
 import { getStorage } from './utils/storage.js';
 
@@ -30,6 +32,8 @@ export const COMPONENTS = [
   initWaitlistForm,
   initAuthForm,
   initDashboard,
+  initQuota,
+  initWelcome,
   initAppSearch,
   initSettings,
   initEditor,

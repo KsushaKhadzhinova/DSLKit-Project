@@ -106,7 +106,7 @@ test('the editor of a signed-in user saves into the projects of that user', asyn
   const storage = memory();
   const { user } = await createAccountStore({ storage }).register({ name: 'Ксения', email: 'k@example.com', password: 'correct horse' });
   const dom = new JSDOM(editor, { url: 'http://localhost/app/editor.html' });
-  initEditorProjects({ root: dom.window.document, storage, navigate: () => {} });
+  initEditorProjects({ root: dom.window.document, storage, navigate: () => {}, seed: false });
   dom.window.document.querySelector('.app-page--editor').dispatchEvent(new dom.window.CustomEvent('dslkit:save', { bubbles: true }));
   assert.equal(storage.get(`projects.${user.id}`).length, 1);
   assert.equal(storage.get('projects'), null);

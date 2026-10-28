@@ -240,6 +240,12 @@
   gap: 0.125rem;
 }
 
+/* Many saved projects scroll inside the list, so the palette below it stays on the screen. */
+.file-tree {
+  max-height: calc(var(--space-1) * 18);
+  overflow-y: auto;
+}
+
 .file-tree__item,
 .templates__item {
   display: flex;

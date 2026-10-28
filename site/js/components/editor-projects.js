@@ -1,6 +1,7 @@
 import { readCode, showCode } from './code-lines.js';
 import { TEMPLATES, parseDiagram } from '../notations/index.js';
 import { currentUser } from '../storage/accounts.js';
+import { starterProjects } from '../storage/seeds.js';
 import { createProjectStore, createTemplateStore, showQuota } from '../storage/projects.js';
 
 const TEXTS = {
@@ -25,7 +26,15 @@ const fileName = (title) =>
 // Connects the editor to the list of projects. The address says what to open: ?p=<id> is a saved project,
 // ?template=<name> a starter, nothing is a new diagram. The Save button and Ctrl+S create the project,
 // after that the autosave keeps it up to date; a new diagram becomes a project with the first change of its code. The project appears on the "My projects" page.
-export const initEditorProjects = ({ root = document, storage, now = () => Date.now(), setTimer = setTimeout, clearTimer = clearTimeout, navigate } = {}) => {
+export const initEditorProjects = ({
+  root = document,
+  storage,
+  now = () => Date.now(),
+  setTimer = setTimeout,
+  clearTimer = clearTimeout,
+  navigate,
+  seed = true,
+} = {}) => {
   const page = root.querySelector('.app-page--editor');
   const codeLines = page?.querySelector('.code__lines');
   if (!codeLines) return null;
@@ -34,6 +43,7 @@ export const initEditorProjects = ({ root = document, storage, now = () => Date.
   const owner = currentUser(storage)?.id ?? null;
   const store = createProjectStore({ storage, now, owner });
   const templates = createTemplateStore({ storage, now, owner });
+  if (seed) store.seed(starterProjects());
   const note = page.querySelector('.editor-status__saved');
   const switchButton = page.querySelector('.editor-toolbar__switch');
   const params = new view.URLSearchParams(view.location.search);

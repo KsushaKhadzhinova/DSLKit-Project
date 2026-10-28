@@ -1,5 +1,6 @@
 import { NOTATIONS, NOTATION_KEYS, TEMPLATES, parseDiagram } from '../notations/index.js';
 import { currentUser } from '../storage/accounts.js';
+import { starterProjects } from '../storage/seeds.js';
 import { createProjectStore, createTemplateStore, showQuota } from '../storage/projects.js';
 
 const FILTERS = ['all', ...NOTATION_KEYS];
@@ -65,17 +66,6 @@ const normalize = (saved) => ({
   sort: SORTS.includes(saved?.sort) ? saved.sort : 'newest',
 });
 
-const HOUR = 3600000;
-// The diagrams of the first visit: one of the first notations each, changed at different times, some of them published.
-const SEED_PLAN = [
-  ['idef0', 2 * HOUR, true],
-  ['bpmn', 26 * HOUR, false],
-  ['uml-class', 3 * 24 * HOUR, true],
-  ['erd', 6 * 24 * HOUR, false],
-  ['dfd', 12 * 24 * HOUR, true],
-  ['petri', 30 * 24 * HOUR, false],
-];
-
 export const initDashboard = ({ root = document, storage, now = () => Date.now(), seed = true, navigate } = {}) => {
   const list = root.querySelector('#project-list');
   if (!list) return null;
@@ -87,17 +77,7 @@ export const initDashboard = ({ root = document, storage, now = () => Date.now()
   const store = createProjectStore({ storage, now, owner });
   const templates = createTemplateStore({ storage, now, owner });
   const go = navigate ?? ((url) => view.location.assign(url));
-  if (seed) {
-    store.seed(
-      SEED_PLAN.map(([key, age, published]) => ({
-        title: parseDiagram(TEMPLATES[key]).title,
-        notation: key,
-        source: TEMPLATES[key],
-        age,
-        published,
-      })),
-    );
-  }
+  if (seed) store.seed(starterProjects());
   const chips = [...root.querySelectorAll('.filter__chip[data-filter]')];
   const others = root.querySelector('#notation-filter');
   const search = root.querySelector('.app-topbar__search-input');

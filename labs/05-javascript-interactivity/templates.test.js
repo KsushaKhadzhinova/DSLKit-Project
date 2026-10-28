@@ -178,7 +178,7 @@ const editor = ({ search = '', storage = memory(), lang = 'ru' } = {}) => {
   const dom = new JSDOM(pages.editor.replace('<html lang="ru">', `<html lang="${lang}">`), { url: `http://localhost/app/editor.html${search}` });
   const { document } = dom.window;
   const timers = [];
-  const api = initEditorProjects({ root: document, storage, now: clock(), setTimer: (fn) => timers.push(fn) - 1, clearTimer: () => {}, navigate: () => {} });
+  const api = initEditorProjects({ root: document, storage, now: clock(), seed: false, setTimer: (fn) => timers.push(fn) - 1, clearTimer: () => {}, navigate: () => {} });
   const code = () => readCode(document.querySelector('.code__lines'));
   const save = () => document.querySelector('.app-page--editor').dispatchEvent(new dom.window.CustomEvent('dslkit:save', { bubbles: true }));
   const flush = async () => {
