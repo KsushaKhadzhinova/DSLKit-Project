@@ -59,3 +59,40 @@ export function validateWaitlist({ name, email, notation, team, comment, consent
   }
   return invalid;
 }
+
+const MIN_PASSWORD_LENGTH = 8;
+const MAX_PASSWORD_LENGTH = 128;
+
+export function isValidPassword(value) {
+  return typeof value === 'string' && value.length >= MIN_PASSWORD_LENGTH && value.length <= MAX_PASSWORD_LENGTH && value.trim() !== '';
+}
+
+// Sign-in: the address must look like an address and the password must not be empty. Its length is not checked here,
+// so the answer does not tell which part of the pair is wrong.
+export function validateLogin({ email, password } = {}) {
+  const invalid = [];
+  if (!isValidEmail(email ?? '')) {
+    invalid.push('email');
+  }
+  if (typeof password !== 'string' || password === '') {
+    invalid.push('password');
+  }
+  return invalid;
+}
+
+export function validateRegistration({ name, email, password, confirm } = {}) {
+  const invalid = [];
+  if (!isValidName(name)) {
+    invalid.push('name');
+  }
+  if (!isValidEmail(email ?? '')) {
+    invalid.push('email');
+  }
+  if (!isValidPassword(password)) {
+    invalid.push('password');
+  }
+  if (typeof confirm !== 'string' || confirm === '' || confirm !== password) {
+    invalid.push('confirm');
+  }
+  return invalid;
+}

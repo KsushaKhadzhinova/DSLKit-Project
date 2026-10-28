@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <meta name="description" content="Sign up for DSLKit with a name, an email and a password of at least 8 characters." />
+    <title>Sign up — DSLKit</title>
+    <meta name="theme-color" content="#2563eb" />
+    <link rel="canonical" href="https://dslkit.io/en/app/register.html" />
+    <link rel="icon" href="../../images/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="../../css/style.css" />
+  </head>
+  <body class="page">
+    <a class="skip-link" href="#main">Skip to main content</a>
+    <header class="header">
+      <div class="header__inner">
+        <a class="header__logo" href="../index.html">
+          <img class="header__logo-image" src="../../images/logo.svg" alt="" width="32" height="32" />
+          <span class="header__logo-text">DSLKit</span>
+        </a>
+        <div class="header__tools">
+          <a class="header__lang" href="../../app/register.html" hreflang="ru" lang="ru">Русский</a>
+          <input class="theme__input" type="checkbox" id="theme-toggle" />
+          <label class="theme__button" for="theme-toggle" title="Dark theme"
+            ><svg class="theme__icon theme__icon--moon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">
+              <path
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"
+              /></svg
+            ><svg class="theme__icon theme__icon--sun" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">
+              <circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2" />
+              <path
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"
+              /></svg
+            ><span class="theme__label">Dark theme</span></label
+          >
+        </div>
+      </div>
+    </header>
+    <main class="main" id="main">
+      <section class="section" aria-labelledby="auth-title">
+        <h1 class="section__title" id="auth-title">Sign up</h1>
+        <p class="section__lead">
+          Create an account to sign your projects with your name. The account is kept in this browser: there is no server, and only a hash of the password is
+          stored.
+        </p>
+        <form class="form auth-form" id="auth-form" data-mode="register" action="register.html" method="post">
+          <p class="form__error" role="alert" id="auth-error" hidden></p>
+          <div class="form__field">
+            <label class="form__label" for="name">Name</label>
+            <input
+              class="form__input"
+              id="name"
+              name="name"
+              type="text"
+              required
+              minlength="2"
+              maxlength="60"
+              autocomplete="name"
+              aria-describedby="name-hint"
+            />
+            <p class="form__hint" id="name-hint">From 2 to 60 letters. A space, a hyphen and an apostrophe are allowed.</p>
+            <p class="form__error" role="alert" id="name-error" hidden>
+              The name was not accepted: the field is empty, shorter than two characters or contains digits and symbols. Enter from 2 to 60 letters, for example
+              "Ksenia".
+            </p>
+          </div>
+          <div class="form__field">
+            <label class="form__label" for="email">Email</label>
+            <input class="form__input" id="email" name="email" type="email" required maxlength="120" autocomplete="email" aria-describedby="email-hint" />
+            <p class="form__hint" id="email-hint">An address like name@example.com. It is your login.</p>
+            <p class="form__error" role="alert" id="email-error" hidden>
+              The address was not accepted: it is empty or does not look like an email. Check that it has an "@" sign and a domain after it.
+            </p>
+          </div>
+          <div class="form__field">
+            <label class="form__label" for="password">Password</label>
+            <input
+              class="form__input"
+              id="password"
+              name="password"
+              type="password"
+              required
+              minlength="8"
+              maxlength="128"
+              autocomplete="new-password"
+              aria-describedby="password-hint"
+            />
+            <p class="form__hint" id="password-hint">From 8 to 128 characters. A long phrase that is easy to remember works well.</p>
+            <p class="form__error" role="alert" id="password-error" hidden>
+              The password was not accepted: it needs from 8 to 128 characters and not only spaces.
+            </p>
+          </div>
+          <div class="form__field">
+            <label class="form__label" for="confirm">Repeat the password</label>
+            <input class="form__input" id="confirm" name="confirm" type="password" required minlength="8" maxlength="128" autocomplete="new-password" />
+            <p class="form__error" role="alert" id="confirm-error" hidden>The passwords do not match. Enter the same password again.</p>
+          </div>
+          <button class="button button--primary form__submit" type="submit">Create account</button>
+          <p class="form__hint">Already have an account? <a class="form__link" href="login.html">Sign in</a></p>
+        </form>
+      </section>
+    </main>
+    <footer class="footer">
+      <div class="footer__inner">
+        <nav class="footer__nav" aria-label="Footer navigation">
+          <ul class="footer__list">
+            <li class="footer__item"><a class="footer__link" href="../index.html#notations">Notations</a></li>
+            <li class="footer__item"><a class="footer__link" href="../index.html#pricing">Pricing</a></li>
+            <li class="footer__item"><a class="footer__link" href="../index.html#faq">Questions and answers</a></li>
+            <li class="footer__item"><a class="footer__link" href="../privacy.html">Privacy policy</a></li>
+            <li class="footer__item"><a class="footer__link" href="../../app/register.html" hreflang="ru" lang="ru">Русская версия</a></li>
+          </ul>
+        </nav>
+        <address class="footer__address">Contacts: <a class="footer__link" href="mailto:hello@dslkit.io">hello@dslkit.io</a></address>
+        <p class="footer__copy"><small>© 2026 DSLKit. BSUIR diploma project.</small></p>
+      </div>
+    </footer>
+    <script type="module" src="../../js/script.js"></script>
+  </body>
+</html>

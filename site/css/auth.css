@@ -1,0 +1,107 @@
+/* Account menu and the sign-in and registration pages.
+   The menu sits in the navigation of the site pages, in the top bar of the application and in the menu of the editor. */
+.nav__item--auth {
+  margin-top: var(--space-1);
+  padding-top: var(--space-1);
+  border-top: 1px solid var(--color-border);
+}
+
+.auth {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+/* In the menu of the editor the entries are plain items of the list, so the wrapper adds no box. */
+.auth--menu {
+  display: contents;
+}
+
+.auth__link {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--target-size-small);
+  padding: 0 var(--space-1);
+  border: 0;
+  border-radius: var(--radius-small);
+  background: transparent;
+  color: var(--color-link);
+  cursor: pointer;
+  font: inherit;
+  font-size: var(--text-small);
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background-color 160ms ease;
+}
+
+.auth__link:hover {
+  background: var(--color-secondary);
+  text-decoration: none;
+}
+
+.auth__button {
+  flex: none;
+  min-height: var(--target-size-small);
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-small);
+  font-size: var(--text-small);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.auth__name {
+  display: none;
+  max-width: 12rem;
+  overflow: hidden;
+  color: var(--color-text);
+  font-size: var(--text-small);
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* In the menu of the site, on a phone, the two buttons stand one under the other over the whole width. */
+.nav__item--auth .auth {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+/* The top bar of the application is narrow on a phone: the registration button and the name wait for more room. */
+.auth--app {
+  flex: none;
+  flex-wrap: nowrap;
+}
+
+.auth--app .button--primary {
+  display: none;
+}
+
+.auth-form {
+  margin-top: var(--space-3);
+}
+
+@media (min-width: 576px) {
+  .auth--app .button--primary {
+    display: inline-flex;
+  }
+}
+
+@media (min-width: 768px) {
+  .nav__item--auth {
+    margin-top: 0;
+    margin-inline-start: var(--space-1);
+    padding-top: 0;
+    border-top: 0;
+  }
+
+  .nav__item--auth .auth {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .auth__name {
+    display: inline;
+  }
+}

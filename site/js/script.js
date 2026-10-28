@@ -1,5 +1,6 @@
 import { initAccordion } from './components/accordion.js';
 import { initAppSearch } from './components/app-search.js';
+import { initAuthForm, initAuthMenu } from './components/auth.js';
 import { initBurger } from './components/burger.js';
 import { initCanvasDrag } from './components/canvas-drag.js';
 import { initDashboard } from './components/dashboard.js';
@@ -23,9 +24,11 @@ import { getStorage } from './utils/storage.js';
 export const COMPONENTS = [
   initTheme,
   initBurger,
+  initAuthMenu,
   initAccordion,
   initNotationFilter,
   initWaitlistForm,
+  initAuthForm,
   initDashboard,
   initAppSearch,
   initSettings,

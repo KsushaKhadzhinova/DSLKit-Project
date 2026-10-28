@@ -38,6 +38,14 @@
             <li class="nav__item"><a class="nav__link" href="#audience">Who it is for</a></li>
             <li class="nav__item"><a class="nav__link" href="#pricing">Pricing</a></li>
             <li class="nav__item"><a class="nav__link" href="#faq">FAQ</a></li>
+            <li class="nav__item nav__item--auth">
+              <div class="auth" data-auth data-home="./">
+                <a class="button auth__button" href="app/login.html" data-auth-guest>Sign in</a>
+                <a class="button button--primary auth__button" href="app/register.html" data-auth-guest>Sign up</a>
+                <a class="auth__link" href="app/dashboard.html" data-auth-user hidden><span data-auth-name>Account</span></a>
+                <button type="button" class="button auth__button" data-auth-logout data-auth-user hidden>Sign out</button>
+              </div>
+            </li>
           </ul>
         </nav>
         <div class="header__tools">

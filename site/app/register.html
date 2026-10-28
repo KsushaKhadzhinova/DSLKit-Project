@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <meta name="description" content="Регистрация в DSLKit: имя, электронная почта и пароль от 8 символов." />
+    <title>Регистрация — DSLKit</title>
+    <meta name="theme-color" content="#2563eb" />
+    <link rel="canonical" href="https://dslkit.io/app/register.html" />
+    <link rel="icon" href="../images/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="../css/style.css" />
+  </head>
+  <body class="page">
+    <a class="skip-link" href="#main">Перейти к основному содержимому</a>
+    <header class="header">
+      <div class="header__inner">
+        <a class="header__logo" href="../index.html">
+          <img class="header__logo-image" src="../images/logo.svg" alt="" width="32" height="32" />
+          <span class="header__logo-text">DSLKit</span>
+        </a>
+        <div class="header__tools">
+          <a class="header__lang" href="../en/app/register.html" hreflang="en" lang="en">English</a>
+          <input class="theme__input" type="checkbox" id="theme-toggle" />
+          <label class="theme__button" for="theme-toggle" title="Тёмная тема"
+            ><svg class="theme__icon theme__icon--moon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">
+              <path
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"
+              /></svg
+            ><svg class="theme__icon theme__icon--sun" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">
+              <circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2" />
+              <path
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"
+              /></svg
+            ><span class="theme__label">Тёмная тема</span></label
+          >
+        </div>
+      </div>
+    </header>
+    <main class="main" id="main">
+      <section class="section" aria-labelledby="auth-title">
+        <h1 class="section__title" id="auth-title">Регистрация</h1>
+        <p class="section__lead">
+          Создайте аккаунт, чтобы подписать свои проекты именем. Аккаунт хранится в этом браузере: сервера нет, пароль сохраняется только в виде хеша.
+        </p>
+        <form class="form auth-form" id="auth-form" data-mode="register" action="register.html" method="post">
+          <p class="form__error" role="alert" id="auth-error" hidden></p>
+          <div class="form__field">
+            <label class="form__label" for="name">Имя</label>
+            <input
+              class="form__input"
+              id="name"
+              name="name"
+              type="text"
+              required
+              minlength="2"
+              maxlength="60"
+              autocomplete="name"
+              aria-describedby="name-hint"
+            />
+            <p class="form__hint" id="name-hint">От 2 до 60 букв. Допустимы пробел, дефис и апостроф.</p>
+            <p class="form__error" role="alert" id="name-error" hidden>
+              Имя не принято: поле пустое, короче двух символов или содержит цифры и знаки. Введите от 2 до 60 букв, например «Ксения».
+            </p>
+          </div>
+          <div class="form__field">
+            <label class="form__label" for="email">Электронная почта</label>
+            <input class="form__input" id="email" name="email" type="email" required maxlength="120" autocomplete="email" aria-describedby="email-hint" />
+            <p class="form__hint" id="email-hint">Адрес вида name@example.com. Он служит логином.</p>
+            <p class="form__error" role="alert" id="email-error" hidden>
+              Адрес не принят: он пустой или не похож на электронную почту. Проверьте, что есть символ «@» и домен после него.
+            </p>
+          </div>
+          <div class="form__field">
+            <label class="form__label" for="password">Пароль</label>
+            <input
+              class="form__input"
+              id="password"
+              name="password"
+              type="password"
+              required
+              minlength="8"
+              maxlength="128"
+              autocomplete="new-password"
+              aria-describedby="password-hint"
+            />
+            <p class="form__hint" id="password-hint">От 8 до 128 символов. Лучше длинная фраза, которую легко запомнить.</p>
+            <p class="form__error" role="alert" id="password-error" hidden>Пароль не принят: нужно от 8 до 128 символов, не только пробелы.</p>
+          </div>
+          <div class="form__field">
+            <label class="form__label" for="confirm">Повторите пароль</label>
+            <input class="form__input" id="confirm" name="confirm" type="password" required minlength="8" maxlength="128" autocomplete="new-password" />
+            <p class="form__error" role="alert" id="confirm-error" hidden>Пароли не совпадают. Введите тот же пароль ещё раз.</p>
+          </div>
+          <button class="button button--primary form__submit" type="submit">Создать аккаунт</button>
+          <p class="form__hint">Уже есть аккаунт? <a class="form__link" href="login.html">Войти</a></p>
+        </form>
+      </section>
+    </main>
+    <footer class="footer">
+      <div class="footer__inner">
+        <nav class="footer__nav" aria-label="Нижняя навигация">
+          <ul class="footer__list">
+            <li class="footer__item"><a class="footer__link" href="../index.html#notations">Нотации</a></li>
+            <li class="footer__item"><a class="footer__link" href="../index.html#pricing">Тарифы</a></li>
+            <li class="footer__item"><a class="footer__link" href="../index.html#faq">Вопросы и ответы</a></li>
+            <li class="footer__item"><a class="footer__link" href="../privacy.html">Политика конфиденциальности</a></li>
+            <li class="footer__item"><a class="footer__link" href="../en/app/register.html" hreflang="en" lang="en">English version</a></li>
+          </ul>
+        </nav>
+        <address class="footer__address">Контакты: <a class="footer__link" href="mailto:hello@dslkit.io">hello@dslkit.io</a></address>
+        <p class="footer__copy"><small>© 2026 DSLKit. Дипломный проект БГУИР.</small></p>
+      </div>
+    </footer>
+    <script type="module" src="../js/script.js"></script>
+  </body>
+</html>
