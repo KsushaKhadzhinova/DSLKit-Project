@@ -64,8 +64,9 @@
 
 /* In the menu of the site, on a phone, the two buttons stand one under the other over the whole width. */
 .nav__item--auth .auth {
-  flex-direction: column;
+  flex-flow: column nowrap;
   align-items: stretch;
+  width: 100%;
 }
 
 /* The top bar of the application is narrow on a phone: the registration button and the name wait for more room. */
@@ -91,17 +92,24 @@
 @media (min-width: 768px) {
   .nav__item--auth {
     margin-top: 0;
-    margin-inline-start: var(--space-1);
+    margin-inline-start: auto;
     padding-top: 0;
     border-top: 0;
   }
 
   .nav__item--auth .auth {
-    flex-direction: row;
+    flex-flow: row nowrap;
+    width: auto;
     align-items: center;
   }
 
   .auth__name {
     display: inline;
+  }
+}
+
+@media (min-width: 1024px) {
+  .nav__item--auth {
+    margin-inline-start: var(--space-1);
   }
 }

@@ -123,6 +123,16 @@
     transform 160ms ease;
 }
 
+/* On a phone the button shows only its icon, the text stays for screen readers. */
+.app-topbar__new span {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 .app-topbar__new:hover {
   filter: brightness(1.1);
   text-decoration: none;
@@ -995,6 +1005,14 @@
 }
 
 @media (min-width: 1024px) {
+  .app-topbar__new span {
+    position: static;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    clip-path: none;
+  }
+
   .app-page {
     grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
     grid-template-rows: var(--header-height) minmax(0, 1fr) auto;

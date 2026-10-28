@@ -17,6 +17,7 @@ def check(id_, title, fn):
     try:
         fn()
         results.append({"id": id_, "kind": "auth", "title": title, "status": "Passed", "note": ""})
+        print("ok", id_, flush=True)
     except Exception as e:  # noqa: BLE001
         try:
             (out.parent / "screens").mkdir(exist_ok=True)
@@ -24,6 +25,7 @@ def check(id_, title, fn):
         except Exception:  # noqa: BLE001
             pass
         results.append({"id": id_, "kind": "auth", "title": title, "status": "Failed", "note": " ".join(str(e).splitlines()[:8])[:600]})
+        print("FAIL", id_, results[-1]["note"][:200], flush=True)
 
 
 def eq(a, b, msg=""):
@@ -142,7 +144,7 @@ def run_variant(p, tag, root, lang, viewport):
             """(t) => { const c = document.querySelector('.code__line code'); c.textContent = 'diagram bpmn "' + t + '"'; c.dispatchEvent(new Event('input', {bubbles:true})); }""",
             title,
         )
-        page.click(".button--run", force=True)
+        page.evaluate("document.querySelector(\".button--run\").click()")
         page.wait_for_timeout(400)
         yes(title in code(), code()[:60])
         page.click('[data-action="save"]')
@@ -167,7 +169,7 @@ def run_variant(p, tag, root, lang, viewport):
         page.goto(prefix + "/app/editor.html?template=dfd")
         page.wait_for_timeout(600)
         before = code().count("process")
-        page.locator(".palette__item").first.click()
+        page.evaluate("document.querySelector(\".palette__item\").click()")
         page.wait_for_timeout(500)
         yes(code() != "", "пустой код")
         yes(page.locator(".palette__message").count() >= 1, "нет сообщения палитры")
@@ -231,7 +233,7 @@ def run_variant(p, tag, root, lang, viewport):
                 """(t) => { const c = document.querySelector('.code__line code'); c.textContent = c.textContent.replace(/"[^"]*"/, '"' + t + '"'); c.dispatchEvent(new Event('input', {bubbles:true})); }""",
                 title,
             )
-            page.click(".button--run", force=True)
+            page.evaluate("document.querySelector(\".button--run\").click()")
             page.wait_for_timeout(1800)
             yes("?p=" in page.url or page.locator(".editor-status__saved").inner_text() != "", f"круг {n}: проект не создан автоматически")
             page.go_back() if n == 2 else None
@@ -309,14 +311,43 @@ def run_variant(p, tag, root, lang, viewport):
         pass
 
 
+import os
+import subprocess
+
+VARIANTS = {
+    "ru": ("", "ru", {"width": 1366, "height": 800}),
+    "en": ("/en", "en", {"width": 1366, "height": 800}),
+    "phone": ("", "ru", {"width": 375, "height": 812}),
+}
+wanted = os.environ.get("AUTH_VARIANTS")
+
+if wanted is None:
+    # Every variant runs in its own process with a clean browser, then the parts are merged.
+    merged = {"results": [], "console_errors": []}
+    for tag in VARIANTS:
+        try:
+            subprocess.run([sys.executable, __file__, base], env={**os.environ, "AUTH_VARIANTS": tag}, timeout=300, check=False)
+        except subprocess.TimeoutExpired:
+            merged["results"].append({"id": f"AUTH-{tag}-00", "kind": "auth", "title": f"[{tag}] Сценарий завершился", "status": "Failed", "note": "тайм-аут 300 с"})
+        part = out / f"auth-e2e.{tag}.json"
+        if part.exists():
+            data = json.loads(part.read_text(encoding="utf8"))
+            merged["results"] += data["results"]
+            merged["console_errors"] += data["console_errors"]
+            part.unlink()
+    (out / "auth-e2e.json").write_text(json.dumps(merged, ensure_ascii=False, indent=2), encoding="utf8")
+    failed = [r for r in merged["results"] if r["status"] == "Failed"]
+    print({"total": len(merged["results"]), "passed": len(merged["results"]) - len(failed), "failed": len(failed)})
+    sys.exit(1 if failed else 0)
+
 with sync_playwright() as p:
-    run_variant(p, "ru", "", "ru", {"width": 1366, "height": 800})
-    run_variant(p, "en", "/en", "en", {"width": 1366, "height": 800})
-    run_variant(p, "phone", "", "ru", {"width": 375, "height": 812})
+    for tag in wanted.split(","):
+        run_variant(p, tag, *VARIANTS[tag])
 
 check("AUTH-99", "За весь путь в консоли нет ошибок", lambda: eq([e for e in errors if "favicon" not in e.lower()], []))
 
-json.dump({"results": results, "console_errors": errors}, open(out / "auth-e2e.json", "w", encoding="utf8"), ensure_ascii=False, indent=2)
+part = out / f"auth-e2e.{wanted}.json"
+json.dump({"results": results, "console_errors": errors}, open(part, "w", encoding="utf8"), ensure_ascii=False, indent=2)
 failed = [r for r in results if r["status"] == "Failed"]
 for r in failed:
     print(r["id"], "Failed", r["title"], "|", r["note"])

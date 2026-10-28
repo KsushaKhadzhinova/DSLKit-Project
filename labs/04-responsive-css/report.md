@@ -1156,21 +1156,21 @@ label > span {
   }
 
   .header__tools {
-    grid-column: auto;
-    grid-row: auto;
+    grid-column: 3;
+    grid-row: 1;
   }
 
   .nav {
     display: block;
-    grid-column: auto;
-    grid-row: auto;
-    padding-bottom: 0;
+    grid-column: 1 / -1;
+    grid-row: 2;
+    padding-bottom: var(--space-1);
   }
 
   .nav__list {
     flex-flow: row wrap;
     gap: 0;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
   }
 
@@ -1202,8 +1202,15 @@ label > span {
     gap: var(--space-3);
   }
 
+  .nav {
+    grid-column: auto;
+    grid-row: auto;
+    padding-bottom: 0;
+  }
+
   .nav__list {
     gap: var(--space-1);
+    justify-content: center;
   }
 
   .nav__link {
