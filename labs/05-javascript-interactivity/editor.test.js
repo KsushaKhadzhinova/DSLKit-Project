@@ -6,7 +6,28 @@ import { initEditor } from '../../site/js/components/editor.js';
 import { createMemoryBackend, createStorage } from '../../site/js/utils/storage.js';
 
 const html = readFileSync('site/app/editor.html', 'utf8');
-const load = () => new JSDOM(html, { url: 'http://localhost/' }).window;
+// The page has one file; the tab machinery is written for several, so the tests add a second tab and its panel.
+const load = () => {
+  const window = new JSDOM(html, { url: 'http://localhost/' }).window;
+  const { document } = window;
+  const second = document.createElement('button');
+  second.type = 'button';
+  second.setAttribute('role', 'tab');
+  second.id = 'tab-rules';
+  second.className = 'editor-tabs__tab';
+  second.setAttribute('aria-selected', 'false');
+  second.setAttribute('aria-controls', 'rules-panel');
+  second.tabIndex = -1;
+  second.innerHTML = '<span>rules.dsl</span>';
+  document.querySelector('.editor-tabs__list').append(second);
+  const panel = document.createElement('div');
+  panel.className = 'editor-panel';
+  panel.id = 'rules-panel';
+  panel.setAttribute('role', 'tabpanel');
+  panel.hidden = true;
+  document.querySelector('#editor-panel').after(panel);
+  return window;
+};
 const memory = () => createStorage(createMemoryBackend());
 const setup = (storage = memory()) => {
   const window = load();
@@ -231,7 +252,29 @@ test('the dialog names the active file, resets its result and the close button d
   dialog.returnValue = 'discard';
   dialog.dispatchEvent(new window.Event('close'));
   assert.equal(dialog.returnValue, '');
+  const events = [];
+  document.querySelector('.app-page--editor').addEventListener('dslkit:close', () => events.push('close'));
   dialog.returnValue = 'discard';
   dialog.dispatchEvent(new window.Event('close'));
-  assert.equal(closeButton.hidden, true);
+  assert.deepEqual(events, ['close']);
+});
+
+test('the dialog says the file is closed and Save saves it before the editor is left, in English too', () => {
+  const { window, document } = setup();
+  const english = new JSDOM(readFileSync('site/en/app/editor.html', 'utf8'), { url: 'http://localhost/' }).window;
+  initEditor({ root: english.document, storage: memory() });
+  click(english, english.document.querySelector('.editor-tabs__close'));
+  assert.match(english.document.querySelector('.modal__text').textContent, /^Close the file order\.dsl\?/);
+  const events = [];
+  const page = document.querySelector('.app-page--editor');
+  ['dslkit:save', 'dslkit:close'].forEach((name) => page.addEventListener(name, () => events.push(name)));
+  const dialog = document.querySelector('#close-tab-modal');
+  click(window, tab(document, 'tab-rules'));
+  dialog.returnValue = 'save';
+  dialog.dispatchEvent(new window.Event('close'));
+  assert.deepEqual(events, ['dslkit:save']);
+  click(window, tab(document, 'tab-rules'));
+  dialog.returnValue = 'cancel';
+  dialog.dispatchEvent(new window.Event('close'));
+  assert.deepEqual(events, ['dslkit:save']);
 });

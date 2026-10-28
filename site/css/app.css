@@ -1128,3 +1128,12 @@
 .project-card__actions[hidden] {
   display: none;
 }
+
+.app-topbar__avatar {
+  text-decoration: none;
+}
+.project-card__link[aria-disabled='true'] {
+  color: var(--color-muted);
+  cursor: default;
+  text-decoration: none;
+}

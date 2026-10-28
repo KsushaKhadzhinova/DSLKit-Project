@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { NOTATIONS, TEMPLATES, parseDiagram } from '../../site/js/notations/index.js';
-import { addElement, connectElements, gate, linksFor, nextId, paletteFor } from '../../site/js/utils/palette.js';
+import { addElement, connectElements, gate, linksFor, nextId, paletteFor, removeElement } from '../../site/js/utils/palette.js';
 
 test('every notation gets a palette from its own statements, and an unknown one gets none', () => {
   assert.deepEqual(
@@ -98,4 +98,35 @@ test('every link of every notation writes one statement that names both ends', (
 test('a place that is not a number is dropped and the element is still added', () => {
   const result = addElement(TEMPLATES.dfd, 'dfd', paletteFor('dfd')[1], { x: Number.NaN, y: 1 });
   assert.ok(result.code.endsWith('process P1 "Process"'));
+});
+
+test('removing an element takes its block and every link that touches it', () => {
+  const box = removeElement(TEMPLATES.idef0, 'A2');
+  assert.equal(box.links, 2);
+  assert.ok(!box.code.includes('A2'));
+  assert.ok(box.code.includes('box A1') && box.code.includes('box A3'));
+  assert.deepEqual(
+    parseDiagram(box.code).problems.filter((item) => item.severity === 'error'),
+    [],
+  );
+  const process = removeElement(TEMPLATES.dfd, '2');
+  assert.equal(process.links, 4);
+  assert.ok(process.code.includes('Customer') && !process.code.includes('process 2'));
+  assert.equal(removeElement(TEMPLATES.erd, 'Customer').links, 2);
+  assert.equal(removeElement(TEMPLATES['uml-class'], 'Customer').links, 2);
+  assert.equal(removeElement(TEMPLATES['uml-sequence'], 'Shop').links, 5);
+});
+
+test('removing keeps comments and quoted words, and reports an unknown element', () => {
+  const code = ['diagram dfd "T"', '// flow a -> b mentions a', 'entity a "flow a -> b"', 'entity b', 'process 1 "p"', 'flow a -> 1 "x"', 'flow 1 -> b'].join(
+    '\n',
+  );
+  const result = removeElement(code, 'a');
+  assert.equal(result.links, 1);
+  assert.ok(result.code.includes('// flow a -> b mentions a'));
+  assert.ok(!result.code.includes('entity a'));
+  assert.equal(removeElement(code, 'nope'), null);
+  const open = removeElement(['diagram erd "T"', 'entity A {', '  id: int pk'].join('\n'), 'A');
+  assert.equal(open.code, 'diagram erd "T"');
+  assert.equal(removeElement('entity X.Y', 'X.Y').code, '');
 });

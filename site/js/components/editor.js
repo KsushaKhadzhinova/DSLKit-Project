@@ -75,25 +75,36 @@ const initCloseDialog = ({ page, root, tabs, tabsApi }) => {
     });
   };
 
+  // Closing the last open file leaves the editor: the project list is shown.
+  const announce = (name) => page.dispatchEvent(new root.defaultView.CustomEvent(name, { bubbles: true }));
   const discard = () => {
     const index = current();
     tabs[index].hidden = true;
     panels[index].hidden = true;
     const next = tabs.findIndex((tab) => !tab.hidden);
     if (next >= 0) select(next);
-    else if (closeButton) closeButton.hidden = true;
+    else announce('dslkit:close');
   };
 
   closeButton?.addEventListener('click', () => {
     if (!dialog) return;
     dialog.returnValue = '';
-    if (dialogText) dialogText.textContent = `В файле ${tabName(current())} есть несохранённые изменения.`;
+    if (dialogText) {
+      const name = tabName(current());
+      dialogText.textContent =
+        root.documentElement.lang === 'en'
+          ? `Close the file ${name}? Unsaved changes are lost unless you save.`
+          : `Закрыть файл ${name}? Несохранённые изменения будут потеряны, если не сохранить.`;
+    }
     if (typeof dialog.showModal === 'function') dialog.showModal();
     else dialog.setAttribute('open', '');
   });
   dialog?.addEventListener('close', () => {
-    if (dialog.returnValue === 'save') markSaved();
-    else if (dialog.returnValue === 'discard') discard();
+    if (dialog.returnValue === 'save') {
+      announce('dslkit:save');
+      markSaved();
+      discard();
+    } else if (dialog.returnValue === 'discard') discard();
     dialog.returnValue = '';
   });
   return { markSaved };

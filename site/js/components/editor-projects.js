@@ -1,11 +1,12 @@
 import { readCode, showCode } from './code-lines.js';
 import { TEMPLATES, parseDiagram } from '../notations/index.js';
-import { createProjectStore } from '../storage/projects.js';
+import { createProjectStore, showQuota } from '../storage/projects.js';
 
 const TEXTS = {
   saved: { ru: 'Сохранено в «Мои проекты»: {title}', en: 'Saved to "My projects": {title}' },
   notFound: { ru: 'Проект не найден, открыта новая диаграмма.', en: 'The project is not found, a new diagram is open.' },
   untitled: { ru: 'Без названия', en: 'Untitled' },
+  fresh: { ru: 'Новая диаграмма (не сохранена)', en: 'New diagram (not saved)' },
 };
 export const PROJECT_AUTOSAVE_MS = 1000;
 
@@ -21,7 +22,7 @@ const fileName = (title) =>
 // Connects the editor to the list of projects. The address says what to open: ?p=<id> is a saved project,
 // ?template=<name> a starter, nothing is a new diagram. The Save button and Ctrl+S create the project,
 // after that the autosave keeps it up to date. The project appears on the "My projects" page.
-export const initEditorProjects = ({ root = document, storage, now = () => Date.now(), setTimer = setTimeout, clearTimer = clearTimeout } = {}) => {
+export const initEditorProjects = ({ root = document, storage, now = () => Date.now(), setTimer = setTimeout, clearTimer = clearTimeout, navigate } = {}) => {
   const page = root.querySelector('.app-page--editor');
   const codeLines = page?.querySelector('.code__lines');
   if (!codeLines) return null;
@@ -32,6 +33,7 @@ export const initEditorProjects = ({ root = document, storage, now = () => Date.
   const switchButton = page.querySelector('.editor-toolbar__switch');
   const params = new view.URLSearchParams(view.location.search);
   const run = () => page.dispatchEvent(new view.CustomEvent('dslkit:run', { bubbles: true }));
+  const go = navigate ?? ((url) => view.location.assign(url));
 
   let project = params.has('p') ? store.get(params.get('p')) : null;
   let lastSaved = null;
@@ -60,6 +62,37 @@ export const initEditorProjects = ({ root = document, storage, now = () => Date.
   carryQuery();
   run();
 
+  // The explorer lists the saved projects of the user; pressing one opens it, the open one is marked.
+  const tree = page.querySelector('.file-tree');
+  const quotaText = page.querySelector('#quota-text');
+  const quotaBar = page.querySelector('.editor-sidebar__beta progress');
+  const renderTree = () => {
+    showQuota(quotaText, quotaBar, store.createdOn(), lang);
+    if (!tree) return;
+    const rows = store.list().map((item) => ({ id: item.id, label: fileName(item.title), active: item.id === project?.id }));
+    if (!project) rows.unshift({ id: '', label: TEXTS.fresh[lang], active: true });
+    tree.replaceChildren(
+      ...rows.map((row) => {
+        const li = root.createElement('li');
+        const button = root.createElement('button');
+        button.type = 'button';
+        button.className = `file-tree__item${row.active ? ' file-tree__item--active' : ''}`;
+        button.dataset.project = row.id;
+        if (row.active) button.setAttribute('aria-current', 'true');
+        button.textContent = row.label;
+        li.append(button);
+        return li;
+      }),
+    );
+  };
+  tree?.addEventListener('click', (event) => {
+    const id = event.target.closest('[data-project]')?.dataset.project;
+    if (id && id !== project?.id) go(`${view.location.pathname}?p=${encodeURIComponent(id)}`);
+  });
+  renderTree();
+  // Closing the last file leaves the editor for the list of projects.
+  page.addEventListener('dslkit:close', () => go('dashboard.html'));
+
   const save = () => {
     const source = readCode(codeLines);
     const model = parseDiagram(source);
@@ -71,6 +104,7 @@ export const initEditorProjects = ({ root = document, storage, now = () => Date.
     params.delete('template');
     view.history.replaceState(null, '', `${view.location.pathname}?${params}`);
     carryQuery();
+    renderTree();
     if (note) note.textContent = TEXTS.saved[lang].replace('{title}', project.title);
     return project;
   };

@@ -27,20 +27,19 @@
   z-index: 10;
   border-bottom: 1px solid var(--color-border);
   background: var(--color-surface);
-  position: sticky;
-  top: 0;
 }
 
+/* On a phone the action bar stays: undo, redo, save and the menu with check, format, share, layout, import, export and theme */
 .editor-toolbar__row {
-  display: none;
-  flex-wrap: wrap;
+  display: flex;
+  flex-wrap: nowrap;
   align-items: center;
-  gap: var(--space-1) var(--space-2);
-  min-height: var(--toolbar-height);
-  padding: var(--space-1) var(--space-3);
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-2);
 }
 
 .editor-toolbar__logo {
+  display: none;
   margin-right: var(--space-1);
   color: var(--color-text);
   font-size: var(--step-0);
@@ -50,7 +49,7 @@
 }
 
 .editor-toolbar__run {
-  display: flex;
+  display: none;
   align-items: center;
   gap: var(--space-2);
 }
@@ -855,6 +854,18 @@
 
   .editor-toolbar__row {
     display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1) var(--space-2);
+    min-height: var(--toolbar-height);
+    padding: var(--space-1) var(--space-3);
+  }
+
+  .editor-toolbar__logo {
+    display: revert;
+  }
+
+  .editor-toolbar__run {
+    display: flex;
   }
 
   .editor-activity {
@@ -1498,6 +1509,62 @@
 .notation__node--selected ellipse,
 .notation__node--selected polygon,
 .notation__node--selected path {
+  stroke: var(--color-primary);
+  stroke-width: 3;
+}
+
+/* The text field of the code lies over the coloured lines and has the same font, so the caret stands where the text is drawn */
+.code {
+  position: relative;
+}
+.code__lines {
+  position: relative;
+  z-index: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.code__input {
+  position: absolute;
+  z-index: 1;
+  top: var(--space-2);
+  left: 0;
+  box-sizing: border-box;
+  min-width: 100%;
+  margin: 0;
+  padding: 0 var(--space-3) 0 calc(var(--space-1) + 3.5ch + var(--space-2));
+  border: 0;
+  outline: none;
+  resize: none;
+  overflow: hidden;
+  background: transparent;
+  color: transparent;
+  caret-color: var(--color-code-text);
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  line-height: 1.6;
+  white-space: pre;
+  tab-size: 2;
+}
+.code__input::selection {
+  background: rgb(37 99 235 / 0.5);
+  background: color-mix(in srgb, var(--color-primary) 55%, transparent);
+  color: transparent;
+}
+.code:focus-within {
+  outline: 2px solid var(--color-primary);
+  outline-offset: -2px;
+}
+
+.palette__remove {
+  inline-size: 100%;
+  margin-block-start: var(--space-1);
+  justify-content: flex-start;
+}
+.notation__node--picked rect,
+.notation__node--picked ellipse,
+.notation__node--picked polygon,
+.notation__node--picked path {
   stroke: var(--color-primary);
   stroke-width: 3;
 }

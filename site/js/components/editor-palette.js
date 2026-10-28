@@ -1,7 +1,7 @@
 import { readCode, showCode } from './code-lines.js';
 import { pointInDrawing } from './canvas-drag.js';
 import { parseDiagram } from '../notations/index.js';
-import { addElement, connectElements, gate, linksFor, paletteFor } from '../utils/palette.js';
+import { addElement, connectElements, gate, linksFor, paletteFor, removeElement } from '../utils/palette.js';
 
 const TEXTS = {
   heading: { ru: 'Элементы', en: 'Elements' },
@@ -15,9 +15,19 @@ const TEXTS = {
   linked: { ru: 'Связь {from} → {to} добавлена.', en: 'The link {from} → {to} is added.' },
   refusedLink: { ru: 'Связь {from} → {to} отклонена: {reason}', en: 'The link {from} → {to} is refused: {reason}' },
   cancelled: { ru: 'Соединение отменено.', en: 'Connecting is cancelled.' },
+  remove: { ru: 'Удалить выбранный', en: 'Delete the selected' },
+  picked: {
+    ru: 'Выбран блок {id}. Delete или кнопка «Удалить выбранный» уберёт его вместе со связями.',
+    en: 'Block {id} is selected. Delete or the button removes it with its links.',
+  },
+  removed: { ru: 'Удалено: {id}, связей: {links}.', en: 'Removed: {id}, links: {links}.' },
+  nothingPicked: { ru: 'Сначала нажмите на блок на доске.', en: 'Press a block on the board first.' },
 };
 const NODE = '.notation__node[data-id]';
 const MOVE_TO_DRAG = 4;
+const NEW_WIDTH = 100;
+const NEW_HEIGHT = 60;
+const MAX_NUDGES = 8;
 
 // The elements the user can put on the board by hand: drag an item of the palette onto the drawing, or press it.
 // The Connect mode joins two blocks. Every change passes the strict gate: the notation must not report a new error.
@@ -47,10 +57,12 @@ export const initEditorPalette = ({ root = document } = {}) => {
   const linkSelect = el('select', 'settings-row__select palette__link');
   linkSelect.setAttribute('aria-label', t('linkKind'));
   connectRow.append(mode, linkSelect);
+  const removeButton = el('button', 'button button--quiet palette__remove', t('remove'));
+  removeButton.type = 'button';
   const message = el('p', 'palette__message');
   message.setAttribute('role', 'status');
   message.setAttribute('aria-live', 'polite');
-  sidebar.append(heading, hint, list, connectRow, message);
+  sidebar.append(heading, hint, list, connectRow, removeButton, message);
 
   const code = () => readCode(codeLines);
   const write = (text) => {
@@ -115,6 +127,28 @@ export const initEditorPalette = ({ root = document } = {}) => {
     add(Number(button.dataset.index), null);
   });
 
+  // A block dropped onto another block would hide under it, so the new one moves down to the first free place.
+  // The size of a new block is taken as about 200 by 120 units of the drawing, whatever the zoom is.
+  const freeSpot = (svg, x, y) => {
+    const box = svg.getBoundingClientRect();
+    const scale = box.width / Number((svg.getAttribute('viewBox') ?? '').split(/\s+/)[2] || box.width);
+    const halfWidth = NEW_WIDTH * scale;
+    const halfHeight = NEW_HEIGHT * scale;
+    const rects = [...remote.querySelectorAll(NODE)].map((node) => node.getBoundingClientRect()).filter((rect) => rect.width > 0);
+    const hit = (py) =>
+      rects.find((rect) => x >= rect.left - halfWidth && x <= rect.right + halfWidth && py >= rect.top - halfHeight && py <= rect.bottom + halfHeight);
+    let at = y;
+    for (let tries = 0; tries < MAX_NUDGES && hit(at); tries += 1) {
+      const lowest = Math.max(
+        ...rects
+          .filter((rect) => at >= rect.top - halfHeight && at <= rect.bottom + halfHeight && x >= rect.left - halfWidth && x <= rect.right + halfWidth)
+          .map((rect) => rect.bottom),
+      );
+      at = lowest + halfHeight + 1;
+    }
+    return { x, y: Math.min(at, box.bottom - halfHeight) };
+  };
+
   // Drag: the item follows the pointer and is dropped on the drawing at the place where the pointer is released.
   let drag = null;
   list.addEventListener('pointerdown', (event) => {
@@ -145,8 +179,10 @@ export const initEditorPalette = ({ root = document } = {}) => {
     ghost.remove();
     justDragged = true;
     const svg = remote.querySelector('svg');
-    if (svg && inside(svg, event.clientX, event.clientY)) add(index, pointInDrawing(svg, event.clientX, event.clientY));
-    else say(t('hint'));
+    if (svg && inside(svg, event.clientX, event.clientY)) {
+      const spot = freeSpot(svg, event.clientX, event.clientY);
+      add(index, pointInDrawing(svg, spot.x, spot.y));
+    } else say(t('hint'));
   });
   root.addEventListener('pointercancel', () => {
     drag?.ghost?.remove();
@@ -222,10 +258,41 @@ export const initEditorPalette = ({ root = document } = {}) => {
     }
   });
 
+  // Delete: a block pressed on the board is selected, Delete or the button removes it with the links that touch it.
+  let picked = null;
+  const markPicked = () => {
+    remote.querySelectorAll('.notation__node--picked').forEach((node) => node.classList.remove('notation__node--picked'));
+    [...remote.querySelectorAll(NODE)].find((node) => node.dataset.id === picked)?.classList.add('notation__node--picked');
+  };
+  const removeSelected = (id) => {
+    if (id === null) return say(t('nothingPicked'));
+    const result = removeElement(code(), id);
+    picked = null;
+    if (result === null) return say(t('nothingPicked'));
+    write(result.code);
+    return say(t('removed', { id, links: result.links }));
+  };
+  remote.addEventListener('click', (event) => {
+    if (connecting()) return;
+    const node = event.target.closest(NODE);
+    picked = node ? node.dataset.id : null;
+    markPicked();
+    if (node) say(t('picked', { id: picked }));
+  });
+  remote.addEventListener('keydown', (event) => {
+    const node = event.target.closest?.(NODE);
+    if (!connecting() && node && (event.key === 'Delete' || event.key === 'Backspace')) {
+      event.preventDefault();
+      removeSelected(node.dataset.id);
+    }
+  });
+  removeButton.addEventListener('click', () => removeSelected(picked));
+
   page.addEventListener('dslkit:run', () => {
     clearSelection();
     refresh();
+    markPicked();
   });
   refresh();
-  return { refresh, add, notation: () => notation, connecting };
+  return { refresh, add, notation: () => notation, connecting, picked: () => picked };
 };

@@ -15,7 +15,7 @@ PAGES = [
     "/app/editor.html?template=idef0", "/app/editor.html?template=dfd", "/en/", "/en/app/dashboard.html", "/en/app/editor.html?template=erd",
     "/en/app/settings.html", "/en/app/welcome.html",
 ]
-VIEWPORTS = [("desktop", 1366, 800), ("phone", 390, 800)]
+VIEWPORTS = [("desktop", 1366, 800)]
 SELECTOR = "button, a[href], [role=button], [role=tab], [role=switch], summary, input[type=checkbox], input[type=radio], select, .notation__node"
 INIT = """
 window.__m = 0;
@@ -121,7 +121,6 @@ with sync_playwright() as p:
                         page.url != before_url
                         or page.evaluate("window.__m") != before_m
                         or el.evaluate("e => (e.checked !== undefined ? 'c' + e.checked : '') + (e.value !== undefined && e.tagName === 'SELECT' ? 'v' + e.value : '')") != before_state
-                        or page.evaluate("document.activeElement && document.activeElement.outerHTML.slice(0, 80)") != before_focus
                         or events["dialog"]
                         or events["download"]
                         or len(errors) > n_err

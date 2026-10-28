@@ -192,3 +192,76 @@ test('the link type is taken from the list of the notation', () => {
   pickBlock(t, 'Order');
   assert.match(t.code(), /relationship Customer 1:N Order$/);
 });
+
+const stubRect = (node, left, top, width, height) => {
+  node.getBoundingClientRect = () => ({ left, top, right: left + width, bottom: top + height, width, height });
+};
+const dropOn = (t, x, y) => {
+  const item = t.document.querySelectorAll('.palette__item')[1];
+  t.fire(item, 'pointerdown', { clientX: 10, clientY: 10, button: 0 });
+  t.fire(t.document, 'pointermove', { clientX: 200, clientY: 200 });
+  t.fire(t.document, 'pointerup', { clientX: x, clientY: y });
+};
+
+test('an element dropped onto a block moves down to the first free place, and stays inside the drawing', () => {
+  const t = setup();
+  const nodes = t.remote.querySelectorAll('.notation__node');
+  stubRect(nodes[0], 200, 200, 100, 60);
+  stubRect(nodes[1], 200, 260, 100, 60);
+  stubRect(nodes[2], 400, 440, 100, 40);
+  dropOn(t, 250, 230);
+  assert.match(t.code(), /pos=150x281$/);
+  dropOn(t, 450, 450);
+  assert.match(t.code(), /pos=350x340$/);
+  dropOn(t, 600, 300);
+  assert.match(t.code(), /pos=500x200$/);
+});
+
+test('a drawing without a viewBox still gets its element dropped at the pointer', () => {
+  const t = setup();
+  t.remote.querySelector('svg').removeAttribute('viewBox');
+  dropOn(t, 250, 230);
+  assert.match(t.code(), /process P1 "Process" pos=150x130$/);
+});
+
+test('a pressed block is selected, Delete and the button remove it with its links', () => {
+  const t = setup();
+  const press = (node) => node.dispatchEvent(new t.window.MouseEvent('click', { bubbles: true }));
+  const key = (node, init) => node.dispatchEvent(new t.window.KeyboardEvent('keydown', { bubbles: true, cancelable: true, ...init }));
+  const button = t.$('.palette__remove');
+  t.fire(button, 'click');
+  assert.equal(t.$('.palette__message').textContent, 'Сначала нажмите на блок на доске.');
+  press(t.remote.querySelector('[data-id="Bank"]'));
+  assert.equal(t.api.picked(), 'Bank');
+  assert.ok(t.remote.querySelector('[data-id="Bank"]').classList.contains('notation__node--picked'));
+  assert.match(t.$('.palette__message').textContent, /Выбран блок Bank/);
+  press(t.remote.querySelector('svg'));
+  assert.equal(t.api.picked(), null);
+  assert.equal(t.remote.querySelectorAll('.notation__node--picked').length, 0);
+  press(t.remote.querySelector('[data-id="Bank"]'));
+  t.fire(button, 'click');
+  assert.equal(t.$('.palette__message').textContent, 'Удалено: Bank, связей: 2.');
+  assert.ok(!t.code().includes('Bank'));
+  press(t.remote.querySelector('[data-id="Customer"]'));
+  assert.equal(key(t.remote.querySelector('[data-id="Customer"]'), { key: 'a' }), true);
+  assert.equal(key(t.remote.querySelector('[data-id="Customer"]'), { key: 'Delete' }), false);
+  assert.ok(!t.code().includes('Customer'));
+  assert.equal(key(t.remote.querySelector('svg'), { key: 'Delete' }), true);
+  t.fire(t.remote.querySelector('[data-id="2"]'), 'click');
+  t.remote.querySelector('[data-id="2"]').dispatchEvent(new t.window.KeyboardEvent('keydown', { bubbles: true, key: 'Backspace' }));
+  assert.ok(!t.code().includes('process 2'));
+});
+
+test('a block that is gone from the code says so and the Connect mode does not select', () => {
+  const t = setup();
+  t.remote.innerHTML = '<svg viewBox="0 0 600 400"><g class="notation__node" data-id="Ghost"></g></svg>';
+  t.remote.querySelector('[data-id="Ghost"]').dispatchEvent(new t.window.MouseEvent('click', { bubbles: true }));
+  t.fire(t.$('.palette__remove'), 'click');
+  assert.equal(t.$('.palette__message').textContent, 'Сначала нажмите на блок на доске.');
+  t.fire(t.$('.palette__mode'), 'click');
+  t.remote.querySelector('[data-id="Ghost"]').dispatchEvent(new t.window.MouseEvent('click', { bubbles: true }));
+  assert.equal(t.api.picked(), null);
+  const key = new t.window.KeyboardEvent('keydown', { bubbles: true, cancelable: true, key: 'Delete' });
+  t.remote.querySelector('[data-id="Ghost"]').dispatchEvent(key);
+  assert.equal(key.defaultPrevented, false);
+});

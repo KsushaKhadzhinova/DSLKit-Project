@@ -8,7 +8,7 @@ const escapeRegExp = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 const outsideQuotes = (line) => line.split(QUOTED).map((part, index) => (index % 2 === 0 ? part : '""'));
 
 // A line that declares the node: a keyword and the id, no arrow, not the header.
-const declares = (line, id) => {
+export const declares = (line, id) => {
   const text = outsideQuotes(line).join('').trim();
   return !text.startsWith('diagram ') && !text.includes('->') && new RegExp(`^(?:abstract\\s+)?[\\w-]+\\s+${escapeRegExp(id)}(\\s|$)`).test(text);
 };

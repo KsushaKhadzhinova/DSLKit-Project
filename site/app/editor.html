@@ -153,35 +153,7 @@
 
     <nav class="editor-sidebar" aria-label="Файлы и шаблоны">
       <h2 class="editor-sidebar__heading">Проводник</h2>
-      <ul class="file-tree">
-        <li>
-          <button type="button" class="file-tree__item file-tree__item--active" data-file="order" aria-current="true">
-            <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
-              <path d="M5 3h7l3 3v11H5z" />
-              <path d="M12 3v3h3" />
-            </svg>
-            <span>order.dsl</span>
-          </button>
-        </li>
-        <li>
-          <button type="button" class="file-tree__item" data-file="rules">
-            <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
-              <path d="M5 3h7l3 3v11H5z" />
-              <path d="M12 3v3h3" />
-            </svg>
-            <span>rules.dsl</span>
-          </button>
-        </li>
-        <li>
-          <button type="button" class="file-tree__item" data-file="invoice">
-            <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
-              <path d="M5 3h7l3 3v11H5z" />
-              <path d="M12 3v3h3" />
-            </svg>
-            <span>invoice.dsl</span>
-          </button>
-        </li>
-      </ul>
+      <ul class="file-tree"></ul>
 
       <div class="editor-sidebar__beta">
         <p id="quota-text">Бета: 3 из 5 сегодня</p>
@@ -243,9 +215,6 @@
             <span class="editor-tabs__dot" aria-hidden="true"></span>
             <span class="visually-hidden">не сохранено</span>
           </button>
-          <button type="button" role="tab" id="tab-rules" class="editor-tabs__tab" aria-selected="false" aria-controls="rules-panel" tabindex="-1">
-            <span>rules.dsl</span>
-          </button>
         </div>
         <button
           type="button"
@@ -262,7 +231,7 @@
       </div>
 
       <div class="editor-panel" id="editor-panel" role="tabpanel" aria-labelledby="tab-order">
-        <section class="code" aria-label="Код DSL" tabindex="0">
+        <section class="code" aria-label="Код DSL">
           <ol class="code__lines">
             <li class="code__line">
               <code><span class="code__keyword">diagram</span> idef0 <span class="code__string">"Order process"</span></code>
@@ -290,11 +259,8 @@
               <code><span class="code__keyword">arrow</span> A0.output -&gt; A1.input</code>
             </li>
           </ol>
+          <textarea class="code__input" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" wrap="off" aria-label="Код DSL"></textarea>
         </section>
-      </div>
-
-      <div class="editor-panel" id="rules-panel" role="tabpanel" aria-labelledby="tab-rules" hidden>
-        <p class="editor-panel__placeholder">Файл rules.dsl</p>
       </div>
 
       <figure class="canvas" id="canvas-figure">

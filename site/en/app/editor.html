@@ -18,7 +18,7 @@
       <h1 class="visually-hidden">Editor order.dsl</h1>
 
       <div class="editor-toolbar__row">
-        <a class="editor-toolbar__logo" href="../../app/dashboard.html"
+        <a class="editor-toolbar__logo" href="dashboard.html"
           ><img class="app-topbar__logo-image" src="../../images/logo-editor.svg" alt="" width="24" height="24" /><span class="app-topbar__logo-text"
             >DSLKit</span
           ></a
@@ -143,7 +143,7 @@
           <path d="M10 3l1.6 4.4L16 9l-4.4 1.6L10 15l-1.6-4.4L4 9l4.4-1.6z" />
         </svg>
       </button>
-      <a class="editor-activity__button editor-activity__settings" href="../../app/settings.html" aria-label="Settings" data-tip="Settings">
+      <a class="editor-activity__button editor-activity__settings" href="settings.html" aria-label="Settings" data-tip="Settings">
         <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
           <circle cx="10" cy="10" r="3" />
           <path d="M10 2v3M10 15v3M2 10h3M15 10h3M4.5 4.5l2 2M13.5 13.5l2 2M15.5 4.5l-2 2M6.5 13.5l-2 2" />
@@ -153,35 +153,7 @@
 
     <nav class="editor-sidebar" aria-label="Files and templates">
       <h2 class="editor-sidebar__heading">Explorer</h2>
-      <ul class="file-tree">
-        <li>
-          <button type="button" class="file-tree__item file-tree__item--active" data-file="order" aria-current="true">
-            <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
-              <path d="M5 3h7l3 3v11H5z" />
-              <path d="M12 3v3h3" />
-            </svg>
-            <span>order.dsl</span>
-          </button>
-        </li>
-        <li>
-          <button type="button" class="file-tree__item" data-file="rules">
-            <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
-              <path d="M5 3h7l3 3v11H5z" />
-              <path d="M12 3v3h3" />
-            </svg>
-            <span>rules.dsl</span>
-          </button>
-        </li>
-        <li>
-          <button type="button" class="file-tree__item" data-file="invoice">
-            <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
-              <path d="M5 3h7l3 3v11H5z" />
-              <path d="M12 3v3h3" />
-            </svg>
-            <span>invoice.dsl</span>
-          </button>
-        </li>
-      </ul>
+      <ul class="file-tree"></ul>
 
       <div class="editor-sidebar__beta">
         <p id="quota-text">Beta: 3 of 5 today</p>
@@ -243,9 +215,6 @@
             <span class="editor-tabs__dot" aria-hidden="true"></span>
             <span class="visually-hidden">unsaved</span>
           </button>
-          <button type="button" role="tab" id="tab-rules" class="editor-tabs__tab" aria-selected="false" aria-controls="rules-panel" tabindex="-1">
-            <span>rules.dsl</span>
-          </button>
         </div>
         <button
           type="button"
@@ -262,7 +231,7 @@
       </div>
 
       <div class="editor-panel" id="editor-panel" role="tabpanel" aria-labelledby="tab-order">
-        <section class="code" aria-label="DSL code" tabindex="0">
+        <section class="code" aria-label="DSL code">
           <ol class="code__lines">
             <li class="code__line">
               <code><span class="code__keyword">diagram</span> idef0 <span class="code__string">"Order process"</span></code>
@@ -290,11 +259,8 @@
               <code><span class="code__keyword">arrow</span> A0.output -&gt; A1.input</code>
             </li>
           </ol>
+          <textarea class="code__input" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" wrap="off" aria-label="DSL code"></textarea>
         </section>
-      </div>
-
-      <div class="editor-panel" id="rules-panel" role="tabpanel" aria-labelledby="tab-rules" hidden>
-        <p class="editor-panel__placeholder">File rules.dsl</p>
       </div>
 
       <figure class="canvas" id="canvas-figure">
@@ -469,7 +435,7 @@
         </svg>
         <span>Files</span>
       </button>
-      <a class="editor-bottom-nav__item" href="../../app/settings.html">
+      <a class="editor-bottom-nav__item" href="settings.html">
         <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
           <circle cx="10" cy="10" r="3" />
           <path d="M10 2v3M10 15v3M2 10h3M15 10h3M4.5 4.5l2 2M13.5 13.5l2 2M15.5 4.5l-2 2M6.5 13.5l-2 2" />

@@ -180,17 +180,6 @@ test('without the explorer the menu buttons do nothing', () => {
   assert.equal(document.querySelector('.editor-sidebar'), null);
 });
 
-test('the explorer opens a file as a tab and tells about a file without a tab', () => {
-  const { document, press, note } = setup();
-  press('[data-file="rules"]');
-  assert.equal(document.querySelector('#tab-rules').getAttribute('aria-selected'), 'true');
-  assert.equal(document.querySelector('[data-file="rules"]').getAttribute('aria-current'), 'true');
-  assert.equal(document.querySelector('[data-file="order"]').hasAttribute('aria-current'), false);
-  assert.ok(document.querySelector('[data-file="rules"]').classList.contains('file-tree__item--active'));
-  press('[data-file="invoice"]');
-  assert.equal(note(), 'Файл invoice.dsl пока нельзя открыть.');
-});
-
 test('the banner button shows and hides the problems panel', () => {
   const { document, press } = setup();
   const button = document.querySelector('.editor-banner [data-action="problems"]');

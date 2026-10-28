@@ -2,9 +2,15 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
 import { JSDOM } from 'jsdom';
-import { initDashboard } from '../../site/js/components/dashboard.js';
+import { initDashboard as start } from '../../site/js/components/dashboard.js';
 import { createMemoryBackend, createStorage } from '../../site/js/utils/storage.js';
 
+// The sample cards live in the shared section, most of these tests work with them.
+const initDashboard = (options) => {
+  const api = start(options);
+  api?.show('shared');
+  return api;
+};
 const html = readFileSync('site/app/dashboard.html', 'utf8');
 const load = (source = html) => new JSDOM(source, { url: 'http://localhost/' }).window;
 const memory = () => createStorage(createMemoryBackend());
@@ -19,12 +25,14 @@ test('without the project list nothing is built', () => {
   assert.equal(initDashboard({ root: document, storage: memory() }), null);
 });
 
-test('the dashboard shows all eight projects and a Russian count at the start', () => {
+test('the dashboard shows an example of every notation and a Russian count at the start', () => {
   const { document } = load();
   initDashboard({ root: document, storage: memory() });
-  assert.equal(titles(document).length, 8);
-  assert.equal(document.querySelector('#project-count').textContent, 'Найдено проектов: 8');
+  assert.equal(titles(document).length, 33);
+  assert.equal(document.querySelector('#project-count').textContent, 'Найдено проектов: 33');
   assert.equal(chip(document, 'all').getAttribute('aria-pressed'), 'true');
+  const tags = [...document.querySelectorAll('.project-card__tag')].map((node) => node.textContent);
+  assert.equal(new Set(tags).size, 33);
 });
 
 test('a filter chip shows only projects of that notation and is saved', () => {
@@ -33,10 +41,30 @@ test('a filter chip shows only projects of that notation and is saved', () => {
   const storage = memory();
   initDashboard({ root: document, storage });
   chip(document, 'erd').dispatchEvent(new window.MouseEvent('click', { bubbles: true }));
-  assert.deepEqual(titles(document), ['Shop schema', 'Users & roles']);
+  assert.deepEqual(titles(document), ['Shop']);
   assert.equal(chip(document, 'erd').getAttribute('aria-pressed'), 'true');
   assert.ok(chip(document, 'erd').classList.contains('filter__chip--active'));
   assert.equal(storage.get('dashboard').filter, 'erd');
+});
+
+test('every other notation can be chosen from the list, and the list follows the filter', () => {
+  const window = load();
+  const { document } = window;
+  initDashboard({ root: document, storage: memory() });
+  const others = document.querySelector('#notation-filter');
+  const values = [...others.options].map((option) => option.value).filter(Boolean);
+  assert.equal(values.length, 29);
+  assert.ok(!values.includes('erd') && values.includes('uml-class') && values.includes('petri'));
+  others.value = 'uml-class';
+  others.dispatchEvent(new window.Event('change', { bubbles: true }));
+  assert.equal(titles(document).length, 1);
+  assert.equal(document.querySelector('.project-list__item:not([hidden]) .project-card__tag').textContent, 'UML · Class');
+  assert.equal(chip(document, 'all').getAttribute('aria-pressed'), 'false');
+  chip(document, 'dfd').dispatchEvent(new window.MouseEvent('click', { bubbles: true }));
+  assert.equal(others.value, '');
+  others.value = '';
+  others.dispatchEvent(new window.Event('change', { bubbles: true }));
+  assert.equal(titles(document).length, 33);
 });
 
 test('a click on the group but not on a chip changes nothing', () => {
@@ -44,7 +72,7 @@ test('a click on the group but not on a chip changes nothing', () => {
   const { document } = window;
   initDashboard({ root: document, storage: memory() });
   document.querySelector('.filter').dispatchEvent(new window.MouseEvent('click', { bubbles: true }));
-  assert.equal(titles(document).length, 8);
+  assert.equal(titles(document).length, 33);
 });
 
 test('the search box filters by title ignoring case and shows an empty message', () => {
@@ -52,7 +80,7 @@ test('the search box filters by title ignoring case and shows an empty message',
   const { document } = window;
   initDashboard({ root: document, storage: memory() });
   const search = document.querySelector('.app-topbar__search-input');
-  search.value = ' ORDER ';
+  search.value = ' ORDER process ';
   search.dispatchEvent(new window.Event('input', { bubbles: true }));
   assert.deepEqual(titles(document), ['Order process']);
   search.value = 'zzz';
@@ -84,12 +112,17 @@ test('the sort select reorders the list by name and in reverse', () => {
 
 test('the saved state is restored after a reload', () => {
   const storage = memory();
-  storage.set('dashboard', { filter: 'bpmn', query: 'r', sort: 'name' });
+  storage.set('dashboard', { filter: 'bpmn', query: 'o', sort: 'name' });
   const { document } = load();
   initDashboard({ root: document, storage });
-  assert.deepEqual(titles(document), ['Hiring flow', 'Release process']);
-  assert.equal(document.querySelector('.app-topbar__search-input').value, 'r');
+  assert.equal(titles(document).length, 1);
+  assert.equal(document.querySelector('.app-topbar__search-input').value, 'o');
   assert.equal(document.querySelector('#project-sort').value, 'name');
+  const other = memory();
+  other.set('dashboard', { filter: 'uml-state', query: '', sort: 'newest' });
+  const again = load().document;
+  initDashboard({ root: again, storage: other });
+  assert.equal(again.querySelector('#notation-filter').value, 'uml-state');
 });
 
 test('broken saved values fall back to the defaults', () => {
@@ -107,9 +140,10 @@ test('update works from the API and the English page gets English labels', () =>
   const { document } = load(english);
   const api = initDashboard({ root: document, storage: memory() });
   api.update({ filter: 'dfd' });
-  assert.equal(document.querySelector('#project-count').textContent, 'Projects found: 2');
+  assert.equal(document.querySelector('#project-count').textContent, 'Projects found: 1');
   api.update({ query: 'nothing' });
   assert.equal(document.querySelector('#project-count').textContent, 'No projects found');
+  assert.match(document.querySelector('#notation-filter').options[1].textContent, /[A-Za-z]/);
 });
 
 test('a page without chips, search, sort and count still works', () => {

@@ -20,7 +20,6 @@ const TEXTS = {
   redone: { ru: 'Изменение возвращено.', en: 'Change redone.' },
   nothingUndo: { ru: 'Отменять нечего.', en: 'Nothing to undo.' },
   nothingRedo: { ru: 'Возвращать нечего.', en: 'Nothing to redo.' },
-  noFile: { ru: 'Файл {name} пока нельзя открыть.', en: 'The file {name} cannot be opened yet.' },
 };
 
 // Wires the buttons of the editor that work on the code and the drawing: undo and redo, save, check, format, share, auto layout, theme, zoom and the side panels.
@@ -32,8 +31,8 @@ export const initEditorActions = ({ root = document, storage, clipboard = root.d
   const note = page.querySelector('.editor-status__saved');
   const remote = page.querySelector('.canvas__remote');
   const sidebar = page.querySelector('.editor-sidebar');
-  const say = (key, params = {}) => {
-    const text = TEXTS[key][lang].replace(/\{(\w+)\}/g, (_, name) => params[name]);
+  const say = (key) => {
+    const text = TEXTS[key][lang];
     if (note) note.textContent = text;
     return text;
   };
@@ -159,25 +158,6 @@ export const initEditorActions = ({ root = document, storage, clipboard = root.d
     button.addEventListener('click', () => {
       const open = toggleSidebar();
       button.setAttribute('aria-pressed', String(open));
-    }),
-  );
-
-  // The explorer opens a file as a tab, a file without a tab says so.
-  const files = [...page.querySelectorAll('[data-file]')];
-  files.forEach((button) =>
-    button.addEventListener('click', () => {
-      const tab = root.getElementById(`tab-${button.dataset.file}`);
-      if (!tab) {
-        say('noFile', { name: button.textContent.trim() });
-        return;
-      }
-      tab.click();
-      files.forEach((item) => {
-        const active = item === button;
-        item.classList.toggle('file-tree__item--active', active);
-        if (active) item.setAttribute('aria-current', 'true');
-        else item.removeAttribute('aria-current');
-      });
     }),
   );
 

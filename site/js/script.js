@@ -1,9 +1,11 @@
 import { initAccordion } from './components/accordion.js';
+import { initAppSearch } from './components/app-search.js';
 import { initBurger } from './components/burger.js';
 import { initCanvasDrag } from './components/canvas-drag.js';
 import { initDashboard } from './components/dashboard.js';
 import { initDiagramRunner } from './components/diagram-runner.js';
 import { initEditor } from './components/editor.js';
+import { initCodeInput } from './components/code-input.js';
 import { initEditorActions } from './components/editor-actions.js';
 import { initEditorPalette } from './components/editor-palette.js';
 import { initEditorProjects } from './components/editor-projects.js';
@@ -25,9 +27,11 @@ export const COMPONENTS = [
   initNotationFilter,
   initWaitlistForm,
   initDashboard,
+  initAppSearch,
   initSettings,
   initEditor,
   initEditorProjects,
+  initCodeInput,
   initEditorActions,
   initEditorTools,
   initEditorPalette,

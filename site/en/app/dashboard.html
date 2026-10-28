@@ -36,15 +36,15 @@
         <span>New diagram</span>
       </a>
       <a class="header__lang" href="../../app/dashboard.html" hreflang="ru" lang="ru">Русский</a>
-      <button type="button" class="app-topbar__avatar" aria-label="Profile">
+      <a class="app-topbar__avatar" href="settings.html" aria-label="Profile and settings">
         <span aria-hidden="true">KX</span>
-      </button>
+      </a>
     </header>
 
     <nav class="app-nav" aria-label="Application sections">
       <ul class="app-nav__list">
         <li class="app-nav__item">
-          <a class="app-nav__link" href="dashboard.html" aria-current="page">
+          <a class="app-nav__link" href="dashboard.html" data-section="mine" aria-current="page">
             <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
               <path d="M3 10l7-6 7 6M5 9v7h10V9" />
             </svg>
@@ -60,7 +60,7 @@
           </a>
         </li>
         <li class="app-nav__item">
-          <button type="button" class="app-nav__link">
+          <button type="button" class="app-nav__link" data-section="shared">
             <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
               <circle cx="7" cy="7" r="3" />
               <path d="M2 16c0-3 2-5 5-5s5 2 5 5M14 4a3 3 0 010 6M16 16c0-2-1-4-3-5" />
@@ -69,7 +69,7 @@
           </button>
         </li>
         <li class="app-nav__item">
-          <button type="button" class="app-nav__link">
+          <button type="button" class="app-nav__link" data-section="trash">
             <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
               <path d="M4 6h12M8 6V4h4v2M6 6l1 10h6l1-10" />
             </svg>
@@ -97,6 +97,7 @@
         </div>
 
         <div class="sort">
+          <select id="notation-filter" class="sort__select" aria-label="Other notations"><option value="">Other notations…</option></select>
           <label class="visually-hidden" for="project-sort">Sort</label>
           <select id="project-sort" class="sort__select" name="sort">
             <option value="newest" selected>Newest first</option>
@@ -108,128 +109,7 @@
 
       <p class="dashboard__count" id="project-count" role="status" aria-live="polite"></p>
 
-      <ul class="project-list" id="project-list">
-        <li class="project-list__item" data-notation="idef0">
-          <article class="project-card">
-            <div class="project-card__preview" aria-hidden="true"></div>
-            <h2 class="project-card__title"><a class="project-card__link" href="editor.html?template=idef0">Order process</a></h2>
-            <p class="project-card__notation"><span class="project-card__tag">IDEF0</span> <span class="badge">beta</span></p>
-            <p class="project-card__updated">Edited 2 h ago</p>
-            <button type="button" class="project-card__menu" aria-label="Actions for project Order process">
-              <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
-                <circle cx="5" cy="10" r="1" />
-                <circle cx="10" cy="10" r="1" />
-                <circle cx="15" cy="10" r="1" />
-              </svg>
-            </button>
-          </article>
-        </li>
-        <li class="project-list__item" data-notation="erd">
-          <article class="project-card">
-            <div class="project-card__preview" aria-hidden="true"></div>
-            <h2 class="project-card__title"><a class="project-card__link" href="editor.html?template=erd">Shop schema</a></h2>
-            <p class="project-card__notation"><span class="project-card__tag">ERD</span> <span class="badge">beta</span></p>
-            <p class="project-card__updated">Edited 2 h ago</p>
-            <button type="button" class="project-card__menu" aria-label="Actions for project Shop schema">
-              <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
-                <circle cx="5" cy="10" r="1" />
-                <circle cx="10" cy="10" r="1" />
-                <circle cx="15" cy="10" r="1" />
-              </svg>
-            </button>
-          </article>
-        </li>
-        <li class="project-list__item" data-notation="bpmn">
-          <article class="project-card">
-            <div class="project-card__preview" aria-hidden="true"></div>
-            <h2 class="project-card__title"><a class="project-card__link" href="editor.html?template=bpmn">Hiring flow</a></h2>
-            <p class="project-card__notation"><span class="project-card__tag">BPMN</span></p>
-            <p class="project-card__updated">Edited 2 h ago</p>
-            <button type="button" class="project-card__menu" aria-label="Actions for project Hiring flow">
-              <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
-                <circle cx="5" cy="10" r="1" />
-                <circle cx="10" cy="10" r="1" />
-                <circle cx="15" cy="10" r="1" />
-              </svg>
-            </button>
-          </article>
-        </li>
-        <li class="project-list__item" data-notation="dfd">
-          <article class="project-card">
-            <div class="project-card__preview" aria-hidden="true"></div>
-            <h2 class="project-card__title"><a class="project-card__link" href="editor.html?template=dfd">Data pipeline</a></h2>
-            <p class="project-card__notation"><span class="project-card__tag">DFD</span> <span class="badge">beta</span></p>
-            <p class="project-card__updated">Edited 2 h ago</p>
-            <button type="button" class="project-card__menu" aria-label="Actions for project Data pipeline">
-              <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
-                <circle cx="5" cy="10" r="1" />
-                <circle cx="10" cy="10" r="1" />
-                <circle cx="15" cy="10" r="1" />
-              </svg>
-            </button>
-          </article>
-        </li>
-        <li class="project-list__item" data-notation="idef0">
-          <article class="project-card">
-            <div class="project-card__preview" aria-hidden="true"></div>
-            <h2 class="project-card__title"><a class="project-card__link" href="editor.html?template=idef0">Warehouse</a></h2>
-            <p class="project-card__notation"><span class="project-card__tag">IDEF0</span> <span class="badge">beta</span></p>
-            <p class="project-card__updated">Edited 2 h ago</p>
-            <button type="button" class="project-card__menu" aria-label="Actions for project Warehouse">
-              <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
-                <circle cx="5" cy="10" r="1" />
-                <circle cx="10" cy="10" r="1" />
-                <circle cx="15" cy="10" r="1" />
-              </svg>
-            </button>
-          </article>
-        </li>
-        <li class="project-list__item" data-notation="erd">
-          <article class="project-card">
-            <div class="project-card__preview" aria-hidden="true"></div>
-            <h2 class="project-card__title"><a class="project-card__link" href="editor.html?template=erd">Users &amp; roles</a></h2>
-            <p class="project-card__notation"><span class="project-card__tag">ERD</span> <span class="badge">beta</span></p>
-            <p class="project-card__updated">Edited 2 h ago</p>
-            <button type="button" class="project-card__menu" aria-label="Actions for project Users &amp; roles">
-              <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
-                <circle cx="5" cy="10" r="1" />
-                <circle cx="10" cy="10" r="1" />
-                <circle cx="15" cy="10" r="1" />
-              </svg>
-            </button>
-          </article>
-        </li>
-        <li class="project-list__item" data-notation="bpmn">
-          <article class="project-card">
-            <div class="project-card__preview" aria-hidden="true"></div>
-            <h2 class="project-card__title"><a class="project-card__link" href="editor.html?template=bpmn">Release process</a></h2>
-            <p class="project-card__notation"><span class="project-card__tag">BPMN</span></p>
-            <p class="project-card__updated">Edited 2 h ago</p>
-            <button type="button" class="project-card__menu" aria-label="Actions for project Release process">
-              <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
-                <circle cx="5" cy="10" r="1" />
-                <circle cx="10" cy="10" r="1" />
-                <circle cx="15" cy="10" r="1" />
-              </svg>
-            </button>
-          </article>
-        </li>
-        <li class="project-list__item" data-notation="dfd">
-          <article class="project-card">
-            <div class="project-card__preview" aria-hidden="true"></div>
-            <h2 class="project-card__title"><a class="project-card__link" href="editor.html?template=dfd">Billing</a></h2>
-            <p class="project-card__notation"><span class="project-card__tag">DFD</span> <span class="badge">beta</span></p>
-            <p class="project-card__updated">Edited 2 h ago</p>
-            <button type="button" class="project-card__menu" aria-label="Actions for project Billing">
-              <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
-                <circle cx="5" cy="10" r="1" />
-                <circle cx="10" cy="10" r="1" />
-                <circle cx="15" cy="10" r="1" />
-              </svg>
-            </button>
-          </article>
-        </li>
-      </ul>
+      <ul class="project-list" id="project-list" data-examples></ul>
     </main>
     <script type="module" src="../../js/script.js"></script>
   </body>

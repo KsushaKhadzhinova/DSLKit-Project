@@ -1,5 +1,5 @@
 import { NOTATIONS, formatProblem, parseDiagram } from '../notations/index.js';
-import { setNodePosition } from './node-position.js';
+import { declares, setNodePosition } from './node-position.js';
 
 // Names of the elements for the palette; a keyword without a name is shown as it is written in the code.
 const NAMES = {
@@ -216,4 +216,34 @@ export const gate = (before, after, lang = 'ru') => {
   );
   const added = parseDiagram(after).problems.find((item) => item.severity === 'error' && !known.has(signature(item)) && !UNFINISHED.has(item.code));
   return added ? { ok: false, message: formatProblem(added, lang), problem: added } : { ok: true, message: '', problem: null };
+};
+
+// Words that open a statement joining two elements, besides the lines that carry an arrow or a dash.
+const LINK_WORDS =
+  /^(arrow|flow|edge|relationship|identifying|nonidentifying|nonspecific|category|depend|precedence|transition|link|include|extend|generalize|association|message|connect|isa|partof|instanceof|path)\b/;
+const LINK_MARKS = /->|--|\.\.|\*--|o--/;
+const escapeRegExp = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const unquoted = (line) => line.replace(/"(?:[^"\\]|\\.)*"/g, '""');
+
+// Removes an element from the code with its whole block and every statement that joins it to another element.
+// Returns null when the code has no such element.
+export const removeElement = (code, id) => {
+  const lines = code.split('\n');
+  const at = lines.findIndex((line) => declares(line, id));
+  if (at < 0) return null;
+  let end = at;
+  if (unquoted(lines[at]).trimEnd().endsWith('{')) {
+    const close = lines.findIndex((line, index) => index > at && line.trim() === '}');
+    end = close < 0 ? lines.length - 1 : close;
+  }
+  const word = new RegExp(`(?<![\\w.-])${escapeRegExp(id)}(?![\\w-])`);
+  let links = 0;
+  const kept = lines.filter((line, index) => {
+    if (index >= at && index <= end) return false;
+    const text = unquoted(line).trim();
+    const joins = (LINK_MARKS.test(text) || LINK_WORDS.test(text)) && !text.startsWith('//') && word.test(text);
+    if (joins) links += 1;
+    return !joins;
+  });
+  return { code: kept.join('\n'), links };
 };
