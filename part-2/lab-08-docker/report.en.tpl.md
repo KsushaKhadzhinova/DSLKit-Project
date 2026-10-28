@@ -75,7 +75,7 @@ Figure 4 – The /health answers, the internal and public networks and the pgdat
 
 ### 3.6 Verification
 
-The structure of the Docker files is checked by six automated tests that run without a Docker daemon. They check the two-stage client build, installing production dependencies only, the `node` user, the `service_healthy` conditions, the database volume, the closed network, the absence of secret values in the sample file and the Nginx proxy. The server is covered by 92 tests, including two tests of the `/health` route. The launch is described in `README.md`. Repository branch: 28.
+The structure of the Docker files is checked by twenty-one automated tests that run without a Docker daemon. They check the two-stage client build, installing production dependencies only, the `node` user, the `service_healthy` conditions, the database volume, the closed network, the absence of secret values in the sample file and the Nginx proxy. Twelve of them cover hardening: image versions without the `latest` tag, no passwords in images, closed ports and networks, dropped container rights and the Nginx headers. The server is covered by 137 tests, including two tests of the `/health` route. The launch is described in `README.md`. Repository branch: 28.
 
 ## Conclusion
 

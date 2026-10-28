@@ -47,7 +47,7 @@ If Docker Hub is unavailable, put `REGISTRY=mirror.gcr.io/` (with the trailing s
 ```bash
 npm test                 # 6 checks of the Docker files (no daemon needed) and the report checks
 npm run shots            # screenshots of figures 1–4 in figures/ (needs the running stack, Chrome or Edge, npm ci in ../lab-05-react-api)
-cd ../lab-03-auth && npm test   # 92 server tests, including /health
+cd ../lab-03-auth && npm test   # 137 server tests, including /health
 ```
 
 Build and start were checked on Docker 29.3.1: all three containers became healthy, registration, login and the list work through Nginx and the data survived `docker compose restart db`.

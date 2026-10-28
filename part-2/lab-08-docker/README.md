@@ -47,7 +47,7 @@ docker compose up --build
 ```bash
 npm test                 # 6 проверок файлов Docker (без демона) и проверка отчётов
 npm run shots            # скриншоты рисунков 1–4 в figures/ (нужен запущенный стек, Chrome или Edge, npm ci в ../lab-05-react-api)
-cd ../lab-03-auth && npm test   # 92 теста сервера, включая /health
+cd ../lab-03-auth && npm test   # 137 тестов сервера, включая /health
 ```
 
 Сборка и запуск проверены на Docker 29.3.1: все три контейнера получили статус healthy, регистрация, вход и работа со списком идут через Nginx, данные пережили `docker compose restart db`.
