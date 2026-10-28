@@ -19,9 +19,9 @@ writeFileSync(join(root, 'style.css'), 'a{}');
 for (const code of [400, 403, 404, 405, 500]) writeFileSync(join(root, 'errors', `${code}.html`), `<h1>${code}</h1>`);
 
 const start = (server) => new Promise((ok) => server.listen(0, '127.0.0.1', () => ok(server)));
-const get = (server, path, method = 'GET') =>
+const get = (server, path, method = 'GET', headers = {}) =>
   new Promise((ok, fail) => {
-    const req = request({ host: '127.0.0.1', port: server.address().port, path, method }, (res) => {
+    const req = request({ host: '127.0.0.1', port: server.address().port, path, method, headers }, (res) => {
       let body = '';
       res.on('data', (c) => (body += c));
       res.on('end', () => ok({ status: res.statusCode, headers: res.headers, body }));
@@ -153,4 +153,19 @@ test('every answer carries the security headers, also errors and HEAD requests',
   } finally {
     server.close();
   }
+});
+
+test('files carry a validator and must be revalidated, an unchanged file answers 304', async () => {
+  const first = await get(main, '/style.css');
+  assert.match(first.headers.etag, /^W\/"[0-9a-f]+-[0-9a-f]+"$/);
+  assert.equal(first.headers['cache-control'], 'no-cache');
+  assert.equal((await get(main, '/style.css', 'HEAD')).headers.etag, first.headers.etag);
+  const same = await get(main, '/style.css', 'GET', { 'If-None-Match': first.headers.etag });
+  assert.equal(same.status, 304);
+  assert.equal(same.body, '');
+  assert.equal(same.headers.etag, first.headers.etag);
+  const other = await get(main, '/style.css', 'GET', { 'If-None-Match': 'W/"0-0"' });
+  assert.equal(other.status, 200);
+  assert.equal(other.body, 'a{}');
+  assert.equal((await get(main, '/missing.html')).headers.etag, undefined);
 });

@@ -21,7 +21,9 @@ test('links of a notation: its own statements or the edges of its spec', () => {
   assert.equal(linksFor('graph')[0].make('A', 'B'), 'edge A -- B');
   assert.equal(linksFor('dfd')[0].make('a', 'b'), 'flow a -> b');
   assert.deepEqual(linksFor('unknown'), []);
-  assert.deepEqual(linksFor('uml-class'), []);
+  assert.equal(linksFor('uml-class').length, 6);
+  assert.equal(linksFor('uml-sequence')[0].make('A', 'B'), 'A -> B : message');
+  assert.deepEqual(linksFor('uml-timing'), []);
 });
 
 test('a new identifier is the first one that no line uses', () => {

@@ -260,7 +260,7 @@ export const staticServer = (rootDir, fs = nodeFs) => {
       'Content-Type': target ? (TYPES[extname(target)] ?? 'application/octet-stream') : 'text/plain; charset=utf-8',
       ...headers,
     });
-    if (req.method === 'HEAD') return res.end();
+    if (req.method === 'HEAD' || status === 304) return res.end();
     if (!target) return res.end(String(status));
     return fs
       .createReadStream(target)
@@ -279,7 +279,11 @@ export const staticServer = (rootDir, fs = nodeFs) => {
       let file = resolve(join(root, path));
       if (file !== root && !file.startsWith(root + sep)) return send(req, res, 403);
       if (fs.existsSync(file) && fs.statSync(file).isDirectory()) file = join(file, 'index.html');
-      return fs.existsSync(file) ? send(req, res, 200, file) : send(req, res, 404);
+      if (!fs.existsSync(file)) return send(req, res, 404);
+      // The browser may keep a file but must ask again before it uses it: a weak ETag from the size and the time of the change answers 304 when nothing changed.
+      const stat = fs.statSync(file);
+      const headers = { ETag: `W/"${stat.size.toString(16)}-${Math.floor(stat.mtimeMs).toString(16)}"`, 'Cache-Control': 'no-cache' };
+      return send(req, res, req.headers['if-none-match'] === headers.ETag ? 304 : 200, file, headers);
     } catch {
       return send(req, res, 500);
     }

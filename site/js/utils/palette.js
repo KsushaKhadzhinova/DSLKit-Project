@@ -101,6 +101,24 @@ const OWN_LINKS = {
   idef1x: [{ id: 'nonidentifying', make: (a, b) => `nonidentifying ${a} -> ${b}` }],
   erd: [{ id: 'relationship', make: (a, b) => `relationship ${a} 1:N ${b}` }],
   graph: [{ id: 'edge', make: (a, b) => `edge ${a} -- ${b}` }],
+  'uml-class': [
+    { id: 'association', make: (a, b) => `${a} --> ${b}` },
+    { id: 'inheritance', make: (a, b) => `${a} --|> ${b}` },
+    { id: 'realization', make: (a, b) => `${a} ..|> ${b}` },
+    { id: 'composition', make: (a, b) => `${a} *-- ${b}` },
+    { id: 'aggregation', make: (a, b) => `${a} o-- ${b}` },
+    { id: 'dependency', make: (a, b) => `${a} ..> ${b}` },
+  ],
+  idef4: [
+    { id: 'association', make: (a, b) => `${a} --> ${b}` },
+    { id: 'inheritance', make: (a, b) => `${a} --|> ${b}` },
+    { id: 'composition', make: (a, b) => `${a} *-- ${b}` },
+  ],
+  'uml-sequence': [
+    { id: 'call', make: (a, b) => `${a} -> ${b} : message` },
+    { id: 'return', make: (a, b) => `${a} --> ${b} : result` },
+    { id: 'async', make: (a, b) => `${a} ->> ${b} : signal` },
+  ],
 };
 
 const nameOf = (keyword) => NAMES[keyword] ?? [keyword, keyword];

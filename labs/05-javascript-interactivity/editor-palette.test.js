@@ -56,7 +56,7 @@ test('the palette follows the notation after a run, and the link controls hide w
   t.fire(t.$('.app-page--editor'), 'dslkit:run');
   assert.equal(t.api.notation(), 'erd');
   assert.equal(t.api.refresh(), 'erd');
-  showCode(t.document, t.$('.code__lines'), TEMPLATES['uml-class']);
+  showCode(t.document, t.$('.code__lines'), TEMPLATES['uml-timing']);
   t.api.refresh();
   assert.equal(t.$('.palette__connect').hidden, true);
   showCode(t.document, t.$('.code__lines'), 'diagram nonsense');
