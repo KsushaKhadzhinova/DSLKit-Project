@@ -271,3 +271,12 @@ test('the English dashboard asks in English before deleting, and the default clo
   assert.match(asked[0], /^Delete the project "/);
   assert.equal(createProjectStore({ storage }).list().length, 0);
 });
+
+test('the link to the other language carries the project of the address', () => {
+  const { document, save, dom } = open({ search: '?template=erd' });
+  const link = document.querySelector('.editor-menu a[hreflang]');
+  assert.equal(link.getAttribute('href'), '../en/app/editor.html?template=erd');
+  save();
+  assert.match(link.getAttribute('href'), /^\.\.\/en\/app\/editor\.html\?p=/);
+  assert.equal(dom.window.location.search, new URL(link.href, 'http://localhost/app/').search);
+});

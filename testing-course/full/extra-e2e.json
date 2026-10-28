@@ -1,0 +1,81 @@
+{
+  "results": [
+    {
+      "id": "EX-01",
+      "kind": "extra",
+      "title": "У каждой видимой кнопки, ссылки и поля есть доступное имя (все страницы, ru и en)",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "EX-02",
+      "kind": "extra",
+      "title": "Редактор проходится клавишей Tab, у фокуса есть видимая рамка",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "EX-03",
+      "kind": "extra",
+      "title": "Нет горизонтальной прокрутки на ширинах 320, 390, 768, 1024, 1366 (10 страниц)",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "EX-04",
+      "kind": "extra",
+      "title": "Переключатель языка ведёт на парную страницу и обратно",
+      "status": "Failed",
+      "note": "/app/editor.html: нет ссылки на английский"
+    },
+    {
+      "id": "EX-05",
+      "kind": "extra",
+      "title": "Тема переключается и запоминается после перезагрузки",
+      "status": "Failed",
+      "note": "Locator.click: Timeout 8000ms exceeded. Call log:   - waiting for locator(\".editor-menu [data-action=\\\"theme\\\"]\")     - locator resolved to <button type=\"button\" data-action=\"theme\" class=\"button button--quiet\">Тема</button>   - attempting click action"
+    },
+    {
+      "id": "EX-06",
+      "kind": "extra",
+      "title": "С выключенным хранилищем браузера редактор и панель проектов всё равно работают",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "EX-07",
+      "kind": "extra",
+      "title": "Проект, сохранённый в одной вкладке, виден в другой",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "EX-08",
+      "kind": "extra",
+      "title": "Страница 404 с заголовком и ссылкой назад",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "EX-09",
+      "kind": "extra",
+      "title": "Редактор не падает на коде из 400 строк комментариев",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "EX-10",
+      "kind": "extra",
+      "title": "Очень длинное название диаграммы не ломает отрисовку",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "EX-11",
+      "kind": "extra",
+      "title": "HTML и скрипт в названии диаграммы не выполняются (XSS)",
+      "status": "Passed",
+      "note": ""
+    }
+  ]
+}

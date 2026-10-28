@@ -52,6 +52,12 @@ export const initEditorProjects = ({ root = document, storage, now = () => Date.
     showCode(root, codeLines, TEMPLATES[key] ?? TEMPLATES.idef0);
     if (params.has('p') && note) note.textContent = TEXTS.notFound[lang];
   }
+  // The link to the other language keeps the project or the template of the address.
+  const carryQuery = () =>
+    page.querySelectorAll('a[hreflang]').forEach((link) => {
+      link.href = `${link.getAttribute('href').split('?')[0]}${view.location.search}`;
+    });
+  carryQuery();
   run();
 
   const save = () => {
@@ -64,6 +70,7 @@ export const initEditorProjects = ({ root = document, storage, now = () => Date.
     params.set('p', project.id);
     params.delete('template');
     view.history.replaceState(null, '', `${view.location.pathname}?${params}`);
+    carryQuery();
     if (note) note.textContent = TEXTS.saved[lang].replace('{title}', project.title);
     return project;
   };
