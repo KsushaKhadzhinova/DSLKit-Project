@@ -115,41 +115,61 @@ Table 3 – Automated test scenarios
 
 The manual check was done in several browser windows, each window is a separate client (Alice, Bob, Carol). The screenshots are made by the script `shots/shots.mjs` in a real Chromium browser that connects to the running server. The steps: two clients connect, join a room, exchange messages, the rooms are checked for isolation, the editing flag, a validation error, leave and disconnect. The results are on figures 2 to 11.
 
+This step (alice window: the welcome message and the notice that Bob connected) is shown in figure 2.
+
 ![Alice window: the welcome message and the notice that Bob connected](figures/01-join-notifications-alice.png)
 
 Figure 2 – Alice window: the welcome message and the notice that Bob connected
+
+This step (bob window after joining the diagram room) is shown in figure 3.
 
 ![Bob window after joining the diagram room](figures/02-join-bob.png)
 
 Figure 3 – Bob window after joining the diagram room
 
+This step (alice window: the message of Bob arrived in the room) is shown in figure 4.
+
 ![Alice window: the message of Bob arrived in the room](figures/03-chat-alice.png)
 
 Figure 4 – Alice window: the message of Bob arrived in the room
+
+This step (bob window: own and foreign messages in the room) is shown in figure 5.
 
 ![Bob window: own and foreign messages in the room](figures/04-chat-bob.png)
 
 Figure 5 – Bob window: own and foreign messages in the room
 
+This step (carol window in another room: the messages of the first room do not arrive) is shown in figure 6.
+
 ![Carol window in another room: the messages of the first room do not arrive](figures/05-room-diagram-2-carol.png)
 
 Figure 6 – Carol window in another room: the messages of the first room do not arrive
+
+This step (alice window: the messages of the other room did not reach her feed) is shown in figure 7.
 
 ![Alice window: the messages of the other room did not reach her feed](figures/06-room-diagram-1-alice-no-leak.png)
 
 Figure 7 – Alice window: the messages of the other room did not reach her feed
 
+This step (bob window: the list shows who is editing the diagram) is shown in figure 8.
+
 ![Bob window: the list shows who is editing the diagram](figures/07-who-is-editing-bob.png)
 
 Figure 8 – Bob window: the list shows who is editing the diagram
+
+This step (bob window: a validation error for an empty message) is shown in figure 9.
 
 ![Bob window: a validation error for an empty message](figures/08-validation-error-bob.png)
 
 Figure 9 – Bob window: a validation error for an empty message
 
+This step (alice window: the notice that Bob left the room) is shown in figure 10.
+
 ![Alice window: the notice that Bob left the room](figures/09-leave-notification-alice.png)
 
 Figure 10 – Alice window: the notice that Bob left the room
+
+This step (alice window: the notice that Bob disconnected) is shown in figure 11.
 
 ![Alice window: the notice that Bob disconnected](figures/10-disconnect-notification-alice.png)
 
