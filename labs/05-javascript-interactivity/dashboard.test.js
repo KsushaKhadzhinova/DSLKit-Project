@@ -114,7 +114,7 @@ test('update works from the API and the English page gets English labels', () =>
 
 test('a page without chips, search, sort and count still works', () => {
   const { document } = new JSDOM(
-    '<!doctype html><html lang="ru"><body><ul id="project-list"><li class="project-list__item" data-notation="erd"><a class="project-card__link">A</a></li></ul></body></html>',
+    '<!doctype html><html lang="ru"><body><ul id="project-list"><li class="project-list__item" data-notation="erd"><article class="project-card"><a class="project-card__link">A</a></article></li></ul></body></html>',
   ).window;
   const api = initDashboard({ root: document, storage: memory() });
   api.update({ filter: 'bpmn' });

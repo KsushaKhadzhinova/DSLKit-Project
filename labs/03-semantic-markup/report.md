@@ -805,7 +805,7 @@ test('every local href and src resolves to an existing file', () => {
   const missing = [];
   for (const file of files.filter((name) => name.endsWith('.html'))) {
     const html = readFileSync(file, 'utf8');
-    for (const [, url] of html.matchAll(/\b(?:href|src)="([^"#]*)(?:#[^"]*)?"/g)) {
+    for (const [, url] of html.matchAll(/\b(?:href|src)="([^"#?]*)(?:[?#][^"]*)?"/g)) {
       if (!url || /^(https?:|mailto:)/.test(url)) continue;
       const target = url.startsWith('/') ? join(SITE, url) : join(dirname(file), url);
       const resolved = statSync(target, { throwIfNoEntry: false })?.isDirectory() ? join(target, 'index.html') : target;
