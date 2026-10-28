@@ -223,7 +223,7 @@ export const parsePosition = (value) => {
 export const applyPositions = (placed, size) => {
   let { width, height } = size;
   placed.forEach((item) => {
-    const position = parsePosition(item.node.attrs?.pos);
+    const position = parsePosition(item.node.pos ?? item.node.attrs?.pos);
     if (!position) return;
     item.x = Math.max(EDGE_OF_PAGE, position.x - item.w / 2);
     item.y = Math.max(EDGE_OF_PAGE, position.y - item.h / 2);

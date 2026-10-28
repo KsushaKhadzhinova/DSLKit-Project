@@ -1,7 +1,7 @@
 import { ID, STR, escapeXml, findCycle, problem, quoteDot, textWidth, unquote } from './common.js';
 import { INK, MUTED, renderLayout, text } from './svg.js';
 
-const CLASS = new RegExp(`^(class|abstract class|interface)\\s+(${ID})(?:\\s+${STR})?\\s*(\\{)?\\s*$`);
+const CLASS = new RegExp(`^(class|abstract class|interface)\\s+(${ID})(?:\\s+${STR})?((?:\\s+pos=\\S+)?)\\s*(\\{)?\\s*$`);
 const MEMBER = /^([+\-#~])?\s*([A-Za-z_]\w*)\s*(?:\(([^)]*)\))?\s*(?::\s*(.+?))?\s*$/;
 const REL = new RegExp(
   `^(${ID})(?:\\s+"([^"]*)")?\\s+(--\\|>|\\.\\.\\|>|<\\|--|<\\|\\.\\.|-->|--|o--|\\*--|\\.\\.>)\\s+(?:"([^"]*)"\\s+)?(${ID})(?:\\s*:\\s*(.+?))?\\s*$`,
@@ -59,9 +59,10 @@ export const parseClassModel = (lines, header, notation) => {
     } else if ((match = CLASS.exec(line))) {
       const known = model.classes.find((cls) => cls.id === match[2]);
       const cls = { id: match[2], label: unquote(match[3] ?? match[2]), stereotype: match[1], members: [], line: n };
+      if (match[4]) cls.pos = match[4].trim().slice(4);
       if (known) model.problems.push(problem(n, 'error', 'duplicate', { id: match[2], first: known.line }));
       else model.classes.push(cls);
-      if (match[4]) open = known ? { members: [], id: match[2], line: n } : cls;
+      if (match[5]) open = known ? { members: [], id: match[2], line: n } : cls;
     } else if ((match = REL.exec(line))) {
       const token = TOKENS[match[3]];
       const [from, to, fromMult, toMult] = token.swap

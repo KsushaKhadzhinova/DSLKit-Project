@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { JSDOM } from 'jsdom';
-import { parseDiagram, renderNotation } from '../../site/js/notations/index.js';
+import { TEMPLATES, parseDiagram, renderNotation } from '../../site/js/notations/index.js';
 import { parseDsl } from '../../site/js/utils/dataParser.js';
 import { setNodePosition } from '../../site/js/utils/node-position.js';
 
@@ -31,7 +31,7 @@ test('a box line may carry a place before or after the brace', () => {
 
 test('moving an IDEF0 box writes its place and the drawing keeps it', () => {
   const moved = setNodePosition(SOURCE, 'A2', 400, 300);
-  assert.match(moved, /box A2 "Two" \{ pos=400x300/);
+  assert.match(moved, /box A2 "Two" pos=400x300 \{/);
   const svg = renderNotation(parseDiagram(moved));
   const doc = new JSDOM(svg, { contentType: 'image/svg+xml' }).window.document;
   const box = doc.querySelector('[data-id="A2"]');
@@ -54,4 +54,40 @@ test('a malformed place of an IDEF0 box is a strict error, a good one is not', (
   assert.ok(bad.problems.some((item) => item.code === 'strict-pos'));
   const good = parseDiagram(SOURCE.replace('box A1 "One" {', 'box A1 "One" pos=10x10 {'));
   assert.ok(!good.problems.some((item) => item.code === 'strict-pos'));
+});
+
+test('moving an entity or a class keeps the code valid and the drawing at the new place', () => {
+  for (const [key, id] of [
+    ['erd', 'Customer'],
+    ['uml-class', 'Payable'],
+    ['uml-class', 'Person'],
+    ['idef4', 'Vehicle'],
+  ]) {
+    const moved = setNodePosition(TEMPLATES[key], id, 333, 222);
+    assert.ok(moved.includes(' pos=333x222'), key);
+    assert.deepEqual(
+      parseDiagram(moved).problems.filter((item) => item.severity === 'error'),
+      [],
+      key,
+    );
+    assert.match(renderNotation(parseDiagram(moved)), /data-cx="333"/);
+  }
+});
+
+test('an entity or a class line with a place and a brace opens a block that must be closed', () => {
+  const entity = parseDiagram('diagram erd "T"\nentity A pos=10x20 {\n  id: int pk');
+  assert.ok(entity.problems.some((item) => item.code === 'unclosed'));
+  assert.equal(entity.entities[0].pos, '10x20');
+  const noBrace = parseDiagram('diagram erd "T"\nentity A pos=10x20');
+  assert.equal(noBrace.entities[0].pos, '10x20');
+  const cls = parseDiagram('diagram uml class "T"\nclass A pos=5x6 {\n  + x: int\n}\nclass A pos=1x1 {\n}');
+  assert.equal(cls.classes[0].pos, '5x6');
+  assert.ok(cls.problems.some((item) => item.code === 'duplicate'));
+  assert.equal(parseDiagram('diagram uml class "T"\nclass B').classes[0].pos, undefined);
+  assert.equal(parseDiagram('diagram erd "T"\nentity B').entities[0].pos, undefined);
+});
+
+test('a place goes before the brace and an abstract class can be moved', () => {
+  assert.equal(setNodePosition('diagram uml class "T"\nabstract class P {\n}', 'P', 1, 2), 'diagram uml class "T"\nabstract class P pos=1x2 {\n}');
+  assert.equal(setNodePosition('class Q', 'Q', 3, 4), 'class Q pos=3x4');
 });

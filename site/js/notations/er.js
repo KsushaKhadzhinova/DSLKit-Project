@@ -1,7 +1,7 @@
 import { ID, STR, escapeXml, parseAttrs, problem, quoteDot, textWidth, unquote } from './common.js';
 import { INK, MUTED, renderLayout, text } from './svg.js';
 
-const ENTITY = new RegExp(`^entity\\s+(${ID})(?:\\s+${STR})?((?:\\s+[\\w-]+)*?)\\s*(\\{)?\\s*$`);
+const ENTITY = new RegExp(`^entity\\s+(${ID})(?:\\s+${STR})?((?:\\s+[\\w-]+)*?)((?:\\s+pos=\\S+)?)\\s*(\\{)?\\s*$`);
 const ATTRIBUTE = new RegExp(`^(${ID})\\s*:?\\s*([\\w()\\[\\],.]+)((?:\\s+(?:pk|fk|ak\\d*|unique|notnull))*)(?:\\s*->\\s*(${ID}))?\\s*$`, 'i');
 
 // Relationship ends: SVG marker, Mermaid/PlantUML tokens for the left and right side of `--`.
@@ -44,13 +44,14 @@ export const parseEr = (lines, header, cfg) => {
       const flags = match[3].split(/\s+/).filter(Boolean);
       const known = model.entities.find((entity) => entity.id === match[1]);
       const entity = { id: match[1], label: unquote(match[2] ?? match[1]), attrs: [], dependent: flags.includes('dependent'), line: n };
+      if (match[4]) entity.pos = match[4].trim().slice(4);
       if (flags.some((flag) => !cfg.flags.includes(flag))) model.problems.push(problem(n, 'error', 'syntax', { text: line }));
       else if (known) model.problems.push(problem(n, 'error', 'duplicate', { id: match[1], first: known.line }));
       else {
         model.entities.push(entity);
-        if (match[4]) open = entity;
+        if (match[5]) open = entity;
       }
-      if (match[4] && open !== entity) open = { attrs: [], line: n, id: match[1] };
+      if (match[5] && open !== entity) open = { attrs: [], line: n, id: match[1] };
     } else if (!cfg.statement(line, n, model)) model.problems.push(problem(n, 'error', 'syntax', { text: line }));
   });
   if (open) model.problems.push(problem(open.line, 'error', 'unclosed', { id: open.id }));

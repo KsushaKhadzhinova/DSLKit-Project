@@ -17,7 +17,8 @@ export { MESSAGES, formatProblem } from './messages.js';
 export { enabledTransitions, fire, initialMarking, isDeadlock } from './specs.js';
 export { KEYWORDS, TEMPLATES } from './templates.js';
 
-const fromSpec = (impl) => ({ parse: impl.parse, generators: impl.generators, render: impl.render });
+// A graph notation also tells its node and edge keywords, the palette of the editor is built from them.
+const fromSpec = (impl) => ({ parse: impl.parse, generators: impl.generators, render: impl.render, nodes: impl.spec?.nodes, edges: impl.spec?.edges });
 const entry = (short, ru, en, impl) => ({ short, name: { ru, en }, ...impl });
 
 const idef4 = (lines, header) => {
