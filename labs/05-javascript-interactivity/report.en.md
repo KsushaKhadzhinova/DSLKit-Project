@@ -125,6 +125,7 @@ Modular JavaScript is written for the DSLKit project: an entry point, storage an
 ```js
 import { initAccordion } from './components/accordion.js';
 import { initAppSearch } from './components/app-search.js';
+import { initAuthForm, initAuthMenu } from './components/auth.js';
 import { initBurger } from './components/burger.js';
 import { initCanvasDrag } from './components/canvas-drag.js';
 import { initDashboard } from './components/dashboard.js';
@@ -148,9 +149,11 @@ import { getStorage } from './utils/storage.js';
 export const COMPONENTS = [
   initTheme,
   initBurger,
+  initAuthMenu,
   initAccordion,
   initNotationFilter,
   initWaitlistForm,
+  initAuthForm,
   initDashboard,
   initAppSearch,
   initSettings,
@@ -315,6 +318,43 @@ export function validateWaitlist({ name, email, notation, team, comment, consent
   }
   if (consent !== true) {
     invalid.push('consent');
+  }
+  return invalid;
+}
+
+const MIN_PASSWORD_LENGTH = 8;
+const MAX_PASSWORD_LENGTH = 128;
+
+export function isValidPassword(value) {
+  return typeof value === 'string' && value.length >= MIN_PASSWORD_LENGTH && value.length <= MAX_PASSWORD_LENGTH && value.trim() !== '';
+}
+
+// Sign-in: the address must look like an address and the password must not be empty. Its length is not checked here,
+// so the answer does not tell which part of the pair is wrong.
+export function validateLogin({ email, password } = {}) {
+  const invalid = [];
+  if (!isValidEmail(email ?? '')) {
+    invalid.push('email');
+  }
+  if (typeof password !== 'string' || password === '') {
+    invalid.push('password');
+  }
+  return invalid;
+}
+
+export function validateRegistration({ name, email, password, confirm } = {}) {
+  const invalid = [];
+  if (!isValidName(name)) {
+    invalid.push('name');
+  }
+  if (!isValidEmail(email ?? '')) {
+    invalid.push('email');
+  }
+  if (!isValidPassword(password)) {
+    invalid.push('password');
+  }
+  if (typeof confirm !== 'string' || confirm === '' || confirm !== password) {
+    invalid.push('confirm');
   }
   return invalid;
 }
@@ -495,11 +535,12 @@ export const initWaitlistForm = ({
 
 ```js
 import { NOTATIONS, NOTATION_KEYS, TEMPLATES, parseDiagram } from '../notations/index.js';
-import { createProjectStore, showQuota } from '../storage/projects.js';
+import { currentUser } from '../storage/accounts.js';
+import { createProjectStore, createTemplateStore, showQuota } from '../storage/projects.js';
 
 const FILTERS = ['all', ...NOTATION_KEYS];
 const SORTS = ['newest', 'oldest', 'name'];
-const SECTIONS = ['mine', 'shared', 'trash'];
+const SECTIONS = ['mine', 'templates', 'shared', 'trash'];
 
 const LABELS = {
   ru: {
@@ -507,6 +548,14 @@ const LABELS = {
     none: 'Проектов не найдено',
     changed: (time) => `Изменён ${time}`,
     sample: 'Общий пример',
+    published: 'опубликован',
+    saveTemplate: 'Сохранить как шаблон',
+    edit: 'Изменить шаблон',
+    removeTemplate: 'Удалить шаблон',
+    askNewTemplate: 'Название нового шаблона',
+    askRemoveTemplate: (title) => `Удалить шаблон «${title}»? Это нельзя отменить.`,
+    foundTemplates: (count) => `Найдено шаблонов: ${count}`,
+    noneTemplates: 'Шаблонов не найдено. Сохраните проект как шаблон или создайте новый.',
     trashed: (time) => `Удалён ${time}`,
     rename: 'Переименовать',
     remove: 'В корзину',
@@ -517,13 +566,21 @@ const LABELS = {
     askTrash: (title) => `Переместить проект «${title}» в корзину?`,
     askPurge: (title) => `Удалить проект «${title}» навсегда? Это нельзя отменить.`,
     actions: (title) => `Действия с проектом ${title}`,
-    titles: { mine: 'Мои проекты', shared: 'Общие примеры', trash: 'Корзина' },
+    titles: { mine: 'Мои проекты', templates: 'Мои шаблоны', shared: 'Общие примеры', trash: 'Корзина' },
   },
   en: {
     found: (count) => `Projects found: ${count}`,
     none: 'No projects found',
     changed: (time) => `Changed ${time}`,
     sample: 'Shared example',
+    published: 'published',
+    saveTemplate: 'Save as a template',
+    edit: 'Edit the template',
+    removeTemplate: 'Delete the template',
+    askNewTemplate: 'Name of the new template',
+    askRemoveTemplate: (title) => `Delete the template "${title}"? This cannot be undone.`,
+    foundTemplates: (count) => `Templates found: ${count}`,
+    noneTemplates: 'No templates found. Save a project as a template or create a new one.',
     trashed: (time) => `Deleted ${time}`,
     rename: 'Rename',
     remove: 'Move to trash',
@@ -534,7 +591,7 @@ const LABELS = {
     askTrash: (title) => `Move the project "${title}" to the trash?`,
     askPurge: (title) => `Delete the project "${title}" forever? This cannot be undone.`,
     actions: (title) => `Actions for the project ${title}`,
-    titles: { mine: 'My projects', shared: 'Shared examples', trash: 'Trash' },
+    titles: { mine: 'My projects', templates: 'My templates', shared: 'Shared examples', trash: 'Trash' },
   },
 };
 
@@ -544,20 +601,46 @@ const normalize = (saved) => ({
   sort: SORTS.includes(saved?.sort) ? saved.sort : 'newest',
 });
 
-export const initDashboard = ({ root = document, storage, now = () => Date.now() } = {}) => {
+const HOUR = 3600000;
+// The diagrams of the first visit: one of the first notations each, changed at different times, some of them published.
+const SEED_PLAN = [
+  ['idef0', 2 * HOUR, true],
+  ['bpmn', 26 * HOUR, false],
+  ['uml-class', 3 * 24 * HOUR, true],
+  ['erd', 6 * 24 * HOUR, false],
+  ['dfd', 12 * 24 * HOUR, true],
+  ['petri', 30 * 24 * HOUR, false],
+];
+
+export const initDashboard = ({ root = document, storage, now = () => Date.now(), seed = true, navigate } = {}) => {
   const list = root.querySelector('#project-list');
   if (!list) return null;
 
   const view = root.defaultView;
   const lang = root.documentElement.lang === 'ru' ? 'ru' : 'en';
   const labels = LABELS[lang];
-  const store = createProjectStore({ storage, now });
+  const owner = currentUser(storage)?.id ?? null;
+  const store = createProjectStore({ storage, now, owner });
+  const templates = createTemplateStore({ storage, now, owner });
+  const go = navigate ?? ((url) => view.location.assign(url));
+  if (seed) {
+    store.seed(
+      SEED_PLAN.map(([key, age, published]) => ({
+        title: parseDiagram(TEMPLATES[key]).title,
+        notation: key,
+        source: TEMPLATES[key],
+        age,
+        published,
+      })),
+    );
+  }
   const chips = [...root.querySelectorAll('.filter__chip[data-filter]')];
   const others = root.querySelector('#notation-filter');
   const search = root.querySelector('.app-topbar__search-input');
   const sortSelect = root.querySelector('#project-sort');
   const count = root.querySelector('#project-count');
   const heading = root.querySelector('.dashboard__title');
+  const newTemplate = root.querySelector('[data-new-template]');
   const navigation = [...root.querySelectorAll('[data-section]')];
   const quotaText = root.querySelector('.app-nav__quota-text');
   const quotaBar = root.querySelector('.app-nav__progress');
@@ -577,19 +660,22 @@ export const initDashboard = ({ root = document, storage, now = () => Date.now()
   const time = (ms) => new Date(ms).toISOString().slice(0, 16).replace('T', ' ');
 
   // A card of a saved project, built like the sample cards of the page. A project in the trash cannot be opened.
-  const card = (project, trashed = false) => {
+  const card = (project, kind = 'project') => {
+    const trashed = kind === 'trash';
     const item = el('li', 'project-list__item');
-    item.dataset.project = project.id;
+    if (kind === 'template') item.dataset.template = project.id;
+    else item.dataset.project = project.id;
     if (trashed) item.dataset.trashed = 'yes';
     item.dataset.notation = FILTERS.includes(project.notation) ? project.notation : 'other';
     const article = el('article', 'project-card');
     const headingBox = el('h2', 'project-card__title');
     const link = el('a', 'project-card__link', project.title);
     if (trashed) link.setAttribute('aria-disabled', 'true');
-    else link.href = `editor.html?p=${encodeURIComponent(project.id)}`;
+    else link.href = `editor.html?${kind === 'template' ? 'my' : 'p'}=${encodeURIComponent(project.id)}`;
     headingBox.append(link);
     const tag = el('p', 'project-card__notation');
     tag.append(el('span', 'project-card__tag', NOTATIONS[project.notation]?.short ?? project.notation.toUpperCase()));
+    if (project.published) tag.append(' ', el('span', 'badge', labels.published));
     const stamp = trashed ? labels.trashed(time(project.trashedAt)) : labels.changed(time(project.updated));
     article.append(el('div', 'project-card__preview'), headingBox, tag, el('p', 'project-card__updated', stamp));
     item.append(article);
@@ -612,7 +698,9 @@ export const initDashboard = ({ root = document, storage, now = () => Date.now()
     const actions = el('div', 'project-card__actions');
     actions.hidden = true;
     if (item.dataset.trashed) actions.append(button('restore', labels.restore), button('purge', labels.purge));
-    else if (item.dataset.project) actions.append(button('rename', labels.rename), button('remove', labels.remove));
+    else if (item.dataset.project) actions.append(button('rename', labels.rename), button('template', labels.saveTemplate), button('remove', labels.remove));
+    else if (item.dataset.template)
+      actions.append(button('rename', labels.rename), button('edit', labels.edit), button('remove-template', labels.removeTemplate));
     else actions.append(button('copy', labels.copy));
     article.append(actions);
   };
@@ -649,11 +737,15 @@ export const initDashboard = ({ root = document, storage, now = () => Date.now()
       });
   };
   const rebuild = () => {
-    list.querySelectorAll('[data-project]').forEach((item) => item.remove());
+    list.querySelectorAll('[data-project], [data-template]').forEach((item) => item.remove());
     store
       .listTrash()
       .reverse()
-      .forEach((project) => list.prepend(card(project, true)));
+      .forEach((project) => list.prepend(card(project, 'trash')));
+    templates
+      .list()
+      .reverse()
+      .forEach((template) => list.prepend(card(template, 'template')));
     store
       .list()
       .reverse()
@@ -679,6 +771,7 @@ export const initDashboard = ({ root = document, storage, now = () => Date.now()
   let section = 'mine';
   const sectionOf = (item) => {
     if (item.dataset.trashed) return 'trash';
+    if (item.dataset.template) return 'templates';
     return item.dataset.project ? 'mine' : 'shared';
   };
 
@@ -711,7 +804,12 @@ export const initDashboard = ({ root = document, storage, now = () => Date.now()
     if (others) others.value = chipKeys.has(state.filter) ? '' : state.filter;
     if (search) search.value = state.query;
     if (sortSelect) sortSelect.value = state.sort;
-    if (count) count.textContent = shown > 0 ? labels.found(shown) : labels.none;
+    if (newTemplate) newTemplate.hidden = section !== 'templates';
+    if (count) {
+      const own = section === 'templates';
+      if (shown > 0) count.textContent = own ? labels.foundTemplates(shown) : labels.found(shown);
+      else count.textContent = own ? labels.noneTemplates : labels.none;
+    }
     showQuota(quotaText, quotaBar, store.createdOn(), lang);
     storage.set('dashboard', state);
   };
@@ -741,10 +839,20 @@ export const initDashboard = ({ root = document, storage, now = () => Date.now()
   );
 
   const act = (action, item) => {
-    const id = item.dataset.project;
+    const id = item.dataset.project ?? item.dataset.template;
     if (action === 'rename') {
       const name = view.prompt(labels.askName, title(item));
-      if (name === null || store.rename(id, name) === null) return false;
+      const done = item.dataset.template ? templates.rename(id, name ?? '') : store.rename(id, name ?? '');
+      if (done === null) return false;
+    } else if (action === 'template') {
+      const project = store.get(id);
+      templates.save({ title: project.title, notation: project.notation, source: project.source });
+    } else if (action === 'edit') {
+      go(`editor.html?tpl=${encodeURIComponent(id)}`);
+      return true;
+    } else if (action === 'remove-template') {
+      if (!view.confirm(labels.askRemoveTemplate(title(item)))) return false;
+      templates.remove(id);
     } else if (action === 'remove') {
       if (!view.confirm(labels.askTrash(title(item)))) return false;
       store.trash(id);
@@ -760,6 +868,12 @@ export const initDashboard = ({ root = document, storage, now = () => Date.now()
     render();
     return true;
   };
+  newTemplate?.addEventListener('click', () => {
+    const name = view.prompt(labels.askNewTemplate, '');
+    if (name === null || name.trim() === '') return;
+    const template = templates.save({ title: name, notation: 'idef0', source: TEMPLATES.idef0 });
+    go(`editor.html?tpl=${encodeURIComponent(template.id)}`);
+  });
   list.addEventListener('click', (event) => {
     const menu = event.target.closest('.project-card__menu');
     if (menu) {
@@ -774,7 +888,7 @@ export const initDashboard = ({ root = document, storage, now = () => Date.now()
 
   render();
 
-  return { state: () => ({ ...state }), update, store, show, section: () => section };
+  return { state: () => ({ ...state }), update, store, templates, show, section: () => section };
 };
 ```
 

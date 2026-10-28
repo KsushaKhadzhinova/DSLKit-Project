@@ -76,6 +76,7 @@
             <button type="button" class="button button--quiet" data-action="check">Check</button>
             <button type="button" class="button button--quiet" data-action="format">Format</button>
             <button type="button" class="button button--quiet" data-action="share">Share</button>
+            <button type="button" class="button button--quiet" data-action="save-template">Save as a template</button>
             <button type="button" class="button button--quiet" data-notation-label>Diagram: IDEF0</button>
             <button type="button" class="button button--quiet" data-action="layout">Auto layout</button>
             <button type="button" class="button button--quiet" data-import="file">Import from a file</button>
@@ -93,11 +94,21 @@
               <span>Autosave</span>
             </button>
             <button type="button" class="button button--quiet" data-action="theme">Theme</button>
+            <div class="auth auth--menu" data-auth data-home="../index.html">
+              <a class="button button--quiet" href="login.html" data-auth-guest>Sign in</a>
+              <a class="button button--quiet" href="register.html" data-auth-guest>Sign up</a>
+              <span class="button button--quiet" data-auth-name data-auth-user hidden></span>
+              <button type="button" class="button button--quiet" data-auth-logout data-auth-user hidden>Sign out</button>
+            </div>
             <a class="button button--quiet" href="../../app/editor.html" hreflang="ru" lang="ru">Русская версия</a>
           </div>
         </details>
 
-        <span class="editor-toolbar__avatar" role="img" aria-label="KX">KX</span>
+        <a class="editor-toolbar__avatar" href="settings.html" aria-label="Settings"
+          ><svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="10" cy="10" r="2.5" />
+            <path d="M10 2.5v2.5M10 15v2.5M2.5 10H5M15 10h2.5M4.7 4.7l1.8 1.8M13.5 13.5l1.8 1.8M4.7 15.3l1.8-1.8M13.5 6.5l1.8-1.8" /></svg
+        ></a>
       </div>
 
       <div class="editor-topbar">
@@ -119,7 +130,14 @@
     </header>
 
     <nav class="editor-activity" aria-label="Action bar">
-      <button type="button" class="editor-activity__button editor-activity__button--active" data-panel="files" aria-label="Files" aria-pressed="true" data-tip="Files">
+      <button
+        type="button"
+        class="editor-activity__button editor-activity__button--active"
+        data-panel="files"
+        aria-label="Files"
+        aria-pressed="true"
+        data-tip="Files"
+      >
         <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
           <path d="M3 6h5l2 2h7v8H3z" />
         </svg>
@@ -259,7 +277,15 @@
               <code><span class="code__keyword">arrow</span> A0.output -&gt; A1.input</code>
             </li>
           </ol>
-          <textarea class="code__input" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" wrap="off" aria-label="DSL code"></textarea>
+          <textarea
+            class="code__input"
+            spellcheck="false"
+            autocapitalize="off"
+            autocomplete="off"
+            autocorrect="off"
+            wrap="off"
+            aria-label="DSL code"
+          ></textarea>
         </section>
       </div>
 
@@ -304,7 +330,13 @@
           <button type="button" class="button button--icon" data-action="zoom-out" aria-label="Zoom out" data-tip="Zoom out">
             <span aria-hidden="true">−</span>
           </button>
-          <button type="button" class="button button--icon" data-action="zoom-fit" aria-label="Fit the diagram to the screen" data-tip="Fit the diagram to the screen">
+          <button
+            type="button"
+            class="button button--icon"
+            data-action="zoom-fit"
+            aria-label="Fit the diagram to the screen"
+            data-tip="Fit the diagram to the screen"
+          >
             <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
               <path d="M4 8V4h4M12 4h4v4M16 12v4h-4M8 16H4v-4" />
             </svg>
@@ -317,7 +349,14 @@
       <h2 class="visually-hidden">Problems</h2>
 
       <div class="problems__tabs">
-        <button type="button" class="problems__tab problems__tab--active" data-problems-tab="problems" aria-pressed="true" aria-label="Problems: 3" data-tip="Problems: 3">
+        <button
+          type="button"
+          class="problems__tab problems__tab--active"
+          data-problems-tab="problems"
+          aria-pressed="true"
+          aria-label="Problems: 3"
+          data-tip="Problems: 3"
+        >
           <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
             <path d="M10 3l8 14H2z" />
             <path d="M10 8v4M10 14v.5" /></svg
@@ -411,7 +450,15 @@
         <path d="M7 7l6 6M13 7l-6 6" />
       </svg>
       <span class="editor-banner__text">2 errors in order.dsl</span>
-      <button type="button" class="button button--icon" aria-label="Show errors" data-action="problems" aria-expanded="false" aria-controls="problems-panel" data-tip="Show errors">
+      <button
+        type="button"
+        class="button button--icon"
+        aria-label="Show errors"
+        data-action="problems"
+        aria-expanded="false"
+        aria-controls="problems-panel"
+        data-tip="Show errors"
+      >
         <span aria-hidden="true">▲</span>
       </button>
     </div>

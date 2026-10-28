@@ -160,6 +160,14 @@ Google Rich Results Test не запускался: сайт не опублик
             <li class="nav__item"><a class="nav__link" href="#audience">Для кого</a></li>
             <li class="nav__item"><a class="nav__link" href="#pricing">Тарифы</a></li>
             <li class="nav__item"><a class="nav__link" href="#faq">FAQ</a></li>
+            <li class="nav__item nav__item--auth">
+              <div class="auth" data-auth data-home="./">
+                <a class="button auth__button" href="app/login.html" data-auth-guest>Войти</a>
+                <a class="button button--primary auth__button" href="app/register.html" data-auth-guest>Регистрация</a>
+                <a class="auth__link" href="app/dashboard.html" data-auth-user hidden><span data-auth-name>Аккаунт</span></a>
+                <button type="button" class="button auth__button" data-auth-logout data-auth-user hidden>Выйти</button>
+              </div>
+            </li>
           </ul>
         </nav>
         <div class="header__tools">
@@ -734,9 +742,13 @@ test('the site has the landing pages in both languages, error pages and applicat
     'en/app/settings.html',
     'app/welcome.html',
     'en/app/welcome.html',
+    'app/login.html',
+    'en/app/login.html',
+    'app/register.html',
+    'en/app/register.html',
   ])
     assert.ok(names.includes(page), page);
-  assert.equal(names.length, 19);
+  assert.equal(names.length, 23);
 });
 
 eachPage('every page has lang, title, charset and viewport', documentProblems);
@@ -782,6 +794,8 @@ test('the Russian and English versions have the same element structure', () => {
     ['app/dashboard.html', 'en/app/dashboard.html'],
     ['app/settings.html', 'en/app/settings.html'],
     ['app/welcome.html', 'en/app/welcome.html'],
+    ['app/login.html', 'en/app/login.html'],
+    ['app/register.html', 'en/app/register.html'],
   ])
     assert.deepEqual(parityProblems(pages[ru], pages[en]), [], ru);
 });

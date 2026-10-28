@@ -1296,6 +1296,7 @@ label > span {
 @import url('footer.css');
 @import url('pages.css');
 @import url('app.css');
+@import url('auth.css');
 @import url('editor.css');
 @import url('adaptive.css');
 ```

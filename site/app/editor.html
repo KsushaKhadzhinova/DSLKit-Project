@@ -76,6 +76,7 @@
             <button type="button" class="button button--quiet" data-action="check">Проверить</button>
             <button type="button" class="button button--quiet" data-action="format">Форматировать</button>
             <button type="button" class="button button--quiet" data-action="share">Поделиться</button>
+            <button type="button" class="button button--quiet" data-action="save-template">Сохранить как шаблон</button>
             <button type="button" class="button button--quiet" data-notation-label>Диаграмма: IDEF0</button>
             <button type="button" class="button button--quiet" data-action="layout">Автораскладка</button>
             <button type="button" class="button button--quiet" data-import="file">Импорт из файла</button>
@@ -93,11 +94,21 @@
               <span>Автосохранение</span>
             </button>
             <button type="button" class="button button--quiet" data-action="theme">Тема</button>
+            <div class="auth auth--menu" data-auth data-home="../index.html">
+              <a class="button button--quiet" href="login.html" data-auth-guest>Войти</a>
+              <a class="button button--quiet" href="register.html" data-auth-guest>Регистрация</a>
+              <span class="button button--quiet" data-auth-name data-auth-user hidden></span>
+              <button type="button" class="button button--quiet" data-auth-logout data-auth-user hidden>Выйти</button>
+            </div>
             <a class="button button--quiet" href="../en/app/editor.html" hreflang="en" lang="en">English</a>
           </div>
         </details>
 
-        <span class="editor-toolbar__avatar" role="img" aria-label="KX">KX</span>
+        <a class="editor-toolbar__avatar" href="settings.html" aria-label="Настройки"
+          ><svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="10" cy="10" r="2.5" />
+            <path d="M10 2.5v2.5M10 15v2.5M2.5 10H5M15 10h2.5M4.7 4.7l1.8 1.8M13.5 13.5l1.8 1.8M4.7 15.3l1.8-1.8M13.5 6.5l1.8-1.8" /></svg
+        ></a>
       </div>
 
       <div class="editor-topbar">
@@ -119,7 +130,14 @@
     </header>
 
     <nav class="editor-activity" aria-label="Панель действий">
-      <button type="button" class="editor-activity__button editor-activity__button--active" data-panel="files" aria-label="Файлы" aria-pressed="true" data-tip="Файлы">
+      <button
+        type="button"
+        class="editor-activity__button editor-activity__button--active"
+        data-panel="files"
+        aria-label="Файлы"
+        aria-pressed="true"
+        data-tip="Файлы"
+      >
         <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
           <path d="M3 6h5l2 2h7v8H3z" />
         </svg>
@@ -315,7 +333,14 @@
       <h2 class="visually-hidden">Проблемы</h2>
 
       <div class="problems__tabs">
-        <button type="button" class="problems__tab problems__tab--active" data-problems-tab="problems" aria-pressed="true" aria-label="Проблемы: 3" data-tip="Проблемы: 3">
+        <button
+          type="button"
+          class="problems__tab problems__tab--active"
+          data-problems-tab="problems"
+          aria-pressed="true"
+          aria-label="Проблемы: 3"
+          data-tip="Проблемы: 3"
+        >
           <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
             <path d="M10 3l8 14H2z" />
             <path d="M10 8v4M10 14v.5" /></svg
@@ -412,7 +437,8 @@
       <button
         type="button"
         class="button button--icon"
-        aria-label="Показать ошибки" data-action="problems"
+        aria-label="Показать ошибки"
+        data-action="problems"
         aria-expanded="false"
         aria-controls="problems-panel"
         data-tip="Показать ошибки"

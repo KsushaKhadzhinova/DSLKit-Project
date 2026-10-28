@@ -7,7 +7,7 @@ import { createMemoryBackend, createStorage } from '../../site/js/utils/storage.
 
 // The sample cards live in the shared section, most of these tests work with them.
 const initDashboard = (options) => {
-  const api = start(options);
+  const api = start({ seed: false, ...options });
   api?.show('shared');
   return api;
 };

@@ -36,9 +36,17 @@
         <span>New diagram</span>
       </a>
       <a class="header__lang" href="../../app/dashboard.html" hreflang="ru" lang="ru">Русский</a>
-      <a class="app-topbar__avatar" href="settings.html" aria-label="Profile and settings">
-        <span aria-hidden="true">KX</span>
-      </a>
+      <div class="auth auth--app" data-auth data-home="../index.html">
+        <a class="button auth__button" href="login.html" data-auth-guest>Sign in</a>
+        <a class="button button--primary auth__button" href="register.html" data-auth-guest>Sign up</a>
+        <span class="auth__name" data-auth-name data-auth-user hidden></span>
+        <button type="button" class="button auth__button" data-auth-logout data-auth-user hidden>Sign out</button>
+      </div>
+      <a class="app-topbar__avatar" href="settings.html" aria-label="Settings"
+        ><svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="10" cy="10" r="2.5" />
+          <path d="M10 2.5v2.5M10 15v2.5M2.5 10H5M15 10h2.5M4.7 4.7l1.8 1.8M13.5 13.5l1.8 1.8M4.7 15.3l1.8-1.8M13.5 6.5l1.8-1.8" /></svg
+      ></a>
     </header>
 
     <nav class="app-nav" aria-label="Application sections">
@@ -58,6 +66,14 @@
             </svg>
             <span>Templates</span>
           </a>
+        </li>
+        <li class="app-nav__item">
+          <button type="button" class="app-nav__link" data-section="templates">
+            <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M4 3h8l4 4v10H4zM12 3v4h4M7 11h6M7 14h4" />
+            </svg>
+            <span>My templates</span>
+          </button>
         </li>
         <li class="app-nav__item">
           <button type="button" class="app-nav__link" data-section="shared">
@@ -97,7 +113,9 @@
         </div>
 
         <div class="sort">
-          <select id="notation-filter" class="sort__select" aria-label="Other notations"><option value="">Other notations…</option></select>
+          <select id="notation-filter" class="sort__select" aria-label="Other notations">
+            <option value="">Other notations…</option>
+          </select>
           <label class="visually-hidden" for="project-sort">Sort</label>
           <select id="project-sort" class="sort__select" name="sort">
             <option value="newest" selected>Newest first</option>
@@ -106,6 +124,8 @@
           </select>
         </div>
       </div>
+
+      <button type="button" class="button button--primary" data-new-template hidden>New template</button>
 
       <p class="dashboard__count" id="project-count" role="status" aria-live="polite"></p>
 

@@ -36,9 +36,17 @@
         <span>Новая диаграмма</span>
       </a>
       <a class="header__lang" href="../en/app/settings.html" hreflang="en" lang="en">English</a>
-      <a class="app-topbar__avatar" href="settings.html" aria-label="Профиль и настройки">
-        <span aria-hidden="true">KX</span>
-      </a>
+      <div class="auth auth--app" data-auth data-home="../index.html">
+        <a class="button auth__button" href="login.html" data-auth-guest>Войти</a>
+        <a class="button button--primary auth__button" href="register.html" data-auth-guest>Регистрация</a>
+        <span class="auth__name" data-auth-name data-auth-user hidden></span>
+        <button type="button" class="button auth__button" data-auth-logout data-auth-user hidden>Выйти</button>
+      </div>
+      <a class="app-topbar__avatar" href="settings.html" aria-label="Настройки"
+        ><svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="10" cy="10" r="2.5" />
+          <path d="M10 2.5v2.5M10 15v2.5M2.5 10H5M15 10h2.5M4.7 4.7l1.8 1.8M13.5 13.5l1.8 1.8M4.7 15.3l1.8-1.8M13.5 6.5l1.8-1.8" /></svg
+      ></a>
     </header>
 
     <nav class="app-nav" aria-label="Разделы приложения">

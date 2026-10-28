@@ -118,13 +118,17 @@ test('a saved project opens from the address, an unknown one says so and opens a
   assert.match(missing.document.querySelector('.editor-status__saved').textContent, /не найден/);
 });
 
-test('the autosave updates a saved project only, only when the switch is on and the code changed', async () => {
+test('the autosave leaves an untouched new diagram alone, creates the project at the first change and then keeps it up to date', async () => {
   const storage = memory();
+  const untouched = open({ storage });
+  await untouched.flush();
+  assert.equal(createProjectStore({ storage }).list().length, 0);
   const fresh = open({ storage });
   showCode(fresh.document, fresh.document.querySelector('.code__lines'), 'diagram idef0 "A"');
   await fresh.flush();
-  assert.equal(createProjectStore({ storage }).list().length, 0);
+  assert.equal(createProjectStore({ storage }).list().length, 1);
   fresh.save();
+  assert.equal(createProjectStore({ storage }).list().length, 1);
   const [project] = createProjectStore({ storage }).list();
   const { document, flush, code } = open({ search: `?p=${project.id}`, storage });
   await flush();
@@ -160,7 +164,7 @@ const dashboard = ({ lang = 'ru', storage = memory(), answers = {}, now = clock(
   const dom = new JSDOM(lang === 'ru' ? pages.dashboard : pages.en, { url: `http://localhost/app/dashboard.html${search}` });
   dom.window.prompt = () => answers.prompt ?? null;
   dom.window.confirm = () => answers.confirm ?? false;
-  const api = initDashboard({ root: dom.window.document, storage, now });
+  const api = initDashboard({ root: dom.window.document, storage, now, seed: false });
   const press = (node) => node.dispatchEvent(new dom.window.MouseEvent('click', { bubbles: true, cancelable: true }));
   const visible = () => [...dom.window.document.querySelectorAll('.project-list__item:not([hidden]) .project-card__link')].map((node) => node.textContent);
   return { dom, document: dom.window.document, api, press, visible, storage };
@@ -275,7 +279,7 @@ test('a card without its own menu button gets one', () => {
     '<!doctype html><html lang="ru"><body><ul id="project-list"><li class="project-list__item" data-notation="erd"><article class="project-card"><a class="project-card__link" href="editor.html">A</a></article></li></ul></body></html>',
     { url: 'http://localhost/' },
   );
-  initDashboard({ root: dom.window.document, storage: memory() });
+  initDashboard({ root: dom.window.document, storage: memory(), seed: false });
   assert.ok(dom.window.document.querySelector('.project-card__menu'));
 });
 
@@ -287,7 +291,7 @@ test('the English dashboard asks in English before deleting for good, and the de
     return true;
   };
   const storage = memory();
-  const api = initDashboard({ root: dom.window.document, storage });
+  const api = initDashboard({ root: dom.window.document, storage, seed: false });
   const press = (node) => node.dispatchEvent(new dom.window.MouseEvent('click', { bubbles: true }));
   api.show('shared');
   press(dom.window.document.querySelector('[data-act="copy"]'));
@@ -329,7 +333,7 @@ test('the search of the address fills the query of the list', () => {
 
 test('a page without the quota, the headings and the navigation still works', () => {
   const dom = new JSDOM('<!doctype html><html lang="ru"><body><ul id="project-list"></ul></body></html>', { url: 'http://localhost/' });
-  const api = initDashboard({ root: dom.window.document, storage: memory() });
+  const api = initDashboard({ root: dom.window.document, storage: memory(), seed: false });
   assert.equal(api.show('mine'), true);
 });
 
