@@ -9,6 +9,7 @@ sp = json.load(open(here / "static-sec-perf.json", encoding="utf8"))["results"]
 e2e = json.load(open(here / "editor-e2e.json", encoding="utf8"))["results"]
 cpath = json.load(open(here / "critical-path-e2e.json", encoding="utf8"))["results"]
 pal = json.load(open(here / "palette-e2e.json", encoding="utf8"))["results"]
+extra = json.load(open(here / "extra-e2e.json", encoding="utf8"))["results"]
 lab2 = json.load(open(tc / "lab2" / "results.json", encoding="utf8"))
 lab3 = json.load(open(tc / "lab3" / "results.json", encoding="utf8"))
 lab2_list = lab2["results"] if isinstance(lab2, dict) and "results" in lab2 else lab2
@@ -31,11 +32,12 @@ def table(rows):
     return "\n".join(out)
 
 
-all_rows = sp + e2e + cpath + pal
+all_rows = sp + e2e + cpath + pal + extra
 t_all, p_all, f_all = counts(all_rows)
 l2_t = len(lab2_list)
 l2_p = sum(1 for r in lab2_list if r.get("status") == "Passed")
-unit = 713
+import os
+unit = int(os.environ.get("UNIT_TESTS", "730"))
 
 doc = f"""# Тестовая документация DSLKit
 
@@ -97,6 +99,10 @@ doc = f"""# Тестовая документация DSLKit
 
 {table(pal)}
 
+## 5.3 Дополнительные проверки (доступность, ширины, язык, тема, отказ хранилища, нагрузка кодом, XSS)
+
+{table(extra)}
+
 ## 6 Найденные дефекты
 
 | ID | Что найдено | Серьёзность | Вид тестирования | Статус |
@@ -111,6 +117,8 @@ doc = f"""# Тестовая документация DSLKit
 | DF-8 | Перетаскивание сущности ERD или класса UML записывало pos= после скобки и ломало код («строка не распознана») | Критическая | ручное проектирование | исправлено: положение перед скобкой, разбор в ER и классах |
 | DF-9 | Меню карточки проекта сдвигало соседей и мигало при наведении | Низкая | CP-14 | исправлено: меню поверх карточки |
 | DF-10 | Не было строгих общих правил (самопетля, повтор связи, формат pos=, регистр id, одинаковые названия, DFD-хранилища, нумерация IDEF0) | Средняя | требование владельца | исправлено: `notations/strict.js` |
+| DF-11 | Меню «⋯» редактора при окне высотой 800 px уходило за нижний край, последние пункты (в том числе «Тема») нельзя было нажать | Высокая | кликабельность | исправлено: прокрутка внутри меню |
+| DF-12 | В редакторе не было переключателя языка | Средняя | EX-04 | исправлено: пункт в меню, сохраняет проект в адресе |
 | D-1 | Для статики не задан ни Cache-Control, ни ETag (PF-08) | Низкая | производительность | **открыт**: рекомендация добавить `Cache-Control` в `tools/server.js` с тестами (порог покрытия 100%) |
 
 ## 7 Риски, ограничения, что не закрыто

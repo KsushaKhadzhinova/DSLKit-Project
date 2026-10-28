@@ -59,7 +59,7 @@
     {
       "id": "ST-09",
       "kind": "static",
-      "title": "Синтаксис всех JS-файлов корректен (51 файлов, node --check)",
+      "title": "Синтаксис всех JS-файлов корректен (56 файлов, node --check)",
       "status": "Passed",
       "note": ""
     },
@@ -248,7 +248,7 @@
     {
       "id": "PF-03",
       "kind": "performance",
-      "title": "Вес страницы /app/dashboard.html со стилями, скриптами и картинками ≤ 1500 КБ (сейчас 16 КБ)",
+      "title": "Вес страницы /app/dashboard.html со стилями, скриптами и картинками ≤ 1500 КБ (сейчас 17 КБ)",
       "status": "Passed",
       "note": ""
     },
@@ -269,14 +269,14 @@
     {
       "id": "PF-06",
       "kind": "performance",
-      "title": "Редактор отдаётся быстро: p95 из 20 запросов ≤ 100 мс (сейчас 3.3 мс)",
+      "title": "Редактор отдаётся быстро: p95 из 20 запросов ≤ 100 мс (сейчас 9.3 мс)",
       "status": "Passed",
       "note": ""
     },
     {
       "id": "PF-07",
       "kind": "performance",
-      "title": "Нагрузка: 200 параллельных запросов к главной, все 200 OK (за 278 мс)",
+      "title": "Нагрузка: 200 параллельных запросов к главной, все 200 OK (за 959 мс)",
       "status": "Passed",
       "note": ""
     },
@@ -284,26 +284,26 @@
       "id": "PF-08",
       "kind": "performance",
       "title": "Для статики задан Cache-Control или ETag/Last-Modified",
-      "status": "Failed",
-      "note": "нет заголовков кэша"
+      "status": "Passed",
+      "note": ""
     }
   ],
   "perfRows": [
     {
       "page": "/",
-      "kb": 31.7
+      "kb": 31.9
     },
     {
       "page": "/app/editor.html",
-      "kb": 29.7
+      "kb": 30
     },
     {
       "page": "/app/dashboard.html",
-      "kb": 16.2
+      "kb": 16.5
     },
     {
       "page": "/en/",
-      "kb": 28.9
+      "kb": 29.1
     }
   ]
 }

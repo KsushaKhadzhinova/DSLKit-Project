@@ -125,7 +125,7 @@ with sync_playwright() as p:
     def save():
         page.click('[data-action="save"]')
         page.wait_for_timeout(400)
-        yes("Мои проекты" in page.inner_text(".editor-status__saved"), page.inner_text(".editor-status__saved"))
+        yes("Сохранено" in page.inner_text(".editor-status__saved"), page.inner_text(".editor-status__saved"))
         yes("?p=" in page.url, page.url)
         eq(page.inner_text(".editor-topbar__title"), "мой-заказ.dsl")
         state["url"] = page.url

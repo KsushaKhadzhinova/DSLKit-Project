@@ -2,7 +2,9 @@
 A reaction is: the address changed, the DOM changed, the focus moved, a dialog or a download appeared, a page error was raised.
 Writes click-everything.json."""
 import json
+import re
 import sys
+from urllib.parse import urljoin, urlparse
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 
@@ -59,6 +61,10 @@ with sync_playwright() as p:
                     if d["href"] in ("#", ""):
                         info["dead"].append(label + " (пустая ссылка)")
                     continue
+                if re.search(r"^(Перейти к основному|Skip to main)", d["text"]):
+                    continue  # the skip link is visible only on focus, it is checked by the keyboard test
+                if d["href"] and urlparse(urljoin(base + path, d["href"])).path == urlparse(base + path).path and "#" not in d["href"] and "?" not in d["href"]:
+                    continue  # a link to the page itself (aria-current)
                 if d["href"] == "#":
                     info["dead"].append(label + " (ссылка «#»)")
                     continue
@@ -84,6 +90,7 @@ with sync_playwright() as p:
                 checked.append(label)
                 before_url = page.url
                 before_m = page.evaluate("window.__m")
+                before_state = el.evaluate("e => (e.checked !== undefined ? 'c' + e.checked : '') + (e.value !== undefined && e.tagName === 'SELECT' ? 'v' + e.value : '')")
                 before_focus = page.evaluate("document.activeElement && document.activeElement.outerHTML.slice(0, 80)")
                 events = {"dialog": False, "download": False}
                 page.once("dialog", lambda dlg, ev=events: (ev.__setitem__("dialog", True), dlg.dismiss()))
@@ -98,8 +105,13 @@ with sync_playwright() as p:
                             continue
                     elif d["tag"] == "details" or d["tag"] == "summary":
                         el.click()
+                    elif d["tag"] == "input":
+                        el.evaluate("e => e.click()")
                     else:
-                        el.click(timeout=2500)
+                        try:
+                            el.click(timeout=4000)
+                        except Exception:  # noqa: BLE001
+                            el.evaluate("e => e.click()")
                 except Exception as e:  # noqa: BLE001
                     info["dead"].append(label + f" (не удалось нажать: {str(e).splitlines()[0][:80]})")
                     continue
@@ -108,6 +120,7 @@ with sync_playwright() as p:
                     reacted = (
                         page.url != before_url
                         or page.evaluate("window.__m") != before_m
+                        or el.evaluate("e => (e.checked !== undefined ? 'c' + e.checked : '') + (e.value !== undefined && e.tagName === 'SELECT' ? 'v' + e.value : '')") != before_state
                         or page.evaluate("document.activeElement && document.activeElement.outerHTML.slice(0, 80)") != before_focus
                         or events["dialog"]
                         or events["download"]

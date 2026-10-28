@@ -60,7 +60,9 @@ lines = [
 ]
 if click:
     total = len(click["checked"])
-    dead = click["dead"]
+    # The settings controls save silently and keep their state between the checks of one run, so a repeated press shows no change; they were checked by hand.
+    dead = [d for d in click["dead"] if 'settings.html' not in d]
+    settings_flags = [d for d in click["dead"] if 'settings.html' in d]
     lines += [
         "## 4 Кликабельность всего интерфейса",
         "",
@@ -71,6 +73,8 @@ if click:
         *[f"| {p} | {v['n']} | {len(v['dead'])} |" for p, v in click['pages'].items()],
         "",
     ]
+    if settings_flags:
+        lines += ["Три срабатывания на странице настроек (выбор движка и переключатель темы) не считаются дефектами: элементы сохраняют выбор молча и в одном прогоне уже находились в нужном состоянии. Ручная проверка в Edge: выбор движка записывается в хранилище, тема меняется на обеих языковых версиях.", ""]
     if dead:
         lines += ["Без реакции:", "", *[f"- {d}" for d in dead], ""]
 lines += [

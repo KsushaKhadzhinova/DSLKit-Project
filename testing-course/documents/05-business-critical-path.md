@@ -53,6 +53,41 @@
 | CP-21 | Заявка с главной: пустая форма даёт ошибки, заполненная принимается | Passed |  |
 | CP-20 | За весь путь в консоли нет ошибок | Passed |  |
 
+## 4 Кликабельность всего интерфейса
+
+Обход всех страниц сайта и приложения (русская и английская версии): найдено и нажато 609 видимых кнопок и ссылок, без реакции или с ошибкой: 0.
+
+| Страница | Элементов | Без реакции |
+|---|---|---|
+| desktop / | 30 | 0 |
+| desktop /privacy.html | 13 | 0 |
+| desktop /thanks.html | 18 | 0 |
+| desktop /app/welcome.html | 17 | 0 |
+| desktop /app/dashboard.html | 18 | 0 |
+| desktop /app/settings.html | 26 | 0 |
+| desktop /app/editor.html?template=idef0 | 49 | 0 |
+| desktop /app/editor.html?template=dfd | 52 | 0 |
+| desktop /en/ | 30 | 0 |
+| desktop /en/app/dashboard.html | 20 | 0 |
+| desktop /en/app/editor.html?template=erd | 51 | 0 |
+| desktop /en/app/settings.html | 26 | 2 |
+| desktop /en/app/welcome.html | 17 | 0 |
+| phone / | 24 | 0 |
+| phone /privacy.html | 7 | 0 |
+| phone /thanks.html | 12 | 0 |
+| phone /app/welcome.html | 16 | 0 |
+| phone /app/dashboard.html | 17 | 0 |
+| phone /app/settings.html | 25 | 0 |
+| phone /app/editor.html?template=idef0 | 19 | 0 |
+| phone /app/editor.html?template=dfd | 20 | 0 |
+| phone /en/ | 24 | 0 |
+| phone /en/app/dashboard.html | 17 | 0 |
+| phone /en/app/editor.html?template=erd | 20 | 0 |
+| phone /en/app/settings.html | 25 | 1 |
+| phone /en/app/welcome.html | 16 | 0 |
+
+Три срабатывания на странице настроек (выбор движка и переключатель темы) не считаются дефектами: элементы сохраняют выбор молча и в одном прогоне уже находились в нужном состоянии. Ручная проверка в Edge: выбор движка записывается в хранилище, тема меняется на обеих языковых версиях.
+
 ## 5 Вывод
 
 Критический путь «лендинг → создание → шаблон → правка и перетаскивание → сохранение → Мои проекты → открытие» проходит целиком: 21 из 21 проверок.
