@@ -32,6 +32,23 @@ export const MESSAGES = {
   'idef0-context': { ru: 'Контекстная диаграмма A-0 должна содержать один блок', en: 'The A-0 context diagram must hold a single box' },
   'idef0-count': { ru: 'На диаграмме декомпозиции {n} блоков, должно быть от 3 до 6', en: 'The decomposition diagram has {n} boxes, it should have 3 to 6' },
 
+  'strict-pos': {
+    ru: 'У элемента {id} неверное положение «pos={value}», нужен вид pos=120x80',
+    en: 'Element {id} has a wrong place "pos={value}", the form is pos=120x80',
+  },
+  'strict-dup-edge': { ru: 'Связь {from} → {to} уже есть, повтор лишний', en: 'The link {from} → {to} already exists, the repeat is extra' },
+  'strict-self-loop': { ru: 'Элемент {id} ведёт сам в себя: в этой нотации так нельзя', en: 'Element {id} points at itself, this notation does not allow it' },
+  'strict-id-case': { ru: 'Идентификатор «{id}» отличается от «{other}» только регистром', en: 'Identifier "{id}" differs from "{other}" only in case' },
+  'strict-dup-label': { ru: 'Элементы {id} и {other} названы одинаково: «{label}»', en: 'Elements {id} and {other} have the same name: "{label}"' },
+  'strict-store-write-only': { ru: 'В хранилище {id} только пишут и никогда не читают', en: 'Data store {id} is only written and never read' },
+  'strict-store-read-only': { ru: 'Из хранилища {id} только читают, в него никто не пишет', en: 'Data store {id} is only read and never written' },
+  'strict-idef0-feedback': {
+    ru: 'Стрелка блока {id} возвращается в него же: обратную связь рисуют через другой блок',
+    en: 'The arrow of box {id} returns to the same box: draw feedback through another box',
+  },
+  'strict-idef0-gap': { ru: 'Нумерация блоков прерывается: после {previous} идёт {id}', en: 'The box numbers have a gap: {id} follows {previous}' },
+  'strict-idef0-port-dup': { ru: 'У блока {id} в разделе {port} повторяется одна и та же стрелка', en: 'Box {id} repeats the same arrow in {port}' },
+
   'dfd-no-process': {
     ru: 'Поток {from} → {to} не касается процесса: хотя бы один конец должен быть процессом',
     en: 'Flow {from} → {to} touches no process: one end must be a process',

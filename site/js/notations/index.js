@@ -4,6 +4,7 @@ import { parseHeader, problem, sourceLines } from './common.js';
 import { erGenerators, erd, idef1, idef1x, renderEr } from './er.js';
 import { dag, graphNotation, parseGraphTheory } from './graphs.js';
 import { parseIdef0 } from './idef0.js';
+import { strictProblems } from './strict.js';
 import { renderIdef0 } from './idef0-render.js';
 import { generators as sequenceGenerators, parseSequence, render as renderSequence } from './sequence.js';
 import { activity, bpmn, dfd, gostFlow, idef3, petri, state, usecase } from './specs.js';
@@ -105,6 +106,7 @@ export const parseDiagram = (source) => {
   const header = lines.length > 0 ? parseHeader(lines[0].text) : null;
   if (header === null) {
     const model = parseIdef0(source);
+    model.problems.push(...strictProblems('idef0', model));
     if (lines.length > 0) model.problems.unshift(problem(lines[0].n, 'warning', 'no-header'));
     return sortProblems(model);
   }
@@ -120,6 +122,7 @@ export const parseDiagram = (source) => {
   const model = NOTATIONS[key].parse(lines.slice(1), header, source);
   model.notation = key;
   model.problems.unshift(...extra);
+  model.problems.push(...strictProblems(key, model));
   return sortProblems(model);
 };
 
