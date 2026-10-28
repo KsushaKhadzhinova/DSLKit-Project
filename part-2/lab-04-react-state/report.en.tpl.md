@@ -28,6 +28,8 @@ The functions `filterDiagrams`, `sortDiagrams` and `getStats` are pure and live 
 
 The tab title is updated by an effect and shows the number of diagrams. The `useAutosaveStatus` hook shows "Saving…" after a change and "Saved" after 500 ms of quiet. This is a debounce: every new change clears the previous timer with the effect cleanup function.
 
+The third effect simulates loading from a server. The `useServerLoad` hook turns a loading flag on at start, turns it off with a timer after 1 second and clears the timer when the page is closed. While the flag is on, the message "Загрузка диаграмм…" is shown instead of the list.
+
 ### 3.5 Input Validation
 
 The form and the edit mode check the diagram title before saving. A value made of spaces only counts as empty and is rejected with the message "Введите название диаграммы". A title longer than the limit is rejected with a message that names the allowed number of characters. The title length limit and the maximum number of records live in a separate file, `src/limits.json`, not in the component code. The list is capped at 200 records, so endless additions cannot fill `localStorage`. The "Создана" field of every record shows the creation time with seconds. If a record is created in the same second as the previous one, its time is moved one second forward, so no two records share a time.
@@ -136,11 +138,11 @@ Figure 15 – Application page in the dark theme
 
 This work has no server and no routes, so the pages 401, 403 and 404 are not needed, and for the errors of the application itself there are two pages built from the catalogue of texts `src/shell/errorCatalog.js`. The 500 page is shown when an unexpected error occurs while rendering, and the "No connection to the server" page with a retry button is shown when a part of the code could not be downloaded. Each answers three questions: what the error is, why it happened and how to solve it. The technical text of the error goes to the console only and never reaches the page.
 
-Fifty-five automated tests check the pure functions, both hooks and the application behaviour: adding, deleting, editing with Enter and Esc, status switching, filters, sorting, list restoring, whitespace and huge values, unique creation time, broken storage data, markup rendered as text, the theme switch and the 500 page. The manual check is described in `README.md`, the content of `localStorage` is viewed in the Application tab of the developer tools.
+One hundred automated tests check the pure functions, both hooks and the application behaviour: adding, deleting, editing with Enter and Esc, status switching, filters, sorting, list restoring, whitespace and huge values, unique creation time, broken storage data, markup rendered as text, the theme switch and the 500 page, and the 1-second simulated load with the indicator on fake timers. The manual check is described in `README.md`, the content of `localStorage` is viewed in the Application tab of the developer tools.
 
 ## Conclusion
 
-The Vite application implements adding, deleting and editing diagrams, filtering and sorting, saving to `localStorage` and two additional effects, the page title and autosave with debounce. The storage logic is extracted into a custom hook, which will simplify replacing `localStorage` with a REST API in laboratory work No. 5.
+The Vite application implements adding, deleting and editing diagrams, filtering and sorting, saving to `localStorage` and three additional effects, the page title, autosave with debounce and a simulated server load of 1 second. The storage logic is extracted into a custom hook, which will simplify replacing `localStorage` with a REST API in laboratory work No. 5.
 
 ## Answers to Control Questions
 
@@ -183,6 +185,15 @@ useEffect(() => {
   const timer = setTimeout(() => setStatus('saved'), AUTOSAVE_DELAY);
   return () => clearTimeout(timer);
 }, [value]);
+```
+
+```jsx
+// hooks/useServerLoad.js: simulated server load, 1 second
+useEffect(() => {
+  if (!loading) return undefined;
+  const timer = setTimeout(() => setLoading(false), loadConfig.delay);
+  return () => clearTimeout(timer);
+}, [loading]);
 ```
 
 ```jsx

@@ -6,6 +6,7 @@ import StatsBar from './components/StatsBar';
 import { INITIAL_DIAGRAMS } from './data/initialDiagrams';
 import { useAutosaveStatus } from './hooks/useAutosaveStatus';
 import { useLocalStorage } from './hooks/useLocalStorage';
+import { useServerLoad } from './hooks/useServerLoad';
 import { ThemeProvider } from './shell/theme';
 import SiteFooter from './shell/SiteFooter';
 import SiteHeader, { LogoContent } from './shell/SiteHeader';
@@ -53,6 +54,7 @@ export default function App() {
   const [notation, setNotation] = useState('all');
   const [sortBy, setSortBy] = useState('date');
   const autosave = useAutosaveStatus(diagrams);
+  const loading = useServerLoad();
 
   useEffect(() => {
     document.title = `DSLKit: диаграмм ${diagrams.length}`;
@@ -102,7 +104,11 @@ export default function App() {
           </h2>
           <DiagramFilters query={query} status={status} notation={notation} sortBy={sortBy} onQuery={setQuery} onStatus={setStatus} onNotation={setNotation} onSort={setSortBy} />
           <StatsBar stats={getStats(diagrams)} autosave={autosave} />
-          {visible.length === 0 ? (
+          {loading ? (
+            <p className="empty" role="status" aria-live="polite">
+              Загрузка диаграмм…
+            </p>
+          ) : visible.length === 0 ? (
             <p className="empty">Диаграммы не найдены.</p>
           ) : (
             <ul className="cards" aria-label="Диаграммы">

@@ -11,7 +11,7 @@
 | `useEffect` и `localStorage`                        | `hooks/useLocalStorage.js`: загрузка при инициализации, запись при каждом изменении |
 | Добавление, удаление, редактирование                | форма, кнопки «Удалить» и «Изменить», переключатель статуса                         |
 | Фильтрация и сортировка                             | поиск по названию, статус, сортировка по дате и названию (`utils/diagrams.js`)      |
-| Дополнительные эффекты                              | `document.title`, автосохранение с debounce 500 мс (`hooks/useAutosaveStatus.js`)   |
+| Дополнительные эффекты                              | `document.title`, автосохранение с debounce 500 мс (`hooks/useAutosaveStatus.js`), имитация загрузки с сервера 1 с с индикатором (`hooks/useServerLoad.js`) |
 | Статистика                                          | всего, опубликовано, черновики (`StatsBar.jsx`)                                     |
 | Пустой localStorage                                 | начальные данные `data/initialDiagrams.js`, повреждённый JSON тоже даёт начальные   |
 | Хук `useLocalStorage` вынесен, как советует условие | `hooks/useLocalStorage.js`                                                          |
@@ -23,7 +23,7 @@
 cd part-2/lab-04-react-state
 npm install
 npm run dev      # http://localhost:5175
-npm test         # Vitest и React Testing Library, 55 тестов
+npm test         # Vitest и React Testing Library, 102 теста
 npm run build    # сборка в dist/
 ```
 
