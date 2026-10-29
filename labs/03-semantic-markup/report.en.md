@@ -746,9 +746,11 @@ test('the site has the landing pages in both languages, error pages and applicat
     'en/app/login.html',
     'app/register.html',
     'en/app/register.html',
+    'app/docs.html',
+    'en/app/docs.html',
   ])
     assert.ok(names.includes(page), page);
-  assert.equal(names.length, 23);
+  assert.equal(names.length, 25);
 });
 
 eachPage('every page has lang, title, charset and viewport', documentProblems);
@@ -796,6 +798,7 @@ test('the Russian and English versions have the same element structure', () => {
     ['app/welcome.html', 'en/app/welcome.html'],
     ['app/login.html', 'en/app/login.html'],
     ['app/register.html', 'en/app/register.html'],
+    ['app/docs.html', 'en/app/docs.html'],
   ])
     assert.deepEqual(parityProblems(pages[ru], pages[en]), [], ru);
 });

@@ -1804,6 +1804,16 @@
   .board-tools__text {
     display: inline;
   }
+  .docs {
+    grid-template-columns: 16rem minmax(0, 1fr);
+    align-items: start;
+  }
+  .docs__editor,
+  .docs__edit,
+  .docs__role,
+  .docs__status {
+    grid-column: 2;
+  }
 }
 
 /* The menu is split into groups with a title and a divider; the export formats fold into a sub-menu */
@@ -1860,7 +1870,8 @@
 }
 
 /* Until the scripts have run, the sample content of the markup is hidden, so it never flashes before the real content; after 3 seconds it shows anyway */
-html.js:not(.is-ready) :is(.canvas__diagram, .problems__list, .problems__status, .editor-banner, .canvas__status, .project-list, .app-nav__quota, .file-tree, .dashboard__count) {
+html.js:not(.is-ready)
+  :is(.canvas__diagram, .problems__list, .problems__status, .editor-banner, .canvas__status, .project-list, .app-nav__quota, .file-tree, .dashboard__count) {
   visibility: hidden;
   animation: dslkit-reveal 0s 3s forwards;
 }
@@ -1868,4 +1879,114 @@ html.js:not(.is-ready) :is(.canvas__diagram, .problems__list, .problems__status,
   to {
     visibility: visible;
   }
+}
+
+/* Documentation page */
+.docs {
+  display: grid;
+  gap: var(--space-3);
+  align-content: start;
+}
+.docs__kinds {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+.docs__kinds .button[aria-pressed='true'] {
+  color: var(--color-on-primary);
+  background: var(--color-primary);
+}
+.docs__list {
+  display: grid;
+  gap: 0.125rem;
+  margin: var(--space-2) 0 0;
+  padding: 0;
+  list-style: none;
+}
+.docs__link {
+  inline-size: 100%;
+  padding: 0.375rem var(--space-2);
+  border: 0;
+  border-radius: var(--radius-small);
+  color: var(--color-text);
+  background: transparent;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+.docs__link:hover,
+.docs__link[aria-current='true'] {
+  color: var(--color-link);
+  background: var(--color-secondary);
+}
+.docs__article {
+  min-width: 0;
+  max-inline-size: 48rem;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+.docs__article pre {
+  padding: var(--space-2);
+  overflow-x: auto;
+  border-radius: var(--radius-small);
+  color: var(--color-code-text);
+  background: var(--color-code-background);
+}
+.docs__article code {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+}
+.docs__edited,
+.docs__status,
+.docs__role-hint {
+  color: var(--color-muted);
+  font-size: 0.875rem;
+}
+.docs__text {
+  inline-size: 100%;
+  padding: var(--space-2);
+  color: var(--color-text);
+  background: var(--color-background);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-small);
+  font: 0.875rem/1.5 var(--font-mono);
+}
+.docs__actions,
+.docs__role {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1);
+}
+.docs__role-title {
+  inline-size: 100%;
+  margin: 0;
+  font-size: 1rem;
+}
+.docs__role-hint {
+  inline-size: 100%;
+  margin: 0;
+}
+.docs__role-input {
+  min-block-size: var(--target-size-small);
+  padding: 0 var(--space-2);
+  color: var(--color-text);
+  background: var(--color-background);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-small);
+}
+
+.app-page--docs .settings {
+  padding-block-end: var(--space-5);
+}
+.docs__nav {
+  min-width: 0;
+}
+.docs__hint {
+  margin: 0;
+  color: var(--color-muted);
+}
+.docs__role-label {
+  font-size: 0.875rem;
+  font-weight: 600;
 }

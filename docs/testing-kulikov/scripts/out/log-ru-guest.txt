@@ -1,0 +1,28 @@
+== ru guest index.html: 45 elements
+== ru guest app/login.html: 14 elements
+== ru guest app/register.html: 16 elements
+== ru guest app/dashboard.html: 14 elements
+== ru guest app/welcome.html: 24 elements
+Traceback (most recent call last):
+  File "E:\DSLKit-Project\docs\testing-kulikov\scripts\nav-01-crawl.py", line 35, in <module>
+    p.goto(full); p.wait_for_timeout(900)
+    ^^^^^^^^^^^^
+  File "E:\VisualDSL_Tools\Python311\Lib\site-packages\playwright\sync_api\_generated.py", line 9903, in goto
+    self._sync(
+  File "E:\VisualDSL_Tools\Python311\Lib\site-packages\playwright\_impl\_sync_base.py", line 115, in _sync
+    return task.result()
+           ^^^^^^^^^^^^^
+  File "E:\VisualDSL_Tools\Python311\Lib\site-packages\playwright\_impl\_page.py", line 562, in goto
+    return await self._main_frame.goto(**locals_to_params(locals()))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\VisualDSL_Tools\Python311\Lib\site-packages\playwright\_impl\_frame.py", line 157, in goto
+    await self._channel.send(
+  File "E:\VisualDSL_Tools\Python311\Lib\site-packages\playwright\_impl\_connection.py", line 76, in send
+    return await self._connection.wrap_api_call(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\VisualDSL_Tools\Python311\Lib\site-packages\playwright\_impl\_connection.py", line 632, in wrap_api_call
+    raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+playwright._impl._errors.Error: Page.goto: Navigation to "http://localhost:5191/app/editor.html" is interrupted by another navigation to "http://localhost:5191/app/login.html"
+Call log:
+  - navigating to "http://localhost:5191/app/editor.html", waiting until "load"
+

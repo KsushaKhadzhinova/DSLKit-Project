@@ -1,3 +1,5 @@
+import { DEVELOPER_CODE_SHA256 } from '../config/roles.js';
+
 const ACCOUNTS = 'accounts';
 const SESSION = 'session';
 const ITERATIONS = 100000;
@@ -10,7 +12,7 @@ const toHex = (buffer) => [...new Uint8Array(buffer)].map((byte) => byte.toStrin
 const HEX = /^(?:[0-9a-f]{2})+$/;
 const fromHex = (hex) => Uint8Array.from(hex.match(/../g), (pair) => Number.parseInt(pair, 16));
 
-const publicUser = ({ id, name, email }) => ({ id, name, email });
+const publicUser = ({ id, name, email, role }) => ({ id, name, email, role: role === 'developer' ? 'developer' : 'user' });
 
 const normalizeEmail = (email) => String(email).trim().toLowerCase();
 
@@ -48,7 +50,7 @@ export const currentUser = (storage) => {
 
 // Accounts of the site live in the browser: there is no server. The password is never stored, only its PBKDF2-SHA-256 hash with a salt of its own.
 // The session is the id of the signed-in account. Every method answers with { ok, ... } and never throws for a wrong input.
-export const createAccountStore = ({ storage, crypto = globalThis.crypto, now = () => Date.now() }) => {
+export const createAccountStore = ({ storage, crypto = globalThis.crypto, now = () => Date.now(), developerHash = DEVELOPER_CODE_SHA256 }) => {
   const supported = () => typeof crypto?.subtle?.deriveBits === 'function' && typeof crypto.getRandomValues === 'function';
 
   const read = () => readAccounts(storage);
@@ -96,5 +98,23 @@ export const createAccountStore = ({ storage, crypto = globalThis.crypto, now = 
 
   const current = () => currentUser(storage);
 
-  return { register, login, logout, current };
+  // The role "developer" is given by a code whose hash is in the config; it is written to the account of the signed-in user.
+  const becomeDeveloper = async (code) => {
+    const user = current();
+    if (!user) return { ok: false, error: 'signed-out' };
+    if (!supported()) return { ok: false, error: 'unsupported' };
+    const digest = toHex(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(String(code))));
+    if (!same(digest, developerHash)) return { ok: false, error: 'invalid' };
+    const accounts = read().map((account) => (account.id === user.id ? { ...account, role: 'developer' } : account));
+    if (!storage.set(ACCOUNTS, accounts)) return { ok: false, error: 'storage' };
+    return { ok: true, user: current() };
+  };
+
+  const leaveDeveloper = () => {
+    const user = current();
+    if (!user) return false;
+    return storage.set(ACCOUNTS, read().map((account) => (account.id === user.id ? { ...account, role: 'user' } : account)));
+  };
+
+  return { register, login, logout, current, becomeDeveloper, leaveDeveloper };
 };

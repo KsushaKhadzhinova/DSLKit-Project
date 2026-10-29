@@ -24,7 +24,7 @@ test('registration stores a salted hash, never the password, and signs the user 
   const store = createAccountStore({ storage: createStorage(backend), now: () => 5 });
   const result = await store.register(person);
   assert.equal(result.ok, true);
-  assert.deepEqual(Object.keys(result.user).sort(), ['email', 'id', 'name']);
+  assert.deepEqual(Object.keys(result.user).sort(), ['email', 'id', 'name', 'role']);
   assert.equal(result.user.name, 'Ксения');
   assert.equal(result.user.email, 'ksenia@example.com');
   assert.deepEqual(store.current(), result.user);
@@ -116,7 +116,7 @@ test('damaged data gives a guest and ignores broken accounts', () => {
   storage.set('session', { userId: 'u1' });
   assert.equal(currentUser(storage), null);
   storage.set('accounts', [null, 'x', { ...good, id: 5 }, { ...good, salt: 'zz' }, { ...good, hash: undefined }, { ...good, iterations: 0 }, good]);
-  assert.deepEqual(currentUser(storage), { id: 'u1', name: 'A', email: 'a@b.co' });
+  assert.deepEqual(currentUser(storage), { id: 'u1', name: 'A', email: 'a@b.co', role: 'user' });
   storage.set('session', { userId: 'unknown' });
   assert.equal(currentUser(storage), null);
   storage.set('session', 'u1');

@@ -5,6 +5,7 @@ import { initAuthGate } from './components/auth-gate.js';
 import { initBurger } from './components/burger.js';
 import { initCanvasDrag } from './components/canvas-drag.js';
 import { initDashboard } from './components/dashboard.js';
+import { initDocs } from './components/docs.js';
 import { initDiagramRunner } from './components/diagram-runner.js';
 import { initEditor } from './components/editor.js';
 import { initCodeInput } from './components/code-input.js';
@@ -37,6 +38,7 @@ export const COMPONENTS = [
   initDashboard,
   initQuota,
   initWelcome,
+  initDocs,
   initAppSearch,
   initSettings,
   initEditor,
