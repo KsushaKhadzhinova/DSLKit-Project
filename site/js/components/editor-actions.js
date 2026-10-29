@@ -175,6 +175,7 @@ export const initEditorActions = ({ root = document, storage, clipboard = root.d
     if (!sidebar) return;
     sidebar.dataset.view = view;
     templatesButton?.setAttribute('aria-pressed', String(view === 'templates'));
+    if (view === 'templates') page.querySelectorAll('[data-panel="files"]').forEach((button) => button.setAttribute('aria-pressed', 'false'));
   };
   templatesButton?.addEventListener('click', () => {
     const showing = sidebar?.dataset.view === 'templates' && sidebar.classList.contains('editor-sidebar--open');

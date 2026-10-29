@@ -8,6 +8,7 @@ import { showProblems } from '../../site/js/components/problems-panel.js';
 import { ENGINES, engineForFormat } from '../../site/js/engines/engines.js';
 import { renderLocal } from '../../site/js/engines/local-engine.js';
 import {
+  NOTATIONS,
   TEMPLATES,
   analyzeDag,
   analyzeGraph,
@@ -345,4 +346,22 @@ test('info and warning problems get their own icons and do not block running', a
   assert.equal($('.button--run').getAttribute('aria-disabled'), 'false');
   assert.match($('.problems__list').innerHTML, /problems__icon"/);
   assert.match($('.problems__list').innerHTML, /Критический путь/);
+});
+
+test('the Templates tab lists every notation and a field filters the list', () => {
+  const { document } = page();
+  const items = [...document.querySelectorAll('.templates__item')];
+  assert.equal(items.length, Object.keys(NOTATIONS).length);
+  assert.deepEqual(
+    items.slice(0, 3).map((item) => item.dataset.template),
+    ['idef0', 'dfd', 'erd'],
+  );
+  const search = document.querySelector('.templates__search');
+  search.value = 'sequence';
+  search.dispatchEvent(new document.defaultView.Event('input'));
+  assert.ok(document.querySelectorAll('.templates li:not([hidden])').length >= 1);
+  assert.ok(document.querySelectorAll('.templates li:not([hidden])').length < items.length);
+  search.value = '';
+  search.dispatchEvent(new document.defaultView.Event('input'));
+  assert.equal(document.querySelectorAll('.templates li[hidden]').length, 0);
 });

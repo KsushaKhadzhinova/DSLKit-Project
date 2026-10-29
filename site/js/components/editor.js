@@ -172,6 +172,40 @@ const initTemplates = ({ page, root }) => {
     announceRun(page, root);
     return true;
   };
+  // The Templates tab lists every notation of the editor, the three most used ones first, with a field that filters the list.
+  const list = page.querySelector('.templates');
+  if (list) {
+    const keys = ['idef0', 'dfd', 'erd', ...Object.keys(NOTATIONS).filter((key) => !['idef0', 'dfd', 'erd'].includes(key))];
+    list.replaceChildren(
+      ...keys.map((key) => {
+        const item = root.createElement('li');
+        const button = root.createElement('button');
+        button.type = 'button';
+        button.className = 'templates__item';
+        button.dataset.template = key;
+        const name = root.createElement('span');
+        name.textContent = NOTATIONS[key].name[lang];
+        const short = root.createElement('span');
+        short.className = 'badge';
+        short.textContent = NOTATIONS[key].short;
+        button.append(name, short);
+        item.append(button);
+        return item;
+      }),
+    );
+    const search = root.createElement('input');
+    search.type = 'search';
+    search.className = 'templates__search settings-row__select';
+    search.placeholder = ui('template', {}, lang);
+    search.setAttribute('aria-label', ui('template', {}, lang));
+    search.addEventListener('input', () => {
+      const query = search.value.trim().toLowerCase();
+      list.querySelectorAll('li').forEach((item) => {
+        item.hidden = query !== '' && !item.textContent.toLowerCase().includes(query);
+      });
+    });
+    list.before(search);
+  }
   page.querySelectorAll('[data-template]').forEach((button) => button.addEventListener('click', () => loadTemplate(button.dataset.template)));
   const picker = page.querySelector('[data-notation-select]');
   if (picker) {

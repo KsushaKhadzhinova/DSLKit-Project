@@ -1834,3 +1834,15 @@
 .editor-menu__sub > .button:not(.editor-menu__subsummary) {
   padding-inline-start: var(--space-4);
 }
+
+.templates__search {
+  inline-size: 100%;
+  margin-block-end: var(--space-1);
+}
+.editor-sidebar:not([data-view='templates']) > .templates__search {
+  display: none;
+}
+.templates {
+  max-block-size: calc(100dvh - 14rem);
+  overflow-y: auto;
+}
