@@ -37,7 +37,8 @@ const ICONS = {
   edit: '<path d="M4 16l1-4 9-9 3 3-9 9z"/><path d="M12 5l3 3"/>',
   remove: '<path d="M4 6h12M8 6V4h4v2M6 6l1 10h6l1-10M9 9v4M11 9v4"/>',
 };
-const icon = (paths) => `<svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">${paths}</svg>`;
+const icon = (paths) =>
+  `<svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">${paths}</svg>`;
 const NODE = '.notation__node[data-id]';
 const MOVE_TO_DRAG = 4;
 const NEW_WIDTH = 100;

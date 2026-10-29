@@ -16,6 +16,7 @@ import { initExport } from './components/export-menu.js';
 import { initImport } from './components/import-menu.js';
 import { registerServiceWorker } from './components/pwa.js';
 import { initNotationFilter } from './components/notation-filter.js';
+import { initPopups } from './components/popups.js';
 import { initSettings } from './components/settings.js';
 import { initTheme } from './components/theme.js';
 import { initQuota } from './components/quota.js';
@@ -49,6 +50,7 @@ export const COMPONENTS = [
   initTour,
   initCanvasDrag,
   initDiagramRunner,
+  initPopups,
 ];
 
 // Starts every component that finds its markup on the page; a failing component is reported and does not stop the others.
@@ -62,6 +64,8 @@ export const boot = (root, { components = COMPONENTS, logger = console } = {}) =
       logger.error(`DSLKit: component ${init.name} failed`, error);
     }
   });
+  // The placeholders of the markup stay hidden until the components have written the real content.
+  root.documentElement.classList.add('is-ready');
   return started;
 };
 

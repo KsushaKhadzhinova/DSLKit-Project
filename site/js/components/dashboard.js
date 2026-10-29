@@ -140,7 +140,9 @@ export const initDashboard = ({ root = document, storage, now = () => Date.now()
     const tag = el('p', 'project-card__notation');
     tag.append(el('span', 'project-card__tag', NOTATIONS[project.notation]?.short ?? project.notation.toUpperCase()));
     if (project.published) tag.append(' ', el('span', 'badge', labels.published));
-    const stamp = trashed ? labels.trashed(time(project.trashedAt), Math.max(0, Math.ceil(TRASH_DAYS - (now() - project.trashedAt) / 86400000))) : labels.changed(time(project.updated));
+    const stamp = trashed
+      ? labels.trashed(time(project.trashedAt), Math.max(0, Math.ceil(TRASH_DAYS - (now() - project.trashedAt) / 86400000)))
+      : labels.changed(time(project.updated));
     article.append(el('div', 'project-card__preview'), headingBox, tag, el('p', 'project-card__updated', stamp));
     item.append(article);
     return item;
@@ -340,7 +342,11 @@ export const initDashboard = ({ root = document, storage, now = () => Date.now()
       if (action === 'copy-template') templates.save(copy);
       else if (action === 'like') {
         const liked = likes();
-        if (liked.includes(key)) storage.set(likesKey, liked.filter((entry) => entry !== key));
+        if (liked.includes(key))
+          storage.set(
+            likesKey,
+            liked.filter((entry) => entry !== key),
+          );
         else {
           storage.set(likesKey, [...liked, key]);
           store.save(copy);

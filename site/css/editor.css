@@ -1821,7 +1821,7 @@
   margin: 0;
   padding: 0 var(--space-2);
   color: var(--color-muted);
-  font-size: 0.6875rem;
+  font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -1857,4 +1857,15 @@
 .templates {
   max-block-size: calc(100dvh - 14rem);
   overflow-y: auto;
+}
+
+/* Until the scripts have run, the sample content of the markup is hidden, so it never flashes before the real content; after 3 seconds it shows anyway */
+html.js:not(.is-ready) :is(.canvas__diagram, .problems__list, .problems__status, .editor-banner, .canvas__status, .project-list, .app-nav__quota, .file-tree, .dashboard__count) {
+  visibility: hidden;
+  animation: dslkit-reveal 0s 3s forwards;
+}
+@keyframes dslkit-reveal {
+  to {
+    visibility: visible;
+  }
 }

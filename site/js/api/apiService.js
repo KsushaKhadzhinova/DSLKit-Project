@@ -55,7 +55,10 @@ export const createApi = ({ config = API_CONFIG, fetchImpl = globalThis.fetch?.b
   };
 
   // Retries network failures, 429 and 5xx (a timeout is final, it already took the whole time limit) up to `retries` times with exponential backoff.
-  const send = async (path, { method = 'GET', body, headers = {}, baseUrl, signal, timeoutMs = config.timeoutMs, retries = config.retries, parse = 'text' } = {}) => {
+  const send = async (
+    path,
+    { method = 'GET', body, headers = {}, baseUrl, signal, timeoutMs = config.timeoutMs, retries = config.retries, parse = 'text' } = {},
+  ) => {
     const url = `${baseUrl ?? config.baseUrl}${path}`;
     const tryOnce = async (attemptNumber) => {
       try {
