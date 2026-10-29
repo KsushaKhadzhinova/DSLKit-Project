@@ -96,7 +96,12 @@ const OWNERS = /^(?:classifier|part)\s+(\S+)/m;
 
 // The ways to connect two elements, written the way the notation expects them.
 const OWN_LINKS = {
-  idef0: [{ id: 'arrow', make: (a, b) => `arrow ${a}.output -> ${b}.input` }],
+  // The output of a box can feed the input, the control or the mechanism of another box.
+  idef0: [
+    { id: 'output → input', make: (a, b) => `arrow ${a}.output -> ${b}.input` },
+    { id: 'output → control', make: (a, b) => `arrow ${a}.output -> ${b}.control` },
+    { id: 'output → mechanism', make: (a, b) => `arrow ${a}.output -> ${b}.mechanism` },
+  ],
   idef1: [{ id: 'relationship', make: (a, b) => `relationship ${a} 1:N ${b}` }],
   idef1x: [{ id: 'nonidentifying', make: (a, b) => `nonidentifying ${a} -> ${b}` }],
   erd: [{ id: 'relationship', make: (a, b) => `relationship ${a} 1:N ${b}` }],
