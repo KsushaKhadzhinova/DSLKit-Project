@@ -20,3 +20,14 @@ test('every keyword has an icon, and shapes differ by kind', () => {
   assert.notEqual(glyphFor('database'), glyphFor('start'));
   assert.equal(glyphFor('unknown-keyword'), glyphFor('another'));
 });
+
+test('IDEF0 offers a plain box and a box with a mechanism, with their own names', async () => {
+  const { paletteFor, linksFor } = await import('../../site/js/utils/palette.js');
+  const items = paletteFor('idef0');
+  assert.deepEqual(
+    items.map((item) => item.label[0]),
+    ['Блок функции', 'Блок с механизмом'],
+  );
+  assert.match(items[1].make('A9'), /mechanism: Performer/);
+  assert.equal(linksFor('idef0').length, 3);
+});

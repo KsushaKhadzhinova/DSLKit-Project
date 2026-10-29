@@ -74,7 +74,15 @@ const NAMES = {
 
 // Elements of the notations whose statements are not plain `<keyword> <id> "Label"` lines.
 const OWN = {
-  idef0: [{ keyword: 'box', prefix: 'A', make: (id) => `box ${id} "${id} function" {\n input: Input\n control: Rule\n output: Output\n}` }],
+  idef0: [
+    { keyword: 'box', prefix: 'A', make: (id) => `box ${id} "${id} function" {\n input: Input\n control: Rule\n output: Output\n}` },
+    {
+      keyword: 'box',
+      prefix: 'A',
+      label: ['Блок с механизмом', 'Box with mechanism'],
+      make: (id) => `box ${id} "${id} function" {\n input: Input\n control: Rule\n output: Output\n mechanism: Performer\n}`,
+    },
+  ],
   idef1: [{ keyword: 'entity', prefix: 'E', make: (id) => `entity ${id} {\n  id: int pk\n}` }],
   idef1x: [{ keyword: 'entity', prefix: 'E', make: (id) => `entity ${id} {\n  ${id.toLowerCase()}_id: int pk\n}` }],
   erd: [{ keyword: 'entity', prefix: 'E', make: (id) => `entity ${id} {\n  id: int pk\n}` }],
@@ -131,7 +139,7 @@ const nameOf = (keyword) => NAMES[keyword] ?? [keyword, keyword];
 // The elements that can be put on the board of a notation.
 export const paletteFor = (notation) => {
   const own = OWN[notation];
-  if (own) return own.map((item) => ({ ...item, label: nameOf(item.keyword) }));
+  if (own) return own.map((item) => ({ ...item, label: item.label ?? nameOf(item.keyword) }));
   const nodes = NOTATIONS[notation]?.nodes ?? {};
   return Object.keys(nodes).map((keyword) => ({
     keyword,
