@@ -73,34 +73,49 @@
             </svg>
           </summary>
           <div class="editor-menu__panel">
-            <button type="button" class="button button--quiet" data-action="check">Проверить</button>
-            <button type="button" class="button button--quiet" data-action="format">Форматировать</button>
-            <button type="button" class="button button--quiet" data-action="share">Поделиться</button>
-            <button type="button" class="button button--quiet" data-action="save-template">Сохранить как шаблон</button>
-            <button type="button" class="button button--quiet" data-notation-label>Диаграмма: IDEF0</button>
-            <button type="button" class="button button--quiet" data-action="layout">Автораскладка</button>
-            <button type="button" class="button button--quiet" data-import="file">Импорт из файла</button>
-            <button type="button" class="button button--quiet" data-import="clipboard">Импорт из буфера</button>
-            <input type="file" class="editor-import__file" accept=".puml,.plantuml,.pu,.mmd,.mermaid,.md,.txt,.dsl" aria-label="Файл с диаграммой" hidden />
-            <button type="button" class="button button--quiet" data-export="svg">Экспорт SVG</button>
-            <button type="button" class="button button--quiet" data-export="png">Экспорт PNG</button>
-            <button type="button" class="button button--quiet" data-export="jpeg">Экспорт JPEG</button>
-            <button type="button" class="button button--quiet" data-export="drawio">Экспорт draw.io</button>
-            <button type="button" class="button button--quiet" data-export="html">Экспорт HTML</button>
-            <button type="button" class="button button--quiet" data-tour-start>Показать тур</button>
-            <button type="button" class="button button--quiet canvas__refresh">Обновить с сервера</button>
-            <button type="button" class="editor-toolbar__switch" role="switch" aria-checked="true">
-              <span class="editor-toolbar__switch-track" aria-hidden="true"></span>
-              <span>Автосохранение</span>
-            </button>
-            <button type="button" class="button button--quiet" data-action="theme">Тема</button>
-            <div class="auth auth--menu" data-auth data-home="../index.html">
-              <a class="button button--quiet" href="login.html" data-auth-guest>Войти</a>
-              <a class="button button--quiet" href="register.html" data-auth-guest>Регистрация</a>
-              <span class="button button--quiet" data-auth-name data-auth-user hidden></span>
-              <button type="button" class="button button--quiet" data-auth-logout data-auth-user hidden>Выйти</button>
+            <div class="editor-menu__group" role="group" aria-label="Диаграмма">
+              <p class="editor-menu__title" aria-hidden="true">Диаграмма</p>
+              <button type="button" class="button button--quiet" data-action="check">Проверить</button>
+              <button type="button" class="button button--quiet" data-action="format">Форматировать</button>
+              <button type="button" class="button button--quiet" data-action="layout">Автораскладка</button>
+              <button type="button" class="button button--quiet" data-notation-label>Диаграмма: IDEF0</button>
             </div>
-            <a class="button button--quiet" href="../en/app/editor.html" hreflang="en" lang="en">English</a>
+            <div class="editor-menu__group" role="group" aria-label="Файл">
+              <p class="editor-menu__title" aria-hidden="true">Файл</p>
+              <button type="button" class="button button--quiet" data-action="share">Поделиться</button>
+              <button type="button" class="button button--quiet" data-action="save-template">Сохранить как шаблон</button>
+              <button type="button" class="button button--quiet" data-import="file">Импорт из файла</button>
+              <button type="button" class="button button--quiet" data-import="clipboard">Импорт из буфера</button>
+              <input type="file" class="editor-import__file" accept=".puml,.plantuml,.pu,.mmd,.mermaid,.md,.txt,.dsl" aria-label="Файл с диаграммой" hidden />
+            </div>
+            <details class="editor-menu__sub">
+              <summary class="button button--quiet editor-menu__subsummary">Экспорт</summary>
+              <button type="button" class="button button--quiet" data-export="svg">Экспорт SVG</button>
+              <button type="button" class="button button--quiet" data-export="png">Экспорт PNG</button>
+              <button type="button" class="button button--quiet" data-export="jpeg">Экспорт JPEG</button>
+              <button type="button" class="button button--quiet" data-export="drawio">Экспорт draw.io</button>
+              <button type="button" class="button button--quiet" data-export="html">Экспорт HTML</button>
+            </details>
+            <div class="editor-menu__group" role="group" aria-label="Вид и справка">
+              <p class="editor-menu__title" aria-hidden="true">Вид и справка</p>
+              <button type="button" class="button button--quiet" data-tour-start>Показать тур</button>
+              <button type="button" class="button button--quiet canvas__refresh">Обновить с сервера</button>
+              <button type="button" class="editor-toolbar__switch" role="switch" aria-checked="true">
+                <span class="editor-toolbar__switch-track" aria-hidden="true"></span>
+                <span>Автосохранение</span>
+              </button>
+              <button type="button" class="button button--quiet" data-action="theme">Тема</button>
+            </div>
+            <div class="editor-menu__group" role="group" aria-label="Аккаунт">
+              <p class="editor-menu__title" aria-hidden="true">Аккаунт</p>
+              <div class="auth auth--menu" data-auth data-home="../index.html">
+                <a class="button button--quiet" href="login.html" data-auth-guest>Войти</a>
+                <a class="button button--quiet" href="register.html" data-auth-guest>Регистрация</a>
+                <span class="button button--quiet" data-auth-name data-auth-user hidden></span>
+                <button type="button" class="button button--quiet" data-auth-logout data-auth-user hidden>Выйти</button>
+              </div>
+              <a class="button button--quiet" href="../en/app/editor.html" hreflang="en" lang="en">English</a>
+            </div>
           </div>
         </details>
 
