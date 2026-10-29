@@ -1739,3 +1739,57 @@
   clip-path: inset(50%);
   white-space: nowrap;
 }
+
+/* Fluid toolbar: buttons take the size of their content, and the type, the targets and the gaps grow with the width of the screen */
+.editor-toolbar__row {
+  gap: clamp(0.25rem, 0.1rem + 0.6vw, 0.625rem);
+  padding: clamp(0.25rem, 0.1rem + 0.5vw, 0.5rem) clamp(0.375rem, 0.1rem + 1vw, 1rem);
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+.editor-toolbar__row .button {
+  flex: 0 0 auto;
+  inline-size: auto;
+  min-block-size: clamp(2rem, 1.5rem + 1.2vw, 2.75rem);
+  padding-inline: clamp(0.5rem, 0.25rem + 0.9vw, 1rem);
+  font-size: clamp(0.75rem, 0.68rem + 0.3vw, 0.9375rem);
+  white-space: nowrap;
+}
+.editor-toolbar__row .button--icon {
+  min-inline-size: clamp(2rem, 1.5rem + 1.2vw, 2.75rem);
+  padding-inline: 0;
+}
+.editor-toolbar__row .board-tools__add {
+  padding-inline: clamp(0.5rem, 0.25rem + 0.9vw, 1rem);
+}
+.board-tools {
+  gap: clamp(0.25rem, 0.1rem + 0.5vw, 0.5rem);
+  flex: 0 0 auto;
+}
+.board-tools .palette__link {
+  inline-size: auto;
+  max-inline-size: clamp(5rem, 3rem + 6vw, 9rem);
+  min-block-size: clamp(2rem, 1.5rem + 1.2vw, 2.75rem);
+  font-size: clamp(0.75rem, 0.68rem + 0.3vw, 0.9375rem);
+}
+.board-tools .icon,
+.editor-toolbar__row .icon {
+  inline-size: clamp(1rem, 0.85rem + 0.5vw, 1.25rem);
+  block-size: clamp(1rem, 0.85rem + 0.5vw, 1.25rem);
+}
+.app-topbar__theme {
+  display: inline-grid;
+  place-items: center;
+  inline-size: clamp(2rem, 1.5rem + 1.2vw, 2.75rem);
+  block-size: clamp(2rem, 1.5rem + 1.2vw, 2.75rem);
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+  color: var(--color-text);
+  background: transparent;
+  cursor: pointer;
+}
+@media (min-width: 48rem) {
+  .board-tools__text {
+    display: inline;
+  }
+}

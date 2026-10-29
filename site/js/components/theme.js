@@ -50,6 +50,14 @@ export const initTheme = ({ root = document, storage, matchMedia = defaultMatchM
     apply(value);
   });
 
+  // The button of the page header switches between the light and the dark theme.
+  root.addEventListener('click', (event) => {
+    if (!event.target.closest('[data-theme-switch]')) return;
+    const value = current === 'dark' ? 'light' : 'dark';
+    storage.set(STORAGE_KEY, value);
+    apply(value);
+  });
+
   root.addEventListener('change', (event) => {
     const radio = event.target.closest('input[name="theme"]');
     if (!radio || !SAVED_VALUES.includes(radio.value)) return;
