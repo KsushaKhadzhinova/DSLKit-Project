@@ -118,6 +118,9 @@ export const API_CONFIG = {
   baseUrl: 'https://kroki.io',
   diagramType: 'graphviz',
   outputFormat: 'svg',
+  // The own rendering API of DSLKit lives on the same server as the pages.
+  ownBaseUrl: '',
+  ownPath: '/api/render',
   timeoutMs: 10000,
   retries: 3,
   retryDelayMs: 300,
@@ -186,8 +189,8 @@ export const createApi = ({ config = API_CONFIG, fetchImpl = globalThis.fetch?.b
   };
 
   // Retries network failures, 429 and 5xx (a timeout is final, it already took the whole time limit) up to `retries` times with exponential backoff.
-  const send = async (path, { method = 'GET', body, headers = {}, signal, timeoutMs = config.timeoutMs, retries = config.retries, parse = 'text' } = {}) => {
-    const url = `${config.baseUrl}${path}`;
+  const send = async (path, { method = 'GET', body, headers = {}, baseUrl, signal, timeoutMs = config.timeoutMs, retries = config.retries, parse = 'text' } = {}) => {
+    const url = `${baseUrl ?? config.baseUrl}${path}`;
     const tryOnce = async (attemptNumber) => {
       try {
         const response = await attempt(url, { method, body, headers, signal, timeoutMs });
@@ -228,8 +231,16 @@ export const createApi = ({ config = API_CONFIG, fetchImpl = globalThis.fetch?.b
   const checkHealth = (options = {}) => fetchData('/health', { ...options, parse: 'json' });
 
   // Sends diagram source (Graphviz DOT) and returns the SVG text; anything else is rejected as an unexpected answer.
+  // The engine type `dslkit` goes to the own server (JSON in, SVG out); any other type is a Kroki endpoint.
   const renderDiagram = async (source, { type = config.diagramType, format = config.outputFormat, ...options } = {}) => {
-    const svg = await postData(`/${type}/${format}`, source, { ...options, headers: { 'Content-Type': 'text/plain' } });
+    const svg =
+      type === 'dslkit'
+        ? await postData(config.ownPath, JSON.stringify({ source }), {
+            ...options,
+            baseUrl: config.ownBaseUrl,
+            headers: { 'Content-Type': 'application/json', Accept: 'image/svg+xml' },
+          })
+        : await postData(`/${type}/${format}`, source, { ...options, headers: { 'Content-Type': 'text/plain' } });
     if (!/<svg[\s>]/i.test(svg)) throw new ApiError('The service did not return a diagram', { kind: 'invalid' });
     return svg;
   };
@@ -581,10 +592,11 @@ export const initDiagramRunner = ({
       return false;
     }
     const wanted = currentEngine();
-    const format = wanted.type ? pickFormat(model, wanted.type) : null;
-    const engine = wanted.type && format !== wanted.type ? engineForFormat(format) : wanted;
+    const viaKroki = wanted.type && wanted.type !== 'dslkit';
+    const format = viaKroki ? pickFormat(model, wanted.type) : null;
+    const engine = viaKroki && format !== wanted.type ? engineForFormat(format) : wanted;
     const fallback = engine === wanted ? '' : ` ${ui('fallback', { label: tr(engine.label) }, lang)}`;
-    const input = engine.build(model);
+    const input = engine.build(model, source());
     controller?.abort();
     // The own engine draws in the browser: no request, no cache, and it works offline.
     if (!engine.type) {

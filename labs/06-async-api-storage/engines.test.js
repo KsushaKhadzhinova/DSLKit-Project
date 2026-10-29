@@ -24,13 +24,15 @@ arrow A0 -> Missing`;
 
 const model = () => parseDsl(SAMPLE);
 
-test('the registry lists three Kroki engines and the own engine and falls back to the own engine', () => {
+test('the registry lists three Kroki engines, the DSLKit server and the browser engine, and falls back to the browser engine', () => {
   assert.deepEqual(
     ENGINES.map((engine) => engine.id),
-    ['graphviz', 'mermaid', 'plantuml', 'local'],
+    ['graphviz', 'mermaid', 'plantuml', 'dslkit', 'local'],
   );
   assert.equal(findEngine('local').type, null);
   assert.equal(findEngine('mermaid').type, 'mermaid');
+  assert.equal(findEngine('dslkit').type, 'dslkit');
+  assert.equal(findEngine('dslkit').build(model(), 'raw source'), 'raw source');
   assert.equal(findEngine('nonsense').id, 'local');
   assert.equal(findEngine(undefined).id, 'local');
 });

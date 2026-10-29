@@ -12,6 +12,10 @@ const valid = (item) =>
 // The projects of the user: every saved diagram keeps its title, notation, code and the time of the last change.
 // A damaged store gives an empty list, a damaged project is dropped.
 // The projects of a signed-in user are kept under a key of their own, the projects of a guest under the plain key.
+// A project stays in the trash for 30 days, then it is deleted for good.
+export const TRASH_DAYS = 30;
+const DAY = 24 * 60 * 60 * 1000;
+
 export const createProjectStore = ({ storage, now = () => Date.now(), owner = null }) => {
   const key = owner ? `${KEY}.${owner}` : KEY;
   const seededKey = owner ? `seeded.${owner}` : 'seeded';
@@ -28,9 +32,10 @@ export const createProjectStore = ({ storage, now = () => Date.now(), owner = nu
     read()
       .filter((item) => item.trashedAt === undefined)
       .sort((a, b) => b.updated - a.updated);
+  const expired = (item) => item.trashedAt !== undefined && now() - item.trashedAt >= TRASH_DAYS * DAY;
   const listTrash = () =>
     read()
-      .filter((item) => item.trashedAt !== undefined)
+      .filter((item) => item.trashedAt !== undefined && !expired(item))
       .sort((a, b) => b.trashedAt - a.trashedAt);
   const get = (id) => list().find((item) => item.id === id) ?? null;
 
@@ -81,6 +86,13 @@ export const createProjectStore = ({ storage, now = () => Date.now(), owner = nu
     write(rest);
     return true;
   };
+  // Deletes what stayed in the trash for 30 days; returns how many projects went.
+  const purgeExpired = () => {
+    const projects = read();
+    const kept = projects.filter((item) => !expired(item));
+    if (kept.length !== projects.length) write(kept);
+    return projects.length - kept.length;
+  };
   // The first time the list is empty, ready diagrams are put into it: { title, notation, source, published, age } with the age in milliseconds.
   // It happens once, the flag stays after the projects are deleted, so they do not come back. Seeds do not count into the daily quota.
   const seed = (samples) => {
@@ -109,7 +121,7 @@ export const createProjectStore = ({ storage, now = () => Date.now(), owner = nu
   // How many diagrams were created on the day of `at`; the beta allows five a day, a deleted one still counts. Seeds are not counted.
   const createdOn = (at = now()) =>
     read().filter((item) => !item.seed && new Date(item.created ?? item.updated).toDateString() === new Date(at).toDateString()).length;
-  return { list, listTrash, get, save, rename, trash, restore, remove, createdOn, seed };
+  return { list, listTrash, get, save, rename, trash, restore, remove, createdOn, seed, purgeExpired };
 };
 
 // The templates of the user: a title, a notation and the code, kept apart from the projects and without a trash or a quota.

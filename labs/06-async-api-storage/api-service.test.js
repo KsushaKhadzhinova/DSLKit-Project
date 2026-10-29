@@ -191,3 +191,14 @@ test('identical requests that read the answer differently are not merged', async
   assert.deepEqual(json, { status: 'pass' });
   assert.equal(fetchImpl.mock.callCount(), 2);
 });
+
+test('the type dslkit sends JSON to the own server on the same origin and asks for an SVG', async () => {
+  const fetchImpl = mock.fn(async () => reply('<svg xmlns="http://www.w3.org/2000/svg"></svg>'));
+  const api = createApi({ config: { ...config, ownBaseUrl: '', ownPath: '/api/render' }, fetchImpl, sleep: async () => {} });
+  assert.match(await api.renderDiagram('diagram dfd', { type: 'dslkit' }), /<svg/);
+  const [url, init] = fetchImpl.mock.calls[0].arguments;
+  assert.equal(url, '/api/render');
+  assert.equal(init.body, JSON.stringify({ source: 'diagram dfd' }));
+  assert.equal(init.headers['Content-Type'], 'application/json');
+  assert.equal(init.headers.Accept, 'image/svg+xml');
+});

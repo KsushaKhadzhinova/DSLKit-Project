@@ -247,3 +247,53 @@ export const removeElement = (code, id) => {
   });
   return { code: kept.join('\n'), links };
 };
+
+const LABEL = /"((?:[^"\\]|\\.)*)"/;
+const quoteLabel = (text) => `"${String(text).replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\r?\n/g, '\\n')}"`;
+
+// The text of the first quoted string on the line that declares the element, or null when the element has no label in the code.
+export const labelOf = (code, id) => {
+  const line = code.split('\n').find((item) => declares(item, id));
+  const found = line === undefined ? null : LABEL.exec(line);
+  return found ? found[1].replace(/\\(.)/g, (_, char) => (char === 'n' ? '\n' : char)) : null;
+};
+
+// Writes a new label into the declaration of an element. Returns null when the element does not exist or has no label to change.
+export const renameElement = (code, id, label) => {
+  const lines = code.split('\n');
+  const at = lines.findIndex((item) => declares(item, id));
+  if (at < 0 || !LABEL.test(lines[at])) return null;
+  lines[at] = lines[at].replace(LABEL, () => quoteLabel(label));
+  return lines.join('\n');
+};
+
+// The picture of an element on its button: one of a few shapes, as in a shape library of a drawing tool.
+const SHAPES = {
+  circle: ['start', 'end', 'intermediate', 'place', 'vertex', 'initial', 'final', 'and', 'or', 'xor', 'port', 'connector', 'individual'],
+  diamond: ['exclusive', 'decision', 'question', 'merge'],
+  bar: ['fork', 'join', 'transition', 'parallel'],
+  cylinder: ['database', 'store'],
+  cloud: ['cloud'],
+  actor: ['actor', 'person', 'client'],
+  doc: ['note', 'comment', 'artifact', 'data'],
+  hexagon: ['event', 'router', 'switch', 'server'],
+  round: ['process', 'task', 'usecase', 'state', 'function', 'system', 'external', 'unit', 'topic', 'root', 'outcome', 'object', 'interaction'],
+  class: ['class', 'interface', 'entity', 'classifier', 'metaclass', 'stereotype'],
+};
+const PATHS = {
+  circle: '<circle cx="10" cy="10" r="6.5"/>',
+  diamond: '<path d="M10 2.5l7.5 7.5-7.5 7.5L2.5 10z"/>',
+  bar: '<rect x="3" y="8" width="14" height="4"/>',
+  cylinder: '<ellipse cx="10" cy="5" rx="6" ry="2.5"/><path d="M4 5v10c0 1.4 2.7 2.5 6 2.5s6-1.1 6-2.5V5"/>',
+  cloud: '<path d="M6 15a3.5 3.5 0 010-7 4.5 4.5 0 018.6-1A3.8 3.8 0 0115 15z"/>',
+  actor: '<circle cx="10" cy="5" r="2.5"/><path d="M10 7.5v6M5 10h10M10 13.5l-3.5 4M10 13.5l3.5 4"/>',
+  doc: '<path d="M4 3h8l4 4v10H4zM12 3v4h4"/>',
+  hexagon: '<path d="M6 3.5h8l3.5 6.5-3.5 6.5H6L2.5 10z"/>',
+  round: '<rect x="2.5" y="5" width="15" height="10" rx="5"/>',
+  class: '<rect x="3" y="3.5" width="14" height="13"/><path d="M3 8h14M3 12h14"/>',
+  box: '<rect x="2.5" y="5" width="15" height="10" rx="1"/>',
+};
+const SHAPE_OF = Object.fromEntries(Object.entries(SHAPES).flatMap(([shape, words]) => words.map((word) => [word, shape])));
+
+// The inner markup of a 20 by 20 icon for a keyword; every keyword has one.
+export const glyphFor = (keyword) => PATHS[SHAPE_OF[keyword] ?? 'box'];

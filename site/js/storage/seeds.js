@@ -1,15 +1,19 @@
-import { TEMPLATES, parseDiagram } from '../notations/index.js';
+import { NOTATION_KEYS, TEMPLATES, parseDiagram } from '../notations/index.js';
 
 const HOUR = 3600000;
-// The diagrams of the first visit: one of the first notations each, changed at different times, some of them published.
-const PLAN = [
+const DAY = 24 * HOUR;
+// The diagrams of the first visit: the first six are the most used notations, changed at different times, some of them published.
+const FIRST = [
   ['idef0', 2 * HOUR, true],
   ['bpmn', 26 * HOUR, false],
-  ['uml-class', 3 * 24 * HOUR, true],
-  ['erd', 6 * 24 * HOUR, false],
-  ['dfd', 12 * 24 * HOUR, true],
-  ['petri', 30 * 24 * HOUR, false],
+  ['uml-class', 3 * DAY, true],
+  ['erd', 6 * DAY, false],
+  ['dfd', 12 * DAY, true],
+  ['petri', 30 * DAY, false],
 ];
+// Every other notation of the editor follows, older and older, every third one published, so the list has an example of each kind.
+const REST = NOTATION_KEYS.filter((key) => !FIRST.some(([notation]) => notation === key)).map((key, index) => [key, (31 + index) * DAY, index % 3 === 0]);
+const PLAN = [...FIRST, ...REST];
 
 export const starterProjects = () =>
   PLAN.map(([notation, age, published]) => ({

@@ -1266,6 +1266,10 @@
   fill: var(--color-text-light);
 }
 
+.canvas__remote[data-engine='local'] svg [fill$='1e293b' i] {
+  fill: var(--color-text-light);
+}
+
 .canvas__remote[data-engine='local'] svg :is([stroke$='1e293b' i], [stroke$='334155' i]) {
   stroke: var(--color-text-light);
 }
@@ -1573,4 +1577,165 @@
 .notation__node--picked path {
   stroke: var(--color-primary);
   stroke-width: 3;
+}
+
+/* Board tools in the toolbar: add (a menu of shapes), connect, rename, delete */
+.board-tools {
+  position: relative;
+  align-items: center;
+  padding-inline-start: var(--space-2);
+  border-inline-start: 1px solid var(--color-border);
+}
+.board-tools__button[aria-disabled='true'] {
+  opacity: 0.45;
+}
+.board-tools__add {
+  gap: 0.25rem;
+  padding-inline: var(--space-2);
+}
+.board-tools__text {
+  display: none;
+}
+.board-tools__pop {
+  position: absolute;
+  z-index: 40;
+  inset-block-start: calc(100% + 0.5rem);
+  inset-inline-start: var(--space-2);
+  inline-size: min(17rem, 90vw);
+  padding: var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-large);
+}
+.board-tools__pop[hidden] {
+  display: none;
+}
+.board-tools .palette {
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.375rem;
+}
+.board-tools .palette__item {
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  gap: 0.25rem;
+  min-block-size: 4.25rem;
+  padding: 0.5rem 0.25rem;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  text-align: center;
+  font-size: 0.75rem;
+  line-height: 1.2;
+}
+.board-tools .palette__item:hover {
+  border-color: var(--color-primary);
+}
+.board-tools .palette__item .icon {
+  inline-size: 1.75rem;
+  block-size: 1.75rem;
+}
+.board-tools .palette__connect {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin: 0;
+}
+.board-tools .palette__link {
+  max-inline-size: 7.5rem;
+  min-block-size: var(--target-size-small);
+}
+.board-tools .palette__mode[aria-pressed='true'] {
+  color: var(--color-on-primary);
+  background: var(--color-primary);
+}
+.board-tools .palette__remove {
+  inline-size: auto;
+  margin: 0;
+  justify-content: center;
+}
+.board-edit {
+  position: fixed;
+  z-index: 70;
+  box-sizing: border-box;
+  block-size: 2rem;
+  padding: 0 0.5rem;
+  border: 2px solid var(--color-primary);
+  border-radius: 6px;
+  color: var(--color-text);
+  background: var(--color-surface);
+  font: inherit;
+}
+.canvas {
+  position: relative;
+}
+.canvas__remote {
+  background-image: radial-gradient(circle, var(--color-border) 1px, transparent 1px);
+  background-size: 16px 16px;
+}
+.canvas > .palette__message {
+  position: absolute;
+  inset-block-end: 0.5rem;
+  inset-inline-start: 0.5rem;
+  max-inline-size: 70%;
+  margin: 0;
+  padding: 0.25rem 0.625rem;
+  border-radius: 6px;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-large);
+}
+.canvas > .palette__message:empty {
+  display: none;
+}
+
+@media (min-width: 64rem) {
+  .board-tools__text {
+    display: inline;
+  }
+}
+
+/* The panel under the code is small while the code has no problems, and tall again for the assistant, the output and the versions */
+.app-page--editor[data-clean='true']:not([data-tab='ai'], [data-tab='output'], [data-tab='versions']) {
+  --problems-height: 4.5rem;
+}
+.problems > .editor-tools__view {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: 0;
+  overflow: auto;
+}
+.problems > .editor-tools__view[hidden] {
+  display: none;
+}
+.problems .editor-tools__chat {
+  flex: 1 0 100%;
+  max-height: 7rem;
+  margin: 0;
+  padding: 0;
+  overflow: auto;
+  list-style: none;
+}
+.problems .editor-tools__view .editor-tools__input {
+  flex: 1 1 12rem;
+}
+.editor-sidebar[data-view='templates'] > :is(h2:first-child, .file-tree, .editor-sidebar__beta),
+.editor-sidebar:not([data-view='templates']) > :is(h2:nth-of-type(2), .templates, .templates__select) {
+  display: none;
+}
+
+.editor-toolbar__row .button--icon[aria-disabled='true'] {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.canvas__status[data-state='ready'] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }

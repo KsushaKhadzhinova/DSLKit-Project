@@ -55,8 +55,8 @@ export const createApi = ({ config = API_CONFIG, fetchImpl = globalThis.fetch?.b
   };
 
   // Retries network failures, 429 and 5xx (a timeout is final, it already took the whole time limit) up to `retries` times with exponential backoff.
-  const send = async (path, { method = 'GET', body, headers = {}, signal, timeoutMs = config.timeoutMs, retries = config.retries, parse = 'text' } = {}) => {
-    const url = `${config.baseUrl}${path}`;
+  const send = async (path, { method = 'GET', body, headers = {}, baseUrl, signal, timeoutMs = config.timeoutMs, retries = config.retries, parse = 'text' } = {}) => {
+    const url = `${baseUrl ?? config.baseUrl}${path}`;
     const tryOnce = async (attemptNumber) => {
       try {
         const response = await attempt(url, { method, body, headers, signal, timeoutMs });
@@ -97,8 +97,16 @@ export const createApi = ({ config = API_CONFIG, fetchImpl = globalThis.fetch?.b
   const checkHealth = (options = {}) => fetchData('/health', { ...options, parse: 'json' });
 
   // Sends diagram source (Graphviz DOT) and returns the SVG text; anything else is rejected as an unexpected answer.
+  // The engine type `dslkit` goes to the own server (JSON in, SVG out); any other type is a Kroki endpoint.
   const renderDiagram = async (source, { type = config.diagramType, format = config.outputFormat, ...options } = {}) => {
-    const svg = await postData(`/${type}/${format}`, source, { ...options, headers: { 'Content-Type': 'text/plain' } });
+    const svg =
+      type === 'dslkit'
+        ? await postData(config.ownPath, JSON.stringify({ source }), {
+            ...options,
+            baseUrl: config.ownBaseUrl,
+            headers: { 'Content-Type': 'application/json', Accept: 'image/svg+xml' },
+          })
+        : await postData(`/${type}/${format}`, source, { ...options, headers: { 'Content-Type': 'text/plain' } });
     if (!/<svg[\s>]/i.test(svg)) throw new ApiError('The service did not return a diagram', { kind: 'invalid' });
     return svg;
   };

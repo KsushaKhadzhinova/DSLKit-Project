@@ -15,7 +15,7 @@ test('the English landing page starts the same components', () => {
 });
 
 test('the dashboard, the settings and the editor start their own components', () => {
-  assert.deepEqual(boot(load('app/dashboard.html')), ['initTheme', 'initAuthMenu', 'initDashboard', 'initQuota', 'initAppSearch']);
+  assert.deepEqual(boot(load('app/dashboard.html')), ['initTheme', 'initAuthGate', 'initAuthMenu', 'initDashboard', 'initQuota', 'initAppSearch']);
   assert.deepEqual(boot(load('app/settings.html')), ['initTheme', 'initAuthMenu', 'initQuota', 'initAppSearch', 'initSettings']);
   assert.deepEqual(boot(load('app/editor.html')), [
     'initTheme',

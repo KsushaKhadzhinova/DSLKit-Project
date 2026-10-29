@@ -455,3 +455,25 @@ test('a response that arrives after a newer cached view is dropped', async () =>
   await flush();
   assert.match(second.$('.canvas__status').textContent, /сохранённая копия/);
 });
+
+test('the DSLKit server engine sends the source text of the editor, not a generated format', async () => {
+  const storage = memory();
+  useEngine(storage, 'dslkit');
+  const { window, api } = setup({ storage });
+  run(window);
+  await flush();
+  const [source, options] = api.renderDiagram.mock.calls[0].arguments;
+  assert.match(source, /^diagram /);
+  assert.equal(options.type, 'dslkit');
+});
+
+test('the plain ready note is kept for screen readers only, other notes stay visible', async () => {
+  const { window, $ } = setup();
+  run(window);
+  await flush();
+  assert.equal($('.canvas__status').dataset.state, 'ready');
+  const offline = setup({ online: false });
+  run(offline.window);
+  await flush();
+  assert.equal(offline.$('.canvas__status').dataset.state, 'note');
+});

@@ -234,3 +234,37 @@ test('formatCode handles closing lines, quoted braces and blank lines', () => {
 test('clearPositions removes pos= outside of the quoted strings only', () => {
   assert.equal(clearPositions('box A "pos=1x1" pos=3x4  \nplain'), 'box A "pos=1x1"\nplain');
 });
+
+test('the Templates tab swaps the explorer for the templates and the Files tab brings the explorer back', () => {
+  const { document, press } = setup();
+  const sidebar = document.querySelector('.editor-sidebar');
+  const tab = document.querySelector('[data-panel="templates"]');
+  press('[data-panel="templates"]');
+  assert.equal(sidebar.dataset.view, 'templates');
+  assert.equal(tab.getAttribute('aria-pressed'), 'true');
+  assert.ok(sidebar.classList.contains('editor-sidebar--open'));
+  press('[data-panel="templates"]');
+  assert.equal(sidebar.classList.contains('editor-sidebar--open'), false);
+  press('[data-panel="templates"]');
+  assert.ok(sidebar.classList.contains('editor-sidebar--open'));
+  press('[data-panel="files"]');
+  assert.equal(sidebar.dataset.view, 'files');
+  assert.equal(tab.getAttribute('aria-pressed'), 'false');
+});
+
+test('without the explorer the Templates tab does nothing', () => {
+  const { document, press } = setup({ prepare: (document) => document.querySelector('.editor-sidebar').remove() });
+  press('[data-panel="templates"]');
+  press('[data-panel="files"]');
+  assert.equal(document.querySelector('.editor-sidebar'), null);
+});
+
+test('undo and redo are switched off where there is nothing to undo or redo', async () => {
+  const { press, document, write } = setup();
+  const state = (name) => document.querySelector(`[data-action="${name}"]`).getAttribute('aria-disabled');
+  assert.deepEqual([state('undo'), state('redo')], ['true', 'true']);
+  await write('diagram idef0 "One"');
+  assert.deepEqual([state('undo'), state('redo')], ['false', 'true']);
+  press('[data-action="undo"]');
+  assert.deepEqual([state('undo'), state('redo')], ['true', 'false']);
+});

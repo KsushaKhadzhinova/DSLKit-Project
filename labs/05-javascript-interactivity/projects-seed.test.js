@@ -74,12 +74,12 @@ test('every user has projects of their own, a guest has the shared ones', () => 
   assert.equal(storage.get('projects.u1').length, 1);
 });
 
-test('the dashboard seeds six projects for a guest once, marks the published ones and keeps the quota at zero', () => {
+test('the dashboard seeds a project of every notation for a guest once, marks the published ones and keeps the quota at zero', () => {
   const storage = memory();
   const window = new JSDOM(dashboard, { url: 'http://localhost/' }).window;
   const api = initDashboard({ root: window.document, storage });
-  assert.equal(cards(window.document).length, 6);
-  assert.equal(window.document.querySelectorAll('[data-project] .badge').length, 3);
+  assert.equal(cards(window.document).length, 33);
+  assert.equal(window.document.querySelectorAll('[data-project] .badge').length, 12);
   assert.equal(api.store.createdOn(), 0);
   assert.match(window.document.querySelector('.app-nav__quota-text').textContent, /0 из 5/);
   api.store.list().forEach((project) => api.store.remove(project.id));
@@ -95,10 +95,10 @@ test('a new user gets seeds of their own, the guest projects stay apart, and the
   await createAccountStore({ storage }).register({ name: 'Ксения', email: 'k@example.com', password: 'correct horse' });
   const english = new JSDOM(readFileSync('site/en/app/dashboard.html', 'utf8'), { url: 'http://localhost/' }).window;
   const api = initDashboard({ root: english.document, storage });
-  assert.equal(cards(english.document).length, 6);
+  assert.equal(cards(english.document).length, 33);
   assert.equal(english.document.querySelector('[data-project] .badge').textContent, 'published');
-  assert.equal(api.store.list().length, 6);
-  assert.equal(storage.get('projects').length, 6);
+  assert.equal(api.store.list().length, 33);
+  assert.equal(storage.get('projects').length, 33);
   assert.equal(Object.keys(storage.get('accounts')[0]).includes('hash'), true);
 });
 

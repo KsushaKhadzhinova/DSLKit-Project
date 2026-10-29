@@ -1,7 +1,7 @@
 import { NOTATIONS, NOTATION_KEYS, TEMPLATES, parseDiagram } from '../notations/index.js';
 import { currentUser } from '../storage/accounts.js';
 import { starterProjects } from '../storage/seeds.js';
-import { createProjectStore, createTemplateStore, showQuota } from '../storage/projects.js';
+import { TRASH_DAYS, createProjectStore, createTemplateStore, showQuota } from '../storage/projects.js';
 
 const FILTERS = ['all', ...NOTATION_KEYS];
 const SORTS = ['newest', 'oldest', 'name'];
@@ -21,12 +21,17 @@ const LABELS = {
     askRemoveTemplate: (title) => `Удалить шаблон «${title}»? Это нельзя отменить.`,
     foundTemplates: (count) => `Найдено шаблонов: ${count}`,
     noneTemplates: 'Шаблонов не найдено. Сохраните проект как шаблон или создайте новый.',
-    trashed: (time) => `Удалён ${time}`,
+    trashed: (time, left) => `Удалён ${time}, будет стёрт через ${left} дн.`,
     rename: 'Переименовать',
     remove: 'В корзину',
     restore: 'Восстановить',
     purge: 'Удалить навсегда',
     copy: 'Сохранить копию в «Мои проекты»',
+    copyTemplate: 'Добавить в «Мои шаблоны»',
+    like: 'Нравится',
+    liked: 'В избранном',
+    emptyTrash: 'Очистить корзину',
+    askEmpty: (count) => `Удалить навсегда все проекты в корзине (${count})? Это нельзя отменить.`,
     askName: 'Новое название проекта',
     askTrash: (title) => `Переместить проект «${title}» в корзину?`,
     askPurge: (title) => `Удалить проект «${title}» навсегда? Это нельзя отменить.`,
@@ -46,12 +51,17 @@ const LABELS = {
     askRemoveTemplate: (title) => `Delete the template "${title}"? This cannot be undone.`,
     foundTemplates: (count) => `Templates found: ${count}`,
     noneTemplates: 'No templates found. Save a project as a template or create a new one.',
-    trashed: (time) => `Deleted ${time}`,
+    trashed: (time, left) => `Deleted ${time}, erased in ${left} days`,
     rename: 'Rename',
     remove: 'Move to trash',
     restore: 'Restore',
     purge: 'Delete forever',
     copy: 'Save a copy to "My projects"',
+    copyTemplate: 'Add to "My templates"',
+    like: 'Like',
+    liked: 'Liked',
+    emptyTrash: 'Empty the trash',
+    askEmpty: (count) => `Delete all ${count} projects in the trash forever? This cannot be undone.`,
     askName: 'New project name',
     askTrash: (title) => `Move the project "${title}" to the trash?`,
     askPurge: (title) => `Delete the project "${title}" forever? This cannot be undone.`,
@@ -77,6 +87,7 @@ export const initDashboard = ({ root = document, storage, now = () => Date.now()
   const store = createProjectStore({ storage, now, owner });
   const templates = createTemplateStore({ storage, now, owner });
   const go = navigate ?? ((url) => view.location.assign(url));
+  store.purgeExpired();
   if (seed) store.seed(starterProjects());
   const chips = [...root.querySelectorAll('.filter__chip[data-filter]')];
   const others = root.querySelector('#notation-filter');
@@ -85,6 +96,11 @@ export const initDashboard = ({ root = document, storage, now = () => Date.now()
   const count = root.querySelector('#project-count');
   const heading = root.querySelector('.dashboard__title');
   const newTemplate = root.querySelector('[data-new-template]');
+  const likesKey = `likes-${owner ?? 'guest'}`;
+  const likes = () => {
+    const saved = storage.get(likesKey, []);
+    return Array.isArray(saved) ? saved : [];
+  };
   const navigation = [...root.querySelectorAll('[data-section]')];
   const quotaText = root.querySelector('.app-nav__quota-text');
   const quotaBar = root.querySelector('.app-nav__progress');
@@ -101,6 +117,10 @@ export const initDashboard = ({ root = document, storage, now = () => Date.now()
     node.dataset.act = act;
     return node;
   };
+  const emptyTrash = el('button', 'button button--quiet', labels.emptyTrash);
+  emptyTrash.type = 'button';
+  emptyTrash.hidden = true;
+  newTemplate?.after(emptyTrash);
   const time = (ms) => new Date(ms).toISOString().slice(0, 16).replace('T', ' ');
 
   // A card of a saved project, built like the sample cards of the page. A project in the trash cannot be opened.
@@ -120,7 +140,7 @@ export const initDashboard = ({ root = document, storage, now = () => Date.now()
     const tag = el('p', 'project-card__notation');
     tag.append(el('span', 'project-card__tag', NOTATIONS[project.notation]?.short ?? project.notation.toUpperCase()));
     if (project.published) tag.append(' ', el('span', 'badge', labels.published));
-    const stamp = trashed ? labels.trashed(time(project.trashedAt)) : labels.changed(time(project.updated));
+    const stamp = trashed ? labels.trashed(time(project.trashedAt), Math.max(0, Math.ceil(TRASH_DAYS - (now() - project.trashedAt) / 86400000))) : labels.changed(time(project.updated));
     article.append(el('div', 'project-card__preview'), headingBox, tag, el('p', 'project-card__updated', stamp));
     item.append(article);
     return item;
@@ -145,7 +165,7 @@ export const initDashboard = ({ root = document, storage, now = () => Date.now()
     else if (item.dataset.project) actions.append(button('rename', labels.rename), button('template', labels.saveTemplate), button('remove', labels.remove));
     else if (item.dataset.template)
       actions.append(button('rename', labels.rename), button('edit', labels.edit), button('remove-template', labels.removeTemplate));
-    else actions.append(button('copy', labels.copy));
+    else actions.append(button('like', labels.like), button('copy', labels.copy), button('copy-template', labels.copyTemplate));
     article.append(actions);
   };
 
@@ -249,6 +269,16 @@ export const initDashboard = ({ root = document, storage, now = () => Date.now()
     if (search) search.value = state.query;
     if (sortSelect) sortSelect.value = state.sort;
     if (newTemplate) newTemplate.hidden = section !== 'templates';
+    emptyTrash.hidden = section !== 'trash' || store.listTrash().length === 0;
+    const liked = likes();
+    original
+      .filter((item) => item.dataset.notation && sectionOf(item) === 'shared')
+      .forEach((item) => {
+        const mark = item.querySelector('[data-act="like"]');
+        const on = liked.includes(item.dataset.notation);
+        mark.setAttribute('aria-pressed', String(on));
+        mark.textContent = `${on ? '♥' : '♡'} ${on ? labels.liked : labels.like}`;
+      });
     if (count) {
       const own = section === 'templates';
       if (shown > 0) count.textContent = own ? labels.foundTemplates(shown) : labels.found(shown);
@@ -306,12 +336,28 @@ export const initDashboard = ({ root = document, storage, now = () => Date.now()
       store.remove(id);
     } else {
       const key = new view.URL(item.querySelector('.project-card__link').href).searchParams.get('template');
-      store.save({ title: title(item), notation: item.dataset.notation, source: TEMPLATES[key] ?? TEMPLATES.idef0 });
+      const copy = { title: title(item), notation: item.dataset.notation, source: TEMPLATES[key] ?? TEMPLATES.idef0 };
+      if (action === 'copy-template') templates.save(copy);
+      else if (action === 'like') {
+        const liked = likes();
+        if (liked.includes(key)) storage.set(likesKey, liked.filter((entry) => entry !== key));
+        else {
+          storage.set(likesKey, [...liked, key]);
+          store.save(copy);
+        }
+      } else store.save(copy);
     }
     rebuild();
     render();
     return true;
   };
+  emptyTrash.addEventListener('click', () => {
+    const trashed = store.listTrash();
+    if (trashed.length === 0 || !view.confirm(labels.askEmpty(trashed.length))) return;
+    trashed.forEach((project) => store.remove(project.id));
+    rebuild();
+    render();
+  });
   newTemplate?.addEventListener('click', () => {
     const name = view.prompt(labels.askNewTemplate, '');
     if (name === null || name.trim() === '') return;
@@ -328,6 +374,13 @@ export const initDashboard = ({ root = document, storage, now = () => Date.now()
     }
     const target = event.target.closest('[data-act]');
     if (target) act(target.dataset.act, target.closest('.project-list__item'));
+  });
+
+  // Another tab may have changed the projects, the templates or the trash: the list follows at once, so no card acts on a stale entry.
+  view.addEventListener('storage', () => {
+    store.purgeExpired();
+    rebuild();
+    render();
   });
 
   render();

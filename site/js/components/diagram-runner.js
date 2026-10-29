@@ -57,8 +57,10 @@ export const initDiagramRunner = ({
 
   const tr = createTranslator(root);
   const lang = root.documentElement.lang === 'en' ? 'en' : 'ru';
+  // The plain "ready" note is only for screen readers: a sighted user sees the drawing. Every other note (saved copy, loading, errors) stays visible.
   const setStatus = (text) => {
     status.textContent = tr(text);
+    status.dataset.state = text === 'Диаграмма готова.' ? 'ready' : 'note';
   };
   const setBusy = (busy) => {
     canvas.setAttribute('aria-busy', String(busy));
@@ -120,10 +122,11 @@ export const initDiagramRunner = ({
       return false;
     }
     const wanted = currentEngine();
-    const format = wanted.type ? pickFormat(model, wanted.type) : null;
-    const engine = wanted.type && format !== wanted.type ? engineForFormat(format) : wanted;
+    const viaKroki = wanted.type && wanted.type !== 'dslkit';
+    const format = viaKroki ? pickFormat(model, wanted.type) : null;
+    const engine = viaKroki && format !== wanted.type ? engineForFormat(format) : wanted;
     const fallback = engine === wanted ? '' : ` ${ui('fallback', { label: tr(engine.label) }, lang)}`;
-    const input = engine.build(model);
+    const input = engine.build(model, source());
     controller?.abort();
     // The own engine draws in the browser: no request, no cache, and it works offline.
     if (!engine.type) {
@@ -138,6 +141,7 @@ ${input}`);
 
     if (cached && !cached.expired && !refresh && show(cached.data, `Показана сохранённая копия от ${formatTime(cached.savedAt)}.`, engine)) {
       status.textContent += fallback;
+      if (fallback) status.dataset.state = 'note';
       setBusy(false);
       return true;
     }
@@ -153,6 +157,7 @@ ${input}`);
       if (signal.aborted) throw Object.assign(new Error('cancelled'), { kind: 'aborted' });
       if (!show(svgText, 'Диаграмма готова.', engine)) throw Object.assign(new Error('invalid'), { kind: 'invalid' });
       status.textContent += fallback;
+      if (fallback) status.dataset.state = 'note';
       cache.set(key, svgText);
       history.add({ key, title: model.title, at: now() });
       renderHistory();

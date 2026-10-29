@@ -224,7 +224,7 @@ test('the card menu opens, renames and moves a saved project to the trash, where
   ask.confirm = true;
   press(item().querySelector('[data-act="remove"]'));
   assert.deepEqual(visible(), []);
-  assert.equal(createProjectStore({ storage }).listTrash().length, 1);
+  assert.equal(createProjectStore({ storage, now: clock() }).listTrash().length, 1);
   press(document.querySelector('[data-section="trash"]'));
   assert.deepEqual(visible(), ['Renamed']);
   assert.match(item().querySelector('.project-card__updated').textContent, /^Удалён /);
@@ -478,4 +478,72 @@ test('the trash lists the newest deleted project first', () => {
     store.listTrash().map((item) => item.title),
     ['B', 'A'],
   );
+});
+
+test('the trash erases a project after 30 days, and the card says how many days are left', () => {
+  const storage = memory();
+  let at = 1_700_000_000_000;
+  const store = createProjectStore({ storage, now: () => at });
+  const old = store.save({ title: 'Old', notation: 'idef0', source: 's' });
+  const fresh = store.save({ title: 'Fresh', notation: 'idef0', source: 's' });
+  store.trash(old.id);
+  at += 20 * 86_400_000;
+  store.trash(fresh.id);
+  at += 15 * 86_400_000;
+  assert.deepEqual(
+    store.listTrash().map((item) => item.title),
+    ['Fresh'],
+  );
+  assert.equal(store.purgeExpired(), 1);
+  assert.equal(store.purgeExpired(), 0);
+  const page = dashboard({ storage, now: () => at });
+  page.press(page.document.querySelector('[data-section="trash"]'));
+  assert.match(page.document.querySelector('.project-list__item:not([hidden]) .project-card__updated').textContent, /будет стёрт через 15 дн\./);
+  const en = dashboard({ storage, lang: 'en', now: () => at });
+  en.press(en.document.querySelector('[data-section="trash"]'));
+  assert.match(en.document.querySelector('.project-list__item:not([hidden]) .project-card__updated').textContent, /erased in 15 days/);
+});
+
+test('shared examples can be liked, copied to the projects or to the templates; the trash can be emptied', () => {
+  const storage = memory();
+  const answers = { confirm: true };
+  const t = dashboard({ storage, answers });
+  const { document, press } = t;
+  press(document.querySelector('[data-section="shared"]'));
+  const first = () => document.querySelector('.project-list__item:not([hidden])');
+  press(first().querySelector('.project-card__menu'));
+  press(first().querySelector('[data-act="copy-template"]'));
+  press(first().querySelector('[data-act="like"]'));
+  assert.equal(first().querySelector('[data-act="like"]').getAttribute('aria-pressed'), 'true');
+  const store = createProjectStore({ storage, now: clock() });
+  assert.equal(store.list().length, 1);
+  press(first().querySelector('[data-act="like"]'));
+  assert.equal(first().querySelector('[data-act="like"]').getAttribute('aria-pressed'), 'false');
+  assert.equal(store.list().length, 1);
+  press(first().querySelector('[data-act="copy"]'));
+  assert.equal(store.list().length, 2);
+  press(document.querySelector('[data-section="templates"]'));
+  assert.equal(document.querySelectorAll('[data-template]:not([hidden])').length, 1);
+  store.list().forEach((project) => store.trash(project.id));
+  press(document.querySelector('[data-section="trash"]'));
+  const empty = [...document.querySelectorAll('button')].find((node) => node.textContent === 'Очистить корзину');
+  assert.equal(empty.hidden, false);
+  answers.confirm = false;
+  press(empty);
+  assert.equal(store.listTrash().length, 2);
+  answers.confirm = true;
+  press(empty);
+  assert.equal(store.listTrash().length, 0);
+  assert.equal(empty.hidden, true);
+  empty.hidden = false;
+  press(empty);
+});
+
+test('a change made in another tab refreshes the list at once', () => {
+  const storage = memory();
+  const t = dashboard({ storage });
+  assert.deepEqual(t.visible(), []);
+  createProjectStore({ storage, now: clock() }).save({ title: 'From another tab', notation: 'idef0', source: 's' });
+  t.dom.window.dispatchEvent(new t.dom.window.Event('storage'));
+  assert.deepEqual(t.visible(), ['From another tab']);
 });

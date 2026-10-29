@@ -1,5 +1,6 @@
 import * as nodeFs from 'node:fs';
 import { createServer } from 'node:http';
+import { handleApi } from './render-api.js';
 import { extname, join, resolve, sep } from 'node:path';
 
 const TYPES = {
@@ -45,6 +46,10 @@ export const staticServer = (rootDir, fs = nodeFs) => {
   };
   return createServer((req, res) => {
     try {
+      if (req.url === '/api' || req.url.startsWith('/api/') || req.url.startsWith('/api?')) {
+        handleApi(req, res);
+        return;
+      }
       if (req.method !== 'GET' && req.method !== 'HEAD') return send(req, res, 405, null, { Allow: 'GET, HEAD' });
       let path;
       try {

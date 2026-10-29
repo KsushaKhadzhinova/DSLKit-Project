@@ -29,6 +29,7 @@ export const showProblems = ({ root, page, problems, lang, file }) => {
       return li;
     }),
   );
+  page.dataset.clean = String(problems.length === 0);
   const status = page.querySelector('.problems__status');
   if (status) status.textContent = problems.length === 0 ? ui('clean', {}, lang) : ui('status', { n: errors + warnings, e: errors, w: warnings }, lang);
   const counter = page.querySelector('.problems__count');

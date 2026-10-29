@@ -1,7 +1,7 @@
 import { readCode, showCode } from './code-lines.js';
 import { pointInDrawing } from './canvas-drag.js';
 import { parseDiagram } from '../notations/index.js';
-import { addElement, connectElements, gate, linksFor, paletteFor, removeElement } from '../utils/palette.js';
+import { addElement, connectElements, gate, glyphFor, labelOf, linksFor, paletteFor, removeElement, renameElement } from '../utils/palette.js';
 import { setNodePosition } from '../utils/node-position.js';
 
 const TEXTS = {
@@ -15,6 +15,7 @@ const TEXTS = {
   pickTo: { ru: 'Теперь выберите блок, в который идёт связь ({from} →).', en: 'Now pick the block the link goes to ({from} →).' },
   linked: { ru: 'Связь {from} → {to} добавлена.', en: 'The link {from} → {to} is added.' },
   refusedLink: { ru: 'Связь {from} → {to} отклонена: {reason}', en: 'The link {from} → {to} is refused: {reason}' },
+  selfLink: { ru: 'Блок нельзя соединить с самим собой: выберите другой блок.', en: 'A block cannot be linked to itself: pick another block.' },
   cancelled: { ru: 'Соединение отменено.', en: 'Connecting is cancelled.' },
   remove: { ru: 'Удалить выбранный', en: 'Delete the selected' },
   picked: {
@@ -23,7 +24,20 @@ const TEXTS = {
   },
   removed: { ru: 'Удалено: {id}, связей: {links}.', en: 'Removed: {id}, links: {links}.' },
   nothingPicked: { ru: 'Сначала нажмите на блок на доске.', en: 'Press a block on the board first.' },
+  add: { ru: 'Добавить элемент', en: 'Add an element' },
+  addShort: { ru: 'Элемент', en: 'Element' },
+  edit: { ru: 'Переименовать выбранный (двойной щелчок по блоку)', en: 'Rename the selected (double-click a block)' },
+  noLabel: { ru: 'У элемента {id} нет подписи: имя меняется в коде.', en: 'Element {id} has no label: change its name in the code.' },
+  renamed: { ru: 'Подпись элемента {id} изменена.', en: 'The label of {id} is changed.' },
+  label: { ru: 'Новая подпись', en: 'New label' },
 };
+const ICONS = {
+  add: '<path d="M10 4v12M4 10h12"/>',
+  connect: '<circle cx="5" cy="14" r="2.2"/><circle cx="15" cy="6" r="2.2"/><path d="M6.7 12.5l6.6-5"/>',
+  edit: '<path d="M4 16l1-4 9-9 3 3-9 9z"/><path d="M12 5l3 3"/>',
+  remove: '<path d="M4 6h12M8 6V4h4v2M6 6l1 10h6l1-10M9 9v4M11 9v4"/>',
+};
+const icon = (paths) => `<svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">${paths}</svg>`;
 const NODE = '.notation__node[data-id]';
 const MOVE_TO_DRAG = 4;
 const NEW_WIDTH = 100;
@@ -34,10 +48,10 @@ const MAX_NUDGES = 8;
 // The Connect mode joins two blocks. Every change passes the strict gate: the notation must not report a new error.
 export const initEditorPalette = ({ root = document } = {}) => {
   const page = root.querySelector('.app-page--editor');
-  const sidebar = page?.querySelector('.editor-sidebar');
+  const toolbar = page?.querySelector('.editor-toolbar__row');
   const codeLines = page?.querySelector('.code__lines');
   const remote = page?.querySelector('.canvas__remote');
-  if (!sidebar || !codeLines || !remote) return null;
+  if (!toolbar || !codeLines || !remote) return null;
   const view = root.defaultView;
   const lang = root.documentElement.lang === 'en' ? 'en' : 'ru';
   const t = (key, params = {}) => TEXTS[key][lang].replace(/\{(\w+)\}/g, (_, name) => params[name]);
@@ -48,22 +62,56 @@ export const initEditorPalette = ({ root = document } = {}) => {
     return node;
   };
 
-  const heading = el('h2', 'editor-sidebar__heading', t('heading'));
+  // The tools sit in the toolbar, as in a drawing tool: add (a menu of shapes to press or drag), connect, rename, delete.
+  const tool = (className, label, paths, text) => {
+    const node = el('button', `button button--icon board-tools__button ${className}`);
+    node.type = 'button';
+    node.setAttribute('aria-label', label);
+    node.dataset.tip = label;
+    node.innerHTML = icon(paths) + (text ? `<span class="board-tools__text">${text}</span>` : '');
+    return node;
+  };
+  const group = el('div', 'editor-toolbar__group board-tools');
+  group.setAttribute('role', 'group');
+  group.setAttribute('aria-label', t('heading'));
+  const addButton = tool('board-tools__add', t('add'), ICONS.add, t('addShort'));
+  addButton.setAttribute('aria-haspopup', 'true');
+  addButton.setAttribute('aria-expanded', 'false');
+  const pop = el('div', 'board-tools__pop');
+  pop.hidden = true;
   const hint = el('p', 'palette__hint', t('hint'));
   const list = el('ul', 'palette');
+  pop.append(hint, list);
   const connectRow = el('div', 'palette__connect');
-  const mode = el('button', 'button button--quiet palette__mode', t('connect'));
-  mode.type = 'button';
+  const mode = tool('palette__mode', t('connect'), ICONS.connect);
   mode.setAttribute('aria-pressed', 'false');
   const linkSelect = el('select', 'settings-row__select palette__link');
   linkSelect.setAttribute('aria-label', t('linkKind'));
   connectRow.append(mode, linkSelect);
-  const removeButton = el('button', 'button button--quiet palette__remove', t('remove'));
-  removeButton.type = 'button';
+  const editButton = tool('palette__edit', t('edit'), ICONS.edit);
+  const removeButton = tool('palette__remove', t('remove'), ICONS.remove);
+  [editButton, removeButton].forEach((node) => node.setAttribute('aria-disabled', 'true'));
   const message = el('p', 'palette__message');
   message.setAttribute('role', 'status');
   message.setAttribute('aria-live', 'polite');
-  sidebar.append(heading, hint, list, connectRow, removeButton, message);
+  group.append(addButton, pop, connectRow, editButton, removeButton);
+  (toolbar.querySelector('[data-action="save"]') ?? toolbar.lastChild)?.after(group);
+  (remote.parentElement ?? page).append(message);
+
+  const closePop = () => {
+    pop.hidden = true;
+    addButton.setAttribute('aria-expanded', 'false');
+  };
+  addButton.addEventListener('click', () => {
+    pop.hidden = !pop.hidden;
+    addButton.setAttribute('aria-expanded', String(!pop.hidden));
+  });
+  root.addEventListener('pointerdown', (event) => {
+    if (!pop.hidden && !group.contains(event.target)) closePop();
+  });
+  group.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') closePop();
+  });
 
   const code = () => readCode(codeLines);
   const write = (text) => {
@@ -87,8 +135,10 @@ export const initEditorPalette = ({ root = document } = {}) => {
     list.replaceChildren(
       ...items.map((item, index) => {
         const li = el('li');
-        const button = el('button', 'button button--quiet palette__item', item.label[lang === 'en' ? 1 : 0]);
+        const button = el('button', 'button button--quiet palette__item');
         button.type = 'button';
+        button.innerHTML = icon(glyphFor(item.keyword));
+        button.append(el('span', 'palette__name', item.label[lang === 'en' ? 1 : 0]));
         button.dataset.index = String(index);
         button.dataset.keyword = item.keyword;
         li.append(button);
@@ -132,6 +182,7 @@ export const initEditorPalette = ({ root = document } = {}) => {
       justDragged = false;
       return;
     }
+    closePop();
     add(Number(button.dataset.index), null);
   });
 
@@ -169,6 +220,7 @@ export const initEditorPalette = ({ root = document } = {}) => {
     if (!drag.ghost && Math.hypot(event.clientX - drag.x, event.clientY - drag.y) >= MOVE_TO_DRAG) {
       drag.ghost = el('div', 'palette__ghost', drag.label);
       root.body.append(drag.ghost);
+      closePop();
     }
     if (drag.ghost) {
       drag.ghost.style.left = `${event.clientX + 8}px`;
@@ -224,6 +276,7 @@ export const initEditorPalette = ({ root = document } = {}) => {
       node.classList.add('notation__node--selected');
       return say(t('pickTo', { from: id }));
     }
+    if (from === id) return say(t('selfLink'));
     const start = from;
     stopConnect();
     mode.setAttribute('aria-pressed', 'true');
@@ -270,7 +323,10 @@ export const initEditorPalette = ({ root = document } = {}) => {
   let picked = null;
   const markPicked = () => {
     remote.querySelectorAll('.notation__node--picked').forEach((node) => node.classList.remove('notation__node--picked'));
-    [...remote.querySelectorAll(NODE)].find((node) => node.dataset.id === picked)?.classList.add('notation__node--picked');
+    const found = [...remote.querySelectorAll(NODE)].find((node) => node.dataset.id === picked);
+    found?.classList.add('notation__node--picked');
+    if (!found) picked = null;
+    [editButton, removeButton].forEach((node) => node.setAttribute('aria-disabled', String(!found)));
   };
   const removeSelected = (id) => {
     if (id === null) return say(t('nothingPicked'));
@@ -296,11 +352,52 @@ export const initEditorPalette = ({ root = document } = {}) => {
   });
   removeButton.addEventListener('click', () => removeSelected(picked));
 
+  // Rename: a field opens over the block; Enter keeps the new label, Escape or a press elsewhere is handled as the keys say.
+  const rename = (id) => {
+    const node = [...remote.querySelectorAll(NODE)].find((item) => item.dataset.id === id);
+    if (id === null || !node) return say(t('nothingPicked'));
+    const current = labelOf(code(), id);
+    if (current === null) return say(t('noLabel', { id }));
+    const rect = node.getBoundingClientRect();
+    const field = el('input', 'board-edit');
+    field.value = current.replace(/\n/g, ' ');
+    field.setAttribute('aria-label', t('label'));
+    field.style.left = `${rect.left}px`;
+    field.style.top = `${rect.top + rect.height / 2 - 16}px`;
+    field.style.width = `${Math.max(rect.width, 140)}px`;
+    root.body.append(field);
+    field.focus();
+    field.select();
+    let done = false;
+    const finish = (keep) => {
+      if (done) return;
+      done = true;
+      field.remove();
+      if (!keep || field.value.trim() === '' || field.value === current) return;
+      write(renameElement(code(), id, field.value.trim()));
+      say(t('renamed', { id }));
+    };
+    field.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') finish(true);
+      if (event.key === 'Escape') finish(false);
+    });
+    field.addEventListener('blur', () => finish(true));
+    return id;
+  };
+  editButton.addEventListener('click', () => rename(picked));
+  remote.addEventListener('dblclick', (event) => {
+    const node = connecting() ? null : event.target.closest(NODE);
+    if (!node) return;
+    picked = node.dataset.id;
+    markPicked();
+    rename(picked);
+  });
+
   page.addEventListener('dslkit:run', () => {
     clearSelection();
     refresh();
     markPicked();
   });
   refresh();
-  return { refresh, add, notation: () => notation, connecting, picked: () => picked };
+  return { refresh, add, rename, notation: () => notation, connecting, picked: () => picked };
 };

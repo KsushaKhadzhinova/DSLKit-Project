@@ -45,6 +45,7 @@ const TEXTS = {
 
 const STORAGE_KEY = 'git-commits';
 const VIEWS = ['search', 'git', 'ai'];
+const DRAWER_VIEWS = ['search', 'git'];
 
 // The panels of the activity bar and the tabs under the code: search and replace, local Git history, the offline assistant, the run output.
 export const initEditorTools = ({ root = document, storage, now = () => Date.now(), clipboard = root.defaultView.navigator.clipboard } = {}) => {
@@ -245,20 +246,26 @@ export const initEditorTools = ({ root = document, storage, now = () => Date.now
   const closeButton = button(t('close'), 'button button--icon editor-tools__close');
   closeButton.setAttribute('aria-label', t('close'));
   closeButton.textContent = '×';
-  const views = { search: searchView, git: gitView, ai: aiView };
+  const views = { search: searchView, git: gitView };
   drawer.append(el('div', 'editor-tools__head'), status);
   drawer.firstChild.append(heading, closeButton);
   drawer.insertBefore(searchView, status);
   drawer.insertBefore(gitView, status);
-  drawer.insertBefore(aiView, status);
   page.append(drawer);
   const buttons = [...page.querySelectorAll('[data-panel]')].filter((node) => VIEWS.includes(node.dataset.panel));
   let current = null;
+  // The assistant lives in the panel under the code, next to the problems and the output; the drawer holds search and Git.
   const open = (name) => {
     current = name;
-    drawer.hidden = name === null;
-    VIEWS.forEach((view) => (views[view].hidden = view !== name));
+    drawer.hidden = name === null || name === 'ai';
+    DRAWER_VIEWS.forEach((view) => (views[view].hidden = view !== name));
     buttons.forEach((node) => node.setAttribute('aria-pressed', String(node.dataset.panel === name)));
+    if (name === 'ai') {
+      selectTab('ai');
+      askBox.focus();
+      return name;
+    }
+    if (currentTab === 'ai') selectTab('problems');
     if (name === null) return null;
     heading.textContent = t(name);
     if (name === 'search') {
@@ -289,7 +296,10 @@ export const initEditorTools = ({ root = document, storage, now = () => Date.now
   const tabs = [...page.querySelectorAll('[data-problems-tab]')];
   const outputList = el('ul', 'editor-tools__list problems__extra');
   const versionsList = el('ul', 'editor-tools__list problems__extra');
-  const extra = { output: outputList, versions: versionsList };
+  aiView.hidden = true;
+  panel?.append(aiView);
+  const extra = { output: outputList, versions: versionsList, ai: aiView };
+  let currentTab = 'problems';
   Object.values(extra).forEach((node) => {
     node.hidden = true;
     panel?.append(node);
@@ -304,7 +314,9 @@ export const initEditorTools = ({ root = document, storage, now = () => Date.now
     );
   };
   const selectTab = (name) => {
-    if (name === 'ai') open('ai');
+    currentTab = name;
+    page.dataset.tab = name;
+    buttons.filter((node) => node.dataset.panel === 'ai').forEach((node) => node.setAttribute('aria-pressed', String(name === 'ai')));
     tabs.forEach((node) => {
       const active = node.dataset.problemsTab === name;
       node.setAttribute('aria-pressed', String(active));
@@ -314,6 +326,10 @@ export const initEditorTools = ({ root = document, storage, now = () => Date.now
     Object.entries(extra).forEach(([key, node]) => (node.hidden = key !== name));
     if (name === 'output') showOutput();
     if (name === 'versions') showVersions();
+    if (name === 'ai' && current !== 'ai') {
+      current = 'ai';
+      askBox.focus();
+    }
     return name;
   };
   tabs.forEach((node) => node.addEventListener('click', () => selectTab(node.dataset.problemsTab)));
@@ -329,7 +345,7 @@ export const initEditorTools = ({ root = document, storage, now = () => Date.now
   // The Fix button of a problem repairs the code with the same rules as the assistant.
   panel?.addEventListener('click', (event) => {
     if (!event.target.closest('.problems__item .button')) return;
-    open('ai');
+    selectTab('ai');
     ask(t('fixPrompt'));
   });
 

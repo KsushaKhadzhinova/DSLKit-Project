@@ -16,6 +16,13 @@ export const ENGINES = [
     build: (model) => [MERMAID_INIT, generate(model, 'mermaid')].join('\n'),
   },
   { id: 'plantuml', label: 'Kroki · PlantUML', type: 'plantuml', action: 'Нарисовать через Kroki', build: (model) => generate(model, 'plantuml') },
+  {
+    id: 'dslkit',
+    label: 'Сервер DSLKit (свой API)',
+    type: 'dslkit',
+    action: 'Нарисовать через сервер DSLKit',
+    build: (model, source) => source,
+  },
   { id: 'local', label: 'Собственный движок (в браузере)', type: null, action: 'Нарисовать в браузере', build: renderLocal },
 ];
 

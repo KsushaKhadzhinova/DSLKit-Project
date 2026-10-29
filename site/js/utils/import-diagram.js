@@ -178,9 +178,14 @@ const importState = (lines) => {
 
 const UNSUPPORTED = /^(classDiagram|erDiagram|gantt|pie|journey|gitGraph|mindmap|timeline|quadrantChart|requirementDiagram|C4Context|sankey|xychart|block)\b/;
 
+// A text or a line this long is refused before any pattern runs on it, so a crafted file cannot freeze the page.
+export const MAX_TEXT = 200000;
+export const MAX_LINE = 2000;
+
 // The result is { ok: true, kind, dsl, skipped } or { ok: false, reason, name }.
 export const importDiagram = (source) => {
   const text = String(source ?? '');
+  if (text.length > MAX_TEXT || text.split(/\r?\n/).some((line) => line.length > MAX_LINE)) return { ok: false, reason: 'too-long' };
   const lines = linesOf(text);
   if (lines.length === 0) return { ok: false, reason: 'empty' };
   const first = lines[0];

@@ -280,3 +280,89 @@ test('a block dropped on the board does not make the others jump: they keep thei
   assert.match(code, /process P1 "Process" pos=/);
   assert.ok(!code.includes('Bank "Payment bank" pos='));
 });
+
+test('the add button opens the menu of shapes and a press elsewhere, Escape or an item closes it', () => {
+  const t = setup();
+  const add = t.$('.board-tools__add');
+  const pop = t.$('.board-tools__pop');
+  assert.equal(pop.hidden, true);
+  t.fire(add, 'click');
+  assert.equal(pop.hidden, false);
+  assert.equal(add.getAttribute('aria-expanded'), 'true');
+  t.fire(pop, 'pointerdown');
+  assert.equal(pop.hidden, false);
+  t.fire(t.document.body, 'pointerdown');
+  assert.equal(pop.hidden, true);
+  t.fire(add, 'click');
+  add.dispatchEvent(new t.window.KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+  assert.equal(pop.hidden, true);
+  t.fire(add, 'click');
+  t.fire(t.document.querySelectorAll('.palette__item')[0], 'click');
+  assert.equal(pop.hidden, true);
+  assert.ok(t.document.querySelector('.palette__item svg'));
+});
+
+test('the edit and delete buttons stay disabled until a block is picked', () => {
+  const t = setup();
+  assert.equal(t.$('.palette__edit').getAttribute('aria-disabled'), 'true');
+  assert.equal(t.$('.palette__remove').getAttribute('aria-disabled'), 'true');
+  t.fire(t.remote.querySelector('[data-id="Bank"]'), 'click');
+  assert.equal(t.$('.palette__edit').getAttribute('aria-disabled'), 'false');
+  t.fire(t.$('.palette__edit'), 'click');
+  assert.ok(t.document.querySelector('.board-edit'));
+});
+
+test('a double click on a block opens a field; Enter writes the new label, Escape and empty values change nothing', () => {
+  const t = setup();
+  const before = t.code();
+  const open = () => {
+    t.fire(t.remote.querySelector('[data-id="Bank"]'), 'dblclick');
+    return t.document.querySelector('.board-edit');
+  };
+  let field = open();
+  field.value = 'Changed';
+  field.dispatchEvent(new t.window.KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+  assert.equal(t.document.querySelector('.board-edit'), null);
+  assert.equal(t.code(), before);
+  field = open();
+  field.value = '   ';
+  field.dispatchEvent(new t.window.KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+  assert.equal(t.code(), before);
+  field = open();
+  field.dispatchEvent(new t.window.KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+  assert.equal(t.code(), before);
+  field = open();
+  field.value = 'Client "VIP"';
+  field.dispatchEvent(new t.window.KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+  field.dispatchEvent(new t.window.FocusEvent('blur'));
+  assert.match(t.code(), /entity Bank "Client \\"VIP\\""/);
+  assert.equal(t.$('.palette__message').textContent, 'Подпись элемента Bank изменена.');
+  field = open();
+  field.value = 'By blur';
+  field.dispatchEvent(new t.window.FocusEvent('blur'));
+  assert.match(t.code(), /"By blur"/);
+});
+
+test('rename says so when there is nothing to rename, no label, or a press in the connect mode', () => {
+  const t = setup();
+  t.fire(t.$('.palette__edit'), 'click');
+  assert.equal(t.$('.palette__message').textContent, 'Сначала нажмите на блок на доске.');
+  assert.equal(t.api.rename('missing'), t.$('.palette__message').textContent === '' ? null : t.api.rename('missing'));
+  showCode(t.document, t.$('.code__lines'), 'diagram dfd\nentity Customer');
+  t.fire(t.remote.querySelector('[data-id="Customer"]'), 'dblclick');
+  assert.equal(t.$('.palette__message').textContent, 'У элемента Customer нет подписи: имя меняется в коде.');
+  assert.equal(t.document.querySelector('.board-edit'), null);
+  t.fire(t.$('.palette__mode'), 'click');
+  t.fire(t.remote.querySelector('[data-id="Customer"]'), 'dblclick');
+  t.fire(t.remote, 'dblclick');
+  assert.equal(t.document.querySelector('.board-edit'), null);
+});
+
+test('a block cannot be linked to itself in the connect mode', () => {
+  const t = setup();
+  t.fire(t.$('.palette__mode'), 'click');
+  t.fire(t.remote.querySelector('[data-id="Customer"]'), 'pointerdown');
+  t.fire(t.remote.querySelector('[data-id="Customer"]'), 'pointerdown');
+  assert.equal(t.$('.palette__message').textContent, 'Блок нельзя соединить с самим собой: выберите другой блок.');
+  assert.equal(t.api.connecting(), true);
+});

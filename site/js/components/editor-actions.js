@@ -45,17 +45,25 @@ export const initEditorActions = ({ root = document, storage, clipboard = root.d
   // Every state of the code is remembered, so undo and redo work for typing, templates, format and moving blocks alike.
   const states = [readCode(codeLines)];
   let at = 0;
+  // Undo and redo are switched off where there is nothing to undo or redo, so a wrong order of presses is not possible.
+  const syncHistory = () => {
+    page.querySelectorAll('[data-action="undo"]').forEach((button) => button.setAttribute('aria-disabled', String(at === 0)));
+    page.querySelectorAll('[data-action="redo"]').forEach((button) => button.setAttribute('aria-disabled', String(at === states.length - 1)));
+  };
   new root.defaultView.MutationObserver(() => {
     const text = readCode(codeLines);
     if (text === states[at]) return;
     states.splice(at + 1, states.length, text);
     if (states.length > HISTORY_LIMIT) states.shift();
     at = states.length - 1;
+    syncHistory();
   }).observe(codeLines, { childList: true, subtree: true, characterData: true });
+  syncHistory();
   const go = (step, done, nothing) => {
     const target = at + step;
     if (target < 0 || target >= states.length) return say(nothing);
     at = target;
+    syncHistory();
     write(states[at]);
     return say(done);
   };
@@ -160,6 +168,21 @@ export const initEditorActions = ({ root = document, storage, clipboard = root.d
       button.setAttribute('aria-pressed', String(open));
     }),
   );
+
+  // The Templates tab of the activity bar swaps the explorer for the list of templates in the same side panel.
+  const templatesButton = page.querySelector('[data-panel="templates"]');
+  const showView = (view) => {
+    if (!sidebar) return;
+    sidebar.dataset.view = view;
+    templatesButton?.setAttribute('aria-pressed', String(view === 'templates'));
+  };
+  templatesButton?.addEventListener('click', () => {
+    const showing = sidebar?.dataset.view === 'templates' && sidebar.classList.contains('editor-sidebar--open');
+    showView('templates');
+    if (!showing && !sidebar?.classList.contains('editor-sidebar--open')) toggleSidebar();
+    else if (showing) toggleSidebar();
+  });
+  page.querySelectorAll('[data-panel="files"]').forEach((button) => button.addEventListener('click', () => showView('files')));
 
   return { states: () => [...states], position: () => at, zoom: () => zoom, actions: ACTIONS };
 };

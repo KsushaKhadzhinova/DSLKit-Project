@@ -19,6 +19,8 @@ const RULES = [
   [/^Сервис Kroki недоступен, будут использованы сохранённые копии$/, 'The Kroki service is unavailable, saved copies will be used'],
   [/^Движок: (.+)$/, 'Engine: $1'],
   [/^Собственный движок \(в браузере\)$/, 'Own engine (in the browser)'],
+  [/^Сервер DSLKit \(свой API\)$/, 'DSLKit server (own API)'],
+  [/^Нарисовать через сервер DSLKit$/, 'Draw with the DSLKit server'],
   [/^Диаграмма: (.+)$/, 'Diagram: $1'],
   [/^Без названия$/, 'Untitled'],
 ];
