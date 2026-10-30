@@ -2011,3 +2011,8 @@ html.js:not(.is-ready)
 .editor-toolbar {
   overflow-x: clip;
 }
+
+/* touch-action is not applied to the inner elements of an SVG, so a finger on a block was taken for a scroll and the drag was cancelled; it is set on the drawing itself */
+.canvas__remote svg {
+  touch-action: none;
+}
