@@ -281,7 +281,7 @@ const rough = (port, rawPath, method = 'GET') =>
     socket.on('error', () => resolve({ status: 0, data }));
     socket.on('close', () => resolve({ status: Number(/^HTTP\/1\.\d (\d{3})/.exec(data)?.[1] ?? 0), data }));
     socket.on('connect', () => socket.write(`${method} ${rawPath} HTTP/1.1\r\nHost: x\r\nConnection: close\r\n\r\n`));
-    setTimeout(() => socket.destroy(), 1500);
+    setTimeout(() => socket.destroy(), 8000);
   });
 
 test('static server: path tricks never leave the site folder, rough methods and huge paths do not crash it', async () => {

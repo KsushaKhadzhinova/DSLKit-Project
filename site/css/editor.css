@@ -1761,13 +1761,13 @@
 .editor-toolbar__row .button {
   flex: 0 0 auto;
   inline-size: auto;
-  min-block-size: clamp(2rem, 1.5rem + 1.2vw, 2.75rem);
+  min-block-size: clamp(2.75rem, 2.5rem + 0.4vw, 3rem);
   padding-inline: clamp(0.5rem, 0.25rem + 0.9vw, 1rem);
   font-size: clamp(0.75rem, 0.68rem + 0.3vw, 0.9375rem);
   white-space: nowrap;
 }
 .editor-toolbar__row .button--icon {
-  min-inline-size: clamp(2rem, 1.5rem + 1.2vw, 2.75rem);
+  min-inline-size: clamp(2.75rem, 2.5rem + 0.4vw, 3rem);
   padding-inline: 0;
 }
 .editor-toolbar__row .board-tools__add {
@@ -1780,7 +1780,7 @@
 .board-tools .palette__link {
   inline-size: auto;
   max-inline-size: clamp(5rem, 3rem + 6vw, 9rem);
-  min-block-size: clamp(2rem, 1.5rem + 1.2vw, 2.75rem);
+  min-block-size: clamp(2.75rem, 2.5rem + 0.4vw, 3rem);
   font-size: clamp(0.75rem, 0.68rem + 0.3vw, 0.9375rem);
 }
 .board-tools .icon,
@@ -1791,8 +1791,8 @@
 .app-topbar__theme {
   display: inline-grid;
   place-items: center;
-  inline-size: clamp(2rem, 1.5rem + 1.2vw, 2.75rem);
-  block-size: clamp(2rem, 1.5rem + 1.2vw, 2.75rem);
+  inline-size: clamp(2.75rem, 2.5rem + 0.4vw, 3rem);
+  block-size: clamp(2.75rem, 2.5rem + 0.4vw, 3rem);
   border: 1px solid var(--color-border);
   border-radius: 50%;
   color: var(--color-text);
