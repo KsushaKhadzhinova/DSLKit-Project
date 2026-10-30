@@ -18,7 +18,10 @@ const html = (source) => {
   box.append(renderMarkdown(document, source));
   return box;
 };
-const wait = () => new Promise((resolve) => setTimeout(resolve, 20));
+// Waits until the page shows the expected status, up to five seconds, so a slow machine does not make the test fail.
+const wait = async (t, text) => {
+  for (let tries = 0; tries < 500 && t.$('.docs__status').textContent !== text; tries += 1) await new Promise((resolve) => setTimeout(resolve, 10));
+};
 
 test('the reader builds headings, paragraphs, lists, code, bold, code spans and safe links', () => {
   const box = html(
@@ -135,7 +138,7 @@ test('the role form refuses a wrong code and a guest; only a developer edits, sa
   const submit = () => t.$('[data-docs-role]').dispatchEvent(new t.window.Event('submit', { bubbles: true, cancelable: true }));
   t.$('.docs__role-input').value = 'wrong';
   submit();
-  await wait();
+  await wait(t, 'Код неверный.');
   assert.equal(t.$('.docs__status').textContent, 'Код неверный.');
   assert.equal(t.$('[data-docs-edit]').hidden, true);
   t.press(t.$('[data-docs-edit]'));
@@ -172,7 +175,7 @@ test('the role form refuses a wrong code and a guest; only a developer edits, sa
   t.press(t.$('[data-docs-save]'));
   assert.equal(t.$('.docs__status').textContent, 'Менять документацию может только разработчик.');
   submit();
-  await wait();
+  await wait(t, 'Сначала войдите в аккаунт.');
   assert.equal(t.$('.docs__status').textContent, 'Сначала войдите в аккаунт.');
 });
 
@@ -200,7 +203,7 @@ test('the right code turns the role on and the edit button appears', async () =>
   const t = open({ storage, developerHash: hashCode('team-code') });
   t.$('.docs__role-input').value = 'team-code';
   t.$('[data-docs-role]').dispatchEvent(new t.window.Event('submit', { bubbles: true, cancelable: true }));
-  await wait();
+  await wait(t, 'Роль «разработчик» включена.');
   assert.equal(t.$('.docs__status').textContent, 'Роль «разработчик» включена.');
   assert.equal(t.$('[data-docs-edit]').hidden, false);
   assert.equal(t.$('[data-docs-role-off]').hidden, false);
