@@ -34,7 +34,7 @@ Extra operations:
 | `POST` | `/diagrams/:id/publish`   | Set status to `published`; repeating it changes nothing | 200     | 400, 404 |
 | `POST` | `/diagrams/:id/duplicate` | Copy a diagram as a draft titled "... (copy)"           | 201     | 400, 404 |
 
-Personal data: the user list returns `id`, `name`, `role` and `createdAt` without the `email`. The email comes only with one user (`GET /api/users/:id`), and a list cannot be filtered or searched by it.
+Personal data: the user list returns `id`, `name`, `role` and `createdAt` without the `email`. The email comes only with one user (`GET /api/users/:id`), and a list cannot be filtered, searched or sorted by it.
 
 ## List query parameters
 

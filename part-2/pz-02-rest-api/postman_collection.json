@@ -296,7 +296,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{ \"name\": \"Anna Smith\", \"email\": \"anna@example.com\", \"role\": \"owner\" }",
+          "raw": "{ \"name\": \"Ada King\", \"email\": \"ada@example.com\", \"role\": \"owner\" }",
           "options": {
             "raw": {
               "language": "json"
@@ -438,6 +438,35 @@
               "key": "limit",
               "value": "10"
             }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Projects of one user -> 200",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base}}/users/1/projects",
+          "host": [
+            "{{base}}"
+          ],
+          "path": [
+            "users",
+            "1",
+            "projects"
           ]
         }
       }

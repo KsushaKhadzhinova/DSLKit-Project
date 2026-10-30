@@ -47,6 +47,22 @@ Table 2 – API endpoints
 | `POST /api/diagrams/:id/publish`   | Publish, repeating changes nothing        | 200     |
 | `POST /api/diagrams/:id/duplicate` | Copy of a diagram as a draft              | 201     |
 
+Examples of the request body and the expected response for the main operations are in table 3. The data come from `API.md` and match the answers of the running server (port 3962). The `createdAt` field is shortened to `…`, and `id` depends on the number of records already created.
+
+Table 3 – Request and response examples
+
+| Request | Request body | Expected response |
+| ------- | ------------ | ----------------- |
+| `POST /api/users` | `{"name":"Anna","email":"anna@example.com","role":"owner"}` | 201, `{"id":3,"name":"Anna","email":"anna@example.com","role":"owner","createdAt":"…"}` |
+| `POST /api/diagrams` | `{"title":"Billing schema","notation":"ERD","code":"invoice -> payment","projectId":1}` | 201, `{"id":4,"title":"Billing schema","notation":"ERD","code":"invoice -> payment","projectId":1,"status":"draft","createdAt":"…"}` |
+| `GET /api/diagrams?q=billing&sort=-title` | none | 200, `{"data":[{…},{…}],"meta":{"page":1,"limit":20,"total":2}}` |
+| `PATCH /api/users/1` | `{"role":"editor"}` | 200, the user with `"role":"editor"` |
+| `POST /api/diagrams/1/publish` | none | 200, the diagram with `"status":"published"` |
+| `POST /api/diagrams/1/duplicate` | none | 201, a copy with `"title":"Checkout sequence (copy)"` and `"status":"draft"` |
+| `DELETE /api/diagrams/2` | none | 204, no body |
+| `DELETE /api/users/1` | none | 409, `{"error":{"code":"conflict","message":"User still owns projects"}}` |
+| `POST /api/users` | `{"name":"","email":"x"}` | 400, `{"error":{"code":"validation_failed","message":"Request body is invalid","details":[{"field":"name",…},{"field":"email",…}]}}` |
+
 Lists accept `page` and `limit` for paging, `sort` for sorting (a minus sign means descending), `q` for search in text fields and any field name for an exact filter. A list response holds the array `data` and the object `meta` with the total count. The route `GET /api/users/:id/projects` returns the projects of one user with the same list parameters and answers 404 for an unknown user. The file `API.md` collects detailed request and response examples.
 
 ### 3.3 Validation and errors
@@ -152,6 +168,14 @@ Figure 13 – End of the npm test output: the number of passed tests and the cov
 ### 3.6 OpenAPI description
 
 The route `GET /api/openapi.json` returns the description of the API in the OpenAPI 3.0 format. It is built from the same schemas that validate the requests, so field lengths, lists of allowed values and required fields in the document match the code. The `email` field is not offered as a filter of the user list. The document can be opened in Swagger UI or imported into Postman.
+
+A fragment of the API documentation is shown in figure 14.
+
+![API documentation](figures/14-api-docs.png)
+
+Figure 14 – A fragment of the file `API.md` and of the answer of `GET /api/openapi.json` (text captured by the script `shots/docs-shot.mjs`, not a Swagger UI window)
+
+No Postman window was captured in this work: real screenshots of the program window cannot be produced here, so a script sent the requests in figures 2 and 9–12, and the captions say so. The ready collection `postman_collection.json` and the file `requests.http` allow repeating the check and taking such screenshots by hand.
 
 ## Conclusion
 
@@ -362,7 +386,7 @@ const parsePositive = (raw, name, fallback, max = Number.MAX_SAFE_INTEGER) => {
 };
 
 // Filtering by any schema field (?status=draft), search (?q=text), sorting (?sort=-title), pagination (?page=2&limit=10).
-// hidden: fields that never appear in a list and cannot be used to filter or search it (otherwise ?email= would reveal them).
+// hidden: fields that never appear in a list and cannot be used to filter, search or sort it (otherwise ?email= or ?sort=email would reveal them).
 export const listItems = (items, schema, query, hidden = []) => {
   const page = parsePositive(query.page, 'page', 1);
   const limit = parsePositive(query.limit, 'limit', 20, 100);
@@ -381,7 +405,7 @@ export const listItems = (items, schema, query, hidden = []) => {
   if (query.sort !== undefined) {
     const desc = String(query.sort).startsWith('-');
     const field = String(query.sort).replace(/^-/, '');
-    if (field !== 'id' && field !== 'createdAt' && !Object.hasOwn(schema, field)) throw new ApiError(400, 'invalid_query', `cannot sort by ${field}`);
+    if (hidden.includes(field) || (field !== 'id' && field !== 'createdAt' && !Object.hasOwn(schema, field))) throw new ApiError(400, 'invalid_query', `cannot sort by ${field}`);
     result = [...result].sort((a, b) => (a[field] > b[field] ? 1 : a[field] < b[field] ? -1 : 0) * (desc ? -1 : 1));
   }
   const total = result.length;

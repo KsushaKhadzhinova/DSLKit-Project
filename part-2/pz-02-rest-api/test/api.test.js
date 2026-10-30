@@ -311,6 +311,12 @@ withApi('the user list hides the email and cannot be filtered or searched by it,
   // A filter or search by the hidden field is ignored, so it cannot be used to find out which emails exist.
   assert.equal((await call('GET', '/users?email=ada@example.com')).json.meta.total, list.json.meta.total);
   assert.equal((await call('GET', '/users?q=ada@example')).json.meta.total, 0);
+  // Sorting by the hidden field would leak the order of the emails, so it is refused.
+  for (const sort of ['email', '-email']) {
+    const sorted = await call('GET', `/users?sort=${sort}`);
+    assert.equal(sorted.status, 400);
+    assert.equal(sorted.json.error.code, 'invalid_query');
+  }
   const one = await call('GET', '/users/1');
   assert.equal(one.json.email, 'ada@example.com');
 });

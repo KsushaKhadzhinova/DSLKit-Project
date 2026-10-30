@@ -26,7 +26,7 @@ const parsePositive = (raw, name, fallback, max = Number.MAX_SAFE_INTEGER) => {
 };
 
 // Filtering by any schema field (?status=draft), search (?q=text), sorting (?sort=-title), pagination (?page=2&limit=10).
-// hidden: fields that never appear in a list and cannot be used to filter or search it (otherwise ?email= would reveal them).
+// hidden: fields that never appear in a list and cannot be used to filter, search or sort it (otherwise ?email= or ?sort=email would reveal them).
 export const listItems = (items, schema, query, hidden = []) => {
   const page = parsePositive(query.page, 'page', 1);
   const limit = parsePositive(query.limit, 'limit', 20, 100);
@@ -45,7 +45,7 @@ export const listItems = (items, schema, query, hidden = []) => {
   if (query.sort !== undefined) {
     const desc = String(query.sort).startsWith('-');
     const field = String(query.sort).replace(/^-/, '');
-    if (field !== 'id' && field !== 'createdAt' && !Object.hasOwn(schema, field)) throw new ApiError(400, 'invalid_query', `cannot sort by ${field}`);
+    if (hidden.includes(field) || (field !== 'id' && field !== 'createdAt' && !Object.hasOwn(schema, field))) throw new ApiError(400, 'invalid_query', `cannot sort by ${field}`);
     result = [...result].sort((a, b) => (a[field] > b[field] ? 1 : a[field] < b[field] ? -1 : 0) * (desc ? -1 : 1));
   }
   const total = result.length;

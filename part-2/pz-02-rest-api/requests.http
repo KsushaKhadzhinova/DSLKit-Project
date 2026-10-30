@@ -38,7 +38,7 @@ Content-Type: application/json
 PUT {{base}}/users/1
 Content-Type: application/json
 
-{ "name": "Anna Smith", "email": "anna@example.com", "role": "owner" }
+{ "name": "Ada King", "email": "ada@example.com", "role": "owner" }
 
 ### Create a project -> 201
 POST {{base}}/projects

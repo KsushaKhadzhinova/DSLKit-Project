@@ -47,6 +47,22 @@
 | `POST /api/diagrams/:id/publish`   | Публикация, повтор ничего не меняет                  | 200   |
 | `POST /api/diagrams/:id/duplicate` | Копия диаграммы в статусе черновика                  | 201   |
 
+Примеры тела запроса и ожидаемого ответа для основных операций приведены в таблице 3. Данные взяты из `API.md` и проверены на запущенном сервере (порт 3962). Поле `createdAt` сокращено до `…`, а `id` зависит от числа уже созданных записей.
+
+Таблица 3 – Примеры запросов и ответов
+
+| Запрос | Тело запроса | Ожидаемый ответ |
+| ------ | ------------ | --------------- |
+| `POST /api/users` | `{"name":"Anna","email":"anna@example.com","role":"owner"}` | 201, `{"id":3,"name":"Anna","email":"anna@example.com","role":"owner","createdAt":"…"}` |
+| `POST /api/diagrams` | `{"title":"Billing schema","notation":"ERD","code":"invoice -> payment","projectId":1}` | 201, `{"id":4,"title":"Billing schema","notation":"ERD","code":"invoice -> payment","projectId":1,"status":"draft","createdAt":"…"}` |
+| `GET /api/diagrams?q=billing&sort=-title` | нет | 200, `{"data":[{…},{…}],"meta":{"page":1,"limit":20,"total":2}}` |
+| `PATCH /api/users/1` | `{"role":"editor"}` | 200, пользователь с `"role":"editor"` |
+| `POST /api/diagrams/1/publish` | нет | 200, диаграмма с `"status":"published"` |
+| `POST /api/diagrams/1/duplicate` | нет | 201, копия с `"title":"Checkout sequence (copy)"` и `"status":"draft"` |
+| `DELETE /api/diagrams/2` | нет | 204, тела нет |
+| `DELETE /api/users/1` | нет | 409, `{"error":{"code":"conflict","message":"User still owns projects"}}` |
+| `POST /api/users` | `{"name":"","email":"x"}` | 400, `{"error":{"code":"validation_failed","message":"Request body is invalid","details":[{"field":"name",…},{"field":"email",…}]}}` |
+
 Списки принимают параметры `page` и `limit` для страниц, `sort` для сортировки (знак минус означает убывание), `q` для поиска по текстовым полям и любое имя поля для точного фильтра. Ответ списка содержит массив `data` и объект `meta` с общим числом записей. Маршрут `GET /api/users/:id/projects` отдаёт проекты одного пользователя с теми же параметрами списка, а для неизвестного пользователя отвечает 404. Подробные примеры запросов и ответов собраны в файле `API.md`.
 
 ### 3.3 Проверка входных данных и ошибки
@@ -152,6 +168,14 @@
 ### 3.6 Описание OpenAPI
 
 Маршрут `GET /api/openapi.json` отдаёт описание API в формате OpenAPI 3.0. Оно строится из тех же схем, которые проверяют запросы, поэтому длины полей, списки допустимых значений и обязательные поля в документе совпадают с кодом. Поле `email` не предлагается как фильтр списка пользователей. Документ можно открыть в Swagger UI или импортировать в Postman.
+
+Фрагмент документации API показан на рисунке 14.
+
+![Документация API](figures/14-api-docs.png)
+
+Рисунок 14 – Фрагмент файла `API.md` и ответа `GET /api/openapi.json` (текст, снятый скриптом `shots/docs-shot.mjs`, не окно Swagger UI)
+
+Окно Postman в этой работе не снималось: настоящие снимки окна программы здесь получить нельзя, поэтому запросы на рисунках 2, 9–12 отправлены скриптом, и это указано в подписях. Готовая коллекция `postman_collection.json` и файл `requests.http` позволяют повторить проверку и сделать такие снимки вручную.
 
 ## Заключение
 
@@ -362,7 +386,7 @@ const parsePositive = (raw, name, fallback, max = Number.MAX_SAFE_INTEGER) => {
 };
 
 // Filtering by any schema field (?status=draft), search (?q=text), sorting (?sort=-title), pagination (?page=2&limit=10).
-// hidden: fields that never appear in a list and cannot be used to filter or search it (otherwise ?email= would reveal them).
+// hidden: fields that never appear in a list and cannot be used to filter, search or sort it (otherwise ?email= or ?sort=email would reveal them).
 export const listItems = (items, schema, query, hidden = []) => {
   const page = parsePositive(query.page, 'page', 1);
   const limit = parsePositive(query.limit, 'limit', 20, 100);
@@ -381,7 +405,7 @@ export const listItems = (items, schema, query, hidden = []) => {
   if (query.sort !== undefined) {
     const desc = String(query.sort).startsWith('-');
     const field = String(query.sort).replace(/^-/, '');
-    if (field !== 'id' && field !== 'createdAt' && !Object.hasOwn(schema, field)) throw new ApiError(400, 'invalid_query', `cannot sort by ${field}`);
+    if (hidden.includes(field) || (field !== 'id' && field !== 'createdAt' && !Object.hasOwn(schema, field))) throw new ApiError(400, 'invalid_query', `cannot sort by ${field}`);
     result = [...result].sort((a, b) => (a[field] > b[field] ? 1 : a[field] < b[field] ? -1 : 0) * (desc ? -1 : 1));
   }
   const total = result.length;
