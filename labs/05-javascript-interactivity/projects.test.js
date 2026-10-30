@@ -49,7 +49,7 @@ test('the store saves, updates, lists newest first, renames and removes', () => 
 test('the store ignores a damaged value and drops damaged projects, and is limited', () => {
   const storage = memory();
   storage.set('projects', 'oops');
-  const store = createProjectStore({ storage });
+  const store = createProjectStore({ storage, unlimited: true });
   assert.deepEqual(store.list(), []);
   storage.set('projects', [null, { id: 1 }, { id: 'x', title: 't', source: 's', updated: 1, notation: 'idef0' }]);
   assert.equal(store.list().length, 1);
@@ -306,7 +306,7 @@ test('the English dashboard asks in English before deleting for good, and the de
 
 test('the quota counts the diagrams created today and only shows the limit', () => {
   const storage = memory();
-  const store = createProjectStore({ storage, now: clock() });
+  const store = createProjectStore({ storage, now: clock(), unlimited: true });
   const { document } = dashboard({ storage });
   assert.equal(document.querySelector('.app-nav__quota-text').textContent, 'Бета: сегодня создано 0 из 5');
   for (let i = 0; i < 6; i += 1) store.save({ title: `n${i}`, notation: 'idef0', source: 's' });
@@ -316,7 +316,7 @@ test('the quota counts the diagrams created today and only shows the limit', () 
   assert.equal(again.document.querySelector('.app-nav__progress').value, 5);
   const en = dashboard({ storage, lang: 'en', now: later });
   assert.match(en.document.querySelector('.app-nav__quota-text').textContent, /^Beta: 6 created today/);
-  const trashed = createProjectStore({ storage });
+  const trashed = createProjectStore({ storage, unlimited: true });
   trashed.trash(trashed.list()[0].id);
   assert.equal(dashboard({ storage }).document.querySelector('.app-nav__quota-text').textContent, 'Бета: сегодня создано 6, лимит 5 в день превышен');
 });
@@ -516,12 +516,12 @@ test('shared examples can be liked, copied to the projects or to the templates; 
   press(first().querySelector('[data-act="like"]'));
   assert.equal(first().querySelector('[data-act="like"]').getAttribute('aria-pressed'), 'true');
   const store = createProjectStore({ storage, now: clock() });
-  assert.equal(store.list().length, 1);
+  assert.equal(store.list().length, 0, 'a like only marks the example, it copies nothing');
   press(first().querySelector('[data-act="like"]'));
   assert.equal(first().querySelector('[data-act="like"]').getAttribute('aria-pressed'), 'false');
-  assert.equal(store.list().length, 1);
+  assert.equal(store.list().length, 0);
   press(first().querySelector('[data-act="copy"]'));
-  assert.equal(store.list().length, 2);
+  assert.equal(store.list().length, 1);
   press(document.querySelector('[data-section="templates"]'));
   assert.equal(document.querySelectorAll('[data-template]:not([hidden])').length, 1);
   store.list().forEach((project) => store.trash(project.id));
@@ -530,7 +530,7 @@ test('shared examples can be liked, copied to the projects or to the templates; 
   assert.equal(empty.hidden, false);
   answers.confirm = false;
   press(empty);
-  assert.equal(store.listTrash().length, 2);
+  assert.equal(store.listTrash().length, 1);
   answers.confirm = true;
   press(empty);
   assert.equal(store.listTrash().length, 0);
@@ -577,4 +577,37 @@ test('a project with a damaged trash time is dropped, a date in the future is ca
   const notes = [...en.document.querySelectorAll('.project-card__updated')].map((node) => node.textContent).filter((text) => text.includes('erased'));
   assert.ok(notes.some((text) => text.endsWith('erased in 30 days')));
   assert.ok(notes.some((text) => text.endsWith('erased in 1 day')));
+});
+
+test('the sixth new project of a day is refused for a user, a developer and an admin have no limit', async () => {
+  const at = 1_700_000_000_000;
+  const limited = createProjectStore({ storage: memory(), now: () => at });
+  const made = Array.from({ length: 6 }, (_, index) => limited.save({ title: `n${index}`, notation: 'idef0', source: 's' }));
+  assert.deepEqual(
+    made.map((item) => item !== null),
+    [true, true, true, true, true, false],
+  );
+  assert.equal(limited.save({ id: made[0].id, title: 'changed', notation: 'idef0', source: 's' }).title, 'changed');
+  const next = createProjectStore({ storage: limited && memory(), now: () => at + 86_400_000 });
+  assert.notEqual(next.save({ title: 'new day', notation: 'idef0', source: 's' }), null);
+  const free = createProjectStore({ storage: memory(), now: () => at, unlimited: true });
+  assert.equal(
+    Array.from({ length: 8 }, (_, index) => free.save({ title: `f${index}`, notation: 'idef0', source: 's' })).every((item) => item !== null),
+    true,
+  );
+});
+
+test('the copy of an example over the daily limit is refused with a message; templates are not limited', () => {
+  const storage = memory();
+  const store = createProjectStore({ storage, now: clock(), unlimited: true });
+  for (let index = 0; index < 5; index += 1) store.save({ title: `n${index}`, notation: 'idef0', source: 's' });
+  const t = dashboard({ storage, now: () => 1_700_000_000_000 + 10 * 60_000 });
+  t.press(t.document.querySelector('[data-section="shared"]'));
+  const first = () => t.document.querySelector('.project-list__item:not([hidden])');
+  t.press(first().querySelector('.project-card__menu'));
+  t.press(first().querySelector('[data-act="copy"]'));
+  assert.match(t.document.querySelector('#project-count').textContent, /Лимит беты/);
+  assert.equal(store.list().length, 5);
+  t.press(first().querySelector('[data-act="copy-template"]'));
+  assert.equal(t.api.templates.list().length, 1);
 });

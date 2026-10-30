@@ -79,7 +79,7 @@ The data belongs to the browser and the site address. The guide "How to move pro
 
 - The "New diagram" button leads to the "Templates" page: choose a notation or an empty file.
 - A new diagram becomes a project at the first change of its code or at saving (Ctrl+S, the Save button). The title comes from the header \`diagram ... "Title"\`.
-- A shared example becomes a project with the "Save a copy to My projects" or "Like" button.
+- A shared example becomes a project with the "Save a copy to My projects" button. "Like" only marks the example and copies nothing.
 - On the first visit the list is filled with starter diagrams (one per notation, some marked as published). They appear once and do not come back after deleting.
 
 ## Reading and the list
@@ -117,8 +117,8 @@ Note: a deleted project still counts in the daily quota for the day of its creat
       body: `The "Shared" section holds one ready example for every notation of the editor. These are the same templates the editor puts in.
 
 - The title of an example opens the editor with it (\`editor.html?template=<notation>\`). No project is created until you change the code.
-- **Like** is a like mark (♡ becomes ♥ "Liked") and at the same time a copy of the example in "My projects". Pressing it again removes the mark but does not delete the copy.
-- **Save a copy to "My projects"** is a copy without a like.
+- **Like** is a like mark (♡ becomes ♥ "Liked"). It copies nothing; pressing it again removes the mark.
+- **Save a copy to "My projects"** is a copy of the example in your projects. It counts as a new diagram of the day and is refused with a message once the limit is used up.
 - **Add to "My templates"** is a copy in your templates.
 
 Likes are kept separately for every account (and for a guest). Filter, search and sort work as in "My projects".`,
@@ -143,8 +143,8 @@ The templates of every account are isolated, like the projects.`,
 - N is the real number of diagrams created today (by the calendar day of your browser).
 - New projects count, copies of shared examples among them. Starter diagrams of the first visit and edits of existing projects do not count.
 - A deleted project stays in the count.
-- If N is above 5, the label says the limit is exceeded: "the limit of 5 a day is exceeded".
-- The limit is **only shown** for now: the editor does not forbid creating more. The label "Pro — no limits" refers to a future plan.
+- A sixth new project of a day is not created: the editor says "Beta limit: 5 new diagrams a day", and the copy of a shared example is refused with the same message. Templates are not limited. The limit renews tomorrow.
+- The limit does not apply to the roles "developer" and "admin": instead of "N of 5" the label says "Beta: N created today, no daily limit". The role is turned on with a code on the "Documentation" page.
 
 The bar is refreshed on every page of the application.`,
     },

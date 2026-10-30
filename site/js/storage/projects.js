@@ -18,7 +18,7 @@ const valid = (item) =>
 export const TRASH_DAYS = 30;
 const DAY = 24 * 60 * 60 * 1000;
 
-export const createProjectStore = ({ storage, now = () => Date.now(), owner = null }) => {
+export const createProjectStore = ({ storage, now = () => Date.now(), owner = null, unlimited = false }) => {
   const key = owner ? `${KEY}.${owner}` : KEY;
   const seededKey = owner ? `seeded.${owner}` : 'seeded';
   const read = () => {
@@ -42,9 +42,11 @@ export const createProjectStore = ({ storage, now = () => Date.now(), owner = nu
   const get = (id) => list().find((item) => item.id === id) ?? null;
 
   // A project with a known id is updated, any other gets a new id and the time of its creation.
+  // A new project is refused (null) once the daily limit of the beta is used up, unless the user has no limit.
   const save = ({ id, title, notation, source }) => {
     const projects = read();
     const at = projects.findIndex((item) => item.id === id && item.trashedAt === undefined);
+    if (at < 0 && !unlimited && createdOn() >= DAILY_LIMIT) return null;
     const stamp = now();
     const project = {
       id: at >= 0 ? id : makeId(),
@@ -177,16 +179,17 @@ export const createTemplateStore = ({ storage, now = () => Date.now(), owner = n
 
 export const DAILY_LIMIT = 5;
 
-// The text under the quota bar: the beta allows five new diagrams a day, the number is real, the limit is only shown.
-export const quotaLabel = (used, lang) => {
+// The text under the quota bar: the beta allows five new diagrams a day to a user, none to a developer and an admin; a sixth new project of a user is refused by the store.
+export const quotaLabel = (used, lang, unlimited = false) => {
+  if (unlimited) return lang === 'en' ? `Beta: ${used} created today, no daily limit` : `Бета: сегодня создано ${used}, без дневного лимита`;
   if (lang === 'en')
     return used > DAILY_LIMIT ? `Beta: ${used} created today, the limit of ${DAILY_LIMIT} a day is exceeded` : `Beta: ${used} of ${DAILY_LIMIT} created today`;
   return used > DAILY_LIMIT ? `Бета: сегодня создано ${used}, лимит ${DAILY_LIMIT} в день превышен` : `Бета: сегодня создано ${used} из ${DAILY_LIMIT}`;
 };
 
 // Writes the quota into a text and a progress bar of a page.
-export const showQuota = (text, bar, used, lang) => {
-  if (text) text.textContent = quotaLabel(used, lang);
+export const showQuota = (text, bar, used, lang, unlimited = false) => {
+  if (text) text.textContent = quotaLabel(used, lang, unlimited);
   if (bar) {
     bar.max = DAILY_LIMIT;
     bar.value = Math.min(used, DAILY_LIMIT);

@@ -1,6 +1,6 @@
 import { readCode, showCode } from './code-lines.js';
 import { TEMPLATES, parseDiagram } from '../notations/index.js';
-import { currentUser } from '../storage/accounts.js';
+import { currentUser, isUnlimited } from '../storage/accounts.js';
 import { starterProjects } from '../storage/seeds.js';
 import { createProjectStore, createTemplateStore, showQuota } from '../storage/projects.js';
 
@@ -10,6 +10,10 @@ const TEXTS = {
   untitled: { ru: 'Без названия', en: 'Untitled' },
   templateSaved: { ru: 'Шаблон сохранён в «Мои шаблоны»: {title}', en: 'Template saved to "My templates": {title}' },
   editingTemplate: { ru: 'Шаблон (изменение)', en: 'Template (editing)' },
+  limit: {
+    ru: 'Лимит беты: 5 новых диаграмм в день. Проект не сохранён, завтра лимит обновится.',
+    en: 'Beta limit: 5 new diagrams a day. The project is not saved, the limit renews tomorrow.',
+  },
   fresh: { ru: 'Новая диаграмма (не сохранена)', en: 'New diagram (not saved)' },
 };
 export const PROJECT_AUTOSAVE_MS = 1000;
@@ -40,8 +44,9 @@ export const initEditorProjects = ({
   if (!codeLines) return null;
   const view = root.defaultView;
   const lang = root.documentElement.lang === 'en' ? 'en' : 'ru';
-  const owner = currentUser(storage)?.id ?? null;
-  const store = createProjectStore({ storage, now, owner });
+  const user = currentUser(storage);
+  const owner = user?.id ?? null;
+  const store = createProjectStore({ storage, now, owner, unlimited: isUnlimited(user) });
   const templates = createTemplateStore({ storage, now, owner });
   if (seed) store.seed(starterProjects());
   const note = page.querySelector('.editor-status__saved');
@@ -87,7 +92,7 @@ export const initEditorProjects = ({
   const quotaText = page.querySelector('#quota-text');
   const quotaBar = page.querySelector('.editor-sidebar__beta progress');
   const renderTree = () => {
-    showQuota(quotaText, quotaBar, store.createdOn(), lang);
+    showQuota(quotaText, quotaBar, store.createdOn(), lang, isUnlimited(user));
     if (!tree) return;
     const rows = store.list().map((item) => ({ id: item.id, label: fileName(item.title), active: item.id === project?.id }));
     if (!project) rows.unshift({ id: '', label: (template ? TEXTS.editingTemplate : TEXTS.fresh)[lang], active: true });
@@ -132,7 +137,12 @@ export const initEditorProjects = ({
       return template;
     }
     const { source, title, notation } = describe();
-    project = store.save({ id: project?.id, title, notation, source });
+    const saved = store.save({ id: project?.id, title, notation, source });
+    if (saved === null) {
+      if (note) note.textContent = TEXTS.limit[lang];
+      return null;
+    }
+    project = saved;
     lastSaved = source;
     name(project.title);
     params.set('p', project.id);
