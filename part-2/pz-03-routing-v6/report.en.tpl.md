@@ -60,77 +60,83 @@ The menu with the highlighted item "Каталог" and the template cards are s
 
 Figure 2 – Template catalog with the sticky header and the highlighted menu item
 
-The dynamic route `/catalog/2` opens the template card, as figure 3 shows.
+The "About" page is opened at `/about` and its menu item is highlighted, as figure 3 shows.
+
+![About page with the highlighted menu item](figures/14-about.png)
+
+Figure 3 – The "About" page at `/about` with the menu item "О проекте" highlighted
+
+The dynamic route `/catalog/2` opens the template card, as figure 4 shows.
 
 ![Template page](figures/03-catalog-item.png)
 
-Figure 3 – Template page opened at the address `/catalog/2`
+Figure 4 – Template page opened at the address `/catalog/2`
 
-The address `/catalog/999` with a missing identifier leads to the 404 page, shown in figure 4.
+The address `/catalog/999` with a missing identifier leads to the 404 page, shown in figure 5.
 
 ![Unknown template](figures/04-not-found-id.png)
 
-Figure 4 – Error page 404 for an unknown template identifier
+Figure 5 – Error page 404 for an unknown template identifier
 
-For an unknown path a styled 404 page is shown, and it is visible in figure 5.
+For an unknown path a styled 404 page is shown, and it is visible in figure 6.
 
 ![404 page](figures/05-not-found.png)
 
-Figure 5 – The page "Ошибка 404: страница не найдена" in the site style
+Figure 6 – The page "Ошибка 404: страница не найдена" in the site style
 
 The error pages are built from one catalogue of texts, `src/shell/errorCatalog.js`, and each answers three questions: what the error is, why it happened and how to solve it. This is how 404 (no such page), 403 (the role is not enough), 500 (a failure while showing a page) and the "No connection to the server" page work, and the error boundary shows the last one when a piece of code could not be downloaded. Error 401 is explained on the sign-in form: a guest whom `PrivateRoute` sent to `/login` sees a folded block "Error 401: why am I here and what to do".
 
-A guest who opens `/dashboard` lands on the login form with a hint, as in figure 6.
+A guest who opens `/dashboard` lands on the login form with a hint, as in figure 7.
 
 ![Redirect to login](figures/06-redirect-to-login.png)
 
-Figure 6 – Login form with the hint "Эта страница доступна после входа"
+Figure 7 – Login form with the hint "Эта страница доступна после входа"
 
-The error for an empty name is visible under the field in figure 7.
+The error for an empty name is visible under the field in figure 8.
 
 ![Login form error](figures/07-login-validation.png)
 
-Figure 7 – Login form with the error message for an empty name
+Figure 8 – Login form with the error message for an empty name
 
-After login the requested page opens, and it is visible in figure 8.
+After login the requested page opens, and it is visible in figure 9.
 
 ![Dashboard](figures/08-dashboard-after-login.png)
 
-Figure 8 – Dashboard after login with the greeting and the menu item "Выйти"
+Figure 9 – Dashboard after login with the greeting and the menu item "Выйти"
 
-The catalog filter is kept in the address, as in figure 9.
+The catalog filter is kept in the address, as in figure 10.
 
 ![Catalog filter](figures/12-catalog-filter.png)
 
-Figure 9 – Catalog at the link `/catalog?q=UML&sort=title` with breadcrumbs and the found count
+Figure 10 – Catalog at the link `/catalog?q=UML&sort=title` with breadcrumbs and the found count
 
-A regular user on the administrator page sees the 403 error, as in figure 10.
+A regular user on the administrator page sees the 403 error, as in figure 11.
 
 ![403 page](figures/13-forbidden.png)
 
-Figure 10 – Error page 403 for a user without the admin role
+Figure 11 – Error page 403 for a user without the admin role
 
-On a phone width of 375 pixels the cards go in one column, as in figure 11.
+On a phone width of 375 pixels the cards go in one column, as in figure 12.
 
 ![Catalog on a phone](figures/09-catalog-mobile.png)
 
-Figure 11 – Template catalog on a screen 375 pixels wide
+Figure 12 – Template catalog on a screen 375 pixels wide
 
-The phone menu opens with the three bar button and is shown in figure 12.
+The phone menu opens with the three bar button and is shown in figure 13.
 
 ![Menu on a phone](figures/10-menu-mobile.png)
 
-Figure 12 – Opened menu on a screen 375 pixels wide
+Figure 13 – Opened menu on a screen 375 pixels wide
 
-The dark theme is switched on with the moon icon in the header and is shown in figure 13.
+The dark theme is switched on with the moon icon in the header and is shown in figure 14.
 
 ![Catalog in the dark theme](figures/11-catalog-dark.png)
 
-Figure 13 – Template catalog in the dark theme
+Figure 14 – Template catalog in the dark theme
 
 ### 3.7 Testing
 
-Sixty-one automated tests on `MemoryRouter` check all the pages, the catalog filter in the address (a huge and a whitespace-only query, a forged sort, markup in the query), lazy loading with the fallback message, breadcrumbs, the admin-only route (guest, user, admin, a logout in another tab), a double click on the sign-in button, the `NavLink` highlight, the dynamic route, the 404 page, the guest redirect, the return with query parameters, the name check, a forged return address, a logout in another tab, the focus move, markup rendered as text and the 500 page. The manual check is described in `README.md`.
+One hundred and forty-six automated tests on `MemoryRouter` check all the pages, the catalog filter in the address (a huge and a whitespace-only query, a forged sort, markup in the query), lazy loading with the fallback message, breadcrumbs, the admin-only route (guest, user, admin, a logout in another tab), a double click on the sign-in button, the `NavLink` highlight, the dynamic route, the 404 page, the guest redirect, the return with query parameters, the name check, a forged return address, a logout in another tab, the focus move, markup rendered as text and the 500 page. The manual check is described in `README.md`.
 
 ### 3.8 Addresses and hosting
 
@@ -178,18 +184,32 @@ The Vite application contains eight routes, a menu with the active item highligh
 ## Appendix A (mandatory) Key Code Fragments
 
 ```jsx
-// App.jsx: route map, Layout provides the menu and Outlet
+// App.jsx: full route map, Layout provides the menu and Outlet
 <Routes>
+  {/* Layout route without a path: menu, header, footer and Outlet for the pages */}
   <Route element={<Layout />}>
+    {/* Home: index route, the address / */}
     <Route index element={<Home />} />
+    {/* Catalog (lazy loaded), the filter in ?q= and ?sort= */}
+    <Route path="catalog" element={<Catalog />} />
+    {/* Dynamic route: id is read with useParams, an unknown id renders 404 in place */}
     <Route path="catalog/:id" element={<CatalogItem />} />
+    {/* The "About" page, highlighted in the menu by NavLink */}
+    <Route path="about" element={<About />} />
+    {/* Login form (a signed-in user is redirected to the dashboard) */}
+    <Route path="login" element={<Login />} />
+    {/* Logout: clears the session and returns to the home page */}
     <Route path="logout" element={<Logout />} />
+    {/* Protected group: without a login a redirect to /login that remembers the address */}
     <Route element={<PrivateRoute />}>
+      {/* Dashboard (lazy loaded) */}
       <Route path="dashboard" element={<Dashboard />} />
+      {/* Nested role check: admin only, other roles get 403 */}
       <Route element={<RoleRoute role="admin" />}>
         <Route path="admin" element={<Admin />} />
       </Route>
     </Route>
+    {/* Any unknown path: the 404 page, the route stays last */}
     <Route path="*" element={<NotFound />} />
   </Route>
 </Routes>

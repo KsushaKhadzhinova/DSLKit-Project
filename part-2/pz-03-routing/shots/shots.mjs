@@ -45,6 +45,8 @@ await go('/catalog');
 await shot('02-catalog');
 await go('/catalog/2');
 await shot('03-catalog-item');
+await go('/about');
+await shot('14-about');
 await go('/catalog/999');
 await shot('04-not-found-id');
 await go('/no/such/page');
