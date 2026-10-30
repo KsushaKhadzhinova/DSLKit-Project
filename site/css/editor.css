@@ -1996,3 +1996,18 @@ html.js:not(.is-ready)
 .app-topbar__theme {
   flex: 0 0 auto;
 }
+
+/* On a narrow screen the group of board tools may wrap and never be wider than the screen */
+.board-tools {
+  flex: 0 1 auto;
+  flex-wrap: wrap;
+  max-inline-size: 100%;
+}
+.board-tools .palette__connect {
+  flex-wrap: nowrap;
+}
+
+/* The hidden tooltips of the toolbar buttons reach beyond the screen on a phone; they are clipped sideways, while the menus still open downwards */
+.editor-toolbar {
+  overflow-x: clip;
+}
