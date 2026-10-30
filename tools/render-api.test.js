@@ -85,8 +85,10 @@ test('POST /api/parse and /api/generate', async () => {
   assert.ok((await post('/api/parse', { source: GOOD })).json().model.nodes.length >= 2);
   const dot = await post('/api/generate', { source: GOOD, format: 'graphviz' });
   assert.match(dot.json().text, /digraph/);
-  const fallback = await post('/api/generate', { source: GOOD, format: 'cobol' });
-  assert.ok(['plantuml', 'mermaid', 'graphviz'].includes(fallback.json().format));
+  const wrong = await post('/api/generate', { source: GOOD, format: 'cobol' });
+  assert.equal(wrong.status, 400);
+  assert.equal(wrong.json().error.code, 'format');
+  assert.equal((await post('/api/generate', { source: GOOD })).status, 200);
 });
 
 test('unusual input: unknown notation, UML without kind, no header', async () => {
@@ -134,7 +136,7 @@ test('unusual requests: empty, wrong types, bad JSON, huge, wrong method, unknow
   assert.equal((await post('/api/render', '"text"')).status, 400);
   assert.equal((await post('/api/render', '{not json')).status, 400);
   assert.equal((await post('/api/render', '')).status, 400);
-  assert.equal((await post('/api/render', { source: GOOD, lang: 'klingon' })).status, 200);
+  assert.equal((await post('/api/render', { source: GOOD, lang: 'klingon' })).status, 400);
   assert.equal((await post('/api/render', { source: 'x'.repeat(MAX_SOURCE + 1) })).status, 413);
   assert.equal((await post('/api/render', 'x'.repeat(MAX_SOURCE * 6 + 5000), { type: 'text/plain' })).status, 413);
   assert.equal((await call('/api/render', { method: 'GET' })).status, 405);

@@ -54,6 +54,7 @@ export const GRAMMAR = [
 ].join('\n');
 
 const LANGS = ['ru', 'en'];
+const FORMATS = ['graphviz', 'mermaid', 'plantuml'];
 const langOf = (value) => (LANGS.includes(value) ? value : 'ru');
 
 export const listNotations = (lang = 'ru') =>
@@ -197,6 +198,10 @@ export const handleApi = async (req, res, { fetchImpl = globalThis.fetch, krokiU
     if (typeof input.source !== 'string' || input.source.trim() === '') return fail(res, 400, 'source', 'The "source" text is required');
     if (input.source.length > MAX_SOURCE) return fail(res, 413, 'too-large', `The source is longer than ${MAX_SOURCE} characters`);
     if (input.source.split('\n').length > MAX_LINES) return fail(res, 422, 'too-complex', `The source has more than ${MAX_LINES} lines`);
+    // A wrong language or format is an error of the caller, not something to hide behind a default.
+    if (input.lang !== undefined && !LANGS.includes(input.lang)) return fail(res, 400, 'lang', `The language must be one of: ${LANGS.join(', ')}`);
+    if (pathname === '/api/generate' && input.format !== undefined && !FORMATS.includes(input.format))
+      return fail(res, 400, 'format', `The format must be one of: ${FORMATS.join(', ')}`);
     const lang = langOf(input.lang);
     if (pathname === '/api/render') {
       const result = renderSource(input.source, lang);
