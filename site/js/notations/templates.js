@@ -148,20 +148,20 @@ arc free -> put
 arc put -> used weight=2
 arc used -> take
 arc take -> free`,
-  gost: `diagram gost "Сумма чисел"
-start s "Начало"
-io in "Ввод n"
+  gost: `diagram gost "Sum of numbers"
+start s "Start"
+io in "Input n"
 preparation p "i = 1, sum = 0"
 decision d "i <= n?"
 process a "sum = sum + i, i = i + 1"
-io out "Вывод sum"
-end e "Конец"
+io out "Output sum"
+end e "End"
 flow s -> in
 flow in -> p
 flow p -> d
-flow d -> a "Да"
+flow d -> a "Yes"
 flow a -> d
-flow d -> out "Нет"
+flow d -> out "No"
 flow out -> e`,
   graph: `diagram graph "Roads"
 mode undirected

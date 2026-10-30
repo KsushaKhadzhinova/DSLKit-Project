@@ -21,9 +21,14 @@ export const sourceLines = (source) =>
     .map((raw, index) => ({ n: index + 1, text: raw.trim() }))
     .filter(({ text }) => text !== '' && !text.startsWith('//'));
 
+// A title with quotes inside that were not escaped still counts: the title runs to the last quote of the line.
+const LENIENT_HEADER = /^diagram\s+([\w-]+)(?:\s+([\w-]+))?\s+"(.*)"\s*$/;
+
 export const parseHeader = (text) => {
   const match = HEADER.exec(text);
-  return match ? { notation: match[1].toLowerCase(), kind: (match[2] ?? '').toLowerCase(), title: unquote(match[3] ?? '') } : null;
+  if (match) return { notation: match[1].toLowerCase(), kind: (match[2] ?? '').toLowerCase(), title: unquote(match[3] ?? '') };
+  const lenient = LENIENT_HEADER.exec(text);
+  return lenient ? { notation: lenient[1].toLowerCase(), kind: (lenient[2] ?? '').toLowerCase(), title: lenient[3] } : null;
 };
 
 // The width of a line of text in pixels, from the widths of letters in a typical sans-serif face (Helvetica, Arial), in units of the font size.

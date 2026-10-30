@@ -147,7 +147,7 @@ test('generators write native syntax for each format', () => {
   assert.match(generate(model('bpmn'), 'mermaid'), /\{"In stock\?"\}/);
   assert.match(generate(model('bpmn'), 'plantuml'), /diamond "In stock\?" as n2/);
   assert.match(generate(model('uml-usecase'), 'plantuml'), /n[0-9]+ \.\.> n[0-9]+ : «include»/);
-  assert.match(generate(model('gost'), 'mermaid'), /\(\["Начало"\]\)/);
+  assert.match(generate(model('gost'), 'mermaid'), /\(\["Start"\]\)/);
   assert.match(generate(model('gost'), 'graphviz'), /shape=parallelogram/);
   assert.match(generate(model('graph'), 'graphviz'), /^graph diagram/);
   assert.match(generate(model('graph'), 'mermaid'), /v0 ---\|"4"\| v1/);

@@ -326,7 +326,8 @@ const PORTS = ['input', 'control', 'output', 'mechanism'];
 const BOX_PATTERN = /^box\s+(\S+)\s+"([^"]*)"((?:\s+pos=\S+|\s*\{)*)\s*$/;
 const PORT_PATTERN = /^(input|control|output|mechanism)\s*:\s*(.+)$/;
 const ARROW_PATTERN = /^arrow\s+(\S+?)(?:\.(\w+))?\s*->\s*(\S+?)(?:\.(\w+))?$/;
-const DIAGRAM_PATTERN = /^diagram\s+(\S+)(?:\s+"([^"]*)")?$/;
+// The title runs to the last quote of the line, so quotes inside it do not break the header.
+const DIAGRAM_PATTERN = /^diagram\s+(\S+)(?:\s+"(.*)")?$/;
 
 // Reads the DSL shown in the editor. Lines it does not understand are reported instead of stopping the run.
 export const parseDsl = (source) => {

@@ -547,7 +547,7 @@ export const initWaitlistForm = ({
 
 ```js
 import { NOTATIONS, NOTATION_KEYS, TEMPLATES, parseDiagram } from '../notations/index.js';
-import { currentUser } from '../storage/accounts.js';
+import { currentUser, isUnlimited } from '../storage/accounts.js';
 import { starterProjects } from '../storage/seeds.js';
 import { TRASH_DAYS, createProjectStore, createTemplateStore, showQuota } from '../storage/projects.js';
 
@@ -576,6 +576,7 @@ const LABELS = {
     purge: 'Удалить навсегда',
     copy: 'Сохранить копию в «Мои проекты»',
     copyTemplate: 'Добавить в «Мои шаблоны»',
+    limit: 'Лимит беты: 5 новых диаграмм в день. Попробуйте завтра или сохраните пример как шаблон.',
     like: 'Нравится',
     liked: 'В избранном',
     emptyTrash: 'Очистить корзину',
@@ -606,6 +607,7 @@ const LABELS = {
     purge: 'Delete forever',
     copy: 'Save a copy to "My projects"',
     copyTemplate: 'Add to "My templates"',
+    limit: 'Beta limit: 5 new diagrams a day. Try tomorrow, or save the example as a template.',
     like: 'Like',
     liked: 'Liked',
     emptyTrash: 'Empty the trash',
@@ -631,8 +633,9 @@ export const initDashboard = ({ root = document, storage, now = () => Date.now()
   const view = root.defaultView;
   const lang = root.documentElement.lang === 'ru' ? 'ru' : 'en';
   const labels = LABELS[lang];
-  const owner = currentUser(storage)?.id ?? null;
-  const store = createProjectStore({ storage, now, owner });
+  const user = currentUser(storage);
+  const owner = user?.id ?? null;
+  const store = createProjectStore({ storage, now, owner, unlimited: isUnlimited(user) });
   const templates = createTemplateStore({ storage, now, owner });
   const go = navigate ?? ((url) => view.location.assign(url));
   store.purgeExpired();
@@ -834,7 +837,7 @@ export const initDashboard = ({ root = document, storage, now = () => Date.now()
       if (shown > 0) count.textContent = own ? labels.foundTemplates(shown) : labels.found(shown);
       else count.textContent = own ? labels.noneTemplates : labels.none;
     }
-    showQuota(quotaText, quotaBar, store.createdOn(), lang);
+    showQuota(quotaText, quotaBar, store.createdOn(), lang, isUnlimited(user));
     storage.set('dashboard', state);
   };
 
@@ -895,11 +898,11 @@ export const initDashboard = ({ root = document, storage, now = () => Date.now()
             likesKey,
             liked.filter((entry) => entry !== key),
           );
-        else {
-          storage.set(likesKey, [...liked, key]);
-          store.save(copy);
-        }
-      } else store.save(copy);
+        else storage.set(likesKey, [...liked, key]);
+      } else if (store.save(copy) === null) {
+        if (count) count.textContent = labels.limit;
+        return false;
+      }
     }
     rebuild();
     render();

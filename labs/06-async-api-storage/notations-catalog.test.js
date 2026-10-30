@@ -76,7 +76,7 @@ test('an element of the palette of every notation is drawn after it is added', (
 });
 
 test('every template survives being saved as a project and opened again', () => {
-  const store = createProjectStore({ storage: createStorage(createMemoryBackend()) });
+  const store = createProjectStore({ storage: createStorage(createMemoryBackend()), unlimited: true });
   keys.forEach((key) => {
     const saved = store.save({ title: key, notation: key, source: TEMPLATES[key] });
     assert.equal(store.get(saved.id).source, TEMPLATES[key], key);
