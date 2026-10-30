@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { mock, test } from 'node:test';
 import { JSDOM } from 'jsdom';
 import { readCode, showCode } from '../../site/js/components/code-lines.js';
-import { ZOOM_MAX, ZOOM_MIN, ZOOM_STEP, initEditorActions } from '../../site/js/components/editor-actions.js';
+import { ZOOM_MAX, ZOOM_MIN, ZOOM_STEP, codeFromHash, initEditorActions } from '../../site/js/components/editor-actions.js';
 import { initEditor } from '../../site/js/components/editor.js';
 import { clearPositions, formatCode } from '../../site/js/utils/format-code.js';
 import { createMemoryBackend, createStorage } from '../../site/js/utils/storage.js';
@@ -12,8 +12,8 @@ const pages = { ru: readFileSync('site/app/editor.html', 'utf8'), en: readFileSy
 const memory = () => createStorage(createMemoryBackend());
 const tick = () => new Promise((resolve) => setTimeout(resolve, 0));
 
-const setup = ({ lang = 'ru', clipboard = { writeText: async () => {} }, storage = memory(), prepare = () => {} } = {}) => {
-  const window = new JSDOM(pages[lang], { url: 'http://localhost/' }).window;
+const setup = ({ lang = 'ru', clipboard = { writeText: async () => {} }, storage = memory(), prepare = () => {}, url = 'http://localhost/' } = {}) => {
+  const window = new JSDOM(pages[lang], { url }).window;
   const { document } = window;
   prepare(document);
   initEditor({ root: document, storage, setTimer: () => 0, clearTimer: () => {} });
@@ -126,8 +126,10 @@ test('Share copies the code to the clipboard and reports a failure', async () =>
   const copied = [];
   const ok = setup({ clipboard: { writeText: async (text) => copied.push(text) } });
   await ok.api.actions.share();
-  assert.deepEqual(copied, [ok.code()]);
-  assert.equal(ok.note(), 'Код скопирован в буфер обмена.');
+  assert.equal(copied.length, 1);
+  assert.match(copied[0], /^http:\/\/localhost\/#s=[\w-]+$/);
+  assert.equal(codeFromHash(copied[0].slice('http://localhost/'.length)), ok.code());
+  assert.equal(ok.note(), 'Ссылка на диаграмму скопирована: по ней откроется этот код.');
   const failing = setup({
     clipboard: {
       writeText: async () => {
@@ -267,4 +269,29 @@ test('undo and redo are switched off where there is nothing to undo or redo', as
   assert.deepEqual([state('undo'), state('redo')], ['false', 'true']);
   press('[data-action="undo"]');
   assert.deepEqual([state('undo'), state('redo')], ['true', 'false']);
+});
+
+test('a code too long for an address is copied as text, and a link opens the code in the editor', async () => {
+  const copied = [];
+  const t = setup({ clipboard: { writeText: async (text) => copied.push(text) } });
+  await t.write(['diagram idef0 "Big"', ...Array.from({ length: 800 }, (_, index) => `box A${index} "x" {`)].join(String.fromCharCode(10)));
+  await t.api.actions.share();
+  assert.equal(copied[0], t.code());
+  assert.equal(t.note(), 'Код скопирован в буфер обмена.');
+});
+
+test('the address of a link is read back, and a damaged or empty one is ignored', () => {
+  const pack = (text) => `#s=${Buffer.from(text).toString('base64url')}`;
+  assert.equal(codeFromHash(pack('diagram dfd "Привет 🙂"')), 'diagram dfd "Привет 🙂"');
+  assert.equal(codeFromHash('#other'), null);
+  assert.equal(codeFromHash('#s=!!!not base64!!!'), null);
+  assert.equal(codeFromHash(pack('   ')), null);
+  assert.equal(codeFromHash(pack('x'.repeat(100001))), null);
+  assert.equal(codeFromHash('#s=//8'), null);
+});
+
+test('opening a link of the Share button puts its code into the editor', () => {
+  const code = ['diagram dfd "Shared"', 'entity E'].join(String.fromCharCode(10));
+  const t = setup({ url: `http://localhost/app/editor.html#s=${Buffer.from(code).toString('base64url')}` });
+  assert.equal(t.code(), code);
 });

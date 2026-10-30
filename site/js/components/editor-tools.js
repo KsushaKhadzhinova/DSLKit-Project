@@ -20,6 +20,7 @@ const TEXTS = {
   empty: { ru: 'Коммитов пока нет.', en: 'No commits yet.' },
   changes: { ru: 'Изменений с последнего коммита: +{add} −{del}', en: 'Changes since the last commit: +{add} −{del}' },
   clean: { ru: 'Рабочая копия совпадает с последним коммитом.', en: 'The working copy equals the last commit.' },
+  autoCommit: { ru: 'Сохранение', en: 'Save' },
   untracked: { ru: 'Коммитов нет, весь код не отслеживается.', en: 'No commits, all the code is untracked.' },
   diff: { ru: 'Сравнить', en: 'Compare' },
   restore: { ru: 'Вернуть', en: 'Restore' },
@@ -179,6 +180,14 @@ export const initEditorTools = ({ root = document, storage, now = () => Date.now
     return say(t('committed', { id: commits[0].id }));
   };
   commitButton.addEventListener('click', commit);
+  // Every explicit save (the Save button, Ctrl+S) also leaves a version, so the history of a work is not empty.
+  page.addEventListener('dslkit:save', () => {
+    const result = addCommit(commits, code(), t('autoCommit'), now());
+    if (!result.added) return;
+    commits = result.commits;
+    saveCommits();
+    renderLog();
+  });
   log.addEventListener('click', (event) => {
     const target = event.target.closest('[data-act]');
     const entry = target && commits.find((item) => item.id === target.closest('li').dataset.id);

@@ -13,6 +13,7 @@ const TEXTS = {
   formatted: { ru: 'Код отформатирован.', en: 'Code formatted.' },
   unchanged: { ru: 'Код уже отформатирован.', en: 'The code is already formatted.' },
   copied: { ru: 'Код скопирован в буфер обмена.', en: 'The code is copied to the clipboard.' },
+  linkCopied: { ru: 'Ссылка на диаграмму скопирована: по ней откроется этот код.', en: 'The link to the diagram is copied: it opens this code.' },
   copyFailed: { ru: 'Не удалось скопировать код.', en: 'The code could not be copied.' },
   layout: { ru: 'Ручное расположение блоков сброшено.', en: 'The manual place of the blocks is reset.' },
   noLayout: { ru: 'В коде нет ручного расположения блоков.', en: 'The code has no manual place of the blocks.' },
@@ -23,6 +24,24 @@ const TEXTS = {
 };
 
 // Wires the buttons of the editor that work on the code and the drawing: undo and redo, save, check, format, share, auto layout, theme, zoom and the side panels.
+const SHARE_KEY = 's=';
+const SHARE_LIMIT = 6000;
+
+// The code of a link made by the Share button, or null when the address holds none.
+export const codeFromHash = (hash) => {
+  if (!hash.startsWith(`#${SHARE_KEY}`)) return null;
+  try {
+    const packed = hash
+      .slice(SHARE_KEY.length + 1)
+      .replaceAll('-', '+')
+      .replaceAll('_', '/');
+    const text = new TextDecoder('utf-8', { fatal: true }).decode(Uint8Array.from(atob(packed), (char) => char.charCodeAt(0)));
+    return text.trim() === '' || text.length > 100000 ? null : text;
+  } catch {
+    return null;
+  }
+};
+
 export const initEditorActions = ({ root = document, storage, clipboard = root.defaultView.navigator.clipboard } = {}) => {
   const page = root.querySelector('.app-page--editor');
   const codeLines = page?.querySelector('.code__lines');
@@ -84,10 +103,23 @@ export const initEditorActions = ({ root = document, storage, clipboard = root.d
     write(next);
     return say('formatted');
   };
+  // The code is packed into the address after the # (it never goes to a server): whoever opens the link gets the same code in the editor.
+  // A code too long for an address is copied as text instead.
+  const shareLink = (text) => {
+    const bytes = new TextEncoder().encode(text);
+    const packed = btoa(String.fromCharCode(...bytes))
+      .replaceAll('+', '-')
+      .replaceAll('/', '_')
+      .replace(/=+$/, '');
+    const { origin, pathname } = root.defaultView.location;
+    return packed.length <= SHARE_LIMIT ? `${origin}${pathname}#${SHARE_KEY}${packed}` : null;
+  };
   const share = async () => {
     try {
-      await clipboard.writeText(readCode(codeLines));
-      return say('copied');
+      const text = readCode(codeLines);
+      const link = shareLink(text);
+      await clipboard.writeText(link ?? text);
+      return say(link === null ? 'copied' : 'linkCopied');
     } catch {
       return say('copyFailed');
     }
@@ -184,6 +216,9 @@ export const initEditorActions = ({ root = document, storage, clipboard = root.d
     else if (showing) toggleSidebar();
   });
   page.querySelectorAll('[data-panel="files"]').forEach((button) => button.addEventListener('click', () => showView('files')));
+
+  const shared = codeFromHash(root.defaultView.location.hash);
+  if (shared !== null) write(shared);
 
   return { states: () => [...states], position: () => at, zoom: () => zoom, actions: ACTIONS };
 };

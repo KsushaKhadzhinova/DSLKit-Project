@@ -52,7 +52,7 @@ export const NOTATIONS = {
   erd: entry('ERD', 'ERD — диаграмма «сущность — связь»', 'ERD — entity-relationship diagram', { parse: erd, generators: erGenerators, render: renderEr }),
   bpmn: entry('BPMN', 'BPMN — бизнес-процессы', 'BPMN — business processes', fromSpec(bpmn)),
   petri: entry('Petri', 'Сети Петри', 'Petri nets', fromSpec(petri)),
-  gost: entry('ГОСТ', 'Блок-схемы по ГОСТ 19.701-90', 'GOST 19.701-90 flowcharts', fromSpec(gostFlow)),
+  gost: entry('GOST', 'Блок-схемы по ГОСТ 19.701-90', 'GOST 19.701-90 flowcharts', fromSpec(gostFlow)),
   graph: entry('Graph', 'Графы', 'Graphs', { parse: parseGraphTheory, ...graphNotation }),
   dag: entry('DAG', 'DAG — ориентированный ациклический граф', 'DAG — directed acyclic graph', fromSpec(dag)),
   'uml-class': entry('UML · Class', 'UML — диаграмма классов', 'UML — class diagram', {

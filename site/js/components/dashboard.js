@@ -34,6 +34,7 @@ const LABELS = {
     emptyTrash: 'Очистить корзину',
     askEmpty: (count) => `Удалить навсегда все проекты в корзине (${count})? Это нельзя отменить.`,
     askName: 'Новое название проекта',
+    nameEmpty: 'Название не может быть пустым, прежнее оставлено.',
     askTrash: (title) => `Переместить проект «${title}» в корзину?`,
     askPurge: (title) => `Удалить проект «${title}» навсегда? Это нельзя отменить.`,
     actions: (title) => `Действия с проектом ${title}`,
@@ -65,6 +66,7 @@ const LABELS = {
     emptyTrash: 'Empty the trash',
     askEmpty: (count) => `Delete all ${count} projects in the trash forever? This cannot be undone.`,
     askName: 'New project name',
+    nameEmpty: 'The name cannot be empty, the old one is kept.',
     askTrash: (title) => `Move the project "${title}" to the trash?`,
     askPurge: (title) => `Delete the project "${title}" forever? This cannot be undone.`,
     actions: (title) => `Actions for the project ${title}`,
@@ -274,6 +276,8 @@ export const initDashboard = ({ root = document, storage, now = () => Date.now()
     if (search) search.value = state.query;
     if (sortSelect) sortSelect.value = state.sort;
     if (newTemplate) newTemplate.hidden = section !== 'templates';
+    // The notation filters have no meaning among the templates and in the trash.
+    root.querySelectorAll('.filter, #notation-filter').forEach((node) => (node.hidden = section === 'templates' || section === 'trash'));
     emptyTrash.hidden = section !== 'trash' || store.listTrash().length === 0;
     const liked = likes();
     original
@@ -322,7 +326,10 @@ export const initDashboard = ({ root = document, storage, now = () => Date.now()
     if (action === 'rename') {
       const name = view.prompt(labels.askName, title(item));
       const done = item.dataset.template ? templates.rename(id, name ?? '') : store.rename(id, name ?? '');
-      if (done === null) return false;
+      if (done === null) {
+        if (name !== null && name.trim() === '' && count) count.textContent = labels.nameEmpty;
+        return false;
+      }
     } else if (action === 'template') {
       const project = store.get(id);
       templates.save({ title: project.title, notation: project.notation, source: project.source });

@@ -2043,3 +2043,31 @@ html.js:not(.is-ready)
   inline-size: 1.125rem;
   block-size: 1.125rem;
 }
+
+/* Printing the editor prints the diagram and its code, without the panels and buttons */
+@media print {
+  .editor-toolbar,
+  .editor-activity,
+  .editor-sidebar,
+  .editor-bottom-nav,
+  .editor-status,
+  .editor-banner,
+  .problems,
+  .editor-tools,
+  .tour,
+  .canvas__toolbar,
+  .palette__message,
+  .skip-link {
+    display: none;
+  }
+  .app-page--editor {
+    display: block;
+    color: black;
+    background: white;
+  }
+  .canvas__remote,
+  .canvas__remote svg {
+    max-inline-size: 100%;
+    background: white;
+  }
+}

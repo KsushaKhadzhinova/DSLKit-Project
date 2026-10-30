@@ -349,3 +349,16 @@ test('opening search while the assistant tab is shown brings the problems tab ba
   press('[data-panel="search"]');
   assert.equal($('.app-page--editor').dataset.tab, 'problems');
 });
+
+test('an explicit save leaves a version once, and the same code leaves none again', () => {
+  const { $, document, put, window } = setup();
+  put('diagram idef0 "One"');
+  const save = () => $('.app-page--editor').dispatchEvent(new window.CustomEvent('dslkit:save', { bubbles: true }));
+  save();
+  assert.equal(document.querySelectorAll('.editor-tools__commit').length, 1);
+  save();
+  assert.equal(document.querySelectorAll('.editor-tools__commit').length, 1);
+  put('diagram idef0 "Two"');
+  save();
+  assert.equal(document.querySelectorAll('.editor-tools__commit').length, 2);
+});

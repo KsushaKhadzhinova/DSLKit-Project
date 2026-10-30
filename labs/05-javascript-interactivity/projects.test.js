@@ -611,3 +611,22 @@ test('the copy of an example over the daily limit is refused with a message; tem
   t.press(first().querySelector('[data-act="copy-template"]'));
   assert.equal(t.api.templates.list().length, 1);
 });
+
+test('an empty new name is explained, the filters hide among templates and in the trash', () => {
+  const storage = memory();
+  createProjectStore({ storage, now: clock() }).save({ title: 'Mine', notation: 'idef0', source: 's' });
+  const answers = { prompt: '   ' };
+  const t = dashboard({ storage, answers });
+  const item = () => t.document.querySelector('.project-list__item:not([hidden])');
+  t.press(item().querySelector('.project-card__menu'));
+  t.press(item().querySelector('[data-act="rename"]'));
+  assert.match(t.document.querySelector('#project-count').textContent, /не может быть пустым/);
+  assert.equal(t.document.querySelector('.filter').hidden, false);
+  t.press(t.document.querySelector('[data-section="templates"]'));
+  assert.equal(t.document.querySelector('.filter').hidden, true);
+  assert.equal(t.document.querySelector('#notation-filter').hidden, true);
+  t.press(t.document.querySelector('[data-section="shared"]'));
+  assert.equal(t.document.querySelector('.filter').hidden, false);
+  t.press(t.document.querySelector('[data-section="trash"]'));
+  assert.equal(t.document.querySelector('.filter').hidden, true);
+});
