@@ -1,4 +1,5 @@
 import { readCode, showCode } from './code-lines.js';
+import { notify } from './toast.js';
 import { pointInDrawing } from './canvas-drag.js';
 import { parseDiagram } from '../notations/index.js';
 import { addElement, connectElements, gate, glyphFor, labelOf, linksFor, paletteFor, removeElement, renameElement } from '../utils/palette.js';
@@ -121,6 +122,8 @@ export const initEditorPalette = ({ root = document } = {}) => {
   };
   const say = (text) => {
     message.textContent = text;
+    // The hint that repeats the instruction is not an answer to an action, the others are.
+    if (text !== t('hint')) notify(root, text);
     return text;
   };
 

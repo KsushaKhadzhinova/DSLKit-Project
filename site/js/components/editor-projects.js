@@ -1,4 +1,5 @@
 import { readCode, showCode } from './code-lines.js';
+import { notify } from './toast.js';
 import { TEMPLATES, parseDiagram } from '../notations/index.js';
 import { currentUser, isUnlimited } from '../storage/accounts.js';
 import { starterProjects } from '../storage/seeds.js';
@@ -126,7 +127,9 @@ export const initEditorProjects = ({
   };
   const saveTemplate = (id) => {
     const saved = templates.save({ id, ...describe() });
-    if (note) note.textContent = TEXTS.templateSaved[lang].replace('{title}', saved.title);
+    const saidTemplate = TEXTS.templateSaved[lang].replace('{title}', saved.title);
+    if (note) note.textContent = saidTemplate;
+    notify(root, saidTemplate, 'success');
     return saved;
   };
   const save = () => {
@@ -140,6 +143,7 @@ export const initEditorProjects = ({
     const saved = store.save({ id: project?.id, title, notation, source });
     if (saved === null) {
       if (note) note.textContent = TEXTS.limit[lang];
+      notify(root, TEXTS.limit[lang], 'error');
       return null;
     }
     project = saved;

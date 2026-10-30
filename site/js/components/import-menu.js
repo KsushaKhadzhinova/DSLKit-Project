@@ -1,5 +1,6 @@
 import { importDiagram } from '../utils/import-diagram.js';
 import { showCode } from './code-lines.js';
+import { notify } from './toast.js';
 
 const KINDS = {
   ru: { flowchart: 'блок-схема', sequence: 'диаграмма последовательности', state: 'диаграмма состояний', dsl: 'код DSLKit' },
@@ -39,6 +40,7 @@ export const initImport = ({ root = document, readClipboard } = {}) => {
   const clipboard = readClipboard ?? (() => root.defaultView.navigator.clipboard.readText());
   const say = (text) => {
     if (status) status.textContent = text;
+    notify(root, text);
   };
 
   const load = (source) => {

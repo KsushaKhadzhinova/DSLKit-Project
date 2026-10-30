@@ -147,12 +147,14 @@ import { initSettings } from './components/settings.js';
 import { initTheme } from './components/theme.js';
 import { initQuota } from './components/quota.js';
 import { initTour } from './components/tour.js';
+import { initToasts } from './components/toast.js';
 import { initWelcome } from './components/welcome.js';
 import { initWaitlistForm } from './components/waitlist-form.js';
 import { getStorage } from './utils/storage.js';
 
 export const COMPONENTS = [
   initTheme,
+  initToasts,
   initBurger,
   initAuthGate,
   initAuthMenu,
@@ -548,6 +550,7 @@ export const initWaitlistForm = ({
 ```js
 import { NOTATIONS, NOTATION_KEYS, TEMPLATES, parseDiagram } from '../notations/index.js';
 import { currentUser, isUnlimited } from '../storage/accounts.js';
+import { notify } from './toast.js';
 import { starterProjects } from '../storage/seeds.js';
 import { TRASH_DAYS, createProjectStore, createTemplateStore, showQuota } from '../storage/projects.js';
 
@@ -583,6 +586,19 @@ const LABELS = {
     askEmpty: (count) => `Удалить навсегда все проекты в корзине (${count})? Это нельзя отменить.`,
     askName: 'Новое название проекта',
     nameEmpty: 'Название не может быть пустым, прежнее оставлено.',
+    done: {
+      rename: 'Название изменено.',
+      template: 'Проект сохранён как шаблон.',
+      'remove-template': 'Шаблон удалён.',
+      remove: 'Проект перемещён в корзину.',
+      restore: 'Проект восстановлен.',
+      purge: 'Проект удалён навсегда.',
+      copy: 'Копия сохранена в «Мои проекты».',
+      'copy-template': 'Пример добавлен в «Мои шаблоны».',
+      like: 'Добавлено в избранное.',
+      unlike: 'Убрано из избранного.',
+      emptied: 'Корзина очищена.',
+    },
     askTrash: (title) => `Переместить проект «${title}» в корзину?`,
     askPurge: (title) => `Удалить проект «${title}» навсегда? Это нельзя отменить.`,
     actions: (title) => `Действия с проектом ${title}`,
@@ -615,6 +631,19 @@ const LABELS = {
     askEmpty: (count) => `Delete all ${count} projects in the trash forever? This cannot be undone.`,
     askName: 'New project name',
     nameEmpty: 'The name cannot be empty, the old one is kept.',
+    done: {
+      rename: 'The name is changed.',
+      template: 'The project is saved as a template.',
+      'remove-template': 'The template is deleted.',
+      remove: 'The project is moved to the trash.',
+      restore: 'The project is restored.',
+      purge: 'The project is deleted forever.',
+      copy: 'A copy is saved to "My projects".',
+      'copy-template': 'The example is added to "My templates".',
+      like: 'Added to favourites.',
+      unlike: 'Removed from favourites.',
+      emptied: 'The trash is emptied.',
+    },
     askTrash: (title) => `Move the project "${title}" to the trash?`,
     askPurge: (title) => `Delete the project "${title}" forever? This cannot be undone.`,
     actions: (title) => `Actions for the project ${title}`,
@@ -871,11 +900,15 @@ export const initDashboard = ({ root = document, storage, now = () => Date.now()
 
   const act = (action, item) => {
     const id = item.dataset.project ?? item.dataset.template;
+    let said = action;
     if (action === 'rename') {
       const name = view.prompt(labels.askName, title(item));
       const done = item.dataset.template ? templates.rename(id, name ?? '') : store.rename(id, name ?? '');
       if (done === null) {
-        if (name !== null && name.trim() === '' && count) count.textContent = labels.nameEmpty;
+        if (name !== null && name.trim() === '') {
+          if (count) count.textContent = labels.nameEmpty;
+          notify(root, labels.nameEmpty, 'error');
+        }
         return false;
       }
     } else if (action === 'template') {
@@ -900,6 +933,7 @@ export const initDashboard = ({ root = document, storage, now = () => Date.now()
       if (action === 'copy-template') templates.save(copy);
       else if (action === 'like') {
         const liked = likes();
+        said = liked.includes(key) ? 'unlike' : 'like';
         if (liked.includes(key))
           storage.set(
             likesKey,
@@ -908,11 +942,13 @@ export const initDashboard = ({ root = document, storage, now = () => Date.now()
         else storage.set(likesKey, [...liked, key]);
       } else if (store.save(copy) === null) {
         if (count) count.textContent = labels.limit;
+        notify(root, labels.limit, 'error');
         return false;
       }
     }
     rebuild();
     render();
+    notify(root, labels.done[said], 'success');
     return true;
   };
   emptyTrash.addEventListener('click', () => {
@@ -921,6 +957,7 @@ export const initDashboard = ({ root = document, storage, now = () => Date.now()
     trashed.forEach((project) => store.remove(project.id));
     rebuild();
     render();
+    notify(root, labels.done.emptied, 'success');
   });
   newTemplate?.addEventListener('click', () => {
     const name = view.prompt(labels.askNewTemplate, '');

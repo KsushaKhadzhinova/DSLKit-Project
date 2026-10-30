@@ -1,4 +1,5 @@
 import { readCode, showCode } from './code-lines.js';
+import { notify } from './toast.js';
 import { addCommit, assistant, diffLines, diffText, replaceAll, searchLines } from '../utils/editor-tools.js';
 
 const TEXTS = {
@@ -85,6 +86,11 @@ export const initEditorTools = ({ root = document, storage, now = () => Date.now
     status.textContent = text;
     return text;
   };
+  // The results of actions (a version, a restore, a copy, a replace) are also shown as toasts; the live count of the search is not.
+  const tell = (text) => {
+    notify(root, text);
+    return say(text);
+  };
 
   const loadCommits = () => {
     const saved = storage.get(STORAGE_KEY, []);
@@ -130,7 +136,7 @@ export const initEditorTools = ({ root = document, storage, now = () => Date.now
     const done = replaceAll(code(), findBox.value, replaceBox.value, caseBox.checked);
     if (done.count > 0) write(done.text);
     search();
-    return say(t('replaced', { n: done.count }));
+    return tell(t('replaced', { n: done.count }));
   });
   searchView.append(findBox, caseLabel, replaceBox, replaceButton, results);
 
@@ -172,12 +178,12 @@ export const initEditorTools = ({ root = document, storage, now = () => Date.now
   };
   const commit = () => {
     const result = addCommit(commits, code(), messageBox.value, now());
-    if (!result.added) return say(t('unchanged'));
+    if (!result.added) return tell(t('unchanged'));
     commits = result.commits;
     saveCommits();
     messageBox.value = '';
     renderLog();
-    return say(t('committed', { id: commits[0].id }));
+    return tell(t('committed', { id: commits[0].id }));
   };
   commitButton.addEventListener('click', commit);
   // Every explicit save (the Save button, Ctrl+S) also leaves a version, so the history of a work is not empty.
@@ -199,14 +205,14 @@ export const initEditorTools = ({ root = document, storage, now = () => Date.now
     }
     write(entry.text);
     renderLog();
-    say(t('restored', { id: entry.id }));
+    tell(t('restored', { id: entry.id }));
   });
   patchButton.addEventListener('click', async () => {
     try {
       await clipboard.writeText(diffText(diffLines(commits[0]?.text ?? '', code())));
-      say(t('patchCopied'));
+      tell(t('patchCopied'));
     } catch {
-      say(t('patchFailed'));
+      tell(t('patchFailed'));
     }
   });
   gitView.append(messageBox, commitButton, patchButton, summary, log, diffBox);

@@ -18,6 +18,8 @@ const MESSAGES = {
 
 const FIELDS = { login: ['email', 'password'], register: ['name', 'email', 'password', 'confirm'] };
 
+import { flash } from './toast.js';
+
 const goTo = (root) => (url) => root.defaultView.location.assign(url);
 
 // The account menu: guests see the sign-in and registration links, a signed-in user sees the name and the sign-out button.
@@ -48,6 +50,7 @@ export const initAuthMenu = ({ root = document, storage, crypto, navigate = goTo
     if (!button) return;
     store.logout();
     render();
+    flash(storage, root.documentElement.lang === 'en' ? 'You are signed out.' : 'Вы вышли из аккаунта.', 'info');
     navigate(button.closest('[data-auth]')?.dataset.home ?? './');
   });
 
@@ -115,6 +118,18 @@ export const initAuthForm = ({ root = document, storage, crypto, navigate = goTo
       field(mode === 'register' && result.error === 'exists' ? 'email' : 'password').focus();
       return false;
     }
+    const english = root.documentElement.lang === 'en';
+    flash(
+      storage,
+      mode === 'register'
+        ? english
+          ? 'The account is created, welcome!'
+          : 'Аккаунт создан, добро пожаловать!'
+        : english
+          ? 'You are signed in.'
+          : 'Вы вошли в аккаунт.',
+      'success',
+    );
     navigate(mode === 'register' ? 'welcome.html' : 'dashboard.html');
     return true;
   };

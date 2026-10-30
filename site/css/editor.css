@@ -1293,6 +1293,15 @@
   .canvas[aria-busy='true'] .canvas__status::before {
     animation: loader-turn 1.2s linear infinite;
   }
+  .toast {
+    animation: dslkit-toast-in 0.18s ease-out;
+  }
+  @keyframes dslkit-toast-in {
+    from {
+      opacity: 0;
+      transform: translateY(0.5rem);
+    }
+  }
 }
 
 /* Tour of the editor: a card in the corner and an outline around the part it talks about */
@@ -2070,4 +2079,73 @@ html.js:not(.is-ready)
     max-inline-size: 100%;
     background: white;
   }
+  .toasts {
+    display: none;
+  }
+}
+
+/* Toasts: short answers of the system in a corner */
+.toasts {
+  position: fixed;
+  z-index: 90;
+  inset-inline: var(--space-2);
+  inset-block-end: calc(var(--space-2) + env(safe-area-inset-bottom, 0px));
+  display: grid;
+  gap: 0.5rem;
+  justify-items: end;
+  pointer-events: none;
+}
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  box-sizing: border-box;
+  max-inline-size: min(26rem, 100%);
+  padding: 0.625rem 0.75rem;
+  border: 1px solid var(--color-border);
+  border-inline-start: 4px solid var(--color-primary);
+  border-radius: var(--radius-medium);
+  color: var(--color-text);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-large);
+  font-size: 0.875rem;
+  line-height: 1.35;
+  pointer-events: auto;
+}
+.toast--error {
+  border-inline-start-color: var(--color-error);
+}
+.toast--success {
+  border-inline-start-color: var(--color-success, var(--color-primary));
+}
+.toast__mark {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  inline-size: 1.25rem;
+  block-size: 1.25rem;
+  border-radius: 50%;
+  color: var(--color-on-primary);
+  background: var(--color-primary);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+.toast--error .toast__mark {
+  background: var(--color-error);
+}
+.toast__text {
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+.toast__close {
+  flex: none;
+  inline-size: 1.5rem;
+  block-size: 1.5rem;
+  padding: 0;
+  border: 0;
+  color: var(--color-muted);
+  background: transparent;
+  font-size: 1.125rem;
+  line-height: 1;
+  cursor: pointer;
 }

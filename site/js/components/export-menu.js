@@ -1,6 +1,7 @@
 import { parseDiagram } from '../notations/index.js';
 import { drawioFile, fileName, htmlFile, rasterize, serializeSvg, sizeOf } from '../utils/exporters.js';
 import { readCode } from './code-lines.js';
+import { notify } from './toast.js';
 
 const TEXT = {
   ru: {
@@ -48,6 +49,7 @@ export const initExport = ({ root = document, save = download(root) } = {}) => {
   const lang = root.documentElement.lang === 'en' ? 'en' : 'ru';
   const say = (text) => {
     if (status) status.textContent = text;
+    notify(root, text);
   };
 
   const exportAs = async (format) => {

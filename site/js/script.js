@@ -22,12 +22,14 @@ import { initSettings } from './components/settings.js';
 import { initTheme } from './components/theme.js';
 import { initQuota } from './components/quota.js';
 import { initTour } from './components/tour.js';
+import { initToasts } from './components/toast.js';
 import { initWelcome } from './components/welcome.js';
 import { initWaitlistForm } from './components/waitlist-form.js';
 import { getStorage } from './utils/storage.js';
 
 export const COMPONENTS = [
   initTheme,
+  initToasts,
   initBurger,
   initAuthGate,
   initAuthMenu,

@@ -1,4 +1,5 @@
 import { renderMarkdown } from '../utils/markdown.js';
+import { notify } from './toast.js';
 import { createAccountStore } from '../storage/accounts.js';
 import { createDocsStore } from '../storage/docs.js';
 import { DOCS as RU } from '../docs/content.ru.js';
@@ -56,6 +57,7 @@ export const initDocs = ({ root = document, storage, developerHash } = {}) => {
 
   const say = (message) => {
     status.textContent = message;
+    notify(root, message);
     return message;
   };
   const developer = () => accounts.current()?.role === 'developer';

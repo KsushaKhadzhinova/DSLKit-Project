@@ -1,5 +1,6 @@
 import { applyTheme } from './theme.js';
 import { readCode, showCode } from './code-lines.js';
+import { notify } from './toast.js';
 import { clearPositions, formatCode } from '../utils/format-code.js';
 
 export const ZOOM_MIN = 0.5;
@@ -53,6 +54,7 @@ export const initEditorActions = ({ root = document, storage, clipboard = root.d
   const say = (key) => {
     const text = TEXTS[key][lang];
     if (note) note.textContent = text;
+    notify(root, text);
     return text;
   };
   const run = () => page.dispatchEvent(new root.defaultView.CustomEvent('dslkit:run', { bubbles: true }));

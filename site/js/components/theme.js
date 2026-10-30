@@ -1,3 +1,5 @@
+import { notify } from './toast.js';
+
 export const THEMES = ['light', 'dark'];
 
 const STORAGE_KEY = 'theme';
@@ -56,6 +58,8 @@ export const initTheme = ({ root = document, storage, matchMedia = defaultMatchM
     const value = current === 'dark' ? 'light' : 'dark';
     storage.set(STORAGE_KEY, value);
     apply(value);
+    const english = html.lang === 'en';
+    notify(root, english ? `Theme: ${value}` : `Тема: ${value === 'dark' ? 'тёмная' : 'светлая'}`, 'info');
   });
 
   root.addEventListener('change', (event) => {
