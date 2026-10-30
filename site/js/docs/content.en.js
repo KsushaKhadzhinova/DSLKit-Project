@@ -338,6 +338,48 @@ Mermaid flowcharts, sequence diagrams and state diagrams are supported. Other ki
   ],
   guides: [
     {
+      id: 'russian-names',
+      title: 'Names in Russian',
+      body: `Every name in a diagram can be written in Russian: the labels in quotes and the identifiers of the elements themselves.
+
+## What can be Russian
+
+- Labels in quotes: \`entity Клиент "Покупатель магазина"\`.
+- Identifiers of elements: \`entity Клиент\`, \`process Оформление "Оформление заказа"\`, \`class Счёт\`. Russian and Latin letters, digits, a dot, an underscore and a hyphen are allowed.
+- Attributes, fields and methods in ERD and UML: \`идентификатор: int pk\`, \`+ баланс: Деньги\`, \`+ снять(сумма: Деньги): void\`.
+- Values of the attributes of elements, for example the owner of a port: \`port вход "вход" of=двигатель\`.
+- The title of the diagram in the header: \`diagram erd "Магазин"\`.
+
+## What stays English
+
+The keywords of the language are not translated: \`diagram\`, \`entity\`, \`process\`, \`flow\`, \`relationship\`, \`class\`, \`input\`, \`control\`, \`output\`. The names of the notations in the header are English too: \`diagram dfd\`, \`diagram uml class\`.
+
+## Example: an ERD of a shop entirely in Russian
+
+\`\`\`
+diagram erd "Магазин"
+entity Клиент {
+  идентификатор: int pk
+  имя: string
+}
+entity Заказ {
+  номер: int pk
+  клиент_id: int fk -> Клиент
+}
+relationship Клиент 1:N Заказ "оформляет"
+\`\`\`
+
+## New elements from the toolbar
+
+On the Russian page the "Element" button adds blocks with Russian names: "Процесс", "Сущность", "Блок функции" (with an input, a rule and an output). On the English page the names are English.
+
+## Typical mistakes
+
+- A space in an identifier: \`entity Заказ клиента\` gives the error "Unrecognized line". Write \`Заказ_клиента\` and put the nice name in quotes.
+- Write an identifier the same way everywhere: \`Клиент\` and \`клиент\` are different elements for the editor.
+- Escape quotes inside a quoted label with a backslash.`,
+    },
+    {
       id: 'first-diagram',
       title: 'Your first diagram in 5 minutes',
       body: `## Goal

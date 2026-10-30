@@ -1,5 +1,7 @@
 // Shared helpers for every notation parser: line reading, header parsing, problems and text utilities.
-export const ID = '[\\w.]+(?:-[\\w.]+)*';
+// Identifiers may be written in Latin and Cyrillic letters (and other European ones), so the names of the elements of a diagram can be in Russian.
+export const LETTERS = '\\u00C0-\\u024F\\u0400-\\u04FF';
+export const ID = `[\\w${LETTERS}.]+(?:-[\\w${LETTERS}.]+)*`;
 export const STR = '"((?:[^"\\\\]|\\\\.)*)"';
 const HEADER = /^diagram\s+([\w-]+)(?:\s+([\w-]+))?(?:\s+"((?:[^"\\]|\\.)*)")?\s*$/;
 

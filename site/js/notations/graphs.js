@@ -1,9 +1,9 @@
-import { ID, STR, escapeXml, findCycle, parseAttrs, problem, quoteDot, unquote } from './common.js';
+import { ID, LETTERS, STR, escapeXml, findCycle, parseAttrs, problem, quoteDot, unquote } from './common.js';
 import { defineGraph, plain } from './graph.js';
 import { edgeMarkup, sizer, svgDocument, SHAPES } from './svg.js';
 
 const VERTEX = new RegExp(`^vertex\\s+(${ID})(?:\\s+${STR})?\\s*$`);
-const EDGE = new RegExp(`^edge\\s+(${ID})\\s*(->|--)\\s*(${ID})((?:\\s+[\\w.-]+(?:=[\\w.-]+)?)*)(?:\\s+${STR})?\\s*$`);
+const EDGE = new RegExp(`^edge\\s+(${ID})\\s*(->|--)\\s*(${ID})((?:\\s+[\\w${LETTERS}.-]+(?:=[\\w${LETTERS}.-]+)?)*)(?:\\s+${STR})?\\s*$`);
 const MODE = /^mode\s+(directed|undirected)\s*$/;
 const PATH = new RegExp(`^path\\s+(${ID})\\s*->\\s*(${ID})\\s*$`);
 const NUMBER = /^-?\d+(?:\.\d+)?$/;

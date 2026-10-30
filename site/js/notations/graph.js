@@ -1,7 +1,7 @@
-import { ID, STR, parseAttrs, problem, quoteDot, unquote } from './common.js';
+import { ID, LETTERS, STR, parseAttrs, problem, quoteDot, unquote } from './common.js';
 import { SHAPES, renderLayout } from './svg.js';
 
-const ATTRS = '((?:\\s+[\\w.-]+(?:=[\\w.-]+)?)*)';
+const ATTRS = `((?:\\s+[\\w${LETTERS}.-]+(?:=[\\w${LETTERS}.-]+)?)*)`;
 const plain = (node) => node.label;
 const identity = (node) => node;
 

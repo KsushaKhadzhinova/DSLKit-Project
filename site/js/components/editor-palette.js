@@ -134,7 +134,7 @@ export const initEditorPalette = ({ root = document } = {}) => {
     const key = parseDiagram(code()).notation ?? 'idef0';
     if (key === notation) return notation;
     notation = key;
-    items = paletteFor(key);
+    items = paletteFor(key, lang);
     links = linksFor(key);
     list.replaceChildren(
       ...items.map((item, index) => {

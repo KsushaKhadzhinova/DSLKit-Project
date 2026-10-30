@@ -75,12 +75,22 @@ const NAMES = {
 // Elements of the notations whose statements are not plain `<keyword> <id> "Label"` lines.
 const OWN = {
   idef0: [
-    { keyword: 'box', prefix: 'A', make: (id) => `box ${id} "${id} function" {\n input: Input\n control: Rule\n output: Output\n}` },
+    {
+      keyword: 'box',
+      prefix: 'A',
+      make: (id, code, lang) =>
+        lang === 'ru'
+          ? `box ${id} "${id} Функция" {\n input: Вход\n control: Правило\n output: Выход\n}`
+          : `box ${id} "${id} function" {\n input: Input\n control: Rule\n output: Output\n}`,
+    },
     {
       keyword: 'box',
       prefix: 'A',
       label: ['Блок с механизмом', 'Box with mechanism'],
-      make: (id) => `box ${id} "${id} function" {\n input: Input\n control: Rule\n output: Output\n mechanism: Performer\n}`,
+      make: (id, code, lang) =>
+        lang === 'ru'
+          ? `box ${id} "${id} Функция" {\n input: Вход\n control: Правило\n output: Выход\n mechanism: Исполнитель\n}`
+          : `box ${id} "${id} function" {\n input: Input\n control: Rule\n output: Output\n mechanism: Performer\n}`,
     },
   ],
   idef1: [{ keyword: 'entity', prefix: 'E', make: (id) => `entity ${id} {\n  id: int pk\n}` }],
@@ -137,9 +147,11 @@ const OWN_LINKS = {
 const nameOf = (keyword) => NAMES[keyword] ?? [keyword, keyword];
 
 // The elements that can be put on the board of a notation.
-export const paletteFor = (notation) => {
+// The new element is written in the language of the interface: a Russian page puts Russian names into the code.
+export const paletteFor = (notation, lang = 'en') => {
+  const at = lang === 'ru' ? 0 : 1;
   const own = OWN[notation];
-  if (own) return own.map((item) => ({ ...item, label: item.label ?? nameOf(item.keyword) }));
+  if (own) return own.map((item) => ({ ...item, label: item.label ?? nameOf(item.keyword), make: (id, code) => item.make(id, code, lang) }));
   const nodes = NOTATIONS[notation]?.nodes ?? {};
   return Object.keys(nodes).map((keyword) => ({
     keyword,
@@ -147,8 +159,8 @@ export const paletteFor = (notation) => {
     label: nameOf(keyword),
     make:
       keyword === 'port'
-        ? (id, code) => `port ${id} "${nameOf(keyword)[1]}" of=${OWNERS.exec(code)?.[1] ?? id}`
-        : (id) => `${keyword} ${id} "${nameOf(keyword)[1]}"`,
+        ? (id, code) => `port ${id} "${nameOf(keyword)[at]}" of=${OWNERS.exec(code)?.[1] ?? id}`
+        : (id) => `${keyword} ${id} "${nameOf(keyword)[at]}"`,
   }));
 };
 
@@ -249,7 +261,7 @@ export const removeElement = (code, id) => {
     const close = lines.findIndex((line, index) => index > at && line.trim() === '}');
     end = close < 0 ? lines.length - 1 : close;
   }
-  const word = new RegExp(`(?<![\\w.-])${escapeRegExp(id)}(?![\\w-])`);
+  const word = new RegExp(`(?<![\\w.\\u00C0-\\u024F\\u0400-\\u04FF-])${escapeRegExp(id)}(?![\\w\\u00C0-\\u024F\\u0400-\\u04FF-])`);
   let links = 0;
   const kept = lines.filter((line, index) => {
     if (index >= at && index <= end) return false;

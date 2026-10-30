@@ -2,7 +2,7 @@ import { ID, STR, escapeXml, findCycle, problem, quoteDot, textWidth, unquote } 
 import { INK, MUTED, renderLayout, text } from './svg.js';
 
 const CLASS = new RegExp(`^(class|abstract class|interface)\\s+(${ID})(?:\\s+${STR})?((?:\\s+pos=\\S+)?)\\s*(\\{)?\\s*$`);
-const MEMBER = /^([+\-#~])?\s*([A-Za-z_]\w*)\s*(?:\(([^)]*)\))?\s*(?::\s*(.+?))?\s*$/;
+const MEMBER = /^([+\-#~])?\s*([A-Za-z_À-ɏЀ-ӿ][\wÀ-ɏЀ-ӿ]*)\s*(?:\(([^)]*)\))?\s*(?::\s*(.+?))?\s*$/;
 const REL = new RegExp(
   `^(${ID})(?:\\s+"([^"]*)")?\\s+(--\\|>|\\.\\.\\|>|<\\|--|<\\|\\.\\.|-->|--|o--|\\*--|\\.\\.>)\\s+(?:"([^"]*)"\\s+)?(${ID})(?:\\s*:\\s*(.+?))?\\s*$`,
 );

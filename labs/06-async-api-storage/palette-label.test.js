@@ -31,3 +31,21 @@ test('IDEF0 offers a plain box and a box with a mechanism, with their own names'
   assert.match(items[1].make('A9'), /mechanism: Performer/);
   assert.equal(linksFor('idef0').length, 3);
 });
+
+test('a new element is written with Russian names on a Russian page and with English names otherwise', async () => {
+  const { paletteFor, addElement } = await import('../../site/js/utils/palette.js');
+  const ru = paletteFor('idef0', 'ru');
+  assert.match(ru[0].make('A9'), /Функция/);
+  assert.match(ru[1].make('A9'), /Исполнитель/);
+  assert.match(paletteFor('idef0', 'en')[0].make('A9'), /function/);
+  const dfd = paletteFor('dfd', 'ru').find((item) => item.keyword === 'process');
+  assert.equal(addElement('diagram dfd', 'dfd', dfd, null).code.split(String.fromCharCode(10))[1], 'process P1 "Процесс"');
+  assert.match(
+    paletteFor('dfd')
+      .find((item) => item.keyword === 'process')
+      .make('P1'),
+    /"Process"/,
+  );
+  const port = paletteFor('uml-composite', 'ru').find((item) => item.keyword === 'port');
+  assert.match(port.make('p1', 'classifier c "C"'), /port p1 "Порт" of=c/);
+});

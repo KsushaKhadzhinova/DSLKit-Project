@@ -1,4 +1,4 @@
-import { ID, STR, escapeXml, parseAttrs, problem, quoteDot, textWidth, unquote } from './common.js';
+import { ID, LETTERS, STR, escapeXml, parseAttrs, problem, quoteDot, textWidth, unquote } from './common.js';
 import { INK, MUTED, renderLayout, text } from './svg.js';
 
 const ENTITY = new RegExp(`^entity\\s+(${ID})(?:\\s+${STR})?((?:\\s+[\\w-]+)*?)((?:\\s+pos=\\S+)?)\\s*(\\{)?\\s*$`);
@@ -260,7 +260,7 @@ export const idef1 = (lines, header) =>
   });
 
 // ---------- IDEF1X ----------
-const LINK = new RegExp(`^(identifying|nonidentifying)\\s+(${ID})\\s*->\\s*(${ID})(?:\\s+${STR})?((?:\\s+[\\w.-]+(?:=[\\w.-]+)?)*)\\s*$`);
+const LINK = new RegExp(`^(identifying|nonidentifying)\\s+(${ID})\\s*->\\s*(${ID})(?:\\s+${STR})?((?:\\s+[\\w${LETTERS}.-]+(?:=[\\w${LETTERS}.-]+)?)*)\\s*$`);
 const SPECIFIC = new RegExp(`^nonspecific\\s+(${ID})\\s*--\\s*(${ID})(?:\\s+${STR})?\\s*$`);
 const CATEGORY = new RegExp(`^category\\s+(${ID})\\s+(complete|incomplete)\\s+(${ID})\\s*:\\s*(${ID}(?:\\s*,\\s*${ID})*)\\s*$`);
 const CHILD_END = { P: 'one-many', Z: 'zero-one' };

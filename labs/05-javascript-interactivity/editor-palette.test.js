@@ -70,7 +70,7 @@ test('the palette follows the notation after a run, and the link controls hide w
 test('pressing an item adds the element to the code and runs the drawing', () => {
   const t = setup();
   t.fire(t.document.querySelectorAll('.palette__item')[1], 'click');
-  assert.match(t.code(), /process P1 "Process"$/);
+  assert.match(t.code(), /process P1 "Процесс"$/);
   assert.equal(t.$('.palette__message').textContent, 'Добавлено: P1.');
   assert.equal(t.runs.length >= 1, true);
   t.fire(t.$('.palette'), 'click');
@@ -97,7 +97,7 @@ test('an item is dragged onto the drawing and written with the place, a drop out
   t.fire(t.document, 'pointermove', { clientX: 210, clientY: 260 });
   t.fire(t.document, 'pointerup', { clientX: 250, clientY: 300 });
   assert.equal(t.document.querySelector('.palette__ghost'), null);
-  assert.match(t.code(), /process P1 "Process" pos=150x200$/);
+  assert.match(t.code(), /process P1 "Процесс" pos=150x200$/);
   t.fire(item, 'click');
   assert.equal(t.code().match(/process P/g).length, 1);
   t.fire(item, 'click');
@@ -221,7 +221,7 @@ test('a drawing without a viewBox still gets its element dropped at the pointer'
   const t = setup();
   t.remote.querySelector('svg').removeAttribute('viewBox');
   dropOn(t, 250, 230);
-  assert.match(t.code(), /process P1 "Process" pos=150x130$/);
+  assert.match(t.code(), /process P1 "Процесс" pos=150x130$/);
 });
 
 test('a pressed block is selected, Delete and the button remove it with its links', () => {
@@ -277,7 +277,7 @@ test('a block dropped on the board does not make the others jump: they keep thei
   const code = t.code();
   assert.match(code, /entity Customer pos=120x80/);
   assert.match(code, /process 2 "Take payment" pos=300x90\.5/);
-  assert.match(code, /process P1 "Process" pos=/);
+  assert.match(code, /process P1 "Процесс" pos=/);
   assert.ok(!code.includes('Bank "Payment bank" pos='));
 });
 
