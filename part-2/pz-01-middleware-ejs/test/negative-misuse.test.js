@@ -279,3 +279,22 @@ test('a request log under a regular file shows the styled 500 page without inter
     rmSync(dir, { recursive: true, force: true });
   }
 });
+
+withServer('a title made only of zero-width or filler characters is refused with 400', async ({ base, store }) => {
+  const before = store.all().length;
+  for (const title of ['\u200b', '\u200b\u200d\ufeff', '\u3164', '\u00a0\u2060']) {
+    const res = await post(`${base}/add?auth=1`, { ...valid, title });
+    assert.equal(res.status, 400, JSON.stringify(title));
+    assert.match(await res.text(), /visible character|Title is required/);
+  }
+  assert.equal(store.all().length, before);
+});
+
+withServer('a title with DEL or a C1 control character is refused, a ZWJ emoji sequence is kept', async ({ base, store }) => {
+  for (const title of ['a\u007fb', 'a\u0085b']) {
+    assert.equal((await post(`${base}/add?auth=1`, { ...valid, title })).status, 400, JSON.stringify(title));
+  }
+  const family = '\u{1F468}\u200d\u{1F469}\u200d\u{1F467}';
+  assert.equal((await post(`${base}/add?auth=1`, { ...valid, title: family })).status, 302);
+  assert.equal(store.all().at(-1).title, family);
+});

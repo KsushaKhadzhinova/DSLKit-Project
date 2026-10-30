@@ -9,12 +9,13 @@ import { consolePage, ensureDir, here, isUp, launch, pause, runToEnd, shootHtml,
 const work = here(import.meta.url);
 const out = ensureDir(path.join(work, 'figures'));
 const png = (name) => path.join(out, `${name}.png`);
-const ORIGIN = 'http://localhost:3000';
+const PORT = process.env.SHOTS_PORT || '3000';
+const ORIGIN = `http://localhost:${PORT}`;
 const tmp = mkdtempSync(path.join(tmpdir(), 'pz1-'));
 
 if (await isUp(ORIGIN)) throw new Error(`${ORIGIN} is already in use, stop that server first`);
 
-const server = start(work, ['src/server.js'], { PORT: '3000', DB_FILE: path.join(tmp, 'requests.db') });
+const server = start(work, ['src/server.js'], { PORT, DB_FILE: path.join(tmp, 'requests.db') });
 await waitFor(ORIGIN);
 
 const browser = await launch();
@@ -39,8 +40,11 @@ await shot('list');
 await open('/item/1');
 await shot('detail');
 
-// The form with wrong values: a title of spaces and a negative revision.
+// The clean empty form, no errors.
 await open('/add?auth=1');
+await shot('form-empty');
+
+// The form with wrong values: a title of spaces and a negative revision.
 await fill('#title', '   ');
 await fill('#description', 'Checked on the server');
 await page.$eval('#revision', (el) => {
@@ -78,7 +82,7 @@ await shootHtml(page, consolePage({ title: 'Console output of the server (npm st
 // A real failure: the database file lies under a path that is a file, so the folder for it cannot be made.
 const blocker = path.join(tmp, 'not-a-folder');
 writeFileSync(blocker, 'x');
-const broken = start(work, ['src/server.js'], { PORT: '3000', DB_FILE: path.join(blocker, 'requests.db') });
+const broken = start(work, ['src/server.js'], { PORT, DB_FILE: path.join(blocker, 'requests.db') });
 await waitFor(ORIGIN);
 await open('/');
 await shot('server-error');

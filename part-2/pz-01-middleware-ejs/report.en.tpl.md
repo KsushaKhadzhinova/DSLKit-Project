@@ -106,65 +106,71 @@ The detail page of one record with its revision and code is shown in figure 2.
 
 Figure 2 – Diagram page with the description, the revision and the source code
 
-The form after sending a whitespace-only title and a negative revision is shown in figure 3. A message stands under every wrong field and the entered values are kept.
+The empty add form before any input is shown in figure 3.
+
+![Empty add form](figures/form-empty.png)
+
+Figure 3 – Add form with no entered values and no error messages
+
+The form after sending a whitespace-only title and a negative revision is shown in figure 4. A message stands under every wrong field and the entered values are kept.
 
 ![Form with errors](figures/form-errors.png)
 
-Figure 3 – Add form with messages about the empty title and the negative revision
+Figure 4 – Add form with messages about the empty title and the negative revision
 
-The request log table from the database is shown in figure 4.
+The request log table from the database is shown in figure 5.
 
 ![Request log](figures/log.png)
 
-Figure 4 – Log page with the latest rows of the request_log table
+Figure 5 – Log page with the latest rows of the request_log table
 
-The 404 page for an unknown address is shown in figure 5.
+The 404 page for an unknown address is shown in figure 6.
 
 ![404 page](figures/not-found.png)
 
-Figure 5 – The 404 error page in the site design
+Figure 6 – The 404 error page in the site design
 
-The 500 page during a real failure is shown in figure 6. The server was started with a database file that cannot be created, so the log write failed.
+The 500 page during a real failure is shown in figure 7. The server was started with a database file that cannot be created, so the log write failed.
 
 ![500 page](figures/server-error.png)
 
-Figure 6 – The 500 error page with an explanation about the unavailable log table
+Figure 7 – The 500 error page with an explanation about the unavailable log table
 
 The log can be exported to a text file and downloaded. The button "Export the log to a file" writes the rows of the table through a stream (`pipeline` with `createWriteStream`) into a temporary file and renames it to the final one only when the whole file is written, so a failure in the middle does not damage the earlier file. The button "Download the file" sends the file through `createReadStream`. If the file is deleted, moved or unreadable, the person sees a page that explains what happened, why and how to fix it, not a cut connection and not an unnamed 500 error. A failure in the middle of the transfer closes the connection and is written to the console of the server, and the server goes on working. The texts of all error pages live in one catalogue, `src/errors.js`, and each page answers three questions: what it is, why it happened and how to fix it.
 
-The same form with correct values saves the record, and the home page shows the new card with its own creation time, as in figure 7.
+The same form with correct values saves the record, and the home page shows the new card with its own creation time, as in figure 8.
 
 ![Record after adding](figures/added.png)
 
-Figure 7 – Home page after a diagram is added through the form
+Figure 8 – Home page after a diagram is added through the form
 
-The «Edit» button on the detail page opens the edit form with the current field values, shown in figure 8.
+The «Edit» button on the detail page opens the edit form with the current field values, shown in figure 9.
 
 ![Edit form](figures/edit.png)
 
-Figure 8 – Edit form of the first diagram with the current values and a new revision
+Figure 9 – Edit form of the first diagram with the current values and a new revision
 
-After the changes are saved the detail page opens with the new revision, and the creation time stays the same, as in figure 9.
+After the changes are saved the detail page opens with the new revision, and the creation time stays the same, as in figure 10.
 
 ![Record after editing](figures/edited.png)
 
-Figure 9 – Detail page of the first diagram after editing
+Figure 10 – Detail page of the first diagram after editing
 
 ### 3.9 Automatic verification
 
 Automatic tests on the built-in `node:test` start the server on a free port and check the pages, the guest redirect, adding an item, field validation, escaping, the log table, an unavailable database, the unique creation time, editing and deleting a record with the CSRF token, both error pages, the CSRF token, the security headers, the rate limit, log escaping and huge values. The command is `npm test` in the project folder.
 
-The console of the server started with `npm start` and after the requests is shown in figure 10.
+The console of the server started with `npm start` and after the requests is shown in figure 11.
 
 ![Server console](figures/console.png)
 
-Figure 10 – Console output of the server with the request log lines (process output captured as text)
+Figure 11 – Console output of the server with the request log lines (process output captured as text)
 
-The result of the `npm test` command with the number of tests and the code coverage is shown in figure 11.
+The result of the `npm test` command with the number of tests and the code coverage is shown in figure 12.
 
 ![Test result](figures/tests.png)
 
-Figure 11 – End of the npm test output: the number of passed tests and the coverage table (process output captured as text)
+Figure 12 – End of the npm test output: the number of passed tests and the coverage table (process output captured as text)
 
 ## 4 Answers to Control Questions
 
