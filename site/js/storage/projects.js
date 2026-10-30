@@ -7,6 +7,7 @@ const valid = (item) =>
   typeof item.id === 'string' &&
   typeof item.title === 'string' &&
   typeof item.source === 'string' &&
+  typeof item.notation === 'string' &&
   Number.isFinite(item.updated) &&
   (item.trashedAt === undefined || Number.isFinite(item.trashedAt));
 

@@ -145,3 +145,18 @@ test('the real timers are used when none are given', async () => {
   await new Promise((resolve) => setTimeout(resolve, 30));
   assert.equal(storage.get('editor-source'), 'b');
 });
+
+test('a full browser storage is reported instead of "Saved", in both languages', async () => {
+  for (const [page, text] of [
+    [html, /^Не сохранено: хранилище браузера переполнено$/],
+    [htmlEn, /^Not saved: the browser storage is full$/],
+  ]) {
+    const storage = memory();
+    const { document, timers, api } = setup({ page, storage });
+    storage.set = () => false;
+    api.loadTemplate('petri');
+    await settle();
+    timers.fire();
+    assert.match(document.querySelector('.editor-status__saved').textContent, text);
+  }
+});

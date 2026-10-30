@@ -34,7 +34,11 @@ export const initSourceAutosave = ({
   const save = ({ force = false } = {}) => {
     timer = null;
     if (!force && switchButton && switchButton.getAttribute('aria-checked') !== 'true') return false;
-    storage.set(SOURCE_KEY, readCode(codeLines));
+    // A full browser storage refuses the write: the page says so instead of claiming the code is saved.
+    if (!storage.set(SOURCE_KEY, readCode(codeLines))) {
+      if (note) note.textContent = lang === 'en' ? 'Not saved: the browser storage is full' : 'Не сохранено: хранилище браузера переполнено';
+      return false;
+    }
     if (note) note.textContent = `${lang === 'en' ? 'Saved' : 'Сохранено'} ${clock(now())}`;
     onSaved();
     return true;
