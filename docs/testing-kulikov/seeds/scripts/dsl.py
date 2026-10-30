@@ -32,59 +32,61 @@ arrow A1.output -> A2.input
 arrow A2.output -> A3.input
 '''
 COURSE['dfd-0'] = '''diagram dfd "ЛР2. DFD уровень 0"
-entity Клиент
-entity Банк
+entity Client "Клиент"
+entity Bank "Банк"
 process 0 "Система продаж"
-flow Клиент -> 0 "заказ"
-flow 0 -> Клиент "чек"
-flow 0 -> Банк "запрос оплаты"
-flow Банк -> 0 "результат оплаты"
+flow Client -> 0 "заказ"
+flow 0 -> Client "чек"
+flow 0 -> Bank "запрос оплаты"
+flow Bank -> 0 "результат оплаты"
 '''
 COURSE['dfd-1'] = '''diagram dfd "ЛР2. DFD уровень 1"
-entity Клиент
-entity Банк
+entity Client "Клиент"
+entity Bank "Банк"
 process 1 "Проверить заказ"
 process 2 "Принять оплату"
 process 3 "Отгрузить"
 store D1 "Заказы"
-flow Клиент -> 1 "заказ"
+flow Client -> 1 "заказ"
 flow 1 -> D1 "проверенный заказ"
 flow D1 -> 2 "заказ к оплате"
-flow 2 -> Банк "запрос оплаты"
-flow Банк -> 2 "результат"
+flow 2 -> Bank "запрос оплаты"
+flow Bank -> 2 "результат"
 flow 2 -> 3 "оплаченный заказ"
-flow 3 -> Клиент "накладная"
+flow 3 -> Client "накладная"
 '''
 COURSE['dfd-2'] = '''diagram dfd "ЛР2. DFD уровень 2 (процесс 2)"
-entity Банк
-process 2.1 "Сформировать счёт"
-process 2.2 "Отправить в банк"
-process 2.3 "Записать результат"
+entity Bank "Банк"
+store D1 "Заказы"
+process 21 "Сформировать счёт"
+process 22 "Отправить в банк"
+process 23 "Записать результат"
 store D2 "Счета"
-flow 2.1 -> D2 "счёт"
-flow D2 -> 2.2 "счёт к оплате"
-flow 2.2 -> Банк "запрос"
-flow Банк -> 2.3 "ответ"
-flow 2.3 -> D2 "статус оплаты"
+flow D1 -> 21 "заказ к оплате"
+flow 21 -> D2 "счёт"
+flow D2 -> 22 "счёт к оплате"
+flow 22 -> Bank "запрос"
+flow Bank -> 23 "ответ"
+flow 23 -> D2 "статус оплаты"
 '''
 COURSE['erd'] = '''diagram erd "ЛР3. ERD магазина"
-entity Клиент {
+entity Customer {
   id: int pk
   email: string unique
   name: string
 }
-entity Заказ {
+entity Orders {
   id: int pk
-  client_id: int fk -> Клиент
+  customer_id: int fk -> Customer
   total: decimal
 }
-entity Товар {
+entity Product {
   id: int pk
   name: string
   price: decimal
 }
-relationship Клиент 1:N Заказ "делает"
-relationship Заказ N:M Товар "содержит"
+relationship Customer 1:N Orders "делает"
+relationship Orders N:M Product "содержит"
 '''
 COURSE['uml-class'] = '''diagram uml class "ЛР4. UML классы"
 interface Payable {
@@ -110,13 +112,13 @@ Customer "1" --> "0..*" Order : делает
 Order "1" *-- "1..*" Item : содержит
 '''
 COURSE['uml-sequence'] = '''diagram uml sequence "ЛР4. UML последовательность"
-actor Клиент
-participant Магазин
-participant Банк
-Клиент -> Магазин : оформить заказ
-Магазин -> Банк : списать оплату
-Банк --> Магазин : одобрено
-Магазин --> Клиент : заказ принят
+actor Client "Клиент"
+participant Shop "Магазин"
+participant Bank "Банк"
+Client -> Shop : оформить заказ
+Shop -> Bank : списать оплату
+Bank --> Shop : одобрено
+Shop --> Client : заказ принят
 '''
 COURSE['uml-state'] = '''diagram uml state "ЛР4. UML состояния заказа"
 initial i
@@ -130,14 +132,14 @@ transition paid -> shipped "отгрузка"
 transition shipped -> f "получен"
 '''
 COURSE['uml-usecase'] = '''diagram uml usecase "ЛР4. UML варианты использования"
-actor Клиент
-actor Менеджер
+actor Client "Клиент"
+actor Manager "Менеджер"
 usecase browse "Смотреть каталог"
 usecase order "Оформить заказ"
 usecase pay "Оплатить"
-link Клиент -> browse
-link Клиент -> order
-link Менеджер -> order
+link Client -> browse
+link Client -> order
+link Manager -> order
 include order -> pay
 '''
 COURSE['uml-activity'] = '''diagram uml activity "ЛР4. UML деятельность"

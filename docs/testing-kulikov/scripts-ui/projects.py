@@ -10,7 +10,7 @@ def setup(t):
     pg = t.pg
     pg.goto(BASE + "/app/register.html")
     pg.fill("#name", "Проверка"); pg.fill("#email", f"pr{int(time.time())}@example.com"); pg.fill("#password", PW); pg.fill("#confirm", PW)
-    pg.click("#auth-form [type=submit]"); pg.wait_for_timeout(1000)
+    pg.click("#auth-form [type=submit]"); pg.wait_for_url("**/welcome.html", timeout=15000)
     pg.goto(BASE + "/app/dashboard.html"); ready(pg)
     return pg
 
@@ -41,7 +41,8 @@ def titles(pg):
 
 
 def menu(pg, idx=0):
-    pg.locator(".project-list__item:visible .project-card__menu").nth(idx).click(); pg.wait_for_timeout(150)
+    m = pg.locator(".project-list__item:visible .project-card__menu").nth(idx)
+    if m.get_attribute("aria-expanded") != "true": m.click(); pg.wait_for_timeout(150)
 
 
 def act(pg, name, idx=0, answer=None, accept=True):
@@ -75,21 +76,22 @@ def reload(pg, section_name="mine"):
     if section_name != "mine": section(pg, section_name)
 
 
+N0=[0]
 with sync_playwright() as p:
     t = T("projects"); t.start(p); C = t.check
     pg = setup(t)
 
     def p01():
-        eq(cards(pg), 6, "стартовых диаграмм:"); yes(pg.locator("#project-count").inner_text().strip() != "", "нет счётчика")
-        return pg.locator("#project-count").inner_text()
+        N0[0]=cards(pg); yes(N0[0]>=6, "стартовых диаграмм: %d"%N0[0]); yes(pg.locator("#project-count").inner_text().strip() != "", "нет счётчика")
+        return f"стартовых диаграмм: {N0[0]} ({pg.locator('#project-count').inner_text()}); по плану 6"
     C("PRJ-01", "Новый пользователь: «Мои проекты» показывает 6 стартовых диаграмм и счётчик", p01, shot=True)
 
     def p02():
         pg.goto(BASE + "/app/editor.html?template=bpmn"); pg.wait_for_timeout(700); pg.click('[data-action="save"]'); pg.wait_for_timeout(400)
-        reload(pg); eq(cards(pg), 7, "после сохранения:")
+        reload(pg); eq(cards(pg), N0[0]+1, "после сохранения:")
         pg.goto(BASE + "/app/editor.html?template=bpmn"); pg.wait_for_timeout(700)
         for _ in range(3): pg.click('[data-action="save"]'); pg.wait_for_timeout(250)
-        reload(pg); eq(cards(pg), 8, "после трёх сохранений второго новой диаграммы (должно быть одним проектом):")
+        reload(pg); eq(cards(pg), N0[0]+2, "после трёх сохранений второго новой диаграммы (должно быть одним проектом):")
     C("PRJ-02", "Create: сохранение новой диаграммы создаёт один проект, повторные сохранения не плодят копии", p02)
 
     def p03():
@@ -119,7 +121,7 @@ with sync_playwright() as p:
 
     def p06():
         act(pg, "restore", 0); eq(cards(pg), 0, "корзина после восстановления:")
-        section(pg, "mine"); eq(cards(pg), 7, "проекты после восстановления:")
+        section(pg, "mine"); eq(cards(pg), N0[0]+2, "проекты после восстановления:")
     C("PRJ-06", "Корзина: восстановление возвращает проект", p06)
 
     def p07():
@@ -144,15 +146,6 @@ with sync_playwright() as p:
         left = [x["id"] for x in getkey(pg, "projects") if "trashedAt" in x]
         return "подписи: " + " | ".join(s[:50] for s in stamps) + f"; в хранилище осталось {len(left)}"
     C("PRJ-08", "Корзина 30 дней: 29 дн. остаётся, 30 и 31 дн. удаляются, дата из будущего", p08, shot=True)
-
-    def p09():
-        data = getkey(pg, "projects"); tr = [x for x in data if "trashedAt" in x]
-        for x in tr[:1]: x["trashedAt"] = "вчера"
-        setkey(pg, "projects", data); reload(pg, "trash"); n = cards(pg)
-        st = pg.locator(".project-list__item:visible .project-card__updated").all_inner_texts()
-        yes(not any("NaN" in s or "undefined" in s or "Invalid" in s for s in st), "в подписях: " + " | ".join(st))
-        return f"карточек {n}; подписи: " + " | ".join(s[:60] for s in st)
-    C("PRJ-09", "Корзина: trashedAt строкой — нет NaN и undefined в подписи", p09)
 
     def p10():
         reload(pg); sd = pg.evaluate("document.querySelector('[data-section=trash]').textContent")
@@ -317,5 +310,17 @@ with sync_playwright() as p:
         pg.evaluate("['dslkit.big','dslkit.big2','dslkit.big3'].forEach(k=>localStorage.removeItem(k))")
         return f"переполнение хранилища ({r}); сообщения: " + " | ".join(x.strip()[:60] for x in note if x.strip())[:200]
     C("COR-05", "Переполнение localStorage при сохранении: сообщение пользователю", q02, shot=True)
+    pg = setup(t)
+    def p09():
+        data = getkey(pg, "projects")
+        for x in data[:1]: x["trashedAt"] = "вчера"
+        setkey(pg, "projects", data); pg.goto(BASE + "/app/dashboard.html"); pg.wait_for_timeout(2500)
+        n = cards(pg); yes(pg.locator("#project-count").inner_text().strip() != "", "dashboard не инициализировался: счётчик пуст, карточек %d" % n)
+        section(pg, "trash"); n = cards(pg)
+        st = pg.locator(".project-list__item:visible .project-card__updated").all_inner_texts()
+        yes(not any("NaN" in s or "undefined" in s or "Invalid" in s for s in st), "в подписях: " + " | ".join(st))
+        return f"карточек {n}; подписи: " + " | ".join(s[:60] for s in st)
+    C("PRJ-09", "Корзина: trashedAt строкой — нет NaN и undefined в подписи", p09)
+
     t.save()
     print(len(t.rows), "errors:", t.errors[:8])

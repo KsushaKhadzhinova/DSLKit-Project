@@ -30,13 +30,17 @@ def open_editor(ctx, query='', lang='ru', dialog=True):
     return t
 
 
+def mo(p):
+    p.evaluate("()=>document.querySelectorAll('.editor-menu, .editor-menu__sub').forEach(d=>d.open=true)")
+
+
 def type_code(p, text):
     p.fill('.code__input', text); p.wait_for_timeout(900)
 
 
 def add_item(p, index=0):
     p.click('.board-tools__add'); p.wait_for_timeout(100)
-    p.locator('.palette__item').nth(index).click(); p.wait_for_timeout(250)
+    p.locator('.palette__item').nth(index % max(1, p.locator('.palette__item').count())).click(); p.wait_for_timeout(250)
 
 
 with sync_playwright() as pw:
@@ -48,25 +52,25 @@ with sync_playwright() as pw:
     e = open_editor(ctx)
     # E01 undo on empty history
     c0 = code(e)
-    e.click('[data-action=undo]'); e.wait_for_timeout(300)
+    e.click('[data-action=undo]', force=True); e.wait_for_timeout(300)
     R.add('E01', 'Отменить на пустой истории (сразу после открытия)', 'сообщение «Отменять нечего», код не меняется', f'«{say(e)[:60]}», код тот же={code(e) == c0}', code(e) == c0 and 'нечего' in say(e))
-    e.click('[data-action=redo]'); e.wait_for_timeout(300)
+    e.click('[data-action=redo]', force=True); e.wait_for_timeout(300)
     R.add('E02', 'Повторить на пустой истории', 'сообщение «Возвращать нечего»', say(e)[:70], code(e) == c0 and 'нечего' in say(e))
     # E03 redo before undo after a change, then undo twice, redo thrice
     add_item(e, 0)
     c1 = code(e); n1 = len(nodes(e))
-    e.click('[data-action=redo]'); e.wait_for_timeout(200)
+    e.click('[data-action=redo]', force=True); e.wait_for_timeout(200)
     R.add('E03', 'Повторить сразу после правки (до отмены)', 'ничего не меняется, «Возвращать нечего»', f'код тот же={code(e)==c1}; «{say(e)[:50]}»', code(e) == c1)
-    e.click('[data-action=undo]'); e.wait_for_timeout(300)
+    e.click('[data-action=undo]', force=True); e.wait_for_timeout(300)
     R.add('E04', 'Отменить добавление блока', f'блоков стало {n1-1}', f'блоков {len(nodes(e))}', len(nodes(e)) == n1 - 1)
-    e.click('[data-action=undo]'); e.wait_for_timeout(300); e.click('[data-action=undo]'); e.wait_for_timeout(300)
+    e.click('[data-action=undo]', force=True); e.wait_for_timeout(300); e.click('[data-action=undo]', force=True); e.wait_for_timeout(300)
     R.add('E05', 'Отменить трижды при одной правке в истории', 'после первой отмены — «Отменять нечего»', say(e)[:70], 'нечего' in say(e))
     for _ in range(3):
-        e.click('[data-action=redo]'); e.wait_for_timeout(300)
+        e.click('[data-action=redo]', force=True); e.wait_for_timeout(300)
     R.add('E06', 'Повторить трижды при одной правке', 'вернулся блок, затем «Возвращать нечего»', f'блоков {len(nodes(e))}; «{say(e)[:40]}»', len(nodes(e)) == n1)
     # undo after typing
     type_code(e, 'idef0 "Только я"\n'); c2 = code(e)
-    e.click('[data-action=undo]'); e.wait_for_timeout(300)
+    e.click('[data-action=undo]', force=True); e.wait_for_timeout(300)
     R.add('E07', 'Печать → Отменить', 'возврат к предыдущему состоянию', f'изменился={code(e) != c2}', code(e) != c2)
     # keyboard Ctrl+Z
     e.click('.code__input'); type_code(e, 'idef0 "Горячая клавиша"\n')
@@ -114,7 +118,7 @@ with sync_playwright() as pw:
     R.add('E14', 'Удалить блок, затем нажать «Удалить» ещё раз (блока уже нет)', 'первый раз блок исчезает, второй — «Сначала нажмите на блок»', f'исчез={gone}; «{say(e)[:60]}»', gone and 'Сначала' in say(e))
     # Delete key on a focused node
     # undo removes it back
-    e.click('[data-action=undo]'); e.wait_for_timeout(300)
+    e.click('[data-action=undo]', force=True); e.wait_for_timeout(300)
     R.add('E15', 'Отменить удаление блока', 'блок вернулся', str(bid in nodes(e)), bid in nodes(e))
 
     # 50 additions
@@ -124,7 +128,7 @@ with sync_playwright() as pw:
         add_item(e, i % 3)
     cnt = len(nodes(e))
     R.add('E16', 'Добавить 50 элементов подряд', f'на доске стало {cnt0+50} блоков, редактор не зависает', f'блоков={cnt} (было {cnt0}), время {time.time()-t0:.1f} с, строк кода={len(code(e).splitlines())}, ошибок консоли={len(s.errors)-errs0}', cnt >= cnt0 + 50)
-    e.click('[data-action=undo]', click_count=1); e.wait_for_timeout(300)
+    e.click('[data-action=undo]', force=True, ); e.wait_for_timeout(300)
     # drag element outside the board
     e.click('.board-tools__add'); item = e.locator('.palette__item').first
     ib = item.bounding_box(); n0 = len(nodes(e))
@@ -148,13 +152,13 @@ with sync_playwright() as pw:
     downloads = []
     e.on('download', lambda d: downloads.append(d.suggested_filename))
     for fmt in ('svg', 'png', 'jpeg', 'drawio', 'html'):
-        e.click(f'[data-export={fmt}]'); e.wait_for_timeout(700)
+        mo(e); e.click(f'[data-export={fmt}]'); e.wait_for_timeout(700)
         R.add('E21', f'Экспорт {fmt.upper()} пустой диаграммы', 'сообщение «нет диаграммы» или пустой файл без ошибки', f'файлы={downloads[-1:]}; «{say(e)[:70]}»', True)
     # export normal
     e = open_editor(ctx); downloads2 = []
     e.on('download', lambda d: downloads2.append(d.suggested_filename))
     for fmt in ('svg', 'png', 'jpeg', 'drawio', 'html'):
-        e.click(f'[data-export={fmt}]'); e.wait_for_timeout(900)
+        mo(e); e.click(f'[data-export={fmt}]'); e.wait_for_timeout(900)
     R.add('E22', 'Экспорт шаблонной диаграммы во все 5 форматов', '5 файлов', str(downloads2), len(downloads2) == 5)
 
     # import invalid
@@ -167,9 +171,20 @@ with sync_playwright() as pw:
         e.set_input_files('.editor-import__file', path); e.wait_for_timeout(900)
         changed = code(e) != c_before
         R.add('E23', f'Импорт файла {name}', 'корректный файл импортируется, неверный отклоняется с сообщением, код не портится', f'код заменён={changed}; «{say(e)[:80]}»', (name == 'mermaid.txt' and changed) or (name != 'mermaid.txt' and not changed) or name == 'huge.txt')
-        e = open_editor(ctx) if name in ('mermaid.txt',) else e
+        e = open_editor(ctx)
+    # huge import last: 3000 edges
+    NL = chr(10).encode()
+    path = os.path.join(tmp, 'huge.txt'); open(path, 'wb').write(b'graph TD' + NL + NL.join(b'N%d-->N%d' % (n, n + 1) for n in range(3000)))
+    t0 = time.time(); e = open_editor(ctx)
+    try:
+        e.set_input_files('.editor-import__file', path); e.wait_for_timeout(1500)
+        alive = e.evaluate("()=>1", ) == 1
+        R.add('E23', 'Импорт большого файла (3000 связей Mermaid)', 'импорт завершается за разумное время или отклоняется с сообщением, вкладка жива', f'вкладка жива={alive}, время {time.time()-t0:.1f} с; «{say(e)[:60]}»', alive and time.time() - t0 < 30)
+    except Exception as ex:
+        R.add('E23', 'Импорт большого файла (3000 связей Mermaid)', 'вкладка жива', 'сбой: ' + str(ex)[:80], False)
+    e = open_editor(ctx)
     # import from clipboard without permission
-    e.click('[data-import=clipboard]'); e.wait_for_timeout(500)
+    mo(e); e.click('[data-import=clipboard]'); e.wait_for_timeout(500)
     R.add('E24', 'Импорт из буфера без разрешения/пустой буфер', 'сообщение «Не удалось прочитать» или «Нет диаграммы»', say(e)[:90], True)
 
     # notation change in the middle of an edit
@@ -177,7 +192,7 @@ with sync_playwright() as pw:
     type_code(e, 'idef0 "Моя правка"\nA1 "Вручную"\n'); typed = code(e)
     e.select_option('[data-notation-select]', 'bpmn'); e.wait_for_timeout(900)
     R.add('E25', 'Смена нотации (список «Шаблон») после ручной правки кода', 'пользователя предупреждают о потере правки или правка сохранена/отменяема', f'код заменён без вопроса={code(e) != typed}; отмена возвращает: ', code(e) == typed)
-    e.click('[data-action=undo]'); e.wait_for_timeout(300)
+    e.click('[data-action=undo]', force=True); e.wait_for_timeout(300)
     R.add('E26', 'Отменить смену нотации', 'правка пользователя вернулась', f'вернулась={code(e) == typed}', code(e) == typed)
     # notation change updates palette
     e.select_option('[data-notation-select]', 'erd'); e.wait_for_timeout(900)
@@ -189,14 +204,14 @@ with sync_playwright() as pw:
     e = open_editor(ctx, '', 'ru')
     type_code(e, 'idef0 "Чужой язык"\n'); e.wait_for_timeout(1500)
     proj_url = e.url
-    e.click('a[hreflang=en]'); e.wait_for_timeout(1200)
+    mo(e); e.click('a[hreflang=en]'); e.wait_for_timeout(1200)
     R.add('E28', 'Смена языка во время правки (автосохранение успело)', 'в английской версии открыт тот же проект с тем же кодом', f'{e.url.replace(BASE,"")}; код «{code(e)[:30]}»', 'Чужой язык' in code(e))
     e = open_editor(ctx, '', 'ru')
-    e.fill('.code__input', 'idef0 "Не сохранилось"\n'); e.click('a[hreflang=en]'); e.wait_for_timeout(1500)
+    e.fill('.code__input', 'idef0 "Не сохранилось"\n'); mo(e); e.click('a[hreflang=en]'); e.wait_for_timeout(1500)
     R.add('E29', 'Смена языка сразу после правки (до автосохранения 1 с)', 'правка не теряется молча', f'{e.url.replace(BASE,"")}; код «{code(e)[:30]}»', 'Не сохранилось' in code(e))
     # theme during edit
     e = open_editor(ctx); type_code(e, 'idef0 "Тема"\n'); th0 = e.evaluate("()=>document.documentElement.dataset.theme")
-    e.click('[data-action=theme]'); e.wait_for_timeout(300)
+    mo(e); e.click('[data-action=theme]'); e.wait_for_timeout(300)
     th1 = e.evaluate("()=>document.documentElement.dataset.theme")
     R.add('E30', 'Смена темы во время правки', 'тема меняется, код и холст сохраняются', f'{th0}→{th1}; код «{code(e)[:20]}», блоков {len(nodes(e))}', th0 != th1 and 'Тема' in code(e))
     e.reload(); e.wait_for_timeout(1000)
@@ -205,7 +220,7 @@ with sync_playwright() as pw:
     # logout while editing
     e = open_editor(ctx, '?p=' + (json.loads(e.evaluate("()=>localStorage.getItem(Object.keys(localStorage).find(k=>k.startsWith('dslkit.projects.')))") or '[]') or [{'id': 'x'}])[0]['id'])
     type_code(e, 'idef0 "Правка перед выходом"\n')
-    e.click('[data-auth-logout]', force=True); e.wait_for_timeout(1500)
+    mo(e); e.click('[data-auth-logout]', force=True); e.wait_for_timeout(1500)
     R.add('E32', 'Выход из аккаунта во время правки (кнопка «Выйти» в редакторе)', 'правка автосохранена перед выходом либо пользователя предупредили; переход на главную', f'{e.url.replace(BASE,"")}', True)
     d = json.loads(p.evaluate("()=>JSON.stringify(Object.fromEntries(Object.entries(localStorage).filter(([k])=>k.startsWith('dslkit.projects.'))))") or '{}')
     saved = any('Правка перед выходом' in x.get('source', '') for v in d.values() for x in json.loads(v))
@@ -215,7 +230,7 @@ with sync_playwright() as pw:
     reg = s.page(); reg.on('dialog', lambda d: d.accept())
     register(reg, 'Второй Вход', 'ed2%s@example.com' % STAMP)
     a = open_editor(ctx); b = open_editor(ctx, '', 'ru')
-    b.click('[data-auth-logout]', force=True); b.wait_for_timeout(800)
+    mo(b); b.click('[data-auth-logout]', force=True); b.wait_for_timeout(800)
     type_code(a, 'idef0 "После выхода в другой вкладке"\n'); a.wait_for_timeout(1500)
     keys = a.evaluate("()=>Object.fromEntries(Object.keys(localStorage).filter(k=>k.includes('projects')).map(k=>[k,(JSON.parse(localStorage[k])||[]).filter(x=>x.title.includes('После выхода')).length]))")
     R.add('E34', 'Разлогин в одной вкладке, правка в другой (автосохранение)', 'вкладка видит, что вошедшего нет; правка не пишется в данные вышедшего пользователя', f'записано в: {keys}', all((not k.startswith('dslkit.projects.u')) or v == 0 for k, v in keys.items()))

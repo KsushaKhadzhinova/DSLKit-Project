@@ -30,7 +30,7 @@ import { request, post, R, st, isJson, alive, J, svgIssues, short, TEMPLATES, re
   await t('C16', 'body 5 MB text', 'a'.repeat(5 * 1024 * 1024), '413 or connection closed', (r) => r.status === 413 || r.status === 0);
   await t('C17', 'body 50 MB text', 'a'.repeat(50 * 1024 * 1024), '413 or connection closed', (r) => r.status === 413 || r.status === 0);
   R('C18', g, 'server still alive after huge bodies', 'GET /api/grammar', '200', st(await request({ path: '/api/grammar' })), await alive());
-  await t('C19', 'source of 50000 emoji (100000 UTF-16 units, 200000 bytes)', L('😀'.repeat(50000)), '413 or 422', (r) => [413, 422].includes(r.status));
+  await t('C19', 'source of 50000 emoji (100000 UTF-16 units, 200000 bytes)', L('😀'.repeat(50000)), '200/422 (100000 units = at the limit), never 413', (r) => [200, 422].includes(r.status));
   await t('C20', 'source of 30000 Cyrillic chars (60000 bytes)', L('я'.repeat(30000)), '422', (r) => r.status === 422);
   await t('C21', 'source of 100000 Cyrillic chars (valid length, 200000 bytes)', L('я'.repeat(100000)), 'not 413: length is exactly 100000 chars', (r) => r.status !== 413, J, '/api/render', 'The byte limit (100000+1024) is checked in bytes, not characters: a valid 100000-char Cyrillic source is refused');
   await t('C22', 'source of 50000 Cyrillic chars (100000 bytes)', L('я'.repeat(50000)), 'not 413', (r) => r.status !== 413);

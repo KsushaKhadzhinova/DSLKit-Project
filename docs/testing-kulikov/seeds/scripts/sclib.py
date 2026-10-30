@@ -94,7 +94,11 @@ class User:
         p.wait_for_timeout(900)
 
     def set_code_fill(self, dsl):
-        self.p.fill('.code__input', dsl)
+        if len(dsl) > 50000:  # a 100 KB paste: set the value and fire the input event like a paste does
+            self.p.evaluate("(v)=>{const t=document.querySelector('.code__input');t.value=v;t.dispatchEvent(new Event('input',{bubbles:true}))}", dsl)
+            self.p.wait_for_timeout(2500)
+        else:
+            self.p.fill('.code__input', dsl)
         self.p.wait_for_timeout(900)
 
     def code(self):
@@ -146,5 +150,24 @@ class User:
 def snapshot(user, path):
     data = {k: v for k, v in user.ls().items()}
     with open(path, 'w', encoding='utf-8') as f:
-        json.dump({'origin': BASE, 'user': user.email, 'localStorage': data}, f, ensure_ascii=False, indent=1)
+        json.dump({'origin': BASE, 'user': user.email, 'savedAt': int(time.time() * 1000), 'localStorage': data}, f, ensure_ascii=False, indent=1)
     return data
+
+
+def login(user):
+    p = user.p
+    p.goto(url('app/login.html', user.lang))
+    p.fill('#email', user.email); p.fill('#password', PW)
+    p.click('#auth-form [type=submit]')
+    p.wait_for_function("()=>location.pathname.endsWith('dashboard.html')", timeout=30000)
+
+
+def load_snapshot(user, path, user_index=None):
+    """Loads a scenario-N.json into the empty context the same way the README script does it in the console."""
+    data = json.load(open(path, encoding='utf-8'))
+    if user_index is not None:
+        data = data['users'][user_index]
+    user.p.goto(BASE + '/index.html')
+    user.p.evaluate("(d)=>{localStorage.clear();for(const [k,v] of Object.entries(d)) localStorage.setItem(k,v)}", data['localStorage'])
+    user.p.goto(url('app/dashboard.html', user.lang))
+    user.p.wait_for_timeout(600)

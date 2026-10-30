@@ -1,7 +1,7 @@
 // Builds docs/testing-kulikov/30-api-test-run.md from results.json written by run-all.mjs.
 import { readFileSync, writeFileSync } from 'node:fs';
 
-const results = JSON.parse(readFileSync(new URL('./results.json', import.meta.url), 'utf8'));
+const results = [...JSON.parse(readFileSync(new URL('./results.json', import.meta.url), 'utf8')), ...JSON.parse(readFileSync(new URL('./results-external.json', import.meta.url), 'utf8'))];
 const cell = (s) => String(s ?? '').replace(/\|/g, '\\|').replace(/\r?\n/g, ' ').replace(/`/g, "'");
 const groups = [...new Set(results.map((r) => r.group))];
 const pass = results.filter((r) => r.pass).length;

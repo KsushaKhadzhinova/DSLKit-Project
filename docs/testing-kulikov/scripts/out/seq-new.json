@@ -1,0 +1,163 @@
+[
+ [
+  "N01",
+  "Гость открывает dashboard.html (early.js)",
+  "переход на вход до отрисовки, script.js панели не грузится",
+  "/app/login.html; script.js запрошен для dashboard: True",
+  "Pass"
+ ],
+ [
+  "N02",
+  "Тема dark в хранилище: атрибут data-theme до загрузки страницы",
+  "dark с первого кадра",
+  "dark",
+  "Pass"
+ ],
+ [
+  "N03",
+  "Испорченное значение темы \"purple\"",
+  "light/dark по системной теме, без ошибок",
+  "light",
+  "Pass"
+ ],
+ [
+  "N03",
+  "Испорченное значение темы 123",
+  "light/dark по системной теме, без ошибок",
+  "light",
+  "Pass"
+ ],
+ [
+  "N03",
+  "Испорченное значение темы {bad",
+  "light/dark по системной теме, без ошибок",
+  "light",
+  "Pass"
+ ],
+ [
+  "N03",
+  "Испорченное значение темы null",
+  "light/dark по системной теме, без ошибок",
+  "light",
+  "Pass"
+ ],
+ [
+  "N04",
+  "Подделанная сессия (id не из списка аккаунтов)",
+  "на вход",
+  "/app/login.html",
+  "Pass"
+ ],
+ [
+  "N05",
+  "Верная сессия",
+  "dashboard открыт",
+  "/app/dashboard.html",
+  "Pass"
+ ],
+ [
+  "N06",
+  "Гость: /en/app/dashboard.html?q=x#y",
+  "на /en/app/login.html",
+  "/en/app/login.html",
+  "Pass"
+ ],
+ [
+  "N07",
+  "Гость: /app/dashboard.html/",
+  "404 или вход, но не защищённое содержимое",
+  "200 /app/dashboard.html/",
+  "Fail"
+ ],
+ [
+  "N07",
+  "Гость: /app/dashboard.html%20",
+  "404 или вход, но не защищённое содержимое",
+  "404 /app/dashboard.html%20",
+  "Pass"
+ ],
+ [
+  "N08",
+  "docs.html (ru, guest): все внутренние ссылки",
+  "нет 404",
+  "status=200, ссылок=10, битых=[]",
+  "Pass"
+ ],
+ [
+  "N08",
+  "docs.html (ru, user): все внутренние ссылки",
+  "нет 404",
+  "status=200, ссылок=10, битых=[]",
+  "Pass"
+ ],
+ [
+  "N08",
+  "docs.html (en, guest): все внутренние ссылки",
+  "нет 404",
+  "status=200, ссылок=10, битых=[]",
+  "Pass"
+ ],
+ [
+  "N08",
+  "docs.html (en, user): все внутренние ссылки",
+  "нет 404",
+  "status=200, ссылок=10, битых=[]",
+  "Pass"
+ ],
+ [
+  "N09",
+  "docs.html#несуществующий-якорь",
+  "страница открыта без ошибок",
+  "Документация — DSLKit",
+  "Pass"
+ ],
+ [
+  "N10",
+  "Меню ⋯ карточки: группы действий",
+  "действия разбиты на группы с подписями",
+  "[]",
+  "Fail"
+ ],
+ [
+  "N11",
+  "Меню ⋯: Esc закрывает",
+  "меню закрыто",
+  "открытых меню=0",
+  "Pass"
+ ],
+ [
+  "N12",
+  "Меню ⋯: клик вне меню закрывает",
+  "меню закрыто",
+  "открытых меню=0",
+  "Pass"
+ ],
+ [
+  "N13",
+  "Открыть меню ⋯ второй карточки при открытом первом",
+  "открыто только одно",
+  "открытых меню=1",
+  "Pass"
+ ],
+ [
+  "N14",
+  "Редактор: вкладки боковой панели",
+  "есть вкладка «Шаблоны»",
+  "['order.dsl']",
+  "Fail"
+ ],
+ [
+  "N15",
+  "Редактор: открыть вкладку «Шаблоны»",
+  "виден список шаблонов",
+  "ошибка Locator.click: Timeout 3000ms exceeded.\nCall log:\n  - waiting for locator(\"text=",
+  "Fail"
+ ],
+ [
+  "N18",
+  "Ошибки консоли и страницы за прогон",
+  "0",
+  "[\"console:Refused to apply style from 'http://localhost:5191/app/css/style.css' because it\", 'console:Failed to load resource: the server responded with a status of 404 (Not Found)', \"console:Refused to execute script from 'http://localhost:5191/app/js/early.js' because i\", 'console:Failed to load resource: the server responded with a status of 404 (Not Found)', 'console:Failed to load resource: the server responded with a status of 404 (Not Found)']",
+  "Fail"
+ ]
+]

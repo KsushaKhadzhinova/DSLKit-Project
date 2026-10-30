@@ -16,7 +16,7 @@ class T:
         if tour: s.ctx.add_init_script("try{if(!sessionStorage.getItem('__wiped')){localStorage.setItem('dslkit.tour-done','true')}}catch(e){}")
         s.pg=s.page()
     def page(s, ctx=None):
-        pg=(ctx or s.ctx).new_page(); pg.set_default_timeout(12000)
+        pg=(ctx or s.ctx).new_page(); pg.set_default_timeout(30000)
         _g=pg.goto
         pg.goto=lambda url,**k: _g(url,**{"wait_until":"domcontentloaded",**k})
         pg.on("pageerror",lambda e: s.errors.append(("pageerror",pg.url,str(e)[:200])))

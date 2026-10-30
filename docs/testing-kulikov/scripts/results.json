@@ -1015,7 +1015,7 @@
   "title": "Content-Length larger than the sent body (truncated request)",
   "request": "raw: CL=500, 13 bytes sent, then wait",
   "expect": "server stays alive for other requests",
-  "actual": "timeout after 4309 ms, status 0",
+  "actual": "timeout after 4076 ms, status 0",
   "pass": true,
   "note": ""
  },
@@ -1025,7 +1025,7 @@
   "title": "source length 0",
   "request": "POST /api/render {\"source\":\"\"} (13 bytes)",
   "expect": "400",
-  "actual": "400 7 ms {\"error\":{\"code\":\"source\",\"message\":\"The \\\"source\\\" text is required\"}…",
+  "actual": "400 70 ms {\"error\":{\"code\":\"source\",\"message\":\"The \\\"source\\\" text is required\"}…",
   "pass": true,
   "note": ""
  },
@@ -1035,7 +1035,7 @@
   "title": "source length 1 (\"a\")",
   "request": "POST /api/render {\"source\":\"a\"} (14 bytes)",
   "expect": "422",
-  "actual": "200 6 ms {\"notation\":\"idef0\",\"valid\":false,\"problems\":[{\"line\":1,\"severity\":\"wa…",
+  "actual": "200 4 ms {\"notation\":\"idef0\",\"valid\":false,\"problems\":[{\"line\":1,\"severity\":\"wa…",
   "pass": false,
   "note": ""
  },
@@ -1045,7 +1045,7 @@
   "title": "source length 1 (validate)",
   "request": "POST /api/validate {\"source\":\"a\"} (14 bytes)",
   "expect": "200/422, not 500",
-  "actual": "200 5 ms {\"notation\":\"idef0\",\"valid\":false,\"problems\":[{\"line\":1,\"severity\":\"wa…",
+  "actual": "200 4 ms {\"notation\":\"idef0\",\"valid\":false,\"problems\":[{\"line\":1,\"severity\":\"wa…",
   "pass": true,
   "note": ""
  },
@@ -1055,7 +1055,7 @@
   "title": "source 99999 chars (render)",
   "request": "POST /api/render {\"source\":\"diagram graph \\\"x\\\" (107218 bytes)",
   "expect": "not 413",
-  "actual": "200 22063 ms {\"notation\":\"graph\",\"valid\":false,\"problems\":[{\"line\":1,\"severity\":\"in…",
+  "actual": "200 22461 ms {\"notation\":\"graph\",\"valid\":false,\"problems\":[{\"line\":1,\"severity\":\"in…",
   "pass": true,
   "note": ""
  },
@@ -1065,7 +1065,7 @@
   "title": "source exactly 100000 chars (render)",
   "request": "POST /api/render {\"source\":\"diagram graph \\\"x\\\" (107219 bytes)",
   "expect": "accepted (not 413)",
-  "actual": "200 27525 ms {\"notation\":\"graph\",\"valid\":false,\"problems\":[{\"line\":1,\"severity\":\"in…",
+  "actual": "200 14905 ms {\"notation\":\"graph\",\"valid\":false,\"problems\":[{\"line\":1,\"severity\":\"in…",
   "pass": true,
   "note": ""
  },
@@ -1075,7 +1075,7 @@
   "title": "source 100001 chars (render)",
   "request": "POST /api/render {\"source\":\"diagram graph \\\"x\\\" (107220 bytes)",
   "expect": "413",
-  "actual": "413 17 ms {\"error\":{\"code\":\"too-large\",\"message\":\"The source is longer than 1000…",
+  "actual": "413 16 ms {\"error\":{\"code\":\"too-large\",\"message\":\"The source is longer than 1000…",
   "pass": true,
   "note": ""
  },
@@ -1085,7 +1085,7 @@
   "title": "source 100000 chars (validate)",
   "request": "POST /api/validate {\"source\":\"diagram graph \\\"x\\\" (107219 bytes)",
   "expect": "200",
-  "actual": "200 12049 ms {\"notation\":\"graph\",\"valid\":false,\"problems\":[{\"line\":1,\"severity\":\"in…",
+  "actual": "200 22721 ms {\"notation\":\"graph\",\"valid\":false,\"problems\":[{\"line\":1,\"severity\":\"in…",
   "pass": true,
   "note": ""
  },
@@ -1095,7 +1095,7 @@
   "title": "source 100001 chars (validate)",
   "request": "POST /api/validate {\"source\":\"diagram graph \\\"x\\\" (107220 bytes)",
   "expect": "413",
-  "actual": "413 21 ms {\"error\":{\"code\":\"too-large\",\"message\":\"The source is longer than 1000…",
+  "actual": "413 20 ms {\"error\":{\"code\":\"too-large\",\"message\":\"The source is longer than 1000…",
   "pass": true,
   "note": ""
  },
@@ -1105,7 +1105,7 @@
   "title": "source 100001 chars (parse)",
   "request": "POST /api/parse {\"source\":\"diagram graph \\\"x\\\" (107220 bytes)",
   "expect": "413",
-  "actual": "413 7 ms {\"error\":{\"code\":\"too-large\",\"message\":\"The source is longer than 1000…",
+  "actual": "413 9 ms {\"error\":{\"code\":\"too-large\",\"message\":\"The source is longer than 1000…",
   "pass": true,
   "note": ""
  },
@@ -1115,7 +1115,7 @@
   "title": "source 100001 chars (generate)",
   "request": "POST /api/generate {\"source\":\"diagram graph \\\"x\\\" (107220 bytes)",
   "expect": "413",
-  "actual": "413 6 ms {\"error\":{\"code\":\"too-large\",\"message\":\"The source is longer than 1000…",
+  "actual": "413 10 ms {\"error\":{\"code\":\"too-large\",\"message\":\"The source is longer than 1000…",
   "pass": true,
   "note": ""
  },
@@ -1125,7 +1125,7 @@
   "title": "text/plain 100000 chars",
   "request": "POST /api/render diagram graph \"x\" vertex v18 v (100000 bytes)",
   "expect": "accepted",
-  "actual": "200 11987 ms {\"notation\":\"graph\",\"valid\":false,\"problems\":[{\"line\":1,\"severity\":\"in…",
+  "actual": "200 45184 ms {\"notation\":\"graph\",\"valid\":false,\"problems\":[{\"line\":1,\"severity\":\"in…",
   "pass": true,
   "note": ""
  },
@@ -1135,7 +1135,7 @@
   "title": "text/plain 100001 chars",
   "request": "POST /api/render diagram graph \"x\" vertex v18 v (100001 bytes)",
   "expect": "413",
-  "actual": "413 6 ms {\"error\":{\"code\":\"too-large\",\"message\":\"The source is longer than 1000…",
+  "actual": "413 282 ms {\"error\":{\"code\":\"too-large\",\"message\":\"The source is longer than 1000…",
   "pass": true,
   "note": ""
  },
@@ -1145,7 +1145,7 @@
   "title": "text/plain 101024 chars (limit + slack)",
   "request": "POST /api/render aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa (101024 bytes)",
   "expect": "413",
-  "actual": "413 5 ms {\"error\":{\"code\":\"too-large\",\"message\":\"The source is longer than 1000…",
+  "actual": "413 14 ms {\"error\":{\"code\":\"too-large\",\"message\":\"The source is longer than 1000…",
   "pass": true,
   "note": ""
  },
@@ -1165,7 +1165,7 @@
   "title": "body 200 KB JSON",
   "request": "POST /api/render {\"source\":\"aaaaaaaaaaaaaaaaaaa (200013 bytes)",
   "expect": "413",
-  "actual": "413 70 ms {\"error\":{\"code\":\"too-large\",\"message\":\"The source is longer than 1000…",
+  "actual": "413 29 ms {\"error\":{\"code\":\"too-large\",\"message\":\"The source is longer than 1000…",
   "pass": true,
   "note": ""
  },
@@ -1175,7 +1175,7 @@
   "title": "body 5 MB text",
   "request": "POST /api/render aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa (5242880 bytes)",
   "expect": "413 or connection closed",
-  "actual": "413 29 ms {\"error\":{\"code\":\"too-large\",\"message\":\"The request is longer than 100…",
+  "actual": "413 46 ms {\"error\":{\"code\":\"too-large\",\"message\":\"The request is longer than 100…",
   "pass": true,
   "note": ""
  },
@@ -1185,7 +1185,7 @@
   "title": "body 50 MB text",
   "request": "POST /api/render aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa (52428800 bytes)",
   "expect": "413 or connection closed",
-  "actual": "413 252 ms {\"error\":{\"code\":\"too-large\",\"message\":\"The request is longer than 100…",
+  "actual": "413 400 ms {\"error\":{\"code\":\"too-large\",\"message\":\"The request is longer than 100…",
   "pass": true,
   "note": ""
  },
@@ -1204,9 +1204,9 @@
   "group": "C. Size boundaries",
   "title": "source of 50000 emoji (100000 UTF-16 units, 200000 bytes)",
   "request": "POST /api/render {\"source\":\"😀😀😀😀😀😀😀😀😀\ud83d (100013 bytes)",
-  "expect": "413 or 422",
-  "actual": "200 8 ms {\"notation\":\"idef0\",\"valid\":false,\"problems\":[{\"line\":1,\"severity\":\"wa…",
-  "pass": false,
+  "expect": "200/422 (100000 units = at the limit), never 413",
+  "actual": "200 11 ms {\"notation\":\"idef0\",\"valid\":false,\"problems\":[{\"line\":1,\"severity\":\"wa…",
+  "pass": true,
   "note": ""
  },
  {
@@ -1215,7 +1215,7 @@
   "title": "source of 30000 Cyrillic chars (60000 bytes)",
   "request": "POST /api/render {\"source\":\"яяяяяяяяяяяяяяяяяяя (30013 bytes)",
   "expect": "422",
-  "actual": "200 4 ms {\"notation\":\"idef0\",\"valid\":false,\"problems\":[{\"line\":1,\"severity\":\"wa…",
+  "actual": "200 5 ms {\"notation\":\"idef0\",\"valid\":false,\"problems\":[{\"line\":1,\"severity\":\"wa…",
   "pass": false,
   "note": ""
  },
@@ -1225,7 +1225,7 @@
   "title": "source of 100000 Cyrillic chars (valid length, 200000 bytes)",
   "request": "POST /api/render {\"source\":\"яяяяяяяяяяяяяяяяяяя (100013 bytes)",
   "expect": "not 413: length is exactly 100000 chars",
-  "actual": "200 6 ms {\"notation\":\"idef0\",\"valid\":false,\"problems\":[{\"line\":1,\"severity\":\"wa…",
+  "actual": "200 9 ms {\"notation\":\"idef0\",\"valid\":false,\"problems\":[{\"line\":1,\"severity\":\"wa…",
   "pass": true,
   "note": "The byte limit (100000+1024) is checked in bytes, not characters: a valid 100000-char Cyrillic source is refused"
  },
@@ -1245,7 +1245,7 @@
   "title": "source of 60000 Cyrillic chars (120000 bytes, 60000 chars < 100000)",
   "request": "POST /api/render {\"source\":\"яяяяяяяяяяяяяяяяяяя (60013 bytes)",
   "expect": "not 413 (60000 < 100000 chars)",
-  "actual": "200 5 ms {\"notation\":\"idef0\",\"valid\":false,\"problems\":[{\"line\":1,\"severity\":\"wa…",
+  "actual": "200 8 ms {\"notation\":\"idef0\",\"valid\":false,\"problems\":[{\"line\":1,\"severity\":\"wa…",
   "pass": true,
   "note": "Same defect as C21"
  },
@@ -1255,7 +1255,7 @@
   "title": "100000 chars written as \\u0000 escapes (600 KB JSON)",
   "request": "POST /api/render {\"source\":\"\\u0000\\u0000\\u0000\\ (600013 bytes)",
   "expect": "not 413 (source is 100000 chars)",
-  "actual": "200 11 ms {\"notation\":\"idef0\",\"valid\":false,\"problems\":[{\"line\":1,\"severity\":\"wa…",
+  "actual": "200 12 ms {\"notation\":\"idef0\",\"valid\":false,\"problems\":[{\"line\":1,\"severity\":\"wa…",
   "pass": true,
   "note": "JSON escapes count against the byte limit"
  },
@@ -1265,7 +1265,7 @@
   "title": "long single word 99900 chars",
   "request": "POST /api/render {\"source\":\"diagram graph \\\"x\\\" (99941 bytes)",
   "expect": "responds < 5 s",
-  "actual": "200 15 ms {\"notation\":\"graph\",\"valid\":true,\"problems\":[{\"line\":1,\"severity\":\"inf…",
+  "actual": "200 17 ms {\"notation\":\"graph\",\"valid\":true,\"problems\":[{\"line\":1,\"severity\":\"inf…",
   "pass": true,
   "note": ""
  },
@@ -1275,7 +1275,7 @@
   "title": "long title 99000 chars",
   "request": "POST /api/render {\"source\":\"diagram graph \\\"TTT (99041 bytes)",
   "expect": "responds < 5 s",
-  "actual": "200 9 ms {\"notation\":\"graph\",\"valid\":true,\"problems\":[{\"line\":1,\"severity\":\"inf…",
+  "actual": "200 11 ms {\"notation\":\"graph\",\"valid\":true,\"problems\":[{\"line\":1,\"severity\":\"inf…",
   "pass": true,
   "note": ""
  },
@@ -1285,8 +1285,8 @@
   "title": "chain of 300 nodes",
   "request": "POST /api/render (8689 chars)",
   "expect": "200, valid SVG, < 3 s",
-  "actual": "200 776 ms {\"notation\":\"graph\",\"valid\":true,\"problems\":[{\"line\":1,\"seve…",
-  "pass": true,
+  "actual": "200 3066 ms {\"notation\":\"graph\",\"valid\":true,\"problems\":[{\"line\":1,\"seve…",
+  "pass": false,
   "note": ""
  },
  {
@@ -1295,8 +1295,8 @@
   "title": "chain of 600 nodes",
   "request": "POST /api/render (17689 chars)",
   "expect": "answer < 10 s, not 500",
-  "actual": "200 7260 ms {\"notation\":\"graph\",\"valid\":true,\"problems\":[{\"line\":1,\"seve…",
-  "pass": true,
+  "actual": "200 10831 ms {\"notation\":\"graph\",\"valid\":true,\"problems\":[{\"line\":1,\"seve…",
+  "pass": false,
   "note": ""
  },
  {
@@ -1305,7 +1305,7 @@
   "title": "cycle of 300 nodes",
   "request": "POST /api/render (8705 chars)",
   "expect": "200 < 3 s",
-  "actual": "200 1113 ms {\"notation\":\"graph\",\"valid\":true,\"problems\":[{\"line\":1,\"seve…",
+  "actual": "200 895 ms {\"notation\":\"graph\",\"valid\":true,\"problems\":[{\"line\":1,\"seve…",
   "pass": true,
   "note": ""
  },
@@ -1315,7 +1315,7 @@
   "title": "300 self-loops",
   "request": "POST /api/render (8704 chars)",
   "expect": "200 < 3 s",
-  "actual": "200 766 ms {\"notation\":\"graph\",\"valid\":true,\"problems\":[{\"line\":1,\"seve…",
+  "actual": "200 1508 ms {\"notation\":\"graph\",\"valid\":true,\"problems\":[{\"line\":1,\"seve…",
   "pass": true,
   "note": ""
  },
@@ -1325,7 +1325,7 @@
   "title": "complete graph of 40 nodes (1560 edges)",
   "request": "POST /api/render (24645 chars)",
   "expect": "200 < 5 s",
-  "actual": "200 2267 ms {\"notation\":\"graph\",\"valid\":true,\"problems\":[{\"line\":1,\"seve…",
+  "actual": "200 4389 ms {\"notation\":\"graph\",\"valid\":true,\"problems\":[{\"line\":1,\"seve…",
   "pass": true,
   "note": ""
  },
@@ -1335,8 +1335,8 @@
   "title": "complete graph of 60 nodes (3540 edges)",
   "request": "POST /api/render (56145 chars)",
   "expect": "answer < 15 s, not 500",
-  "actual": "200 11319 ms {\"notation\":\"graph\",\"valid\":true,\"problems\":[{\"line\":1,\"seve…",
-  "pass": true,
+  "actual": "200 22011 ms {\"notation\":\"graph\",\"valid\":true,\"problems\":[{\"line\":1,\"seve…",
+  "pass": false,
   "note": ""
  },
  {
@@ -1345,7 +1345,7 @@
   "title": "star of 500 nodes",
   "request": "POST /api/render (14325 chars)",
   "expect": "answer < 10 s, not 500",
-  "actual": "200 2593 ms {\"notation\":\"graph\",\"valid\":true,\"problems\":[{\"line\":1,\"seve…",
+  "actual": "200 2623 ms {\"notation\":\"graph\",\"valid\":true,\"problems\":[{\"line\":1,\"seve…",
   "pass": true,
   "note": ""
  },
@@ -1355,7 +1355,7 @@
   "title": "DAG chain 400 tasks",
   "request": "POST /api/render (18757 chars)",
   "expect": "200 < 5 s",
-  "actual": "200 590 ms {\"notation\":\"dag\",\"valid\":true,\"problems\":[{\"line\":1,\"severi…",
+  "actual": "200 757 ms {\"notation\":\"dag\",\"valid\":true,\"problems\":[{\"line\":1,\"severi…",
   "pass": true,
   "note": ""
  },
@@ -1365,7 +1365,7 @@
   "title": "DAG with a cycle of 400 tasks",
   "request": "POST /api/render (18775 chars)",
   "expect": "200 valid=false (cycle reported) < 5 s",
-  "actual": "200 217 ms {\"notation\":\"dag\",\"valid\":false,\"problems\":[{\"line\":402,\"sev…",
+  "actual": "200 609 ms {\"notation\":\"dag\",\"valid\":false,\"problems\":[{\"line\":402,\"sev…",
   "pass": true,
   "note": ""
  },
@@ -1375,7 +1375,7 @@
   "title": "DAG cycle, validate",
   "request": "POST /api/validate (2175 chars)",
   "expect": "valid=false with a cycle problem",
-  "actual": "200 5 ms {\"notation\":\"dag\",\"valid\":false,\"problems\":[{\"line\":52,\"seve…",
+  "actual": "200 12 ms {\"notation\":\"dag\",\"valid\":false,\"problems\":[{\"line\":52,\"seve…",
   "pass": true,
   "note": ""
  },
@@ -1385,7 +1385,7 @@
   "title": "validate of a chain of 800 vertices",
   "request": "POST /api/validate (23689 chars)",
   "expect": "200 < 5 s",
-  "actual": "200 28002 ms {\"notation\":\"graph\",\"valid\":true,\"problems\":[{\"line\":1,\"seve…",
+  "actual": "200 15483 ms {\"notation\":\"graph\",\"valid\":true,\"problems\":[{\"line\":1,\"seve…",
   "pass": false,
   "note": ""
  },
@@ -1395,7 +1395,7 @@
   "title": "parse of a chain of 800 vertices",
   "request": "POST /api/parse (23689 chars)",
   "expect": "200 < 5 s",
-  "actual": "200 26260 ms {\"notation\":\"graph\",\"valid\":true,\"problems\":[{\"line\":1,\"seve…",
+  "actual": "200 18202 ms {\"notation\":\"graph\",\"valid\":true,\"problems\":[{\"line\":1,\"seve…",
   "pass": false,
   "note": ""
  },
@@ -1405,8 +1405,8 @@
   "title": "validate of a chain of 400 vertices",
   "request": "POST /api/validate (11689 chars)",
   "expect": "200 < 2 s",
-  "actual": "200 3208 ms {\"notation\":\"graph\",\"valid\":true,\"problems\":[{\"line\":1,\"seve…",
-  "pass": false,
+  "actual": "200 1896 ms {\"notation\":\"graph\",\"valid\":true,\"problems\":[{\"line\":1,\"seve…",
+  "pass": true,
   "note": ""
  },
  {
@@ -1415,8 +1415,8 @@
   "title": "validate of a DAG of 800 tasks (for comparison)",
   "request": "POST /api/validate (37957 chars)",
   "expect": "200 < 2 s",
-  "actual": "200 845 ms {\"notation\":\"dag\",\"valid\":true,\"problems\":[{\"line\":1,\"severi…",
-  "pass": true,
+  "actual": "200 5157 ms {\"notation\":\"dag\",\"valid\":true,\"problems\":[{\"line\":1,\"severi…",
+  "pass": false,
   "note": ""
  },
  {
@@ -1425,7 +1425,7 @@
   "title": "generate graphviz for 400 nodes",
   "request": "POST /api/generate",
   "expect": "200 < 5 s",
-  "actual": "200 3394 ms",
+  "actual": "200 4894 ms",
   "pass": true,
   "note": ""
  },
@@ -1435,7 +1435,7 @@
   "title": "generate mermaid for 400 nodes",
   "request": "POST /api/generate",
   "expect": "200 < 5 s",
-  "actual": "200 4069 ms",
+  "actual": "200 3153 ms",
   "pass": true,
   "note": ""
  },
@@ -1445,7 +1445,7 @@
   "title": "many quotes",
   "request": "POST /api/render (50025 chars)",
   "expect": "answer < 5 s, no 500/hang",
-  "actual": "200 9 ms {\"notation\":\"graph\",\"valid\":false,\"problems\":[{\"line\":2,\"sev…",
+  "actual": "200 13 ms {\"notation\":\"graph\",\"valid\":false,\"problems\":[{\"line\":2,\"sev…",
   "pass": true,
   "note": ""
  },
@@ -1455,7 +1455,7 @@
   "title": "many backslashes",
   "request": "POST /api/render (50025 chars)",
   "expect": "answer < 5 s, no 500/hang",
-  "actual": "200 20 ms {\"notation\":\"graph\",\"valid\":true,\"problems\":[{\"line\":1,\"seve…",
+  "actual": "200 99 ms {\"notation\":\"graph\",\"valid\":true,\"problems\":[{\"line\":1,\"seve…",
   "pass": true,
   "note": ""
  },
@@ -1475,7 +1475,7 @@
   "title": "long unterminated string",
   "request": "POST /api/render (90028 chars)",
   "expect": "answer < 5 s, no 500/hang",
-  "actual": "200 22 ms {\"notation\":\"graph\",\"valid\":false,\"problems\":[{\"line\":2,\"sev…",
+  "actual": "200 7 ms {\"notation\":\"graph\",\"valid\":false,\"problems\":[{\"line\":2,\"sev…",
   "pass": true,
   "note": ""
  },
@@ -1485,7 +1485,7 @@
   "title": "long word of dots/dashes",
   "request": "POST /api/render (80025 chars)",
   "expect": "answer < 5 s, no 500/hang",
-  "actual": "200 8 ms {\"notation\":\"graph\",\"valid\":false,\"problems\":[{\"line\":2,\"sev…",
+  "actual": "200 9 ms {\"notation\":\"graph\",\"valid\":false,\"problems\":[{\"line\":2,\"sev…",
   "pass": true,
   "note": ""
  },
@@ -1495,7 +1495,7 @@
   "title": "weight with 50000 digits",
   "request": "POST /api/render (50055 chars)",
   "expect": "answer < 5 s, no 500/hang",
-  "actual": "200 6 ms {\"notation\":\"graph\",\"valid\":true,\"problems\":[{\"line\":1,\"seve…",
+  "actual": "200 7 ms {\"notation\":\"graph\",\"valid\":true,\"problems\":[{\"line\":1,\"seve…",
   "pass": true,
   "note": ""
  },
@@ -1505,7 +1505,7 @@
   "title": "weights 1e999 / NaN / -0",
   "request": "POST /api/render (117 chars)",
   "expect": "answer < 5 s, no 500/hang",
-  "actual": "200 5 ms {\"notation\":\"graph\",\"valid\":false,\"problems\":[{\"line\":1,\"sev…",
+  "actual": "200 6 ms {\"notation\":\"graph\",\"valid\":false,\"problems\":[{\"line\":1,\"sev…",
   "pass": true,
   "note": ""
  },
@@ -1515,7 +1515,7 @@
   "title": "20000 empty lines then header",
   "request": "POST /api/render (20026 chars)",
   "expect": "answer < 5 s, no 500/hang",
-  "actual": "200 12 ms {\"notation\":\"graph\",\"valid\":true,\"problems\":[{\"line\":1,\"seve…",
+  "actual": "200 9 ms {\"notation\":\"graph\",\"valid\":true,\"problems\":[{\"line\":1,\"seve…",
   "pass": true,
   "note": ""
  },
@@ -1525,7 +1525,7 @@
   "title": "19000 comment lines",
   "request": "POST /api/render (95018 chars)",
   "expect": "answer < 5 s, no 500/hang",
-  "actual": "200 10 ms {\"notation\":\"graph\",\"valid\":true,\"problems\":[],\"svg\":…http:/…",
+  "actual": "200 18 ms {\"notation\":\"graph\",\"valid\":true,\"problems\":[],\"svg\":…http:/…",
   "pass": true,
   "note": ""
  },
@@ -1535,7 +1535,7 @@
   "title": "5000 unclosed braces (uml class)",
   "request": "POST /api/render (50022 chars)",
   "expect": "answer < 5 s, no 500/hang",
-  "actual": "200 39 ms {\"notation\":\"uml-class\",\"valid\":false,\"problems\":[{\"line\":2,…",
+  "actual": "200 185 ms {\"notation\":\"uml-class\",\"valid\":false,\"problems\":[{\"line\":2,…",
   "pass": true,
   "note": ""
  },
@@ -1545,7 +1545,7 @@
   "title": "id of 60000 letters + \"!\"",
   "request": "POST /api/render (60026 chars)",
   "expect": "answer < 5 s, no 500/hang",
-  "actual": "200 7 ms {\"notation\":\"graph\",\"valid\":false,\"problems\":[{\"line\":2,\"sev…",
+  "actual": "200 10 ms {\"notation\":\"graph\",\"valid\":false,\"problems\":[{\"line\":2,\"sev…",
   "pass": true,
   "note": ""
  },
@@ -1555,7 +1555,7 @@
   "title": "idef0 with 500 boxes",
   "request": "POST /api/render (23077 chars)",
   "expect": "answer < 5 s",
-  "actual": "200 70 ms {\"notation\":\"idef0\",\"valid\":false,\"problems\":[{\"line\":2,\"sev…",
+  "actual": "200 218 ms {\"notation\":\"idef0\",\"valid\":false,\"problems\":[{\"line\":2,\"sev…",
   "pass": true,
   "note": ""
  },
@@ -1565,7 +1565,7 @@
   "title": "erd with 300 entities and relations",
   "request": "POST /api/render (17656 chars)",
   "expect": "answer < 5 s",
-  "actual": "200 850 ms {\"notation\":\"erd\",\"valid\":true,\"problems\":[],\"svg\":…http://w…",
+  "actual": "200 875 ms {\"notation\":\"erd\",\"valid\":true,\"problems\":[],\"svg\":…http://w…",
   "pass": true,
   "note": ""
  },
@@ -1575,7 +1575,7 @@
   "title": "uml sequence with 2000 messages",
   "request": "POST /api/render (40053 chars)",
   "expect": "answer < 5 s",
-  "actual": "200 22 ms {\"notation\":\"uml-sequence\",\"valid\":false,\"problems\":[{\"line\"…",
+  "actual": "200 183 ms {\"notation\":\"uml-sequence\",\"valid\":false,\"problems\":[{\"line\"…",
   "pass": true,
   "note": ""
  },
@@ -1585,7 +1585,7 @@
   "title": "mindmap depth 2000",
   "request": "POST /api/render (72696 chars)",
   "expect": "answer < 5 s, no stack overflow",
-  "actual": "200 12209 ms {\"notation\":\"mindmap\",\"valid\":true,\"problems\":[],\"svg\":…http…",
+  "actual": "200 15086 ms {\"notation\":\"mindmap\",\"valid\":true,\"problems\":[],\"svg\":…http…",
   "pass": false,
   "note": ""
  },
@@ -1595,7 +1595,7 @@
   "title": "orgchart depth 3000 (recursion?)",
   "request": "POST /api/render (104672 chars)",
   "expect": "answer < 5 s, no 500",
-  "actual": "413 7 ms {\"error\":{\"code\":\"too-large\",\"message\":\"The source is longer…",
+  "actual": "413 35 ms {\"error\":{\"code\":\"too-large\",\"message\":\"The source is longer…",
   "pass": true,
   "note": ""
  },
@@ -1605,7 +1605,7 @@
   "title": "decision tree depth 3000",
   "request": "POST /api/render (137665 chars)",
   "expect": "answer < 5 s, no 500",
-  "actual": "413 8 ms {\"error\":{\"code\":\"too-large\",\"message\":\"The source is longer…",
+  "actual": "413 5 ms {\"error\":{\"code\":\"too-large\",\"message\":\"The source is longer…",
   "pass": true,
   "note": ""
  },
@@ -1615,7 +1615,7 @@
   "title": "latency of a normal render, 20 sequential requests",
   "request": "POST /api/render gost template x20",
   "expect": "median < 100 ms, max < 500 ms",
-  "actual": "median 7.3 ms, max 22.5 ms",
+  "actual": "median 7.2 ms, max 15.4 ms",
   "pass": true,
   "note": ""
  },
@@ -1635,7 +1635,7 @@
   "title": "render template idef0",
   "request": "POST /api/render (397 chars)",
   "expect": "200, valid=true, valid SVG without script/on*/javascript:, < 500 ms",
-  "actual": "200 valid=true 11 ms issues=none",
+  "actual": "200 valid=true 6 ms issues=none",
   "pass": true,
   "note": ""
  },
@@ -1705,7 +1705,7 @@
   "title": "render template idef1",
   "request": "POST /api/render (169 chars)",
   "expect": "200, valid=true, valid SVG without script/on*/javascript:, < 500 ms",
-  "actual": "200 valid=true 5 ms issues=none",
+  "actual": "200 valid=true 6 ms issues=none",
   "pass": true,
   "note": ""
  },
@@ -1775,7 +1775,7 @@
   "title": "render template idef1x",
   "request": "POST /api/render (513 chars)",
   "expect": "200, valid=true, valid SVG without script/on*/javascript:, < 500 ms",
-  "actual": "200 valid=true 9 ms issues=none",
+  "actual": "200 valid=true 11 ms issues=none",
   "pass": true,
   "note": ""
  },
@@ -1845,7 +1845,7 @@
   "title": "render template idef3",
   "request": "POST /api/render (300 chars)",
   "expect": "200, valid=true, valid SVG without script/on*/javascript:, < 500 ms",
-  "actual": "200 valid=true 8 ms issues=none",
+  "actual": "200 valid=true 15 ms issues=none",
   "pass": true,
   "note": ""
  },
@@ -1915,7 +1915,7 @@
   "title": "render template idef4",
   "request": "POST /api/render (181 chars)",
   "expect": "200, valid=true, valid SVG without script/on*/javascript:, < 500 ms",
-  "actual": "200 valid=true 10 ms issues=none",
+  "actual": "200 valid=true 12 ms issues=none",
   "pass": true,
   "note": ""
  },
@@ -2055,7 +2055,7 @@
   "title": "render template dfd",
   "request": "POST /api/render (315 chars)",
   "expect": "200, valid=true, valid SVG without script/on*/javascript:, < 500 ms",
-  "actual": "200 valid=true 8 ms issues=none",
+  "actual": "200 valid=true 7 ms issues=none",
   "pass": true,
   "note": ""
  },
@@ -2125,7 +2125,7 @@
   "title": "render template erd",
   "request": "POST /api/render (285 chars)",
   "expect": "200, valid=true, valid SVG without script/on*/javascript:, < 500 ms",
-  "actual": "200 valid=true 5 ms issues=none",
+  "actual": "200 valid=true 7 ms issues=none",
   "pass": true,
   "note": ""
  },
@@ -2195,7 +2195,7 @@
   "title": "render template bpmn",
   "request": "POST /api/render (281 chars)",
   "expect": "200, valid=true, valid SVG without script/on*/javascript:, < 500 ms",
-  "actual": "200 valid=true 7 ms issues=none",
+  "actual": "200 valid=true 10 ms issues=none",
   "pass": true,
   "note": ""
  },
@@ -2265,7 +2265,7 @@
   "title": "render template petri",
   "request": "POST /api/render (220 chars)",
   "expect": "200, valid=true, valid SVG without script/on*/javascript:, < 500 ms",
-  "actual": "200 valid=true 8 ms issues=none",
+  "actual": "200 valid=true 12 ms issues=none",
   "pass": true,
   "note": ""
  },
@@ -2335,7 +2335,7 @@
   "title": "render template gost",
   "request": "POST /api/render (281 chars)",
   "expect": "200, valid=true, valid SVG without script/on*/javascript:, < 500 ms",
-  "actual": "200 valid=true 6 ms issues=none",
+  "actual": "200 valid=true 11 ms issues=none",
   "pass": true,
   "note": ""
  },
@@ -2405,7 +2405,7 @@
   "title": "render template graph",
   "request": "POST /api/render (190 chars)",
   "expect": "200, valid=true, valid SVG without script/on*/javascript:, < 500 ms",
-  "actual": "200 valid=true 6 ms issues=none",
+  "actual": "200 valid=true 8 ms issues=none",
   "pass": true,
   "note": ""
  },
@@ -2465,7 +2465,7 @@
   "title": "render template dag",
   "request": "POST /api/render (296 chars)",
   "expect": "200, valid=true, valid SVG without script/on*/javascript:, < 500 ms",
-  "actual": "200 valid=true 9 ms issues=none",
+  "actual": "200 valid=true 8 ms issues=none",
   "pass": true,
   "note": ""
  },
@@ -2535,7 +2535,7 @@
   "title": "render template uml-class",
   "request": "POST /api/render (397 chars)",
   "expect": "200, valid=true, valid SVG without script/on*/javascript:, < 500 ms",
-  "actual": "200 valid=true 6 ms issues=none",
+  "actual": "200 valid=true 8 ms issues=none",
   "pass": true,
   "note": ""
  },
@@ -2605,7 +2605,7 @@
   "title": "render template uml-object",
   "request": "POST /api/render (164 chars)",
   "expect": "200, valid=true, valid SVG without script/on*/javascript:, < 500 ms",
-  "actual": "200 valid=true 8 ms issues=none",
+  "actual": "200 valid=true 5 ms issues=none",
   "pass": true,
   "note": ""
  },
@@ -2675,7 +2675,7 @@
   "title": "render template uml-component",
   "request": "POST /api/render (232 chars)",
   "expect": "200, valid=true, valid SVG without script/on*/javascript:, < 500 ms",
-  "actual": "200 valid=true 10 ms issues=none",
+  "actual": "200 valid=true 9 ms issues=none",
   "pass": true,
   "note": ""
  },
@@ -2745,7 +2745,7 @@
   "title": "render template uml-composite",
   "request": "POST /api/render (178 chars)",
   "expect": "200, valid=true, valid SVG without script/on*/javascript:, < 500 ms",
-  "actual": "200 valid=true 6 ms issues=none",
+  "actual": "200 valid=true 7 ms issues=none",
   "pass": true,
   "note": ""
  },
@@ -2815,7 +2815,7 @@
   "title": "render template uml-deployment",
   "request": "POST /api/render (289 chars)",
   "expect": "200, valid=true, valid SVG without script/on*/javascript:, < 500 ms",
-  "actual": "200 valid=true 6 ms issues=none",
+  "actual": "200 valid=true 11 ms issues=none",
   "pass": true,
   "note": ""
  },
@@ -2885,7 +2885,7 @@
   "title": "render template uml-package",
   "request": "POST /api/render (205 chars)",
   "expect": "200, valid=true, valid SVG without script/on*/javascript:, < 500 ms",
-  "actual": "200 valid=true 8 ms issues=none",
+  "actual": "200 valid=true 9 ms issues=none",
   "pass": true,
   "note": ""
  },
@@ -2955,7 +2955,7 @@
   "title": "render template uml-profile",
   "request": "POST /api/render (161 chars)",
   "expect": "200, valid=true, valid SVG without script/on*/javascript:, < 500 ms",
-  "actual": "200 valid=true 26 ms issues=none",
+  "actual": "200 valid=true 9 ms issues=none",
   "pass": true,
   "note": ""
  },
@@ -3025,7 +3025,7 @@
   "title": "render template uml-usecase",
   "request": "POST /api/render (276 chars)",
   "expect": "200, valid=true, valid SVG without script/on*/javascript:, < 500 ms",
-  "actual": "200 valid=true 6 ms issues=none",
+  "actual": "200 valid=true 9 ms issues=none",
   "pass": true,
   "note": ""
  },
@@ -3095,7 +3095,7 @@
   "title": "render template uml-activity",
   "request": "POST /api/render (276 chars)",
   "expect": "200, valid=true, valid SVG without script/on*/javascript:, < 500 ms",
-  "actual": "200 valid=true 6 ms issues=none",
+  "actual": "200 valid=true 16 ms issues=none",
   "pass": true,
   "note": ""
  },
@@ -3165,7 +3165,7 @@
   "title": "render template uml-state",
   "request": "POST /api/render (270 chars)",
   "expect": "200, valid=true, valid SVG without script/on*/javascript:, < 500 ms",
-  "actual": "200 valid=true 6 ms issues=none",
+  "actual": "200 valid=true 10 ms issues=none",
   "pass": true,
   "note": ""
  },
@@ -3235,7 +3235,7 @@
   "title": "render template uml-sequence",
   "request": "POST /api/render (251 chars)",
   "expect": "200, valid=true, valid SVG without script/on*/javascript:, < 500 ms",
-  "actual": "200 valid=true 5 ms issues=none",
+  "actual": "200 valid=true 10 ms issues=none",
   "pass": true,
   "note": ""
  },
@@ -3295,7 +3295,7 @@
   "title": "render template uml-communication",
   "request": "POST /api/render (207 chars)",
   "expect": "200, valid=true, valid SVG without script/on*/javascript:, < 500 ms",
-  "actual": "200 valid=true 6 ms issues=none",
+  "actual": "200 valid=true 7 ms issues=none",
   "pass": true,
   "note": ""
  },
@@ -3365,7 +3365,7 @@
   "title": "render template uml-timing",
   "request": "POST /api/render (248 chars)",
   "expect": "200, valid=true, valid SVG without script/on*/javascript:, < 500 ms",
-  "actual": "200 valid=true 8 ms issues=none",
+  "actual": "200 valid=true 12 ms issues=none",
   "pass": true,
   "note": ""
  },
@@ -3415,7 +3415,7 @@
   "title": "render template uml-overview",
   "request": "POST /api/render (260 chars)",
   "expect": "200, valid=true, valid SVG without script/on*/javascript:, < 500 ms",
-  "actual": "200 valid=true 8 ms issues=none",
+  "actual": "200 valid=true 24 ms issues=none",
   "pass": true,
   "note": ""
  },
@@ -3485,7 +3485,7 @@
   "title": "render template mindmap",
   "request": "POST /api/render (353 chars)",
   "expect": "200, valid=true, valid SVG without script/on*/javascript:, < 500 ms",
-  "actual": "200 valid=true 16 ms issues=none",
+  "actual": "200 valid=true 12 ms issues=none",
   "pass": true,
   "note": ""
  },
@@ -3625,7 +3625,7 @@
   "title": "render template c4",
   "request": "POST /api/render (305 chars)",
   "expect": "200, valid=true, valid SVG without script/on*/javascript:, < 500 ms",
-  "actual": "200 valid=true 8 ms issues=none",
+  "actual": "200 valid=true 9 ms issues=none",
   "pass": true,
   "note": ""
  },
@@ -3695,7 +3695,7 @@
   "title": "render template network",
   "request": "POST /api/render (262 chars)",
   "expect": "200, valid=true, valid SVG without script/on*/javascript:, < 500 ms",
-  "actual": "200 valid=true 7 ms issues=none",
+  "actual": "200 valid=true 10 ms issues=none",
   "pass": true,
   "note": ""
  },
@@ -3765,7 +3765,7 @@
   "title": "render template decision",
   "request": "POST /api/render (267 chars)",
   "expect": "200, valid=true, valid SVG without script/on*/javascript:, < 500 ms",
-  "actual": "200 valid=true 7 ms issues=none",
+  "actual": "200 valid=true 5 ms issues=none",
   "pass": true,
   "note": ""
  },
@@ -3835,7 +3835,7 @@
   "title": "render template epc",
   "request": "POST /api/render (362 chars)",
   "expect": "200, valid=true, valid SVG without script/on*/javascript:, < 500 ms",
-  "actual": "200 valid=true 27 ms issues=none",
+  "actual": "200 valid=true 8 ms issues=none",
   "pass": true,
   "note": ""
  },
@@ -4835,7 +4835,7 @@
   "title": "50 simultaneous renders of different notations",
   "request": "50 x POST /api/render in parallel",
   "expect": "all 200, total < 5 s",
-  "actual": "50/50 x 200, total 112 ms, max 103 ms",
+  "actual": "50/50 x 200, total 1195 ms, max 1177 ms",
   "pass": true,
   "note": ""
  },
@@ -4865,7 +4865,7 @@
   "title": "50 simultaneous renders of a 150-node graph",
   "request": "50 x heavy POST",
   "expect": "all 200, total < 15 s",
-  "actual": "50/50 x 200, total 51321 ms",
+  "actual": "40/50 x 200, total 60228 ms",
   "pass": false,
   "note": ""
  },
@@ -4875,7 +4875,7 @@
   "title": "a light request while 5 heavy renders run (event-loop blocking)",
   "request": "GET /api/grammar during 5 x 400-node renders",
   "expect": "answers < 1 s",
-  "actual": "probe 11206 ms, heavy: 4370/1972/9020/6789/11247 ms",
+  "actual": "probe 20037 ms, heavy: 16156/19607/23550/26562/28871 ms",
   "pass": false,
   "note": "Rendering is synchronous on the single Node thread, so heavy requests delay all clients"
  },
@@ -4885,7 +4885,7 @@
   "title": "slow client: header sent, then 1 body byte per second for 15 s",
   "request": "raw slow POST",
   "expect": "server ends the connection by itself within ~15 s (body timeout)",
-  "actual": "closed after 15465 ms (by the client, server never gave up), response: none",
+  "actual": "closed after 16687 ms (by the client, server never gave up), response: none",
   "pass": false,
   "note": "Node defaults: requestTimeout 300 s; a slow client can hold a socket for 5 minutes"
  },
@@ -4895,7 +4895,7 @@
   "title": "request headers never finished",
   "request": "raw: partial header, 8 s wait",
   "expect": "server closes (headersTimeout) or 408 within 8 s",
-  "actual": "timeout after 8080 ms, status 0",
+  "actual": "timeout after 8208 ms, status 0",
   "pass": false,
   "note": "Node default headersTimeout is 60 s"
  },
@@ -4905,7 +4905,7 @@
   "title": "100 idle open connections do not block new requests",
   "request": "100 idle sockets + GET",
   "expect": "200",
-  "actual": "100 open, probe 200 10 ms",
+  "actual": "100 open, probe 200 76 ms",
   "pass": true,
   "note": ""
  },
@@ -5365,7 +5365,7 @@
   "title": "traversal: NTFS alternate stream of a script",
   "request": "GET /js/script.js::$DATA",
   "expect": "no content from outside site/; 400/403/404",
-  "actual": "200 a3e import { initAccordion } from './components/accordion.js…",
+  "actual": "200 b54 import { initAccordion } from './components/accordion.js…",
   "pass": true,
   "note": ""
  },
@@ -5915,7 +5915,7 @@
   "title": "/api/../index.html is answered (not left hanging)",
   "request": "GET /api/../index.html (raw)",
   "expect": "any answer within 4 s (200/404)",
-  "actual": "no answer in 5006 ms (timeout)",
+  "actual": "no answer in 5168 ms (timeout)",
   "pass": false,
   "note": "server.js calls handleApi() and returns without checking its false result; the request is never answered"
  },
@@ -5925,7 +5925,7 @@
   "title": "/api/%2e%2e/index.html is answered",
   "request": "GET /api/%2e%2e/index.html (raw)",
   "expect": "any answer within 4 s",
-  "actual": "no answer in 5021 ms",
+  "actual": "no answer in 5138 ms",
   "pass": false,
   "note": "same cause as I63"
  },

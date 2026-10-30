@@ -1,5 +1,6 @@
-== ru user index.html: 45 elements
-== ru user app/login.html: 219 elements
+== ru user app/welcome.html: 26 elements
+== ru user app/settings.html: 33 elements
+== ru user app/docs.html: 43 elements
 node:events:505
     throw er; // Unhandled 'error' event
     ^

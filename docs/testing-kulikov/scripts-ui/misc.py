@@ -126,7 +126,8 @@ with sync_playwright() as p:
         pg.screenshot(path=SC + "TUR-01.png")
         pg.keyboard.press("Escape"); pg.wait_for_timeout(500)
         vis2 = pg.evaluate("!![...document.querySelectorAll('.tour,[data-tour]')].find(e=>e.offsetParent&&!e.hidden)")
-        return f"тур показан: {vis}; после Escape виден: {vis2}; флаг tour-done: {pg.evaluate('localStorage.getItem(\"dslkit.tour-done\")')}"
+        flag = pg.evaluate("localStorage.getItem('dslkit.tour-done')")
+        return f"тур показан: {vis}; после Escape виден: {vis2}; флаг tour-done: {flag}"
     C("TUR-01", "Первый запуск редактора: тур показывается и закрывается Escape", tr1, shot=True)
 
     def nf1():

@@ -38,8 +38,15 @@ with sync_playwright() as pw:
         n = p.evaluate(TAG)
         descs = [p.evaluate(DESCR, i) for i in range(n)]
         print(f'== {lang} {auth} {path}: {n} elements', flush=True)
+        json.dump(out, open(f'out/crawl-{lang}-{auth}.partial.json', 'w', encoding='utf-8'), ensure_ascii=False)
+        seen = {}
         for i, d in enumerate(descs):
             rec = dict(page=path, lang=lang, auth=auth, i=i, **d)
+            kk = (d['tag'], d['act'], (d['href'] or '').split('=')[0], '' if d['act'] else d['text'][:6]) if path.endswith('dashboard.html') else None
+            if kk is not None:
+                seen[kk] = seen.get(kk, 0) + 1
+                if seen[kk] > 2:
+                    rec['result'] = 'same as the previous cards (repeated element, not clicked again)'; rec['errors'] = []; out.append(rec); continue
             dialogs = []
 
             def on_dialog(dlg, dialogs=dialogs):

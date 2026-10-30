@@ -5,8 +5,8 @@ from playwright.sync_api import sync_playwright
 import os
 BASE = os.environ.get('DSL_BASE', 'http://localhost:5191')  # own copy of the same site (tools/serve.js site 5191); 5190 works too
 PAGES = ['index.html', 'app/login.html', 'app/register.html', 'app/dashboard.html',
-         'app/welcome.html', 'app/editor.html', 'app/settings.html']
-PROTECTED = ['app/dashboard.html', 'app/welcome.html', 'app/editor.html', 'app/settings.html']
+         'app/welcome.html', 'app/editor.html', 'app/settings.html', 'app/docs.html']
+PROTECTED = ['app/dashboard.html', 'app/welcome.html', 'app/editor.html', 'app/settings.html', 'app/docs.html']
 
 
 def url(path, lang='ru'):
@@ -45,6 +45,9 @@ def register(page, name, email, pw='Passw0rd!x', lang='ru'):
 
 def login(page, email, pw='Passw0rd!x', lang='ru'):
     page.goto(url('app/login.html', lang))
+    page.wait_for_timeout(800)
+    if 'dashboard' in page.url:
+        return
     page.fill('#email', email); page.fill('#password', pw)
     page.click('#auth-form [type=submit]')
     page.wait_for_url('**/dashboard.html', timeout=30000)
