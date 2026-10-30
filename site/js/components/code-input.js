@@ -64,8 +64,12 @@ export const initCodeInput = ({ root = document, setTimer = setTimeout, clearTim
     input.setRangeText(text, input.selectionStart, input.selectionEnd, 'end');
     change();
   };
+  // Escape releases the Tab key for one press, so a keyboard user is never trapped in the field: Escape, then Tab moves the focus on.
+  let released = false;
   input.addEventListener('keydown', (event) => {
-    if (event.key === 'Tab' && !event.shiftKey && !event.ctrlKey && !event.metaKey) {
+    const wasReleased = released;
+    released = event.key === 'Escape';
+    if (event.key === 'Tab' && !event.shiftKey && !event.ctrlKey && !event.metaKey && !wasReleased) {
       event.preventDefault();
       insert(INDENT);
     } else if (event.key === 'Enter' && !event.ctrlKey && !event.metaKey && !event.shiftKey) {

@@ -110,7 +110,7 @@ export const initDiagramRunner = ({
     historyList.hidden = items.length === 0;
   };
 
-  const run = async ({ refresh = false } = {}) => {
+  const runUnsafe = async ({ refresh = false } = {}) => {
     showAction();
     const model = parseDiagram(source());
     const short = model.notation ? notationShort(model) : '?';
@@ -178,6 +178,19 @@ ${input}`);
     // A cancelled run belongs to an older request, so only the newest one may release the buttons.
     if (signal === controller.signal) setBusy(false);
     return succeeded;
+  };
+
+  // Whatever goes wrong while the code is read or drawn is reported on the page and in the log; the buttons are released and the editor keeps working.
+  const run = async (options) => {
+    try {
+      return await runUnsafe(options);
+    } catch (error) {
+      logger.error('DSLKit: the diagram could not be processed', error);
+      setBusy(false);
+      status.textContent = ui('drawFailed', {}, lang);
+      status.dataset.state = 'note';
+      return false;
+    }
   };
 
   refreshButton?.addEventListener('click', () => run({ refresh: true }));

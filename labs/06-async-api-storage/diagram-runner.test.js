@@ -477,3 +477,17 @@ test('the plain ready note is kept for screen readers only, other notes stay vis
   await flush();
   assert.equal(offline.$('.canvas__status').dataset.state, 'note');
 });
+
+test('an exception while the code is processed is reported, logged, and the editor stays usable', async () => {
+  const { window, logger, $, runner } = setup();
+  const page = window.document.querySelector('.app-page--editor');
+  const original = page.querySelectorAll.bind(page);
+  page.querySelectorAll = (selector) => {
+    if (selector === '.code__line code') throw new Error('boom');
+    return original(selector);
+  };
+  assert.equal(await runner.run(), false);
+  assert.equal(logger.error.mock.calls.length >= 1, true);
+  assert.notEqual($('.canvas__status').textContent, '');
+  assert.equal($('.canvas').getAttribute('aria-busy'), 'false');
+});

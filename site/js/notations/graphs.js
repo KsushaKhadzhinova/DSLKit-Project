@@ -12,13 +12,18 @@ export const parseGraphTheory = (lines, header) => {
   const model = { notation: 'graph', kind: '', title: header.title, directed: false, vertices: [], edges: [], queries: [], problems: [] };
   let mode = null;
   const arrows = [];
+  const byId = new Map();
   lines.forEach(({ n, text: line }) => {
     let match;
     if ((match = MODE.exec(line))) mode = match[1];
     else if ((match = VERTEX.exec(line))) {
-      const known = model.vertices.find((vertex) => vertex.id === match[1]);
-      if (known) model.problems.push(problem(n, 'error', 'duplicate', { id: match[1], first: known.line }));
-      else model.vertices.push({ id: match[1], label: unquote(match[2] ?? match[1]), line: n });
+      const first = byId.get(match[1]);
+      if (first) model.problems.push(problem(n, 'error', 'duplicate', { id: match[1], first: first.line }));
+      else {
+        const vertex = { id: match[1], label: unquote(match[2] ?? match[1]), line: n };
+        byId.set(match[1], vertex);
+        model.vertices.push(vertex);
+      }
     } else if ((match = EDGE.exec(line))) {
       const attrs = parseAttrs(match[4]);
       arrows.push(match[2]);
@@ -27,7 +32,7 @@ export const parseGraphTheory = (lines, header) => {
     else model.problems.push(problem(n, 'error', 'syntax', { text: line }));
   });
   model.directed = mode === null ? arrows.includes('->') : mode === 'directed';
-  const known = (id) => model.vertices.some((vertex) => vertex.id === id);
+  const known = (id) => byId.has(id);
   const bad = [];
   model.edges.forEach((edge) => {
     [edge.from, edge.to].filter((id) => !known(id)).forEach((id) => bad.push(problem(edge.line, 'error', 'unknown-ref', { id })));
@@ -63,7 +68,18 @@ const neighbours = (model) => {
 
 const components = (model) => {
   const parent = new Map(model.vertices.map((vertex) => [vertex.id, vertex.id]));
-  const root = (id) => (parent.get(id) === id ? id : root(parent.get(id)));
+  // The root of a set, with the path compressed, without recursion, so a long chain is neither slow nor a stack overflow.
+  const root = (id) => {
+    let top = id;
+    while (parent.get(top) !== top) top = parent.get(top);
+    let at = id;
+    while (parent.get(at) !== top) {
+      const next = parent.get(at);
+      parent.set(at, top);
+      at = next;
+    }
+    return top;
+  };
   model.edges.forEach((edge) => parent.set(root(edge.from), root(edge.to)));
   return model.vertices.map((vertex) => root(vertex.id));
 };
@@ -121,6 +137,19 @@ export const topologicalOrder = (nodes, edges) => {
   return order.length === nodes.length ? order : null;
 };
 
+// The adjacency matrix is filled edge by edge, in the time of the matrix itself and not of its cells times the edges; a big graph gets none.
+const MATRIX_LIMIT = 60;
+const adjacency = (model, ids) => {
+  if (ids.length > MATRIX_LIMIT) return [];
+  const index = new Map(ids.map((id, at) => [id, at]));
+  const rows = ids.map(() => ids.map(() => 0));
+  model.edges.forEach((edge) => {
+    rows[index.get(edge.from)][index.get(edge.to)] += 1;
+    if (!model.directed && edge.from !== edge.to) rows[index.get(edge.to)][index.get(edge.from)] += 1;
+  });
+  return rows;
+};
+
 export const analyzeGraph = (model) => {
   const ids = model.vertices.map((vertex) => vertex.id);
   const roots = components(model);
@@ -135,21 +164,24 @@ export const analyzeGraph = (model) => {
   const cyclic = model.directed ? findCycle(model.edges).length > 0 : model.edges.length - ids.length + count > 0;
   const colour = new Map();
   let bipartite = true;
+  // Neighbours by vertex, so the walk costs the number of edges once, not once for every vertex.
+  const around = new Map(ids.map((id) => [id, []]));
+  model.edges.forEach((edge) => {
+    around.get(edge.from).push(edge.to);
+    around.get(edge.to).push(edge.from);
+  });
   ids.forEach((start) => {
     if (colour.has(start)) return;
     colour.set(start, 0);
     const queue = [start];
-    while (queue.length > 0) {
-      const id = queue.shift();
-      model.edges
-        .filter((edge) => edge.from === id || edge.to === id)
-        .forEach((edge) => {
-          const other = edge.from === id ? edge.to : edge.from;
-          if (!colour.has(other)) {
-            colour.set(other, 1 - colour.get(id));
-            queue.push(other);
-          } else if (colour.get(other) === colour.get(id)) bipartite = false;
-        });
+    for (let head = 0; head < queue.length; head += 1) {
+      const id = queue[head];
+      around.get(id).forEach((other) => {
+        if (!colour.has(other)) {
+          colour.set(other, 1 - colour.get(id));
+          queue.push(other);
+        } else if (colour.get(other) === colour.get(id)) bipartite = false;
+      });
     }
   });
   return {
@@ -164,9 +196,7 @@ export const analyzeGraph = (model) => {
     isDag: model.directed && !cyclic,
     bipartite,
     degree,
-    matrix: ids.map((a) =>
-      ids.map((b) => model.edges.filter((edge) => (edge.from === a && edge.to === b) || (!model.directed && edge.from === b && edge.to === a)).length),
-    ),
+    matrix: adjacency(model, ids),
     order: model.directed ? topologicalOrder(ids, model.edges) : null,
     mst: model.directed ? null : kruskal(model),
   };
@@ -200,7 +230,9 @@ const graphInfo = (model) => {
         )
         .join(', '),
     }),
-    problem(1, 'info', 'graph-matrix', { matrix: info.matrix.map((row, index) => `${model.vertices[index].id}: ${row.join(' ')}`).join('; ') }),
+    ...(info.matrix.length === 0
+      ? []
+      : [problem(1, 'info', 'graph-matrix', { matrix: info.matrix.map((row, index) => `${model.vertices[index].id}: ${row.join(' ')}`).join('; ') })]),
   ];
   if (info.order) out.push(problem(1, 'info', 'graph-order', { order: info.order.join(' -> ') }));
   if (info.mst)

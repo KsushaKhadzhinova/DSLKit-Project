@@ -228,3 +228,38 @@ test('the external route refuses what it cannot send and reports what the servic
   assert.equal(await send('/api/external/d2', { body }, async () => Promise.reject(new Error('refused'))), 502);
   assert.equal(await send('/api/external/d2', { body }, async () => Promise.reject(Object.assign(new Error('slow'), { name: 'TimeoutError' }))), 504);
 });
+
+test('a source with too many lines is refused before it is parsed', async () => {
+  const lines = Array.from({ length: 2001 }, (_, index) => `vertex v${index}`).join('\n');
+  const answer = await post('/api/render', { source: `diagram graph\n${lines}` });
+  assert.equal(answer.status, 422);
+  assert.equal(answer.json().error.code, 'too-complex');
+});
+
+test('an outside service cannot crash the server, bring script, or send a huge drawing', async () => {
+  const send = async (fetchImpl) => {
+    const { req, res } = fake('/api/external/d2', { body: JSON.stringify({ source: 'a' }) });
+    await handleApi(req, res, { fetchImpl, krokiUrl: 'http://kroki.test' });
+    return res.status;
+  };
+  assert.equal(await send(svgAnswer('<svg><script>alert(1)</script></svg>')), 502);
+  assert.equal(await send(svgAnswer('<svg onload="x()"></svg>')), 502);
+  assert.equal(await send(svgAnswer('<svg><a href="javascript:x()"></a></svg>')), 502);
+  assert.equal(await send(svgAnswer(`<svg>${'x'.repeat(5_000_001)}</svg>`)), 502);
+  const hangs = async () => ({ ok: true, status: 200, text: async () => Promise.reject(Object.assign(new Error('slow'), { name: 'TimeoutError' })) });
+  assert.equal(await send(hangs), 500);
+});
+
+test('API answers carry the security headers, a path that only looks like the API reaches the files, and names of the object prototype are not notations', async () => {
+  const answer = await post('/api/validate', { source: 'diagram dfd' });
+  assert.equal(answer.headers['x-content-type-options'], 'nosniff');
+  assert.match(answer.headers['content-security-policy'], /default-src/);
+  const dotdot = await call('/api/../index.html', { method: 'GET' });
+  assert.ok([200, 404].includes(dotdot.status));
+  for (const name of ['constructor', '__proto__', 'toString']) {
+    const result = await post('/api/validate', { source: `diagram ${name}` });
+    assert.equal(result.status, 200);
+    assert.equal(result.json().notation, null);
+    assert.equal((await post('/api/render', { source: `diagram ${name}` })).status, 422);
+  }
+});

@@ -143,3 +143,16 @@ test('the field works on a page without the cursor note', () => {
   input.dispatchEvent(new window.Event('input', { bubbles: true }));
   assert.equal(api.position().line, 1);
 });
+
+test('Escape frees the Tab key for one press, so the field is not a keyboard trap', () => {
+  const { input, window } = setup();
+  const press = (key) => {
+    const event = new window.KeyboardEvent('keydown', { key, bubbles: true, cancelable: true });
+    input.dispatchEvent(event);
+    return event.defaultPrevented;
+  };
+  assert.equal(press('Tab'), true);
+  press('Escape');
+  assert.equal(press('Tab'), false);
+  assert.equal(press('Tab'), true);
+});

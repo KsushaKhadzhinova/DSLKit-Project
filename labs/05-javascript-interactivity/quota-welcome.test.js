@@ -55,7 +55,7 @@ test('the first open of the editor puts the starter diagrams into the list once'
     return initEditorProjects({ root: dom.window.document, storage, navigate: () => {} });
   };
   const first = open();
-  assert.equal(first.store.list().length, 6);
+  assert.equal(first.store.list().length, 33);
   assert.equal(first.store.createdOn(), 0);
   first.store.list().forEach((project) => first.store.remove(project.id));
   assert.equal(open().store.list().length, 0);

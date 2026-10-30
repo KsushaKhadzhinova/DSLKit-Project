@@ -2,6 +2,8 @@ import { NOTATIONS, NOTATION_KEYS, formatProblem, generate, parseDiagram, pickFo
 
 // The own rendering API of DSLKit: the same parsers and renderers as the editor, served over HTTP, so no outside service is needed.
 export const MAX_SOURCE = 100_000;
+// A source with more lines than this is refused: parsing and drawing run in the one thread of the server, a huge diagram would stop every other request.
+export const MAX_LINES = 2000;
 
 // Other diagram languages are drawn by an external Kroki-compatible service, reached through this server so the page keeps one origin.
 export const EXTERNAL_TYPES = [
@@ -32,6 +34,9 @@ export const EXTERNAL_TYPES = [
 ];
 // A source of MAX_SOURCE characters may take six bytes per character once it is escaped in JSON.
 const MAX_BODY = MAX_SOURCE * 6 + 1024;
+// What an outside service may send back: a drawing up to 5 million characters, with no script, no event handler and no javascript: address.
+const MAX_EXTERNAL = 5_000_000;
+const UNSAFE_SVG = /<script|\son[a-z]+\s*=|javascript:/i;
 const EXTERNAL_TIMEOUT_MS = 10_000;
 
 export const GRAMMAR = [
@@ -145,6 +150,8 @@ const external = async (res, { fetchImpl, krokiUrl, type, source }) => {
   }
   const text = await answer.text();
   if (!answer.ok) return fail(res, answer.status === 400 ? 422 : 502, 'upstream-error', `The drawing service answered ${answer.status}`);
+  if (text.length > MAX_EXTERNAL || UNSAFE_SVG.test(text))
+    return fail(res, 502, 'upstream-unsafe', 'The drawing service answered with a diagram that is too large or not safe');
   if (!/^\s*(<\?xml[^>]*>\s*)?(<!DOCTYPE[^>]*>\s*)?<svg[\s>]/i.test(text))
     return fail(res, 502, 'upstream-invalid', 'The drawing service did not return a diagram');
   res.writeHead(200, { 'Content-Type': 'image/svg+xml; charset=utf-8', 'Cache-Control': 'no-store' });
@@ -182,13 +189,14 @@ export const handleApi = async (req, res, { fetchImpl = globalThis.fetch, krokiU
       const input = await readInput(req);
       if (typeof input.source !== 'string' || input.source.trim() === '') return fail(res, 400, 'source', 'The "source" text is required');
       if (input.source.length > MAX_SOURCE) return fail(res, 413, 'too-large', `The source is longer than ${MAX_SOURCE} characters`);
-      return external(res, { fetchImpl, krokiUrl, type, source: input.source });
+      return await external(res, { fetchImpl, krokiUrl, type, source: input.source });
     }
     if (pathname !== '/api/render' && !(pathname in POST_ROUTES)) return fail(res, 404, 'not-found', `Unknown endpoint ${pathname}`);
     if (req.method !== 'POST') return fail(res, 405, 'method', 'Use POST', { Allow: 'POST' });
     const input = await readInput(req);
     if (typeof input.source !== 'string' || input.source.trim() === '') return fail(res, 400, 'source', 'The "source" text is required');
     if (input.source.length > MAX_SOURCE) return fail(res, 413, 'too-large', `The source is longer than ${MAX_SOURCE} characters`);
+    if (input.source.split('\n').length > MAX_LINES) return fail(res, 422, 'too-complex', `The source has more than ${MAX_LINES} lines`);
     const lang = langOf(input.lang);
     if (pathname === '/api/render') {
       const result = renderSource(input.source, lang);

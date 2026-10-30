@@ -189,7 +189,10 @@ export const createApi = ({ config = API_CONFIG, fetchImpl = globalThis.fetch?.b
   };
 
   // Retries network failures, 429 and 5xx (a timeout is final, it already took the whole time limit) up to `retries` times with exponential backoff.
-  const send = async (path, { method = 'GET', body, headers = {}, baseUrl, signal, timeoutMs = config.timeoutMs, retries = config.retries, parse = 'text' } = {}) => {
+  const send = async (
+    path,
+    { method = 'GET', body, headers = {}, baseUrl, signal, timeoutMs = config.timeoutMs, retries = config.retries, parse = 'text' } = {},
+  ) => {
     const url = `${baseUrl ?? config.baseUrl}${path}`;
     const tryOnce = async (attemptNumber) => {
       try {
@@ -529,8 +532,10 @@ export const initDiagramRunner = ({
 
   const tr = createTranslator(root);
   const lang = root.documentElement.lang === 'en' ? 'en' : 'ru';
+  // The plain "ready" note is only for screen readers: a sighted user sees the drawing. Every other note (saved copy, loading, errors) stays visible.
   const setStatus = (text) => {
     status.textContent = tr(text);
+    status.dataset.state = text === 'Диаграмма готова.' ? 'ready' : 'note';
   };
   const setBusy = (busy) => {
     canvas.setAttribute('aria-busy', String(busy));
@@ -580,7 +585,7 @@ export const initDiagramRunner = ({
     historyList.hidden = items.length === 0;
   };
 
-  const run = async ({ refresh = false } = {}) => {
+  const runUnsafe = async ({ refresh = false } = {}) => {
     showAction();
     const model = parseDiagram(source());
     const short = model.notation ? notationShort(model) : '?';
@@ -611,6 +616,7 @@ ${input}`);
 
     if (cached && !cached.expired && !refresh && show(cached.data, `Показана сохранённая копия от ${formatTime(cached.savedAt)}.`, engine)) {
       status.textContent += fallback;
+      if (fallback) status.dataset.state = 'note';
       setBusy(false);
       return true;
     }
@@ -626,6 +632,7 @@ ${input}`);
       if (signal.aborted) throw Object.assign(new Error('cancelled'), { kind: 'aborted' });
       if (!show(svgText, 'Диаграмма готова.', engine)) throw Object.assign(new Error('invalid'), { kind: 'invalid' });
       status.textContent += fallback;
+      if (fallback) status.dataset.state = 'note';
       cache.set(key, svgText);
       history.add({ key, title: model.title, at: now() });
       renderHistory();
@@ -646,6 +653,19 @@ ${input}`);
     // A cancelled run belongs to an older request, so only the newest one may release the buttons.
     if (signal === controller.signal) setBusy(false);
     return succeeded;
+  };
+
+  // Whatever goes wrong while the code is read or drawn is reported on the page and in the log; the buttons are released and the editor keeps working.
+  const run = async (options) => {
+    try {
+      return await runUnsafe(options);
+    } catch (error) {
+      logger.error('DSLKit: the diagram could not be processed', error);
+      setBusy(false);
+      status.textContent = ui('drawFailed', {}, lang);
+      status.dataset.state = 'note';
+      return false;
+    }
   };
 
   refreshButton?.addEventListener('click', () => run({ refresh: true }));

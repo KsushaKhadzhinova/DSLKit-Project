@@ -1696,7 +1696,7 @@
 
 /* The panel under the code is small while the code has no problems, and tall again for the assistant, the output and the versions */
 .app-page--editor[data-clean='true']:not([data-tab='ai'], [data-tab='output'], [data-tab='versions']) {
-  --problems-height: 4.5rem;
+  --problems-height: 5.75rem;
 }
 .problems > .editor-tools__view {
   display: grid;
@@ -1756,8 +1756,7 @@
 .editor-toolbar__row {
   gap: clamp(0.25rem, 0.1rem + 0.6vw, 0.625rem);
   padding: clamp(0.25rem, 0.1rem + 0.5vw, 0.5rem) clamp(0.375rem, 0.1rem + 1vw, 1rem);
-  overflow-x: auto;
-  scrollbar-width: thin;
+  flex-wrap: wrap;
 }
 .editor-toolbar__row .button {
   flex: 0 0 auto;
@@ -1813,6 +1812,9 @@
   .docs__role,
   .docs__status {
     grid-column: 2;
+  }
+  .editor-toolbar__row {
+    flex-wrap: nowrap;
   }
 }
 
@@ -1989,4 +1991,8 @@ html.js:not(.is-ready)
 .docs__role-label {
   font-size: 0.875rem;
   font-weight: 600;
+}
+
+.app-topbar__theme {
+  flex: 0 0 auto;
 }

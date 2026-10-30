@@ -5,7 +5,7 @@ export const createCodeLine = (root, text) => {
   const item = root.createElement('li');
   item.className = 'code__line';
   const code = root.createElement('code');
-  const [, indent, word, rest] = /^(\s*)([a-z]*)(.*)$/.exec(text);
+  const [, indent, word, rest] = /^(\s*)([a-z]*)([\s\S]*)$/.exec(text);
   code.append(indent);
   if (KEYWORDS.has(word)) {
     const keyword = root.createElement('span');

@@ -425,8 +425,8 @@ export const gostFlow = defineGraph({
     comment: gost('comment', 40, 'shape=plaintext', ['[', ']'], 'rectangle'),
   },
   edgeKinds: {
-    // Arrowheads are drawn only where the direction is not the standard one (left to right).
-    flow: { look: (edge, source, target) => ({ end: target.cx > source.cx ? null : 'arrow' }), dot: 'arrowhead=none', mermaid: '---', plantuml: '--' },
+    // GOST 19.701 allows leaving out the arrowhead where the line goes the standard way, but a reader of a drawing cannot tell the way of a line without it, so every flow has one.
+    flow: { look: () => ({ end: 'arrow' }), dot: 'arrowhead=none', mermaid: '---', plantuml: '--' },
     note: { look: still({ dash: true }), dot: 'style=dashed, arrowhead=none', mermaid: '-.-', plantuml: '..' },
   },
   validate: (model) => {

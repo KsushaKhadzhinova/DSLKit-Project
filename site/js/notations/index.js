@@ -117,8 +117,8 @@ export const parseDiagram = (source) => {
   if (key === 'uml') {
     if (header.kind === '') return failed('header-kind', { list: UML_KINDS.join(', ') });
     key = `uml-${header.kind}`;
-    if (!(key in NOTATIONS)) return failed('header-kind-unknown', { name: header.kind, list: UML_KINDS.join(', ') });
-  } else if (!(key in NOTATIONS)) return failed('header-unknown', { name: key, list: BASE_NAMES.join(', ') });
+    if (!Object.hasOwn(NOTATIONS, key)) return failed('header-kind-unknown', { name: header.kind, list: UML_KINDS.join(', ') });
+  } else if (!Object.hasOwn(NOTATIONS, key)) return failed('header-unknown', { name: key, list: BASE_NAMES.join(', ') });
   else if (header.kind !== '') extra.push(problem(lines[0].n, 'warning', 'header-extra', { name: key, kind: header.kind }));
   const model = NOTATIONS[key].parse(lines.slice(1), header, source);
   model.notation = key;

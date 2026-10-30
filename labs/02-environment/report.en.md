@@ -44,7 +44,7 @@ Table 1 – Environment check results
 | README.md file | passed | — |
 | Figma design link | passed | — |
 | Remote repository | passed | https://github.com/KsushaKhadzhinova/DSLKit-Project.git |
-| Commit history | passed | 243 |
+| Commit history | passed | 253 |
 
 All checks passed.
 
@@ -269,11 +269,17 @@ export const staticServer = (rootDir, fs = nodeFs) => {
       .pipe(res);
   };
   return createServer((req, res) => {
+    if (req.url === '/api' || req.url.startsWith('/api/') || req.url.startsWith('/api?')) {
+      Object.entries(SECURITY_HEADERS).forEach(([name, value]) => res.setHeader(name, value));
+      // A path that only looks like the API (for example /api/../index.html) is not answered by it and goes on to the files.
+      // handleApi answers every error itself and never rejects.
+      handleApi(req, res).then((handled) => handled || serve(req, res));
+      return;
+    }
+    serve(req, res);
+  });
+  function serve(req, res) {
     try {
-      if (req.url === '/api' || req.url.startsWith('/api/') || req.url.startsWith('/api?')) {
-        handleApi(req, res);
-        return;
-      }
       if (req.method !== 'GET' && req.method !== 'HEAD') return send(req, res, 405, null, { Allow: 'GET, HEAD' });
       let path;
       try {
@@ -292,7 +298,7 @@ export const staticServer = (rootDir, fs = nodeFs) => {
     } catch {
       return send(req, res, 500);
     }
-  });
+  }
 };
 ```
 

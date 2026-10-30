@@ -130,6 +130,7 @@ import { initAuthGate } from './components/auth-gate.js';
 import { initBurger } from './components/burger.js';
 import { initCanvasDrag } from './components/canvas-drag.js';
 import { initDashboard } from './components/dashboard.js';
+import { initDocs } from './components/docs.js';
 import { initDiagramRunner } from './components/diagram-runner.js';
 import { initEditor } from './components/editor.js';
 import { initCodeInput } from './components/code-input.js';
@@ -141,6 +142,7 @@ import { initExport } from './components/export-menu.js';
 import { initImport } from './components/import-menu.js';
 import { registerServiceWorker } from './components/pwa.js';
 import { initNotationFilter } from './components/notation-filter.js';
+import { initPopups } from './components/popups.js';
 import { initSettings } from './components/settings.js';
 import { initTheme } from './components/theme.js';
 import { initQuota } from './components/quota.js';
@@ -161,6 +163,7 @@ export const COMPONENTS = [
   initDashboard,
   initQuota,
   initWelcome,
+  initDocs,
   initAppSearch,
   initSettings,
   initEditor,
@@ -174,6 +177,7 @@ export const COMPONENTS = [
   initTour,
   initCanvasDrag,
   initDiagramRunner,
+  initPopups,
 ];
 
 // Starts every component that finds its markup on the page; a failing component is reported and does not stop the others.
@@ -187,6 +191,8 @@ export const boot = (root, { components = COMPONENTS, logger = console } = {}) =
       logger.error(`DSLKit: component ${init.name} failed`, error);
     }
   });
+  // The placeholders of the markup stay hidden until the components have written the real content.
+  root.documentElement.classList.add('is-ready');
   return started;
 };
 
@@ -682,7 +688,9 @@ export const initDashboard = ({ root = document, storage, now = () => Date.now()
     const tag = el('p', 'project-card__notation');
     tag.append(el('span', 'project-card__tag', NOTATIONS[project.notation]?.short ?? project.notation.toUpperCase()));
     if (project.published) tag.append(' ', el('span', 'badge', labels.published));
-    const stamp = trashed ? labels.trashed(time(project.trashedAt), Math.max(0, Math.ceil(TRASH_DAYS - (now() - project.trashedAt) / 86400000))) : labels.changed(time(project.updated));
+    const stamp = trashed
+      ? labels.trashed(time(project.trashedAt), Math.max(0, Math.ceil(TRASH_DAYS - (now() - project.trashedAt) / 86400000)))
+      : labels.changed(time(project.updated));
     article.append(el('div', 'project-card__preview'), headingBox, tag, el('p', 'project-card__updated', stamp));
     item.append(article);
     return item;
@@ -882,7 +890,11 @@ export const initDashboard = ({ root = document, storage, now = () => Date.now()
       if (action === 'copy-template') templates.save(copy);
       else if (action === 'like') {
         const liked = likes();
-        if (liked.includes(key)) storage.set(likesKey, liked.filter((entry) => entry !== key));
+        if (liked.includes(key))
+          storage.set(
+            likesKey,
+            liked.filter((entry) => entry !== key),
+          );
         else {
           storage.set(likesKey, [...liked, key]);
           store.save(copy);
@@ -916,6 +928,13 @@ export const initDashboard = ({ root = document, storage, now = () => Date.now()
     }
     const target = event.target.closest('[data-act]');
     if (target) act(target.dataset.act, target.closest('.project-list__item'));
+  });
+
+  // Another tab may have changed the projects, the templates or the trash: the list follows at once, so no card acts on a stale entry.
+  view.addEventListener('storage', () => {
+    store.purgeExpired();
+    rebuild();
+    render();
   });
 
   render();
@@ -1101,6 +1120,40 @@ const initTemplates = ({ page, root }) => {
     announceRun(page, root);
     return true;
   };
+  // The Templates tab lists every notation of the editor, the three most used ones first, with a field that filters the list.
+  const list = page.querySelector('.templates');
+  if (list) {
+    const keys = ['idef0', 'dfd', 'erd', ...Object.keys(NOTATIONS).filter((key) => !['idef0', 'dfd', 'erd'].includes(key))];
+    list.replaceChildren(
+      ...keys.map((key) => {
+        const item = root.createElement('li');
+        const button = root.createElement('button');
+        button.type = 'button';
+        button.className = 'templates__item';
+        button.dataset.template = key;
+        const name = root.createElement('span');
+        name.textContent = NOTATIONS[key].name[lang];
+        const short = root.createElement('span');
+        short.className = 'badge';
+        short.textContent = NOTATIONS[key].short;
+        button.append(name, short);
+        item.append(button);
+        return item;
+      }),
+    );
+    const search = root.createElement('input');
+    search.type = 'search';
+    search.className = 'templates__search settings-row__select';
+    search.placeholder = ui('template', {}, lang);
+    search.setAttribute('aria-label', ui('template', {}, lang));
+    search.addEventListener('input', () => {
+      const query = search.value.trim().toLowerCase();
+      list.querySelectorAll('li').forEach((item) => {
+        item.hidden = query !== '' && !item.textContent.toLowerCase().includes(query);
+      });
+    });
+    list.before(search);
+  }
   page.querySelectorAll('[data-template]').forEach((button) => button.addEventListener('click', () => loadTemplate(button.dataset.template)));
   const picker = page.querySelector('[data-notation-select]');
   if (picker) {
