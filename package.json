@@ -27,6 +27,8 @@
     "tc:full": "node testing-course/full/static-sec-perf.js && python testing-course/full/editor-e2e.py && python testing-course/full/auth-e2e.py && python testing-course/full/build-md.py",
     "tc:reports": "node testing-course/lab3/run.js && node testing-course/build-reports.js",
     "dev:code": "node tools/dev-code-cli.js",
+    "build": "node tools/build-site-cli.js",
+    "start:prod": "node tools/serve.js dist 5173",
     "dsl:reference": "node tools/dsl-reference-cli.js docs",
     "design:build": "node tools/build-design.js"
   },
@@ -34,6 +36,7 @@
     "lodash": "^4.18.1"
   },
   "devDependencies": {
+    "esbuild": "^0.28.2",
     "html-validate": "^11.16.2",
     "jsdom": "^29.1.1",
     "nodemon": "^3.1.14",
