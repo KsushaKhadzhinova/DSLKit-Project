@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
 
 export const THEME_KEY = 'dslkit.theme';
 
@@ -20,6 +20,7 @@ export function readTheme() {
 
 export function ThemeProvider({ children }) {
   const [theme, setThemeState] = useState(readTheme);
+  const chosen = useRef(false);
 
   // The root attribute lets the colour tokens of dslkit.css switch the whole page.
   useEffect(() => {
@@ -27,17 +28,35 @@ export function ThemeProvider({ children }) {
   }, [theme]);
 
   const value = useMemo(() => {
+    // Only the two known themes are accepted, anything else is ignored.
     const setTheme = (next) => {
+      if (next !== 'light' && next !== 'dark') return;
+      chosen.current = true;
       setThemeState(next);
-      try {
-        localStorage.setItem(THEME_KEY, next);
-      } catch {
-        // The choice lives in memory only.
-      }
     };
-    return { theme, setTheme, toggleTheme: () => setTheme(theme === 'light' ? 'dark' : 'light') };
+    // The functional update makes two toggles in a row flip twice, not once.
+    const toggleTheme = () => {
+      chosen.current = true;
+      setThemeState((prev) => (prev === 'light' ? 'dark' : 'light'));
+    };
+    return { theme, setTheme, toggleTheme };
+  }, [theme]);
+
+  // Only a choice made by the user is stored, so the system preference is still followed until then.
+  useEffect(() => {
+    if (!chosen.current) return;
+    try {
+      localStorage.setItem(THEME_KEY, theme);
+    } catch {
+      // The choice lives in memory only.
+    }
   }, [theme]);
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 }
 
-export const useTheme = () => useContext(ThemeContext);
+// Outside the provider there is no value to read: fail with a message that names the provider.
+export const useTheme = () => {
+  const value = useContext(ThemeContext);
+  if (value === null) throw new Error('useTheme must be used inside ThemeProvider');
+  return value;
+};

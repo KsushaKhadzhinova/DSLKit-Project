@@ -1,10 +1,10 @@
-import { render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import App from './App';
 import PropDrilling from './components/PropDrilling';
 import { FAVORITES_KEY, MAX_QTY, favoritesReducer, sanitizeFavorites, useFavorites, useFavoritesDispatch } from './context/FavoritesContext';
 import { LanguageProvider, useLanguage } from './context/LanguageContext';
-import { THEME_KEY, readTheme } from './context/ThemeContext';
+import { THEME_KEY, ThemeProvider, readTheme, useTheme } from './context/ThemeContext';
 
 const item = (id, qty) => ({ id, qty });
 
@@ -155,5 +155,55 @@ describe('hooks used outside their provider', () => {
     };
     expect(() => render(<Probe />)).toThrow(/LanguageProvider/);
     spy.mockRestore();
+  });
+
+  it('throws a clear error when useTheme is used outside ThemeProvider', () => {
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const Probe = () => {
+      useTheme();
+      return null;
+    };
+    expect(() => render(<Probe />)).toThrow(/ThemeProvider/);
+    spy.mockRestore();
+  });
+});
+
+describe('theme and language switched in a row', () => {
+  it('flips the theme twice when toggled twice in one tick, and ignores an unknown theme', async () => {
+    let api;
+    const Probe = () => {
+      api = useTheme();
+      return <span data-testid="t">{api.theme}</span>;
+    };
+    render(
+      <ThemeProvider>
+        <Probe />
+      </ThemeProvider>,
+    );
+    const start = api.theme;
+    act(() => {
+      api.toggleTheme();
+      api.toggleTheme();
+    });
+    expect(screen.getByTestId('t')).toHaveTextContent(start);
+    act(() => api.setTheme('<script>'));
+    expect(screen.getByTestId('t')).toHaveTextContent(start);
+  });
+
+  it('does not store the system theme before the user chooses', () => {
+    render(
+      <ThemeProvider>
+        <span />
+      </ThemeProvider>,
+    );
+    expect(localStorage.getItem(THEME_KEY)).toBeNull();
+  });
+
+  it('survives 20 language toggles in a row and ends on the right language', async () => {
+    const user = userEvent.setup();
+    render(<App />);
+    for (let i = 0; i < 20; i += 1) await user.click(screen.getByRole('button', { name: /^(Язык|Language): / }));
+    expect(document.documentElement.lang).toBe('ru');
+    expect(localStorage.getItem('dslkit.language')).toBe('ru');
   });
 });

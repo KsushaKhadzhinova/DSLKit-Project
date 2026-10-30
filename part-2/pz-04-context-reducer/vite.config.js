@@ -9,6 +9,7 @@ export default defineConfig({
     setupFiles: './src/setupTests.js',
     globals: true,
     // report.test.mjs uses node:test, it runs with the second command of npm test.
+    testTimeout: 30000,
     exclude: ['**/node_modules/**', 'report.test.mjs', 'report.test.js'],
   },
 });

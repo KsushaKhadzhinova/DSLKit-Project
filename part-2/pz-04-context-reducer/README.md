@@ -21,7 +21,7 @@
 cd part-2/pz-04-context-reducer
 npm install
 npm run dev      # http://localhost:5177
-npm test         # Vitest и React Testing Library, 38 тестов
+npm test         # Vitest и React Testing Library, 81 тест
 npm run build
 ```
 

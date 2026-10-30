@@ -50,47 +50,53 @@ The buttons with the signs "+" and "−" change the quantity through reducer act
 
 Figure 3 – The "Избранное" panel with the quantity 3 for the first template
 
-After the page is reloaded the choice and the quantity are kept, as figure 4 shows.
+Removing one template with the "Убрать" button leaves only the other ones in the panel, as in figure 4.
+
+![Removing a template from favorites](figures/10-removed.png)
+
+Figure 4 – The "Избранное" panel after one of three templates is removed
+
+After the page is reloaded the choice and the quantity are kept, as figure 5 shows.
 
 ![Favorites after reload](figures/05-after-reload.png)
 
-Figure 4 – The "Избранное" panel after a page reload
+Figure 5 – The "Избранное" panel after a page reload
 
-The theme switch changes the colors of the whole page, as figure 5 shows.
+The theme switch changes the colors of the whole page, as figure 6 shows.
 
 ![Dark theme](figures/03-dark-theme.png)
 
-Figure 5 – Page in the dark theme with the tooltip at the switch
+Figure 6 – Page in the dark theme with the tooltip at the switch
 
-Changing the language translates the headings, the template names and the button labels, as in figure 6.
+Changing the language translates the headings, the template names and the button labels, as in figure 7.
 
 ![English language](figures/04-english.png)
 
-Figure 6 – Page after switching the language to English
+Figure 7 – Page after switching the language to English
 
-The prop drilling problem and its solution through the context stand side by side, as in figure 7.
+The prop drilling problem and its solution through the context stand side by side, as in figure 8.
 
 ![Prop drilling problem and solution](figures/06-prop-drilling.png)
 
-Figure 7 – Block with the name passed through props and the block with the same name from `UserContext`
+Figure 8 – Block with the name passed through props and the block with the same name from `UserContext`
 
-The "Очистить" button resets the list with the `CLEAR` action and the panel shows a message, as in figure 8.
+The "Очистить" button resets the list with the `CLEAR` action and the panel shows a message, as in figure 9.
 
 ![Empty favorites](figures/09-cleared.png)
 
-Figure 8 – The "Избранное" panel after the list is cleared
+Figure 9 – The "Избранное" panel after the list is cleared
 
-On a phone width of 375 pixels the blocks go in one column, as in figure 9.
+On a phone width of 375 pixels the blocks go in one column, as in figure 10.
 
 ![Page on a phone](figures/07-mobile.png)
 
-Figure 9 – Application page on a screen 375 pixels wide
+Figure 10 – Application page on a screen 375 pixels wide
 
 ### 2.7 Testing
 
 This work has no server and no routes, so the pages 401, 403 and 404 are not needed, and for the errors of the application itself there are two pages built from the catalogue of texts `src/shell/errorCatalog.js`. The 500 page is shown when an unexpected error occurs while rendering, and the "No connection to the server" page with a retry button is shown when a part of the code could not be downloaded. Each answers three questions: what the error is, why it happened and how to solve it. The technical text of the error goes to the console only and never reaches the page.
 
-Thirty-eight automated tests check the reducer as a pure function, the quantity change with its limits, the split of the contexts (the number of re-renders), the prop drilling problem and its solution, a double click on the buttons, the theme and language switching, saving of the choice, adding, removing and clearing favorites, restoring after a reload, broken data, a storage write error, the prop drilling demo, markup rendered as text and the 500 page.
+Eighty-one automated tests check the reducer as a pure function, the quantity change with its limits, the split of the contexts (the number of re-renders), the prop drilling problem and its solution, a double click on the buttons, the theme and language switching, saving of the choice, adding, removing and clearing favorites, restoring after a reload, broken data, a storage write error, the prop drilling demo, markup rendered as text and the 500 page.
 
 ## Conclusion
 
@@ -147,38 +153,9 @@ Prop drilling is shown on a chain of five components and removed with the theme,
 // ContextAvatar: const userName = useUser();
 ```
 
-```jsx
-// ThemeContext.jsx: theme provider
-const [theme, setThemeState] = useState(readTheme);
-const toggleTheme = () => setTheme((prev) => (prev === 'light' ? 'dark' : 'light'));
-useEffect(() => {
-  document.documentElement.dataset.theme = theme;
-}, [theme]);
-```
+{{code:part-2/pz-04-context-reducer/src/context/ThemeContext.jsx}}
 
-```jsx
-// FavoritesContext.jsx: reducer and provider
-export function favoritesReducer(state, action) {
-  switch (action.type) {
-    case 'ADD':
-      return state.some((item) => item.id === action.id) ? state : [...state, { id: action.id, qty: 1 }];
-    case 'REMOVE':
-      return state.filter((item) => item.id !== action.id);
-    case 'INCREMENT':
-      return changeQty(state, action.id, (qty) => qty + 1);
-    case 'DECREMENT':
-      return changeQty(state, action.id, (qty) => qty - 1);
-    case 'SET_QTY':
-      return changeQty(state, action.id, () => action.qty);
-    case 'CLEAR':
-      return [];
-    default:
-      return state;
-  }
-}
-
-const [favorites, dispatch] = useReducer(favoritesReducer, undefined, loadFavorites);
-```
+{{code:part-2/pz-04-context-reducer/src/context/FavoritesContext.jsx}}
 
 ```jsx
 // Templates.jsx: the data and dispatch come from different contexts
