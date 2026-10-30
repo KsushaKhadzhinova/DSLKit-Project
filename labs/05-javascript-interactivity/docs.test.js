@@ -209,3 +209,17 @@ test('the right code turns the role on and the edit button appears', async () =>
   assert.equal(t.$('[data-docs-role-off]').hidden, false);
   assert.equal(t.$('.docs__role-input').hidden, true);
 });
+
+test('the admin code turns the admin role on and says so', async () => {
+  const storage = createStorage(createMemoryBackend());
+  await createAccountStore({ storage }).register({ name: 'Boss', email: 'boss@example.com', password: 'correct horse' });
+  const window = new JSDOM(readFileSync('site/app/docs.html', 'utf8'), { url: 'http://localhost/app/docs.html' }).window;
+  const options = { root: window.document, storage };
+  initDocs({ ...options, developerHash: hashCode('dev-code-x'), adminHash: hashCode('admin-code-x') });
+  window.document.querySelector('.docs__role-input').value = 'admin-code-x';
+  window.document.querySelector('[data-docs-role]').dispatchEvent(new window.Event('submit', { bubbles: true, cancelable: true }));
+  const status = () => window.document.querySelector('.docs__status').textContent;
+  for (let tries = 0; tries < 500 && status() === ''; tries += 1) await new Promise((resolve) => setTimeout(resolve, 10));
+  assert.equal(status(), 'Роль «администратор» включена: дневного лимита диаграмм нет.');
+  assert.equal(window.document.querySelector('[data-docs-edit]').hidden, true);
+});

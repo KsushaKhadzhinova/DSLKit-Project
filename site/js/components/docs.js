@@ -16,6 +16,7 @@ const TEXTS = {
     edited: 'Изменено разработчиком',
     none: 'Раздела нет.',
     roleOn: 'Роль «разработчик» включена.',
+    adminOn: 'Роль «администратор» включена: дневного лимита диаграмм нет.',
     roleOff: 'Вы вышли из роли.',
     roleWrong: 'Код неверный.',
     roleSignIn: 'Сначала войдите в аккаунт.',
@@ -29,6 +30,7 @@ const TEXTS = {
     edited: 'Changed by a developer',
     none: 'There is no such section.',
     roleOn: 'The role "developer" is on.',
+    adminOn: 'The role "admin" is on: there is no daily limit of diagrams.',
     roleOff: 'You left the role.',
     roleWrong: 'The code is wrong.',
     roleSignIn: 'Sign in first.',
@@ -36,13 +38,13 @@ const TEXTS = {
 };
 
 // The documentation page: sections of three kinds (program, guides, code) read from site/js/docs, and the editing of a section for the developer role.
-export const initDocs = ({ root = document, storage, developerHash } = {}) => {
+export const initDocs = ({ root = document, storage, developerHash, adminHash } = {}) => {
   const article = root.querySelector('.docs__article');
   if (!article) return null;
   const lang = root.documentElement.lang === 'en' ? 'en' : 'ru';
   const t = TEXTS[lang];
   const docs = createDocsStore({ storage, defaults: { ru: RU, en: EN } });
-  const accounts = createAccountStore({ storage, ...(developerHash ? { developerHash } : {}) });
+  const accounts = createAccountStore({ storage, ...(developerHash ? { developerHash } : {}), ...(adminHash ? { adminHash } : {}) });
   const view = root.defaultView;
   const list = root.querySelector('.docs__list');
   const buttons = [...root.querySelectorAll('[data-docs-kind]')];
@@ -146,7 +148,7 @@ export const initDocs = ({ root = document, storage, developerHash } = {}) => {
     const result = await accounts.becomeDeveloper(field.value);
     field.value = '';
     syncRole();
-    return say(result.ok ? t.roleOn : t[result.error === 'signed-out' ? 'roleSignIn' : 'roleWrong']);
+    return say(result.ok ? (result.user.role === 'admin' ? t.adminOn : t.roleOn) : t[result.error === 'signed-out' ? 'roleSignIn' : 'roleWrong']);
   });
   roleOff.addEventListener('click', () => {
     accounts.leaveDeveloper();
