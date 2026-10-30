@@ -55,7 +55,9 @@ test('Ctrl+K and Cmd+K put the cursor into the box, other keys do not', () => {
 });
 
 test('without the magnifier and with the default navigation the box still works', () => {
-  const window = new JSDOM('<!doctype html><html lang="ru"><body><input class="app-topbar__search-input"></body></html>', { url: 'http://localhost/app/welcome.html' }).window;
+  const window = new JSDOM('<!doctype html><html lang="ru"><body><input class="app-topbar__search-input"></body></html>', {
+    url: 'http://localhost/app/welcome.html',
+  }).window;
   const api = initAppSearch({ root: window.document });
   assert.doesNotThrow(() => api.submit());
 });

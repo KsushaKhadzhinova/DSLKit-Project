@@ -96,8 +96,8 @@ export const initEditorPalette = ({ root = document } = {}) => {
   message.setAttribute('role', 'status');
   message.setAttribute('aria-live', 'polite');
   group.append(addButton, pop, connectRow, editButton, removeButton);
-  (toolbar.querySelector('[data-action="save"]') ?? toolbar.lastChild)?.after(group);
-  (remote.parentElement ?? page).append(message);
+  toolbar.querySelector('[data-action="save"]').after(group);
+  remote.parentElement.append(message);
 
   const closePop = () => {
     pop.hidden = true;

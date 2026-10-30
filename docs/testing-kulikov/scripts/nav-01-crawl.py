@@ -38,7 +38,7 @@ with sync_playwright() as pw:
         n = p.evaluate(TAG)
         descs = [p.evaluate(DESCR, i) for i in range(n)]
         print(f'== {lang} {auth} {path}: {n} elements', flush=True)
-        json.dump(out, open(f'out/crawl-{lang}-{auth}.partial.json', 'w', encoding='utf-8'), ensure_ascii=False)
+        json.dump(out, open(f'out/crawl-{lang}-{auth}.partial.json', 'w'))
         seen = {}
         for i, d in enumerate(descs):
             rec = dict(page=path, lang=lang, auth=auth, i=i, **d)
@@ -132,6 +132,6 @@ with sync_playwright() as pw:
             rec['errors'] = [f'{k}:{u.replace(BASE, "")}:{m[:100]}' for k, u, m in s.errors[err0:]]
             p.remove_listener('dialog', on_dialog); p.remove_listener('response', on_resp)
             out.append(rec)
-    json.dump(out, open(f'out/crawl-{lang}-{auth}.json', 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
+    json.dump(out, open(f'out/crawl-{lang}-{auth}.json', 'w'), indent=1)
     s.close()
 print('done', len(out))

@@ -1,23 +1,29 @@
-Traceback (most recent call last):
-  File "E:\DSLKit-Project\docs\testing-kulikov\scripts\nav-03-seq-auth.py", line 29, in <module>
-    p.goto(url('app/dashboard.html')); p.wait_for_timeout(800)
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "E:\VisualDSL_Tools\Python311\Lib\site-packages\playwright\sync_api\_generated.py", line 9903, in goto
-    self._sync(
-  File "E:\VisualDSL_Tools\Python311\Lib\site-packages\playwright\_impl\_sync_base.py", line 115, in _sync
-    return task.result()
-           ^^^^^^^^^^^^^
-  File "E:\VisualDSL_Tools\Python311\Lib\site-packages\playwright\_impl\_page.py", line 562, in goto
-    return await self._main_frame.goto(**locals_to_params(locals()))
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "E:\VisualDSL_Tools\Python311\Lib\site-packages\playwright\_impl\_frame.py", line 157, in goto
-    await self._channel.send(
-  File "E:\VisualDSL_Tools\Python311\Lib\site-packages\playwright\_impl\_connection.py", line 76, in send
-    return await self._connection.wrap_api_call(
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "E:\VisualDSL_Tools\Python311\Lib\site-packages\playwright\_impl\_connection.py", line 632, in wrap_api_call
-    raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
-playwright._impl._errors.Error: Page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:5191/app/dashboard.html
-Call log:
-  - navigating to "http://localhost:5191/app/dashboard.html", waiting until "load"
-
+PASS A01: Гость открывает «Мои проекты» по прямому адресу -> /app/login.html
+PASS A02: Гость открывает /en/app/dashboard.html -> /en/app/login.html
+PASS A03: Регистрация нового пользователя -> /app/welcome.html session=True
+PASS A04: Вошедший открывает «Мои проекты» -> 33 проектов
+PASS A06: Выход -> /index.html session=None
+PASS A07: После выхода нажать «Назад» (возврат на защищённую страницу) -> /app/login.html видимых карточек=0
+PASS A08: После выхода открыть dashboard.html заново -> /app/login.html
+PASS A09: Вход с чужим (неверным) паролем -> /app/login.html сообщение="Неверная почта или пароль. Проверьте дан" session=None
+PASS A10: Вход с несуществующей почтой -> "Неверная почта или пароль. Проверьте дан" == "Неверная почта или пароль. Проверьте дан"
+PASS A11: После неудачного входа поле пароля очищено -> ''
+PASS A12: Вход с почтой в ВЕРХНЕМ регистре -> /app/dashboard.html
+PASS A13: После повторного входа проекты на месте -> ['ТолькоУА', 'Order handling']
+PASS A14: Вошедший открывает login.html -> /app/dashboard.html
+PASS A15: Вошедший открывает register.html -> /app/dashboard.html
+PASS A16: Регистрация второго пользователя в том же браузере -> ['Order process', 'Order handling', 'Shop']
+PASS A17: Регистрация существующей почты «a338415@example.com» -> /app/register.html "Аккаунт с такой почтой уже есть. Во" session=None
+PASS A17: Регистрация существующей почты « A338415@EXAMPLE.COM » -> /app/register.html "Аккаунт с такой почтой уже есть. Во" session=None
+PASS A18: Регистрация: пустое имя -> /app/register.html
+PASS A18: Регистрация: плохая почта -> /app/register.html
+PASS A18: Регистрация: короткий пароль -> /app/register.html
+PASS A18: Регистрация: пароли не совпадают -> /app/register.html
+PASS A19: Двойной щелчок по «Регистрация» -> аккаунтов=1, url=/app/welcome.html
+PASS A20: Сессия с несуществующим id -> /app/login.html
+PASS A21: Испорченный JSON в сессии -> /app/login.html
+PASS A22: Вход при испорченном списке аккаунтов -> "Неверная почта или пароль. Проверьте дан"
+PASS A23: Выход во второй вкладке, смотрим первую (событие storage) -> guest-кнопок=2, user-кнопок=0
+FAIL A24: Та же вкладка 1: защищённый список после выхода в другой вкладке -> url=/app/dashboard.html, карточек=33
+FAIL A25: Вкладка 1 (сессии уже нет) отправляет проект в корзину -> проектов отправлено в корзину данных вышедшего пользователя=1
+28 rows; errors: []

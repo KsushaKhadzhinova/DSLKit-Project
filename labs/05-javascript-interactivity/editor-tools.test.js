@@ -341,3 +341,11 @@ test('opening the explorer from the activity bar closes the drawer', () => {
   assert.equal($('.editor-tools').hidden, true);
   assert.equal($('[data-panel="git"]').getAttribute('aria-pressed'), 'false');
 });
+
+test('opening search while the assistant tab is shown brings the problems tab back', () => {
+  const { $, press } = setup();
+  press('[data-panel="ai"]');
+  assert.equal($('.app-page--editor').dataset.tab, 'ai');
+  press('[data-panel="search"]');
+  assert.equal($('.app-page--editor').dataset.tab, 'problems');
+});

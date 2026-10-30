@@ -1,5 +1,6 @@
 == ru guest index.html: 45 elements
-== ru guest app/login.html: 14 elements
-== ru guest app/register.html: 16 elements
-== ru guest app/welcome.html: 26 elements
-== ru guest app/settings.html: 33 elements
+Traceback (most recent call last):
+  File "E:\DSLKit-Project\docs\testing-kulikov\scripts\nav-01-crawl.py", line 41, in <module>
+    json.dump(out, open(f'out/crawl-{lang}-{auth}.partial.json', 'w'))
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+OSError: [Errno 22] Invalid argument: 'out/crawl-ru-guest.partial.json'

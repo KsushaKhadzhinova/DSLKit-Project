@@ -599,7 +599,7 @@ const LABELS = {
     askRemoveTemplate: (title) => `Delete the template "${title}"? This cannot be undone.`,
     foundTemplates: (count) => `Templates found: ${count}`,
     noneTemplates: 'No templates found. Save a project as a template or create a new one.',
-    trashed: (time, left) => `Deleted ${time}, erased in ${left} days`,
+    trashed: (time, left) => `Deleted ${time}, erased in ${left} ${left === 1 ? 'day' : 'days'}`,
     rename: 'Rename',
     remove: 'Move to trash',
     restore: 'Restore',
@@ -689,7 +689,7 @@ export const initDashboard = ({ root = document, storage, now = () => Date.now()
     tag.append(el('span', 'project-card__tag', NOTATIONS[project.notation]?.short ?? project.notation.toUpperCase()));
     if (project.published) tag.append(' ', el('span', 'badge', labels.published));
     const stamp = trashed
-      ? labels.trashed(time(project.trashedAt), Math.max(0, Math.ceil(TRASH_DAYS - (now() - project.trashedAt) / 86400000)))
+      ? labels.trashed(time(project.trashedAt), Math.min(TRASH_DAYS, Math.max(0, Math.ceil(TRASH_DAYS - (now() - project.trashedAt) / 86400000))))
       : labels.changed(time(project.updated));
     article.append(el('div', 'project-card__preview'), headingBox, tag, el('p', 'project-card__updated', stamp));
     item.append(article);

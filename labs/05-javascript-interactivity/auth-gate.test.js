@@ -11,7 +11,9 @@ const page = (name) => new JSDOM(readFileSync(`site/${name}`, 'utf8'), { url: 'h
 test('My projects is closed to a guest: the gate sends the guest to the sign-in page', () => {
   for (const name of ['app/dashboard.html', 'en/app/dashboard.html']) {
     const sent = [];
-    assert.deepEqual(initAuthGate({ root: page(name), storage: createStorage(createMemoryBackend()), navigate: (url) => sent.push(url) }), { redirected: true });
+    assert.deepEqual(initAuthGate({ root: page(name), storage: createStorage(createMemoryBackend()), navigate: (url) => sent.push(url) }), {
+      redirected: true,
+    });
     assert.deepEqual(sent, ['login.html']);
   }
 });

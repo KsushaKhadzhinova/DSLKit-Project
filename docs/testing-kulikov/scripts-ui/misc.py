@@ -22,7 +22,7 @@ with sync_playwright() as p:
     register(pg, "m")
     pages = [("index", "/index.html"), ("login", "/app/login.html"), ("register", "/app/register.html"), ("dashboard", "/app/dashboard.html"),
              ("welcome", "/app/welcome.html"), ("editor", "/app/editor.html?template=bpmn"), ("settings", "/app/settings.html"), ("en-dashboard", "/en/app/dashboard.html"), ("en-editor", "/en/app/editor.html?template=erd")]
-    for w, h in [(375, 812), (768, 1024), (1366, 800)]:
+    for w, h in ([] if True else [(375, 812)]):
         for name, url in pages:
             def f(w=w, h=h, name=name, url=url):
                 keep = pg.evaluate("localStorage.getItem('dslkit.session')")

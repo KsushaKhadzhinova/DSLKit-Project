@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
+import { hashCode } from '../../tools/dev-code.js';
 import { createAccountStore, currentUser } from '../../site/js/storage/accounts.js';
 import { createMemoryBackend, createStorage } from '../../site/js/utils/storage.js';
 
@@ -125,4 +126,22 @@ test('damaged data gives a guest and ignores broken accounts', () => {
   assert.equal(currentUser(storage), null);
   storage.remove('session');
   assert.equal(currentUser(storage), null);
+});
+
+test('the role of one account does not touch another account', async () => {
+  const storage = memory();
+  const store = createAccountStore({ storage, developerHash: hashCode('code-1234') });
+  await store.register({ name: 'First', email: 'one@example.com', password: 'correct horse' });
+  await store.register({ name: 'Second', email: 'two@example.com', password: 'correct horse' });
+  await store.login({ email: 'one@example.com', password: 'correct horse' });
+  assert.equal((await store.becomeDeveloper('code-1234')).ok, true);
+  assert.deepEqual(
+    storage.get('accounts').map((account) => account.role),
+    ['developer', undefined],
+  );
+  assert.equal(store.leaveDeveloper(), true);
+  assert.deepEqual(
+    storage.get('accounts').map((account) => account.role),
+    ['user', undefined],
+  );
 });

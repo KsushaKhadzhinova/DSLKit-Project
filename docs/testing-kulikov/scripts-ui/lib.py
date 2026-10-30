@@ -40,7 +40,7 @@ class T:
             try: s.pg.screenshot(path=SC+f"{id_}.png")
             except Exception: pass
         s.rows.append({"id":id_,"what":what,"res":res,"note":note})
-        print(res,id_,note[:150],flush=True)
+        print(res,id_,note[:150],flush=True); s.save()
     def save(s):
         json.dump(s.rows,open(Path(__file__).parent/f"{s.name}.json","w"),ensure_ascii=False,indent=1)
 def yes(c,m):

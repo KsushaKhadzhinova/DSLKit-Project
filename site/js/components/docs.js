@@ -84,7 +84,7 @@ export const initDocs = ({ root = document, storage, developerHash } = {}) => {
   };
 
   const showKind = (name) => {
-    kind = KINDS.includes(name) ? name : 'project';
+    kind = name;
     buttons.forEach((button) => button.setAttribute('aria-pressed', String(button.dataset.docsKind === kind)));
     const sections = docs.sections(lang, kind);
     list.replaceChildren(
@@ -99,7 +99,7 @@ export const initDocs = ({ root = document, storage, developerHash } = {}) => {
         return item;
       }),
     );
-    return showSection(sections[0]?.id ?? '');
+    return showSection(sections[0].id);
   };
 
   buttons.forEach((button) => button.addEventListener('click', () => showKind(button.dataset.docsKind)));

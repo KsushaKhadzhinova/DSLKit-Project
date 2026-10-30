@@ -1,23 +1,25 @@
-Traceback (most recent call last):
-  File "E:\DSLKit-Project\docs\testing-kulikov\scripts\nav-06-new.py", line 18, in <module>
-    p.goto(url('app/dashboard.html')); p.wait_for_timeout(1500)
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "E:\VisualDSL_Tools\Python311\Lib\site-packages\playwright\sync_api\_generated.py", line 9903, in goto
-    self._sync(
-  File "E:\VisualDSL_Tools\Python311\Lib\site-packages\playwright\_impl\_sync_base.py", line 115, in _sync
-    return task.result()
-           ^^^^^^^^^^^^^
-  File "E:\VisualDSL_Tools\Python311\Lib\site-packages\playwright\_impl\_page.py", line 562, in goto
-    return await self._main_frame.goto(**locals_to_params(locals()))
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "E:\VisualDSL_Tools\Python311\Lib\site-packages\playwright\_impl\_frame.py", line 157, in goto
-    await self._channel.send(
-  File "E:\VisualDSL_Tools\Python311\Lib\site-packages\playwright\_impl\_connection.py", line 76, in send
-    return await self._connection.wrap_api_call(
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "E:\VisualDSL_Tools\Python311\Lib\site-packages\playwright\_impl\_connection.py", line 632, in wrap_api_call
-    raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
-playwright._impl._errors.Error: Page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:5191/app/dashboard.html
-Call log:
-  - navigating to "http://localhost:5191/app/dashboard.html", waiting until "load"
-
+PASS N01: Гость открывает dashboard.html (early.js) -> /app/login.html; script.js запрошен для dashboard: True
+PASS N02: Тема dark в хранилище: атрибут data-theme до загрузки страницы -> dark
+PASS N03: Испорченное значение темы "purple" -> light
+PASS N03: Испорченное значение темы 123 -> light
+PASS N03: Испорченное значение темы {bad -> light
+PASS N03: Испорченное значение темы null -> light
+PASS N04: Подделанная сессия (id не из списка аккаунтов) -> /app/login.html
+PASS N05: Верная сессия -> /app/dashboard.html
+PASS N06: Гость: /en/app/dashboard.html?q=x#y -> /en/app/login.html
+FAIL N07: Гость: /app/dashboard.html/ -> 200 /app/dashboard.html/
+PASS N07: Гость: /app/dashboard.html%20 -> 404 /app/dashboard.html%20
+PASS N08: docs.html (ru, guest): все внутренние ссылки -> status=200, ссылок=10, битых=[]
+PASS N08: docs.html (ru, user): все внутренние ссылки -> status=200, ссылок=10, битых=[]
+PASS N08: docs.html (en, guest): все внутренние ссылки -> status=200, ссылок=10, битых=[]
+PASS N08: docs.html (en, user): все внутренние ссылки -> status=200, ссылок=10, битых=[]
+PASS N09: docs.html#несуществующий-якорь -> Документация — DSLKit
+PASS N10: Меню ⋯ редактора: группы действий -> ['Диаграмма:4', 'Файл:4', 'Вид и справка:5', 'Аккаунт:4']
+PASS N11: Меню ⋯ редактора: Esc закрывает меню -> проверено
+PASS N12: Меню ⋯ редактора: клик вне меню закрывает -> проверено
+PASS N13: Меню ⋯ карточки: открыть второе при открытом первом -> открытых меню=1
+FAIL N14: Редактор: вкладки боковой панели -> ['order.dsl']
+PASS N15: Редактор: открыть вкладку «Шаблоны» -> видимых элементов=33
+PASS N16: Редактор: нажать шаблон -> код изменился=True
+PASS N17: Отмена после выбора шаблона -> True
+PASS N18: Ошибки консоли и страницы за прогон -> []

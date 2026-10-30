@@ -271,10 +271,10 @@ export const initEditorTools = ({ root = document, storage, now = () => Date.now
     if (name === 'search') {
       findBox.focus();
       search();
-    } else if (name === 'git') {
+    } else {
       renderLog();
       say('');
-    } else askBox.focus();
+    }
     return name;
   };
   buttons.forEach((node) => node.addEventListener('click', () => open(current === node.dataset.panel ? null : node.dataset.panel)));

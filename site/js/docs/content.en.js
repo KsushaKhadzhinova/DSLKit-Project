@@ -1,7 +1,10 @@
 // Documentation texts (English). Body format: ## and ### headings, paragraphs, - and 1. lists, ``` code blocks, **bold**, `code`, [text](address).
 export const DOCS = {
   project: [
-    { id: 'what-is-dslkit', title: "What is DSLKit", body: `DSLKit is a web editor for diagrams as code. You write the diagram as text in a compact language, and the editor draws it next to the code at once and checks it against the rules of the chosen notation.
+    {
+      id: 'what-is-dslkit',
+      title: 'What is DSLKit',
+      body: `DSLKit is a web editor for diagrams as code. You write the diagram as text in a compact language, and the editor draws it next to the code at once and checks it against the rules of the chosen notation.
 
 ## Why it is useful
 
@@ -24,8 +27,12 @@ process 1 "Validate order"
 flow Customer -> 1 "order"
 \`\`\`
 
-The full language reference is the file docs/DSL-REFERENCE.md of the repository, and the step-by-step guides are in the "Guides" section of this documentation.` },
-    { id: 'screens-overview', title: "Overview of the screens", body: `The application has several pages.
+The full language reference is the file docs/DSL-REFERENCE.md of the repository, and the step-by-step guides are in the "Guides" section of this documentation.`,
+    },
+    {
+      id: 'screens-overview',
+      title: 'Overview of the screens',
+      body: `The application has several pages.
 
 - **Home** (index.html): the description of the product, examples and the waiting-list form.
 - **Sign up** (register.html) and **sign in** (login.html): creating an account and signing in.
@@ -37,8 +44,12 @@ The full language reference is the file docs/DSL-REFERENCE.md of the repository,
 
 The top bar of every application page has the diagram search (Ctrl+K), the "New diagram" button, the language switch, the account menu and the settings icon. The side menu has the sections and the quota bar "Beta: N of 5 diagrams a day".
 
-Each screen is described in detail in the next sections.` },
-    { id: 'account-and-storage', title: "Account and data storage in the browser", body: `DSLKit has no server-side user database. **Accounts, projects, templates and settings are kept in the localStorage of your browser**, and every key has the prefix \`dslkit.\`.
+Each screen is described in detail in the next sections.`,
+    },
+    {
+      id: 'account-and-storage',
+      title: 'Account and data storage in the browser',
+      body: `DSLKit has no server-side user database. **Accounts, projects, templates and settings are kept in the localStorage of your browser**, and every key has the prefix \`dslkit.\`.
 
 ## Signing up and in
 
@@ -57,8 +68,12 @@ Each screen is described in detail in the next sections.` },
 
 ## Moving the data
 
-The data belongs to the browser and the site address. The guide "How to move projects to another computer" explains how to carry it over.` },
-    { id: 'projects-crudl', title: "Projects: create, read, update, delete, list", body: `A project is a diagram with a title, a notation, the code, the time of creation and the time of the last change.
+The data belongs to the browser and the site address. The guide "How to move projects to another computer" explains how to carry it over.`,
+    },
+    {
+      id: 'projects-crudl',
+      title: 'Projects: create, read, update, delete, list',
+      body: `A project is a diagram with a title, a notation, the code, the time of creation and the time of the last change.
 
 ## Creating
 
@@ -80,8 +95,12 @@ The data belongs to the browser and the site address. The guide "How to move pro
 
 - "Move to trash" puts a project into the trash after a confirmation. The trash is described in the next section.
 
-The store keeps at most 200 projects in one list.` },
-    { id: 'trash', title: "Trash (30 days)", body: `A deleted project is not erased at once, it goes to the trash.
+The store keeps at most 200 projects in one list.`,
+    },
+    {
+      id: 'trash',
+      title: 'Trash (30 days)',
+      body: `A deleted project is not erased at once, it goes to the trash.
 
 - Open the "Trash" section in the side menu. A card shows when the project was deleted and in how many days it will be erased.
 - **Restore** returns the project to "My projects" with its old content.
@@ -90,24 +109,36 @@ The store keeps at most 200 projects in one list.` },
 - A project that stayed in the trash for 30 days is deleted automatically the next time the project list opens.
 - A project in the trash cannot be opened in the editor until it is restored.
 
-Note: a deleted project still counts in the daily quota for the day of its creation.` },
-    { id: 'shared-examples', title: "Shared examples, likes and copying", body: `The "Shared" section holds one ready example for every notation of the editor. These are the same templates the editor puts in.
+Note: a deleted project still counts in the daily quota for the day of its creation.`,
+    },
+    {
+      id: 'shared-examples',
+      title: 'Shared examples, likes and copying',
+      body: `The "Shared" section holds one ready example for every notation of the editor. These are the same templates the editor puts in.
 
 - The title of an example opens the editor with it (\`editor.html?template=<notation>\`). No project is created until you change the code.
 - **Like** is a like mark (♡ becomes ♥ "Liked") and at the same time a copy of the example in "My projects". Pressing it again removes the mark but does not delete the copy.
 - **Save a copy to "My projects"** is a copy without a like.
 - **Add to "My templates"** is a copy in your templates.
 
-Likes are kept separately for every account (and for a guest). Filter, search and sort work as in "My projects".` },
-    { id: 'my-templates', title: "My templates", body: `"My templates" are your own starting points. They are kept apart from the projects, with no trash and no quota.
+Likes are kept separately for every account (and for a guest). Filter, search and sort work as in "My projects".`,
+    },
+    {
+      id: 'my-templates',
+      title: 'My templates',
+      body: `"My templates" are your own starting points. They are kept apart from the projects, with no trash and no quota.
 
 - Create a template: the project menu "Save as a template", the "Save as a template" item of the editor menu "⋯", or the "New template" button of the section (it asks for a name and opens the editor with an IDEF0 starter).
 - Pressing the title of a template starts a new diagram from its code (\`editor.html?my=<id>\`).
 - "Edit the template" opens it for editing (\`editor.html?tpl=<id>\`): saving updates the template itself and does not create a project.
 - "Rename" changes the title, "Delete the template" erases it after a confirmation with no way back.
 
-The templates of every account are isolated, like the projects.` },
-    { id: 'quota', title: "The \"5 diagrams a day\" quota", body: `In the beta version the side menu and the editor panel show the bar "Beta: N of 5 diagrams a day".
+The templates of every account are isolated, like the projects.`,
+    },
+    {
+      id: 'quota',
+      title: 'The "5 diagrams a day" quota',
+      body: `In the beta version the side menu and the editor panel show the bar "Beta: N of 5 diagrams a day".
 
 - N is the real number of diagrams created today (by the calendar day of your browser).
 - New projects count, copies of shared examples among them. Starter diagrams of the first visit and edits of existing projects do not count.
@@ -115,8 +146,12 @@ The templates of every account are isolated, like the projects.` },
 - If N is above 5, the label says the limit is exceeded: "the limit of 5 a day is exceeded".
 - The limit is **only shown** for now: the editor does not forbid creating more. The label "Pro — no limits" refers to a future plan.
 
-The bar is refreshed on every page of the application.` },
-    { id: 'editor', title: "The editor: code, canvas, bottom panel", body: `The editor has several zones.
+The bar is refreshed on every page of the application.`,
+    },
+    {
+      id: 'editor',
+      title: 'The editor: code, canvas, bottom panel',
+      body: `The editor has several zones.
 
 ## The top bar
 
@@ -143,8 +178,12 @@ The activity bar: Files (the explorer with the project list and the quota), Temp
 - **Output**: the log of runs (the last 50).
 - **Versions**: the list of local commits.
 
-One second after you stop typing the diagram and the problems update themselves; the code is also saved to \`editor-source\`.` },
-    { id: 'board-toolbar', title: "The board toolbar and dragging", body: `The top bar of the editor has the board tools next to Save. Each of them changes the code, and the code redraws the diagram, so the code and the picture always agree.
+One second after you stop typing the diagram and the problems update themselves; the code is also saved to \`editor-source\`.`,
+    },
+    {
+      id: 'board-toolbar',
+      title: 'The board toolbar and dragging',
+      body: `The top bar of the editor has the board tools next to Save. Each of them changes the code, and the code redraws the diagram, so the code and the picture always agree.
 
 - **Element** opens a menu of shapes for the current notation. Press a shape to add it (the layout picks the place) or drag it onto the canvas: the block appears where you release the pointer, and moves down if the place is taken.
 - **Connect** turns on the link mode. Choose the link type in the list, press the source block, then the target block. Esc cancels the mode. A block cannot be linked to itself.
@@ -155,8 +194,12 @@ Every change passes a strict gate: if it would create a new error of the notatio
 
 ## Dragging blocks
 
-The blocks of the own engine can be moved with the mouse, a finger or the arrow keys: an arrow moves by 10 units, Shift+arrow by 50. The new place is written to the code as \`pos=120x80\`. "Auto layout" in the "⋯" menu removes all \`pos=\` and brings back the automatic layout. Dragging works only for the own engine.` },
-    { id: 'hotkeys', title: "Hotkeys", body: `- **Ctrl+Enter**: run (draw) the diagram.
+The blocks of the own engine can be moved with the mouse, a finger or the arrow keys: an arrow moves by 10 units, Shift+arrow by 50. The new place is written to the code as \`pos=120x80\`. "Auto layout" in the "⋯" menu removes all \`pos=\` and brings back the automatic layout. Dragging works only for the own engine.`,
+    },
+    {
+      id: 'hotkeys',
+      title: 'Hotkeys',
+      body: `- **Ctrl+Enter**: run (draw) the diagram.
 - **Ctrl+S**: save the project (and the editor code).
 - **Ctrl+F**: open search and replace over the code.
 - **Ctrl+K**: the "Search diagrams" field of the application top bar.
@@ -167,8 +210,12 @@ The blocks of the own engine can be moved with the mouse, a finger or the arrow 
 - **Enter / Space** on a block in the Connect mode: pick the block.
 - **Left/Right arrows, Home, End** on the file tabs: switch tabs.
 
-On a Mac, Cmd works instead of Ctrl.` },
-    { id: 'export-import', title: "Export and import", body: `## Export
+On a Mac, Cmd works instead of Ctrl.`,
+    },
+    {
+      id: 'export-import',
+      title: 'Export and import',
+      body: `## Export
 
 The "⋯" menu of the editor saves the diagram that is on the canvas now (press Run first):
 
@@ -183,8 +230,12 @@ The "⋯" menu of the editor saves the diagram that is on the canvas now (press 
 - Understood: **Mermaid flowcharts**, **sequence diagrams** and **state diagrams** (Mermaid and PlantUML). Anything else is reported as "not supported", nothing is guessed.
 - If some constructs are not carried over they are listed in the message.
 - Limit: 200,000 characters in total and 2,000 characters in a line.
-- The imported code is checked and drawn at once; the import can be undone with the Undo button.` },
-    { id: 'settings', title: "Settings: theme, language, rendering engine", body: `The "Settings" page keeps the choices in the browser (key \`settings\`).
+- The imported code is checked and drawn at once; the import can be undone with the Undo button.`,
+    },
+    {
+      id: 'settings',
+      title: 'Settings: theme, language, rendering engine',
+      body: `The "Settings" page keeps the choices in the browser (key \`settings\`).
 
 ## Theme
 
@@ -204,8 +255,12 @@ The "Diagram generation engine" choice is read at every run:
 
 ## The rest
 
-Font size, line numbers, line wrap, autocomplete, autosave, canvas grid and guides are switches whose values are remembered in the settings; autosave also works from the editor menu.` },
-    { id: 'offline-pwa', title: "Working offline (PWA)", body: `DSLKit installs as a web application and works without a network.
+Font size, line numbers, line wrap, autocomplete, autosave, canvas grid and guides are switches whose values are remembered in the settings; autosave also works from the editor menu.`,
+    },
+    {
+      id: 'offline-pwa',
+      title: 'Working offline (PWA)',
+      body: `DSLKit installs as a web application and works without a network.
 
 - The service worker (file sw.js, cache version \`dslkit-v3\`) saves the pages, styles, scripts and icons on the first visit.
 - Pages load "network first": with a network you see the fresh version, without one the saved copy.
@@ -213,8 +268,12 @@ Font size, line numbers, line wrap, autocomplete, autosave, canvas grid and guid
 - The own engine and all the checks run fully in the browser, so you can write and draw diagrams without the internet. The Kroki and "DSLKit server" engines are not available offline: the editor shows a saved copy of the drawing if there is one.
 - The address bar or the browser menu offers "Install app" (manifest.webmanifest).
 
-If you see an old version after a site update, reload the page twice or clear the site data (projects are deleted with it, so move them first).` },
-    { id: 'developer-docs', title: "The \"developer\" role and documentation", body: `Everybody reads the documentation: guests and signed-in users. **Only a user with the role "developer" can change it.**
+If you see an old version after a site update, reload the page twice or clear the site data (projects are deleted with it, so move them first).`,
+    },
+    {
+      id: 'developer-docs',
+      title: 'The "developer" role and documentation',
+      body: `Everybody reads the documentation: guests and signed-in users. **Only a user with the role "developer" can change it.**
 
 ## How to get the role
 
@@ -235,8 +294,12 @@ Note: the site works without a server, so the role is checked in the browser. Th
 
 ## Who the "Code" section is for
 
-The "Code" section is written for developers: architecture, the language, notations, engines and the API, storage, tests. From the editor it is reached with the item "Code documentation" of the "⋯" menu.` },
-    { id: 'faq', title: "Frequently asked questions and troubleshooting", body: `## "My projects" opens the sign-in page at once
+The "Code" section is written for developers: architecture, the language, notations, engines and the API, storage, tests. From the editor it is reached with the item "Code documentation" of the "⋯" menu.`,
+    },
+    {
+      id: 'faq',
+      title: 'Frequently asked questions and troubleshooting',
+      body: `## "My projects" opens the sign-in page at once
 
 The page is for signed-in users only. Sign in or sign up.
 
@@ -270,10 +333,14 @@ Dragging works for the own engine. Choose it in the settings.
 
 ## The import did not accept the text
 
-Mermaid flowcharts, sequence diagrams and state diagrams are supported. Other kinds (class, ER, Gantt) are not imported.` },
+Mermaid flowcharts, sequence diagrams and state diagrams are supported. Other kinds (class, ER, Gantt) are not imported.`,
+    },
   ],
   guides: [
-    { id: 'first-diagram', title: "Your first diagram in 5 minutes", body: `## Goal
+    {
+      id: 'first-diagram',
+      title: 'Your first diagram in 5 minutes',
+      body: `## Goal
 
 Create, check, draw and save your first diagram.
 
@@ -318,8 +385,12 @@ Three blocks from left to right joined by arrows on the canvas; "No problems" in
 
 - A typo in the word \`control\` gives "Unrecognized line" on that line.
 - A box without \`control\` or \`output\` is reported as having no control or no output. In most notations a forgotten \`}\` gives "Block is not closed".
-- A header that is not on the first line: the diagram is taken for IDEF0 with a warning.` },
-    { id: 'idef0-context', title: "IDEF0: context and decomposition", body: `## Goal
+- A header that is not on the first line: the diagram is taken for IDEF0 with a warning.`,
+    },
+    {
+      id: 'idef0-context',
+      title: 'IDEF0: context and decomposition',
+      body: `## Goal
 
 Build the context diagram A-0 with one box and break it into 3 to 6 boxes (decomposition).
 
@@ -375,8 +446,12 @@ Context: one box with four sides (input, control, output, mechanism). Decomposit
 - More than one box in the context: a warning.
 - A box without \`output\` or \`control\`: an error naming the box.
 - An arrow that does not leave from \`output\`: an error.
-- A gap in the numbers (A1, A3): a warning.` },
-    { id: 'dfd-levels', title: "DFD levels 0 to 2", body: `## Goal
+- A gap in the numbers (A1, A3): a warning.`,
+    },
+    {
+      id: 'dfd-levels',
+      title: 'DFD levels 0 to 2',
+      body: `## Goal
 
 Show a system on three levels of detail.
 
@@ -427,8 +502,12 @@ Three diagrams with matching flows: what enters process 1 on level 1 enters its 
 - A flow between two entities or stores is an error: at least one end must be a process.
 - A flow without a label is a warning.
 - A process without inflows (a "miracle") or without outflows (a "black hole") is an error.
-- A store that is only written or only read is a warning.` },
-    { id: 'erd-shop', title: "ERD of a shop", body: `## Goal
+- A store that is only written or only read is a warning.`,
+    },
+    {
+      id: 'erd-shop',
+      title: 'ERD of a shop',
+      body: `## Goal
 
 Describe the entities of a shop, their attributes and relations.
 
@@ -466,8 +545,12 @@ Three entities as tables with attributes and relation lines with the cardinality
 - A relation with an unknown entity: "Unknown element".
 - Two entities with the same name: "already declared".
 - An entity without relations gets the warning "not connected to anything".
-- For pure relational data modelling by IDEF1X use the notation \`idef1x\`.` },
-    { id: 'uml-class-sequence', title: "UML: classes and sequences", body: `## Goal
+- For pure relational data modelling by IDEF1X use the notation \`idef1x\`.`,
+    },
+    {
+      id: 'uml-class-sequence',
+      title: 'UML: classes and sequences',
+      body: `## Goal
 
 Describe the structure of a shop by a class diagram and the message exchange of checkout by a sequence diagram.
 
@@ -524,8 +607,12 @@ A class diagram with arrows of different kinds; a sequence diagram with lifeline
 
 - The kind is missing in the UML header: "Give the UML diagram kind".
 - A relation with a class that does not exist: "Unknown element".
-- A message from a participant that is not declared with \`actor\` or \`participant\`.` },
-    { id: 'bpmn-order', title: "BPMN: order process", body: `## Goal
+- A message from a participant that is not declared with \`actor\` or \`participant\`.`,
+    },
+    {
+      id: 'bpmn-order',
+      title: 'BPMN: order process',
+      body: `## Goal
 
 Describe order handling with the fork "in stock?".
 
@@ -562,8 +649,12 @@ A flow from left to right: start, task, a diamond gateway, two branches, a secon
 
 - A flow that leads an element into itself is an error.
 - An element without flows is the warning "not connected to anything".
-- An unknown element type gives "Unrecognized line": check the words \`start task exclusive parallel intermediate end\`.` },
-    { id: 'petri-net', title: "A Petri net", body: `## Goal
+- An unknown element type gives "Unrecognized line": check the words \`start task exclusive parallel intermediate end\`.`,
+    },
+    {
+      id: 'petri-net',
+      title: 'A Petri net',
+      body: `## Goal
 
 Model a producer and a consumer with a buffer of two slots.
 
@@ -593,8 +684,12 @@ Two places (circles), two transitions (rectangles), arcs; two tokens in the plac
 
 - An arc between two places or two transitions is an error.
 - An arc to an unknown element: "Unknown element".
-- A transition without incoming arcs is a source of tokens: check that this is intended.` },
-    { id: 'gost-flowchart', title: "A flowchart by GOST", body: `## Goal
+- A transition without incoming arcs is a source of tokens: check that this is intended.`,
+    },
+    {
+      id: 'gost-flowchart',
+      title: 'A flowchart by GOST',
+      body: `## Goal
 
 Draw the algorithm of the sum of numbers 1…n by GOST 19.701-90.
 
@@ -630,8 +725,12 @@ A vertical flowchart with a check diamond and the return arrow of the loop.
 
 - A decision with one branch only or branches without labels.
 - A flow from a block into itself is an error.
-- Several "Start" blocks.` },
-    { id: 'board-tools-guide', title: "How to use the board toolbar", body: `## Goal
+- Several "Start" blocks.`,
+    },
+    {
+      id: 'board-tools-guide',
+      title: 'How to use the board toolbar',
+      body: `## Goal
 
 Build a diagram with the mouse without typing the code by hand.
 
@@ -654,8 +753,12 @@ The diagram is built without typing code, and the code is correct with no errors
 - The message "Not added" or "The link is refused": the change would create an error of the notation, read the reason in the status line.
 - Rename and Delete are disabled: press a block first.
 - A block does not move: the own engine is not chosen.
-- In the Connect mode a press picks a block and does not move it; leave the mode (Esc).` },
-    { id: 'move-projects', title: "How to move projects to another computer", body: `## Goal
+- In the Connect mode a press picks a block and does not move it; leave the mode (Esc).`,
+    },
+    {
+      id: 'move-projects',
+      title: 'How to move projects to another computer',
+      body: `## Goal
 
 Get your diagrams on another computer or in another browser.
 
@@ -689,8 +792,12 @@ The diagrams are available at the new place.
 
 - A different site address (localhost and 127.0.0.1) is a different store.
 - Not all keys are moved: projects are in \`dslkit.projects.<account id>\` and the account itself in \`dslkit.accounts\`.
-- Clearing the site data before the move erases the projects.` },
-    { id: 'fix-errors', title: "How to fix errors in a diagram (problems panel and assistant)", body: `## Goal
+- Clearing the site data before the move erases the projects.`,
+    },
+    {
+      id: 'fix-errors',
+      title: 'How to fix errors in a diagram (problems panel and assistant)',
+      body: `## Goal
 
 Learn to read the editor messages and fix the code fast.
 
@@ -724,8 +831,12 @@ box A1 "Ship goods" {
 
 - Fixing one error reveals others: the parser reports all it sees, cure them in line order.
 - Warnings (⚠) do not stop the run, but point to flaws against the rules of the notation: read them.
-- The assistant works offline by rules and does not understand free questions.` },
-    { id: 'keyboard-only', title: "Hotkeys and the keyboard without a mouse", body: `## Goal
+- The assistant works offline by rules and does not understand free questions.`,
+    },
+    {
+      id: 'keyboard-only',
+      title: 'Hotkeys and the keyboard without a mouse',
+      body: `## Goal
 
 Work in the editor with the keyboard only.
 
@@ -747,8 +858,12 @@ The full cycle "write, check, draw, save" with no mouse.
 ## Typical mistakes
 
 - The focus is in the code field: keys like Delete act on the text, not on a block. Move to the canvas with Tab.
-- Ctrl+S in a browser opens the page save dialog by default; in the editor it is intercepted, but outside the editor field the focus may be on another page.` },
-    { id: 'own-api', title: "How to connect your own rendering API", body: `## Goal
+- Ctrl+S in a browser opens the page save dialog by default; in the editor it is intercepted, but outside the editor field the focus may be on another page.`,
+    },
+    {
+      id: 'own-api',
+      title: 'How to connect your own rendering API',
+      body: `## Goal
 
 Draw diagrams on your own DSLKit server or on your own Kroki instance.
 
@@ -784,10 +899,14 @@ The status line of the editor names the chosen engine and the diagram is drawn.
 - The page is opened as static files (no tools/serve.js): \`/api/render\` does not exist, a server error follows.
 - A source longer than 100,000 characters: the answer 413.
 - Code 422: a header with an unknown notation, the body lists the problems.
-- The CSP blocks a foreign address unless you add it to \`connect-src\`.` },
+- The CSP blocks a foreign address unless you add it to \`connect-src\`.`,
+    },
   ],
   code: [
-    { id: 'architecture', title: "Architecture and folder map", body: `DSLKit is a static site with no build step: the browser loads ES modules directly, and a server is needed only to serve the files and for the optional API.
+    {
+      id: 'architecture',
+      title: 'Architecture and folder map',
+      body: `DSLKit is a static site with no build step: the browser loads ES modules directly, and a server is needed only to serve the files and for the optional API.
 
 \`\`\`
 site/            the site (RU in site/app, EN in site/en/app, shared css, js, images)
@@ -811,8 +930,12 @@ react-app/       a separate React application of lab 7
 - **A module is a function initX({ root, storage, ... })**. A component finds its own markup and returns \`null\` if the page has none. Everything outside (time, timers, clipboard, navigation, \`fetch\`) arrives as a parameter, so tests replace it.
 - **The code is the single source of truth**. The diagram, the palette, dragging and the assistant change only the code text and then send the event \`dslkit:run\`; the drawing is built from the code.
 - **Pure logic apart from the DOM**: parsing, palette, formatting and import live in notations/ and utils/ and are tested without a browser.
-- **Russian is the source language**; English is added with \`{ ru, en }\` dictionaries or rules in i18n.js.` },
-    { id: 'boot', title: "Loading: script.js, boot and the component list", body: `Every page loads one module, site/js/script.js. It imports all the components, collects them into the array \`COMPONENTS\` and starts them.
+- **Russian is the source language**; English is added with \`{ ru, en }\` dictionaries or rules in i18n.js.`,
+    },
+    {
+      id: 'boot',
+      title: 'Loading: script.js, boot and the component list',
+      body: `Every page loads one module, site/js/script.js. It imports all the components, collects them into the array \`COMPONENTS\` and starts them.
 
 \`\`\`
 export const COMPONENTS = [initTheme, initBurger, initAuthGate, initAuthMenu, initAccordion,
@@ -830,8 +953,12 @@ export const boot = (root, { components = COMPONENTS, logger = console } = {}) =
 - The block \`/* node:coverage disable */\` around the start at the end of the file excludes from coverage only the line that runs in a real browser.
 - After that \`registerServiceWorker\` (pwa.js) is called.
 
-To add a component, create a file in components/, export \`initName\`, add it to the imports and to \`COMPONENTS\` with the order in mind.` },
-    { id: 'dsl-parsing', title: "The DSL and parsing: parseDiagram, the model, problems", body: `The input of parsing is a code string, the output is a **model**.
+To add a component, create a file in components/, export \`initName\`, add it to the imports and to \`COMPONENTS\` with the order in mind.`,
+    },
+    {
+      id: 'dsl-parsing',
+      title: 'The DSL and parsing: parseDiagram, the model, problems',
+      body: `The input of parsing is a code string, the output is a **model**.
 
 \`\`\`
 import { parseDiagram, formatProblem } from './notations/index.js';
@@ -863,8 +990,12 @@ Shared strict rules on top of the rules of a notation: a wrong \`pos=\`, repeate
 
 Most notations are defined through \`defineGraph({ notation, nodes, edges, kinds, edgeKinds, validate })\` (graph.js): a shared "node and link" parser and renderer, while the notation supplies the words, shapes and the \`validate\` function. IDEF0, ER, classes, sequences and timing have parsers of their own.
 
-When you add an error code, put it in \`MESSAGES\` in both languages, or the dictionary completeness test fails.` },
-    { id: 'notations', title: "Notations and how to add a new one", body: `The registry of notations is the object \`NOTATIONS\` in notations/index.js. An entry is created by \`entry(short, ru, en, impl)\`.
+When you add an error code, put it in \`MESSAGES\` in both languages, or the dictionary completeness test fails.`,
+    },
+    {
+      id: 'notations',
+      title: 'Notations and how to add a new one',
+      body: `The registry of notations is the object \`NOTATIONS\` in notations/index.js. An entry is created by \`entry(short, ru, en, impl)\`.
 
 \`\`\`
 mindmap: entry('Mind map', 'Ментальная карта', 'Mind map', fromSpec(mindmap)),
@@ -888,8 +1019,12 @@ An implementation gives: \`parse(lines, header, source)\`, \`generators\` (text 
 node --input-type=module -e "import('./site/js/notations/index.js').then(m => console.log(m.parseDiagram(m.TEMPLATES.mindmap).problems))"
 \`\`\`
 
-An empty array means a template with no problems.` },
-    { id: 'rendering', title: "Rendering: renderNotation, svg.js, local-engine, sanitizeSvg", body: `A diagram is drawn in three steps: the model, an SVG string, cleaning and insertion into the page.
+An empty array means a template with no problems.`,
+    },
+    {
+      id: 'rendering',
+      title: 'Rendering: renderNotation, svg.js, local-engine, sanitizeSvg',
+      body: `A diagram is drawn in three steps: the model, an SVG string, cleaning and insertion into the page.
 
 ## renderNotation
 
@@ -911,8 +1046,12 @@ A drawing from an outside server cannot be inserted as is. \`sanitizeSvg(svgText
 - removes the tags \`script, foreignObject, iframe, object, embed, style, use, image, feImage, set, animate, animateTransform, animateMotion\` and elements of foreign namespaces;
 - removes \`on*\` attributes, \`href\` links that do not start with \`#\` or \`http(s)://\` (control characters inside the scheme are removed before the check), and \`style\` with \`url(\`, \`expression(\`, \`javascript:\` or a backslash.
 
-DiagramRunner applies it to the SVG of every engine, the own one included, and only the cleaned node enters \`.canvas__remote\`.` },
-    { id: 'engines-api', title: "Engines and API: engines.js, apiService.js, render-api.js", body: `## engines.js
+DiagramRunner applies it to the SVG of every engine, the own one included, and only the cleaned node enters \`.canvas__remote\`.`,
+    },
+    {
+      id: 'engines-api',
+      title: 'Engines and API: engines.js, apiService.js, render-api.js',
+      body: `## engines.js
 
 \`ENGINES\` is the list of engines: \`graphviz\`, \`mermaid\`, \`plantuml\` (through Kroki), \`dslkit\` (own server) and \`local\` (in the browser). Each has an \`id\`, a \`label\`, a \`type\` (the Kroki endpoint, \`'dslkit'\`, or \`null\` for the browser) and a \`build(model, source)\` that prepares the input. \`DEFAULT_ENGINE_ID = 'local'\`, \`findEngine(id)\` returns the default for an unknown id, \`engineForFormat(format)\` picks an engine when the chosen one cannot produce the needed language (\`pickFormat\` from notations/index.js).
 
@@ -945,8 +1084,12 @@ POST /api/external/<language>  proxies the source to a Kroki-compatible service 
 
 - Body: JSON \`{source}\` or plain text; the limit \`MAX_SOURCE\` = 100,000 characters (413), an empty source is 400, invalid JSON is 400, a wrong method is 405 with \`Allow\`, an unknown notation at render is 422 with a list of problems.
 - The address of the external service comes from the environment variable \`KROKI_URL\` (default https://kroki.io), timeout 10 s.
-- API answers are not cached (\`Cache-Control: no-store\`).` },
-    { id: 'storage', title: "Stores: localStorage, projects.js, accounts.js, seeds.js", body: `## utils/storage.js
+- API answers are not cached (\`Cache-Control: no-store\`).`,
+    },
+    {
+      id: 'storage',
+      title: 'Stores: localStorage, projects.js, accounts.js, seeds.js',
+      body: `## utils/storage.js
 
 \`createStorage(backend, prefix = 'dslkit.')\` gives \`get(key, fallback)\`, \`set\`, \`remove\`. Values are kept as JSON, any error (quota, private mode, broken JSON) becomes the fallback value or \`false\`: exceptions do not leak out. \`getStorage(window)\` substitutes \`createMemoryBackend()\` when localStorage is unavailable.
 
@@ -981,8 +1124,12 @@ diagram_cache, run_history   SVG cache (20 entries, TTL 24 h) and the last 5 run
 
 ## Rule
 
-Any new key has the prefix and goes through \`storage\`, and user data carries the \`owner\` suffix.` },
-    { id: 'editor-components', title: "Editor components and events", body: `The editor is made of independent components that talk through the DOM and two events.
+Any new key has the prefix and goes through \`storage\`, and user data carries the \`owner\` suffix.`,
+    },
+    {
+      id: 'editor-components',
+      title: 'Editor components and events',
+      body: `The editor is made of independent components that talk through the DOM and two events.
 
 ## Events
 
@@ -1012,8 +1159,12 @@ export const initThing = ({ root = document, storage, now = () => Date.now() } =
   page.addEventListener('dslkit:run', () => { /* reaction */ });
   return { /* what the tests need */ };
 };
-\`\`\`` },
-    { id: 'tests', title: "Tests: node:test, jsdom, the 100% threshold", body: `Tests use the built-in runner \`node:test\` and \`node:assert/strict\`, and \`jsdom\` provides the DOM.
+\`\`\``,
+    },
+    {
+      id: 'tests',
+      title: 'Tests: node:test, jsdom, the 100% threshold',
+      body: `Tests use the built-in runner \`node:test\` and \`node:assert/strict\`, and \`jsdom\` provides the DOM.
 
 ## Running
 
@@ -1055,8 +1206,12 @@ test('what the component does', () => {
 - Pass time, timers, \`fetch\`, the clipboard, \`crypto\` and navigation as parameters and replace them.
 - Every \`if\` branch needs a test. If a branch is unreachable, remove it from the code rather than disable coverage; \`/* node:coverage disable */\` is allowed only for the start line that runs in a real browser.
 - A new notation: a test that its template parses with no problems, and tests of every check rule (one per error and per warning).
-- Tests that create accounts keep data in memory only.` },
-    { id: 'style-css', title: "Code style and CSS rules", body: `## JavaScript
+- Tests that create accounts keep data in memory only.`,
+    },
+    {
+      id: 'style-css',
+      title: 'Code style and CSS rules',
+      body: `## JavaScript
 
 - ES modules, no build and no outside libraries in the browser (\`lodash\` is only a dependency of the build).
 - Prettier (.prettierrc): semicolons, single quotes, width 160. Commands \`npm run format\` and \`npm run format:check\`. EditorConfig: UTF-8, LF, two spaces.
@@ -1077,8 +1232,12 @@ test('what the component does', () => {
 
 ## Accessibility
 
-Icon buttons have \`aria-label\` and \`data-tip\`; states use \`aria-pressed\`, \`aria-expanded\`, \`aria-disabled\`, \`aria-current\`; messages use \`role="status"\` with \`aria-live="polite"\`.` },
-    { id: 'reports-build', title: "Building reports and the reference", body: `Lab reports and the language reference are generated from the code, so they never differ from it.
+Icon buttons have \`aria-label\` and \`data-tip\`; states use \`aria-pressed\`, \`aria-expanded\`, \`aria-disabled\`, \`aria-current\`; messages use \`role="status"\` with \`aria-live="polite"\`.`,
+    },
+    {
+      id: 'reports-build',
+      title: 'Building reports and the reference',
+      body: `Lab reports and the language reference are generated from the code, so they never differ from it.
 
 ## Reports
 
@@ -1104,8 +1263,12 @@ The command writes docs/DSL-REFERENCE.md and DSL-REFERENCE.en.md: the parsing pi
 - \`npm run design:generate\` and \`design:build\`: design materials.
 - \`npm run lab2:generate\`: the environment checks of lab 2.
 - \`npm run tc:reports\`: reports of the testing course.
-- tools/make-postman.js and http-to-postman.js build a Postman collection from HTTP requests.` },
-    { id: 'add-page-language', title: "How to add a page or a language", body: `## A new application page
+- tools/make-postman.js and http-to-postman.js build a Postman collection from HTTP requests.`,
+    },
+    {
+      id: 'add-page-language',
+      title: 'How to add a page or a language',
+      body: `## A new application page
 
 1. Copy a similar page from site/app/ (for example settings.html) and its English version from site/en/app/. Keep the shared header, the side menu, the skip link, \`<script type="module" src="../js/script.js">\` (\`../../js/script.js\` in EN) and \`<link rel="stylesheet" href="../css/style.css">\`.
 2. If the page is for signed-in users only, add the attribute \`data-requires-auth\` to \`<body>\`: \`initAuthGate\` will send a guest to login.html.
@@ -1124,8 +1287,12 @@ There are two languages now: Russian (the source) and English. For a third one:
 4. The texts of this documentation are site/js/docs/content.<code>.js with the same section \`id\`s.
 5. Add the language to the API (\`LANGS\` in tools/render-api.js).
 
-The dictionary completeness test must check that every key has all the languages.` },
-    { id: 'security', title: "Security: CSP, SVG cleaning, password hashing", body: `## Content-Security-Policy and headers
+The dictionary completeness test must check that every key has all the languages.`,
+    },
+    {
+      id: 'security',
+      title: 'Security: CSP, SVG cleaning, password hashing',
+      body: `## Content-Security-Policy and headers
 
 tools/server.js sends every answer with the headers \`SECURITY_HEADERS\`. The main one:
 
@@ -1156,6 +1323,7 @@ PBKDF2-SHA-256, 100,000 iterations, a random 16-byte salt, constant-time compari
 - Input size is limited: 100,000 characters in the API, 200,000 in import, 200 records in a list.
 - A failure message gives a code and a status, not internals.
 
-For more on the policy see SECURITY.md in the repository root.` },
+For more on the policy see SECURITY.md in the repository root.`,
+    },
   ],
 };

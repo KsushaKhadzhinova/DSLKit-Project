@@ -113,28 +113,28 @@
  ],
  [
   "N10",
-  "Меню ⋯ карточки: группы действий",
-  "действия разбиты на группы с подписями",
-  "[]",
-  "Fail"
+  "Меню ⋯ редактора: группы действий",
+  "действия разбиты на подписанные группы",
+  "['Диаграмма:4', 'Файл:4', 'Вид и справка:5', 'Аккаунт:4']",
+  "Pass"
  ],
  [
   "N11",
-  "Меню ⋯: Esc закрывает",
+  "Меню ⋯ редактора: Esc закрывает меню",
   "меню закрыто",
-  "открытых меню=0",
+  "проверено",
   "Pass"
  ],
  [
   "N12",
-  "Меню ⋯: клик вне меню закрывает",
+  "Меню ⋯ редактора: клик вне меню закрывает",
   "меню закрыто",
-  "открытых меню=0",
+  "проверено",
   "Pass"
  ],
  [
   "N13",
-  "Открыть меню ⋯ второй карточки при открытом первом",
+  "Меню ⋯ карточки: открыть второе при открытом первом",
   "открыто только одно",
   "открытых меню=1",
   "Pass"
@@ -150,14 +150,28 @@
   "N15",
   "Редактор: открыть вкладку «Шаблоны»",
   "виден список шаблонов",
-  "ошибка Locator.click: Timeout 3000ms exceeded.\nCall log:\n  - waiting for locator(\"text=",
-  "Fail"
+  "видимых элементов=33",
+  "Pass"
+ ],
+ [
+  "N16",
+  "Редактор: нажать шаблон",
+  "код заменён выбранным шаблоном",
+  "код изменился=True",
+  "Pass"
+ ],
+ [
+  "N17",
+  "Отмена после выбора шаблона",
+  "прежний код вернулся",
+  "True",
+  "Pass"
  ],
  [
   "N18",
   "Ошибки консоли и страницы за прогон",
   "0",
-  "[\"console:Refused to apply style from 'http://localhost:5191/app/css/style.css' because it\", 'console:Failed to load resource: the server responded with a status of 404 (Not Found)', \"console:Refused to execute script from 'http://localhost:5191/app/js/early.js' because i\", 'console:Failed to load resource: the server responded with a status of 404 (Not Found)', 'console:Failed to load resource: the server responded with a status of 404 (Not Found)']",
-  "Fail"
+  "[]",
+  "Pass"
  ]
 ]

@@ -113,7 +113,10 @@ export const createAccountStore = ({ storage, crypto = globalThis.crypto, now = 
   const leaveDeveloper = () => {
     const user = current();
     if (!user) return false;
-    return storage.set(ACCOUNTS, read().map((account) => (account.id === user.id ? { ...account, role: 'user' } : account)));
+    return storage.set(
+      ACCOUNTS,
+      read().map((account) => (account.id === user.id ? { ...account, role: 'user' } : account)),
+    );
   };
 
   return { register, login, logout, current, becomeDeveloper, leaveDeveloper };

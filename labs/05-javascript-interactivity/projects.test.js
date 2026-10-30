@@ -547,3 +547,34 @@ test('a change made in another tab refreshes the list at once', () => {
   t.dom.window.dispatchEvent(new t.dom.window.Event('storage'));
   assert.deepEqual(t.visible(), ['From another tab']);
 });
+
+test('the English dashboard empties the trash with its own confirmation, and damaged likes are ignored', () => {
+  const storage = memory();
+  storage.set('likes-guest', 'broken');
+  const t = dashboard({ storage, lang: 'en', answers: { confirm: true } });
+  const store = createProjectStore({ storage, now: clock() });
+  store.trash(store.save({ title: 'To trash', notation: 'idef0', source: 's' }).id);
+  t.dom.window.dispatchEvent(new t.dom.window.Event('storage'));
+  t.press(t.document.querySelector('[data-section="trash"]'));
+  const empty = [...t.document.querySelectorAll('button')].find((node) => node.textContent === 'Empty the trash');
+  assert.equal(empty.hidden, false);
+  t.press(empty);
+  assert.equal(store.listTrash().length, 0);
+});
+
+test('a project with a damaged trash time is dropped, a date in the future is capped and one day is not "1 days"', () => {
+  const storage = memory();
+  const at = 1_700_000_000_000;
+  const store = createProjectStore({ storage, now: () => at });
+  const make = (title, trashedAt) => ({ id: title, title, notation: 'idef0', source: 's', updated: at, trashedAt });
+  storage.set('projects', [make('bad', 'yesterday'), make('future', at + 5 * 86_400_000), make('last', at - 29.5 * 86_400_000)]);
+  assert.deepEqual(
+    store.listTrash().map((item) => item.title),
+    ['future', 'last'],
+  );
+  const en = dashboard({ storage, lang: 'en', now: () => at });
+  en.press(en.document.querySelector('[data-section="trash"]'));
+  const notes = [...en.document.querySelectorAll('.project-card__updated')].map((node) => node.textContent).filter((text) => text.includes('erased'));
+  assert.ok(notes.some((text) => text.endsWith('erased in 30 days')));
+  assert.ok(notes.some((text) => text.endsWith('erased in 1 day')));
+});

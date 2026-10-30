@@ -20,7 +20,7 @@ def on_dialog(d):
 
 def new_tab(ctx, path='app/dashboard.html', lang='ru'):
     t = ctx.new_page(); t.set_default_timeout(30000); t.on('dialog', on_dialog)
-    t.goto(url(path, lang)); t.wait_for_timeout(700)
+    t.goto(url(path, lang)); t.wait_for_selector('#project-list .project-list__item', state='attached'); t.wait_for_timeout(1200)
     return t
 
 

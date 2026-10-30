@@ -7,7 +7,8 @@ const valid = (item) =>
   typeof item.id === 'string' &&
   typeof item.title === 'string' &&
   typeof item.source === 'string' &&
-  Number.isFinite(item.updated);
+  Number.isFinite(item.updated) &&
+  (item.trashedAt === undefined || Number.isFinite(item.trashedAt));
 
 // The projects of the user: every saved diagram keeps its title, notation, code and the time of the last change.
 // A damaged store gives an empty list, a damaged project is dropped.
