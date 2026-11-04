@@ -2,6 +2,8 @@
 
 Russian version: [`PROJECT-STATE.md`](PROJECT-STATE.md). This document is written for anyone who continues the work: the owner, a colleague or a helper. It gathers everything needed to start without questions: the goal, the rules, the branch map, the state of every work, commands, environment traps, decisions taken, open questions and the plan. Detailed study guides for each work are in [`study/`](study/).
 
+Skills for AI agents (Accelerator) are installed in `.claude/skills/`; details and the reasons for the choice are in [`ACCELERATOR.en.md`](ACCELERATOR.en.md) (installed on 4 November 2026).
+
 State as of 23 October 2026.
 
 ## 1 Goal and context

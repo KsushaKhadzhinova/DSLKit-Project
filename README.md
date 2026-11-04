@@ -4,7 +4,7 @@
 
 ## Для продолжения работы
 
-Состояние проекта, правила работы, карта веток и план собраны в [`docs/PROJECT-STATE.md`](docs/PROJECT-STATE.md) (английская версия `docs/PROJECT-STATE.en.md`). Разборы работ для защиты лежат в [`docs/study/`](docs/study/README.md).
+Состояние проекта, правила работы, карта веток и план собраны в [`docs/PROJECT-STATE.md`](docs/PROJECT-STATE.md) (английская версия `docs/PROJECT-STATE.en.md`). Разборы работ для защиты лежат в [`docs/study/`](docs/study/README.md). Установленные навыки для ИИ-агентов (Accelerator) описаны в [`docs/ACCELERATOR.md`](docs/ACCELERATOR.md) (английская версия `docs/ACCELERATOR.en.md`).
 
 ## Технологии
 
