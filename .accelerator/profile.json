@@ -1,0 +1,62 @@
+{
+  "schema_version": "1",
+  "toolset_ref": "refs/tags/v1.4.1",
+  "stack": {
+    "languages": [
+      "javascript"
+    ],
+    "frameworks": [
+      "docker"
+    ],
+    "test_runner": null,
+    "package_manager": "npm"
+  },
+  "shape": {
+    "layout": "single",
+    "ci": "github-actions"
+  },
+  "agents": [
+    "claude-code"
+  ],
+  "intents": [
+    "code-review",
+    "containerization",
+    "data-quality",
+    "debugging",
+    "development-process",
+    "documentation",
+    "ingestion",
+    "refactoring",
+    "research",
+    "security",
+    "testing",
+    "writing"
+  ],
+  "provenance": {
+    "stack": "scanned",
+    "shape": "scanned",
+    "agents": "scanned",
+    "intents": "answered",
+    "selected_artifacts": "answered"
+  },
+  "selected_artifacts": [
+    "CODE-CHANGE-REVIEW",
+    "CODE-COMMENT-WRITING",
+    "COMPLETION-VERIFICATION",
+    "DATA-INCIDENT-TRACING",
+    "DATA-QUALITY-CONTROLS",
+    "DOCKER-COMPOSE-LOCAL-STACK",
+    "DOCKER-IMAGE-BUILD",
+    "ERROR-DIAGNOSIS",
+    "IMPLEMENTATION-PLANNING",
+    "PIPELINE-CHECK-SELECTION",
+    "PIPELINE-OUTPUT-REVIEW",
+    "PLAN-EXECUTION",
+    "PROJECT-ADAPTATION",
+    "PROJECT-DOCUMENTATION",
+    "REFACTOR-STEP-PLANNING",
+    "REQUIREMENTS-BRAINSTORMING",
+    "SENSITIVE-DATA-HANDLING",
+    "TEST-DESIGN-REVIEW"
+  ]
+}
