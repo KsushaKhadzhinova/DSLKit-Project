@@ -1,0 +1,204 @@
+# One docker compose for the whole DSLKit repository.
+# Run only what you need with a profile, for example:
+#   docker compose --profile site up -d            the Part 1 site (labs 1-8 of Part 1)
+#   docker compose --profile db up -d              PostgreSQL for part-2 labs 2 and 3 (and tests)
+#   docker compose --profile mongo up -d           MongoDB for part-2 lab 6
+#   docker compose --profile lab8 up -d --build    part-2 lab 8: db + backend (lab 3) + frontend (lab 5)
+#   docker compose --profile course up -d --build  the course project: db + backend + frontend
+# Secrets come from the .env file next to this file (copy .env.example), never from this file.
+name: dslkit-all
+
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: 10m
+    max-file: '3'
+
+x-postgres: &postgres
+  restart: unless-stopped
+  logging: *logging
+  mem_limit: 512m
+  pids_limit: 200
+  healthcheck:
+    test: ['CMD-SHELL', 'pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}']
+    interval: 5s
+    timeout: 3s
+    retries: 10
+
+x-hardened: &hardened
+  restart: unless-stopped
+  logging: *logging
+  cap_drop: [ALL]
+  security_opt: ['no-new-privileges:true']
+  mem_limit: 512m
+  pids_limit: 200
+
+services:
+  # Part 1: the static site served as it is (the dev server with the API is `npm run dev`).
+  site:
+    profiles: [site]
+    image: ${REGISTRY:-}library/nginx:1.27-alpine
+    restart: unless-stopped
+    volumes:
+      - ./site:/usr/share/nginx/html:ro
+    ports:
+      - '127.0.0.1:${SITE_PORT:-8090}:80'
+    logging: *logging
+    mem_limit: 128m
+    pids_limit: 100
+
+  # Part 2, labs 2 and 3, and their tests against a real PostgreSQL.
+  db:
+    <<: *postgres
+    profiles: [db]
+    image: ${REGISTRY:-}library/postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-dslkit}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:-dslkit}
+    ports:
+      - '127.0.0.1:${POSTGRES_PORT:-5432}:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  # Part 2, lab 6.
+  mongo:
+    profiles: [mongo]
+    image: ${REGISTRY:-}library/mongo:7
+    restart: unless-stopped
+    ports:
+      - '127.0.0.1:${MONGO_PORT:-27017}:27017'
+    volumes:
+      - mongodata:/data/db
+    logging: *logging
+    mem_limit: 512m
+    pids_limit: 200
+
+  # Part 2, lab 8: the stack of lab 8 (backend of lab 3, frontend of lab 5).
+  lab8-db:
+    <<: *postgres
+    profiles: [lab8]
+    image: ${REGISTRY:-}library/postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-dslkit}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:-dslkit}
+    volumes:
+      - lab8-pgdata:/var/lib/postgresql/data
+    networks: [lab8-internal]
+
+  lab8-backend:
+    <<: *hardened
+    profiles: [lab8]
+    build:
+      context: ./part-2/lab-03-auth
+      dockerfile: ../lab-08-docker/backend/Dockerfile
+      args:
+        REGISTRY: ${REGISTRY:-}
+    environment:
+      PORT: 3000
+      DATABASE_URL: postgres://${POSTGRES_USER:-dslkit}:${POSTGRES_PASSWORD}@lab8-db:5432/${POSTGRES_DB:-dslkit}
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env, at least 32 random characters}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-1h}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
+      TRUST_PROXY: '1'
+    depends_on:
+      lab8-db:
+        condition: service_healthy
+    ports:
+      - '127.0.0.1:${LAB8_BACKEND_PORT:-3001}:3000'
+    read_only: true
+    tmpfs: [/tmp]
+    networks: [lab8-internal, lab8-public]
+
+  lab8-frontend:
+    <<: *hardened
+    profiles: [lab8]
+    mem_limit: 128m
+    pids_limit: 100
+    build:
+      context: ./part-2/lab-05-react-api
+      dockerfile: ../lab-08-docker/frontend/Dockerfile
+      additional_contexts:
+        deploy: ./part-2/lab-08-docker/frontend
+      args:
+        REGISTRY: ${REGISTRY:-}
+    depends_on:
+      lab8-backend:
+        condition: service_started
+    ports:
+      - '${LAB8_FRONTEND_PORT:-8081}:8080'
+    networks: [lab8-public]
+
+  # The course project: server, client and database.
+  course-db:
+    <<: *postgres
+    profiles: [course]
+    image: ${REGISTRY:-}library/postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-dslkit}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${COURSE_POSTGRES_DB:-dslkit_course}
+    volumes:
+      - course-pgdata:/var/lib/postgresql/data
+    networks: [course-internal]
+
+  course-backend:
+    <<: *hardened
+    profiles: [course]
+    build:
+      context: ./course-project/course-project/app/server
+      dockerfile: ../docker/backend/Dockerfile
+      args:
+        REGISTRY: ${REGISTRY:-}
+    environment:
+      PORT: 3000
+      DATABASE_URL: postgres://${POSTGRES_USER:-dslkit}:${POSTGRES_PASSWORD}@course-db:5432/${COURSE_POSTGRES_DB:-dslkit_course}
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env, at least 32 random characters}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-1h}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
+      DEMO_USER_PASSWORD: ${DEMO_USER_PASSWORD:-}
+      TRUST_PROXY: '1'
+    depends_on:
+      course-db:
+        condition: service_healthy
+    ports:
+      - '127.0.0.1:${COURSE_BACKEND_PORT:-3002}:3000'
+    read_only: true
+    tmpfs: [/tmp]
+    networks: [course-internal, course-public]
+
+  course-frontend:
+    <<: *hardened
+    profiles: [course]
+    mem_limit: 128m
+    pids_limit: 100
+    build:
+      context: ./course-project/course-project/app/client
+      dockerfile: ../docker/frontend/Dockerfile
+      additional_contexts:
+        deploy: ./course-project/course-project/app/docker/frontend
+      args:
+        REGISTRY: ${REGISTRY:-}
+    depends_on:
+      course-backend:
+        condition: service_started
+    ports:
+      - '${COURSE_FRONTEND_PORT:-8082}:8080'
+    networks: [course-public]
+
+networks:
+  lab8-internal:
+    internal: true
+  lab8-public:
+  course-internal:
+    internal: true
+  course-public:
+
+volumes:
+  pgdata:
+  mongodata:
+  lab8-pgdata:
+  course-pgdata:
