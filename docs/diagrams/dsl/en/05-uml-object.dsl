@@ -1,0 +1,6 @@
+diagram uml object "Data snapshot"
+object u1 "anna : User"
+object d1 "order : Diagram"
+object p1 "shop : Project"
+link u1 -> d1 "owns"
+link p1 -> d1 "contains"

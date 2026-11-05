@@ -1,0 +1,8 @@
+diagram uml deployment "Развёртывание"
+device laptop "Компьютер пользователя"
+environment nginx "Nginx (сборка клиента)"
+environment node "Node.js (сервер Express)"
+environment pg "PostgreSQL (том pgdata)"
+communicate laptop -> nginx "HTTP 8080"
+communicate nginx -> node "/api"
+communicate node -> pg "SQL"

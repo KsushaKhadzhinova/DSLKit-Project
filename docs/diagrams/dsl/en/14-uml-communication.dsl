@@ -1,0 +1,8 @@
+diagram uml communication "Request of the list"
+object c "client : Client"
+object s "server : Server"
+object d "db : Database"
+message c -> s "1: GET /diagrams"
+message s -> d "1.1: SELECT"
+message d -> s "1.2: rows"
+message s -> c "2: array"

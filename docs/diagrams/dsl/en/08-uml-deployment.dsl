@@ -1,0 +1,8 @@
+diagram uml deployment "Deployment"
+device laptop "User computer"
+environment nginx "Nginx (client build)"
+environment node "Node.js (Express server)"
+environment pg "PostgreSQL (pgdata volume)"
+communicate laptop -> nginx "HTTP 8080"
+communicate nginx -> node "/api"
+communicate node -> pg "SQL"
