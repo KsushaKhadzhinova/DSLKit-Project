@@ -1,0 +1,1046 @@
+[
+ {
+  "ch": "0",
+  "advance": 612,
+  "points": 95,
+  "rings": 2
+ },
+ {
+  "ch": "1",
+  "advance": 424,
+  "points": 30,
+  "rings": 1
+ },
+ {
+  "ch": "2",
+  "advance": 612,
+  "points": 78,
+  "rings": 1
+ },
+ {
+  "ch": "3",
+  "advance": 612,
+  "points": 105,
+  "rings": 1
+ },
+ {
+  "ch": "4",
+  "advance": 612,
+  "points": 48,
+  "rings": 2
+ },
+ {
+  "ch": "5",
+  "advance": 612,
+  "points": 95,
+  "rings": 1
+ },
+ {
+  "ch": "6",
+  "advance": 612,
+  "points": 99,
+  "rings": 2
+ },
+ {
+  "ch": "7",
+  "advance": 612,
+  "points": 33,
+  "rings": 1
+ },
+ {
+  "ch": "8",
+  "advance": 612,
+  "points": 160,
+  "rings": 3
+ },
+ {
+  "ch": "9",
+  "advance": 612,
+  "points": 98,
+  "rings": 2
+ },
+ {
+  "ch": "A",
+  "advance": 692,
+  "points": 39,
+  "rings": 2
+ },
+ {
+  "ch": "B",
+  "advance": 676,
+  "points": 98,
+  "rings": 3
+ },
+ {
+  "ch": "C",
+  "advance": 692,
+  "points": 108,
+  "rings": 1
+ },
+ {
+  "ch": "D",
+  "advance": 716,
+  "points": 66,
+  "rings": 2
+ },
+ {
+  "ch": "E",
+  "advance": 636,
+  "points": 54,
+  "rings": 1
+ },
+ {
+  "ch": "F",
+  "advance": 616,
+  "points": 43,
+  "rings": 1
+ },
+ {
+  "ch": "G",
+  "advance": 712,
+  "points": 118,
+  "rings": 1
+ },
+ {
+  "ch": "H",
+  "advance": 736,
+  "points": 44,
+  "rings": 1
+ },
+ {
+  "ch": "I",
+  "advance": 276,
+  "points": 20,
+  "rings": 1
+ },
+ {
+  "ch": "J",
+  "advance": 524,
+  "points": 53,
+  "rings": 1
+ },
+ {
+  "ch": "K",
+  "advance": 696,
+  "points": 44,
+  "rings": 1
+ },
+ {
+  "ch": "L",
+  "advance": 596,
+  "points": 42,
+  "rings": 1
+ },
+ {
+  "ch": "M",
+  "advance": 876,
+  "points": 53,
+  "rings": 1
+ },
+ {
+  "ch": "N",
+  "advance": 756,
+  "points": 38,
+  "rings": 1
+ },
+ {
+  "ch": "O",
+  "advance": 772,
+  "points": 93,
+  "rings": 2
+ },
+ {
+  "ch": "P",
+  "advance": 656,
+  "points": 67,
+  "rings": 2
+ },
+ {
+  "ch": "Q",
+  "advance": 772,
+  "points": 109,
+  "rings": 2
+ },
+ {
+  "ch": "R",
+  "advance": 676,
+  "points": 77,
+  "rings": 2
+ },
+ {
+  "ch": "S",
+  "advance": 652,
+  "points": 145,
+  "rings": 1
+ },
+ {
+  "ch": "T",
+  "advance": 612,
+  "points": 32,
+  "rings": 1
+ },
+ {
+  "ch": "U",
+  "advance": 736,
+  "points": 64,
+  "rings": 1
+ },
+ {
+  "ch": "V",
+  "advance": 672,
+  "points": 35,
+  "rings": 1
+ },
+ {
+  "ch": "W",
+  "advance": 952,
+  "points": 58,
+  "rings": 1
+ },
+ {
+  "ch": "X",
+  "advance": 652,
+  "points": 44,
+  "rings": 1
+ },
+ {
+  "ch": "Y",
+  "advance": 652,
+  "points": 33,
+  "rings": 1
+ },
+ {
+  "ch": "Z",
+  "advance": 612,
+  "points": 50,
+  "rings": 1
+ },
+ {
+  "ch": "a",
+  "advance": 612,
+  "points": 91,
+  "rings": 2
+ },
+ {
+  "ch": "b",
+  "advance": 636,
+  "points": 94,
+  "rings": 2
+ },
+ {
+  "ch": "c",
+  "advance": 572,
+  "points": 97,
+  "rings": 1
+ },
+ {
+  "ch": "d",
+  "advance": 612,
+  "points": 93,
+  "rings": 2
+ },
+ {
+  "ch": "e",
+  "advance": 612,
+  "points": 87,
+  "rings": 2
+ },
+ {
+  "ch": "f",
+  "advance": 464,
+  "points": 66,
+  "rings": 1
+ },
+ {
+  "ch": "g",
+  "advance": 612,
+  "points": 115,
+  "rings": 2
+ },
+ {
+  "ch": "h",
+  "advance": 636,
+  "points": 54,
+  "rings": 1
+ },
+ {
+  "ch": "i",
+  "advance": 276,
+  "points": 52,
+  "rings": 2
+ },
+ {
+  "ch": "j",
+  "advance": 364,
+  "points": 74,
+  "rings": 2
+ },
+ {
+  "ch": "k",
+  "advance": 616,
+  "points": 44,
+  "rings": 1
+ },
+ {
+  "ch": "l",
+  "advance": 276,
+  "points": 20,
+  "rings": 1
+ },
+ {
+  "ch": "m",
+  "advance": 896,
+  "points": 84,
+  "rings": 1
+ },
+ {
+  "ch": "n",
+  "advance": 636,
+  "points": 53,
+  "rings": 1
+ },
+ {
+  "ch": "o",
+  "advance": 632,
+  "points": 95,
+  "rings": 2
+ },
+ {
+  "ch": "p",
+  "advance": 636,
+  "points": 67,
+  "rings": 2
+ },
+ {
+  "ch": "q",
+  "advance": 612,
+  "points": 93,
+  "rings": 2
+ },
+ {
+  "ch": "r",
+  "advance": 464,
+  "points": 34,
+  "rings": 1
+ },
+ {
+  "ch": "s",
+  "advance": 552,
+  "points": 132,
+  "rings": 1
+ },
+ {
+  "ch": "t",
+  "advance": 484,
+  "points": 66,
+  "rings": 1
+ },
+ {
+  "ch": "u",
+  "advance": 636,
+  "points": 53,
+  "rings": 1
+ },
+ {
+  "ch": "v",
+  "advance": 572,
+  "points": 29,
+  "rings": 1
+ },
+ {
+  "ch": "w",
+  "advance": 832,
+  "points": 49,
+  "rings": 1
+ },
+ {
+  "ch": "x",
+  "advance": 552,
+  "points": 44,
+  "rings": 1
+ },
+ {
+  "ch": "y",
+  "advance": 572,
+  "points": 32,
+  "rings": 1
+ },
+ {
+  "ch": "z",
+  "advance": 512,
+  "points": 50,
+  "rings": 1
+ },
+ {
+  "ch": "А",
+  "advance": 692,
+  "points": 39,
+  "rings": 2
+ },
+ {
+  "ch": "В",
+  "advance": 676,
+  "points": 98,
+  "rings": 3
+ },
+ {
+  "ch": "Е",
+  "advance": 636,
+  "points": 54,
+  "rings": 1
+ },
+ {
+  "ch": "К",
+  "advance": 696,
+  "points": 44,
+  "rings": 1
+ },
+ {
+  "ch": "М",
+  "advance": 876,
+  "points": 53,
+  "rings": 1
+ },
+ {
+  "ch": "Н",
+  "advance": 736,
+  "points": 44,
+  "rings": 1
+ },
+ {
+  "ch": "О",
+  "advance": 772,
+  "points": 93,
+  "rings": 2
+ },
+ {
+  "ch": "Р",
+  "advance": 656,
+  "points": 67,
+  "rings": 2
+ },
+ {
+  "ch": "С",
+  "advance": 692,
+  "points": 108,
+  "rings": 1
+ },
+ {
+  "ch": "Т",
+  "advance": 612,
+  "points": 32,
+  "rings": 1
+ },
+ {
+  "ch": "Х",
+  "advance": 652,
+  "points": 44,
+  "rings": 1
+ },
+ {
+  "ch": "Б",
+  "advance": 656,
+  "points": 78,
+  "rings": 2
+ },
+ {
+  "ch": "Г",
+  "advance": 596,
+  "points": 42,
+  "rings": 1
+ },
+ {
+  "ch": "Д",
+  "advance": 796,
+  "points": 76,
+  "rings": 2
+ },
+ {
+  "ch": "Ё",
+  "advance": 636,
+  "points": 117,
+  "rings": 3
+ },
+ {
+  "ch": "Ж",
+  "advance": 1016,
+  "points": 66,
+  "rings": 1
+ },
+ {
+  "ch": "З",
+  "advance": 624,
+  "points": 105,
+  "rings": 1
+ },
+ {
+  "ch": "И",
+  "advance": 756,
+  "points": 38,
+  "rings": 1
+ },
+ {
+  "ch": "Й",
+  "advance": 756,
+  "points": 67,
+  "rings": 2
+ },
+ {
+  "ch": "Л",
+  "advance": 756,
+  "points": 47,
+  "rings": 1
+ },
+ {
+  "ch": "П",
+  "advance": 736,
+  "points": 64,
+  "rings": 1
+ },
+ {
+  "ch": "У",
+  "advance": 652,
+  "points": 32,
+  "rings": 1
+ },
+ {
+  "ch": "Ф",
+  "advance": 872,
+  "points": 126,
+  "rings": 3
+ },
+ {
+  "ch": "Ц",
+  "advance": 776,
+  "points": 69,
+  "rings": 1
+ },
+ {
+  "ch": "Ч",
+  "advance": 716,
+  "points": 54,
+  "rings": 1
+ },
+ {
+  "ch": "Ш",
+  "advance": 996,
+  "points": 74,
+  "rings": 1
+ },
+ {
+  "ch": "Щ",
+  "advance": 1036,
+  "points": 79,
+  "rings": 1
+ },
+ {
+  "ch": "Ъ",
+  "advance": 816,
+  "points": 78,
+  "rings": 2
+ },
+ {
+  "ch": "Ы",
+  "advance": 896,
+  "points": 87,
+  "rings": 3
+ },
+ {
+  "ch": "Ь",
+  "advance": 676,
+  "points": 67,
+  "rings": 2
+ },
+ {
+  "ch": "Э",
+  "advance": 664,
+  "points": 120,
+  "rings": 1
+ },
+ {
+  "ch": "Ю",
+  "advance": 936,
+  "points": 117,
+  "rings": 2
+ },
+ {
+  "ch": "Я",
+  "advance": 676,
+  "points": 76,
+  "rings": 2
+ },
+ {
+  "ch": "а",
+  "advance": 612,
+  "points": 91,
+  "rings": 2
+ },
+ {
+  "ch": "е",
+  "advance": 612,
+  "points": 87,
+  "rings": 2
+ },
+ {
+  "ch": "о",
+  "advance": 632,
+  "points": 95,
+  "rings": 2
+ },
+ {
+  "ch": "р",
+  "advance": 636,
+  "points": 67,
+  "rings": 2
+ },
+ {
+  "ch": "с",
+  "advance": 572,
+  "points": 97,
+  "rings": 1
+ },
+ {
+  "ch": "х",
+  "advance": 552,
+  "points": 44,
+  "rings": 1
+ },
+ {
+  "ch": "у",
+  "advance": 572,
+  "points": 32,
+  "rings": 1
+ },
+ {
+  "ch": "б",
+  "advance": 656,
+  "points": 114,
+  "rings": 2
+ },
+ {
+  "ch": "в",
+  "advance": 616,
+  "points": 93,
+  "rings": 3
+ },
+ {
+  "ch": "г",
+  "advance": 536,
+  "points": 42,
+  "rings": 1
+ },
+ {
+  "ch": "д",
+  "advance": 756,
+  "points": 76,
+  "rings": 2
+ },
+ {
+  "ch": "ё",
+  "advance": 612,
+  "points": 150,
+  "rings": 4
+ },
+ {
+  "ch": "ж",
+  "advance": 916,
+  "points": 66,
+  "rings": 1
+ },
+ {
+  "ch": "з",
+  "advance": 544,
+  "points": 99,
+  "rings": 1
+ },
+ {
+  "ch": "и",
+  "advance": 656,
+  "points": 50,
+  "rings": 1
+ },
+ {
+  "ch": "й",
+  "advance": 656,
+  "points": 79,
+  "rings": 2
+ },
+ {
+  "ch": "к",
+  "advance": 616,
+  "points": 44,
+  "rings": 1
+ },
+ {
+  "ch": "л",
+  "advance": 676,
+  "points": 47,
+  "rings": 1
+ },
+ {
+  "ch": "м",
+  "advance": 816,
+  "points": 61,
+  "rings": 1
+ },
+ {
+  "ch": "н",
+  "advance": 636,
+  "points": 44,
+  "rings": 1
+ },
+ {
+  "ch": "п",
+  "advance": 636,
+  "points": 64,
+  "rings": 1
+ },
+ {
+  "ch": "т",
+  "advance": 532,
+  "points": 32,
+  "rings": 1
+ },
+ {
+  "ch": "ф",
+  "advance": 812,
+  "points": 123,
+  "rings": 3
+ },
+ {
+  "ch": "ц",
+  "advance": 676,
+  "points": 69,
+  "rings": 1
+ },
+ {
+  "ch": "ч",
+  "advance": 616,
+  "points": 54,
+  "rings": 1
+ },
+ {
+  "ch": "ш",
+  "advance": 896,
+  "points": 74,
+  "rings": 1
+ },
+ {
+  "ch": "щ",
+  "advance": 936,
+  "points": 79,
+  "rings": 1
+ },
+ {
+  "ch": "ъ",
+  "advance": 736,
+  "points": 78,
+  "rings": 2
+ },
+ {
+  "ch": "ы",
+  "advance": 796,
+  "points": 87,
+  "rings": 3
+ },
+ {
+  "ch": "ь",
+  "advance": 616,
+  "points": 67,
+  "rings": 2
+ },
+ {
+  "ch": "э",
+  "advance": 564,
+  "points": 105,
+  "rings": 1
+ },
+ {
+  "ch": "ю",
+  "advance": 856,
+  "points": 117,
+  "rings": 2
+ },
+ {
+  "ch": "я",
+  "advance": 616,
+  "points": 75,
+  "rings": 2
+ },
+ {
+  "ch": " ",
+  "advance": 280,
+  "points": 0,
+  "rings": 0
+ },
+ {
+  "ch": ".",
+  "advance": 256,
+  "points": 33,
+  "rings": 1
+ },
+ {
+  "ch": ",",
+  "advance": 286,
+  "points": 20,
+  "rings": 1
+ },
+ {
+  "ch": ":",
+  "advance": 256,
+  "points": 66,
+  "rings": 2
+ },
+ {
+  "ch": ";",
+  "advance": 286,
+  "points": 53,
+  "rings": 2
+ },
+ {
+  "ch": "!",
+  "advance": 266,
+  "points": 53,
+  "rings": 2
+ },
+ {
+  "ch": "?",
+  "advance": 564,
+  "points": 127,
+  "rings": 2
+ },
+ {
+  "ch": "-",
+  "advance": 436,
+  "points": 20,
+  "rings": 1
+ },
+ {
+  "ch": "–",
+  "advance": 576,
+  "points": 20,
+  "rings": 1
+ },
+ {
+  "ch": "—",
+  "advance": 876,
+  "points": 20,
+  "rings": 1
+ },
+ {
+  "ch": "_",
+  "advance": 636,
+  "points": 20,
+  "rings": 1
+ },
+ {
+  "ch": "…",
+  "advance": 736,
+  "points": 99,
+  "rings": 3
+ },
+ {
+  "ch": "•",
+  "advance": 392,
+  "points": 36,
+  "rings": 1
+ },
+ {
+  "ch": "·",
+  "advance": 276,
+  "points": 33,
+  "rings": 1
+ },
+ {
+  "ch": "'",
+  "advance": 266,
+  "points": 20,
+  "rings": 1
+ },
+ {
+  "ch": "\"",
+  "advance": 416,
+  "points": 40,
+  "rings": 2
+ },
+ {
+  "ch": "’",
+  "advance": 286,
+  "points": 20,
+  "rings": 1
+ },
+ {
+  "ch": "‘",
+  "advance": 286,
+  "points": 20,
+  "rings": 1
+ },
+ {
+  "ch": "“",
+  "advance": 456,
+  "points": 40,
+  "rings": 2
+ },
+ {
+  "ch": "”",
+  "advance": 456,
+  "points": 40,
+  "rings": 2
+ },
+ {
+  "ch": "«",
+  "advance": 532,
+  "points": 60,
+  "rings": 2
+ },
+ {
+  "ch": "»",
+  "advance": 532,
+  "points": 60,
+  "rings": 2
+ },
+ {
+  "ch": "(",
+  "advance": 364,
+  "points": 50,
+  "rings": 1
+ },
+ {
+  "ch": ")",
+  "advance": 364,
+  "points": 50,
+  "rings": 1
+ },
+ {
+  "ch": "[",
+  "advance": 396,
+  "points": 42,
+  "rings": 1
+ },
+ {
+  "ch": "]",
+  "advance": 396,
+  "points": 42,
+  "rings": 1
+ },
+ {
+  "ch": "{",
+  "advance": 384,
+  "points": 79,
+  "rings": 1
+ },
+ {
+  "ch": "}",
+  "advance": 384,
+  "points": 79,
+  "rings": 1
+ },
+ {
+  "ch": "/",
+  "advance": 452,
+  "points": 20,
+  "rings": 1
+ },
+ {
+  "ch": "\\",
+  "advance": 452,
+  "points": 20,
+  "rings": 1
+ },
+ {
+  "ch": "|",
+  "advance": 276,
+  "points": 20,
+  "rings": 1
+ },
+ {
+  "ch": "+",
+  "advance": 616,
+  "points": 44,
+  "rings": 1
+ },
+ {
+  "ch": "=",
+  "advance": 616,
+  "points": 40,
+  "rings": 2
+ },
+ {
+  "ch": "<",
+  "advance": 552,
+  "points": 35,
+  "rings": 1
+ },
+ {
+  "ch": ">",
+  "advance": 552,
+  "points": 35,
+  "rings": 1
+ },
+ {
+  "ch": "*",
+  "advance": 556,
+  "points": 66,
+  "rings": 1
+ },
+ {
+  "ch": "#",
+  "advance": 692,
+  "points": 96,
+  "rings": 2
+ },
+ {
+  "ch": "$",
+  "advance": 612,
+  "points": 174,
+  "rings": 3
+ },
+ {
+  "ch": "%",
+  "advance": 792,
+  "points": 190,
+  "rings": 5
+ },
+ {
+  "ch": "&",
+  "advance": 732,
+  "points": 118,
+  "rings": 3
+ },
+ {
+  "ch": "@",
+  "advance": 892,
+  "points": 167,
+  "rings": 2
+ },
+ {
+  "ch": "~",
+  "advance": 572,
+  "points": 65,
+  "rings": 1
+ },
+ {
+  "ch": "^",
+  "advance": 532,
+  "points": 31,
+  "rings": 1
+ },
+ {
+  "ch": "`",
+  "advance": 356,
+  "points": 20,
+  "rings": 1
+ },
+ {
+  "ch": "№",
+  "advance": 1116,
+  "points": 164,
+  "rings": 4
+ },
+ {
+  "ch": "°",
+  "advance": 392,
+  "points": 63,
+  "rings": 2
+ }
+]

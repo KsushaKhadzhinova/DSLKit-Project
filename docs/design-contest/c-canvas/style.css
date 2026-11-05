@@ -1,3 +1,8 @@
+/* Own fonts of the project: Kubik Sans (text) and Kubik Mono (code), see docs/brand/fonts */
+@font-face { font-family: 'Kubik Sans'; font-weight: 400; font-style: normal; font-display: swap; src: url('../assets/fonts/KubikSans-Regular.woff2') format('woff2'); }
+@font-face { font-family: 'Kubik Sans'; font-weight: 700; font-style: normal; font-display: swap; src: url('../assets/fonts/KubikSans-Bold.woff2') format('woff2'); }
+@font-face { font-family: 'Kubik Mono'; font-weight: 400; font-style: normal; font-display: swap; src: url('../assets/fonts/KubikMono-Regular.woff2') format('woff2'); }
+@font-face { font-family: 'Kubik Mono'; font-weight: 700; font-style: normal; font-display: swap; src: url('../assets/fonts/KubikMono-Bold.woff2') format('woff2'); }
 /* Design tokens. Light theme first, dark theme overrides the colour tokens.
    The golden ratio is the base of the scales: type steps grow by √φ and φ,
    spacing follows the Fibonacci numbers multiplied by 8 px (8, 16, 24, 40, 64, 104). */
@@ -29,8 +34,8 @@
   --shadow-small: 0 1px 2px rgb(28 31 46 / 0.06), 0 1px 3px rgb(28 31 46 / 0.1);
   --shadow-large: 0 8px 24px rgb(28 31 46 / 0.08), 0 24px 64px rgb(28 31 46 / 0.12);
 
-  --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  --font-mono: 'JetBrains Mono', ui-monospace, 'Cascadia Code', Consolas, 'Courier New', monospace;
+  --font-sans: 'Kubik Sans', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: 'Kubik Mono', ui-monospace, 'Cascadia Code', Consolas, 'Courier New', monospace;
 
   --step--1: calc(1rem / var(--phi-root));
   --step-0: 1rem;

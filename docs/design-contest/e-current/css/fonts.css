@@ -1,0 +1,5 @@
+/* Own fonts of the project: Kubik Sans (text) and Kubik Mono (code), see docs/brand/fonts */
+@font-face { font-family: 'Kubik Sans'; font-weight: 400; font-style: normal; font-display: swap; src: url('../fonts/KubikSans-Regular.woff2') format('woff2'); }
+@font-face { font-family: 'Kubik Sans'; font-weight: 700; font-style: normal; font-display: swap; src: url('../fonts/KubikSans-Bold.woff2') format('woff2'); }
+@font-face { font-family: 'Kubik Mono'; font-weight: 400; font-style: normal; font-display: swap; src: url('../fonts/KubikMono-Regular.woff2') format('woff2'); }
+@font-face { font-family: 'Kubik Mono'; font-weight: 700; font-style: normal; font-display: swap; src: url('../fonts/KubikMono-Bold.woff2') format('woff2'); }

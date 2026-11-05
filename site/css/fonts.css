@@ -1,0 +1,33 @@
+/* Own typefaces of DSLKit: Kubik Sans for text and Kubik Mono for code. Drawn for the project (tools/fontgen), licence MIT.
+   Latin and Cyrillic; the system fonts stay in the stacks of variables.css for the signs that Kubik does not have. */
+@font-face {
+  font-family: 'Kubik Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../fonts/KubikSans-Regular.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Kubik Sans';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('../fonts/KubikSans-Bold.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Kubik Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../fonts/KubikMono-Regular.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Kubik Mono';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('../fonts/KubikMono-Bold.woff2') format('woff2');
+}

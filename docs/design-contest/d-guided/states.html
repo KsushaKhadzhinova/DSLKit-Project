@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Состояния с маскотом: D по шагам</title>
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    
+    body { margin: 0; background: var(--color-background); color: var(--color-text); font-family: var(--font-sans); }
+    .st-states { display: grid; gap: 24px; padding: 24px 16px 48px; max-width: 1180px; margin: 0 auto; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+    .st-states h1 { grid-column: 1 / -1; margin: 0; font-size: 1.5rem; }
+    .st-state { border: 1px solid var(--color-border-strong); border-radius: 14px; background: var(--color-surface); padding: 20px; display: flex; flex-direction: column; gap: 10px; align-items: flex-start; }
+    .st-state h2 { margin: 0; font-size: 0.8rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-muted); }
+    .st-state h3 { margin: 0; font-size: 1.25rem; }
+    .st-state p, .st-state li { margin: 0; line-height: 1.5; }
+    .st-state ul { margin: 0; padding-left: 20px; list-style: disc; }
+    .st-state img.st-cat { width: 120px; height: 120px; }
+    .st-code { font-family: var(--font-mono); color: var(--color-muted); }
+    .st-pill { display: inline-block; padding: 10px 16px; border-radius: 8px; background: var(--color-primary); color: var(--color-on-primary); font-weight: 700; text-decoration: none; }
+    .st-tour { display: flex; gap: 12px; align-items: flex-end; }
+    .st-bubble { background: var(--color-code-background); color: var(--color-code-text); border-radius: 12px; padding: 12px 14px; max-width: 220px; }
+    .st-loader { align-items: center; }
+    .st-loader img { width: 72px; height: 72px; animation: spin 1.4s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @media (prefers-reduced-motion: reduce) { .st-loader img { animation: none; } }
+  </style>
+</head>
+<body>
+  <main class="st-states">
+    <h1>Состояния с маскотом: D по шагам</h1>
+
+    <section class="st-state" aria-labelledby="s1">
+      <h2 id="s1">Пустой список проектов</h2>
+      <picture><source media="(prefers-color-scheme: dark)" srcset="../assets/mascot-dark.svg" /><img class="st-cat" src="../assets/mascot-light.svg" alt="" /></picture>
+      <h3>Пока ни одной диаграммы</h3>
+      <p>Опишите схему текстом, и она появится рядом. Начните с шаблона или с пустого листа.</p>
+      <a class="st-pill" href="#">Создать диаграмму</a>
+    </section>
+
+    <section class="st-state" aria-labelledby="s2">
+      <h2 id="s2">Ошибка 404</h2>
+      <picture><source media="(prefers-color-scheme: dark)" srcset="../assets/mascot-dark.svg" /><img class="st-cat" src="../assets/mascot-light.svg" alt="" /></picture>
+      <p class="st-code">Код ошибки: 404</p>
+      <h3>Страница не найдена</h3>
+      <p><b>Что это.</b> По этому адресу ничего нет, сайт при этом работает.</p>
+      <p><b>Почему.</b> В адресе опечатка, или проект удалён.</p>
+      <p><b>Как исправить.</b> Проверьте адрес или откройте проект из списка.</p>
+      <a class="st-pill" href="#">К моим проектам</a>
+    </section>
+
+    <section class="st-state" aria-labelledby="s3">
+      <h2 id="s3">Ошибка 500</h2>
+      <picture><source media="(prefers-color-scheme: dark)" srcset="../assets/mascot-dark.svg" /><img class="st-cat" src="../assets/mascot-light.svg" alt="" /></picture>
+      <p class="st-code">Код ошибки: 500</p>
+      <h3>Ошибка на сервере</h3>
+      <p><b>Что это.</b> Сервер не смог подготовить страницу. Ваши данные не изменены.</p>
+      <ul><li>Обновите страницу: короткий сбой часто проходит.</li><li>Если повторяется, сообщите время и адрес страницы.</li></ul>
+      <a class="st-pill" href="#">Обновить страницу</a>
+    </section>
+
+    <section class="st-state" aria-labelledby="s4">
+      <h2 id="s4">Тур по редактору, шаг 2 из 4</h2>
+      <div class="st-tour"><picture><source media="(prefers-color-scheme: dark)" srcset="../assets/mascot-dark.svg" /><img class="st-cat" src="../assets/mascot-light.svg" alt="" /></picture><div class="st-bubble"><b>Слева текст, справа схема.</b><br />Меняйте код: диаграмма перестроится сама.</div></div>
+      <a class="st-pill" href="#">Дальше</a>
+    </section>
+
+    <section class="st-state st-loader" aria-labelledby="s5">
+      <h2 id="s5">Загрузка</h2>
+      <picture><source media="(prefers-color-scheme: dark)" srcset="../assets/mark-dark.svg" /><img src="../assets/mark-light.svg" alt="" /></picture>
+      <p role="status">Строим диаграмму…</p>
+    </section>
+
+    <section class="st-state" aria-labelledby="s6">
+      <h2 id="s6">Главная страница сайта</h2>
+      <div class="st-tour"><img src="../assets/mark-light.svg" alt="" width="40" height="40" /><b style="font-size: 1.5rem">DSLKit</b></div>
+      <h3>Диаграммы из текста</h3>
+      <p>Пишете описание, получаете схему: 33 нотации, экспорт в SVG и PNG.</p>
+      <div class="st-tour"><picture><source media="(prefers-color-scheme: dark)" srcset="../assets/mascot-dark.svg" /><img class="st-cat" src="../assets/mascot-light.svg" alt="" /></picture><a class="st-pill" href="#">Открыть редактор</a></div>
+    </section>
+  </main>
+</body>
+</html>
