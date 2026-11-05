@@ -1,4 +1,0 @@
-{
-  "title": { "minLength": 1, "maxLength": 80 },
-  "diagrams": { "maxCount": 200 }
-}
