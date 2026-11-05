@@ -7,12 +7,26 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const require = createRequire(import.meta.url);
-const fallback = process.env.PUPPETEER_DIR || 'E:/DSLKit-Project/.claude/worktrees/part2-ws-work-ee9b7b/part-2/lab-07-websocket/package.json';
+const here = path.dirname(fileURLToPath(import.meta.url));
+
+// puppeteer-core is installed once, in whichever work folder's node_modules happens to carry it, and this file
+// is copied into every work folder that takes screenshots. PUPPETEER_DIR names that package.json directly when
+// known; otherwise every ancestor directory up to a few levels above this file is tried, instead of one
+// absolute path that only ever existed on the machine that first wrote this file.
+const fallbacks = [process.env.PUPPETEER_DIR, ...Array.from({ length: 6 }, (_, i) => path.join(here, ...Array(i + 2).fill('..'), 'node_modules/puppeteer-core/package.json'))].filter(Boolean);
+
 export const puppeteer = (() => {
   try {
     return require('puppeteer-core');
   } catch {
-    return createRequire(fallback)('puppeteer-core');
+    for (const fallback of fallbacks) {
+      try {
+        return createRequire(fallback)('puppeteer-core');
+      } catch {
+        // try the next candidate
+      }
+    }
+    throw new Error('puppeteer-core was not found; set PUPPETEER_DIR to its package.json path');
   }
 })();
 

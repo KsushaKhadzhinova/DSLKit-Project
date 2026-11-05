@@ -191,6 +191,7 @@ import { createResourceRouter, listItems, methodsOnly, parseId } from './resourc
 import { logSafe, rateLimit, securityHeaders } from './security.js';
 import { buildOpenApi } from './openapi.js';
 import { createStores } from './store.js';
+import { normalizeEmail } from './validation.js';
 
 // All sizes live in limits.json, not in the code.
 export const LIMITS = JSON.parse(readFileSync(new URL('../limits.json', import.meta.url), 'utf8'));
@@ -199,21 +200,29 @@ export const NOTATIONS = ['UML', 'BPMN', 'ERD', 'DFD', 'IDEF0', 'Petri'];
 
 const ID = { type: 'integer', required: true, min: 1, max: LIMITS.idMax };
 
+// Local part: ASCII, no leading/trailing/doubled dot. Domain: one or more dot-separated labels, no leading,
+// trailing or doubled hyphen or dot. Every alternation below is a single, disjoint character class repeated
+// with its own quantifier, so there is no ambiguity for the engine to backtrack over; matching stays linear
+// in the length of the string even for a deliberately pathological input.
+const LOCAL_PART = "[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+)*";
+const DOMAIN_LABEL = '[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?';
+const EMAIL_PATTERN = new RegExp(`^${LOCAL_PART}@${DOMAIN_LABEL}(?:\\.${DOMAIN_LABEL})+$`);
+
 export const schemas = {
   users: {
     name: { type: 'string', required: true, max: LIMITS.userName },
-    email: { type: 'string', required: true, max: LIMITS.userEmail, pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/ },
+    email: { type: 'string', required: true, max: LIMITS.userEmail, pattern: EMAIL_PATTERN, transform: normalizeEmail },
     role: { type: 'string', enum: ['owner', 'editor', 'viewer'], default: 'viewer' },
   },
   projects: {
     name: { type: 'string', required: true, max: LIMITS.projectName },
-    description: { type: 'string', max: LIMITS.projectDescription, default: '' },
+    description: { type: 'string', max: LIMITS.projectDescription, default: '', multiline: true },
     ownerId: ID,
   },
   diagrams: {
     title: { type: 'string', required: true, max: LIMITS.diagramTitle },
     notation: { type: 'string', enum: NOTATIONS, required: true },
-    code: { type: 'string', max: LIMITS.diagramCode, default: '' },
+    code: { type: 'string', max: LIMITS.diagramCode, default: '', multiline: true },
     projectId: ID,
     status: { type: 'string', enum: ['draft', 'published'], default: 'draft' },
   },
@@ -229,7 +238,16 @@ const missingReference = (field, collection, value) =>
 
 const conflict = (message) => new ApiError(409, 'conflict', message);
 
-export const createApp = ({ stores = createStores(), writeError = console.error, limit = { windowMs: LIMITS.rateWindowMs, max: LIMITS.rateMax }, now = Date.now } = {}) => {
+// Methods that normally send no body; a body on one of these is simply not read rather than being a reason
+// to reject the request (a non-JSON Content-Type is only an error on a request that is meant to carry JSON).
+const BODYLESS_METHODS = new Set(['GET', 'HEAD', 'DELETE']);
+
+export const createApp = ({
+  stores = createStores(undefined, LIMITS.maxRecordsPerCollection),
+  writeError = console.error,
+  limit = { windowMs: LIMITS.rateWindowMs, max: LIMITS.rateMax, maxClients: LIMITS.rateMaxClients },
+  now = Date.now,
+} = {}) => {
   const { users, projects, diagrams } = stores;
   const app = express();
   app.disable('x-powered-by');
@@ -238,9 +256,31 @@ export const createApp = ({ stores = createStores(), writeError = console.error,
   app.get('/health', (req, res) => res.json({ status: 'ok' }));
   // Refused before the body is read, so a flood costs little.
   app.use(rateLimit({ ...limit, now }));
-  app.use(express.json({ limit: LIMITS.bodyBytes }));
-  // A body that express.json did not read (another Content-Type) is refused with 415, not taken as a missing body.
+  // This API answers only JSON; a client that explicitly asks for something else gets 406 instead of JSON it
+  // did not ask for. A request with no Accept header, or "*/*", is always welcome.
   app.use((req, res, next) => {
+    const accept = req.headers.accept;
+    if (!accept) return next();
+    const acceptsJson = accept.split(',').some((part) => {
+      const type = part.split(';')[0].trim().toLowerCase();
+      return type === '*/*' || type === 'application/*' || type === 'application/json';
+    });
+    if (!acceptsJson) return next(new ApiError(406, 'not_acceptable', 'This API only returns application/json'));
+    return next();
+  });
+  // A declared charset other than UTF-8 is rejected up front with 415, instead of being read as UTF-8 anyway
+  // and failing JSON parsing later with the unrelated 400 invalid_json.
+  app.use((req, res, next) => {
+    const match = /charset=("?)([^;"]+)\1/i.exec(req.headers['content-type'] ?? '');
+    if (match && match[2].trim().toLowerCase() !== 'utf-8') return next(new ApiError(415, 'unsupported_media_type', 'Only charset=utf-8 is supported'));
+    return next();
+  });
+  app.use(express.json({ limit: LIMITS.bodyBytes }));
+  // A body that express.json did not read (another Content-Type) is refused with 415, not taken as a missing
+  // body - but only for a method that is meant to carry one; GET/HEAD/DELETE never need a JSON body, so any
+  // body they do carry is simply ignored instead of failing the request over an unrelated Content-Type.
+  app.use((req, res, next) => {
+    if (BODYLESS_METHODS.has(req.method)) return next();
     const hasBody = Number(req.headers['content-length'] ?? 0) > 0 || req.headers['transfer-encoding'] !== undefined;
     if (hasBody && req.body === undefined) return next(new ApiError(415, 'unsupported_media_type', 'Content-Type must be application/json'));
     return next();
@@ -249,6 +289,7 @@ export const createApp = ({ stores = createStores(), writeError = console.error,
   const api = express.Router();
   // The machine-readable description of the API, built from the schemas above.
   api.get('/openapi.json', (req, res) => res.json(buildOpenApi(schemas, { hidden: { users: ['email'] } })));
+  api.all('/openapi.json', methodsOnly('GET'));
   // Link between resources: the projects that belong to one user. It is mounted before the standard router so it wins over /:id.
   api.get('/users/:id/projects', (req, res) => {
     const user = users.find(parseId(req.params.id));
@@ -319,7 +360,10 @@ export const createApp = ({ stores = createStores(), writeError = console.error,
   api.post('/diagrams/:id/publish', (req, res) => res.json(diagrams.update(diagram(req), { status: 'published' })));
   api.post('/diagrams/:id/duplicate', (req, res) => {
     const { id, createdAt, ...rest } = diagram(req);
-    res.status(201).json(diagrams.create({ ...rest, title: `${rest.title} (copy)`.slice(0, LIMITS.diagramTitle), status: 'draft' }));
+    // Cut by code points, not by UTF-16 units: slicing a surrogate pair in half would store (and re-serve) a
+    // lone surrogate, which is not valid Unicode text.
+    const title = [...`${rest.title} (copy)`].slice(0, LIMITS.diagramTitle).join('');
+    res.status(201).json(diagrams.create({ ...rest, title, status: 'draft' }));
   });
   api.all('/diagrams/:id/publish', methodsOnly('POST'));
   api.all('/diagrams/:id/duplicate', methodsOnly('POST'));
@@ -379,20 +423,45 @@ export const parseId = (raw) => {
   return Number(raw);
 };
 
-const parsePositive = (raw, name, fallback, max = Number.MAX_SAFE_INTEGER) => {
+// The largest integer `DIGITS` can ever match (15 nines): the real ceiling for page/limit/id, below
+// Number.MAX_SAFE_INTEGER. Error messages quote this instead of a bound that is never actually enforced.
+const MAX_QUERY_INT = 999999999999999;
+
+const scalar = (raw, name) => {
+  if (Array.isArray(raw)) throw new ApiError(400, 'invalid_query', `${name} must not be repeated`);
+  return raw;
+};
+
+const parsePositive = (raw, name, fallback, max = MAX_QUERY_INT) => {
   if (raw === undefined) return fallback;
-  if (!DIGITS.test(String(raw)) || Number(raw) > max) throw new ApiError(400, 'invalid_query', `${name} must be an integer from 1 to ${max}`);
+  if (!DIGITS.test(String(scalar(raw, name))) || Number(raw) > max) throw new ApiError(400, 'invalid_query', `${name} must be an integer from 1 to ${max}`);
   return Number(raw);
 };
 
 // Filtering by any schema field (?status=draft), search (?q=text), sorting (?sort=-title), pagination (?page=2&limit=10).
-// hidden: fields that never appear in a list and cannot be used to filter, search or sort it (otherwise ?email= or ?sort=email would reveal them).
+// hidden: fields that never appear in a list; filtering, searching or sorting by one is silently a no-op
+// (otherwise ?email= or ?sort=email would reveal it) rather than an error, so it still cannot be used as an oracle.
+// Any OTHER query key that is not a schema field, page, limit, sort or q is unknown and answers 400, instead of
+// being read and then quietly ignored.
 export const listItems = (items, schema, query, hidden = []) => {
+  const known = new Set(['page', 'limit', 'sort', 'q', ...Object.keys(schema)]);
+  for (const key of Object.keys(query)) {
+    if (!known.has(key)) throw new ApiError(400, 'invalid_query', `${key} is not a known query parameter`);
+  }
   const page = parsePositive(query.page, 'page', 1);
   const limit = parsePositive(query.limit, 'limit', 20, 100);
-  let result = items.filter((item) => Object.keys(schema).every((field) => hidden.includes(field) || query[field] === undefined || String(item[field]) === String(query[field])));
+  let result = items.filter((item) =>
+    Object.keys(schema).every((field) => {
+      if (hidden.includes(field) || query[field] === undefined) return true;
+      const raw = scalar(query[field], field);
+      const rule = schema[field];
+      if (rule.type === 'integer' && !DIGITS.test(String(raw))) throw new ApiError(400, 'invalid_query', `${field} must be a positive integer`);
+      if (rule.enum && !rule.enum.includes(String(raw))) throw new ApiError(400, 'invalid_query', `${field} must be one of: ${rule.enum.join(', ')}`);
+      return String(item[field]) === String(raw);
+    }),
+  );
   if (query.q !== undefined) {
-    const needle = String(query.q).toLowerCase();
+    const needle = String(scalar(query.q, 'q')).toLowerCase();
     const textFields = Object.keys(schema).filter((field) => schema[field].type === 'string' && !hidden.includes(field));
     result = result.filter((item) =>
       textFields.some((field) =>
@@ -403,10 +472,17 @@ export const listItems = (items, schema, query, hidden = []) => {
     );
   }
   if (query.sort !== undefined) {
-    const desc = String(query.sort).startsWith('-');
-    const field = String(query.sort).replace(/^-/, '');
+    const raw = String(scalar(query.sort, 'sort'));
+    const desc = raw.startsWith('-');
+    const field = raw.replace(/^-/, '');
     if (hidden.includes(field) || (field !== 'id' && field !== 'createdAt' && !Object.hasOwn(schema, field))) throw new ApiError(400, 'invalid_query', `cannot sort by ${field}`);
-    result = [...result].sort((a, b) => (a[field] > b[field] ? 1 : a[field] < b[field] ? -1 : 0) * (desc ? -1 : 1));
+    // Locale-aware for text (so case and accents sort the way a reader expects), tie-broken by id so equal
+    // keys keep a fixed, repeatable order instead of whatever order the sort happened to leave them in.
+    const compare = (a, b) => (typeof a[field] === 'string' && typeof b[field] === 'string' ? a[field].localeCompare(b[field]) : a[field] > b[field] ? 1 : a[field] < b[field] ? -1 : 0);
+    result = [...result].sort((a, b) => {
+      const primary = compare(a, b) * (desc ? -1 : 1);
+      return primary !== 0 ? primary : a.id - b.id;
+    });
   }
   const total = result.length;
   const data = result.slice((page - 1) * limit, page * limit).map((item) => Object.fromEntries(Object.entries(item).filter(([field]) => !hidden.includes(field))));
@@ -423,7 +499,7 @@ export const createResourceRouter = ({ label, collection, schema, hooks = {}, hi
   const body = (req, partial, current) => {
     const input = trimStrings(schema, req.body);
     const errors = validate(schema, input, { partial });
-    const data = partial ? input : applyDefaults(schema, input);
+    const data = partial ? input : applyDefaults(schema, input, current);
     const details = errors.length ? errors : (hooks.check?.(data, current) ?? []);
     if (details.length) throw validationFailed(details);
     return data;
@@ -463,7 +539,16 @@ export const createResourceRouter = ({ label, collection, schema, hooks = {}, hi
 ## Appendix C (mandatory) Listing of the file validation.js
 
 ```js
-// A schema maps a field name to { type, required, max, enum, pattern, default }.
+// C0/C1 control characters (NUL, BEL, newline, ...) minus tab/newline/CR, which `multiline` fields allow.
+const CONTROL_STRICT = /[\u0000-\u001F\u007F-\u009F]/;
+const CONTROL_MULTILINE = /[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F-\u009F]/;
+// Invisible formatting characters that a reader cannot see and that a plain `trim()` does not remove:
+// zero-width space, bidi marks and overrides, byte-order mark, soft hyphen. The zero-width joiner/non-joiner
+// are left out on purpose, they are part of ordinary emoji and script text (e.g. "👩‍💻").
+const INVISIBLE_CODE_POINTS = [0x00ad, 0x200b, 0x200e, 0x200f, 0x202a, 0x202b, 0x202c, 0x202d, 0x202e, 0x2066, 0x2067, 0x2068, 0x2069, 0xfeff];
+const INVISIBLE_FORMAT = new RegExp(`[${INVISIBLE_CODE_POINTS.map((cp) => String.fromCodePoint(cp)).join('')}]`, 'u');
+
+// A schema maps a field name to { type, required, max, enum, pattern, default, multiline }.
 // Types: 'string', 'integer'. Returns a list of { field, message }.
 const checkField = (name, rule, value) => {
   if (rule.type === 'integer') {
@@ -472,8 +557,12 @@ const checkField = (name, rule, value) => {
   }
   if (rule.type === 'string') {
     if (typeof value !== 'string') return `${name} must be a string`;
+    // Rejects an unpaired (lone) surrogate: valid in a JS string and in JSON, but not valid Unicode text.
+    if (!value.isWellFormed()) return `${name} contains an invalid character (an unpaired surrogate)`;
+    if ((rule.multiline ? CONTROL_MULTILINE : CONTROL_STRICT).test(value) || INVISIBLE_FORMAT.test(value)) {
+      return `${name} must not contain control or invisible characters`;
+    }
     if (rule.required && value.trim() === '') return `${name} must not be empty`;
-    if (value.includes('\u0000')) return `${name} must not contain NUL characters`;
     // Counted by code points, so an emoji is one character as the user sees it, not two UTF-16 units.
     if (rule.max && [...value].length > rule.max) return `${name} must be at most ${rule.max} characters`;
     if (rule.pattern && !rule.pattern.test(value)) return `${name} has an invalid format`;
@@ -502,20 +591,33 @@ export const validate = (schema, body, { partial = false } = {}) => {
   return errors;
 };
 
-export const applyDefaults = (schema, body) => {
+// current: the record being replaced (PUT) so a field left out of the body keeps its current value instead of
+// being silently reset to the schema default (a role, for example, must not be lowered just by omitting it).
+// undefined on create (POST), where an omitted field does take the schema default.
+export const applyDefaults = (schema, body, current) => {
   const result = { ...body };
   for (const [field, rule] of Object.entries(schema)) {
-    if (result[field] === undefined && rule.default !== undefined) result[field] = rule.default;
+    if (result[field] !== undefined) continue;
+    if (current && Object.hasOwn(current, field)) result[field] = current[field];
+    else if (rule.default !== undefined) result[field] = rule.default;
   }
   return result;
 };
 
-// Trims surrounding whitespace of known string fields, so " Ada " is stored as "Ada".
+// Unicode compatibility normalization so "é" (one code point) and "e" + combining acute (two code points) become
+// the same text, then strips invisible formatting characters a `trim()` would miss, then lower-cases: two emails
+// that render identically can no longer be told apart or used to register two look-alike accounts.
+export const normalizeEmail = (value) => value.normalize('NFKC').replace(/[\u0000-\u001F\u007F-\u009F\p{Cf}]/gu, '').toLowerCase();
+
+// Trims surrounding whitespace of known string fields, so " Ada " is stored as "Ada", then applies the field's
+// own transform (e-mails are normalized) so validation and storage see the same, final text.
 export const trimStrings = (schema, body) => {
   if (body === null || typeof body !== 'object' || Array.isArray(body)) return body;
   const result = { ...body };
   for (const field of Object.keys(result)) {
-    if (Object.hasOwn(schema, field) && typeof result[field] === 'string') result[field] = result[field].trim();
+    if (!Object.hasOwn(schema, field) || typeof result[field] !== 'string') continue;
+    const trimmed = result[field].trim();
+    result[field] = schema[field].transform ? schema[field].transform(trimmed) : trimmed;
   }
   return result;
 };

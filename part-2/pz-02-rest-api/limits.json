@@ -8,5 +8,7 @@
   "idMax": 2147483647,
   "bodyBytes": "100kb",
   "rateWindowMs": 60000,
-  "rateMax": 300
+  "rateMax": 300,
+  "rateMaxClients": 50000,
+  "maxRecordsPerCollection": 5000
 }

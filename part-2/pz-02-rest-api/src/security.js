@@ -12,15 +12,48 @@ export const securityHeaders = (req, res, next) => {
   next();
 };
 
+// An IPv4 client reaching a dual-stack server is seen by Node as "::ffff:<ipv4>" on some connections and as the
+// plain "<ipv4>" on others; without this the same client gets two separate buckets and can double its quota.
+const bucketKey = (ip) => (typeof ip === 'string' && ip.startsWith('::ffff:') ? ip.slice(7) : ip ?? 'unknown');
+
 // Fixed-window rate limit per client address, kept in memory. The answer is the usual JSON error with Retry-After.
-export const rateLimit = ({ windowMs, max, now = Date.now }) => {
+//
+// Cleanup is amortized, not a periodic full scan: every call walks at most SWEEP_BATCH map entries (resuming
+// where the previous call left off) and drops the ones that expired, so the per-request cost stays bounded
+// however large the map has grown, instead of occasionally scanning the whole thing (a CPU-cost amplifier an
+// attacker rotating addresses could lean on). maxClients is a hard ceiling on distinct addresses tracked at
+// once: once it is reached, the oldest tracked address is evicted to make room, so the map itself cannot grow
+// without bound even if the sweep never catches up (for example many different IPv6 addresses, each used once).
+const SWEEP_BATCH = 500;
+
+export const rateLimit = ({ windowMs, max, now = Date.now, maxClients = 50000 }) => {
   const hits = new Map();
+  let cursor = null;
+
+  const sweep = (time) => {
+    const iterator = cursor ?? hits.entries();
+    for (let i = 0; i < SWEEP_BATCH; i += 1) {
+      const next = iterator.next();
+      if (next.done) {
+        cursor = null;
+        return;
+      }
+      const [key, entry] = next.value;
+      if (entry.reset <= time) hits.delete(key);
+    }
+    cursor = iterator;
+  };
+
   return (req, res, next) => {
     const time = now();
-    if (hits.size > 10000) for (const [key, entry] of hits) if (entry.reset <= time) hits.delete(key);
-    const key = req.ip ?? 'unknown';
+    sweep(time);
+    const key = bucketKey(req.ip);
     let entry = hits.get(key);
     if (!entry || entry.reset <= time) {
+      if (!entry && hits.size >= maxClients) {
+        const oldest = hits.keys().next().value;
+        if (oldest !== undefined) hits.delete(oldest);
+      }
       entry = { count: 0, reset: time + windowMs };
       hits.set(key, entry);
     }

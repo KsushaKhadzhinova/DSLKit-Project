@@ -5,6 +5,7 @@ import { createResourceRouter, listItems, methodsOnly, parseId } from './resourc
 import { logSafe, rateLimit, securityHeaders } from './security.js';
 import { buildOpenApi } from './openapi.js';
 import { createStores } from './store.js';
+import { normalizeEmail } from './validation.js';
 
 // All sizes live in limits.json, not in the code.
 export const LIMITS = JSON.parse(readFileSync(new URL('../limits.json', import.meta.url), 'utf8'));
@@ -13,21 +14,29 @@ export const NOTATIONS = ['UML', 'BPMN', 'ERD', 'DFD', 'IDEF0', 'Petri'];
 
 const ID = { type: 'integer', required: true, min: 1, max: LIMITS.idMax };
 
+// Local part: ASCII, no leading/trailing/doubled dot. Domain: one or more dot-separated labels, no leading,
+// trailing or doubled hyphen or dot. Every alternation below is a single, disjoint character class repeated
+// with its own quantifier, so there is no ambiguity for the engine to backtrack over; matching stays linear
+// in the length of the string even for a deliberately pathological input.
+const LOCAL_PART = "[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+)*";
+const DOMAIN_LABEL = '[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?';
+const EMAIL_PATTERN = new RegExp(`^${LOCAL_PART}@${DOMAIN_LABEL}(?:\\.${DOMAIN_LABEL})+$`);
+
 export const schemas = {
   users: {
     name: { type: 'string', required: true, max: LIMITS.userName },
-    email: { type: 'string', required: true, max: LIMITS.userEmail, pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/ },
+    email: { type: 'string', required: true, max: LIMITS.userEmail, pattern: EMAIL_PATTERN, transform: normalizeEmail },
     role: { type: 'string', enum: ['owner', 'editor', 'viewer'], default: 'viewer' },
   },
   projects: {
     name: { type: 'string', required: true, max: LIMITS.projectName },
-    description: { type: 'string', max: LIMITS.projectDescription, default: '' },
+    description: { type: 'string', max: LIMITS.projectDescription, default: '', multiline: true },
     ownerId: ID,
   },
   diagrams: {
     title: { type: 'string', required: true, max: LIMITS.diagramTitle },
     notation: { type: 'string', enum: NOTATIONS, required: true },
-    code: { type: 'string', max: LIMITS.diagramCode, default: '' },
+    code: { type: 'string', max: LIMITS.diagramCode, default: '', multiline: true },
     projectId: ID,
     status: { type: 'string', enum: ['draft', 'published'], default: 'draft' },
   },
@@ -43,7 +52,16 @@ const missingReference = (field, collection, value) =>
 
 const conflict = (message) => new ApiError(409, 'conflict', message);
 
-export const createApp = ({ stores = createStores(), writeError = console.error, limit = { windowMs: LIMITS.rateWindowMs, max: LIMITS.rateMax }, now = Date.now } = {}) => {
+// Methods that normally send no body; a body on one of these is simply not read rather than being a reason
+// to reject the request (a non-JSON Content-Type is only an error on a request that is meant to carry JSON).
+const BODYLESS_METHODS = new Set(['GET', 'HEAD', 'DELETE']);
+
+export const createApp = ({
+  stores = createStores(undefined, LIMITS.maxRecordsPerCollection),
+  writeError = console.error,
+  limit = { windowMs: LIMITS.rateWindowMs, max: LIMITS.rateMax, maxClients: LIMITS.rateMaxClients },
+  now = Date.now,
+} = {}) => {
   const { users, projects, diagrams } = stores;
   const app = express();
   app.disable('x-powered-by');
@@ -52,9 +70,31 @@ export const createApp = ({ stores = createStores(), writeError = console.error,
   app.get('/health', (req, res) => res.json({ status: 'ok' }));
   // Refused before the body is read, so a flood costs little.
   app.use(rateLimit({ ...limit, now }));
-  app.use(express.json({ limit: LIMITS.bodyBytes }));
-  // A body that express.json did not read (another Content-Type) is refused with 415, not taken as a missing body.
+  // This API answers only JSON; a client that explicitly asks for something else gets 406 instead of JSON it
+  // did not ask for. A request with no Accept header, or "*/*", is always welcome.
   app.use((req, res, next) => {
+    const accept = req.headers.accept;
+    if (!accept) return next();
+    const acceptsJson = accept.split(',').some((part) => {
+      const type = part.split(';')[0].trim().toLowerCase();
+      return type === '*/*' || type === 'application/*' || type === 'application/json';
+    });
+    if (!acceptsJson) return next(new ApiError(406, 'not_acceptable', 'This API only returns application/json'));
+    return next();
+  });
+  // A declared charset other than UTF-8 is rejected up front with 415, instead of being read as UTF-8 anyway
+  // and failing JSON parsing later with the unrelated 400 invalid_json.
+  app.use((req, res, next) => {
+    const match = /charset=("?)([^;"]+)\1/i.exec(req.headers['content-type'] ?? '');
+    if (match && match[2].trim().toLowerCase() !== 'utf-8') return next(new ApiError(415, 'unsupported_media_type', 'Only charset=utf-8 is supported'));
+    return next();
+  });
+  app.use(express.json({ limit: LIMITS.bodyBytes }));
+  // A body that express.json did not read (another Content-Type) is refused with 415, not taken as a missing
+  // body - but only for a method that is meant to carry one; GET/HEAD/DELETE never need a JSON body, so any
+  // body they do carry is simply ignored instead of failing the request over an unrelated Content-Type.
+  app.use((req, res, next) => {
+    if (BODYLESS_METHODS.has(req.method)) return next();
     const hasBody = Number(req.headers['content-length'] ?? 0) > 0 || req.headers['transfer-encoding'] !== undefined;
     if (hasBody && req.body === undefined) return next(new ApiError(415, 'unsupported_media_type', 'Content-Type must be application/json'));
     return next();
@@ -63,6 +103,7 @@ export const createApp = ({ stores = createStores(), writeError = console.error,
   const api = express.Router();
   // The machine-readable description of the API, built from the schemas above.
   api.get('/openapi.json', (req, res) => res.json(buildOpenApi(schemas, { hidden: { users: ['email'] } })));
+  api.all('/openapi.json', methodsOnly('GET'));
   // Link between resources: the projects that belong to one user. It is mounted before the standard router so it wins over /:id.
   api.get('/users/:id/projects', (req, res) => {
     const user = users.find(parseId(req.params.id));
@@ -133,7 +174,10 @@ export const createApp = ({ stores = createStores(), writeError = console.error,
   api.post('/diagrams/:id/publish', (req, res) => res.json(diagrams.update(diagram(req), { status: 'published' })));
   api.post('/diagrams/:id/duplicate', (req, res) => {
     const { id, createdAt, ...rest } = diagram(req);
-    res.status(201).json(diagrams.create({ ...rest, title: `${rest.title} (copy)`.slice(0, LIMITS.diagramTitle), status: 'draft' }));
+    // Cut by code points, not by UTF-16 units: slicing a surrogate pair in half would store (and re-serve) a
+    // lone surrogate, which is not valid Unicode text.
+    const title = [...`${rest.title} (copy)`].slice(0, LIMITS.diagramTitle).join('');
+    res.status(201).json(diagrams.create({ ...rest, title, status: 'draft' }));
   });
   api.all('/diagrams/:id/publish', methodsOnly('POST'));
   api.all('/diagrams/:id/duplicate', methodsOnly('POST'));

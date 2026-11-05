@@ -78,3 +78,16 @@ DELETE {{base}}/diagrams/1
 
 ### Unknown route -> 404
 GET {{base}}/nothing
+
+### An Accept header that cannot match JSON -> 406
+GET {{base}}/users
+Accept: text/html
+
+### An unknown query key is rejected, not silently ignored -> 400 invalid_query
+GET {{base}}/users?bogus=1
+
+### PUT without "role" keeps the current role instead of resetting it to "viewer" -> 200
+PUT {{base}}/users/2
+Content-Type: application/json
+
+{ "name": "Alan Turing", "email": "alan@example.com" }

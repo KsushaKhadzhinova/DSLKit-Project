@@ -223,10 +223,13 @@ withApi('search with a 10000-character q answers 200 with no matches', async ({ 
   assert.equal(res.json.meta.total, 0);
 });
 
-withApi('list query keys __proto__ and constructor are ignored', async ({ call }) => {
+withApi('list query keys __proto__, constructor and other unknown keys are rejected, not silently ignored (F11)', async ({ call }) => {
+  // Before the F11 fix every one of these was quietly dropped and the full list came back (200); a typo in a
+  // filter name looked like "no results match" or "the filter did nothing" instead of a clear error.
   const res = await call('GET', '/diagrams?__proto__=x&constructor=1&prototype=2');
-  assert.equal(res.status, 200);
-  assert.equal(res.json.meta.total, 3);
+  assert.equal(res.status, 400);
+  assert.equal(res.json.error.code, 'invalid_query');
+  assert.equal((await call('GET', '/diagrams?bogus=1')).status, 400);
 });
 
 withApi('PATCH with one invalid field writes nothing, not even the valid ones', async ({ call }) => {

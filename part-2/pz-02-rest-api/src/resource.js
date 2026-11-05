@@ -19,20 +19,45 @@ export const parseId = (raw) => {
   return Number(raw);
 };
 
-const parsePositive = (raw, name, fallback, max = Number.MAX_SAFE_INTEGER) => {
+// The largest integer `DIGITS` can ever match (15 nines): the real ceiling for page/limit/id, below
+// Number.MAX_SAFE_INTEGER. Error messages quote this instead of a bound that is never actually enforced.
+const MAX_QUERY_INT = 999999999999999;
+
+const scalar = (raw, name) => {
+  if (Array.isArray(raw)) throw new ApiError(400, 'invalid_query', `${name} must not be repeated`);
+  return raw;
+};
+
+const parsePositive = (raw, name, fallback, max = MAX_QUERY_INT) => {
   if (raw === undefined) return fallback;
-  if (!DIGITS.test(String(raw)) || Number(raw) > max) throw new ApiError(400, 'invalid_query', `${name} must be an integer from 1 to ${max}`);
+  if (!DIGITS.test(String(scalar(raw, name))) || Number(raw) > max) throw new ApiError(400, 'invalid_query', `${name} must be an integer from 1 to ${max}`);
   return Number(raw);
 };
 
 // Filtering by any schema field (?status=draft), search (?q=text), sorting (?sort=-title), pagination (?page=2&limit=10).
-// hidden: fields that never appear in a list and cannot be used to filter, search or sort it (otherwise ?email= or ?sort=email would reveal them).
+// hidden: fields that never appear in a list; filtering, searching or sorting by one is silently a no-op
+// (otherwise ?email= or ?sort=email would reveal it) rather than an error, so it still cannot be used as an oracle.
+// Any OTHER query key that is not a schema field, page, limit, sort or q is unknown and answers 400, instead of
+// being read and then quietly ignored.
 export const listItems = (items, schema, query, hidden = []) => {
+  const known = new Set(['page', 'limit', 'sort', 'q', ...Object.keys(schema)]);
+  for (const key of Object.keys(query)) {
+    if (!known.has(key)) throw new ApiError(400, 'invalid_query', `${key} is not a known query parameter`);
+  }
   const page = parsePositive(query.page, 'page', 1);
   const limit = parsePositive(query.limit, 'limit', 20, 100);
-  let result = items.filter((item) => Object.keys(schema).every((field) => hidden.includes(field) || query[field] === undefined || String(item[field]) === String(query[field])));
+  let result = items.filter((item) =>
+    Object.keys(schema).every((field) => {
+      if (hidden.includes(field) || query[field] === undefined) return true;
+      const raw = scalar(query[field], field);
+      const rule = schema[field];
+      if (rule.type === 'integer' && !DIGITS.test(String(raw))) throw new ApiError(400, 'invalid_query', `${field} must be a positive integer`);
+      if (rule.enum && !rule.enum.includes(String(raw))) throw new ApiError(400, 'invalid_query', `${field} must be one of: ${rule.enum.join(', ')}`);
+      return String(item[field]) === String(raw);
+    }),
+  );
   if (query.q !== undefined) {
-    const needle = String(query.q).toLowerCase();
+    const needle = String(scalar(query.q, 'q')).toLowerCase();
     const textFields = Object.keys(schema).filter((field) => schema[field].type === 'string' && !hidden.includes(field));
     result = result.filter((item) =>
       textFields.some((field) =>
@@ -43,10 +68,17 @@ export const listItems = (items, schema, query, hidden = []) => {
     );
   }
   if (query.sort !== undefined) {
-    const desc = String(query.sort).startsWith('-');
-    const field = String(query.sort).replace(/^-/, '');
+    const raw = String(scalar(query.sort, 'sort'));
+    const desc = raw.startsWith('-');
+    const field = raw.replace(/^-/, '');
     if (hidden.includes(field) || (field !== 'id' && field !== 'createdAt' && !Object.hasOwn(schema, field))) throw new ApiError(400, 'invalid_query', `cannot sort by ${field}`);
-    result = [...result].sort((a, b) => (a[field] > b[field] ? 1 : a[field] < b[field] ? -1 : 0) * (desc ? -1 : 1));
+    // Locale-aware for text (so case and accents sort the way a reader expects), tie-broken by id so equal
+    // keys keep a fixed, repeatable order instead of whatever order the sort happened to leave them in.
+    const compare = (a, b) => (typeof a[field] === 'string' && typeof b[field] === 'string' ? a[field].localeCompare(b[field]) : a[field] > b[field] ? 1 : a[field] < b[field] ? -1 : 0);
+    result = [...result].sort((a, b) => {
+      const primary = compare(a, b) * (desc ? -1 : 1);
+      return primary !== 0 ? primary : a.id - b.id;
+    });
   }
   const total = result.length;
   const data = result.slice((page - 1) * limit, page * limit).map((item) => Object.fromEntries(Object.entries(item).filter(([field]) => !hidden.includes(field))));
@@ -63,7 +95,7 @@ export const createResourceRouter = ({ label, collection, schema, hooks = {}, hi
   const body = (req, partial, current) => {
     const input = trimStrings(schema, req.body);
     const errors = validate(schema, input, { partial });
-    const data = partial ? input : applyDefaults(schema, input);
+    const data = partial ? input : applyDefaults(schema, input, current);
     const details = errors.length ? errors : (hooks.check?.(data, current) ?? []);
     if (details.length) throw validationFailed(details);
     return data;

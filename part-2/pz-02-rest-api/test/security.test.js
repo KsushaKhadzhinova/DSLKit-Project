@@ -83,6 +83,35 @@ test('rate limit counts per address and opens again after the window', () => {
   assert.equal(run({ ip: 'a' }).err, undefined);
 });
 
+test('F8: an IPv4-mapped IPv6 address shares the same bucket as the plain IPv4 address', () => {
+  const time = 0;
+  const limit = rateLimit({ windowMs: 1000, max: 1, now: () => time });
+  const run = (ip) => {
+    const out = { headers: {} };
+    limit({ ip }, { set: (k, v) => (out.headers[k] = v) }, (err) => (out.err = err));
+    return out;
+  };
+  assert.equal(run('127.0.0.1').err, undefined);
+  assert.equal(run('::ffff:127.0.0.1').err.status, 429, 'same client, should already be over the limit');
+  assert.equal(run('::1').err, undefined, 'a real (non-mapped) IPv6 address is still its own bucket');
+});
+
+test('F8: the client map is bounded; past maxClients the oldest tracked client is evicted', () => {
+  const time = 0;
+  const limit = rateLimit({ windowMs: 100000, max: 1, now: () => time, maxClients: 3 });
+  const run = (ip) => {
+    const out = {};
+    limit({ ip }, {}, (err) => (out.err = err));
+    return out;
+  };
+  run('a');
+  run('b');
+  run('c');
+  run('d'); // map is full (3), so inserting a 4th evicts the oldest tracked client ('a')
+  // 'a' was evicted, so it is treated as a brand-new client, not as still being within its old window.
+  assert.equal(run('a').err, undefined);
+});
+
 test('rate limit sweeps expired entries when the table grows', () => {
   let time = 0;
   const limit = rateLimit({ windowMs: 10, max: 1, now: () => time });
