@@ -74,19 +74,20 @@ def run_variant(p, tag, root, lang, viewport):
     check(f"AUTH-{tag}-01", f"[{tag}] Главная: гостю показаны «Войти» и «Регистрация», выхода нет", guest_header)
 
     def guest_creates():
+        # "My projects" is only for a signed-in user: a guest is sent to the sign-in page (data-requires-auth).
         page.goto(prefix + "/app/dashboard.html")
-        page.wait_for_timeout(400)
-        yes(page.locator("[data-project]").count() == 6, f"сидов {page.locator('[data-project]').count()}")
+        page.wait_for_url("**/login.html")
+        eq(page.locator("[data-project]").count(), 0, "гостю не должны показываться проекты:")
+        # The editor stays open to a guest: a template opens and a save gives the project an address.
         page.goto(prefix + "/app/editor.html?template=idef0")
         page.wait_for_timeout(500)
         page.click('[data-action="save"]')
         page.wait_for_timeout(400)
         yes("?p=" in page.url, page.url)
         page.goto(prefix + "/app/dashboard.html")
-        page.wait_for_timeout(400)
-        eq(page.locator("[data-project]").count(), 7, "6 стартовых и сохранённый проект гостя:")
+        page.wait_for_url("**/login.html")
 
-    check(f"AUTH-{tag}-02", f"[{tag}] Гость: на «Мои проекты» стартовые диаграммы, создание и сохранение работают как раньше", guest_creates)
+    check(f"AUTH-{tag}-02", f"[{tag}] Гость: «Мои проекты» ведут на вход, редактор открыт, сохранение работает", guest_creates)
 
     def register_errors():
         page.goto(prefix + "/app/register.html")
@@ -121,7 +122,8 @@ def run_variant(p, tag, root, lang, viewport):
         page.wait_for_timeout(400)
         yes(page.locator("[data-auth-logout]:visible").count() == 1, "нет кнопки выхода в шапке приложения")
         yes(page.locator("[data-auth-guest]:visible").count() == 0, "у вошедшего видны гостевые ссылки")
-        eq(page.locator("[data-project]").count(), 6, "стартовые диаграммы нового пользователя:")
+        # One starter diagram per notation (33 in total, see site/js/storage/seeds.js).
+        eq(page.locator("[data-project]").count(), 33, "стартовые диаграммы нового пользователя:")
         yes("0" in page.inner_text(".app-nav__quota-text"), page.inner_text(".app-nav__quota-text"))
         page.goto(prefix + "/")
         open_menu()
@@ -219,6 +221,9 @@ def run_variant(p, tag, root, lang, viewport):
     check(f"AUTH-{tag}-11", f"[{tag}] После повторного входа создание диаграммы работает", lambda: create_after_login("Second after login"))
 
     def repeat_create():
+        # A user has a daily limit of five new diagrams and the earlier checks of this run already used some of it, so the user
+        # gets the developer role (no limit) here; the limit itself is covered by labs/05-javascript-interactivity/quota-*.test.js.
+        page.evaluate("""() => { const key = 'dslkit.accounts'; const list = JSON.parse(localStorage.getItem(key)); localStorage.setItem(key, JSON.stringify(list.map((a) => ({ ...a, role: 'developer' })))); }""")
         for n in range(1, 4):
             page.goto(prefix + "/app/dashboard.html")
             page.wait_for_timeout(300)

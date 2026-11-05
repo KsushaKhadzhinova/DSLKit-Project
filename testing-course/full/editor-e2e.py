@@ -1,4 +1,5 @@
 """End-to-end check of the editor in Edge: every button, the panels, the engine, the layouts. Writes editor-e2e.json."""
+import base64
 import json
 import sys
 from pathlib import Path
@@ -78,6 +79,7 @@ with sync_playwright() as p:
         yes("Нет изменений" in page.inner_text(".editor-tools__status"), "повторный коммит")
         page.click('[data-panel="files"]')
         eq(page.locator(".editor-tools").is_visible(), False, "панель Git должна закрыться:")
+        page.click('[data-panel="templates"]')
         page.click('[data-template="dfd"]')
         page.click('[data-panel="git"]')
         page.wait_for_timeout(200)
@@ -100,7 +102,8 @@ with sync_playwright() as p:
 
     def ai_fix():
         page.click('[data-panel="ai"]')
-        yes(page.locator(".editor-tools").is_visible(), "нет панели")
+        # The assistant opens as a tab of the bottom panel, not in the side drawer.
+        yes(page.locator(".editor-tools__chat").is_visible(), "нет панели")
         page.fill('.editor-tools__input[placeholder="Спросите помощника"]', "исправь ошибки")
         page.keyboard.press("Enter")
         page.wait_for_timeout(500)
@@ -148,9 +151,14 @@ with sync_playwright() as p:
         ctx.grant_permissions(["clipboard-read", "clipboard-write"], origin=base)
         page.locator('[data-action="share"]').first.evaluate("e => e.click()")
         page.wait_for_timeout(300)
-        eq(page.evaluate("navigator.clipboard.readText()").replace("\r\n", "\n"), code())
+        # The button copies a link with the code packed after "#s=" (base64 of UTF-8, URL-safe, no padding).
+        link = page.evaluate("navigator.clipboard.readText()")
+        yes("#s=" in link, f"в буфере не ссылка: {link[:80]}")
+        packed = link.split("#s=", 1)[1]
+        text = base64.urlsafe_b64decode(packed + "=" * (-len(packed) % 4)).decode("utf-8")
+        eq(text.replace("\r\n", "\n"), code())
 
-    check("E2E-15", "«Поделиться» копирует код и сообщает результат", share)
+    check("E2E-15", "«Поделиться» копирует ссылку с кодом и сообщает результат", share)
 
     def templates():
         for t in ["idef0", "dfd", "erd"]:
@@ -181,7 +189,7 @@ with sync_playwright() as p:
               .filter(b => !b.disabled && !b.closest('[hidden]') && b.offsetParent !== null)
               .filter(b => b.getAttribute('aria-disabled') !== 'true')
               .filter(b => Object.keys(b.dataset).length === 0 && !b.getAttribute('role') && !b.closest('.tour, .modal, dialog')
-                           && !b.className.match(/button--run|canvas__refresh|editor-toolbar__switch|editor-tabs__close|problems__|palette__|editor-tools|editor-bottom|segmented|templates__|file-tree|banner|history/))
+                           && !b.className.match(/button--run|canvas__refresh|editor-toolbar__switch|editor-tabs__close|problems__|palette__|editor-tools|editor-bottom|segmented|templates__|file-tree|banner|history|toast__close/))
               .map(b => b.className + ':' + b.textContent.trim().slice(0,20))"""
         )
         eq(dead, [], "кнопки без обработчика:")
