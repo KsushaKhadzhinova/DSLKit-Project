@@ -1,0 +1,633 @@
+{
+  "info": {
+    "name": "DSLKit lab-06-mongodb",
+    "description": "Generated from requests.http by tools/make-postman.js. Start the server first.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base",
+      "value": "http://localhost:3000"
+    },
+    {
+      "key": "id",
+      "value": "000000000000000000000001"
+    },
+    {
+      "key": "commentId",
+      "value": "000000000000000000000002"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health check -> 200",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base}}/health",
+          "host": [
+            "{{base}}"
+          ],
+          "path": [
+            "health"
+          ]
+        }
+      }
+    },
+    {
+      "name": "List all diagrams -> 200",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base}}/diagrams",
+          "host": [
+            "{{base}}"
+          ],
+          "path": [
+            "diagrams"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Filter by tag (array contains) and owner -> 200",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base}}/diagrams?tag=shop&owner=anna",
+          "host": [
+            "{{base}}"
+          ],
+          "path": [
+            "diagrams"
+          ],
+          "query": [
+            {
+              "key": "tag",
+              "value": "shop"
+            },
+            {
+              "key": "owner",
+              "value": "anna"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "One diagram -> 200",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base}}/diagrams/{{id}}",
+          "host": [
+            "{{base}}"
+          ],
+          "path": [
+            "diagrams",
+            "{{id}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Well-formed but unknown ObjectId -> 404",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 404', () => pm.response.to.have.status(404));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base}}/diagrams/64b7f0c2a1b2c3d4e5f60718",
+          "host": [
+            "{{base}}"
+          ],
+          "path": [
+            "diagrams",
+            "64b7f0c2a1b2c3d4e5f60718"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Not an ObjectId -> 400",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 400', () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base}}/diagrams/abc",
+          "host": [
+            "{{base}}"
+          ],
+          "path": [
+            "diagrams",
+            "abc"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Create with tags -> 201 + Location",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 201', () => pm.response.to.have.status(201));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Login flow\",\n  \"notation\": \"UML\",\n  \"sourceCode\": \"user -> server\",\n  \"priority\": 1,\n  \"owner\": \"carol\",\n  \"tags\": [\"auth\", \"web\"]\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base}}/diagrams",
+          "host": [
+            "{{base}}"
+          ],
+          "path": [
+            "diagrams"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Invalid data -> 400 with details",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 400', () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{ \"title\": \"\", \"notation\": \"XYZ\", \"tags\": [\"\"] }",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base}}/diagrams",
+          "host": [
+            "{{base}}"
+          ],
+          "path": [
+            "diagrams"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Malformed JSON -> 400",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 400', () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{ \"title\":",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base}}/diagrams",
+          "host": [
+            "{{base}}"
+          ],
+          "path": [
+            "diagrams"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Replace (comments are kept) -> 200",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Order processing v2\",\n  \"notation\": \"BPMN\",\n  \"sourceCode\": \"start -> check -> pay -> ship\",\n  \"priority\": 0,\n  \"owner\": \"anna\",\n  \"tags\": [\"shop\"]\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base}}/diagrams/{{id}}",
+          "host": [
+            "{{base}}"
+          ],
+          "path": [
+            "diagrams",
+            "{{id}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Add a comment: $push into the nested array -> 201",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 201', () => pm.response.to.have.status(201));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{ \"author\": \"boris\", \"text\": \"Add a refund branch\" }",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base}}/diagrams/{{id}}/comments",
+          "host": [
+            "{{base}}"
+          ],
+          "path": [
+            "diagrams",
+            "{{id}}",
+            "comments"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Edit one comment inside the array: positional $ -> 200",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{ \"text\": \"Refund branch added\" }",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base}}/diagrams/{{id}}/comments/{{commentId}}",
+          "host": [
+            "{{base}}"
+          ],
+          "path": [
+            "diagrams",
+            "{{id}}",
+            "comments",
+            "{{commentId}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Remove one comment: $pull -> 200",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{base}}/diagrams/{{id}}/comments/{{commentId}}",
+          "host": [
+            "{{base}}"
+          ],
+          "path": [
+            "diagrams",
+            "{{id}}",
+            "comments",
+            "{{commentId}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Delete the diagram with its comments -> 204 (repeat it -> 404)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 204', () => pm.response.to.have.status(204));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{base}}/diagrams/{{id}}",
+          "host": [
+            "{{base}}"
+          ],
+          "path": [
+            "diagrams",
+            "{{id}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Unknown route -> 404",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 404', () => pm.response.to.have.status(404));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base}}/projects",
+          "host": [
+            "{{base}}"
+          ],
+          "path": [
+            "projects"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Aggregation: count, average priority and comments per notation -> 200",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base}}/diagrams/stats",
+          "host": [
+            "{{base}}"
+          ],
+          "path": [
+            "diagrams",
+            "stats"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Search inside the nested comments array -> 200",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base}}/diagrams?commentAuthor=boris",
+          "host": [
+            "{{base}}"
+          ],
+          "path": [
+            "diagrams"
+          ],
+          "query": [
+            {
+              "key": "commentAuthor",
+              "value": "boris"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Paging -> 200",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base}}/diagrams?limit=2&skip=1",
+          "host": [
+            "{{base}}"
+          ],
+          "path": [
+            "diagrams"
+          ],
+          "query": [
+            {
+              "key": "limit",
+              "value": "2"
+            },
+            {
+              "key": "skip",
+              "value": "1"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
