@@ -83,6 +83,14 @@ test('a new diagram starts from a valid starter and a template in the address pi
   assert.equal(open({ search: '?template=unknown' }).code(), TEMPLATES.idef0);
 });
 
+test('?template=__proto__ (or constructor, toString) cannot reach an inherited property and picks the default starter instead', () => {
+  for (const key of ['__proto__', 'constructor', 'toString', 'hasOwnProperty']) {
+    const opened = open({ search: `?template=${key}` });
+    assert.equal(opened.code(), TEMPLATES.idef0);
+    assert.equal(opened.api.current(), null);
+  }
+});
+
 test('Save creates a project, names the file and the address, and Save again updates it', () => {
   const { dom, document, api, code, save, storage } = open({ search: '?template=erd' });
   save();
@@ -147,6 +155,25 @@ test('the autosave leaves an untouched new diagram alone, creates the project at
   assert.equal(PROJECT_AUTOSAVE_MS, 1000);
 });
 
+test('leaving the page (a language link, sign-out, closing the tab) flushes a pending autosave instead of losing it', async () => {
+  const storage = memory();
+  const opened = open({ storage });
+  showCode(opened.document, opened.document.querySelector('.code__lines'), 'diagram idef0 "Last second"');
+  // The MutationObserver callback that schedules the autosave timer runs as a microtask; waiting a tick here
+  // makes the timer pending (not yet fired) before pagehide, the exact moment this handler must still catch.
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  // The autosave timer (1 s) has not fired yet; pagehide must save before the browser tears the page down.
+  opened.dom.window.dispatchEvent(new opened.dom.window.Event('pagehide'));
+  assert.match(createProjectStore({ storage }).list()[0]?.source ?? '', /Last second/);
+});
+
+test('pagehide with nothing pending, or with the autosave switch off, saves nothing new', () => {
+  const storage = memory();
+  const opened = open({ storage });
+  opened.dom.window.dispatchEvent(new opened.dom.window.Event('pagehide'));
+  assert.equal(createProjectStore({ storage }).list().length, 0);
+});
+
 test('the editor works without the autosave switch', async () => {
   const dom = new JSDOM('<!doctype html><html lang="ru"><body><div class="app-page app-page--editor"><ol class="code__lines"></ol></div></body></html>', {
     url: 'http://localhost/app/editor.html',
@@ -169,6 +196,17 @@ const dashboard = ({ lang = 'ru', storage = memory(), answers = {}, now = clock(
   const visible = () => [...dom.window.document.querySelectorAll('.project-list__item:not([hidden]) .project-card__link')].map((node) => node.textContent);
   return { dom, document: dom.window.document, api, press, visible, storage };
 };
+
+test('the dashboard seeds the shared starter projects by default, seed:false skips it', () => {
+  const seeded = memory();
+  const dom = new JSDOM(pages.dashboard, { url: 'http://localhost/app/dashboard.html' });
+  initDashboard({ root: dom.window.document, storage: seeded, now: clock() });
+  assert.equal(createProjectStore({ storage: seeded }).list().length > 0, true);
+  const skipped = memory();
+  const dom2 = new JSDOM(pages.dashboard, { url: 'http://localhost/app/dashboard.html' });
+  initDashboard({ root: dom2.window.document, storage: skipped, now: clock(), seed: false });
+  assert.deepEqual(createProjectStore({ storage: skipped }).list(), []);
+});
 
 test('My projects shows only the saved diagrams, newest first, with a link that opens them in the editor', () => {
   const storage = memory();
@@ -199,6 +237,14 @@ test('an empty list of projects says so, the shared examples and the trash are t
   assert.equal(api.show('nowhere'), false);
   press(document.querySelector('[data-section="mine"]'));
   assert.equal(api.section(), 'mine');
+});
+
+test('a link such as dashboard.html#shared or #trash from another page opens that section right away', () => {
+  assert.equal(dashboard({ search: '#shared' }).api.section(), 'shared');
+  assert.equal(dashboard({ search: '#trash' }).api.section(), 'trash');
+  // An unknown or missing hash still opens "My projects".
+  assert.equal(dashboard({ search: '#nope' }).api.section(), 'mine');
+  assert.equal(dashboard().api.section(), 'mine');
 });
 
 test('the card menu opens, renames and moves a saved project to the trash, where it can be restored or deleted for good', () => {
@@ -269,6 +315,16 @@ test('the English dashboard gets English labels, and an unknown starter falls ba
   const sample = document.querySelector('.project-list__item');
   assert.match(sample.querySelector('.project-card__menu').getAttribute('aria-label'), /Actions for the project/);
   sample.querySelector('.project-card__link').setAttribute('href', 'editor.html?template=zzz');
+  press(sample.querySelector('.project-card__menu'));
+  press(sample.querySelector('[data-act="copy"]'));
+  assert.equal(createProjectStore({ storage }).list()[0].source, TEMPLATES.idef0);
+});
+
+test('a tampered href of ?template=__proto__ on a shared card cannot reach an inherited property either', () => {
+  const { document, press, storage } = dashboard();
+  press(document.querySelector('[data-section="shared"]'));
+  const sample = document.querySelector('.project-list__item:not([data-project])');
+  sample.querySelector('.project-card__link').setAttribute('href', 'editor.html?template=__proto__');
   press(sample.querySelector('.project-card__menu'));
   press(sample.querySelector('[data-act="copy"]'));
   assert.equal(createProjectStore({ storage }).list()[0].source, TEMPLATES.idef0);

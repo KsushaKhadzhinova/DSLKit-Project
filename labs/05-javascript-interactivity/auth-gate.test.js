@@ -28,6 +28,24 @@ test('a signed-in user stays on the page, and a page that is open to everybody i
   assert.deepEqual(sent, []);
 });
 
+test('a sign-out in another tab sends a page open in this tab to the sign-in page too', async () => {
+  const storage = createStorage(createMemoryBackend());
+  await createAccountStore({ storage }).register({ name: 'Ксения', email: 'k@example.com', password: 'correct horse' });
+  const sent = [];
+  const window = new EventTarget();
+  const root = { body: { dataset: { requiresAuth: '' } }, defaultView: window };
+  assert.equal(initAuthGate({ root, storage, navigate: (url) => sent.push(url) }), null);
+  assert.deepEqual(sent, []);
+  storage.remove('session');
+  window.dispatchEvent(Object.assign(new Event('storage'), { key: 'session' }));
+  assert.deepEqual(sent, ['login.html']);
+  // A storage event for an unrelated key, or a page still signed in, changes nothing.
+  sent.length = 0;
+  await createAccountStore({ storage }).login({ email: 'k@example.com', password: 'correct horse' });
+  window.dispatchEvent(Object.assign(new Event('storage'), { key: 'theme' }));
+  assert.deepEqual(sent, []);
+});
+
 test('the default way out replaces the address of the window', () => {
   const sent = [];
   const root = { body: { dataset: { requiresAuth: '' } }, defaultView: { location: { replace: (url) => sent.push(url) } } };

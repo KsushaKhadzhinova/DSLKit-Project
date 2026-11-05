@@ -47,7 +47,11 @@ test('every problem code the parsers can raise has a Russian and an English text
     assert.ok(texts.ru.length > 3 && texts.en.length > 3, code);
     const params = Object.fromEntries([...texts.ru.matchAll(/\{(\w+)\}/g), ...texts.en.matchAll(/\{(\w+)\}/g)].map((match) => [match[1], 'X']));
     ['ru', 'en'].forEach((lang) => assert.doesNotMatch(formatProblem({ code, params }, lang), /\{\w+\}/, `${code} ${lang}`));
-    assert.deepEqual([...texts.ru.matchAll(/\{(\w+)\}/g)].map((m) => m[1]).sort(), [...texts.en.matchAll(/\{(\w+)\}/g)].map((m) => m[1]).sort(), `${code}: placeholders differ`);
+    assert.deepEqual(
+      [...texts.ru.matchAll(/\{(\w+)\}/g)].map((m) => m[1]).sort(),
+      [...texts.en.matchAll(/\{(\w+)\}/g)].map((m) => m[1]).sort(),
+      `${code}: placeholders differ`,
+    );
   });
 });
 

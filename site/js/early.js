@@ -13,7 +13,7 @@
     var saved = read('theme');
     var dark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
     root.dataset.theme = saved === 'light' || saved === 'dark' ? saved : dark ? 'dark' : 'light';
-    if (/\/dashboard\.html$/.test(location.pathname)) {
+    if (/\/dashboard\.html\/?$/i.test(location.pathname)) {
       var session = read('session');
       var accounts = read('accounts');
       var known =

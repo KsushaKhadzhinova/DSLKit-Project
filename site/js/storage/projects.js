@@ -140,10 +140,13 @@ export const createTemplateStore = ({ storage, now = () => Date.now(), owner = n
   let counter = 0;
   const list = () => read().sort((a, b) => b.updated - a.updated);
   const get = (id) => read().find((item) => item.id === id) ?? null;
-  // A template with a known id is updated, any other gets a new id.
+  // A template with a known id is updated, one with no id gets a new id.
+  // An id that no longer exists (the template was deleted, in this tab or another) is refused instead of
+  // silently coming back to life under a new id.
   const save = ({ id, title, notation, source }) => {
     const items = read();
     const at = items.findIndex((item) => item.id === id);
+    if (id !== undefined && at < 0) return null;
     const stamp = now();
     const template = {
       id: at >= 0 ? id : `t${stamp.toString(36)}${(counter++).toString(36)}`,

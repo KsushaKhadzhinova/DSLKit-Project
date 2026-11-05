@@ -1,7 +1,9 @@
 export const NOTATIONS = ['idef0', 'dfd', 'erd', 'bpmn', 'uml', 'petri'];
 
 const NAME_PATTERN = /^\p{L}[\p{L}' ’-]{1,59}$/u;
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)*\.[^\s@.]{2,}$/;
+// The local part keeps to the common, safe subset of email characters: letters, digits and a handful of
+// punctuation marks, never angle brackets, quotes or other markup, so an address such as <script>@x.com is rejected.
+const EMAIL_PATTERN = /^[A-Za-z0-9!#$%&'*+/=?^_`{|}~.-]+@[^\s@.]+(?:\.[^\s@.]+)*\.[^\s@.]{2,}$/;
 const MAX_EMAIL_LENGTH = 120;
 const MAX_COMMENT_LENGTH = 500;
 const MAX_TEAM_SIZE = 500;

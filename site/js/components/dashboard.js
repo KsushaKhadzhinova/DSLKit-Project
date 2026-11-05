@@ -266,7 +266,9 @@ export const initDashboard = ({ root = document, storage, now = () => Date.now()
   const fromAddress = new view.URLSearchParams(view.location.search).get('q');
   let state = normalize(storage.get('dashboard'));
   if (fromAddress !== null) state.query = fromAddress;
-  let section = 'mine';
+  // A link from another page such as dashboard.html#shared or #trash opens straight into that section.
+  const fromHash = view.location.hash.slice(1);
+  let section = SECTIONS.includes(fromHash) ? fromHash : 'mine';
   const sectionOf = (item) => {
     if (item.dataset.trashed) return 'trash';
     if (item.dataset.template) return 'templates';
@@ -379,7 +381,7 @@ export const initDashboard = ({ root = document, storage, now = () => Date.now()
       store.remove(id);
     } else {
       const key = new view.URL(item.querySelector('.project-card__link').href).searchParams.get('template');
-      const copy = { title: title(item), notation: item.dataset.notation, source: TEMPLATES[key] ?? TEMPLATES.idef0 };
+      const copy = { title: title(item), notation: item.dataset.notation, source: Object.hasOwn(TEMPLATES, key) ? TEMPLATES[key] : TEMPLATES.idef0 };
       if (action === 'copy-template') templates.save(copy);
       else if (action === 'like') {
         const liked = likes();

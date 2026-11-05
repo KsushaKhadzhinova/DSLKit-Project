@@ -48,6 +48,18 @@ test('the template store creates, lists newest first, updates, renames and delet
   assert.equal(store.list().length, 1);
 });
 
+test('saving over an id that was deleted elsewhere is refused instead of reviving it under a new id', () => {
+  const store = createTemplateStore({ storage: memory(), now: clock() });
+  const a = store.save({ title: 'Kept', notation: 'idef0', source: 'a' });
+  store.remove(a.id);
+  assert.equal(store.save({ id: a.id, title: 'Back', notation: 'idef0', source: 'b' }), null);
+  assert.equal(store.list().length, 0);
+  // Saving with no id at all is always a fresh template, never refused.
+  const fresh = store.save({ title: 'Fresh', notation: 'idef0', source: 'c' });
+  assert.equal(store.list().length, 1);
+  assert.equal(fresh.title, 'Fresh');
+});
+
 test('templates are kept per user, a guest has the shared ones, damaged data gives an empty list', () => {
   const storage = memory();
   createTemplateStore({ storage }).save({ title: 'Guest', notation: 'idef0', source: 'g' });
@@ -115,9 +127,16 @@ test('a project is saved as a template, the template is listed, opened as a star
 test('a template can be renamed, edited and deleted, and each step can be cancelled', () => {
   const storage = memory();
   createTemplateStore({ storage }).save({ title: 'Old', notation: 'idef0', source: SOURCE });
+  createProjectStore({ storage }).save({ title: 'Mine', notation: 'idef0', source: SOURCE });
   let answer = 'New name';
   let sure = false;
   const { document, api, navigate, visible, act } = dashboard({ storage, prompt: () => answer, confirm: () => sure });
+  // Cancelling a rename (the prompt returns null) is checked for a project and for a template: the two
+  // branches of "is this a template or a project?" in the rename handler both keep the old title.
+  answer = null;
+  act('rename');
+  assert.deepEqual(visible(), ['Mine']);
+  answer = 'New name';
   api.show('templates');
   act('rename');
   assert.deepEqual(visible(), ['New name']);
@@ -224,6 +243,20 @@ test('?tpl= edits the template itself: Save and the autosave update it and no pr
   await opened.flush();
   assert.equal(createTemplateStore({ storage }).get(template.id).title, 'Again');
   assert.equal(createTemplateStore({ storage }).list().length, 1);
+  assert.equal(createProjectStore({ storage }).list().length, 0);
+});
+
+test('a template deleted in another tab is not revived by Save or the autosave of this tab', async () => {
+  const storage = memory();
+  const template = createTemplateStore({ storage }).save({ title: 'Kept', notation: 'idef0', source: SOURCE });
+  const opened = editor({ search: `?tpl=${template.id}`, storage });
+  createTemplateStore({ storage }).remove(template.id);
+  showCode(opened.document, opened.document.querySelector('.code__lines'), 'diagram idef0 "Changed"\nbox A1 "One" {\n}');
+  opened.save();
+  assert.equal(createTemplateStore({ storage }).list().length, 0);
+  assert.match(opened.document.querySelector('.editor-status__saved').textContent, /удалён в другой вкладке/);
+  await opened.flush();
+  assert.equal(createTemplateStore({ storage }).list().length, 0);
   assert.equal(createProjectStore({ storage }).list().length, 0);
 });
 

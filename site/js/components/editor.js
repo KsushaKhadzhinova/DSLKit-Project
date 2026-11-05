@@ -167,7 +167,7 @@ const initTemplates = ({ page, root }) => {
   const lang = root.documentElement.lang === 'en' ? 'en' : 'ru';
   const codeLines = page.querySelector('.code__lines');
   const loadTemplate = (key) => {
-    if (!codeLines || !(key in TEMPLATES)) return false;
+    if (!codeLines || !Object.hasOwn(TEMPLATES, key)) return false;
     showCode(root, codeLines, TEMPLATES[key]);
     announceRun(page, root);
     return true;

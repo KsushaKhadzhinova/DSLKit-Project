@@ -10,6 +10,10 @@ const TEXTS = {
   notFound: { ru: 'Проект не найден, открыта новая диаграмма.', en: 'The project is not found, a new diagram is open.' },
   untitled: { ru: 'Без названия', en: 'Untitled' },
   templateSaved: { ru: 'Шаблон сохранён в «Мои шаблоны»: {title}', en: 'Template saved to "My templates": {title}' },
+  templateDeleted: {
+    ru: 'Этот шаблон удалён в другой вкладке. Правка не сохранена, сохраните её как новый шаблон или проект.',
+    en: 'This template was deleted in another tab. The change is not saved; save it as a new template or project.',
+  },
   editingTemplate: { ru: 'Шаблон (изменение)', en: 'Template (editing)' },
   limit: {
     ru: 'Лимит беты: 5 новых диаграмм в день. Проект не сохранён, завтра лимит обновится.',
@@ -76,7 +80,9 @@ export const initEditorProjects = ({
     lastSaved = project.source;
   } else {
     const key = params.get('template');
-    baseline = start?.source ?? TEMPLATES[key] ?? TEMPLATES.idef0;
+    // Object.hasOwn keeps an address such as ?template=__proto__ or ?template=constructor from reaching an
+    // inherited property of TEMPLATES, which is not a diagram source and breaks the rest of this component.
+    baseline = start?.source ?? (Object.hasOwn(TEMPLATES, key) ? TEMPLATES[key] : TEMPLATES.idef0);
     showCode(root, codeLines, baseline);
     if ((params.has('p') || params.has('tpl') || params.has('my')) && !start && note) note.textContent = TEXTS.notFound[lang];
   }
@@ -127,6 +133,12 @@ export const initEditorProjects = ({
   };
   const saveTemplate = (id) => {
     const saved = templates.save({ id, ...describe() });
+    if (saved === null) {
+      const saidDeleted = TEXTS.templateDeleted[lang];
+      if (note) note.textContent = saidDeleted;
+      notify(root, saidDeleted, 'error');
+      return null;
+    }
     const saidTemplate = TEXTS.templateSaved[lang].replace('{title}', saved.title);
     if (note) note.textContent = saidTemplate;
     notify(root, saidTemplate, 'success');
@@ -134,7 +146,9 @@ export const initEditorProjects = ({
   };
   const save = () => {
     if (template) {
-      template = saveTemplate(template.id);
+      const saved = saveTemplate(template.id);
+      if (saved === null) return null;
+      template = saved;
       lastSaved = template.source;
       name(template.title);
       return template;
@@ -158,15 +172,25 @@ export const initEditorProjects = ({
     return project;
   };
 
+  const maybeSave = () => {
+    if (readCode(codeLines) !== (lastSaved ?? baseline) && (!switchButton || switchButton.getAttribute('aria-checked') === 'true')) save();
+  };
   const schedule = () => {
     if (timer !== null) clearTimer(timer);
     timer = setTimer(() => {
       timer = null;
-      if (readCode(codeLines) !== (lastSaved ?? baseline) && (!switchButton || switchButton.getAttribute('aria-checked') === 'true')) save();
+      maybeSave();
     }, PROJECT_AUTOSAVE_MS);
   };
   new view.MutationObserver(schedule).observe(codeLines, { childList: true, subtree: true, characterData: true });
   page.addEventListener('dslkit:save', save);
+  // A click on a language link or on "sign out" leaves the page before the autosave timer fires; pagehide
+  // flushes the pending change first so the last second of editing is never lost.
+  view.addEventListener?.('pagehide', () => {
+    if (timer !== null) clearTimer(timer);
+    timer = null;
+    maybeSave();
+  });
   page.addEventListener('click', (event) => {
     if (event.target.closest('[data-action="save-template"]')) saveTemplate();
   });
