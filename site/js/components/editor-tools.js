@@ -1,4 +1,5 @@
 import { readCode, showCode } from './code-lines.js';
+import { createExpertPanel } from './expert-panel.js';
 import { notify } from './toast.js';
 import { addCommit, assistant, diffLines, diffText, replaceAll, searchLines } from '../utils/editor-tools.js';
 
@@ -313,7 +314,8 @@ export const initEditorTools = ({ root = document, storage, now = () => Date.now
   const versionsList = el('ul', 'editor-tools__list problems__extra');
   aiView.hidden = true;
   panel?.append(aiView);
-  const extra = { output: outputList, versions: versionsList, ai: aiView };
+  const expert = createExpertPanel({ root, lang, storage, getCode: code });
+  const extra = { output: outputList, versions: versionsList, ai: aiView, expert: expert.node };
   let currentTab = 'problems';
   Object.values(extra).forEach((node) => {
     node.hidden = true;
@@ -341,6 +343,7 @@ export const initEditorTools = ({ root = document, storage, now = () => Date.now
     Object.entries(extra).forEach(([key, node]) => (node.hidden = key !== name));
     if (name === 'output') showOutput();
     if (name === 'versions') showVersions();
+    if (name === 'expert') expert.refresh();
     if (name === 'ai' && current !== 'ai') {
       current = 'ai';
       askBox.focus();

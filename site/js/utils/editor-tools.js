@@ -1,4 +1,7 @@
 import { KEYWORDS, TEMPLATES, NOTATIONS, parseDiagram, notationName } from '../notations/index.js';
+import { buildFromDescription } from '../automation/build.js';
+import { reviewDiagram, factsFromDescription, rankNotations } from '../expert/review.js';
+import { createFacts } from '../expert/engine.js';
 import { formatCode } from './format-code.js';
 
 const COMMIT_LIMIT = 50;
@@ -110,8 +113,8 @@ export const fixCode = (code) => {
 
 const REPLIES = {
   help: {
-    ru: 'Я умею: «исправь ошибки», «объясни диаграмму», «форматируй код», «создай <нотацию>» (например, «создай erd» или «создай idef0»).',
-    en: 'I can: "fix errors", "explain the diagram", "format the code", "create <notation>" (for example "create erd" or "create idef0").',
+    ru: 'Я умею: «исправь ошибки», «объясни диаграмму», «форматируй код», «создай <нотацию>» (например, «создай erd»), «построй по описанию: …», «проверь диаграмму», «какую нотацию выбрать: …».',
+    en: 'I can: "fix errors", "explain the diagram", "format the code", "create <notation>" (for example "create erd"), "build from description: …", "check the diagram", "which notation to choose: …".',
   },
   fixed: { ru: 'Исправлено: {n}. Проверьте результат и нажмите «Запустить».', en: 'Fixed: {n}. Check the result and press Run.' },
   nothing: { ru: 'Исправлять нечего: ошибок, которые можно починить без догадок, нет.', en: 'Nothing to fix: no error can be repaired without guessing.' },
@@ -125,11 +128,55 @@ const REPLIES = {
     en: 'The {name} template is created. It is in the editor, change the code freely.',
   },
 };
+REPLIES.built = {
+  ru: 'Построено по правилам ({notation}), а не нейросетью: проверьте результат. Ошибок: {errors}.',
+  en: 'Built by rules ({notation}), not by a neural network: check the result. Errors: {errors}.',
+};
+REPLIES.buildFailed = {
+  ru: 'Не получилось построить по описанию: добавьте шаги, связи или участников. Для сложных описаний и картинок откройте «Автоматическое построение» в меню.',
+  en: 'The description could not be built: add steps, relations or participants. For harder descriptions and pictures open "Automatic build" in the menu.',
+};
+REPLIES.reviewed = { ru: 'Рецензия: замечаний {n}. {list}', en: 'Review: {n} remarks. {list}' };
+REPLIES.reviewClean = { ru: 'Рецензия: замечаний нет.', en: 'Review: no remarks.' };
+REPLIES.advice = {
+  ru: 'Лучше всего подходит: {list}. Подробности и вопросы эксперта на странице «Экспертная система».',
+  en: 'Best fits: {list}. Details and the questions of the expert are on the "Expert system" page.',
+};
+REPLIES.adviceNone = {
+  ru: 'Опишите задачу подробнее после двоеточия или откройте страницу «Экспертная система».',
+  en: 'Describe the task after the colon or open the "Expert system" page.',
+};
 const reply = (key, lang, params = {}) => REPLIES[key][lang].replace(/\{(\w+)\}/g, (_, name) => params[name]);
 
 // The assistant works offline on the rules of the editor: no code leaves the browser.
 export const assistant = (prompt, code, lang = 'ru') => {
   const ask = prompt.toLowerCase();
+  const tail = prompt.includes(':') ? prompt.slice(prompt.indexOf(':') + 1).trim() : '';
+  if (/построй по описани|build from (the )?description/.test(ask)) {
+    const built = buildFromDescription(tail, { lang });
+    if (!built.ok) return { text: reply('buildFailed', lang) };
+    const errors = built.problems.filter((item) => item.severity === 'error').length;
+    return { text: reply('built', lang, { notation: notationName(parseDiagram(built.dsl), lang), errors }), code: built.dsl };
+  }
+  if (/проверь диаграмм|рецензи|review|check the diagram/.test(ask)) {
+    const found = reviewDiagram(code, lang).recommendations;
+    return found.length === 0
+      ? { text: reply('reviewClean', lang) }
+      : { text: reply('reviewed', lang, { n: found.length, list: found.map((item) => item.text).join(' ') }) };
+  }
+  if (/какую нотацию|which notation|what notation/.test(ask)) {
+    const { ranking } = rankNotations(createFacts(factsFromDescription(tail || prompt)));
+    return ranking.length === 0
+      ? { text: reply('adviceNone', lang) }
+      : {
+          text: reply('advice', lang, {
+            list: ranking
+              .slice(0, 3)
+              .map((item) => `${NOTATIONS[item.key].name[lang]} (${Math.round(item.cf * 100)} %)`)
+              .join(', '),
+          }),
+        };
+  }
   if (/исправ|почин|fix|repair/.test(ask)) {
     const result = fixCode(code);
     return result.fixes.length === 0 ? { text: reply('nothing', lang) } : { text: reply('fixed', lang, { n: result.fixes.length }), code: result.code };

@@ -1,11 +1,14 @@
 import { initAccordion } from './components/accordion.js';
+import { initAutomation } from './components/automation.js';
 import { initAppSearch } from './components/app-search.js';
 import { initAuthForm, initAuthMenu } from './components/auth.js';
 import { initAuthGate } from './components/auth-gate.js';
 import { initBurger } from './components/burger.js';
 import { initCanvasDrag } from './components/canvas-drag.js';
 import { initDashboard } from './components/dashboard.js';
+import { initDecision } from './components/decision.js';
 import { initDocs } from './components/docs.js';
+import { initExpert } from './components/expert.js';
 import { initDiagramRunner } from './components/diagram-runner.js';
 import { initEditor } from './components/editor.js';
 import { initCodeInput } from './components/code-input.js';
@@ -41,6 +44,8 @@ export const COMPONENTS = [
   initQuota,
   initWelcome,
   initDocs,
+  initExpert,
+  initDecision,
   initAppSearch,
   initSettings,
   initEditor,
@@ -48,6 +53,7 @@ export const COMPONENTS = [
   initCodeInput,
   initEditorActions,
   initEditorTools,
+  initAutomation,
   initEditorPalette,
   initExport,
   initImport,

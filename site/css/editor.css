@@ -1704,7 +1704,7 @@
 }
 
 /* The panel under the code is small while the code has no problems, and tall again for the assistant, the output and the versions */
-.app-page--editor[data-clean='true']:not([data-tab='ai'], [data-tab='output'], [data-tab='versions']) {
+.app-page--editor[data-clean='true']:not([data-tab='ai'], [data-tab='output'], [data-tab='versions'], [data-tab='expert']) {
   --problems-height: 5.75rem;
 }
 .problems > .editor-tools__view {

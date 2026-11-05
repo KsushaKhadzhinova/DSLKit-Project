@@ -71,5 +71,13 @@ export const initImport = ({ root = document, readClipboard } = {}) => {
     if (file) await importFrom(() => file.text());
     input.value = '';
   });
+  // A file dropped on the code is imported like a file chosen in the menu (.dsl, .mmd, .puml, .txt).
+  const area = codeLines.parentElement;
+  area.addEventListener('dragover', (event) => event.preventDefault());
+  area.addEventListener('drop', async (event) => {
+    event.preventDefault();
+    const [file] = event.dataTransfer?.files ?? [];
+    if (file) await importFrom(() => file.text());
+  });
   return { load, importFrom };
 };

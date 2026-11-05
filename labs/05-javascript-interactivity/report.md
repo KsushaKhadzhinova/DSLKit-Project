@@ -124,13 +124,16 @@
 
 ```js
 import { initAccordion } from './components/accordion.js';
+import { initAutomation } from './components/automation.js';
 import { initAppSearch } from './components/app-search.js';
 import { initAuthForm, initAuthMenu } from './components/auth.js';
 import { initAuthGate } from './components/auth-gate.js';
 import { initBurger } from './components/burger.js';
 import { initCanvasDrag } from './components/canvas-drag.js';
 import { initDashboard } from './components/dashboard.js';
+import { initDecision } from './components/decision.js';
 import { initDocs } from './components/docs.js';
+import { initExpert } from './components/expert.js';
 import { initDiagramRunner } from './components/diagram-runner.js';
 import { initEditor } from './components/editor.js';
 import { initCodeInput } from './components/code-input.js';
@@ -166,6 +169,8 @@ export const COMPONENTS = [
   initQuota,
   initWelcome,
   initDocs,
+  initExpert,
+  initDecision,
   initAppSearch,
   initSettings,
   initEditor,
@@ -173,6 +178,7 @@ export const COMPONENTS = [
   initCodeInput,
   initEditorActions,
   initEditorTools,
+  initAutomation,
   initEditorPalette,
   initExport,
   initImport,
@@ -277,7 +283,9 @@ export function getStorage(win = globalThis) {
 export const NOTATIONS = ['idef0', 'dfd', 'erd', 'bpmn', 'uml', 'petri'];
 
 const NAME_PATTERN = /^\p{L}[\p{L}' ’-]{1,59}$/u;
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)*\.[^\s@.]{2,}$/;
+// The local part keeps to the common, safe subset of email characters: letters, digits and a handful of
+// punctuation marks, never angle brackets, quotes or other markup, so an address such as <script>@x.com is rejected.
+const EMAIL_PATTERN = /^[A-Za-z0-9!#$%&'*+/=?^_`{|}~.-]+@[^\s@.]+(?:\.[^\s@.]+)*\.[^\s@.]{2,}$/;
 const MAX_EMAIL_LENGTH = 120;
 const MAX_COMMENT_LENGTH = 500;
 const MAX_TEAM_SIZE = 500;
@@ -816,7 +824,9 @@ export const initDashboard = ({ root = document, storage, now = () => Date.now()
   const fromAddress = new view.URLSearchParams(view.location.search).get('q');
   let state = normalize(storage.get('dashboard'));
   if (fromAddress !== null) state.query = fromAddress;
-  let section = 'mine';
+  // A link from another page such as dashboard.html#shared or #trash opens straight into that section.
+  const fromHash = view.location.hash.slice(1);
+  let section = SECTIONS.includes(fromHash) ? fromHash : 'mine';
   const sectionOf = (item) => {
     if (item.dataset.trashed) return 'trash';
     if (item.dataset.template) return 'templates';
@@ -929,7 +939,7 @@ export const initDashboard = ({ root = document, storage, now = () => Date.now()
       store.remove(id);
     } else {
       const key = new view.URL(item.querySelector('.project-card__link').href).searchParams.get('template');
-      const copy = { title: title(item), notation: item.dataset.notation, source: TEMPLATES[key] ?? TEMPLATES.idef0 };
+      const copy = { title: title(item), notation: item.dataset.notation, source: Object.hasOwn(TEMPLATES, key) ? TEMPLATES[key] : TEMPLATES.idef0 };
       if (action === 'copy-template') templates.save(copy);
       else if (action === 'like') {
         const liked = likes();
@@ -1162,7 +1172,7 @@ const initTemplates = ({ page, root }) => {
   const lang = root.documentElement.lang === 'en' ? 'en' : 'ru';
   const codeLines = page.querySelector('.code__lines');
   const loadTemplate = (key) => {
-    if (!codeLines || !(key in TEMPLATES)) return false;
+    if (!codeLines || !Object.hasOwn(TEMPLATES, key)) return false;
     showCode(root, codeLines, TEMPLATES[key]);
     announceRun(page, root);
     return true;

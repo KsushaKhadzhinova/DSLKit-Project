@@ -43,6 +43,7 @@ test('the dashboard, the settings and the editor start their own components', ()
     'initCodeInput',
     'initEditorActions',
     'initEditorTools',
+    'initAutomation',
     'initEditorPalette',
     'initExport',
     'initImport',
@@ -75,4 +76,9 @@ test('a failing component is reported and the others still start', () => {
   assert.equal(logger.error.mock.callCount(), 1);
   assert.match(logger.error.mock.calls[0].arguments[0], /brokenComponent failed/);
   assert.equal(started.length, 7);
+});
+
+test('the expert and decision pages start their own components', () => {
+  assert.deepEqual(boot(load('app/expert.html')), ['initTheme', 'initToasts', 'initAuthMenu', 'initQuota', 'initExpert', 'initAppSearch']);
+  assert.deepEqual(boot(load('en/app/decision.html')), ['initTheme', 'initToasts', 'initAuthMenu', 'initQuota', 'initDecision', 'initAppSearch']);
 });

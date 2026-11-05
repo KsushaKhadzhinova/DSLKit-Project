@@ -90,6 +90,12 @@
               <button type="button" class="button button--quiet" data-import="clipboard">Импорт из буфера</button>
               <input type="file" class="editor-import__file" accept=".puml,.plantuml,.pu,.mmd,.mermaid,.md,.txt,.dsl" aria-label="Файл с диаграммой" hidden />
             </div>
+            <div class="editor-menu__group" role="group" aria-label="Автоматизация">
+              <p class="editor-menu__title" aria-hidden="true">Автоматизация</p>
+              <button type="button" class="button button--quiet" data-auto-open>Автоматическое построение</button>
+              <a class="button button--quiet" href="expert.html">Экспертная система</a>
+              <a class="button button--quiet" href="decision.html">Принятие решений</a>
+            </div>
             <details class="editor-menu__sub">
               <summary class="button button--quiet editor-menu__subsummary">Экспорт</summary>
               <button type="button" class="button button--quiet" data-export="svg">Экспорт SVG</button>
@@ -101,7 +107,7 @@
             <div class="editor-menu__group" role="group" aria-label="Вид и справка">
               <p class="editor-menu__title" aria-hidden="true">Вид и справка</p>
               <a class="button button--quiet" href="docs.html?kind=code">Документация по коду</a>
-            <button type="button" class="button button--quiet" data-tour-start>Показать тур</button>
+              <button type="button" class="button button--quiet" data-tour-start>Показать тур</button>
               <button type="button" class="button button--quiet canvas__refresh">Обновить с сервера</button>
               <button type="button" class="editor-toolbar__switch" role="switch" aria-checked="true">
                 <span class="editor-toolbar__switch-track" aria-hidden="true"></span>
@@ -159,14 +165,7 @@
     </header>
 
     <nav class="editor-activity" aria-label="Панель действий">
-      <button
-        type="button"
-        class="editor-activity__button"
-        data-panel="files"
-        aria-label="Файлы"
-        aria-pressed="true"
-        data-tip="Файлы"
-      >
+      <button type="button" class="editor-activity__button" data-panel="files" aria-label="Файлы" aria-pressed="true" data-tip="Файлы">
         <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
           <path d="M3 6h5l2 2h7v8H3z" />
         </svg>
@@ -406,6 +405,11 @@
           <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
             <circle cx="10" cy="10" r="7" />
             <path d="M10 6v4l3 2" />
+          </svg>
+        </button>
+        <button type="button" class="problems__tab" data-problems-tab="expert" aria-pressed="false" aria-label="Эксперт" data-tip="Эксперт">
+          <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M10 3a4 4 0 00-2 7.5V13h4v-2.5A4 4 0 0010 3zM8 16h4" />
           </svg>
         </button>
       </div>

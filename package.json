@@ -8,6 +8,7 @@
     "lab1:report": "npm run lab1:generate && node tools/build.js labs/01-network",
     "dev": "nodemon --watch site --ext html,css,js,svg,json tools/serve.js site 5173",
     "start": "node tools/serve.js site 5173",
+    "start:ai": "node --env-file=.env tools/serve.js site 5173",
     "check:env": "node labs/02-environment/check.js ru",
     "check:env:en": "node labs/02-environment/check.js en",
     "format": "prettier --write .",

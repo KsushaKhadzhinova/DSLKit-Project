@@ -119,3 +119,21 @@ test('the import works on a page without the status line, the file field and the
   assert.equal(api.load('hello'), false);
   window.document.querySelector('[data-import="clipboard"]').click();
 });
+
+test('a file dropped on the code is imported, a drop without a file is ignored', async () => {
+  const context = setup();
+  const area = context.document.querySelector('.code__lines').parentElement;
+  const over = new context.window.Event('dragover', { cancelable: true, bubbles: true });
+  area.dispatchEvent(over);
+  assert.equal(over.defaultPrevented, true);
+  const drop = new context.window.Event('drop', { cancelable: true, bubbles: true });
+  drop.dataTransfer = { files: [new context.window.File(['graph LR' + String.fromCharCode(10) + 'A --> B'], 'x.mmd')] };
+  area.dispatchEvent(drop);
+  await new Promise((resolve) => setTimeout(resolve, 20));
+  assert.match(context.code(), /^diagram graph/);
+  const empty = new context.window.Event('drop', { cancelable: true, bubbles: true });
+  area.dispatchEvent(empty);
+  const none = new context.window.Event('drop', { cancelable: true, bubbles: true });
+  none.dataTransfer = { files: [] };
+  area.dispatchEvent(none);
+});

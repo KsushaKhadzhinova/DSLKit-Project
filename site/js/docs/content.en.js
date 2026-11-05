@@ -25,6 +25,7 @@ diagram dfd "Online order"
 entity Customer
 process 1 "Validate order"
 flow Customer -> 1 "order"
+flow 1 -> Customer "receipt"
 \`\`\`
 
 The full language reference is the file docs/DSL-REFERENCE.md of the repository, and the step-by-step guides are in the "Guides" section of this documentation.`,
@@ -334,6 +335,66 @@ Dragging works for the own engine. Choose it in the settings.
 ## The import did not accept the text
 
 Mermaid flowcharts, sequence diagrams and state diagrams are supported. Other kinds (class, ER, Gantt) are not imported.`,
+    },
+    {
+      id: 'auto-build',
+      title: 'Automatic build',
+      body: `The "Automatic build" wizard turns a description, code in another language or a picture into DSLKit code. It opens from the button on the Templates page, from the "Automatic build" item of the "⋯" menu of the editor (group "Automation") and from the assistant command "build from description: …".
+
+## Sources
+
+- **Description.** An idea in words: "First the customer places an order, then the manager checks the stock. If the goods are in stock then ship the order, otherwise tell the customer."
+- **Code or file.** Mermaid, PlantUML or DSLKit text; a .dsl, .mmd, .puml or .txt file can be chosen with the button or dropped on the wizard or on the code of the editor.
+- **Picture.** A photo or a screenshot of a diagram (png, jpeg, webp, gif).
+
+Choose the notation yourself or leave "Detect automatically": then the expert system suggests it.
+
+## With AI and without
+
+With a key on the server, Claude (the Anthropic API) builds from descriptions, code and pictures. The DSLKit parser always checks the answer; if it has errors, they go back to the model, up to twice. The wizard shows the number of attempts and the warnings.
+
+Without a key the wizard says "AI is not connected: add the key to the .env of the server" and works in the simplified mode **by rules** (a reading of phrase patterns, not a neural network): BPMN, GOST flowchart, ERD, DFD and sequence diagram from a text in Russian or English, plus the import of Mermaid and PlantUML. Pictures are not supported without a key: describe the diagram in text or load code.
+
+## What the wizard shows
+
+The preview of the code, the check (errors and warnings with lines), the review of the expert system, the "Insert into the editor" button and the history of latest requests in the browser. A build can be cancelled.
+
+## How to turn the AI on
+
+Put the key in the .env file on the server (the names of the variables are in .env.example: ANTHROPIC_API_KEY, AI_MODEL, AI_DAILY_LIMIT, AI_MAX_IMAGE_MB) and start the server with \`npm run start:ai\`. The key is read only from the environment of the server and never reaches the page, the logs or the answers.`,
+    },
+    {
+      id: 'expert-system',
+      title: 'Expert system',
+      body: `The expert system works on "if — then" rules with certainty factors (as in MYCIN): when several rules support one conclusion, the certainty grows. It is not a neural network: every conclusion can be opened to see which facts and rules led to it.
+
+## Two knowledge bases
+
+- **Which notation to choose.** The description of the task and the answers to questions ("What do you describe?", "Is it an algorithm of a program?") give a ranking of notations.
+- **Diagram review.** The facts come from the model of the diagram: the number of elements, cycles, dangling elements, no start or end, long and repeated labels, a mix of languages, identifiers in different case, a diagram that is too large. The recommendations go by importance, with line numbers.
+
+## Where to use it
+
+The "Expert" page in the side menu (dialog, trace, list of rules) and the "Expert" tab in the bottom panel of the editor (the review of the diagram on the screen).
+
+## Rules
+
+The rules are data in site/js/expert. Everyone can read them. Only the role "developer" can change a rule, reset it to the original and reset all rules, like the documentation: the changes are kept in the browser on top of the originals.`,
+    },
+    {
+      id: 'decision-support',
+      title: 'Decision support',
+      body: `The "Decisions" page helps to choose the best option by several criteria. Three methods:
+
+- **Weighted sum.** Scores are scaled to 0…1 with the direction ("more" or "less" is better), multiplied by the weights and added.
+- **Analytic hierarchy process (AHP).** Criteria are compared in pairs on the Saaty scale (1 equal, 3 moderately more important, 5 strongly, 7 very strongly, 9 extremely). The weights are the principal eigenvector of the matrix; the consistency index and the consistency ratio CR are shown. If CR is above 0.1 the judgements contradict each other and the page warns about it.
+- **TOPSIS.** The alternative closest to the ideal one and farthest from the worst one wins.
+
+## What you get
+
+The ranking, bars of the scores, an explanation, the sensitivity analysis (how the winner changes when the weight of one criterion goes from 0 to 1), the export to Markdown and to a DSLKit diagram (a decision tree). Tasks can be saved in the browser: every user has a list of his own.
+
+Ready templates: choice of a notation, choice of a rendering engine (own, DSLKit server, Kroki), choice of an export format and your own task.`,
     },
   ],
   guides: [
@@ -943,6 +1004,52 @@ The status line of the editor names the chosen engine and the diagram is drawn.
 - Code 422: a header with an unknown notation, the body lists the problems.
 - The CSP blocks a foreign address unless you add it to \`connect-src\`.`,
     },
+    {
+      id: 'guide-build-from-description',
+      title: 'Build a diagram from a description',
+      body: `1. Open "Templates" and press "Automatic build" (or the "⋯" menu of the editor, group "Automation").
+2. Choose the source "Description" and write the idea. Signal words help: "first… then… finally…", "if… then… else…", "a customer has many orders", "the user sends… the system checks…".
+3. Leave the notation on "Detect automatically" or choose your own and press "Build".
+4. Look at the code, the check and the review. The "Why this notation" section shows which rules fired.
+5. Press "Insert into the editor" and adjust the code by hand.
+
+An example of a result by rules:
+
+\`\`\`
+diagram erd "Data model"
+entity Customer {
+  id: int pk
+  name: string
+}
+entity Order {
+  id: int pk
+}
+relationship Customer 1:N Order "has"
+\`\`\`
+
+Without the key of the AI the wizard understands only simple phrases: check the result. With the key Claude handles any text and pictures.`,
+    },
+    {
+      id: 'guide-choose-notation',
+      title: 'Choose a notation with the expert system',
+      body: `1. Open the "Expert" page, the base "Which notation to choose".
+2. If you like, describe the task in words and press "Detect from the description": the words found give the first facts.
+3. Answer the questions of the expert with the buttons. Every answer narrows the choice, and the "Conclusion" list shows the notations with their certainty.
+4. Open "Why this conclusion": it lists the rules that fired and their contribution.
+5. For a ready diagram switch to the base "Diagram review", paste the code and get recommendations with line numbers.
+
+The result is also in the editor: the "Expert" tab under the code reviews the diagram on the screen.`,
+    },
+    {
+      id: 'guide-ahp',
+      title: 'Make a decision with AHP',
+      body: `1. Open the "Decisions" page, choose a template (for example "Choice of an export format") and the method "Analytic hierarchy process (AHP)".
+2. Correct the criteria, the direction ("more" or "less" is better) and the scores of the alternatives.
+3. In the section of pairwise comparisons say how much more important one criterion is than another on the Saaty scale.
+4. Check the consistency ratio CR: it must be at most 0.1. Otherwise revise the comparisons.
+5. Read the ranking and the sensitivity analysis: it shows at which weight of a criterion the winner changes.
+6. Copy the result as Markdown or open the decision tree in the editor. Save the task under your own name.`,
+    },
   ],
   code: [
     {
@@ -1366,6 +1473,41 @@ PBKDF2-SHA-256, 100,000 iterations, a random 16-byte salt, constant-time compari
 - A failure message gives a code and a status, not internals.
 
 For more on the policy see SECURITY.md in the repository root.`,
+    },
+    {
+      id: 'code-automation',
+      title: 'Automation, expert and decision support in code',
+      body: `Modules without a build step, ES modules in site/js.
+
+## Automatic build
+
+- site/js/automation/describe.js: reading a description (steps, conditions, loops, entities, relations, messages).
+- site/js/automation/builders.js: the builders of BPMN, GOST, ERD, DFD and the sequence diagram.
+- site/js/automation/build.js: \`buildFromDescription\`, \`buildFromCode\`, \`check\` (a result always passes \`parseDiagram\`).
+- tools/ai-api.js: \`POST /api/ai/generate\` (body: mode — idea, code or image; text; image and mediaType; notation; lang) and \`GET /api/ai/status\`. Answers: 200 with the code, 503 no key, 429 limit, 422 no correct DSL was obtained, 502 failure of the API. The key is read from \`process.env.ANTHROPIC_API_KEY\`, the model from AI_MODEL (claude-sonnet-5-5 by default), the daily ceiling from AI_DAILY_LIMIT, the size of a picture from AI_MAX_IMAGE_MB.
+
+## Expert system
+
+- site/js/expert/engine.js: \`infer\`, \`combineCf\`, \`nextQuestion\`, \`answerQuestion\`, \`explain\`.
+- site/js/expert/kb-notation.js and kb-review.js: rules as data with texts in Russian and English.
+- site/js/expert/review.js: \`reviewDiagram(code, lang)\`.
+- site/js/storage/expert.js: changes of rules, writing only for the role developer.
+
+## Decision support
+
+- site/js/decision/methods.js: \`weightedSum\`, \`ahp\`, \`ahpPriorities\`, \`topsis\`, \`sensitivity\`, \`solve\`.
+- site/js/decision/report.js: \`toMarkdown\`, \`toDsl\`; tasks.js: templates; store.js: tasks of a user.
+
+An example of a decision result as a DSLKit diagram:
+
+\`\`\`
+diagram decision "Export format"
+question q "Export format"
+outcome a1 "1. SVG (70 %)"
+outcome a2 "2. draw.io (60 %)"
+answer q -> a1 "1"
+answer q -> a2 "2"
+\`\`\``,
     },
   ],
 };

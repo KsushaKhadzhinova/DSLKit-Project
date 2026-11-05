@@ -748,9 +748,14 @@ test('the site has the landing pages in both languages, error pages and applicat
     'en/app/register.html',
     'app/docs.html',
     'en/app/docs.html',
+    'app/expert.html',
+    'en/app/expert.html',
+    'app/decision.html',
+    'en/app/decision.html',
   ])
     assert.ok(names.includes(page), page);
-  assert.equal(names.length, 25);
+  // 431.html joined the other error pages (400, 403, 404, 405, 500) when the header-overflow response got its own page.
+  assert.equal(names.length, 30);
 });
 
 eachPage('every page has lang, title, charset and viewport', documentProblems);
@@ -799,6 +804,8 @@ test('the Russian and English versions have the same element structure', () => {
     ['app/login.html', 'en/app/login.html'],
     ['app/register.html', 'en/app/register.html'],
     ['app/docs.html', 'en/app/docs.html'],
+    ['app/expert.html', 'en/app/expert.html'],
+    ['app/decision.html', 'en/app/decision.html'],
   ])
     assert.deepEqual(parityProblems(pages[ru], pages[en]), [], ru);
 });
