@@ -1,0 +1,29 @@
+<%- include('partials/header') %>
+<section class="section" aria-labelledby="page-title">
+  <h1 class="section__title" id="page-title"><%= t('page.index.heading') %></h1>
+  <p class="section__lead"><%= t('page.index.lead') %></p>
+  <% if (items.length === 0) { %>
+    <p class="note"><%= t('page.index.empty') %></p>
+  <% } else { %>
+    <ul class="cards">
+      <% items.forEach((item) => { %>
+        <li class="cards__item">
+          <article class="card">
+            <h2 class="card__title"><%= item.title %></h2>
+            <p class="card__meta">
+              <span class="badge"><%= item.notation %></span>
+              <span>#<%= item.id %></span>
+              <span><%= t('page.index.created') %> <time datetime="<%= item.createdAt %>"><%= formatTime(item.createdAt) %></time></span>
+            </p>
+            <p class="card__text"><%= item.description %></p>
+            <a class="card__link" href="/item/<%= item.id %><%= authQuery %>"><%= t('page.index.open') %><span class="visually-hidden"> <%= item.title %></span></a>
+          </article>
+        </li>
+      <% }) %>
+    </ul>
+  <% } %>
+  <div class="page-actions">
+    <a class="button button--primary" href="/add<%= authQuery %>"><%= t('page.index.addButton') %></a>
+  </div>
+</section>
+<%- include('partials/footer') %>

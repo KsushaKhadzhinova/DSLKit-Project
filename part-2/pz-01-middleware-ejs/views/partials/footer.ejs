@@ -1,0 +1,17 @@
+    </main>
+    <footer class="footer">
+      <div class="footer__inner">
+        <nav class="footer__nav" aria-label="<%= t('common.footerNav') %>">
+          <ul class="footer__list">
+            <li class="footer__item"><a class="footer__link" href="/<%= authQuery %>"><%= t('common.diagrams') %></a></li>
+            <li class="footer__item"><a class="footer__link" href="/log<%= authQuery %>"><%= t('common.requestLog') %></a></li>
+            <% if (user.guest) { %>
+              <li class="footer__item"><a class="footer__link" href="/login"><%= t('common.signIn') %></a></li>
+            <% } %>
+          </ul>
+        </nav>
+        <p class="footer__copy"><small><%= t('common.footerCopy') %></small></p>
+      </div>
+    </footer>
+  </body>
+</html>

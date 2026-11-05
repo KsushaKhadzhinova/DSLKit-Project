@@ -1,0 +1,9 @@
+<%- include('partials/header') %>
+<section class="section" aria-labelledby="page-title">
+  <h1 class="section__title" id="page-title"><%= t('page.login.heading') %></h1>
+  <p class="section__lead"><%= t('page.login.leadPrefix') %> <code>?auth=1</code>.</p>
+  <div class="page-actions">
+    <a class="button button--primary" href="/add?auth=1"><%= t('page.login.continueAsOwner') %></a>
+  </div>
+</section>
+<%- include('partials/footer') %>

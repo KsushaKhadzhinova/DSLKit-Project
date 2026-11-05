@@ -1,0 +1,35 @@
+<%- include('partials/header') %>
+<section class="section" aria-labelledby="page-title">
+  <h1 class="section__title" id="page-title"><%= t('page.log.heading') %></h1>
+  <p class="section__lead"><%= t('page.log.leadPrefix', { count: rows.length }) %> <code>request_log</code> <%= t('page.log.leadSuffix') %></p>
+  <% if (exported) { %><p class="note" role="status"><%= t('page.log.exportedNote') %></p><% } %>
+  <p class="section__lead">
+    <% if (file && file.folder) { %><%= t('page.log.folderNote') %><% } else if (file) { %><%= t('page.log.fileInfoPrefix') %> <%= file.size %> <%= t('page.log.bytesWritten') %> <time datetime="<%= file.time %>"><%= formatTime(file.time) %></time>.<% } else { %><%= t('page.log.notExportedYet') %><% } %>
+  </p>
+  <div class="actions">
+    <form method="post" action="/log/export<%= authQuery %>">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+      <button class="button" type="submit"><%= t('page.log.exportButton') %></button>
+    </form>
+    <a class="button button--quiet" href="/log/download<%= authQuery %>"><%= t('page.log.downloadButton') %></a>
+  </div>
+  <form method="post" action="/log/clear<%= authQuery %>" class="actions">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+    <button class="button button--quiet button--danger" type="submit"><%= t('page.log.clearButton') %></button>
+  </form>
+  <div class="table-wrap">
+    <table class="table">
+      <thead>
+        <tr><th scope="col"><%= t('page.log.table.time') %></th><th scope="col"><%= t('page.log.table.method') %></th><th scope="col"><%= t('page.log.table.url') %></th><th scope="col"><%= t('page.log.table.status') %></th><th scope="col"><%= t('page.log.table.ms') %></th></tr>
+      </thead>
+      <tbody>
+        <% rows.forEach((row) => { %>
+          <tr>
+            <td><time datetime="<%= row.time %>"><%= formatTime(row.time) %></time></td><td><%= row.method %></td><td class="table__url"><%= row.url %></td><td><%= row.status %></td><td><%= row.ms %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</section>
+<%- include('partials/footer') %>
