@@ -1,0 +1,17 @@
+{
+  "nameMaxLength": 24,
+  "roomMaxLength": 40,
+  "textMaxLength": 500,
+  "historyLimit": 50,
+  "historyMaxRooms": 200,
+  "rateMax": 5,
+  "rateWindowMs": 2000,
+  "eventRateMax": 40,
+  "eventRateWindowMs": 2000,
+  "maxUsers": 200,
+  "maxPerAddress": 20,
+  "maxRoomsPerUser": 5,
+  "maxRoomMembers": 50,
+  "maxPacketBytes": 10000,
+  "slowQueueMax": 20
+}
