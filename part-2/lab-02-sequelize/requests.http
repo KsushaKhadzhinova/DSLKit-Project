@@ -1,0 +1,56 @@
+### VS Code REST Client (extension humao.rest-client). Start the server first: npm run dev
+@base = http://localhost:3000
+
+### List all diagrams -> 200
+GET {{base}}/diagrams
+
+### One diagram -> 200
+GET {{base}}/diagrams/1
+
+### Missing diagram -> 404
+GET {{base}}/diagrams/999
+
+### Bad id -> 400
+GET {{base}}/diagrams/abc
+
+### Create -> 201 + Location
+POST {{base}}/diagrams
+Content-Type: application/json
+
+{
+  "title": "Login flow",
+  "notation": "UML",
+  "sourceCode": "user -> server",
+  "priority": "normal",
+  "owner": "carol"
+}
+
+### Invalid data -> 400 with details
+POST {{base}}/diagrams
+Content-Type: application/json
+
+{ "title": "", "notation": "XYZ" }
+
+### Malformed JSON -> 400
+POST {{base}}/diagrams
+Content-Type: application/json
+
+{ "title":
+
+### Replace -> 200
+PUT {{base}}/diagrams/1
+Content-Type: application/json
+
+{
+  "title": "Order processing v2",
+  "notation": "BPMN",
+  "sourceCode": "start -> check -> pay -> ship",
+  "priority": "low",
+  "owner": "anna"
+}
+
+### Delete -> 204 (repeat it -> 404)
+DELETE {{base}}/diagrams/2
+
+### Unknown route -> 404
+GET {{base}}/projects
