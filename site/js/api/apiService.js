@@ -11,7 +11,7 @@ export class ApiError extends Error {
 
 const defaultSleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-const isRetryable = (error) => error.kind === 'network' || error.kind === 'timeout' || error.status === 429 || (error.status !== null && error.status >= 500);
+const isRetryable = (error) => error.kind === 'network' || error.status === 429 || (error.status !== null && error.status >= 500);
 
 const retryAfterMs = (response, fallback, max) => {
   const seconds = Number(response?.headers?.get?.('Retry-After'));
@@ -54,9 +54,12 @@ export const createApi = ({ config = API_CONFIG, fetchImpl = globalThis.fetch?.b
     return response;
   };
 
-  // Retries network failures, timeouts, 429 and 5xx up to `retries` times with exponential backoff.
-  const send = async (path, { method = 'GET', body, headers = {}, signal, timeoutMs = config.timeoutMs, retries = config.retries, parse = 'text' } = {}) => {
-    const url = `${config.baseUrl}${path}`;
+  // Retries network failures, 429 and 5xx (a timeout is final, it already took the whole time limit) up to `retries` times with exponential backoff.
+  const send = async (
+    path,
+    { method = 'GET', body, headers = {}, baseUrl, signal, timeoutMs = config.timeoutMs, retries = config.retries, parse = 'text' } = {},
+  ) => {
+    const url = `${baseUrl ?? config.baseUrl}${path}`;
     const tryOnce = async (attemptNumber) => {
       try {
         const response = await attempt(url, { method, body, headers, signal, timeoutMs });
@@ -69,6 +72,7 @@ export const createApi = ({ config = API_CONFIG, fetchImpl = globalThis.fetch?.b
         if (!isRetryable(error) || attemptNumber >= retries) throw error;
         const backoff = Math.min(config.retryDelayMs * 2 ** attemptNumber, config.maxRetryDelayMs);
         await sleep(retryAfterMs(error.response, backoff, config.maxRetryDelayMs));
+        if (signal?.aborted) throw new ApiError('Request was cancelled', { kind: 'aborted' });
         return tryOnce(attemptNumber + 1);
       }
     };
@@ -96,8 +100,16 @@ export const createApi = ({ config = API_CONFIG, fetchImpl = globalThis.fetch?.b
   const checkHealth = (options = {}) => fetchData('/health', { ...options, parse: 'json' });
 
   // Sends diagram source (Graphviz DOT) and returns the SVG text; anything else is rejected as an unexpected answer.
+  // The engine type `dslkit` goes to the own server (JSON in, SVG out); any other type is a Kroki endpoint.
   const renderDiagram = async (source, { type = config.diagramType, format = config.outputFormat, ...options } = {}) => {
-    const svg = await postData(`/${type}/${format}`, source, { ...options, headers: { 'Content-Type': 'text/plain' } });
+    const svg =
+      type === 'dslkit'
+        ? await postData(config.ownPath, JSON.stringify({ source }), {
+            ...options,
+            baseUrl: config.ownBaseUrl,
+            headers: { 'Content-Type': 'application/json', Accept: 'image/svg+xml' },
+          })
+        : await postData(`/${type}/${format}`, source, { ...options, headers: { 'Content-Type': 'text/plain' } });
     if (!/<svg[\s>]/i.test(svg)) throw new ApiError('The service did not return a diagram', { kind: 'invalid' });
     return svg;
   };

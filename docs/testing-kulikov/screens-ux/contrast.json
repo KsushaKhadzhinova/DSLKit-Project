@@ -1,0 +1,38 @@
+{
+ "/app/dashboard.html|light": {},
+ "/app/welcome.html|light": {},
+ "/app/editor.html|light": {
+  "span.code__keyword \"diagram\"": "1.15 need 4.5 fg color(srgb 0.507451 0.636275 0.94098) bg rgb(20,21,31)",
+  "span.code__keyword \"box\"": "1.15 need 4.5 fg color(srgb 0.507451 0.636275 0.94098) bg rgb(20,21,31)",
+  "span.code__keyword \"input\"": "1.15 need 4.5 fg color(srgb 0.507451 0.636275 0.94098) bg rgb(20,21,31)",
+  "span.code__keyword \"control\"": "1.15 need 4.5 fg color(srgb 0.507451 0.636275 0.94098) bg rgb(20,21,31)",
+  "span.code__keyword \"output\"": "1.15 need 4.5 fg color(srgb 0.507451 0.636275 0.94098) bg rgb(20,21,31)",
+  "span.code__keyword \"mechanism\"": "1.15 need 4.5 fg color(srgb 0.507451 0.636275 0.94098) bg rgb(20,21,31)",
+  "span.code__keyword \"arrow\"": "1.10 need 4.5 fg color(srgb 0.507451 0.636275 0.94098) bg rgb(15,16,24)"
+ },
+ "/app/settings.html|light": {},
+ "/index.html|light": {
+  "span.header__logo-text \"DSLKit\"": "1.20 need 3 fg rgb(28, 31, 46) bg rgb(45,46,46)",
+  "a.nav__link \"Нотации\"": "1.71 need 4.5 fg rgb(74, 80, 104) bg rgb(45,46,46)",
+  "a.nav__link \"Как это работает\"": "1.71 need 4.5 fg rgb(74, 80, 104) bg rgb(45,46,46)",
+  "a.nav__link \"Для кого\"": "1.71 need 4.5 fg rgb(74, 80, 104) bg rgb(45,46,46)",
+  "a.nav__link \"Тарифы\"": "1.71 need 4.5 fg rgb(74, 80, 104) bg rgb(45,46,46)",
+  "a.nav__link \"FAQ\"": "1.71 need 4.5 fg rgb(74, 80, 104) bg rgb(45,46,46)",
+  "span. \"UX\"": "2.04 need 4.5 fg rgb(29, 78, 216) bg rgb(45,46,46)",
+  "a.header__lang \"English\"": "1.71 need 4.5 fg rgb(74, 80, 104) bg rgb(45,46,46)",
+  "span.theme__label \"Тёмная тема\"": "1.71 need 4.5 fg rgb(74, 80, 104) bg rgb(45,46,46)"
+ },
+ "/app/dashboard.html|dark": {},
+ "/app/welcome.html|dark": {},
+ "/app/editor.html|dark": {
+  "span.code__keyword \"diagram\"": "1.12 need 4.5 fg color(srgb 0.507451 0.636275 0.94098) bg rgb(17,17,27)",
+  "span.code__keyword \"box\"": "1.12 need 4.5 fg color(srgb 0.507451 0.636275 0.94098) bg rgb(17,17,27)",
+  "span.code__keyword \"input\"": "1.12 need 4.5 fg color(srgb 0.507451 0.636275 0.94098) bg rgb(17,17,27)",
+  "span.code__keyword \"control\"": "1.12 need 4.5 fg color(srgb 0.507451 0.636275 0.94098) bg rgb(17,17,27)",
+  "span.code__keyword \"output\"": "1.12 need 4.5 fg color(srgb 0.507451 0.636275 0.94098) bg rgb(17,17,27)",
+  "span.code__keyword \"mechanism\"": "1.12 need 4.5 fg color(srgb 0.507451 0.636275 0.94098) bg rgb(17,17,27)",
+  "span.code__keyword \"arrow\"": "1.08 need 4.5 fg color(srgb 0.507451 0.636275 0.94098) bg rgb(13,13,21)"
+ },
+ "/app/settings.html|dark": {},
+ "/index.html|dark": {}
+}

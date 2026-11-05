@@ -1,0 +1,377 @@
+\documentclass[a4paper,14pt]{extarticle}
+\usepackage{fontspec}
+\IfFontExistsTF{Times New Roman}{\setmainfont{Times New Roman}}{\setmainfont{Liberation Serif}}
+\IfFontExistsTF{Courier New}{\setmonofont{Courier New}}{\setmonofont{Liberation Mono}}
+\usepackage[russian]{babel}
+\usepackage[a4paper,left=30mm,right=15mm,top=20mm,bottom=20mm,footskip=10mm]{geometry}
+\usepackage{graphicx}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{fancyhdr}
+\usepackage{tocloft}
+\usepackage{fvextra}
+\usepackage[hidelinks]{hyperref}
+
+\fontsize{14}{18}\selectfont
+\setlength{\parindent}{1.25cm}
+\setlength{\parskip}{0pt}
+\setlength{\baselineskip}{18pt}
+\raggedbottom
+\sloppy
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyfoot[R]{\thepage}
+\renewcommand{\headrulewidth}{0pt}
+
+\renewcommand{\cftsecfont}{\normalfont}
+\renewcommand{\cftsubsecfont}{\normalfont}
+\renewcommand{\cftsecpagefont}{\normalfont}
+\renewcommand{\cftsecleader}{\cftdotfill{\cftdotsep}}
+\renewcommand{\cftsubsecleader}{\cftdotfill{\cftdotsep}}
+\setlength{\cftbeforesecskip}{0pt}
+\setlength{\cftbeforesubsecskip}{0pt}
+
+\newcommand{\reportchapter}[2]{\clearpage\noindent\hspace{\parindent}\textbf{#1 #2}\par\vspace{\baselineskip}\addcontentsline{toc}{section}{#1 #2}}
+\newcommand{\reportsection}[2]{\noindent\hspace{\parindent}\textbf{#1 #2}\par\vspace{\baselineskip}\addcontentsline{toc}{subsection}{#1 #2}}
+\newcommand{\reportsubsection}[2]{\noindent\hspace{\parindent}\textbf{#1 #2}\par\vspace{\baselineskip}}
+\newcommand{\reportplain}[1]{\clearpage\begin{center}\textbf{#1}\end{center}\vspace{\baselineskip}\addcontentsline{toc}{section}{#1}}
+\newcommand{\reportappendix}[2]{\clearpage\begin{center}\textbf{ПРИЛОЖЕНИЕ #1}\\\textbf{#2}\end{center}\vspace{\baselineskip}\addcontentsline{toc}{section}{ПРИЛОЖЕНИЕ #1 #2}}
+
+\begin{document}
+
+
+\begin{titlepage}
+\centering
+Министерство образования Республики Беларусь\par
+\vspace{\baselineskip}
+Учреждение образования\par
+БЕЛОРУССКИЙ ГОСУДАРСТВЕННЫЙ УНИВЕРСИТЕТ\par
+ИНФОРМАТИКИ И РАДИОЭЛЕКТРОНИКИ\par
+\vspace{\baselineskip}
+\vspace{\baselineskip}
+\noindent Факультет\hspace{1em}<факультет>\par
+\vspace{\baselineskip}
+\noindent Кафедра\hspace{1em}<кафедра>\par
+\vspace{\baselineskip}
+\noindent Дисциплина:\hspace{1em}Тестирование программного обеспечения\par
+\vspace{\baselineskip}
+\vspace{\baselineskip}
+ОТЧЁТ\par
+по лабораторной работе\par
+на тему\par
+\vspace{\baselineskip}
+\textbf{РАЗРАБОТКА ТЕСТ-КЕЙСОВ}\par
+\vspace{\baselineskip}
+\vspace{\baselineskip}
+\vspace{\baselineskip}
+\vspace{\baselineskip}
+\noindent Студент:\hfill <И.О. Фамилия студента>\par
+\vspace{\baselineskip}
+\vspace{\baselineskip}
+\noindent Руководитель:\hfill <И.О. Фамилия руководителя>\par
+\vspace{\baselineskip}
+\vspace{\baselineskip}
+\vspace{\baselineskip}
+\vspace{\baselineskip}
+\vspace{\baselineskip}
+\vspace{\baselineskip}
+\vspace{\baselineskip}
+\vspace{\baselineskip}
+Минск 2026\par
+\end{titlepage}
+
+\reportchapter{1}{ЦЕЛЬ РАБОТЫ}
+
+Изучить структуру тест-кейса, освоить эквивалентное разбиение и анализ граничных значений, оформить и выполнить тест-кейсы для формы заявки на раннее подключение веб-приложения DSLKit.
+
+
+\reportchapter{2}{ТЕОРЕТИЧЕСКИЕ СВЕДЕНИЯ}
+
+Теория дана по книге С. С. Куликова «Тестирование программного обеспечения. Базовый курс» (EPAM Systems, 2015–2025), главы 2.4 и 2.7.2.
+
+
+Тест-кейс — набор входных данных, условий выполнения и ожидаемых результатов, разработанный для проверки определённого свойства или поведения программы. Если не указаны входные данные, условия или ожидаемый результат, либо неясна цель, тест-кейс считается плохим. Тест-кейсы обеспечивают повторяемость проверок, передачу знаний в команде, регрессионное тестирование и улучшение требований.
+
+
+Класс эквивалентности — набор данных, обрабатываемых одинаково и дающих одинаковый результат. Граничное условие — значение на границе классов эквивалентности. Для диапазона проверяют последнее допустимое и первое недопустимое значения, а также «опасные» значения вроде нуля и пустой строки. Позитивные тест-кейсы берут из допустимых классов, негативные из недопустимых.
+
+
+\reportchapter{3}{ХОД РАБОТЫ}
+
+\reportsection{3.1}{Выбор use case и требования}
+
+Тестируется вариант использования UC-01, описанный ниже. Проверку полей выполняет функция validateWaitlist (файл site/js/utils/validation.js), которая возвращает список неверных полей. Проект развёрнут локально командой npm start.
+
+
+*\textit{Название.}*
+
+
+– *\textit{UC-01.}* Подать заявку в лист ожидания.
+
+
+
+*\textit{Система и модуль.}*
+
+
+– *\textit{Система:}\textit{ }DSLKit\textit{ — редактор диаграмм как кода (статический сайт, }site/*);
+
+– *\textit{Модуль:}* «Лист ожидания беты» — форма на главной странице;
+
+– *\textit{Ссылка:}* http://localhost:5173/\#waitlist.
+
+
+
+*\textit{Основной актор.}*
+
+
+– Посетитель сайта (без регистрации и авторизации).
+
+
+
+*\textit{Цель.}*
+
+
+– Оставить контакты, чтобы получить приглашение в бету DSLKit.
+
+
+
+*\textit{Предусловия.}*
+
+
+– 1. Открыта главная страница (\textit{/} или \textit{/en/});
+
+– 2. Форма пуста: нотация не выбрана, размер команды 0, согласие не отмечено.
+
+
+
+*\textit{Основной поток.}*
+
+
+– 1. Посетитель нажимает *\textit{«В бету»}\textit{ в шапке (или }\textit{«Записаться в бету»}\textit{) и попадает к форме }\#waitlist*;
+
+– 2. Вводит *\textit{«Имя\textbackslash{}}»*\textit{ и }\textit{«Электронная почта\textbackslash{}}»**;
+
+– 3. Выбирает *\textit{«Нотация\textbackslash{}}»** (IDEF0, DFD, ERD, BPMN, UML, «Сети Петри»);
+
+– 4. Вводит *\textit{«Размер команды\textbackslash{}}»*\textit{ (0–500) и при желании }\textit{«Комментарий»}*;
+
+– 5. Отмечает согласие\textbackslash{}\textit{ и нажимает }\textit{«Отправить»}*;
+
+– 6. Система проверяет поля по таблице «Структура данных» (\textit{validateWaitlist});
+
+– 7. Система сохраняет заявку в \textit{LocalStorage} (ключ \textit{dslkit.waitlist});
+
+– 8. Система открывает страницу благодарности \textit{thanks.html};
+
+– \textbackslash{}* — обязательное поле.
+
+
+
+*\textit{Альтернативные потоки.}*
+
+
+– *\textit{A1.}* Поле неверно (шаг 6): под полем красное сообщение, фокус на первом неверном поле, заявка не сохраняется; после исправления сообщение исчезает;
+
+– *\textit{A2.}* Повторная заявка с той же почтой: принимается как новая запись (дефект D-1);
+
+– *\textit{A3.}* Посетитель закрыл страницу до шага 5: данные не сохраняются.
+
+
+
+*\textit{Постусловия.}*
+
+
+– Успех: в \textit{LocalStorage} на одну запись больше, открыта \textit{thanks.html}. Ошибка проверки: записей не добавилось, значения остаются в полях.
+
+
+
+*\textit{Исключительные ситуации.}*
+
+
+– *\textit{E1.}\textit{ Запись в }LocalStorage\textit{ не удалась: страница благодарности всё равно открывается, }\textit{заявка потеряна}*, ошибки нет (дефект D-2).
+
+
+
+*\textit{Другие точки входа.}*
+
+
+– Ссылки «Записаться в бету: UML / BPMN / …» в разделе нотаций, кнопка «В бету» на \textit{privacy.html} и \textit{thanks.html}, адрес \textit{/en/\#waitlist}.
+
+
+
+*\textit{Связанные задачи.}*
+
+
+– *\textit{R4}* — Форма заявки и валидация;
+
+– *\textit{UC-00}* — Прочитать политику конфиденциальности;
+
+– *\textit{UC-03}* — Авторизация (в текущей версии не реализована);
+
+– *\textit{UC-04}* — Запись в бету из React-приложения;
+
+– *\textit{TC-WL-001…022}* — Тест-кейсы формы (лаб. 2);
+
+– *\textit{SM-07, CP-35, CP-36}* — Проверки чек-листов (лаб. 3).
+
+
+
+*\textit{Скриншоты.}*
+
+
+– *\textit{SCR-01}* — Форма: ошибки при пустой отправке;
+
+– *\textit{SCR-02}* — Форма: заполнена;
+
+– *\textit{SCR-03}* — Страница благодарности.
+
+
+
+*\textit{Реализация.}*
+
+
+– \textit{site/index.html} (форма \textit{\#waitlist-form}), \textit{site/js/components/waitlist-form.js}, \textit{site/js/utils/validation.js}, \textit{site/js/utils/storage.js}, \textit{site/thanks.html}.
+
+
+
+*\textit{Ссылки.}*
+
+
+– http://localhost:5173/\#waitlist;
+
+– http://localhost:5173/thanks.html;
+
+– https://github.com/KsushaKhadzhinova/DSLKit-Project.
+
+
+
+\noindent Таблица 3.1 – Структура данных заявки (сущность WaitlistEntry)\par\nopagebreak
+\begin{longtable}{|>{\raggedright\arraybackslash}p{0.140\textwidth}|>{\raggedright\arraybackslash}p{0.140\textwidth}|>{\raggedright\arraybackslash}p{0.140\textwidth}|>{\raggedright\arraybackslash}p{0.140\textwidth}|>{\raggedright\arraybackslash}p{0.140\textwidth}|>{\raggedright\arraybackslash}p{0.140\textwidth}|>{\raggedright\arraybackslash}p{0.140\textwidth}|}
+\hline
+Поле & Тип & Длина & Обязат. & Уник. & Маска & Связь \\ \hline
+\endhead
+name\textbackslash{}* (П1) & string & 2–60 & Да & Нет & буквы, пробел, апостроф, дефис; первая — буква & — \\ \hline
+email\textbackslash{}* (П2) & string & 6–120 & Да & Нет (дубликаты принимаются, D-1) & name@domain.zone & — \\ \hline
+notation\textbackslash{}* (П3) & enum & 3–5 & Да & Нет & idef0, dfd, erd, bpmn, uml, petri & → справочник Notation, N:1 \\ \hline
+team\textbackslash{}* (П4) & integer & 0–500 & Да & Нет & целое число; по умолчанию 0 & — \\ \hline
+comment (П5) & string & 0–500 & Нет & Нет & без маски & — \\ \hline
+consent\textbackslash{}* (П6) & boolean & — & Да, только true & — & флажок; в запись не сохраняется & → политика (privacy.html) \\ \hline
+createdAt & string ISO 8601 & 24 & Да, ставит система & Нет & ГГГГ-ММ-ДДTЧЧ:ММ:СС.сссZ & — \\ \hline
+\end{longtable}
+\vspace{\baselineskip}
+
+Хранилище: массив JSON в LocalStorage, ключ dslkit.waitlist. Первичного ключа нет. Звёздочка означает обязательное поле.
+
+
+\reportsection{3.2}{Диаграмма и скриншоты}
+
+\begin{center}
+\includegraphics[width=\textwidth,height=0.6\textheight,keepaspectratio]{figures/fig1.png}\par
+Рисунок 3.1 – Блок-схема сценария UC-01
+\end{center}
+\vspace{\baselineskip}
+
+\begin{center}
+\includegraphics[width=\textwidth,height=0.6\textheight,keepaspectratio]{figures/fig2.png}\par
+Рисунок 3.2 – Форма: ошибки при пустой отправке
+\end{center}
+\vspace{\baselineskip}
+
+\begin{center}
+\includegraphics[width=\textwidth,height=0.6\textheight,keepaspectratio]{figures/fig3.png}\par
+Рисунок 3.3 – Форма заполнена корректными данными
+\end{center}
+\vspace{\baselineskip}
+
+\begin{center}
+\includegraphics[width=\textwidth,height=0.6\textheight,keepaspectratio]{figures/fig4.png}\par
+Рисунок 3.4 – Страница благодарности
+\end{center}
+\vspace{\baselineskip}
+
+Трассировка: правило П1 проверяют TC-WL-002…007, П2 008…011, П3 018, П4 012…017, П5 019 и 020, П6 021, поток A1 022.
+
+
+Требования к полям приведены в таблице ниже.
+
+
+\noindent Таблица 3.2 – Требования к полям формы\par\nopagebreak
+\begin{longtable}{|>{\raggedright\arraybackslash}p{0.490\textwidth}|>{\raggedright\arraybackslash}p{0.490\textwidth}|}
+\hline
+Поле & Правило \\ \hline
+\endhead
+name & Начинается с буквы; буквы, пробел, апостроф, дефис; длина от 2 до 60 \\ \hline
+email & Формат адреса с доменом верхнего уровня; длина не более 120 \\ \hline
+notation & Одно из: idef0, dfd, erd, bpmn, uml, petri \\ \hline
+team & Целое число от 0 до 500 (допустима строка из цифр) \\ \hline
+comment & Не более 500 символов, необязательное \\ \hline
+consent & Только true \\ \hline
+\end{longtable}
+\vspace{\baselineskip}
+
+\reportsection{3.3}{Классы эквивалентности и границы}
+
+Для каждого поля выделены допустимый и недопустимые классы; границы проверяются парами «последнее допустимое и первое недопустимое» значение (таблица ниже).
+
+
+\noindent Таблица 3.3 – Классы эквивалентности и граничные значения\par\nopagebreak
+\begin{longtable}{|>{\raggedright\arraybackslash}p{0.245\textwidth}|>{\raggedright\arraybackslash}p{0.245\textwidth}|>{\raggedright\arraybackslash}p{0.245\textwidth}|>{\raggedright\arraybackslash}p{0.245\textwidth}|}
+\hline
+Поле & Допустимые & Недопустимые & Границы \\ \hline
+\endhead
+name & Буквы 2–60 & Цифры, 1 символ, более 60 & 1 / 2 / 60 / 61 \\ \hline
+email & Корректный адрес & Без @, без домена, более 120 & 120 / 121 \\ \hline
+team & 0–500 & Отрицательное, больше 500, не число & -1 / 0 / 500 / 501 \\ \hline
+notation & Из списка & Любое другое значение & — \\ \hline
+comment & 0–500 & Более 500 & 500 / 501 \\ \hline
+consent & true & false, отсутствует & — \\ \hline
+\end{longtable}
+\vspace{\baselineskip}
+
+\reportsection{3.4}{Тест-кейсы и результаты}
+
+Разработано 22 тест-кейсов: позитивные, негативные и граничные. Идентификаторы в таблице сокращены: полный вид TC-WL-NNN. В столбце «Данные» указаны только поля, отличающиеся от базового корректного набора (name=Анна Иванова, email=anna@example.com, notation=idef0, team=5, comment пустой, consent=true). Общие предусловия: проект запущен, форма открыта, поля пусты. Постусловие: данные не сохраняются, состояние системы не меняется. Шаги общие: 1) подать набор данных на вход проверки формы; 2) получить список неверных полей. Ожидаемый результат указан в таблице.
+
+
+\noindent Таблица 3.4 – Тест-кейсы и результаты выполнения\par\nopagebreak
+\begin{longtable}{|>{\raggedright\arraybackslash}p{0.163\textwidth}|>{\raggedright\arraybackslash}p{0.163\textwidth}|>{\raggedright\arraybackslash}p{0.163\textwidth}|>{\raggedright\arraybackslash}p{0.163\textwidth}|>{\raggedright\arraybackslash}p{0.163\textwidth}|>{\raggedright\arraybackslash}p{0.163\textwidth}|}
+\hline
+ID & Тип, приоритет & Заголовок & Данные & Ожидаемый & Фактический \\ \hline
+\endhead
+WL-001 & позитивный, High & Все поля корректны & все поля корректны & ошибок нет & ошибок нет (Passed) \\ \hline
+WL-002 & граничный, High & Имя из 1 символа (ниже границы 2) & name="A" & name & name (Passed) \\ \hline
+WL-003 & граничный, Medium & Имя из 2 символов (нижняя граница) & name="Ян" & ошибок нет & ошибок нет (Passed) \\ \hline
+WL-004 & граничный, Medium & Имя из 60 символов (верхняя граница) & name=aaaaa… (60) & ошибок нет & ошибок нет (Passed) \\ \hline
+WL-005 & граничный, Medium & Имя из 61 символа (выше границы) & name=aaaaa… (61) & name & name (Passed) \\ \hline
+WL-006 & негативный, High & Имя с цифрой & name="Anna1" & name & name (Passed) \\ \hline
+WL-007 & позитивный, Low & Имя с апострофом и дефисом & name="O'Neil-Smith" & ошибок нет & ошибок нет (Passed) \\ \hline
+WL-008 & негативный, High & Email без символа @ & email=anna.… (16) & email & email (Passed) \\ \hline
+WL-009 & негативный, Medium & Email без домена верхнего уровня & email="anna@example" & email & email (Passed) \\ \hline
+WL-010 & граничный, Medium & Email длиной 120 символов & email=aaaaa… (120) & ошибок нет & ошибок нет (Passed) \\ \hline
+WL-011 & граничный, Medium & Email длиной 121 символ & email=aaaaa… (121) & email & email (Passed) \\ \hline
+WL-012 & граничный, High & Размер команды 0 (нижняя граница) & team=0 & ошибок нет & ошибок нет (Passed) \\ \hline
+WL-013 & граничный, High & Размер команды 500 (верхняя граница) & team=500 & ошибок нет & ошибок нет (Passed) \\ \hline
+WL-014 & граничный, High & Размер команды 501 (выше границы) & team=501 & team & team (Passed) \\ \hline
+WL-015 & граничный, Medium & Размер команды -1 (ниже границы) & team=-1 & team & team (Passed) \\ \hline
+WL-016 & негативный, Medium & Размер команды — не число & team="abc" & team & team (Passed) \\ \hline
+WL-017 & позитивный, Low & Размер команды строкой "12" & team="12" & ошибок нет & ошибок нет (Passed) \\ \hline
+WL-018 & негативный, High & Нотация вне списка & notation="xyz" & notation & notation (Passed) \\ \hline
+WL-019 & граничный, Low & Комментарий 500 символов & comment=xxxxx… (500) & ошибок нет & ошибок нет (Passed) \\ \hline
+WL-020 & граничный, Low & Комментарий 501 символ & comment=xxxxx… (501) & comment & comment (Passed) \\ \hline
+WL-021 & негативный, High & Согласие на обработку не дано & consent=false & consent & consent (Passed) \\ \hline
+WL-022 & негативный, High & Пустая форма & name=undefined; email=undefined; notation=undefined; team=undefined; comment=undefined; consent=undefined & name, email, notation, team, consent & name, email, notation, team, consent (Passed) \\ \hline
+\end{longtable}
+\vspace{\baselineskip}
+
+\reportchapter{4}{АНАЛИЗ РЕЗУЛЬТАТОВ}
+
+Выполнено 22 тест-кейсов, пройдено 22, не пройдено 0. Дефектов не выявлено: проверка полей соответствует требованиям на всех границах. Попутно исправлена ошибка самих тестов на этапе отладки (неверный формат тестовых данных), к продукту она отношения не имеет.
+
+
+\reportchapter{5}{ВЫВОД}
+
+Освоены оформление тест-кейсов по шаблону, эквивалентное разбиение и анализ граничных значений. Тест-кейсы автоматизированы (команда npm run tc:lab2) и повторяются без участия человека.
+
+
+\end{document}

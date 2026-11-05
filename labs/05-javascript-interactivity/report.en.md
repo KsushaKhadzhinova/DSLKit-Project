@@ -94,11 +94,27 @@ Automated jsdom tests are written for every module and parse the real pages of t
 
 The commit with the implementation: https://github.com/KsushaKhadzhinova/DSLKit-Project/commit/39efd4f. The commit message: `feat: add JavaScript interactivity for a SaaS diagram editor`.
 
-## 4 Answers to Control Questions
+### 3.9 Checking in DevTools
 
-25. **Filtering.** A condition is computed for every element and `item.hidden = !matches` is set. The notation filter compares `item.dataset.status` with the chosen value.
-26. **Animation.** CSS provides the smoothness, and a script toggles a class or an attribute. In the project animations are turned off by the `prefers-reduced-motion` rule for users who are bothered by them.
-27. **A slider.** An array of slides, the index of the current one and handlers of the back and forward buttons that change the index and show the needed slide. The index is saved in LocalStorage.
+The page was checked in Chrome 155: the Elements panel shows the event handlers and the Application panel shows the saved data.
+
+The event handlers are shown in Figure 5: the click, change and keydown listeners of the notation filter button are attached to the common container, so delegation is used.
+
+![DevTools screenshot](figures/devtools-01-event-listeners.png)
+
+Figure 5 – The Elements panel, the Event Listeners tab for a filter button
+
+The console check is shown in Figure 6: getEventListeners returns the listeners of the container, and the notation list holds six cards.
+
+![DevTools screenshot](figures/devtools-02-console.png)
+
+Figure 6 – Console: the listeners of the filter container and the card count
+
+The saved state is shown in Figure 7: after the form is submitted, LocalStorage holds keys with the dslkit prefix, among them dslkit.notation-filter and dslkit.waitlist.
+
+![DevTools screenshot](figures/devtools-03-local-storage.png)
+
+Figure 7 – The Application panel: site LocalStorage
 
 ## Conclusion
 
@@ -108,26 +124,68 @@ Modular JavaScript is written for the DSLKit project: an entry point, storage an
 
 ```js
 import { initAccordion } from './components/accordion.js';
+import { initAutomation } from './components/automation.js';
+import { initAppSearch } from './components/app-search.js';
+import { initAuthForm, initAuthMenu } from './components/auth.js';
+import { initAuthGate } from './components/auth-gate.js';
 import { initBurger } from './components/burger.js';
+import { initCanvasDrag } from './components/canvas-drag.js';
 import { initDashboard } from './components/dashboard.js';
+import { initDecision } from './components/decision.js';
+import { initDocs } from './components/docs.js';
+import { initExpert } from './components/expert.js';
 import { initDiagramRunner } from './components/diagram-runner.js';
 import { initEditor } from './components/editor.js';
+import { initCodeInput } from './components/code-input.js';
+import { initEditorActions } from './components/editor-actions.js';
+import { initEditorPalette } from './components/editor-palette.js';
+import { initEditorProjects } from './components/editor-projects.js';
+import { initEditorTools } from './components/editor-tools.js';
+import { initExport } from './components/export-menu.js';
+import { initImport } from './components/import-menu.js';
+import { registerServiceWorker } from './components/pwa.js';
 import { initNotationFilter } from './components/notation-filter.js';
+import { initPopups } from './components/popups.js';
 import { initSettings } from './components/settings.js';
 import { initTheme } from './components/theme.js';
+import { initQuota } from './components/quota.js';
+import { initTour } from './components/tour.js';
+import { initToasts } from './components/toast.js';
+import { initWelcome } from './components/welcome.js';
 import { initWaitlistForm } from './components/waitlist-form.js';
 import { getStorage } from './utils/storage.js';
 
 export const COMPONENTS = [
   initTheme,
+  initToasts,
   initBurger,
+  initAuthGate,
+  initAuthMenu,
   initAccordion,
   initNotationFilter,
   initWaitlistForm,
+  initAuthForm,
   initDashboard,
+  initQuota,
+  initWelcome,
+  initDocs,
+  initExpert,
+  initDecision,
+  initAppSearch,
   initSettings,
   initEditor,
+  initEditorProjects,
+  initCodeInput,
+  initEditorActions,
+  initEditorTools,
+  initAutomation,
+  initEditorPalette,
+  initExport,
+  initImport,
+  initTour,
+  initCanvasDrag,
   initDiagramRunner,
+  initPopups,
 ];
 
 // Starts every component that finds its markup on the page; a failing component is reported and does not stop the others.
@@ -141,11 +199,16 @@ export const boot = (root, { components = COMPONENTS, logger = console } = {}) =
       logger.error(`DSLKit: component ${init.name} failed`, error);
     }
   });
+  // The placeholders of the markup stay hidden until the components have written the real content.
+  root.documentElement.classList.add('is-ready');
   return started;
 };
 
 /* node:coverage disable */
-if (typeof document !== 'undefined') boot(document);
+if (typeof document !== 'undefined') {
+  boot(document);
+  registerServiceWorker({ navigator: document.defaultView.navigator });
+}
 /* node:coverage enable */
 ```
 
@@ -220,7 +283,9 @@ export function getStorage(win = globalThis) {
 export const NOTATIONS = ['idef0', 'dfd', 'erd', 'bpmn', 'uml', 'petri'];
 
 const NAME_PATTERN = /^\p{L}[\p{L}' ’-]{1,59}$/u;
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)*\.[^\s@.]{2,}$/;
+// The local part keeps to the common, safe subset of email characters: letters, digits and a handful of
+// punctuation marks, never angle brackets, quotes or other markup, so an address such as <script>@x.com is rejected.
+const EMAIL_PATTERN = /^[A-Za-z0-9!#$%&'*+/=?^_`{|}~.-]+@[^\s@.]+(?:\.[^\s@.]+)*\.[^\s@.]{2,}$/;
 const MAX_EMAIL_LENGTH = 120;
 const MAX_COMMENT_LENGTH = 500;
 const MAX_TEAM_SIZE = 500;
@@ -275,6 +340,43 @@ export function validateWaitlist({ name, email, notation, team, comment, consent
   }
   if (consent !== true) {
     invalid.push('consent');
+  }
+  return invalid;
+}
+
+const MIN_PASSWORD_LENGTH = 8;
+const MAX_PASSWORD_LENGTH = 128;
+
+export function isValidPassword(value) {
+  return typeof value === 'string' && value.length >= MIN_PASSWORD_LENGTH && value.length <= MAX_PASSWORD_LENGTH && value.trim() !== '';
+}
+
+// Sign-in: the address must look like an address and the password must not be empty. Its length is not checked here,
+// so the answer does not tell which part of the pair is wrong.
+export function validateLogin({ email, password } = {}) {
+  const invalid = [];
+  if (!isValidEmail(email ?? '')) {
+    invalid.push('email');
+  }
+  if (typeof password !== 'string' || password === '') {
+    invalid.push('password');
+  }
+  return invalid;
+}
+
+export function validateRegistration({ name, email, password, confirm } = {}) {
+  const invalid = [];
+  if (!isValidName(name)) {
+    invalid.push('name');
+  }
+  if (!isValidEmail(email ?? '')) {
+    invalid.push('email');
+  }
+  if (!isValidPassword(password)) {
+    invalid.push('password');
+  }
+  if (typeof confirm !== 'string' || confirm === '' || confirm !== password) {
+    invalid.push('confirm');
   }
   return invalid;
 }
@@ -454,12 +556,107 @@ export const initWaitlistForm = ({
 ## Appendix F – Listing of dashboard.js
 
 ```js
-const FILTERS = ['all', 'bpmn', 'erd', 'dfd', 'idef0'];
+import { NOTATIONS, NOTATION_KEYS, TEMPLATES, parseDiagram } from '../notations/index.js';
+import { currentUser, isUnlimited } from '../storage/accounts.js';
+import { notify } from './toast.js';
+import { starterProjects } from '../storage/seeds.js';
+import { TRASH_DAYS, createProjectStore, createTemplateStore, showQuota } from '../storage/projects.js';
+
+const FILTERS = ['all', ...NOTATION_KEYS];
 const SORTS = ['newest', 'oldest', 'name'];
+const SECTIONS = ['mine', 'templates', 'shared', 'trash'];
 
 const LABELS = {
-  ru: { found: (count) => `Найдено проектов: ${count}`, none: 'Проектов не найдено' },
-  en: { found: (count) => `Projects found: ${count}`, none: 'No projects found' },
+  ru: {
+    found: (count) => `Найдено проектов: ${count}`,
+    none: 'Проектов не найдено',
+    changed: (time) => `Изменён ${time}`,
+    sample: 'Общий пример',
+    published: 'опубликован',
+    saveTemplate: 'Сохранить как шаблон',
+    edit: 'Изменить шаблон',
+    removeTemplate: 'Удалить шаблон',
+    askNewTemplate: 'Название нового шаблона',
+    askRemoveTemplate: (title) => `Удалить шаблон «${title}»? Это нельзя отменить.`,
+    foundTemplates: (count) => `Найдено шаблонов: ${count}`,
+    noneTemplates: 'Шаблонов не найдено. Сохраните проект как шаблон или создайте новый.',
+    trashed: (time, left) => `Удалён ${time}, будет стёрт через ${left} дн.`,
+    rename: 'Переименовать',
+    remove: 'В корзину',
+    restore: 'Восстановить',
+    purge: 'Удалить навсегда',
+    copy: 'Сохранить копию в «Мои проекты»',
+    copyTemplate: 'Добавить в «Мои шаблоны»',
+    limit: 'Лимит беты: 5 новых диаграмм в день. Попробуйте завтра или сохраните пример как шаблон.',
+    like: 'Нравится',
+    liked: 'В избранном',
+    emptyTrash: 'Очистить корзину',
+    askEmpty: (count) => `Удалить навсегда все проекты в корзине (${count})? Это нельзя отменить.`,
+    askName: 'Новое название проекта',
+    nameEmpty: 'Название не может быть пустым, прежнее оставлено.',
+    done: {
+      rename: 'Название изменено.',
+      template: 'Проект сохранён как шаблон.',
+      'remove-template': 'Шаблон удалён.',
+      remove: 'Проект перемещён в корзину.',
+      restore: 'Проект восстановлен.',
+      purge: 'Проект удалён навсегда.',
+      copy: 'Копия сохранена в «Мои проекты».',
+      'copy-template': 'Пример добавлен в «Мои шаблоны».',
+      like: 'Добавлено в избранное.',
+      unlike: 'Убрано из избранного.',
+      emptied: 'Корзина очищена.',
+    },
+    askTrash: (title) => `Переместить проект «${title}» в корзину?`,
+    askPurge: (title) => `Удалить проект «${title}» навсегда? Это нельзя отменить.`,
+    actions: (title) => `Действия с проектом ${title}`,
+    titles: { mine: 'Мои проекты', templates: 'Мои шаблоны', shared: 'Общие примеры', trash: 'Корзина' },
+  },
+  en: {
+    found: (count) => `Projects found: ${count}`,
+    none: 'No projects found',
+    changed: (time) => `Changed ${time}`,
+    sample: 'Shared example',
+    published: 'published',
+    saveTemplate: 'Save as a template',
+    edit: 'Edit the template',
+    removeTemplate: 'Delete the template',
+    askNewTemplate: 'Name of the new template',
+    askRemoveTemplate: (title) => `Delete the template "${title}"? This cannot be undone.`,
+    foundTemplates: (count) => `Templates found: ${count}`,
+    noneTemplates: 'No templates found. Save a project as a template or create a new one.',
+    trashed: (time, left) => `Deleted ${time}, erased in ${left} ${left === 1 ? 'day' : 'days'}`,
+    rename: 'Rename',
+    remove: 'Move to trash',
+    restore: 'Restore',
+    purge: 'Delete forever',
+    copy: 'Save a copy to "My projects"',
+    copyTemplate: 'Add to "My templates"',
+    limit: 'Beta limit: 5 new diagrams a day. Try tomorrow, or save the example as a template.',
+    like: 'Like',
+    liked: 'Liked',
+    emptyTrash: 'Empty the trash',
+    askEmpty: (count) => `Delete all ${count} projects in the trash forever? This cannot be undone.`,
+    askName: 'New project name',
+    nameEmpty: 'The name cannot be empty, the old one is kept.',
+    done: {
+      rename: 'The name is changed.',
+      template: 'The project is saved as a template.',
+      'remove-template': 'The template is deleted.',
+      remove: 'The project is moved to the trash.',
+      restore: 'The project is restored.',
+      purge: 'The project is deleted forever.',
+      copy: 'A copy is saved to "My projects".',
+      'copy-template': 'The example is added to "My templates".',
+      like: 'Added to favourites.',
+      unlike: 'Removed from favourites.',
+      emptied: 'The trash is emptied.',
+    },
+    askTrash: (title) => `Move the project "${title}" to the trash?`,
+    askPurge: (title) => `Delete the project "${title}" forever? This cannot be undone.`,
+    actions: (title) => `Actions for the project ${title}`,
+    titles: { mine: 'My projects', templates: 'My templates', shared: 'Shared examples', trash: 'Trash' },
+  },
 };
 
 const normalize = (saved) => ({
@@ -468,19 +665,173 @@ const normalize = (saved) => ({
   sort: SORTS.includes(saved?.sort) ? saved.sort : 'newest',
 });
 
-export const initDashboard = ({ root = document, storage } = {}) => {
+export const initDashboard = ({ root = document, storage, now = () => Date.now(), seed = true, navigate } = {}) => {
   const list = root.querySelector('#project-list');
   if (!list) return null;
 
-  const labels = LABELS[root.documentElement.lang === 'ru' ? 'ru' : 'en'];
-  const original = [...list.querySelectorAll('.project-list__item')];
+  const view = root.defaultView;
+  const lang = root.documentElement.lang === 'ru' ? 'ru' : 'en';
+  const labels = LABELS[lang];
+  const user = currentUser(storage);
+  const owner = user?.id ?? null;
+  const store = createProjectStore({ storage, now, owner, unlimited: isUnlimited(user) });
+  const templates = createTemplateStore({ storage, now, owner });
+  const go = navigate ?? ((url) => view.location.assign(url));
+  store.purgeExpired();
+  if (seed) store.seed(starterProjects());
   const chips = [...root.querySelectorAll('.filter__chip[data-filter]')];
+  const others = root.querySelector('#notation-filter');
   const search = root.querySelector('.app-topbar__search-input');
   const sortSelect = root.querySelector('#project-sort');
   const count = root.querySelector('#project-count');
+  const heading = root.querySelector('.dashboard__title');
+  const newTemplate = root.querySelector('[data-new-template]');
+  const likesKey = `likes-${owner ?? 'guest'}`;
+  const likes = () => {
+    const saved = storage.get(likesKey, []);
+    return Array.isArray(saved) ? saved : [];
+  };
+  const navigation = [...root.querySelectorAll('[data-section]')];
+  const quotaText = root.querySelector('.app-nav__quota-text');
+  const quotaBar = root.querySelector('.app-nav__progress');
   const title = (item) => item.querySelector('.project-card__link').textContent.trim();
+  const el = (tag, className, text) => {
+    const node = root.createElement(tag);
+    if (className) node.className = className;
+    if (text !== undefined) node.textContent = text;
+    return node;
+  };
+  const button = (act, text) => {
+    const node = el('button', 'button button--quiet', text);
+    node.type = 'button';
+    node.dataset.act = act;
+    return node;
+  };
+  const emptyTrash = el('button', 'button button--quiet', labels.emptyTrash);
+  emptyTrash.type = 'button';
+  emptyTrash.hidden = true;
+  newTemplate?.after(emptyTrash);
+  const time = (ms) => new Date(ms).toISOString().slice(0, 16).replace('T', ' ');
 
+  // A card of a saved project, built like the sample cards of the page. A project in the trash cannot be opened.
+  const card = (project, kind = 'project') => {
+    const trashed = kind === 'trash';
+    const item = el('li', 'project-list__item');
+    if (kind === 'template') item.dataset.template = project.id;
+    else item.dataset.project = project.id;
+    if (trashed) item.dataset.trashed = 'yes';
+    item.dataset.notation = FILTERS.includes(project.notation) ? project.notation : 'other';
+    const article = el('article', 'project-card');
+    const headingBox = el('h2', 'project-card__title');
+    const link = el('a', 'project-card__link', project.title);
+    if (trashed) link.setAttribute('aria-disabled', 'true');
+    else link.href = `editor.html?${kind === 'template' ? 'my' : 'p'}=${encodeURIComponent(project.id)}`;
+    headingBox.append(link);
+    const tag = el('p', 'project-card__notation');
+    tag.append(el('span', 'project-card__tag', NOTATIONS[project.notation]?.short ?? project.notation.toUpperCase()));
+    if (project.published) tag.append(' ', el('span', 'badge', labels.published));
+    const stamp = trashed
+      ? labels.trashed(time(project.trashedAt), Math.min(TRASH_DAYS, Math.max(0, Math.ceil(TRASH_DAYS - (now() - project.trashedAt) / 86400000))))
+      : labels.changed(time(project.updated));
+    article.append(el('div', 'project-card__preview'), headingBox, tag, el('p', 'project-card__updated', stamp));
+    item.append(article);
+    return item;
+  };
+
+  // Every card gets a menu: a saved project can be renamed and moved to the trash, a project in the trash restored or deleted for good,
+  // a shared example copied to the saved projects.
+  const addMenu = (item) => {
+    const article = item.querySelector('.project-card');
+    let menu = article.querySelector('.project-card__menu');
+    if (!menu) {
+      menu = el('button', 'project-card__menu');
+      menu.type = 'button';
+      menu.textContent = '⋯';
+      article.append(menu);
+    }
+    menu.setAttribute('aria-label', labels.actions(title(item)));
+    menu.setAttribute('aria-expanded', 'false');
+    const actions = el('div', 'project-card__actions');
+    actions.hidden = true;
+    if (item.dataset.trashed) actions.append(button('restore', labels.restore), button('purge', labels.purge));
+    else if (item.dataset.project) actions.append(button('rename', labels.rename), button('template', labels.saveTemplate), button('remove', labels.remove));
+    else if (item.dataset.template)
+      actions.append(button('rename', labels.rename), button('edit', labels.edit), button('remove-template', labels.removeTemplate));
+    else actions.append(button('like', labels.like), button('copy', labels.copy), button('copy-template', labels.copyTemplate));
+    article.append(actions);
+  };
+
+  // One shared example for every notation of the editor, the page asks for them with the attribute data-examples.
+  const examples = () => {
+    if (list.dataset.examples === undefined) return;
+    NOTATION_KEYS.forEach((key) => {
+      const item = el('li', 'project-list__item');
+      item.dataset.notation = key;
+      const article = el('article', 'project-card');
+      const headingBox = el('h2', 'project-card__title');
+      const link = el('a', 'project-card__link', parseDiagram(TEMPLATES[key]).title);
+      link.href = `editor.html?template=${key}`;
+      headingBox.append(link);
+      const tag = el('p', 'project-card__notation');
+      tag.append(el('span', 'project-card__tag', NOTATIONS[key].short));
+      article.append(el('div', 'project-card__preview'), headingBox, tag, el('p', 'project-card__updated'));
+      item.append(article);
+      list.append(item);
+    });
+  };
+  examples();
+
+  let original = [];
+  const collect = () => {
+    original = [...list.querySelectorAll('.project-list__item')];
+    original
+      .filter((item) => !item.querySelector('.project-card__actions'))
+      .forEach((item) => {
+        const stamp = item.querySelector('.project-card__updated');
+        if (stamp && !item.dataset.project) stamp.textContent = labels.sample;
+        addMenu(item);
+      });
+  };
+  const rebuild = () => {
+    list.querySelectorAll('[data-project], [data-template]').forEach((item) => item.remove());
+    store
+      .listTrash()
+      .reverse()
+      .forEach((project) => list.prepend(card(project, 'trash')));
+    templates
+      .list()
+      .reverse()
+      .forEach((template) => list.prepend(card(template, 'template')));
+    store
+      .list()
+      .reverse()
+      .forEach((project) => list.prepend(card(project)));
+    collect();
+  };
+  rebuild();
+
+  // The notations without a chip are chosen from a list.
+  const chipKeys = new Set(chips.map((chip) => chip.dataset.filter));
+  if (others) {
+    NOTATION_KEYS.filter((key) => !chipKeys.has(key)).forEach((key) => {
+      const option = el('option', '', NOTATIONS[key].name[lang === 'ru' ? 'ru' : 'en']);
+      option.value = key;
+      others.append(option);
+    });
+    others.addEventListener('change', () => update({ filter: others.value === '' ? 'all' : others.value }));
+  }
+
+  const fromAddress = new view.URLSearchParams(view.location.search).get('q');
   let state = normalize(storage.get('dashboard'));
+  if (fromAddress !== null) state.query = fromAddress;
+  // A link from another page such as dashboard.html#shared or #trash opens straight into that section.
+  const fromHash = view.location.hash.slice(1);
+  let section = SECTIONS.includes(fromHash) ? fromHash : 'mine';
+  const sectionOf = (item) => {
+    if (item.dataset.trashed) return 'trash';
+    if (item.dataset.template) return 'templates';
+    return item.dataset.project ? 'mine' : 'shared';
+  };
 
   const sorted = () => {
     if (state.sort === 'oldest') return [...original].reverse();
@@ -492,7 +843,8 @@ export const initDashboard = ({ root = document, storage } = {}) => {
     const query = state.query.trim().toLowerCase();
     let shown = 0;
     original.forEach((item) => {
-      const matches = (state.filter === 'all' || item.dataset.notation === state.filter) && title(item).toLowerCase().includes(query);
+      const matches =
+        sectionOf(item) === section && (state.filter === 'all' || item.dataset.notation === state.filter) && title(item).toLowerCase().includes(query);
       item.hidden = !matches;
       if (matches) shown += 1;
     });
@@ -502,15 +854,45 @@ export const initDashboard = ({ root = document, storage } = {}) => {
       chip.setAttribute('aria-pressed', String(active));
       chip.classList.toggle('filter__chip--active', active);
     });
+    navigation.forEach((node) => {
+      if (node.dataset.section === section) node.setAttribute('aria-current', 'page');
+      else node.removeAttribute('aria-current');
+    });
+    if (heading) heading.textContent = labels.titles[section];
+    if (others) others.value = chipKeys.has(state.filter) ? '' : state.filter;
     if (search) search.value = state.query;
     if (sortSelect) sortSelect.value = state.sort;
-    if (count) count.textContent = shown > 0 ? labels.found(shown) : labels.none;
+    if (newTemplate) newTemplate.hidden = section !== 'templates';
+    // The notation filters have no meaning among the templates and in the trash.
+    root.querySelectorAll('.filter, #notation-filter').forEach((node) => (node.hidden = section === 'templates' || section === 'trash'));
+    emptyTrash.hidden = section !== 'trash' || store.listTrash().length === 0;
+    const liked = likes();
+    original
+      .filter((item) => item.dataset.notation && sectionOf(item) === 'shared')
+      .forEach((item) => {
+        const mark = item.querySelector('[data-act="like"]');
+        const on = liked.includes(item.dataset.notation);
+        mark.setAttribute('aria-pressed', String(on));
+        mark.textContent = `${on ? '♥' : '♡'} ${on ? labels.liked : labels.like}`;
+      });
+    if (count) {
+      const own = section === 'templates';
+      if (shown > 0) count.textContent = own ? labels.foundTemplates(shown) : labels.found(shown);
+      else count.textContent = own ? labels.noneTemplates : labels.none;
+    }
+    showQuota(quotaText, quotaBar, store.createdOn(), lang, isUnlimited(user));
     storage.set('dashboard', state);
   };
 
   const update = (change) => {
     state = normalize({ ...state, ...change });
     render();
+  };
+  const show = (name) => {
+    if (!SECTIONS.includes(name)) return false;
+    section = name;
+    render();
+    return true;
   };
 
   chips[0]?.parentElement.addEventListener('click', (event) => {
@@ -519,42 +901,133 @@ export const initDashboard = ({ root = document, storage } = {}) => {
   });
   search?.addEventListener('input', () => update({ query: search.value }));
   sortSelect?.addEventListener('change', () => update({ sort: sortSelect.value }));
+  navigation.forEach((node) =>
+    node.addEventListener('click', (event) => {
+      event.preventDefault();
+      show(node.dataset.section);
+    }),
+  );
+
+  const act = (action, item) => {
+    const id = item.dataset.project ?? item.dataset.template;
+    let said = action;
+    if (action === 'rename') {
+      const name = view.prompt(labels.askName, title(item));
+      const done = item.dataset.template ? templates.rename(id, name ?? '') : store.rename(id, name ?? '');
+      if (done === null) {
+        if (name !== null && name.trim() === '') {
+          if (count) count.textContent = labels.nameEmpty;
+          notify(root, labels.nameEmpty, 'error');
+        }
+        return false;
+      }
+    } else if (action === 'template') {
+      const project = store.get(id);
+      templates.save({ title: project.title, notation: project.notation, source: project.source });
+    } else if (action === 'edit') {
+      go(`editor.html?tpl=${encodeURIComponent(id)}`);
+      return true;
+    } else if (action === 'remove-template') {
+      if (!view.confirm(labels.askRemoveTemplate(title(item)))) return false;
+      templates.remove(id);
+    } else if (action === 'remove') {
+      if (!view.confirm(labels.askTrash(title(item)))) return false;
+      store.trash(id);
+    } else if (action === 'restore') store.restore(id);
+    else if (action === 'purge') {
+      if (!view.confirm(labels.askPurge(title(item)))) return false;
+      store.remove(id);
+    } else {
+      const key = new view.URL(item.querySelector('.project-card__link').href).searchParams.get('template');
+      const copy = { title: title(item), notation: item.dataset.notation, source: Object.hasOwn(TEMPLATES, key) ? TEMPLATES[key] : TEMPLATES.idef0 };
+      if (action === 'copy-template') templates.save(copy);
+      else if (action === 'like') {
+        const liked = likes();
+        said = liked.includes(key) ? 'unlike' : 'like';
+        if (liked.includes(key))
+          storage.set(
+            likesKey,
+            liked.filter((entry) => entry !== key),
+          );
+        else storage.set(likesKey, [...liked, key]);
+      } else if (store.save(copy) === null) {
+        if (count) count.textContent = labels.limit;
+        notify(root, labels.limit, 'error');
+        return false;
+      }
+    }
+    rebuild();
+    render();
+    notify(root, labels.done[said], 'success');
+    return true;
+  };
+  emptyTrash.addEventListener('click', () => {
+    const trashed = store.listTrash();
+    if (trashed.length === 0 || !view.confirm(labels.askEmpty(trashed.length))) return;
+    trashed.forEach((project) => store.remove(project.id));
+    rebuild();
+    render();
+    notify(root, labels.done.emptied, 'success');
+  });
+  newTemplate?.addEventListener('click', () => {
+    const name = view.prompt(labels.askNewTemplate, '');
+    if (name === null || name.trim() === '') return;
+    const template = templates.save({ title: name, notation: 'idef0', source: TEMPLATES.idef0 });
+    go(`editor.html?tpl=${encodeURIComponent(template.id)}`);
+  });
+  list.addEventListener('click', (event) => {
+    const menu = event.target.closest('.project-card__menu');
+    if (menu) {
+      const actions = menu.closest('.project-card').querySelector('.project-card__actions');
+      actions.hidden = !actions.hidden;
+      menu.setAttribute('aria-expanded', String(!actions.hidden));
+      return;
+    }
+    const target = event.target.closest('[data-act]');
+    if (target) act(target.dataset.act, target.closest('.project-list__item'));
+  });
+
+  // Another tab may have changed the projects, the templates or the trash: the list follows at once, so no card acts on a stale entry.
+  view.addEventListener('storage', () => {
+    store.purgeExpired();
+    rebuild();
+    render();
+  });
 
   render();
 
-  return { state: () => ({ ...state }), update };
+  return { state: () => ({ ...state }), update, store, templates, show, section: () => section };
 };
 ```
 
 ## Appendix G – Listing of editor.js
 
 ```js
+import { NOTATIONS, TEMPLATES } from '../notations/index.js';
+import { ui } from '../notations/messages.js';
+import { showCode } from './code-lines.js';
+import { initSourceAutosave } from './source-autosave.js';
+
 const VIEWS = ['code', 'canvas'];
 const KEY_STEPS = { ArrowRight: 1, ArrowLeft: -1 };
 
 const isPlainObject = (value) => typeof value === 'object' && value !== null && !Array.isArray(value);
 
-export const initEditor = ({ root = document, storage } = {}) => {
-  const page = root.querySelector('.app-page--editor');
-  const tabs = page ? [...page.querySelectorAll('.editor-tabs__list [role="tab"]')] : [];
-  if (tabs.length === 0) return null;
-
-  const panels = tabs.map((tab) => root.getElementById(tab.getAttribute('aria-controls')));
-  const closeButton = page.querySelector('.editor-tabs__close');
-  const dialog = root.querySelector('#close-tab-modal');
-  const dialogText = dialog?.querySelector('.modal__text');
-  const autosave = page.querySelector('.editor-toolbar__switch');
-  const status = page.querySelector('.editor-status__cursor');
-  const main = page.querySelector('.editor-main');
-  const viewButtons = [...page.querySelectorAll('[data-view]')];
-  const runButtons = [...page.querySelectorAll('.button--run')];
-
-  const readSettings = () => {
+// Settings live under one storage key, a damaged value is treated as "no settings".
+const createSettings = (storage) => {
+  const read = () => {
     const saved = storage.get('settings', {});
     return isPlainObject(saved) ? saved : {};
   };
-  const saveSetting = (key, value) => storage.set('settings', { ...readSettings(), [key]: value });
+  return { read, save: (key, value) => storage.set('settings', { ...read(), [key]: value }) };
+};
 
+const announceRun = (page, root) => page.dispatchEvent(new root.defaultView.CustomEvent('dslkit:run', { bubbles: true }));
+
+// File tabs: selection, arrow-key navigation and the remembered tab.
+const initTabs = ({ page, root, storage, tabs }) => {
+  const panels = tabs.map((tab) => root.getElementById(tab.getAttribute('aria-controls')));
+  const closeButton = page.querySelector('.editor-tabs__close');
   const tabName = (index) => tabs[index].querySelector('span').textContent.trim();
   const current = () => tabs.findIndex((tab) => tab.getAttribute('aria-selected') === 'true');
 
@@ -589,6 +1062,17 @@ export const initEditor = ({ root = document, storage } = {}) => {
     select(tabs.indexOf(visible[next]), { focus: true });
   });
 
+  const savedTab = storage.get('editor-tab', null);
+  select(Number.isInteger(savedTab) && tabs[savedTab] ? savedTab : Math.max(0, current()));
+  return { select, current, tabName, panels, closeButton };
+};
+
+// The dialog that asks what to do with unsaved changes when a tab is closed.
+const initCloseDialog = ({ page, root, tabs, tabsApi }) => {
+  const dialog = root.querySelector('#close-tab-modal');
+  const dialogText = dialog?.querySelector('.modal__text');
+  const { select, current, tabName, panels, closeButton } = tabsApi;
+
   const markSaved = () => {
     page.querySelectorAll('.editor-tabs__dot, .editor-topbar__dot').forEach((dot) => dot.remove());
     page.querySelectorAll('.visually-hidden').forEach((note) => {
@@ -596,56 +1080,83 @@ export const initEditor = ({ root = document, storage } = {}) => {
     });
   };
 
+  // Closing the last open file leaves the editor: the project list is shown.
+  const announce = (name) => page.dispatchEvent(new root.defaultView.CustomEvent(name, { bubbles: true }));
   const discard = () => {
     const index = current();
     tabs[index].hidden = true;
     panels[index].hidden = true;
     const next = tabs.findIndex((tab) => !tab.hidden);
     if (next >= 0) select(next);
-    else if (closeButton) closeButton.hidden = true;
+    else announce('dslkit:close');
   };
 
   closeButton?.addEventListener('click', () => {
     if (!dialog) return;
     dialog.returnValue = '';
-    if (dialogText) dialogText.textContent = `В файле ${tabName(current())} есть несохранённые изменения.`;
+    if (dialogText) {
+      const name = tabName(current());
+      dialogText.textContent =
+        root.documentElement.lang === 'en'
+          ? `Close the file ${name}? Unsaved changes are lost unless you save.`
+          : `Закрыть файл ${name}? Несохранённые изменения будут потеряны, если не сохранить.`;
+    }
     if (typeof dialog.showModal === 'function') dialog.showModal();
     else dialog.setAttribute('open', '');
   });
   dialog?.addEventListener('close', () => {
-    if (dialog.returnValue === 'save') markSaved();
-    else if (dialog.returnValue === 'discard') discard();
+    if (dialog.returnValue === 'save') {
+      announce('dslkit:save');
+      markSaved();
+      discard();
+    } else if (dialog.returnValue === 'discard') discard();
     dialog.returnValue = '';
   });
+  return { markSaved };
+};
 
-  if (autosave) {
-    const apply = (on) => {
-      autosave.setAttribute('aria-checked', String(on));
-      if (status) status.textContent = status.textContent.replace(/Автосохранение: (?:вкл|выкл)/, `Автосохранение: ${on ? 'вкл' : 'выкл'}`);
-    };
-    const saved = readSettings().autosave;
-    apply(typeof saved === 'boolean' ? saved : autosave.getAttribute('aria-checked') === 'true');
-    autosave.addEventListener('click', () => {
-      const on = autosave.getAttribute('aria-checked') !== 'true';
-      apply(on);
-      saveSetting('autosave', on);
-    });
-  }
+const initAutosave = ({ page, settings }) => {
+  const autosave = page.querySelector('.editor-toolbar__switch');
+  if (!autosave) return;
+  const status = page.querySelector('.editor-status__cursor');
+  const apply = (on) => {
+    autosave.setAttribute('aria-checked', String(on));
+    if (status) status.textContent = status.textContent.replace(/Автосохранение: (?:вкл|выкл)/, `Автосохранение: ${on ? 'вкл' : 'выкл'}`);
+  };
+  const saved = settings.read().autosave;
+  apply(typeof saved === 'boolean' ? saved : autosave.getAttribute('aria-checked') === 'true');
+  autosave.addEventListener('click', () => {
+    const on = autosave.getAttribute('aria-checked') !== 'true';
+    apply(on);
+    settings.save('autosave', on);
+  });
+};
 
+// Code and canvas views (on a phone only one of them is shown).
+const initViews = ({ page, storage }) => {
+  const main = page.querySelector('.editor-main');
+  const viewButtons = [...page.querySelectorAll('[data-view]')];
   const showView = (view) => {
     if (main) main.dataset.view = view;
     viewButtons.forEach((button) => button.setAttribute('aria-pressed', String(button.dataset.view === view)));
     storage.set('editor-view', view);
   };
   viewButtons.forEach((button) => button.addEventListener('click', () => showView(button.dataset.view)));
+  const savedView = storage.get('editor-view', null);
+  showView(VIEWS.includes(savedView) ? savedView : 'canvas');
+  return { showView, view: () => main?.dataset.view };
+};
 
+// The Run button and Ctrl+Enter ask the runner to draw, unless the code has errors: then focus goes to the first problem.
+const initRun = ({ page, root }) => {
+  const runButtons = [...page.querySelectorAll('.button--run')];
   const run = (event) => {
     event.preventDefault();
     if (runButtons.some((button) => button.getAttribute('aria-disabled') === 'true')) {
       page.querySelector('.problems__location')?.focus();
       return false;
     }
-    page.dispatchEvent(new root.defaultView.CustomEvent('dslkit:run', { bubbles: true }));
+    announceRun(page, root);
     return true;
   };
   page.addEventListener('click', (event) => {
@@ -654,12 +1165,83 @@ export const initEditor = ({ root = document, storage } = {}) => {
   page.addEventListener('keydown', (event) => {
     if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') run(event);
   });
+};
 
-  const savedTab = storage.get('editor-tab', null);
-  select(Number.isInteger(savedTab) && tabs[savedTab] ? savedTab : Math.max(0, current()));
-  const savedView = storage.get('editor-view', null);
-  showView(VIEWS.includes(savedView) ? savedView : 'canvas');
+// Templates: the buttons and the notation list replace the code with a starter example and ask the runner to draw it.
+const initTemplates = ({ page, root }) => {
+  const lang = root.documentElement.lang === 'en' ? 'en' : 'ru';
+  const codeLines = page.querySelector('.code__lines');
+  const loadTemplate = (key) => {
+    if (!codeLines || !Object.hasOwn(TEMPLATES, key)) return false;
+    showCode(root, codeLines, TEMPLATES[key]);
+    announceRun(page, root);
+    return true;
+  };
+  // The Templates tab lists every notation of the editor, the three most used ones first, with a field that filters the list.
+  const list = page.querySelector('.templates');
+  if (list) {
+    const keys = ['idef0', 'dfd', 'erd', ...Object.keys(NOTATIONS).filter((key) => !['idef0', 'dfd', 'erd'].includes(key))];
+    list.replaceChildren(
+      ...keys.map((key) => {
+        const item = root.createElement('li');
+        const button = root.createElement('button');
+        button.type = 'button';
+        button.className = 'templates__item';
+        button.dataset.template = key;
+        const name = root.createElement('span');
+        name.textContent = NOTATIONS[key].name[lang];
+        const short = root.createElement('span');
+        short.className = 'badge';
+        short.textContent = NOTATIONS[key].short;
+        button.append(name, short);
+        item.append(button);
+        return item;
+      }),
+    );
+    const search = root.createElement('input');
+    search.type = 'search';
+    search.className = 'templates__search settings-row__select';
+    search.placeholder = ui('template', {}, lang);
+    search.setAttribute('aria-label', ui('template', {}, lang));
+    search.addEventListener('input', () => {
+      const query = search.value.trim().toLowerCase();
+      list.querySelectorAll('li').forEach((item) => {
+        item.hidden = query !== '' && !item.textContent.toLowerCase().includes(query);
+      });
+    });
+    list.before(search);
+  }
+  page.querySelectorAll('[data-template]').forEach((button) => button.addEventListener('click', () => loadTemplate(button.dataset.template)));
+  const picker = page.querySelector('[data-notation-select]');
+  if (picker) {
+    picker.setAttribute('aria-label', ui('template', {}, lang));
+    picker.replaceChildren(
+      ...Object.entries(NOTATIONS).map(([key, notation]) => {
+        const option = root.createElement('option');
+        option.value = key;
+        option.textContent = notation.name[lang];
+        return option;
+      }),
+    );
+    picker.addEventListener('change', () => loadTemplate(picker.value));
+  }
+  return loadTemplate;
+};
 
-  return { select, showView, view: () => main?.dataset.view };
+export const initEditor = ({ root = document, storage, ...timing } = {}) => {
+  const page = root.querySelector('.app-page--editor');
+  const tabs = page ? [...page.querySelectorAll('.editor-tabs__list [role="tab"]')] : [];
+  if (tabs.length === 0) return null;
+
+  const settings = createSettings(storage);
+  const tabsApi = initTabs({ page, root, storage, tabs });
+  const { markSaved } = initCloseDialog({ page, root, tabs, tabsApi });
+  initAutosave({ page, settings });
+  initRun({ page, root });
+  const sourceAutosave = initSourceAutosave({ page, root, storage, onSaved: markSaved, ...timing });
+  const loadTemplate = initTemplates({ page, root });
+  const { showView, view } = initViews({ page, storage });
+
+  return { select: tabsApi.select, showView, loadTemplate, view, sourceAutosave };
 };
 ```

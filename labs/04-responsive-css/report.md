@@ -49,6 +49,23 @@
 
 В файле `variables.css` определены цвета светлой и тёмной тем, семейства шрифтов, шкала размеров текста, отступы, радиусы, тени и ширина контейнера. Имена из задания (`--font-family-main`, `--font-size-base`, `--spacing-small`, `--container-max-width`, `--breakpoint-mobile` и другие) заданы как псевдонимы к шкалам проекта. Отступы 8, 16, 24, 40, 64 и 104 пикселя соответствуют числам Фибоначчи, умноженным на 8, поэтому сетка по 8 пикселей совпадает с золотым сечением.
 
+Выбор значений основных переменных объяснён в таблице 2.
+
+Таблица 2 – Обоснование значений переменных CSS
+
+| Переменные | Значение | Обоснование |
+|---|---|---|
+| `--phi`, `--phi-root` | 1,618 и 1,272 | Золотое сечение и его квадратный корень задают шкалу шрифтов: шаг √φ даёт мелкие ступени для подписей, шаг φ даёт заголовки |
+| `--font-size-base` | 16 пикселей | Размер по умолчанию в браузерах: шрифт не мельче 12 пикселей, масштаб пользователя в `rem` сохраняется |
+| `--font-size-h1`, `--font-size-h2` | около 53 и 42 пикселей | Ступени `--step-5` и `--step-4` шкалы: 16 × φ² × √φ и 16 × φ² |
+| `--spacing-small` … `--spacing-xlarge` | 8, 16, 24 и 40 пикселей | Числа Фибоначчи 1, 2, 3 и 5, умноженные на 8, поэтому отступы кратны сетке 8 пикселей. В примере условия последний отступ равен 48, в проекте взято 40 ради ряда Фибоначчи |
+| `--space-5`, `--space-6` | 64 и 104 пикселя | Числа 8 и 13 ряда Фибоначчи для вертикальных отступов секций |
+| `--container-max-width` | 1200 пикселей | Значение из условия работы: строка текста остаётся в пределах `--measure` (62 символа), колонки главного блока получают около 458 и 742 пикселей |
+| `--target-size` | 48 пикселей | Размер цели нажатия выше минимума 24 пикселя из WCAG 2.2 (критерий 2.5.8) и удобен для пальца |
+| `--header-height` | 64 пикселя | Равен `--space-5`, чтобы шапка укладывалась в сетку 8 пикселей |
+
+Точки перелома заданы в пикселях в переменных `--breakpoint-small`, `--breakpoint-medium` и `--breakpoint-large` и продублированы в псевдонимах из условия. Переменные CSS нельзя использовать внутри условия `@media`, поэтому числа 576, 768 и 1024 записаны в `adaptive.css` напрямую, а тест сверяет их со списком допустимых точек.
+
 ### 3.4 Базовые стили
 
 Файл `base.css` сбрасывает внешние отступы, задаёт `box-sizing: border-box`, шрифт, цвет и межстрочный интервал текста. Интервал равен 1,618 для основного текста, заголовки используют 1,15. Для всех интерактивных элементов определено видимое кольцо фокуса, класс `visually-hidden` скрывает текст только визуально, а правило `prefers-reduced-motion` отключает анимацию для пользователей, которым она мешает.
@@ -59,13 +76,44 @@
 
 ### 3.6 Сетки Flexbox и Grid
 
-Flexbox применён в шапке, подвале, рядах кнопок и подписях. Grid строит главный блок (две колонки 1 к 1,618), сетку карточек, тарифы, шаги и оболочку приложения с боковой панелью шириной 224 пикселя. Экран редактора использует именованные области `toolbar`, `activity`, `sidebar`, `main`, `problems` и `status`.
+Flexbox и Grid решают разные задачи, поэтому в проекте они работают вместе: Flexbox выстраивает содержимое по одной оси, Grid задаёт двумерную сетку.
+
+#### 3.6.1 Flexbox
+
+Flexbox применён там, где элементы идут рядом или друг под другом и выравниваются по одной оси:
+
+- логотип в шапке (`.header__logo`), строка навигации (`.nav__list`) и ряд инструментов (`.header__tools`);
+- ряды кнопок главного блока (`.hero__actions`) и сами кнопки (`.button`), у которых значок и подпись выравниваются по центру;
+- список ссылок подвала (`.footer__list`);
+- заголовок и мета-строка карточки (`.card__title`, `.card__meta`), вопрос аккордеона (`.faq__question`).
+
+На телефоне навигация идёт колонкой, с ширины 768 пикселей строкой с переносом (`flex-flow: row wrap`).
+
+#### 3.6.2 CSS Grid
+
+Grid применён для двумерных раскладок:
+
+- каркас страницы `.page` описан областями `header`, `main` и `footer` через `grid-template-areas` с одной колонкой и строками `auto 1fr auto`. Строка `1fr` прижимает подвал к низу окна на коротких страницах, как это делал прежний каркас на Flexbox. Боковой панели у публичных страниц нет, поэтому область `sidebar` из примера условия не нужна, а оболочка приложения с панелью шириной 224 пикселя описана отдельно в `app.css`;
+- главный блок `.hero`: одна колонка на телефоне, `1fr 1.618fr` с ширины 1024 пикселей;
+- сетка карточек `.cards`: одна, две и три колонки через `repeat(n, minmax(0, 1fr))`, значение `minmax(0, 1fr)` не даёт длинному слову растянуть колонку;
+- тарифы `.plans` и факты главного блока `.hero__facts`;
+- экран редактора: именованные области `toolbar`, `activity`, `sidebar`, `main`, `problems` и `status`, на широком экране добавляется колонка `sidebar`.
+
+После перевода `.page` с Flexbox на Grid положение и размеры всех элементов сравнены с прежними на шести страницах при ширинах 375, 500, 800 и 1440 пикселей: различий нет.
 
 ### 3.7 Адаптивность
 
-Реализованы три состояния по подходу mobile-first, они перечислены в таблице 2.
+Реализованы три состояния по подходу mobile-first, они перечислены в таблице 3.
 
-Таблица 2 – Точки перелома и поведение страницы
+Точки перелома выбраны по содержимому страницы и по типичным устройствам, а не по моделям телефонов:
+
+- 576 пикселей: граница между узким и широким телефоном, например при повороте экрана. С неё карточкам хватает места на две колонки, а подпись бургера становится видимой;
+- 768 пикселей: ширина планшета в портретной ориентации. Пять пунктов меню, язык и кнопка помещаются в одну строку, поэтому бургер заменяется горизонтальным меню. Эта же граница названа в условии работы как предел для бургера;
+- 1024 пикселя: планшет в альбомной ориентации и ноутбук. Хватает места для трёх колонок карточек и для главного блока в пропорции 1 к 1,618.
+
+Выбран подход mobile-first: базовые стили описывают телефон, а каждый запрос `min-width` только добавляет правила. Телефон не получает десктопных правил, которые затем пришлось бы отменять, а число переопределений в каскаде меньше, чем при подходе desktop-first с `max-width`. Точки заданы в пикселях, так как зависимость от размера шрифта пользователя здесь не нужна. В описании условия для десктопа названа граница 992 пикселя, в проекте взято 1024 как значение из примера медиазапросов в том же условии. Каждый запрос записан в `adaptive.css` одним блоком, повторы запрещает тест.
+
+Таблица 3 – Точки перелома и поведение страницы
 
 | Ширина | Состояние | Поведение |
 |---|---|---|
@@ -98,27 +146,63 @@ Flexbox применён в шапке, подвале, рядах кнопок 
 
 ### 3.9 Кросс-браузерная совместимость
 
-Flexbox и Grid поддерживаются всеми современными браузерами. Для `color-mix()` перед каждым объявлением указано запасное значение, поэтому браузер без поддержки функции использует обычный цвет. Для `backdrop-filter` добавлен префикс `-webkit-`. Автопрефиксер не подключён, так как проект ориентирован на актуальные версии браузеров.
+Flexbox и Grid поддерживаются всеми современными браузерами, поэтому запасные варианты для них не нужны. Для `color-mix()` перед каждым объявлением указано запасное значение, поэтому браузер без поддержки функции использует обычный цвет. Для `backdrop-filter` добавлен префикс `-webkit-`. Автопрефиксер не подключён, так как проект ориентирован на актуальные версии браузеров.
+
+Сайт открыт в реальных браузерах, управление шло через puppeteer-core. Результаты приведены в таблице 4, подробный протокол лежит в `docs/metrics/browsers/README.md`.
+
+Таблица 4 – Результаты проверки в браузерах
+
+| Браузер | Версия | Проверка | Результат |
+|---|---|---|---|
+| Google Chrome | текущая | осмотр на 375, 768 и 1280 пикселей | макет верный |
+| Mozilla Firefox | 157.0.1 | 20 сценариев на лендинге, в приложении и редакторе | 20 из 20 |
+| Microsoft Edge | 155.0.4283.45 | те же 20 сценариев | 20 из 20 |
+| Safari | не проверялся | нет устройства Apple | остаётся задачей приёмки |
+
+В каждом браузере проверены загрузка страницы, переключатель темы, бургер-меню, формы, отсутствие горизонтальной прокрутки на 375 пикселей и отсутствие ошибок в консоли. Проверка нашла дефект: на 375 пикселей страница прокручивалась вбок, он исправлен правилом `overflow-x: clip` для `html` в `base.css`. Снимок лендинга в Firefox на 375 пикселей показан на рисунке 4.
+
+![Лендинг в Firefox на ширине 375 пикселей](figures/firefox-landing-375.png)
+
+Рисунок 4 – Лендинг DSLKit в Firefox на экране шириной 375 пикселей
+
+Снимок лендинга в Edge на 1280 пикселей показан на рисунке 5.
+
+![Лендинг в Edge на ширине 1280 пикселей](figures/edge-landing-1280.png)
+
+Рисунок 5 – Лендинг DSLKit в Edge на экране шириной 1280 пикселей
 
 ### 3.10 Проверка и тестирование
 
-Автоматические проверки собраны в тестах `labs/04-responsive-css`. Они подтверждают, что каждый класс из HTML имеет правило в стилях, что токены следуют золотому сечению, что отступы кратны 8 пикселям и образуют ряд Фибоначчи, что цвета проходят контраст AA в светлой и тёмной темах, что нет цветов вне файла переменных, что размер шрифта не меньше 12 пикселей, что используются только запросы `min-width` и точки перелома 576, 768 и 1024.
+Автоматические проверки собраны в тестах `labs/04-responsive-css`. Они подтверждают, что каждый класс из HTML имеет правило в стилях, что токены следуют золотому сечению, что отступы кратны 8 пикселям и образуют ряд Фибоначчи, что цвета проходят контраст AA в светлой и тёмной темах, что нет цветов вне файла переменных, что размер шрифта не меньше 12 пикселей, что используются только запросы `min-width` и точки перелома 576, 768 и 1024 и что ни один файл не содержит двух одинаковых запросов `@media`.
 
-Все файлы стилей прошли проверку валидатором W3C CSS без ошибок, а HTML-страницы проверены валидатором W3C Nu. Геометрия всех элементов страниц сравнивалась до и после перехода на mobile-first при ширинах 500, 800 и 1440 пикселей: различий не найдено. Страницы осмотрены в Chrome на ширинах 375, 768 и 1280 пикселей. Проверка в Firefox, Edge и Safari на реальных устройствах не выполнялась и остаётся задачей на этап приёмки.
+Каждый файл стилей проверен валидатором W3C CSS (профиль CSS 3.0 с SVG, предупреждения включены). Результаты приведены в таблице 5, полные ответы валидатора сохранены в `docs/metrics/css-validator`.
+
+Таблица 5 – Результаты проверки валидатором W3C CSS
+
+| Файл | Ошибки | Предупреждения |
+|---|---|---|
+| `variables.css` | 0 | 0 |
+| `base.css` | 0 | 29 |
+| `components.css` | 0 | 98 |
+| `header.css` | 0 | 35 |
+| `main.css` | 0 | 34 |
+| `footer.css` | 0 | 9 |
+| `pages.css` | 0 | 26 |
+| `app.css` | 0 | 236 |
+| `editor.css` | 0 | 170 |
+| `adaptive.css` | 0 | 14 |
+
+Почти все предупреждения одного вида: валидатор не может вычислить значения с `var()`, потому что они зависят от среды выполнения. Остальные сообщают о префиксах производителей (`-webkit-appearance`, индикаторы `progress`), об устаревшем свойстве `clip` в классе `visually-hidden`, оставленном как запасной вариант рядом с `clip-path`, и о записи `rect(0 0 0 0)` без запятых, которую понимают браузеры.
+
+Страницы проверены валидатором W3C Nu. Геометрия всех элементов сравнивалась до и после перехода на mobile-first при ширинах 500, 800 и 1440 пикселей: различий не найдено. Тот же приём применён после перевода каркаса `.page` на Grid.
 
 ### 3.11 Фиксация изменений
 
 Работа выполнена в ветке `feature/responsive-layout`. Коммит с реализацией: https://github.com/KsushaKhadzhinova/DSLKit-Project/commit/eb70a59. Сообщение коммита: `feat: implement responsive layout according to Figma design`.
 
-## 4 Ответы на контрольные вопросы
-
-5. **Сложности при переносе дизайна.** Макеты Figma статичны и не содержат состояний, поэтому состояния наведения, фокуса и ошибки пришлось проектировать самостоятельно. Расхождения с сеткой по 8 пикселей решены шкалой отступов по Фибоначчи.
-6. **Медиазапросы.** Правило `@media (min-width: 768px) { .nav { display: block; } }` показывает меню на широких экранах. Запросы включают стили по условию, поэтому одна разметка работает на разных устройствах.
-7. **Гибкие сетки.** Проценты считаются от ширины родителя, а единица `fr` делит остаток свободного места между колонками. Запись `1fr 1.618fr` задаёт колонки главного блока без вычисления процентов.
-
 ## Заключение
 
-Стили проекта DSLKit разнесены по файлам согласно методологии БЭМ и построены по подходу mobile-first. Реализованы три состояния страницы, бургер-меню без JavaScript, сетки на Flexbox и Grid, переменные CSS и тёмная тема. Золотое сечение заложено в шкалу размеров, отступы и колонки, а автоматические тесты не позволяют отклониться от него. Остаётся проверить страницу в Firefox, Edge и Safari на реальных устройствах.
+Стили проекта DSLKit разнесены по файлам согласно методологии БЭМ и построены по подходу mobile-first. Реализованы три состояния страницы, бургер-меню без JavaScript, сетки на Flexbox и Grid, переменные CSS и тёмная тема. Золотое сечение заложено в шкалу размеров, отступы и колонки, а автоматические тесты не позволяют отклониться от него. Страница проверена в Chrome, Firefox и Edge, остаётся проверка в Safari на устройстве Apple.
 
 ## Приложение А – Листинг файла variables.css
 
@@ -134,7 +218,6 @@ Flexbox и Grid поддерживаются всеми современными
   --color-primary: #2563eb;
   --color-on-primary: #ffffff;
   --color-primary-text: #1d4ed8;
-  --color-cta-end: #7c3aed;
   --color-diagram-paper: #ffffff;
   --color-secondary: #e8efff;
   --color-accent: #16a34a;
@@ -170,25 +253,27 @@ Flexbox и Grid поддерживаются всеми современными
   --columns-golden: 1fr 1.618fr;
   --columns-golden-reverse: 1.618fr 1fr;
 
+  /* Smallest readable text: the golden step, but never below 14 px (WCAG and the interface rules). */
+  --text-small: max(var(--step--1), 0.875rem, 14px);
   --line-body: var(--phi);
   --line-heading: 1.15;
 
-  --space-1: 8px;
-  --space-2: 16px;
-  --space-3: 24px;
-  --space-4: 40px;
-  --space-5: 64px;
-  --space-6: 104px;
+  --space-1: 0.5rem;
+  --space-2: 1rem;
+  --space-3: 1.5rem;
+  --space-4: 2.5rem;
+  --space-5: 4rem;
+  --space-6: 6.5rem;
 
-  --radius-small: 8px;
-  --radius-medium: 16px;
-  --radius-large: 24px;
+  --radius-small: 0.5rem;
+  --radius-medium: 1rem;
+  --radius-large: 1.5rem;
 
   --container: 1200px;
   --measure: 62ch;
-  --header-height: 64px;
-  --target-size: 48px;
-  --target-size-small: 32px;
+  --header-height: 4rem;
+  --target-size: max(3rem, 48px);
+  --target-size-small: max(2.75rem, 44px);
   --focus-ring: 0 0 0 3px var(--color-background), 0 0 0 5px var(--color-primary);
 
   --breakpoint-small: 576px;
@@ -197,7 +282,7 @@ Flexbox и Grid поддерживаются всеми современными
 
   /* Names required by the lab assignment; they alias the golden-ratio scales above. */
   --font-family-main: var(--font-sans);
-  --font-size-base: 16px;
+  --font-size-base: 1rem;
   --font-size-h1: var(--step-5);
   --font-size-h2: var(--step-4);
   --spacing-small: var(--space-1);
@@ -270,6 +355,8 @@ Flexbox и Grid поддерживаются всеми современными
 }
 
 html {
+  /* Fluid root size: 15 px on a phone, about 17 px at 1280 px, 18 px at the largest screens. Every rem value follows it, so type, spacing and controls grow together. */
+  font-size: clamp(0.9375rem, 0.875rem + 0.25vw, 1.125rem);
   overflow-x: clip;
   scroll-padding-top: calc(var(--header-height) + var(--space-2));
   -webkit-text-size-adjust: 100%;
@@ -356,24 +443,24 @@ address {
 }
 
 small {
-  font-size: var(--step--1);
+  font-size: var(--text-small);
 }
 
 code,
 kbd,
 pre {
   font-family: var(--font-mono);
-  font-size: 0.92em;
+  font-size: var(--text-small);
   font-feature-settings: 'zero';
 }
 
 kbd {
-  padding: 2px 6px;
+  padding: 0.125rem 0.375rem;
   border: 1px solid var(--color-border-strong);
-  border-radius: 4px;
+  border-radius: var(--radius-small);
   background: var(--color-surface);
   color: var(--color-text-light);
-  font-size: var(--step--1);
+  font-size: var(--text-small);
   line-height: 1.2;
 }
 
@@ -441,18 +528,18 @@ time {
 
 .icon {
   flex: none;
-  width: 20px;
-  height: 20px;
+  width: 1.25rem;
+  height: 1.25rem;
 }
 
 .badge {
   display: inline-flex;
   align-items: center;
-  padding: 2px var(--space-1);
-  border-radius: 999px;
+  padding: 0.125rem var(--space-1);
+  border-radius: 62.4375rem;
   background: var(--color-secondary);
   color: var(--color-link);
-  font-size: var(--step--1);
+  font-size: var(--text-small);
   font-weight: 600;
   line-height: 1.4;
   white-space: nowrap;
@@ -524,6 +611,7 @@ label > span {
 
 ```css
 .header {
+  grid-area: header;
   position: sticky;
   top: 0;
   z-index: 100;
@@ -558,8 +646,8 @@ label > span {
 }
 
 .header__logo-image {
-  width: 32px;
-  height: 32px;
+  width: 2rem;
+  height: 2rem;
 }
 
 .header__logo-text {
@@ -599,9 +687,9 @@ label > span {
 .burger__icon::before,
 .burger__icon::after {
   display: block;
-  width: 18px;
-  height: 2px;
-  border-radius: 2px;
+  width: 1.125rem;
+  height: 0.125rem;
+  border-radius: 0.125rem;
   background: currentColor;
   transition: transform 200ms ease;
 }
@@ -622,7 +710,7 @@ label > span {
 }
 
 .burger__icon::after {
-  top: 6px;
+  top: 0.375rem;
 }
 
 .burger__input:checked + .burger__button .burger__icon {
@@ -702,7 +790,7 @@ label > span {
   min-height: var(--target-size-small);
   padding: 0 var(--space-1);
   color: var(--color-text-light);
-  font-size: var(--step--1);
+  font-size: var(--text-small);
   font-weight: 600;
   text-decoration: none;
 }
@@ -723,10 +811,12 @@ label > span {
 .theme__button {
   display: inline-flex;
   align-items: center;
-  min-height: var(--target-size-small);
-  padding: 0 var(--space-1);
+  justify-content: center;
+  width: var(--target-size);
+  height: var(--target-size);
+  padding: 0;
   border: 1px solid var(--color-border-strong);
-  border-radius: 999px;
+  border-radius: 62.4375rem;
   color: var(--color-text-light);
   cursor: pointer;
   font-size: 0.75rem;
@@ -752,11 +842,33 @@ label > span {
   color: var(--color-text);
 }
 
+.theme__icon {
+  flex: none;
+}
+
+.theme__label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.theme__icon--sun,
+.theme__input:checked + .theme__button .theme__icon--moon {
+  display: none;
+}
+
+.theme__input:checked + .theme__button .theme__icon--sun {
+  display: block;
+}
+
 .header__cta {
   display: none;
   min-height: var(--target-size-small);
   padding: 0 var(--space-2);
-  font-size: var(--step--1);
+  font-size: var(--text-small);
 }
 ```
 
@@ -764,14 +876,19 @@ label > span {
 
 ```css
 .page {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto 1fr auto;
+  grid-template-areas:
+    'header'
+    'main'
+    'footer';
   min-height: 100vh;
   overflow-x: clip;
 }
 
 .main {
-  flex: 1;
+  grid-area: main;
   width: 100%;
   max-width: calc(var(--container) + var(--space-3) * 2);
   padding-inline: var(--space-3);
@@ -796,7 +913,11 @@ label > span {
   z-index: -1;
   background:
     radial-gradient(ellipse 55% 70% at 78% 18%, var(--color-glow), transparent 70%),
-    radial-gradient(ellipse 40% 50% at 8% 0%, var(--color-glow), transparent 70%);
+    radial-gradient(ellipse 40% 50% at 8% 0%, var(--color-glow), transparent 70%), radial-gradient(circle, var(--color-border) 1.4px, transparent 1.6px);
+  background-size:
+    auto,
+    auto,
+    24px 24px;
 }
 
 .hero__content {
@@ -809,19 +930,19 @@ label > span {
   display: inline-flex;
   align-items: center;
   gap: var(--space-1);
-  padding: 4px var(--space-2);
+  padding: 0.25rem var(--space-2);
   border: 1px solid var(--color-border);
-  border-radius: 999px;
+  border-radius: 62.4375rem;
   background: var(--color-surface);
   color: var(--color-text-light);
-  font-size: var(--step--1);
+  font-size: var(--text-small);
   font-weight: 600;
 }
 
 .hero__badge::before {
   content: '';
-  width: 8px;
-  height: 8px;
+  width: 0.5rem;
+  height: 0.5rem;
   border-radius: 50%;
   background: var(--color-accent);
   box-shadow: 0 0 0 4px var(--color-glow);
@@ -842,21 +963,13 @@ label > span {
 .hero__cta {
   display: grid;
   gap: var(--space-2);
-  justify-items: stretch;
-  width: 100%;
-  padding: var(--space-3);
-  border-radius: var(--radius-large);
-  background: var(--color-primary);
-  background: linear-gradient(135deg, var(--color-primary), var(--color-cta-end));
-  box-shadow: var(--shadow-large);
-  color: var(--color-on-primary);
+  justify-items: start;
 }
 
 .hero__cta-note {
   margin: 0;
-  color: var(--color-on-primary);
-  font-size: var(--step--1);
-  text-align: center;
+  color: var(--color-text-light);
+  font-size: var(--text-small);
 }
 
 .hero__actions {
@@ -871,7 +984,7 @@ label > span {
 
 .hero__note {
   color: var(--color-muted);
-  font-size: var(--step--1);
+  font-size: var(--text-small);
 }
 
 .hero__facts {
@@ -885,7 +998,7 @@ label > span {
 
 .hero__fact {
   display: grid;
-  gap: 4px;
+  gap: 0.25rem;
 }
 
 .hero__fact-value {
@@ -898,7 +1011,7 @@ label > span {
 
 .hero__fact-label {
   color: var(--color-text-light);
-  font-size: var(--step--1);
+  font-size: var(--text-small);
 }
 
 .hero__figure {
@@ -916,7 +1029,7 @@ label > span {
 
 .hero__caption {
   color: var(--color-muted);
-  font-size: var(--step--1);
+  font-size: var(--text-small);
   text-align: center;
 }
 
@@ -954,6 +1067,7 @@ label > span {
 
 ```css
 .footer {
+  grid-area: footer;
   margin-top: var(--space-6);
   border-top: 1px solid var(--color-border);
   background: var(--color-surface);
@@ -978,7 +1092,7 @@ label > span {
 .footer__link {
   display: inline-flex;
   align-items: center;
-  min-height: 24px;
+  min-height: 1.5rem;
   color: var(--color-text-light);
   text-decoration: none;
 }
@@ -991,7 +1105,7 @@ label > span {
 .footer__address,
 .footer__copy {
   color: var(--color-muted);
-  font-size: var(--step--1);
+  font-size: var(--text-small);
 }
 ```
 
@@ -1001,6 +1115,14 @@ label > span {
 /* Mobile first: the base styles describe a phone, wider screens add to them.
    Breakpoints: 576, 768 and 1024 px. */
 @media (min-width: 576px) {
+  .error {
+    margin-inline: auto;
+  }
+
+  .error .button {
+    justify-self: start;
+  }
+
   .hero__actions .button {
     flex: 0 0 auto;
   }
@@ -1008,20 +1130,13 @@ label > span {
   .cards {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-}
 
-@media (min-width: 576px) {
   .burger__label {
     position: static;
     width: auto;
     height: auto;
     overflow: visible;
     clip-path: none;
-  }
-
-  .theme__button {
-    padding: 0 var(--space-2);
-    font-size: var(--step--1);
   }
 }
 
@@ -1041,28 +1156,28 @@ label > span {
   }
 
   .header__tools {
-    grid-column: auto;
-    grid-row: auto;
+    grid-column: 3;
+    grid-row: 1;
   }
 
   .nav {
     display: block;
-    grid-column: auto;
-    grid-row: auto;
-    padding-bottom: 0;
+    grid-column: 1 / -1;
+    grid-row: 2;
+    padding-bottom: var(--space-1);
   }
 
   .nav__list {
     flex-flow: row wrap;
     gap: 0;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
   }
 
   .nav__link {
     min-height: var(--target-size-small);
     padding: 0 var(--space-1);
-    font-size: var(--step--1);
+    font-size: var(--text-small);
   }
 
   .hero__facts {
@@ -1087,8 +1202,15 @@ label > span {
     gap: var(--space-3);
   }
 
+  .nav {
+    grid-column: auto;
+    grid-row: auto;
+    padding-bottom: 0;
+  }
+
   .nav__list {
     gap: var(--space-1);
+    justify-content: center;
   }
 
   .nav__link {
@@ -1109,6 +1231,65 @@ label > span {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
+
+/* Touch targets: every control is at least 44 x 44 px (WCAG 2.5.8 asks 24 px, the interface rules of the project ask 44 px). */
+.header__logo,
+.nav__link,
+.footer__link,
+.card__link,
+.template-card__link,
+.project-card__link,
+.app-topbar__logo,
+.editor-toolbar__logo,
+.canvas__engine-link,
+.problems__location {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--target-size-small);
+}
+
+.filter__chip,
+.app-topbar__new,
+.app-topbar__search-input,
+.sort__select,
+.settings-row__select,
+.editor-tabs__tab,
+.problems__tab,
+.editor-segmented__button,
+.canvas__history-item,
+.button {
+  min-height: var(--target-size-small);
+}
+
+.app-topbar__avatar,
+.app-topbar__search-button,
+.project-card__menu,
+.editor-activity__button,
+.editor-tabs__close,
+.button--icon {
+  min-width: var(--target-size-small);
+  min-height: var(--target-size-small);
+}
+
+.form__checkbox {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.app-topbar__logo {
+  min-width: var(--target-size-small);
+  justify-content: center;
+}
+
+.problems__location {
+  align-self: center;
+  min-width: var(--target-size-small);
+  justify-content: center;
+}
+
+.template-card__link {
+  min-width: var(--target-size-small);
+}
 ```
 
 ## Приложение Ж – Листинг файла style.css
@@ -1122,6 +1303,8 @@ label > span {
 @import url('footer.css');
 @import url('pages.css');
 @import url('app.css');
+@import url('auth.css');
 @import url('editor.css');
+@import url('expert.css');
 @import url('adaptive.css');
 ```

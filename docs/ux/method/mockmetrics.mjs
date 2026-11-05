@@ -1,8 +1,10 @@
 import { readFileSync, writeFileSync, readdirSync, mkdirSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 
 const ROOT = 'E:/DSLKit-Project/docs/project/figma-svg';
-const OUT = 'C:/Users/zheny/AppData/Local/Temp/claude/E--DSLKit-Project/74e916db-b67e-49d9-9921-47e8c85bb931/scratchpad/mock';
+const OUT = join(tmpdir(), 'dslkit-mock');
 const CHROME = 'C:/Program Files (x86)/Google/Chrome/Application/chrome.exe';
 mkdirSync(OUT, { recursive: true });
 

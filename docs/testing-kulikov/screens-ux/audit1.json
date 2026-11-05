@@ -1,0 +1,666 @@
+{
+ "app_welcome|375|light": {
+  "small24": [
+   "a. 74x19 Пропустить"
+  ],
+  "small44": 3,
+  "total": 21,
+  "noname": [],
+  "hscroll": false,
+  "h1": 1,
+  "lang": "ru",
+  "skip": true,
+  "imgNoAlt": 0
+ },
+ "app_dashboard|375|light": {
+  "small24": [],
+  "small44": 2,
+  "total": 31,
+  "noname": [],
+  "hscroll": false,
+  "h1": 1,
+  "lang": "ru",
+  "skip": true,
+  "imgNoAlt": 0
+ },
+ "app_editor|375|light": {
+  "small24": [],
+  "small44": 2,
+  "total": 51,
+  "noname": [],
+  "hscroll": true,
+  "h1": 1,
+  "lang": "ru",
+  "skip": true,
+  "imgNoAlt": 0
+ },
+ "app_settings|375|light": {
+  "small24": [
+   "input.switch__input 38x23 ",
+   "input.switch__input 38x23 ",
+   "input.switch__input 38x23 ",
+   "input.switch__input 38x23 ",
+   "input.theme-option__input 1x1 ",
+   "input.theme-option__input 1x1 ",
+   "input.theme-option__input 1x1 "
+  ],
+  "small44": 9,
+  "total": 28,
+  "noname": [],
+  "hscroll": false,
+  "h1": 1,
+  "lang": "ru",
+  "skip": true,
+  "imgNoAlt": 0
+ },
+ "app_login|375|light": {
+  "small24": [],
+  "small44": 2,
+  "total": 31,
+  "noname": [],
+  "hscroll": false,
+  "h1": 1,
+  "lang": "ru",
+  "skip": true,
+  "imgNoAlt": 0
+ },
+ "app_register|375|light": {
+  "small24": [],
+  "small44": 2,
+  "total": 31,
+  "noname": [],
+  "hscroll": false,
+  "h1": 1,
+  "lang": "ru",
+  "skip": true,
+  "imgNoAlt": 0
+ },
+ "en_app_dashboard|375|light": {
+  "small24": [],
+  "small44": 2,
+  "total": 31,
+  "noname": [],
+  "hscroll": false,
+  "h1": 1,
+  "lang": "en",
+  "skip": true,
+  "imgNoAlt": 0
+ },
+ "en_app_editor|375|light": {
+  "small24": [],
+  "small44": 2,
+  "total": 51,
+  "noname": [],
+  "hscroll": true,
+  "h1": 1,
+  "lang": "en",
+  "skip": true,
+  "imgNoAlt": 0
+ },
+ "index|375|light": {
+  "small24": [
+   "input.burger__input 1x1 ",
+   "input.theme__input 1x1 ",
+   "input.form__checkbox 23x23 "
+  ],
+  "small44": 4,
+  "total": 34,
+  "noname": [],
+  "hscroll": false,
+  "h1": 1,
+  "lang": "ru",
+  "skip": true,
+  "imgNoAlt": 0
+ },
+ "app_welcome|375|dark": {
+  "small24": [
+   "a. 74x19 Пропустить"
+  ],
+  "small44": 3,
+  "total": 21,
+  "noname": [],
+  "hscroll": false,
+  "h1": 1,
+  "lang": "ru",
+  "skip": true,
+  "imgNoAlt": 0
+ },
+ "app_dashboard|375|dark": {
+  "small24": [],
+  "small44": 2,
+  "total": 31,
+  "noname": [],
+  "hscroll": false,
+  "h1": 1,
+  "lang": "ru",
+  "skip": true,
+  "imgNoAlt": 0
+ },
+ "app_editor|375|dark": {
+  "small24": [],
+  "small44": 2,
+  "total": 51,
+  "noname": [],
+  "hscroll": true,
+  "h1": 1,
+  "lang": "ru",
+  "skip": true,
+  "imgNoAlt": 0
+ },
+ "app_settings|375|dark": {
+  "small24": [
+   "input.switch__input 38x23 ",
+   "input.switch__input 38x23 ",
+   "input.switch__input 38x23 ",
+   "input.switch__input 38x23 ",
+   "input.theme-option__input 1x1 ",
+   "input.theme-option__input 1x1 ",
+   "input.theme-option__input 1x1 "
+  ],
+  "small44": 9,
+  "total": 28,
+  "noname": [],
+  "hscroll": false,
+  "h1": 1,
+  "lang": "ru",
+  "skip": true,
+  "imgNoAlt": 0
+ },
+ "app_login|375|dark": {
+  "small24": [],
+  "small44": 2,
+  "total": 31,
+  "noname": [],
+  "hscroll": false,
+  "h1": 1,
+  "lang": "ru",
+  "skip": true,
+  "imgNoAlt": 0
+ },
+ "app_register|375|dark": {
+  "small24": [],
+  "small44": 2,
+  "total": 31,
+  "noname": [],
+  "hscroll": false,
+  "h1": 1,
+  "lang": "ru",
+  "skip": true,
+  "imgNoAlt": 0
+ },
+ "en_app_dashboard|375|dark": {
+  "small24": [],
+  "small44": 2,
+  "total": 31,
+  "noname": [],
+  "hscroll": false,
+  "h1": 1,
+  "lang": "en",
+  "skip": true,
+  "imgNoAlt": 0
+ },
+ "en_app_editor|375|dark": {
+  "small24": [],
+  "small44": 2,
+  "total": 51,
+  "noname": [],
+  "hscroll": true,
+  "h1": 1,
+  "lang": "en",
+  "skip": true,
+  "imgNoAlt": 0
+ },
+ "index|375|dark": {
+  "small24": [
+   "input.burger__input 1x1 ",
+   "input.theme__input 1x1 ",
+   "input.form__checkbox 23x23 "
+  ],
+  "small44": 4,
+  "total": 34,
+  "noname": [],
+  "hscroll": false,
+  "h1": 1,
+  "lang": "ru",
+  "skip": true,
+  "imgNoAlt": 0
+ },
+ "app_welcome|768|light": {
+  "small24": [
+   "a. 74x19 Пропустить"
+  ],
+  "small44": 2,
+  "total": 22,
+  "noname": [],
+  "hscroll": false,
+  "h1": 1,
+  "lang": "ru",
+  "skip": true,
+  "imgNoAlt": 0
+ },
+ "app_dashboard|768|light": {
+  "small24": [],
+  "small44": 1,
+  "total": 32,
+  "noname": [],
+  "hscroll": false,
+  "h1": 1,
+  "lang": "ru",
+  "skip": true,
+  "imgNoAlt": 0
+ },
+ "app_editor|768|light": {
+  "small24": [],
+  "small44": 1,
+  "total": 52,
+  "noname": [],
+  "hscroll": false,
+  "h1": 1,
+  "lang": "ru",
+  "skip": true,
+  "imgNoAlt": 0
+ },
+ "app_settings|768|light": {
+  "small24": [
+   "input.switch__input 40x24 ",
+   "input.switch__input 40x24 ",
+   "input.switch__input 40x24 ",
+   "input.switch__input 40x24 ",
+   "input.theme-option__input 1x1 ",
+   "input.theme-option__input 1x1 ",
+   "input.theme-option__input 1x1 "
+  ],
+  "small44": 8,
+  "total": 29,
+  "noname": [],
+  "hscroll": false,
+  "h1": 1,
+  "lang": "ru",
+  "skip": true,
+  "imgNoAlt": 0
+ },
+ "app_login|768|light": {
+  "small24": [],
+  "small44": 1,
+  "total": 32,
+  "noname": [],
+  "hscroll": false,
+  "h1": 1,
+  "lang": "ru",
+  "skip": true,
+  "imgNoAlt": 0
+ },
+ "app_register|768|light": {
+  "small24": [],
+  "small44": 1,
+  "total": 32,
+  "noname": [],
+  "hscroll": false,
+  "h1": 1,
+  "lang": "ru",
+  "skip": true,
+  "imgNoAlt": 0
+ },
+ "en_app_dashboard|768|light": {
+  "small24": [],
+  "small44": 1,
+  "total": 32,
+  "noname": [],
+  "hscroll": false,
+  "h1": 1,
+  "lang": "en",
+  "skip": true,
+  "imgNoAlt": 0
+ },
+ "en_app_editor|768|light": {
+  "small24": [],
+  "small44": 1,
+  "total": 52,
+  "noname": [],
+  "hscroll": false,
+  "h1": 1,
+  "lang": "en",
+  "skip": true,
+  "imgNoAlt": 0
+ },
+ "index|768|light": {
+  "small24": [
+   "input.theme__input 1x1 ",
+   "input.form__checkbox 24x24 "
+  ],
+  "small44": 4,
+  "total": 42,
+  "noname": [],
+  "hscroll": false,
+  "h1": 1,
+  "lang": "ru",
+  "skip": true,
+  "imgNoAlt": 0
+ },
+ "app_welcome|768|dark": {
+  "small24": [
+   "a. 74x19 Пропустить"
+  ],
+  "small44": 2,
+  "total": 22,
+  "noname": [],
+  "hscroll": false,
+  "h1": 1,
+  "lang": "ru",
+  "skip": true,
+  "imgNoAlt": 0
+ },
+ "app_dashboard|768|dark": {
+  "small24": [],
+  "small44": 1,
+  "total": 32,
+  "noname": [],
+  "hscroll": false,
+  "h1": 1,
+  "lang": "ru",
+  "skip": true,
+  "imgNoAlt": 0
+ },
+ "app_editor|768|dark": {
+  "small24": [],
+  "small44": 1,
+  "total": 52,
+  "noname": [],
+  "hscroll": false,
+  "h1": 1,
+  "lang": "ru",
+  "skip": true,
+  "imgNoAlt": 0
+ },
+ "app_settings|768|dark": {
+  "small24": [
+   "input.switch__input 40x24 ",
+   "input.switch__input 40x24 ",
+   "input.switch__input 40x24 ",
+   "input.switch__input 40x24 ",
+   "input.theme-option__input 1x1 ",
+   "input.theme-option__input 1x1 ",
+   "input.theme-option__input 1x1 "
+  ],
+  "small44": 8,
+  "total": 29,
+  "noname": [],
+  "hscroll": false,
+  "h1": 1,
+  "lang": "ru",
+  "skip": true,
+  "imgNoAlt": 0
+ },
+ "app_login|768|dark": {
+  "small24": [],
+  "small44": 1,
+  "total": 32,
+  "noname": [],
+  "hscroll": false,
+  "h1": 1,
+  "lang": "ru",
+  "skip": true,
+  "imgNoAlt": 0
+ },
+ "app_register|768|dark": {
+  "small24": [],
+  "small44": 1,
+  "total": 32,
+  "noname": [],
+  "hscroll": false,
+  "h1": 1,
+  "lang": "ru",
+  "skip": true,
+  "imgNoAlt": 0
+ },
+ "en_app_dashboard|768|dark": {
+  "small24": [],
+  "small44": 1,
+  "total": 32,
+  "noname": [],
+  "hscroll": false,
+  "h1": 1,
+  "lang": "en",
+  "skip": true,
+  "imgNoAlt": 0
+ },
+ "en_app_editor|768|dark": {
+  "small24": [],
+  "small44": 1,
+  "total": 52,
+  "noname": [],
+  "hscroll": false,
+  "h1": 1,
+  "lang": "en",
+  "skip": true,
+  "imgNoAlt": 0
+ },
+ "index|768|dark": {
+  "small24": [
+   "input.theme__input 1x1 ",
+   "input.form__checkbox 24x24 "
+  ],
+  "small44": 4,
+  "total": 42,
+  "noname": [],
+  "hscroll": false,
+  "h1": 1,
+  "lang": "ru",
+  "skip": true,
+  "imgNoAlt": 0
+ },
+ "app_welcome|1366|light": {
+  "small24": [
+   "a. 81x20 Пропустить"
+  ],
+  "small44": 1,
+  "total": 22,
+  "noname": [],
+  "hscroll": false,
+  "h1": 1,
+  "lang": "ru",
+  "skip": true,
+  "imgNoAlt": 0
+ },
+ "app_dashboard|1366|light": {
+  "small24": [],
+  "small44": 0,
+  "total": 32,
+  "noname": [],
+  "hscroll": false,
+  "h1": 1,
+  "lang": "ru",
+  "skip": true,
+  "imgNoAlt": 0
+ },
+ "app_editor|1366|light": {
+  "small24": [],
+  "small44": 1,
+  "total": 63,
+  "noname": [],
+  "hscroll": false,
+  "h1": 1,
+  "lang": "ru",
+  "skip": true,
+  "imgNoAlt": 0
+ },
+ "app_settings|1366|light": {
+  "small24": [
+   "input.theme-option__input 1x1 ",
+   "input.theme-option__input 1x1 ",
+   "input.theme-option__input 1x1 "
+  ],
+  "small44": 7,
+  "total": 29,
+  "noname": [],
+  "hscroll": false,
+  "h1": 1,
+  "lang": "ru",
+  "skip": true,
+  "imgNoAlt": 0
+ },
+ "app_login|1366|light": {
+  "small24": [],
+  "small44": 0,
+  "total": 32,
+  "noname": [],
+  "hscroll": false,
+  "h1": 1,
+  "lang": "ru",
+  "skip": true,
+  "imgNoAlt": 0
+ },
+ "app_register|1366|light": {
+  "small24": [],
+  "small44": 0,
+  "total": 32,
+  "noname": [],
+  "hscroll": false,
+  "h1": 1,
+  "lang": "ru",
+  "skip": true,
+  "imgNoAlt": 0
+ },
+ "en_app_dashboard|1366|light": {
+  "small24": [],
+  "small44": 0,
+  "total": 32,
+  "noname": [],
+  "hscroll": false,
+  "h1": 1,
+  "lang": "en",
+  "skip": true,
+  "imgNoAlt": 0
+ },
+ "en_app_editor|1366|light": {
+  "small24": [],
+  "small44": 1,
+  "total": 63,
+  "noname": [],
+  "hscroll": false,
+  "h1": 1,
+  "lang": "en",
+  "skip": true,
+  "imgNoAlt": 0
+ },
+ "index|1366|light": {
+  "small24": [
+   "input.theme__input 1x1 "
+  ],
+  "small44": 2,
+  "total": 42,
+  "noname": [],
+  "hscroll": false,
+  "h1": 1,
+  "lang": "ru",
+  "skip": true,
+  "imgNoAlt": 0
+ },
+ "app_welcome|1366|dark": {
+  "small24": [
+   "a. 81x20 Пропустить"
+  ],
+  "small44": 1,
+  "total": 22,
+  "noname": [],
+  "hscroll": false,
+  "h1": 1,
+  "lang": "ru",
+  "skip": true,
+  "imgNoAlt": 0
+ },
+ "app_dashboard|1366|dark": {
+  "small24": [],
+  "small44": 0,
+  "total": 32,
+  "noname": [],
+  "hscroll": false,
+  "h1": 1,
+  "lang": "ru",
+  "skip": true,
+  "imgNoAlt": 0
+ },
+ "app_editor|1366|dark": {
+  "small24": [],
+  "small44": 1,
+  "total": 63,
+  "noname": [],
+  "hscroll": false,
+  "h1": 1,
+  "lang": "ru",
+  "skip": true,
+  "imgNoAlt": 0
+ },
+ "app_settings|1366|dark": {
+  "small24": [
+   "input.theme-option__input 1x1 ",
+   "input.theme-option__input 1x1 ",
+   "input.theme-option__input 1x1 "
+  ],
+  "small44": 7,
+  "total": 29,
+  "noname": [],
+  "hscroll": false,
+  "h1": 1,
+  "lang": "ru",
+  "skip": true,
+  "imgNoAlt": 0
+ },
+ "app_login|1366|dark": {
+  "small24": [],
+  "small44": 0,
+  "total": 32,
+  "noname": [],
+  "hscroll": false,
+  "h1": 1,
+  "lang": "ru",
+  "skip": true,
+  "imgNoAlt": 0
+ },
+ "app_register|1366|dark": {
+  "small24": [],
+  "small44": 0,
+  "total": 32,
+  "noname": [],
+  "hscroll": false,
+  "h1": 1,
+  "lang": "ru",
+  "skip": true,
+  "imgNoAlt": 0
+ },
+ "en_app_dashboard|1366|dark": {
+  "small24": [],
+  "small44": 0,
+  "total": 32,
+  "noname": [],
+  "hscroll": false,
+  "h1": 1,
+  "lang": "en",
+  "skip": true,
+  "imgNoAlt": 0
+ },
+ "en_app_editor|1366|dark": {
+  "small24": [],
+  "small44": 1,
+  "total": 63,
+  "noname": [],
+  "hscroll": false,
+  "h1": 1,
+  "lang": "en",
+  "skip": true,
+  "imgNoAlt": 0
+ },
+ "index|1366|dark": {
+  "small24": [
+   "input.theme__input 1x1 "
+  ],
+  "small44": 2,
+  "total": 42,
+  "noname": [],
+  "hscroll": false,
+  "h1": 1,
+  "lang": "ru",
+  "skip": true,
+  "imgNoAlt": 0
+ }
+}

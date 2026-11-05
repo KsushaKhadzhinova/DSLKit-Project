@@ -31,14 +31,14 @@
 | `js/storage/localStorage.js` | Обёртки чтения и записи, кэш с сроком жизни, история запусков |
 | `js/utils/dataParser.js` | Разбор DSL, построение DOT, ключ кэша, очистка SVG |
 | `js/engines/engines.js`, `js/engines/local-engine.js` | Список движков генерации и собственный движок, который рисует в браузере |
-| `js/components/diagram-runner.js` | Выбор движка, кнопки, индикатор загрузки, сообщения об ошибках, офлайн-режим |
+| `js/components/diagram-runner.js` | Выбор движка из настроек, кнопки, индикатор загрузки, сообщения об ошибках, офлайн-режим |
 | `js/script.js` | Точка входа, подключает компонент вместе с остальными |
 
 ### 3.2 Сервис запросов
 
 Функция `createApi` принимает конфигурацию, функцию `fetch` и функцию паузы, поэтому в тестах сеть заменяется подставными ответами. Каждая попытка запроса получает свой `AbortController`: он срабатывает по таймауту в десять секунд или по сигналу вызывающего кода. Ошибки приводятся к классу `ApiError` с видом `network`, `timeout`, `aborted`, `http` или `invalid`, и по виду код выбирает сообщение для пользователя.
 
-Сетевые ошибки, таймауты, код 429 и коды 5xx повторяются до трёх раз с паузой, которая растёт вдвое после каждой попытки, а при коде 429 учитывается заголовок `Retry-After`. Ошибки клиента, например 400 и 404, не повторяются. Одинаковые параллельные запросы без сигнала отмены используют один общий Promise. Функция `renderDiagram` дополнительно проверяет, что в ответе есть разметка `svg`, иначе возвращает ошибку вида `invalid`.
+Сетевые ошибки, код 429 и коды 5xx повторяются до трёх раз с паузой, которая растёт вдвое после каждой попытки, а при коде 429 учитывается заголовок `Retry-After`. Таймаут не повторяется: попытка уже израсходовала весь лимит времени, поэтому ошибка вида `timeout` возвращается сразу. Ошибки клиента, например 400 и 404, не повторяются. Одинаковые параллельные запросы без сигнала отмены используют один общий Promise. Функция `renderDiagram` дополнительно проверяет, что в ответе есть разметка `svg`, иначе возвращает ошибку вида `invalid`.
 
 ### 3.3 Хранилище
 
@@ -48,11 +48,11 @@
 
 Модуль `dataParser.js` читает код из редактора: заголовок `diagram`, блоки `box` с портами `input`, `control`, `output`, `mechanism` и стрелки `arrow`. Незнакомые строки не останавливают запуск, а попадают в список пропущенных. Из модели строится текст Graphviz DOT с экранированием кавычек, обратных косых черт и переводов строк. Ответ сервера считается недоверенным, поэтому перед показом из SVG удаляются теги `script`, `foreignObject`, `style`, `use`, `image` и анимации, атрибуты `on*`, небезопасные стили и любые ссылки `href`, кроме внутренних и `http(s)`. Перед проверкой ссылки из неё убираются управляющие символы, потому что браузеры их игнорируют.
 
-Генерация не ограничена картинкой от сервера. Список движков показан в таблице 1: три движка работают через Kroki (Graphviz, Mermaid, PlantUML), а собственный движок `local-engine.js` сам размещает блоки по столбцам, рисует стрелки, подписи и всплывающие подсказки и возвращает живой SVG с отдельными элементами `g`, `rect` и `text`. Он не отправляет запросов, поэтому работает без интернета. Для остальных движков из той же модели строятся тексты DOT, Mermaid и PlantUML, а выбор движка сохраняется в LocalStorage.
+Генерация не ограничена картинкой от сервера. Движок выбирается на странице настроек (поле «Движок генерации диаграмм») и читается при каждом запуске. Три движка работают через Kroki (Graphviz, Mermaid, PlantUML), а собственный движок `local-engine.js` сам размещает блоки по столбцам, рисует стрелки, подписи и всплывающие подсказки и возвращает живой SVG с отдельными элементами `g`, `rect` и `text`. Он не отправляет запросов, поэтому работает без интернета. Для остальных движков из той же модели строятся тексты DOT, Mermaid и PlantUML, а выбор хранится в настройках сайта в LocalStorage.
 
 ### 3.5 Интеграция с интерфейсом
 
-На холсте редактора добавлены кнопки «Нарисовать через Kroki» и «Обновить с сервера», строка состояния с `aria-live`, строка о доступности сервиса и список последних запусков. Пока идёт запрос, на холсте стоит `aria-busy`, а в строке состояния показан текст загрузки; кнопки остаются доступными, чтобы фокус клавиатуры не терялся, а новый запуск отменяет предыдущий запрос. Страница сама запускает диаграмму при открытии, а список выбора движка перерисовывает её при смене значения. Успешный результат показан на рисунке 1.
+Запуск идёт одной кнопкой «Запустить» в шапке редактора, а пункт «Обновить с сервера» лежит в меню «⋯». Движок отрисовки выбирается на странице настроек, а его название выводится в строке состояния внизу редактора. На холсте добавлены строка состояния с `aria-live`, строка о доступности сервиса и список последних запусков. Пока идёт запрос, на холсте стоит `aria-busy`, а в строке состояния показан текст загрузки; кнопки остаются доступными, чтобы фокус клавиатуры не терялся, а новый запуск отменяет предыдущий запрос. Страница сама запускает диаграмму при открытии, а новый движок, выбранный в настройках, применяется со следующего запуска. Успешный результат показан на рисунке 1.
 
 ![Диаграмма, полученная от Kroki](figures/kroki-diagram.jpg)
 
@@ -72,17 +72,39 @@
 
 ### 3.7 Тестирование
 
-Для сервиса запросов, хранилища, разбора данных и компонента написаны автоматические тесты. Сеть заменяется подставным `fetch`, поэтому тесты проверяют успех, коды 404, 429 и 503, повторы с паузами, таймаут, отмену, объединение одинаковых запросов, неверный ответ и повреждённое хранилище. Покрытие всех файлов JavaScript равно 100 процентов по строкам, ветвлениям и функциям. Интеграция дополнительно проверена в браузере Chrome с настоящим сервисом Kroki: диаграмма получена, запись попала в LocalStorage, офлайн-режим показал сохранённую копию. Снимки вкладок Network и Application и проверка в Firefox и Edge остаются задачей на этап приёмки.
+Для сервиса запросов, хранилища, разбора данных и компонента написаны автоматические тесты. Сеть заменяется подставным `fetch`, поэтому тесты проверяют успех, коды 404, 429 и 503, повторы с паузами, таймаут, отмену, объединение одинаковых запросов, неверный ответ и повреждённое хранилище. Покрытие всех файлов JavaScript равно 100 процентов по строкам, ветвлениям и функциям. Интеграция дополнительно проверена в браузере Chrome с настоящим сервисом Kroki: диаграмма получена, запись попала в LocalStorage, офлайн-режим показал сохранённую копию. Отдельно без браузера проверено поведение при таймауте скриптом `tools/evidence/l6-timeout.mjs`: он вызывает клиент `createApi` с диаграммой Mermaid и считает вызовы `fetch`. Сервис kroki.io был доступен: обычный запрос выполнен за один вызов, а запрос с таймаутом 1 мс дал ровно один вызов и ошибку `timeout` с текстом «Request timed out» за 13 мс. Код 5xx настоящий сервис по требованию не выдаёт, поэтому остальные случаи проверены на локальной заглушке: при зависшем ответе и таймауте 300 мс получен один запрос и ошибка `timeout` за 335 мс; при двух ответах 503 и затем 200 сделано три запроса с паузами 50 и 100 мс, результат получен; при постоянном 503 сделано четыре запроса (первый и три повтора) с паузами 50, 100 и 200 мс, затем ошибка `http` со статусом 503. Снимки вкладок Network и Application и проверка в Firefox и Edge остаются задачей на этап приёмки.
 
 ### 3.8 Фиксация изменений
 
 Коммит с реализацией: https://github.com/KsushaKhadzhinova/DSLKit-Project/commit/2102742. Сообщение коммита: `feat: integrate external API, caching and localStorage for SaaS diagram editor`.
 
-## 4 Ответы на контрольные вопросы
+### 3.9 Проверка в DevTools
 
-25. **Rate limiting.** Это ограничение числа запросов в единицу времени на стороне сервера. Клиент учитывает его кэшем, отменой лишних запросов, повтором с паузой и показом сообщения при коде 429.
-26. **Защита от дублирования.** Активные запросы хранятся в `Map` по ключу из метода, адреса и тела, и повторный вызов получает тот же Promise. После завершения запись удаляется, а запросы с сигналом отмены не объединяются.
-27. **Параметры в строке запроса.** Параметры собирает `URLSearchParams`, например `/items?q=order&sort=name&page=2&limit=20`. В `fetchData` они передаются объектом `params` и кодируются автоматически.
+Работа проверена в Chrome 155: запросы на вкладке Network, хранилище на панели Application. Ключи хранилища названы по смыслу данных (`diagram_cache`, `run_history`) вместо названий `cached_products` и `search_history` из примера задания, потому что проект хранит диаграммы, а не товары.
+
+Запрос к сервису показан на рисунке 3: метод POST на адрес kroki.io/graphviz/svg, статус 200 и тип ответа image/svg+xml.
+
+![Снимок DevTools](figures/devtools-01-kroki-request.png)
+
+Рисунок 3 – Вкладка Network: запрос к Kroki
+
+Отправленное тело запроса показано на рисунке 4: это текст DOT, построенный из DSL.
+
+![Снимок DevTools](figures/devtools-02-kroki-payload.png)
+
+Рисунок 4 – Вкладка Payload: текст DOT, отправленный в Kroki
+
+Хранилище показано на рисунке 5: кэш диаграмм dslkit.diagram_cache и журнал запусков dslkit.run_history, и ещё вкладка с режимом редактора.
+
+![Снимок DevTools](figures/devtools-03-local-storage.png)
+
+Рисунок 5 – Панель Application: LocalStorage редактора
+
+Состояние ошибки показано на рисунке 6: при недоступном сервисе и пустом кэше редактор сообщает о проблеме и не теряет рабочую область.
+
+![Снимок DevTools](figures/error-no-cache.png)
+
+Рисунок 6 – Редактор при недоступном сервисе и пустом кэше
 
 ## Заключение
 
@@ -96,6 +118,9 @@ export const API_CONFIG = {
   baseUrl: 'https://kroki.io',
   diagramType: 'graphviz',
   outputFormat: 'svg',
+  // The own rendering API of DSLKit lives on the same server as the pages.
+  ownBaseUrl: '',
+  ownPath: '/api/render',
   timeoutMs: 10000,
   retries: 3,
   retryDelayMs: 300,
@@ -120,7 +145,7 @@ export class ApiError extends Error {
 
 const defaultSleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-const isRetryable = (error) => error.kind === 'network' || error.kind === 'timeout' || error.status === 429 || (error.status !== null && error.status >= 500);
+const isRetryable = (error) => error.kind === 'network' || error.status === 429 || (error.status !== null && error.status >= 500);
 
 const retryAfterMs = (response, fallback, max) => {
   const seconds = Number(response?.headers?.get?.('Retry-After'));
@@ -163,9 +188,12 @@ export const createApi = ({ config = API_CONFIG, fetchImpl = globalThis.fetch?.b
     return response;
   };
 
-  // Retries network failures, timeouts, 429 and 5xx up to `retries` times with exponential backoff.
-  const send = async (path, { method = 'GET', body, headers = {}, signal, timeoutMs = config.timeoutMs, retries = config.retries, parse = 'text' } = {}) => {
-    const url = `${config.baseUrl}${path}`;
+  // Retries network failures, 429 and 5xx (a timeout is final, it already took the whole time limit) up to `retries` times with exponential backoff.
+  const send = async (
+    path,
+    { method = 'GET', body, headers = {}, baseUrl, signal, timeoutMs = config.timeoutMs, retries = config.retries, parse = 'text' } = {},
+  ) => {
+    const url = `${baseUrl ?? config.baseUrl}${path}`;
     const tryOnce = async (attemptNumber) => {
       try {
         const response = await attempt(url, { method, body, headers, signal, timeoutMs });
@@ -178,6 +206,7 @@ export const createApi = ({ config = API_CONFIG, fetchImpl = globalThis.fetch?.b
         if (!isRetryable(error) || attemptNumber >= retries) throw error;
         const backoff = Math.min(config.retryDelayMs * 2 ** attemptNumber, config.maxRetryDelayMs);
         await sleep(retryAfterMs(error.response, backoff, config.maxRetryDelayMs));
+        if (signal?.aborted) throw new ApiError('Request was cancelled', { kind: 'aborted' });
         return tryOnce(attemptNumber + 1);
       }
     };
@@ -205,8 +234,16 @@ export const createApi = ({ config = API_CONFIG, fetchImpl = globalThis.fetch?.b
   const checkHealth = (options = {}) => fetchData('/health', { ...options, parse: 'json' });
 
   // Sends diagram source (Graphviz DOT) and returns the SVG text; anything else is rejected as an unexpected answer.
+  // The engine type `dslkit` goes to the own server (JSON in, SVG out); any other type is a Kroki endpoint.
   const renderDiagram = async (source, { type = config.diagramType, format = config.outputFormat, ...options } = {}) => {
-    const svg = await postData(`/${type}/${format}`, source, { ...options, headers: { 'Content-Type': 'text/plain' } });
+    const svg =
+      type === 'dslkit'
+        ? await postData(config.ownPath, JSON.stringify({ source }), {
+            ...options,
+            baseUrl: config.ownBaseUrl,
+            headers: { 'Content-Type': 'application/json', Accept: 'image/svg+xml' },
+          })
+        : await postData(`/${type}/${format}`, source, { ...options, headers: { 'Content-Type': 'text/plain' } });
     if (!/<svg[\s>]/i.test(svg)) throw new ApiError('The service did not return a diagram', { kind: 'invalid' });
     return svg;
   };
@@ -225,7 +262,6 @@ import { createMemoryBackend, createStorage, getStorage } from '../utils/storage
 export const STORAGE_KEYS = {
   diagramCache: 'diagram_cache',
   history: 'run_history',
-  favorites: 'favorites',
 };
 
 const MAX_CACHE_ENTRIES = 20;
@@ -247,7 +283,7 @@ export const createCache = ({ storage = createStorage(createMemoryBackend()), tt
   return {
     get(key) {
       const entry = readAll()[key];
-      if (!isPlainObject(entry) || typeof entry.savedAt !== 'number') return null;
+      if (!isPlainObject(entry) || !Number.isFinite(entry.savedAt)) return null;
       return { data: entry.data, savedAt: entry.savedAt, expired: now() - entry.savedAt > ttlMs };
     },
     set(key, data) {
@@ -271,6 +307,7 @@ export const createHistory = ({ storage = createStorage(createMemoryBackend()), 
   return {
     list: read,
     add(entry) {
+      if (!isPlainObject(entry)) return read();
       const next = [entry, ...read().filter((item) => item.key !== entry.key)].slice(0, limit);
       storage.set(STORAGE_KEYS.history, next);
       return next;
@@ -286,14 +323,15 @@ export const createHistory = ({ storage = createStorage(createMemoryBackend()), 
 
 ```js
 const PORTS = ['input', 'control', 'output', 'mechanism'];
-const BOX_PATTERN = /^box\s+(\S+)\s+"([^"]*)"\s*\{?\s*$/;
+const BOX_PATTERN = /^box\s+(\S+)\s+"([^"]*)"((?:\s+pos=\S+|\s*\{)*)\s*$/;
 const PORT_PATTERN = /^(input|control|output|mechanism)\s*:\s*(.+)$/;
 const ARROW_PATTERN = /^arrow\s+(\S+?)(?:\.(\w+))?\s*->\s*(\S+?)(?:\.(\w+))?$/;
-const DIAGRAM_PATTERN = /^diagram\s+(\S+)(?:\s+"([^"]*)")?$/;
+// The title runs to the last quote of the line, so quotes inside it do not break the header.
+const DIAGRAM_PATTERN = /^diagram\s+(\S+)(?:\s+"(.*)")?$/;
 
 // Reads the DSL shown in the editor. Lines it does not understand are reported instead of stopping the run.
 export const parseDsl = (source) => {
-  const model = { type: 'diagram', title: '', boxes: [], arrows: [], skipped: [] };
+  const model = { type: 'diagram', title: '', boxes: [], arrows: [], skipped: [], boxLines: [], arrowLines: [] };
   let box = null;
   String(source)
     .split(/\r?\n/)
@@ -305,12 +343,15 @@ export const parseDsl = (source) => {
         model.type = match[1];
         model.title = match[2] ?? '';
       } else if ((match = BOX_PATTERN.exec(line))) {
-        box = { id: match[1], name: match[2], ports: Object.fromEntries(PORTS.map((port) => [port, []])) };
+        const pos = /pos=(\S+)/.exec(match[3])?.[1];
+        box = { id: match[1], name: match[2], ports: Object.fromEntries(PORTS.map((port) => [port, []])), ...(pos === undefined ? {} : { pos }) };
         model.boxes.push(box);
+        model.boxLines.push(index + 1);
       } else if ((match = PORT_PATTERN.exec(line)) && box) {
         box.ports[match[1]].push(match[2].trim());
       } else if ((match = ARROW_PATTERN.exec(line))) {
         model.arrows.push({ from: match[1], fromPort: match[2] ?? '', to: match[3], toPort: match[4] ?? '' });
+        model.arrowLines.push(index + 1);
       } else if (line !== '}') {
         model.skipped.push(index + 1);
       }
@@ -355,7 +396,7 @@ export const toMermaid = (model) => {
   const name = (id) => `n${model.boxes.findIndex((box) => box.id === id)}`;
   const text = (value) => String(value).replace(/"/g, '#quot;');
   const lines = ['flowchart LR'];
-  model.boxes.forEach((box) => lines.push(`  ${name(box.id)}["${[text(`${box.id} ${box.name}`), ...detailLines(box).map(text)].join('<br/>')}"]`));
+  model.boxes.forEach((box, index) => lines.push(`  n${index}["${[text(`${box.id} ${box.name}`), ...detailLines(box).map(text)].join('<br/>')}"]`));
   knownArrows(model).forEach((arrow) => {
     const label = edgeLabel(arrow);
     lines.push(`  ${name(arrow.from)} -->${label ? `|"${text(label)}"|` : ''} ${name(arrow.to)}`);
@@ -369,7 +410,7 @@ export const toPlantUml = (model) => {
   const text = (value) => String(value).replace(/"/g, "'").replace(/\r?\n/g, ' ');
   const lines = ['@startuml', 'left to right direction'];
   if (model.title) lines.push(`title ${text(model.title)}`);
-  model.boxes.forEach((box) => lines.push(`rectangle "${[text(`${box.id} ${box.name}`), ...detailLines(box).map(text)].join('\\n')}" as ${name(box.id)}`));
+  model.boxes.forEach((box, index) => lines.push(`rectangle "${[text(`${box.id} ${box.name}`), ...detailLines(box).map(text)].join('\\n')}" as n${index}`));
   knownArrows(model).forEach((arrow) => {
     const label = edgeLabel(arrow);
     lines.push(`${name(arrow.from)} --> ${name(arrow.to)}${label ? ` : ${text(label)}` : ''}`);
@@ -436,8 +477,12 @@ export const sanitizeSvg = (svgText, parser) => {
 import { renderDiagram, checkHealth } from '../api/apiService.js';
 import { API_CONFIG } from '../api/config.js';
 import { createCache, createHistory } from '../storage/localStorage.js';
-import { ENGINES, findEngine } from '../engines/engines.js';
-import { parseDsl, sanitizeSvg, sourceKey } from '../utils/dataParser.js';
+import { engineForFormat, findEngine } from '../engines/engines.js';
+import { notationShort, parseDiagram, pickFormat } from '../notations/index.js';
+import { ui } from '../notations/messages.js';
+import { sanitizeSvg, sourceKey } from '../utils/dataParser.js';
+import { createTranslator } from '../utils/i18n.js';
+import { showProblems } from './problems-panel.js';
 
 const MESSAGES = {
   empty: 'В редакторе нет кода диаграммы.',
@@ -471,24 +516,27 @@ export const initDiagramRunner = ({
   autoRun = true,
 } = {}) => {
   const page = root.querySelector('.app-page--editor');
-  const renderButton = page?.querySelector('.canvas__render');
-  if (!renderButton) return null;
+  const status = page?.querySelector('.canvas__status');
+  if (!status) return null;
+  const engineLabel = page.querySelector('.editor-status__engine');
 
   const refreshButton = page.querySelector('.canvas__refresh');
-  const status = page.querySelector('.canvas__status');
   const remote = page.querySelector('.canvas__remote');
   const local = page.querySelector('.canvas__diagram');
   const service = page.querySelector('.canvas__service');
   const historyList = page.querySelector('.canvas__history');
-  const engineSelect = page.querySelector('.canvas__engine');
   const canvas = page.querySelector('.canvas');
   const parser = new root.defaultView.DOMParser();
   const cache = createCache({ storage, ttlMs: API_CONFIG.cacheTtlMs, now });
   const history = createHistory({ storage });
   let controller = null;
 
+  const tr = createTranslator(root);
+  const lang = root.documentElement.lang === 'en' ? 'en' : 'ru';
+  // The plain "ready" note is only for screen readers: a sighted user sees the drawing. Every other note (saved copy, loading, errors) stays visible.
   const setStatus = (text) => {
-    status.textContent = text;
+    status.textContent = tr(text);
+    status.dataset.state = text === 'Диаграмма готова.' ? 'ready' : 'note';
   };
   const setBusy = (busy) => {
     canvas.setAttribute('aria-busy', String(busy));
@@ -496,13 +544,23 @@ export const initDiagramRunner = ({
 
   const source = () => [...page.querySelectorAll('.code__line code')].map((line) => line.textContent).join('\n');
 
-  const currentEngine = () => findEngine(engineSelect?.value);
+  // The engine is chosen on the settings page and read again on every run.
+  const currentEngine = () => {
+    const saved = storage.get('settings', {});
+    return findEngine(saved !== null && typeof saved === 'object' ? saved['diagram-engine'] : undefined);
+  };
 
-  const show = (svgText, note) => {
+  // The engine is chosen on the settings page; the footer of the editor only names the one that will draw.
+  const showAction = () => {
+    if (engineLabel) engineLabel.textContent = tr(currentEngine().label);
+  };
+
+  const show = (svgText, note, engine = currentEngine()) => {
     const svg = sanitizeSvg(svgText, parser);
     if (!svg) return false;
     svg.setAttribute('role', 'img');
-    svg.setAttribute('aria-label', `Диаграмма: ${currentEngine().label}`);
+    svg.setAttribute('aria-label', tr(`Диаграмма: ${tr(engine.label)}`));
+    remote.dataset.engine = engine.id;
     remote.replaceChildren(root.importNode(svg, true));
     remote.hidden = false;
     local?.setAttribute('hidden', '');
@@ -520,7 +578,7 @@ export const initDiagramRunner = ({
         button.type = 'button';
         button.className = 'button button--quiet canvas__history-item';
         button.dataset.key = entry.key;
-        button.textContent = `${entry.title || 'Без названия'} · ${formatTime(entry.at)}`;
+        button.textContent = `${entry.title || tr('Без названия')} · ${formatTime(entry.at)}`;
         item.append(button);
         return item;
       }),
@@ -528,25 +586,38 @@ export const initDiagramRunner = ({
     historyList.hidden = items.length === 0;
   };
 
-  const run = async ({ refresh = false } = {}) => {
-    const model = parseDsl(source());
-    if (model.boxes.length === 0) {
+  const runUnsafe = async ({ refresh = false } = {}) => {
+    showAction();
+    const model = parseDiagram(source());
+    const short = model.notation ? notationShort(model) : '?';
+    showProblems({ root, page, problems: model.problems, lang, file: page.querySelector('.editor-tabs__tab--active span')?.textContent.trim() ?? 'order.dsl' });
+    page.querySelectorAll('.editor-status__type').forEach((node) => (node.textContent = short));
+    page.querySelectorAll('[data-notation-label]').forEach((node) => (node.textContent = ui('notation', { name: short }, lang)));
+    if (model.empty) {
       setStatus(MESSAGES.empty);
       return false;
     }
-    const engine = currentEngine();
-    const input = engine.build(model);
+    const wanted = currentEngine();
+    const viaKroki = wanted.type && wanted.type !== 'dslkit';
+    const format = viaKroki ? pickFormat(model, wanted.type) : null;
+    const engine = viaKroki && format !== wanted.type ? engineForFormat(format) : wanted;
+    const fallback = engine === wanted ? '' : ` ${ui('fallback', { label: tr(engine.label) }, lang)}`;
+    const input = engine.build(model, source());
     controller?.abort();
     // The own engine draws in the browser: no request, no cache, and it works offline.
     if (!engine.type) {
       setBusy(false);
-      return show(input, 'Диаграмма построена собственным движком в браузере.');
+      const drawn = show(input, 'Диаграмма готова.', engine);
+      if (!drawn) status.textContent = ui('drawFailed', {}, lang);
+      return drawn;
     }
     const key = sourceKey(`${engine.id}
 ${input}`);
     const cached = cache.get(key);
 
-    if (cached && !cached.expired && !refresh && show(cached.data, `Показана сохранённая копия от ${formatTime(cached.savedAt)}.`)) {
+    if (cached && !cached.expired && !refresh && show(cached.data, `Показана сохранённая копия от ${formatTime(cached.savedAt)}.`, engine)) {
+      status.textContent += fallback;
+      if (fallback) status.dataset.state = 'note';
       setBusy(false);
       return true;
     }
@@ -560,7 +631,9 @@ ${input}`);
       if (!isOnline()) throw Object.assign(new Error('offline'), { kind: 'offline' });
       const svgText = await api.renderDiagram(input, { signal, type: engine.type });
       if (signal.aborted) throw Object.assign(new Error('cancelled'), { kind: 'aborted' });
-      if (!show(svgText, `Диаграмма получена от сервиса Kroki (${engine.type}).`)) throw Object.assign(new Error('invalid'), { kind: 'invalid' });
+      if (!show(svgText, 'Диаграмма готова.', engine)) throw Object.assign(new Error('invalid'), { kind: 'invalid' });
+      status.textContent += fallback;
+      if (fallback) status.dataset.state = 'note';
       cache.set(key, svgText);
       history.add({ key, title: model.title, at: now() });
       renderHistory();
@@ -568,8 +641,14 @@ ${input}`);
     } catch (error) {
       if (error.kind !== 'aborted') {
         logger.error('DSLKit: не удалось получить диаграмму', error.kind, error.status ?? '');
-        const shown = cached && show(cached.data, `Кэшированные данные от ${formatTime(cached.savedAt)}. ${errorMessage(error)}`);
-        if (!shown) setStatus(error.kind === 'offline' ? `${errorMessage(error)} Сохранённой копии этой диаграммы нет.` : errorMessage(error));
+        const shown = cached && show(cached.data, `Кэшированные данные от ${formatTime(cached.savedAt)}. ${errorMessage(error)}`, engine);
+        if (!shown) {
+          // The drawing of an earlier run and the sample drawing of the page belong to other code, so neither may stay next to this error.
+          remote.replaceChildren();
+          remote.hidden = true;
+          local?.setAttribute('hidden', '');
+          setStatus(error.kind === 'offline' ? `${errorMessage(error)} Сохранённой копии этой диаграммы нет.` : errorMessage(error));
+        }
       }
     }
     // A cancelled run belongs to an older request, so only the newest one may release the buttons.
@@ -577,17 +656,21 @@ ${input}`);
     return succeeded;
   };
 
-  renderButton.addEventListener('click', () => run());
+  // Whatever goes wrong while the code is read or drawn is reported on the page and in the log; the buttons are released and the editor keeps working.
+  const run = async (options) => {
+    try {
+      return await runUnsafe(options);
+    } catch (error) {
+      logger.error('DSLKit: the diagram could not be processed', error);
+      setBusy(false);
+      status.textContent = ui('drawFailed', {}, lang);
+      status.dataset.state = 'note';
+      return false;
+    }
+  };
+
   refreshButton?.addEventListener('click', () => run({ refresh: true }));
   page.addEventListener('dslkit:run', () => run());
-  if (engineSelect) {
-    const saved = storage.get('diagram_engine', null);
-    if (ENGINES.some((engine) => engine.id === saved)) engineSelect.value = saved;
-    engineSelect.addEventListener('change', () => {
-      storage.set('diagram_engine', engineSelect.value);
-      run();
-    });
-  }
   historyList?.addEventListener('click', (event) => {
     const button = event.target.closest('.canvas__history-item');
     if (!button) return;
@@ -602,13 +685,14 @@ ${input}`);
     Promise.resolve()
       .then(() => api.checkHealth())
       .then(() => {
-        service.textContent = 'Сервис Kroki доступен';
+        service.textContent = '';
       })
       .catch(() => {
-        service.textContent = 'Сервис Kroki недоступен, будут использованы сохранённые копии';
+        service.textContent = tr('Сервис Kroki недоступен, будут использованы сохранённые копии');
       });
   }
 
+  showAction();
   renderHistory();
   if (autoRun) run();
   return { run, cache, history };

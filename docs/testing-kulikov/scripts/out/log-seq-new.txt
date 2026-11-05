@@ -1,0 +1,25 @@
+PASS N01: Гость открывает dashboard.html (early.js) -> /app/login.html; script.js запрошен для dashboard: True
+PASS N02: Тема dark в хранилище: атрибут data-theme до загрузки страницы -> dark
+PASS N03: Испорченное значение темы "purple" -> light
+PASS N03: Испорченное значение темы 123 -> light
+PASS N03: Испорченное значение темы {bad -> light
+PASS N03: Испорченное значение темы null -> light
+PASS N04: Подделанная сессия (id не из списка аккаунтов) -> /app/login.html
+PASS N05: Верная сессия -> /app/dashboard.html
+PASS N06: Гость: /en/app/dashboard.html?q=x#y -> /en/app/login.html
+FAIL N07: Гость: /app/dashboard.html/ -> 200 /app/dashboard.html/
+PASS N07: Гость: /app/dashboard.html%20 -> 404 /app/dashboard.html%20
+PASS N08: docs.html (ru, guest): все внутренние ссылки -> status=200, ссылок=10, битых=[]
+PASS N08: docs.html (ru, user): все внутренние ссылки -> status=200, ссылок=10, битых=[]
+PASS N08: docs.html (en, guest): все внутренние ссылки -> status=200, ссылок=10, битых=[]
+PASS N08: docs.html (en, user): все внутренние ссылки -> status=200, ссылок=10, битых=[]
+PASS N09: docs.html#несуществующий-якорь -> Документация — DSLKit
+PASS N10: Меню ⋯ редактора: группы действий -> ['Диаграмма:4', 'Файл:4', 'Вид и справка:5', 'Аккаунт:4']
+PASS N11: Меню ⋯ редактора: Esc закрывает меню -> проверено
+PASS N12: Меню ⋯ редактора: клик вне меню закрывает -> проверено
+PASS N13: Меню ⋯ карточки: открыть второе при открытом первом -> открытых меню=1
+FAIL N14: Редактор: вкладки боковой панели -> ['order.dsl']
+PASS N15: Редактор: открыть вкладку «Шаблоны» -> видимых элементов=33
+PASS N16: Редактор: нажать шаблон -> код изменился=True
+PASS N17: Отмена после выбора шаблона -> True
+PASS N18: Ошибки консоли и страницы за прогон -> []

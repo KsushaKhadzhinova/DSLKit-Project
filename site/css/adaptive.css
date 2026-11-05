@@ -1,6 +1,14 @@
 /* Mobile first: the base styles describe a phone, wider screens add to them.
    Breakpoints: 576, 768 and 1024 px. */
 @media (min-width: 576px) {
+  .error {
+    margin-inline: auto;
+  }
+
+  .error .button {
+    justify-self: start;
+  }
+
   .hero__actions .button {
     flex: 0 0 auto;
   }
@@ -8,20 +16,13 @@
   .cards {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-}
 
-@media (min-width: 576px) {
   .burger__label {
     position: static;
     width: auto;
     height: auto;
     overflow: visible;
     clip-path: none;
-  }
-
-  .theme__button {
-    padding: 0 var(--space-2);
-    font-size: var(--step--1);
   }
 }
 
@@ -41,28 +42,28 @@
   }
 
   .header__tools {
-    grid-column: auto;
-    grid-row: auto;
+    grid-column: 3;
+    grid-row: 1;
   }
 
   .nav {
     display: block;
-    grid-column: auto;
-    grid-row: auto;
-    padding-bottom: 0;
+    grid-column: 1 / -1;
+    grid-row: 2;
+    padding-bottom: var(--space-1);
   }
 
   .nav__list {
     flex-flow: row wrap;
     gap: 0;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
   }
 
   .nav__link {
     min-height: var(--target-size-small);
     padding: 0 var(--space-1);
-    font-size: var(--step--1);
+    font-size: var(--text-small);
   }
 
   .hero__facts {
@@ -87,8 +88,15 @@
     gap: var(--space-3);
   }
 
+  .nav {
+    grid-column: auto;
+    grid-row: auto;
+    padding-bottom: 0;
+  }
+
   .nav__list {
     gap: var(--space-1);
+    justify-content: center;
   }
 
   .nav__link {
@@ -108,4 +116,63 @@
   .cards {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
+}
+
+/* Touch targets: every control is at least 44 x 44 px (WCAG 2.5.8 asks 24 px, the interface rules of the project ask 44 px). */
+.header__logo,
+.nav__link,
+.footer__link,
+.card__link,
+.template-card__link,
+.project-card__link,
+.app-topbar__logo,
+.editor-toolbar__logo,
+.canvas__engine-link,
+.problems__location {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--target-size-small);
+}
+
+.filter__chip,
+.app-topbar__new,
+.app-topbar__search-input,
+.sort__select,
+.settings-row__select,
+.editor-tabs__tab,
+.problems__tab,
+.editor-segmented__button,
+.canvas__history-item,
+.button {
+  min-height: var(--target-size-small);
+}
+
+.app-topbar__avatar,
+.app-topbar__search-button,
+.project-card__menu,
+.editor-activity__button,
+.editor-tabs__close,
+.button--icon {
+  min-width: var(--target-size-small);
+  min-height: var(--target-size-small);
+}
+
+.form__checkbox {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.app-topbar__logo {
+  min-width: var(--target-size-small);
+  justify-content: center;
+}
+
+.problems__location {
+  align-self: center;
+  min-width: var(--target-size-small);
+  justify-content: center;
+}
+
+.template-card__link {
+  min-width: var(--target-size-small);
 }

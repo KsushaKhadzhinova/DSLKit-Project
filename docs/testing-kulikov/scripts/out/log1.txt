@@ -1,0 +1,2 @@
+== ru user app/settings.html: 31 elements
+done 31

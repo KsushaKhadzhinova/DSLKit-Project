@@ -1,8 +1,12 @@
 import { renderDiagram, checkHealth } from '../api/apiService.js';
 import { API_CONFIG } from '../api/config.js';
 import { createCache, createHistory } from '../storage/localStorage.js';
-import { ENGINES, findEngine } from '../engines/engines.js';
-import { parseDsl, sanitizeSvg, sourceKey } from '../utils/dataParser.js';
+import { engineForFormat, findEngine } from '../engines/engines.js';
+import { notationShort, parseDiagram, pickFormat } from '../notations/index.js';
+import { ui } from '../notations/messages.js';
+import { sanitizeSvg, sourceKey } from '../utils/dataParser.js';
+import { createTranslator } from '../utils/i18n.js';
+import { showProblems } from './problems-panel.js';
 
 const MESSAGES = {
   empty: 'В редакторе нет кода диаграммы.',
@@ -36,24 +40,27 @@ export const initDiagramRunner = ({
   autoRun = true,
 } = {}) => {
   const page = root.querySelector('.app-page--editor');
-  const renderButton = page?.querySelector('.canvas__render');
-  if (!renderButton) return null;
+  const status = page?.querySelector('.canvas__status');
+  if (!status) return null;
+  const engineLabel = page.querySelector('.editor-status__engine');
 
   const refreshButton = page.querySelector('.canvas__refresh');
-  const status = page.querySelector('.canvas__status');
   const remote = page.querySelector('.canvas__remote');
   const local = page.querySelector('.canvas__diagram');
   const service = page.querySelector('.canvas__service');
   const historyList = page.querySelector('.canvas__history');
-  const engineSelect = page.querySelector('.canvas__engine');
   const canvas = page.querySelector('.canvas');
   const parser = new root.defaultView.DOMParser();
   const cache = createCache({ storage, ttlMs: API_CONFIG.cacheTtlMs, now });
   const history = createHistory({ storage });
   let controller = null;
 
+  const tr = createTranslator(root);
+  const lang = root.documentElement.lang === 'en' ? 'en' : 'ru';
+  // The plain "ready" note is only for screen readers: a sighted user sees the drawing. Every other note (saved copy, loading, errors) stays visible.
   const setStatus = (text) => {
-    status.textContent = text;
+    status.textContent = tr(text);
+    status.dataset.state = text === 'Диаграмма готова.' ? 'ready' : 'note';
   };
   const setBusy = (busy) => {
     canvas.setAttribute('aria-busy', String(busy));
@@ -61,13 +68,23 @@ export const initDiagramRunner = ({
 
   const source = () => [...page.querySelectorAll('.code__line code')].map((line) => line.textContent).join('\n');
 
-  const currentEngine = () => findEngine(engineSelect?.value);
+  // The engine is chosen on the settings page and read again on every run.
+  const currentEngine = () => {
+    const saved = storage.get('settings', {});
+    return findEngine(saved !== null && typeof saved === 'object' ? saved['diagram-engine'] : undefined);
+  };
 
-  const show = (svgText, note) => {
+  // The engine is chosen on the settings page; the footer of the editor only names the one that will draw.
+  const showAction = () => {
+    if (engineLabel) engineLabel.textContent = tr(currentEngine().label);
+  };
+
+  const show = (svgText, note, engine = currentEngine()) => {
     const svg = sanitizeSvg(svgText, parser);
     if (!svg) return false;
     svg.setAttribute('role', 'img');
-    svg.setAttribute('aria-label', `Диаграмма: ${currentEngine().label}`);
+    svg.setAttribute('aria-label', tr(`Диаграмма: ${tr(engine.label)}`));
+    remote.dataset.engine = engine.id;
     remote.replaceChildren(root.importNode(svg, true));
     remote.hidden = false;
     local?.setAttribute('hidden', '');
@@ -85,7 +102,7 @@ export const initDiagramRunner = ({
         button.type = 'button';
         button.className = 'button button--quiet canvas__history-item';
         button.dataset.key = entry.key;
-        button.textContent = `${entry.title || 'Без названия'} · ${formatTime(entry.at)}`;
+        button.textContent = `${entry.title || tr('Без названия')} · ${formatTime(entry.at)}`;
         item.append(button);
         return item;
       }),
@@ -93,25 +110,38 @@ export const initDiagramRunner = ({
     historyList.hidden = items.length === 0;
   };
 
-  const run = async ({ refresh = false } = {}) => {
-    const model = parseDsl(source());
-    if (model.boxes.length === 0) {
+  const runUnsafe = async ({ refresh = false } = {}) => {
+    showAction();
+    const model = parseDiagram(source());
+    const short = model.notation ? notationShort(model) : '?';
+    showProblems({ root, page, problems: model.problems, lang, file: page.querySelector('.editor-tabs__tab--active span')?.textContent.trim() ?? 'order.dsl' });
+    page.querySelectorAll('.editor-status__type').forEach((node) => (node.textContent = short));
+    page.querySelectorAll('[data-notation-label]').forEach((node) => (node.textContent = ui('notation', { name: short }, lang)));
+    if (model.empty) {
       setStatus(MESSAGES.empty);
       return false;
     }
-    const engine = currentEngine();
-    const input = engine.build(model);
+    const wanted = currentEngine();
+    const viaKroki = wanted.type && wanted.type !== 'dslkit';
+    const format = viaKroki ? pickFormat(model, wanted.type) : null;
+    const engine = viaKroki && format !== wanted.type ? engineForFormat(format) : wanted;
+    const fallback = engine === wanted ? '' : ` ${ui('fallback', { label: tr(engine.label) }, lang)}`;
+    const input = engine.build(model, source());
     controller?.abort();
     // The own engine draws in the browser: no request, no cache, and it works offline.
     if (!engine.type) {
       setBusy(false);
-      return show(input, 'Диаграмма построена собственным движком в браузере.');
+      const drawn = show(input, 'Диаграмма готова.', engine);
+      if (!drawn) status.textContent = ui('drawFailed', {}, lang);
+      return drawn;
     }
     const key = sourceKey(`${engine.id}
 ${input}`);
     const cached = cache.get(key);
 
-    if (cached && !cached.expired && !refresh && show(cached.data, `Показана сохранённая копия от ${formatTime(cached.savedAt)}.`)) {
+    if (cached && !cached.expired && !refresh && show(cached.data, `Показана сохранённая копия от ${formatTime(cached.savedAt)}.`, engine)) {
+      status.textContent += fallback;
+      if (fallback) status.dataset.state = 'note';
       setBusy(false);
       return true;
     }
@@ -125,7 +155,9 @@ ${input}`);
       if (!isOnline()) throw Object.assign(new Error('offline'), { kind: 'offline' });
       const svgText = await api.renderDiagram(input, { signal, type: engine.type });
       if (signal.aborted) throw Object.assign(new Error('cancelled'), { kind: 'aborted' });
-      if (!show(svgText, `Диаграмма получена от сервиса Kroki (${engine.type}).`)) throw Object.assign(new Error('invalid'), { kind: 'invalid' });
+      if (!show(svgText, 'Диаграмма готова.', engine)) throw Object.assign(new Error('invalid'), { kind: 'invalid' });
+      status.textContent += fallback;
+      if (fallback) status.dataset.state = 'note';
       cache.set(key, svgText);
       history.add({ key, title: model.title, at: now() });
       renderHistory();
@@ -133,8 +165,14 @@ ${input}`);
     } catch (error) {
       if (error.kind !== 'aborted') {
         logger.error('DSLKit: не удалось получить диаграмму', error.kind, error.status ?? '');
-        const shown = cached && show(cached.data, `Кэшированные данные от ${formatTime(cached.savedAt)}. ${errorMessage(error)}`);
-        if (!shown) setStatus(error.kind === 'offline' ? `${errorMessage(error)} Сохранённой копии этой диаграммы нет.` : errorMessage(error));
+        const shown = cached && show(cached.data, `Кэшированные данные от ${formatTime(cached.savedAt)}. ${errorMessage(error)}`, engine);
+        if (!shown) {
+          // The drawing of an earlier run and the sample drawing of the page belong to other code, so neither may stay next to this error.
+          remote.replaceChildren();
+          remote.hidden = true;
+          local?.setAttribute('hidden', '');
+          setStatus(error.kind === 'offline' ? `${errorMessage(error)} Сохранённой копии этой диаграммы нет.` : errorMessage(error));
+        }
       }
     }
     // A cancelled run belongs to an older request, so only the newest one may release the buttons.
@@ -142,17 +180,21 @@ ${input}`);
     return succeeded;
   };
 
-  renderButton.addEventListener('click', () => run());
+  // Whatever goes wrong while the code is read or drawn is reported on the page and in the log; the buttons are released and the editor keeps working.
+  const run = async (options) => {
+    try {
+      return await runUnsafe(options);
+    } catch (error) {
+      logger.error('DSLKit: the diagram could not be processed', error);
+      setBusy(false);
+      status.textContent = ui('drawFailed', {}, lang);
+      status.dataset.state = 'note';
+      return false;
+    }
+  };
+
   refreshButton?.addEventListener('click', () => run({ refresh: true }));
   page.addEventListener('dslkit:run', () => run());
-  if (engineSelect) {
-    const saved = storage.get('diagram_engine', null);
-    if (ENGINES.some((engine) => engine.id === saved)) engineSelect.value = saved;
-    engineSelect.addEventListener('change', () => {
-      storage.set('diagram_engine', engineSelect.value);
-      run();
-    });
-  }
   historyList?.addEventListener('click', (event) => {
     const button = event.target.closest('.canvas__history-item');
     if (!button) return;
@@ -167,13 +209,14 @@ ${input}`);
     Promise.resolve()
       .then(() => api.checkHealth())
       .then(() => {
-        service.textContent = 'Сервис Kroki доступен';
+        service.textContent = '';
       })
       .catch(() => {
-        service.textContent = 'Сервис Kroki недоступен, будут использованы сохранённые копии';
+        service.textContent = tr('Сервис Kroki недоступен, будут использованы сохранённые копии');
       });
   }
 
+  showAction();
   renderHistory();
   if (autoRun) run();
   return { run, cache, history };

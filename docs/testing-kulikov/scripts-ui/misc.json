@@ -1,0 +1,86 @@
+[
+ {
+  "id": "LNG-01",
+  "what": "Смена языка в редакторе: открывается английская версия, параметр ?template сохраняется",
+  "res": "Fail",
+  "note": "Исключение теста: Locator.get_attribute: Timeout 30000ms exceeded. Call log:"
+ },
+ {
+  "id": "LNG-02",
+  "what": "Английская «My projects»: нет русского текста, сессия сохранена",
+  "res": "Pass",
+  "note": "русских слов на EN-странице: 1 (Русский)"
+ },
+ {
+  "id": "LNG-03",
+  "what": "Английский редактор: интерфейс переведён полностью",
+  "res": "Pass",
+  "note": "русских слов: 1"
+ },
+ {
+  "id": "THM-01",
+  "what": "Тёмная тема: переключается в настройках и сохраняется на dashboard и в редакторе",
+  "res": "Fail",
+  "note": "Исключение теста: Locator.click: Timeout 30000ms exceeded. Call log:"
+ },
+ {
+  "id": "THM-02",
+  "what": "Повреждённое значение темы в localStorage",
+  "res": "Pass",
+  "note": ""
+ },
+ {
+  "id": "THM-03",
+  "what": "Тёмная тема операционной системы без сохранённого выбора",
+  "res": "Pass",
+  "note": "фон при тёмной теме ОС и без сохранённого выбора: rgb(30, 30, 46)"
+ },
+ {
+  "id": "OFF-01",
+  "what": "Офлайн: повторное открытие редактора (service worker / кэш)",
+  "res": "Pass",
+  "note": "офлайн: страница загрузилась (svg 1) Консоль: console:Failed to load resource: net::ERR_INTERNET_DISCONNECTED; console:Failed to load resource: net::ERR_INTERNET_DISCONNECTED"
+ },
+ {
+  "id": "OFF-02",
+  "what": "Офлайн: ввод кода, отрисовка и сохранение проекта работают локально",
+  "res": "Pass",
+  "note": "офлайн: блоков 2, сохранение выполнено"
+ },
+ {
+  "id": "TUR-01",
+  "what": "Первый запуск редактора: тур показывается и закрывается Escape",
+  "res": "Pass",
+  "note": "тур показан: False; после Escape виден: False; флаг tour-done: true"
+ },
+ {
+  "id": "NF-01",
+  "what": "Несуществующие адреса и обход каталогов: статусы и страница 404",
+  "res": "Pass",
+  "note": "/net-takoy-stranicy.html: 404 ; /app/: 404 ; /en/app/zzz.html: 404 ; /app/editor.html%00: 404 ; /app/%2e%2e/%2e%2e/package.json: 404 ; /..%2f..%2fpackage.json: 403 ; тело 404: Перейти к основному содержимому DSLKit  Код ошибки: 404  Ошибка 404: страница не найдена  По этому адресу нет страницы D Консоль: console:Failed to load resource: the server responded with a status of 404 (Not Found); console:Failed to load resource: the server responded with a status of 404 (Not Found)"
+ },
+ {
+  "id": "COR-06",
+  "what": "Хранилище очищено при открытом редакторе, затем сохранение и перезагрузка",
+  "res": "Pass",
+  "note": "после очистки хранилища при открытом редакторе и сохранения: /app/editor.html?p=pmvujl6as0"
+ },
+ {
+  "id": "COR-07",
+  "what": "Повреждённые ключи dslkit.* (гость): все публичные страницы и редактор открываются",
+  "res": "Pass",
+  "note": ""
+ },
+ {
+  "id": "TWO-01",
+  "what": "Две вкладки редактора сохраняют разные диаграммы: обе остаются",
+  "res": "Pass",
+  "note": "проекты после сохранения в двух вкладках: Вкладка B, Вкладка A, Order process, Order handling, Shop, Shop, Online order, Producer and consumer, Order information, Orders, Order fulfilment, Vehicles, Organisation, Сумма чисел, Roads, Build pipeline, Order snapshot, Shop services, Car, Shop deployment, Shop modules, Shop profile, Online shop, Order flow, Player, Checkout, Checkout, Crossing, Checkout overview, Learning plan, Project team, DSLKit context, Office network, Choose a database, Order handling"
+ },
+ {
+  "id": "TWO-02",
+  "what": "Проект удалён в одной вкладке, во второй нажато «Сохранить»: что произойдёт (воскрешение / новый)",
+  "res": "Fail",
+  "note": "Исключение теста: Locator.click: Timeout 30000ms exceeded. Call log:"
+ }
+]

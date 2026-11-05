@@ -1,0 +1,278 @@
+{
+  "schema_version": "1",
+  "toolset_ref": "v1.4.1",
+  "installed": [
+    {
+      "id": "CODE-CHANGE-REVIEW",
+      "version": "0.2.1",
+      "source_path": "artifacts/CODE-CHANGE-REVIEW",
+      "reason": {
+        "strength": "on-demand",
+        "selected_artifact": "CODE-CHANGE-REVIEW"
+      },
+      "target": "claude-code",
+      "files": {
+        "SKILL.md": "sha256:243ccbd00a2debf7e29110cb0cf61034594559f0fc36f16a8dcd1b527e5aaced",
+        "metadata.json": "sha256:45ba138794eb83c633372b6b0a06253f75882314d0187fbac829b54858ab3278"
+      }
+    },
+    {
+      "id": "CODE-COMMENT-WRITING",
+      "version": "0.1.0",
+      "source_path": "artifacts/CODE-COMMENT-WRITING",
+      "reason": {
+        "strength": "on-demand",
+        "selected_artifact": "CODE-COMMENT-WRITING"
+      },
+      "target": "claude-code",
+      "files": {
+        "SKILL.md": "sha256:4e42056477385c6c4916186b240d1f549297f274be8bf2be2066de14cbe7aff3",
+        "metadata.json": "sha256:12392fee1715d9fc484d1c052f725e8053f99a9302407150a6c5d996f5e973fb",
+        "references/dataform.md": "sha256:cc45f1b4b38accfec5e61dd06eab995243d915798d423303b8cc8d28f2ec38a1",
+        "references/dbt.md": "sha256:4b5dc0525809d80800f4ce8a43b487fadc1f02108de66589aa0af54eb78bf2bd"
+      }
+    },
+    {
+      "id": "COMPLETION-VERIFICATION",
+      "version": "0.1.1",
+      "source_path": "artifacts/COMPLETION-VERIFICATION",
+      "reason": {
+        "strength": "on-demand",
+        "selected_artifact": "COMPLETION-VERIFICATION"
+      },
+      "target": "claude-code",
+      "files": {
+        "SKILL.md": "sha256:35f608c7411f0c5af16b29013c66b256c11eed70eff9b561cbbbbbeee596b7d4",
+        "metadata.json": "sha256:34b4541c8b70a662e734358cf0126b15fd0215226b498415cf89ad79de4c8a49"
+      }
+    },
+    {
+      "id": "DATA-INCIDENT-TRACING",
+      "version": "0.1.1",
+      "source_path": "artifacts/DATA-INCIDENT-TRACING",
+      "reason": {
+        "strength": "on-demand",
+        "selected_artifact": "DATA-INCIDENT-TRACING"
+      },
+      "target": "claude-code",
+      "files": {
+        "SKILL.md": "sha256:e6429f6f69fe94e902f99754564c1871f2d8b67823f4384a55833103d310d01e",
+        "metadata.json": "sha256:546e2b05b07c7e3586c3948490382b81aae34cdfe31260ebf55b92dd9a538b0c"
+      }
+    },
+    {
+      "id": "DATA-QUALITY-CONTROLS",
+      "version": "0.1.0",
+      "source_path": "artifacts/DATA-QUALITY-CONTROLS",
+      "reason": {
+        "strength": "on-demand",
+        "selected_artifact": "DATA-QUALITY-CONTROLS"
+      },
+      "target": "claude-code",
+      "files": {
+        "SKILL.md": "sha256:c41ee9c1b9eb4269a6207b6c75956484b3bcd448b19d2ae67798a51254470b60",
+        "metadata.json": "sha256:5f40eeae6df79267d455795355e03e2f684a51784acdbf0c4b933d49a6babcde",
+        "references/dbt.md": "sha256:728fd111444f14cf19a92abbc5ba2308597a34871be0fbb1ae71d8981c4ebeba",
+        "references/python.md": "sha256:cfbda7ccacd1ba4fe2b01ef4f041bca767f8d21411338073ff93d4cfa72037f0",
+        "references/quarantine.md": "sha256:62a33c8ea32566faddd1748b71bc796682eda9abb5e3f3d669a37a8d5dd9a1ed",
+        "references/release-diff.md": "sha256:a92b0e73afd40249351866c65440a2d93a43b41c4dc3c9eb1a0ef550fd0b2d2f",
+        "references/scorecard.md": "sha256:33b4a9ad33213123ffdb7da1e105e09ea909a5ae1c827c74b6605ee2ac1ad37e"
+      }
+    },
+    {
+      "id": "DOCKER-COMPOSE-LOCAL-STACK",
+      "version": "0.1.1",
+      "source_path": "artifacts/DOCKER-COMPOSE-LOCAL-STACK",
+      "reason": {
+        "strength": "on-demand",
+        "selected_artifact": "DOCKER-COMPOSE-LOCAL-STACK"
+      },
+      "target": "claude-code",
+      "files": {
+        "SKILL.md": "sha256:e9ac63a249e7ce545f1728afae43f0a870b0926f75dbdb74cdd85106d0a647d3",
+        "metadata.json": "sha256:deb1a965b832a1acb65542e3ec899fdff7c0ba7f60eeeaac210031b7acff21fe"
+      }
+    },
+    {
+      "id": "DOCKER-DATA-LOSS-CONFIRMATION",
+      "version": "0.1.1",
+      "source_path": "artifacts/DOCKER-DATA-LOSS-CONFIRMATION",
+      "reason": {
+        "strength": "always"
+      },
+      "target": "claude-code",
+      "files": {
+        "SKILL.md": "sha256:f6d4deee4439905b564cd1484e68e7dfb8c1bb287c585a4f25779bc8260f53d9",
+        "metadata.json": "sha256:4d2a9dc9606dc4df3f6b4d0f75ac9fb57a95e6b24be3168df81899bf7975028e"
+      }
+    },
+    {
+      "id": "DOCKER-IMAGE-BUILD",
+      "version": "0.1.1",
+      "source_path": "artifacts/DOCKER-IMAGE-BUILD",
+      "reason": {
+        "strength": "on-demand",
+        "selected_artifact": "DOCKER-IMAGE-BUILD"
+      },
+      "target": "claude-code",
+      "files": {
+        "SKILL.md": "sha256:f0d7035279a97dbc224ff8acdea638c65e73681cb23b7d6a492b5e8486ba3aaf",
+        "metadata.json": "sha256:88ef2acb0e585f71cefb3a94b4a6afc262da5d37861cfc091bf81dc4db2e28ef"
+      }
+    },
+    {
+      "id": "ERROR-DIAGNOSIS",
+      "version": "0.1.1",
+      "source_path": "artifacts/ERROR-DIAGNOSIS",
+      "reason": {
+        "strength": "on-demand",
+        "selected_artifact": "ERROR-DIAGNOSIS"
+      },
+      "target": "claude-code",
+      "files": {
+        "SKILL.md": "sha256:632ad548374862d48a1561ed61abd83c027363c20e148460de2ef90faeae8985",
+        "metadata.json": "sha256:6c4a74a1343464bae76ece29cbe1fd8d9fa76f1668f9ad9c282fdf95de3aa892"
+      }
+    },
+    {
+      "id": "IMPLEMENTATION-PLANNING",
+      "version": "0.1.1",
+      "source_path": "artifacts/IMPLEMENTATION-PLANNING",
+      "reason": {
+        "strength": "on-demand",
+        "selected_artifact": "IMPLEMENTATION-PLANNING"
+      },
+      "target": "claude-code",
+      "files": {
+        "SKILL.md": "sha256:72d96db8f46b8b039d385ae37d71a724a77f67927d91c1ba412cd950f0871305",
+        "metadata.json": "sha256:181f9c7790a2dd377b8d0f115fa358836aedd832ffcb59aa8d4e18ddc34a111a"
+      }
+    },
+    {
+      "id": "PIPELINE-CHECK-SELECTION",
+      "version": "0.1.1",
+      "source_path": "artifacts/PIPELINE-CHECK-SELECTION",
+      "reason": {
+        "strength": "on-demand",
+        "selected_artifact": "PIPELINE-CHECK-SELECTION"
+      },
+      "target": "claude-code",
+      "files": {
+        "SKILL.md": "sha256:53dcbace2dd8c3407c925442346c97181eb80d4e04b665a336124cb2d31c0a7f",
+        "metadata.json": "sha256:2acf3cc75fabe70a94eb0e68b97a7f36e865f12049622477d424770331df8786"
+      }
+    },
+    {
+      "id": "PIPELINE-OUTPUT-REVIEW",
+      "version": "0.1.1",
+      "source_path": "artifacts/PIPELINE-OUTPUT-REVIEW",
+      "reason": {
+        "strength": "on-demand",
+        "selected_artifact": "PIPELINE-OUTPUT-REVIEW"
+      },
+      "target": "claude-code",
+      "files": {
+        "SKILL.md": "sha256:2a9057855aded9694b3842ffe51820aee2af22f57df314033ebed5f11e0d16c3",
+        "metadata.json": "sha256:09e25436e992060dc226bd2f463ca6d7979b65e5bd066d05df28f37d4fbbb4f5"
+      }
+    },
+    {
+      "id": "PLAN-EXECUTION",
+      "version": "0.1.1",
+      "source_path": "artifacts/PLAN-EXECUTION",
+      "reason": {
+        "strength": "on-demand",
+        "selected_artifact": "PLAN-EXECUTION"
+      },
+      "target": "claude-code",
+      "files": {
+        "SKILL.md": "sha256:c9c47a5273685799589f1d951bce0af832e93091b385cbc7def3f78e0766e4eb",
+        "metadata.json": "sha256:40d99e10f7b6660b94f7e51fc2f8bbc4cca160c5997ecd7f1e7e743942325d59"
+      }
+    },
+    {
+      "id": "PROJECT-ADAPTATION",
+      "version": "0.1.1",
+      "source_path": "artifacts/PROJECT-ADAPTATION",
+      "reason": {
+        "strength": "on-demand",
+        "selected_artifact": "PROJECT-ADAPTATION"
+      },
+      "target": "claude-code",
+      "files": {
+        "SKILL.md": "sha256:942f0ec69902f49dd327be42e01630331079930c07275b284ab62124f859440c",
+        "metadata.json": "sha256:64839fc92357879ab2561c4c7df8ee6bb8f7f26ef158a535725d74598fd268c2"
+      }
+    },
+    {
+      "id": "PROJECT-DOCUMENTATION",
+      "version": "0.1.2",
+      "source_path": "artifacts/PROJECT-DOCUMENTATION",
+      "reason": {
+        "strength": "on-demand",
+        "selected_artifact": "PROJECT-DOCUMENTATION"
+      },
+      "target": "claude-code",
+      "files": {
+        "SKILL.md": "sha256:ccccd14e51a37827946d56fabc1ee78c8026400a649114ba1d4622ea09ecc4f1",
+        "metadata.json": "sha256:36938972a74376d413ae815795c79941a29a8129f8a9331fc283efac9d0de542"
+      }
+    },
+    {
+      "id": "REFACTOR-STEP-PLANNING",
+      "version": "0.1.1",
+      "source_path": "artifacts/REFACTOR-STEP-PLANNING",
+      "reason": {
+        "strength": "on-demand",
+        "selected_artifact": "REFACTOR-STEP-PLANNING"
+      },
+      "target": "claude-code",
+      "files": {
+        "SKILL.md": "sha256:55d0218cb6bc1f1d783ded57f9a141b0f8524aaa347a11421c727dee7614ccb1",
+        "metadata.json": "sha256:a204c6b844fd27ad663217184be6f01f57e8a81c65d76bb0bf8be5035b474703"
+      }
+    },
+    {
+      "id": "REQUIREMENTS-BRAINSTORMING",
+      "version": "0.1.1",
+      "source_path": "artifacts/REQUIREMENTS-BRAINSTORMING",
+      "reason": {
+        "strength": "on-demand",
+        "selected_artifact": "REQUIREMENTS-BRAINSTORMING"
+      },
+      "target": "claude-code",
+      "files": {
+        "SKILL.md": "sha256:a2771a7c5bee5053c11fee5eb0585d65f9c1379b24e02bb6f36d64dd2bee7b79",
+        "metadata.json": "sha256:5378fabe3db0d2f0f35c9a3e4bdf3b4dca8abcd824846150c463265adbd027fd"
+      }
+    },
+    {
+      "id": "SENSITIVE-DATA-HANDLING",
+      "version": "0.1.1",
+      "source_path": "artifacts/SENSITIVE-DATA-HANDLING",
+      "reason": {
+        "strength": "on-demand",
+        "selected_artifact": "SENSITIVE-DATA-HANDLING"
+      },
+      "target": "claude-code",
+      "files": {
+        "SKILL.md": "sha256:3ff6e637e20277fce5b597adc7f004b15435d1fb199671efaff56842392cf224",
+        "metadata.json": "sha256:f3eb6a98b01f5873e202fff1252b70e9bf9b0790ef60b53848bcbff3f5e81ef2"
+      }
+    },
+    {
+      "id": "TEST-DESIGN-REVIEW",
+      "version": "0.1.1",
+      "source_path": "artifacts/TEST-DESIGN-REVIEW",
+      "reason": {
+        "strength": "on-demand",
+        "selected_artifact": "TEST-DESIGN-REVIEW"
+      },
+      "target": "claude-code",
+      "files": {
+        "SKILL.md": "sha256:f1fa85b8cab6f988e5a35ef171618cee825d77f8f7cb9ddfbf8dc20fe48a3956",
+        "metadata.json": "sha256:528f48b6f0f83bc52cbbe3042711fa90e856573533ca607ef5079dcb29f94957"
+      }
+    }
+  ]
+}

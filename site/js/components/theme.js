@@ -1,3 +1,5 @@
+import { notify } from './toast.js';
+
 export const THEMES = ['light', 'dark'];
 
 const STORAGE_KEY = 'theme';
@@ -48,6 +50,16 @@ export const initTheme = ({ root = document, storage, matchMedia = defaultMatchM
     const value = toggle.checked ? 'dark' : 'light';
     storage.set(STORAGE_KEY, value);
     apply(value);
+  });
+
+  // The button of the page header switches between the light and the dark theme.
+  root.addEventListener('click', (event) => {
+    if (!event.target.closest('[data-theme-switch]')) return;
+    const value = current === 'dark' ? 'light' : 'dark';
+    storage.set(STORAGE_KEY, value);
+    apply(value);
+    const english = html.lang === 'en';
+    notify(root, english ? `Theme: ${value}` : `Тема: ${value === 'dark' ? 'тёмная' : 'светлая'}`, 'info');
   });
 
   root.addEventListener('change', (event) => {

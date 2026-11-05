@@ -51,7 +51,7 @@ Table 1 – Semantic tags of the home page
 
 ### 3.4 Heading Hierarchy
 
-Every page has one first-level heading. On the home page it reads "Write code, get a diagram", sections get second-level headings, and cards and steps get third-level headings. No level is skipped, and an automated test confirms it for all 15 pages of the site.
+Every page has one first-level heading. On the home page it reads "Write code, get a diagram", sections get second-level headings, and cards and steps get third-level headings. No level is skipped, and an automated test confirms it for all 16 pages of the site.
 
 ### 3.5 Accessibility
 
@@ -79,21 +79,23 @@ Reviews and ratings are not added because there are no real reviews yet and inve
 
 ### 3.8 Validity Check
 
-The page is checked with the W3C Nu Html Checker. The result is shown in figure 1: there are no errors or warnings. The code was submitted to the validator without indentation, which does not change the content.
+The page is checked with the W3C Nu Html Checker (version vnu 26.10.12, shown in the screenshot) in the "Check by text input" mode: the source code is pasted into the input area because the site is not published and a check by address is impossible. Only errors and warnings are shown. The screenshot does not display the date of the check, and the screenshot file was added to the repository on 14 October 2026. The result is shown in figure 1: there are no errors or warnings. The code was submitted to the validator without indentation, which does not change the content.
 
 ![Result of checking the home page in the W3C validator](figures/w3c-validator.jpg)
 
 Figure 1 – Result of the W3C Nu Html Checker: no errors or warnings
 
-All 15 pages of the site passed the same service with zero errors and warnings. Only informational messages about the slash in void elements remain, and they do not affect the pages.
+All 15 pages of the site passed the same service in the same way, by pasting the code, with zero errors and warnings. Only informational messages about the slash in void elements remain, and they do not affect the pages.
 
 ### 3.9 Microdata Check
 
-The Schema.org validator checks the microdata. The result is shown in figure 2: the objects SoftwareApplication and FAQPage are found without errors or warnings. The Google Rich Results Test needs a public page address, and the domain `dslkit.io` is not bought yet, so the check in that tool is not done and remains a task after publication.
+The Schema.org validator (validator.schema.org) checks the microdata, and the page code is pasted into its input area. The result is shown in figure 2: 2 items are detected, SoftwareApplication and FAQPage, with 0 errors and 0 warnings. The interface in the screenshot is Polish, it does not display the date of the check, and the screenshot file was added to the repository on 14 October 2026.
 
 ![Result of checking the microdata in the Schema.org validator](figures/schema-org-validator.jpg)
 
 Figure 2 – Result of the microdata check: SoftwareApplication and FAQPage without errors
+
+The Google Rich Results Test was not run: the site is not published and the domain `dslkit.io` is not bought yet. The check in that tool remains a task after publication, and the report has no results from it.
 
 ### 3.10 Automated Tests
 
@@ -101,21 +103,19 @@ Tests for the markup check on all pages: the language, title and meta tags, one 
 
 ### 3.11 Project Structure
 
-Project files live in `site` (pages, styles, scripts, images, layouts), `labs` (laboratory works) and `tools` (utilities). The application pages for the next works are in `site/app`.
+Project files live in `site` (pages, styles, scripts, images, layouts), `labs` (laboratory works) and `tools` (utilities). The application pages for the next works are in `site/app`. The structure of the `site` folder and the semantic blocks of the home page are shown in figure 3, which is built from the actual files and the markup of `site/index.html`.
+
+![Project structure and semantic blocks of the home page](figures/project-structure.svg)
+
+Figure 3 – Structure of the site folder and semantic blocks of index.html
 
 ### 3.12 Committing the Changes
 
 The work is done in the branch `feature/semantic-markup`. The commit: https://github.com/KsushaKhadzhinova/DSLKit-Project/commit/a2b85e0. The commit message: `feat: add semantic HTML markup with Schema.org for a SaaS diagram editor`.
 
-## 4 Answers to Control Questions
-
-5. **Validation errors.** The validator reported a section without a heading on the settings page, and local checks found links to non-existent identifiers. The section became a `div` and the links got correct targets. Valid markup is processed identically by browsers and is easier to maintain.
-6. **Section and article.** The `section` element groups a thematic part and needs a heading, for example Pricing. The `article` element is self-contained and can live outside the page, for example a notation card or a plan.
-7. **Figure.** The `figure` element ties an illustration to its `figcaption`, and screen readers treat them as one unit. A plain `div` with an image creates no such link.
-
 ## Conclusion
 
-Semantic markup is created for the DSLKit home page and the related pages: Russian and English versions, error pages, the privacy policy and the signup confirmation. The pages use 15 semantic tags, keep the heading hierarchy and accessibility requirements, and carry SoftwareApplication, Offer and FAQPage microdata. The W3C and Schema.org validators found no errors, and automated tests check the markup on every page. The Rich Results Test is postponed until the site is published.
+Semantic markup is created for the DSLKit home page and the related pages: Russian and English versions, error pages, the privacy policy and the signup confirmation. The pages use 15 semantic tags, keep the heading hierarchy and accessibility requirements, and carry SoftwareApplication, Offer and FAQPage microdata. The W3C and Schema.org validators found no errors, and automated tests check the markup on every page. The Google Rich Results Test was not run because the site is not published and the domain is not bought.
 
 ## Appendix A – Listing of index.html
 
@@ -136,6 +136,8 @@ Semantic markup is created for the DSLKit home page and the related pages: Russi
     <link rel="alternate" hreflang="en" href="https://dslkit.io/en/" />
     <link rel="alternate" hreflang="x-default" href="https://dslkit.io/" />
     <link rel="icon" href="images/favicon.svg" type="image/svg+xml" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <meta name="theme-color" content="#2563eb" />
     <link rel="stylesheet" href="css/style.css" />
   </head>
   <body class="page">
@@ -158,12 +160,40 @@ Semantic markup is created for the DSLKit home page and the related pages: Russi
             <li class="nav__item"><a class="nav__link" href="#audience">Для кого</a></li>
             <li class="nav__item"><a class="nav__link" href="#pricing">Тарифы</a></li>
             <li class="nav__item"><a class="nav__link" href="#faq">FAQ</a></li>
+            <li class="nav__item nav__item--auth">
+              <div class="auth" data-auth data-home="./">
+                <a class="button auth__button" href="app/login.html" data-auth-guest>Войти</a>
+                <a class="button button--primary auth__button" href="app/register.html" data-auth-guest>Регистрация</a>
+                <a class="auth__link" href="app/dashboard.html" data-auth-user hidden><span data-auth-name>Аккаунт</span></a>
+                <button type="button" class="button auth__button" data-auth-logout data-auth-user hidden>Выйти</button>
+              </div>
+            </li>
           </ul>
         </nav>
         <div class="header__tools">
           <a class="header__lang" href="en/" hreflang="en" lang="en">English</a>
           <input class="theme__input" type="checkbox" id="theme-toggle" />
-          <label class="theme__button" for="theme-toggle">Тёмная тема</label>
+          <label class="theme__button" for="theme-toggle" title="Тёмная тема"
+            ><svg class="theme__icon theme__icon--moon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">
+              <path
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"
+              /></svg
+            ><svg class="theme__icon theme__icon--sun" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">
+              <circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2" />
+              <path
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"
+              /></svg
+            ><span class="theme__label">Тёмная тема</span></label
+          >
           <a class="button button--primary header__cta" href="#waitlist">В бету</a>
         </div>
       </div>
@@ -181,11 +211,11 @@ Semantic markup is created for the DSLKit home page and the related pages: Russi
             Веб-редактор диаграмм как кода: опишите схему текстом на DSL, а DSLKit проверит её по правилам нотации и нарисует.
           </p>
           <div class="hero__cta">
-            <a class="button button--hero" href="app/editor.html">Создать диаграмму</a>
+            <a class="button button--primary button--hero" href="app/editor.html">Создать диаграмму</a>
             <p class="hero__cta-note">Откроется редактор: слева код, справа диаграмма</p>
           </div>
           <p class="hero__actions">
-            <a class="button button--primary" href="#waitlist">Записаться в бету</a>
+            <a class="button" href="#waitlist">Записаться в бету</a>
             <a class="button" href="#how">Как это работает</a>
           </p>
           <p class="hero__note" itemprop="offers" itemscope itemtype="https://schema.org/Offer">
@@ -681,7 +711,10 @@ import {
 } from './site-checks.js';
 
 const SITE = join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'site');
-const walk = (dir) => readdirSync(dir).flatMap((name) => (statSync(join(dir, name)).isDirectory() ? walk(join(dir, name)) : [join(dir, name)]));
+const walk = (dir) =>
+  readdirSync(dir)
+    .filter((name) => name !== 'design')
+    .flatMap((name) => (statSync(join(dir, name)).isDirectory() ? walk(join(dir, name)) : [join(dir, name)]));
 const files = walk(SITE);
 const pages = Object.fromEntries(
   files.filter((file) => file.endsWith('.html')).map((file) => [relative(SITE, file).replaceAll('\\', '/'), parse(readFileSync(file, 'utf8'))]),
@@ -695,9 +728,34 @@ const eachPage = (title, check, subset = names) =>
   });
 
 test('the site has the landing pages in both languages, error pages and application screens', () => {
-  for (const page of ['index.html', 'en/index.html', 'thanks.html', 'privacy.html', 'errors/404.html', 'app/editor.html'])
+  for (const page of [
+    'index.html',
+    'en/index.html',
+    'thanks.html',
+    'privacy.html',
+    'errors/404.html',
+    'app/editor.html',
+    'en/app/editor.html',
+    'app/dashboard.html',
+    'en/app/dashboard.html',
+    'app/settings.html',
+    'en/app/settings.html',
+    'app/welcome.html',
+    'en/app/welcome.html',
+    'app/login.html',
+    'en/app/login.html',
+    'app/register.html',
+    'en/app/register.html',
+    'app/docs.html',
+    'en/app/docs.html',
+    'app/expert.html',
+    'en/app/expert.html',
+    'app/decision.html',
+    'en/app/decision.html',
+  ])
     assert.ok(names.includes(page), page);
-  assert.equal(names.length, 15);
+  // 431.html joined the other error pages (400, 403, 404, 405, 500) when the header-overflow response got its own page.
+  assert.equal(names.length, 30);
 });
 
 eachPage('every page has lang, title, charset and viewport', documentProblems);
@@ -740,6 +798,14 @@ test('the Russian and English versions have the same element structure', () => {
     ['index.html', 'en/index.html'],
     ['thanks.html', 'en/thanks.html'],
     ['privacy.html', 'en/privacy.html'],
+    ['app/dashboard.html', 'en/app/dashboard.html'],
+    ['app/settings.html', 'en/app/settings.html'],
+    ['app/welcome.html', 'en/app/welcome.html'],
+    ['app/login.html', 'en/app/login.html'],
+    ['app/register.html', 'en/app/register.html'],
+    ['app/docs.html', 'en/app/docs.html'],
+    ['app/expert.html', 'en/app/expert.html'],
+    ['app/decision.html', 'en/app/decision.html'],
   ])
     assert.deepEqual(parityProblems(pages[ru], pages[en]), [], ru);
 });
@@ -763,7 +829,7 @@ test('every local href and src resolves to an existing file', () => {
   const missing = [];
   for (const file of files.filter((name) => name.endsWith('.html'))) {
     const html = readFileSync(file, 'utf8');
-    for (const [, url] of html.matchAll(/\b(?:href|src)="([^"#]*)(?:#[^"]*)?"/g)) {
+    for (const [, url] of html.matchAll(/\b(?:href|src)="([^"#?]*)(?:[?#][^"]*)?"/g)) {
       if (!url || /^(https?:|mailto:)/.test(url)) continue;
       const target = url.startsWith('/') ? join(SITE, url) : join(dirname(file), url);
       const resolved = statSync(target, { throwIfNoEntry: false })?.isDirectory() ? join(target, 'index.html') : target;

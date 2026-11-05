@@ -1,0 +1,17 @@
+{
+ "origin": "http://localhost:5190",
+ "user": "trash.user.r2@example.com",
+ "savedAt": 1793338341674,
+ "localStorage": {
+  "dslkit.projects.u60a53257af2f58e3": "[{\"id\": \"pmvujbsh40\", \"title\": \"Удалён 29.9 дн. назад\", \"notation\": \"bpmn\", \"source\": \"diagram bpmn \\\"Удалён 29.9 дн. назад\\\"\\nstart s \\\"Начало\\\"\\nend e \\\"Конец\\\"\\nflow s -> e\\n\", \"created\": 1793338310632, \"updated\": 1793338310632, \"trashedAt\": \"вчера\"}, {\"id\": \"pmvujbp8j0\", \"title\": \"Удалён 29 дн. назад\", \"notation\": \"bpmn\", \"source\": \"diagram bpmn \\\"Удалён 29 дн. назад\\\"\\nstart s \\\"Начало\\\"\\nend e \\\"Конец\\\"\\nflow s -> e\\n\", \"created\": 1793338306435, \"updated\": 1793338306435, \"trashedAt\": 1790832732903}, {\"id\": \"pmvujbmch0\", \"title\": \"Удалён 15 дн. назад\", \"notation\": \"bpmn\", \"source\": \"diagram bpmn \\\"Удалён 15 дн. назад\\\"\\nstart s \\\"Начало\\\"\\nend e \\\"Конец\\\"\\nflow s -> e\\n\", \"created\": 1793338302689, \"updated\": 1793338302689, \"trashedAt\": 1792042332903}, {\"id\": \"pmvujbjbx0\", \"title\": \"Удалён 1 дн. назад\", \"notation\": \"bpmn\", \"source\": \"diagram bpmn \\\"Удалён 1 дн. назад\\\"\\nstart s \\\"Начало\\\"\\nend e \\\"Конец\\\"\\nflow s -> e\\n\", \"created\": 1793338298781, \"updated\": 1793338298781, \"trashedAt\": 1793251932903}]",
+  "dslkit.editor-source": "\"diagram bpmn \\\"Удалён 45 дн. назад\\\"\\nstart s \\\"Начало\\\"\\nend e \\\"Конец\\\"\\nflow s -> e\\n\"",
+  "dslkit.tour-done": "1",
+  "dslkit.editor-tab": "0",
+  "dslkit.editor-view": "\"canvas\"",
+  "dslkit.session": "{\"userId\":\"u60a53257af2f58e3\"}",
+  "dslkit.seeded.u60a53257af2f58e3": "true",
+  "dslkit.accounts": "[{\"id\":\"u60a53257af2f58e3\",\"name\":\"Корзина\",\"email\":\"trash.user.r2@example.com\",\"salt\":\"1ca8a2ad24b06e82a7c8ceb0d96dc37b\",\"hash\":\"944af86f886ebc9c03610d2575976e4f970e996adacbbdd8138cdabcb0fc86ab\",\"iterations\":100000,\"created\":1793338266992}]",
+  "dslkit.dashboard": "{\"filter\":\"all\",\"query\":\"\",\"sort\":\"newest\"}"
+ },
+ "note": "one trashedAt is the string \"вчера\": the dashboard fails to start (bug)"
+}

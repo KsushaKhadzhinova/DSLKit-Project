@@ -1,0 +1,74 @@
+PASS E01: Отменить на пустой истории (сразу после открытия) -> «Отменять нечего. |  | Диаграмма готова.», код тот же=True
+PASS E02: Повторить на пустой истории -> Возвращать нечего. |  | Диаграмма готова.
+PASS E03: Повторить сразу после правки (до отмены) -> код тот же=True; «Возвращать нечего. | Добавлено: A4. | Диаграмма го»
+PASS E04: Отменить добавление блока -> блоков 3
+FAIL E05: Отменить трижды при одной правке в истории -> Сохранено 06:36 | Добавлено: A4. | Диаграмма готова.
+PASS E06: Повторить трижды при одной правке -> блоков 4; «Сохранено в «Мои проекты»: Order process»
+PASS E07: Печать → Отменить -> изменился=True
+PASS E08: Ctrl+Z в поле кода -> код изменился=True; кнопка «Отменить» есть, горячей клавиши нет в коде приложения
+PASS E09: Режим «Соединить» включён, блок не выбран → нажать Esc -> 
+PASS E09: Соединить: включить режим и нажать Esc, ничего не выбрав -> aria-pressed=false; «Сохранено 06:36 | Соединение отменено. | Диаграмма готова.»
+PASS E10: Соединить: нажать на пустое место доски вместо блока -> код тот же=True; «Сохранено 06:36 | Выберите блок, из которого идёт »
+PASS E11: Соединить блок сам с собой -> код изменился=False; «Сохранено 06:36 | Блок нельзя соединить с самим собой: выберите другой блок. | Диаграмма г»
+PASS E12: Соединить два блока дважды подряд (дубликат связи) -> «Сохранено 06:36 | Связь A1 → A2 добавлена. | Диаграмма готова.»
+PASS E13: Удалить без выбранного блока (кнопка недоступна, aria-disabled) -> Сохранено 06:36 | Сначала нажмите на блок на доске. | Диаграмма готова.
+PASS E14: Удалить блок, затем нажать «Удалить» ещё раз (блока уже нет) -> исчез=True; «Сохранено 06:36 | Сначала нажмите на блок на доске. | Диагра»
+PASS E15: Отменить удаление блока -> True
+PASS E16: Добавить 50 элементов подряд -> блоков=53 (было 3), время 30.5 с, строк кода=287, ошибок консоли=0
+PASS E17: Перетащить элемент палитры за пределы доски (в левый верхний угол окна) -> блоков 52→52; «Сохранено в «Мои проекты»: Order process | Перетащите элемент на доску»
+PASS E18: Перетащить существующий блок за пределы доски (в 2000,2000) -> все блоки внутри холста=True
+PASS E19: Сохранить пустой проект (Ctrl+S при пустом коде) -> «Сохранено 06:36 |  | В редакторе нет кода диаграммы.»; url=/app/editor.html?p=pmvujidj80
+PASS E20: Пустой код: ошибок JS в консоли нет -> []
+PASS E21: Экспорт SVG пустой диаграммы -> файлы=['diagram.svg']; «Сохранено 06:36 |  | Файл diagram.svg сохранён.»
+PASS E21: Экспорт PNG пустой диаграммы -> файлы=['diagram.png']; «Сохранено 06:36 |  | Файл diagram.png сохранён.»
+PASS E21: Экспорт JPEG пустой диаграммы -> файлы=['diagram.jpg']; «Сохранено 06:36 |  | Файл diagram.jpg сохранён.»
+PASS E21: Экспорт DRAWIO пустой диаграммы -> файлы=['diagram.drawio']; «Сохранено 06:36 |  | Файл diagram.drawio сохранён.»
+PASS E21: Экспорт HTML пустой диаграммы -> файлы=['diagram.html']; «Сохранено 06:36 |  | Файл diagram.html сохранён.»
+PASS E22: Экспорт шаблонной диаграммы во все 5 форматов -> ['order-process.svg', 'order-process.png', 'order-process.jpg', 'order-process.drawio', 'order-process.html']
+PASS E23: Импорт файла bad.txt -> код заменён=False; «Сохранено 06:37 |  | Формат не распознан: нужен текст Mermaid или PlantUML.»
+PASS E23: Импорт файла empty.txt -> код заменён=False; «Сохранено 06:37 |  | В тексте нет диаграммы для импорта.»
+PASS E23: Импорт файла binary.bin -> код заменён=False; «Сохранено 06:37 |  | Формат не распознан: нужен текст Mermaid или PlantUML.»
+PASS E23: Импорт файла huge.txt -> код заменён=True; «Сохранено в «Мои проекты»: Imported flowchart |  | Импортировано: блок-схема.»
+PASS E23: Импорт файла html.txt -> код заменён=False; «Сохранено 06:40 |  | Формат не распознан: нужен текст Mermaid или PlantUML.»
+PASS E23: Импорт файла unsupported.txt -> код заменён=False; «Сохранено 06:40 |  | Диаграмма «gantt» пока не поддерживается: импортируются бло»
+PASS E23: Импорт файла mermaid.txt -> код заменён=True; «Сохранено 06:40 |  | Импортировано: блок-схема.»
+PASS E23: Импорт большого файла (3000 связей Mermaid) -> вкладка жива=True, время 10.2 с; «Сохранено в «Мои проекты»: Imported flowchart |  | Импортиро»
+PASS E24: Импорт из буфера без разрешения/пустой буфер -> Сохранено 06:40 |  | Не удалось прочитать файл или буфер обмена.
+Traceback (most recent call last):
+  File "E:\DSLKit-Project\docs\testing-kulikov\scripts\nav-05-seq-editor.py", line 193, in <module>
+    e.select_option('[data-notation-select]', 'bpmn'); e.wait_for_timeout(900)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\VisualDSL_Tools\Python311\Lib\site-packages\playwright\sync_api\_generated.py", line 12333, in select_option
+    self._sync(
+  File "E:\VisualDSL_Tools\Python311\Lib\site-packages\playwright\_impl\_sync_base.py", line 115, in _sync
+    return task.result()
+           ^^^^^^^^^^^^^
+  File "E:\VisualDSL_Tools\Python311\Lib\site-packages\playwright\_impl\_page.py", line 1075, in select_option
+    return await self._main_frame.select_option(**params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\VisualDSL_Tools\Python311\Lib\site-packages\playwright\_impl\_frame.py", line 815, in select_option
+    return await self._channel.send("selectOption", self._timeout, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\VisualDSL_Tools\Python311\Lib\site-packages\playwright\_impl\_connection.py", line 76, in send
+    return await self._connection.wrap_api_call(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\VisualDSL_Tools\Python311\Lib\site-packages\playwright\_impl\_connection.py", line 632, in wrap_api_call
+    raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+playwright._impl._errors.TimeoutError: Page.select_option: Timeout 30000ms exceeded.
+Call log:
+  - waiting for locator("[data-notation-select]")
+    - locator resolved to <select data-notation-select="" aria-label="Шаблон диаграммы" class="settings-row__select templates__select">…</select>
+  - attempting select option action
+    2 × waiting for element to be visible and enabled
+      - element is not visible
+    - retrying select option action
+    - waiting 20ms
+    2 × waiting for element to be visible and enabled
+      - element is not visible
+    - retrying select option action
+      - waiting 100ms
+    58 × waiting for element to be visible and enabled
+       - element is not visible
+     - retrying select option action
+       - waiting 500ms
+

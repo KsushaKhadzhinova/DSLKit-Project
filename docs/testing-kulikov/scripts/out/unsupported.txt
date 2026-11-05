@@ -1,0 +1,4 @@
+gantt
+ title x
+ section a
+ task :a1, 2024-01-01, 3d

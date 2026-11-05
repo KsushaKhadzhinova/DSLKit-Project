@@ -2,6 +2,9 @@ name: CI
 on:
   push:
   pull_request:
+# The token of the workflow may only read the code: a compromised step cannot push or change settings.
+permissions:
+  contents: read
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -14,3 +17,5 @@ jobs:
       - run: npm ci
       - run: npm run format:check
       - run: npm test
+      # Known vulnerabilities in the libraries that reach the user fail the build; development tools are reported by Dependabot.
+      - run: npm audit --omit=dev --audit-level=high

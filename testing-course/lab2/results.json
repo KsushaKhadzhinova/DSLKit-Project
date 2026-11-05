@@ -1,0 +1,429 @@
+[
+  {
+    "id": "TC-WL-001",
+    "kind": "P",
+    "priority": "High",
+    "title": "Все поля корректны",
+    "data": {
+      "name": "Анна Иванова",
+      "email": "anna@example.com",
+      "notation": "idef0",
+      "team": 5,
+      "comment": "",
+      "consent": true
+    },
+    "expected": [],
+    "actual": [],
+    "status": "Passed"
+  },
+  {
+    "id": "TC-WL-002",
+    "kind": "B",
+    "priority": "High",
+    "title": "Имя из 1 символа (ниже границы 2)",
+    "data": {
+      "name": "A",
+      "email": "anna@example.com",
+      "notation": "idef0",
+      "team": 5,
+      "comment": "",
+      "consent": true
+    },
+    "expected": [
+      "name"
+    ],
+    "actual": [
+      "name"
+    ],
+    "status": "Passed"
+  },
+  {
+    "id": "TC-WL-003",
+    "kind": "B",
+    "priority": "Medium",
+    "title": "Имя из 2 символов (нижняя граница)",
+    "data": {
+      "name": "Ян",
+      "email": "anna@example.com",
+      "notation": "idef0",
+      "team": 5,
+      "comment": "",
+      "consent": true
+    },
+    "expected": [],
+    "actual": [],
+    "status": "Passed"
+  },
+  {
+    "id": "TC-WL-004",
+    "kind": "B",
+    "priority": "Medium",
+    "title": "Имя из 60 символов (верхняя граница)",
+    "data": {
+      "name": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "email": "anna@example.com",
+      "notation": "idef0",
+      "team": 5,
+      "comment": "",
+      "consent": true
+    },
+    "expected": [],
+    "actual": [],
+    "status": "Passed"
+  },
+  {
+    "id": "TC-WL-005",
+    "kind": "B",
+    "priority": "Medium",
+    "title": "Имя из 61 символа (выше границы)",
+    "data": {
+      "name": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "email": "anna@example.com",
+      "notation": "idef0",
+      "team": 5,
+      "comment": "",
+      "consent": true
+    },
+    "expected": [
+      "name"
+    ],
+    "actual": [
+      "name"
+    ],
+    "status": "Passed"
+  },
+  {
+    "id": "TC-WL-006",
+    "kind": "N",
+    "priority": "High",
+    "title": "Имя с цифрой",
+    "data": {
+      "name": "Anna1",
+      "email": "anna@example.com",
+      "notation": "idef0",
+      "team": 5,
+      "comment": "",
+      "consent": true
+    },
+    "expected": [
+      "name"
+    ],
+    "actual": [
+      "name"
+    ],
+    "status": "Passed"
+  },
+  {
+    "id": "TC-WL-007",
+    "kind": "P",
+    "priority": "Low",
+    "title": "Имя с апострофом и дефисом",
+    "data": {
+      "name": "O'Neil-Smith",
+      "email": "anna@example.com",
+      "notation": "idef0",
+      "team": 5,
+      "comment": "",
+      "consent": true
+    },
+    "expected": [],
+    "actual": [],
+    "status": "Passed"
+  },
+  {
+    "id": "TC-WL-008",
+    "kind": "N",
+    "priority": "High",
+    "title": "Email без символа @",
+    "data": {
+      "name": "Анна Иванова",
+      "email": "anna.example.com",
+      "notation": "idef0",
+      "team": 5,
+      "comment": "",
+      "consent": true
+    },
+    "expected": [
+      "email"
+    ],
+    "actual": [
+      "email"
+    ],
+    "status": "Passed"
+  },
+  {
+    "id": "TC-WL-009",
+    "kind": "N",
+    "priority": "Medium",
+    "title": "Email без домена верхнего уровня",
+    "data": {
+      "name": "Анна Иванова",
+      "email": "anna@example",
+      "notation": "idef0",
+      "team": 5,
+      "comment": "",
+      "consent": true
+    },
+    "expected": [
+      "email"
+    ],
+    "actual": [
+      "email"
+    ],
+    "status": "Passed"
+  },
+  {
+    "id": "TC-WL-010",
+    "kind": "B",
+    "priority": "Medium",
+    "title": "Email длиной 120 символов",
+    "data": {
+      "name": "Анна Иванова",
+      "email": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa@mail.com",
+      "notation": "idef0",
+      "team": 5,
+      "comment": "",
+      "consent": true
+    },
+    "expected": [],
+    "actual": [],
+    "status": "Passed"
+  },
+  {
+    "id": "TC-WL-011",
+    "kind": "B",
+    "priority": "Medium",
+    "title": "Email длиной 121 символ",
+    "data": {
+      "name": "Анна Иванова",
+      "email": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa@mail.com",
+      "notation": "idef0",
+      "team": 5,
+      "comment": "",
+      "consent": true
+    },
+    "expected": [
+      "email"
+    ],
+    "actual": [
+      "email"
+    ],
+    "status": "Passed"
+  },
+  {
+    "id": "TC-WL-012",
+    "kind": "B",
+    "priority": "High",
+    "title": "Размер команды 0 (нижняя граница)",
+    "data": {
+      "name": "Анна Иванова",
+      "email": "anna@example.com",
+      "notation": "idef0",
+      "team": 0,
+      "comment": "",
+      "consent": true
+    },
+    "expected": [],
+    "actual": [],
+    "status": "Passed"
+  },
+  {
+    "id": "TC-WL-013",
+    "kind": "B",
+    "priority": "High",
+    "title": "Размер команды 500 (верхняя граница)",
+    "data": {
+      "name": "Анна Иванова",
+      "email": "anna@example.com",
+      "notation": "idef0",
+      "team": 500,
+      "comment": "",
+      "consent": true
+    },
+    "expected": [],
+    "actual": [],
+    "status": "Passed"
+  },
+  {
+    "id": "TC-WL-014",
+    "kind": "B",
+    "priority": "High",
+    "title": "Размер команды 501 (выше границы)",
+    "data": {
+      "name": "Анна Иванова",
+      "email": "anna@example.com",
+      "notation": "idef0",
+      "team": 501,
+      "comment": "",
+      "consent": true
+    },
+    "expected": [
+      "team"
+    ],
+    "actual": [
+      "team"
+    ],
+    "status": "Passed"
+  },
+  {
+    "id": "TC-WL-015",
+    "kind": "B",
+    "priority": "Medium",
+    "title": "Размер команды -1 (ниже границы)",
+    "data": {
+      "name": "Анна Иванова",
+      "email": "anna@example.com",
+      "notation": "idef0",
+      "team": -1,
+      "comment": "",
+      "consent": true
+    },
+    "expected": [
+      "team"
+    ],
+    "actual": [
+      "team"
+    ],
+    "status": "Passed"
+  },
+  {
+    "id": "TC-WL-016",
+    "kind": "N",
+    "priority": "Medium",
+    "title": "Размер команды — не число",
+    "data": {
+      "name": "Анна Иванова",
+      "email": "anna@example.com",
+      "notation": "idef0",
+      "team": "abc",
+      "comment": "",
+      "consent": true
+    },
+    "expected": [
+      "team"
+    ],
+    "actual": [
+      "team"
+    ],
+    "status": "Passed"
+  },
+  {
+    "id": "TC-WL-017",
+    "kind": "P",
+    "priority": "Low",
+    "title": "Размер команды строкой \"12\"",
+    "data": {
+      "name": "Анна Иванова",
+      "email": "anna@example.com",
+      "notation": "idef0",
+      "team": "12",
+      "comment": "",
+      "consent": true
+    },
+    "expected": [],
+    "actual": [],
+    "status": "Passed"
+  },
+  {
+    "id": "TC-WL-018",
+    "kind": "N",
+    "priority": "High",
+    "title": "Нотация вне списка",
+    "data": {
+      "name": "Анна Иванова",
+      "email": "anna@example.com",
+      "notation": "xyz",
+      "team": 5,
+      "comment": "",
+      "consent": true
+    },
+    "expected": [
+      "notation"
+    ],
+    "actual": [
+      "notation"
+    ],
+    "status": "Passed"
+  },
+  {
+    "id": "TC-WL-019",
+    "kind": "B",
+    "priority": "Low",
+    "title": "Комментарий 500 символов",
+    "data": {
+      "name": "Анна Иванова",
+      "email": "anna@example.com",
+      "notation": "idef0",
+      "team": 5,
+      "comment": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      "consent": true
+    },
+    "expected": [],
+    "actual": [],
+    "status": "Passed"
+  },
+  {
+    "id": "TC-WL-020",
+    "kind": "B",
+    "priority": "Low",
+    "title": "Комментарий 501 символ",
+    "data": {
+      "name": "Анна Иванова",
+      "email": "anna@example.com",
+      "notation": "idef0",
+      "team": 5,
+      "comment": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      "consent": true
+    },
+    "expected": [
+      "comment"
+    ],
+    "actual": [
+      "comment"
+    ],
+    "status": "Passed"
+  },
+  {
+    "id": "TC-WL-021",
+    "kind": "N",
+    "priority": "High",
+    "title": "Согласие на обработку не дано",
+    "data": {
+      "name": "Анна Иванова",
+      "email": "anna@example.com",
+      "notation": "idef0",
+      "team": 5,
+      "comment": "",
+      "consent": false
+    },
+    "expected": [
+      "consent"
+    ],
+    "actual": [
+      "consent"
+    ],
+    "status": "Passed"
+  },
+  {
+    "id": "TC-WL-022",
+    "kind": "N",
+    "priority": "High",
+    "title": "Пустая форма",
+    "data": {},
+    "expected": [
+      "name",
+      "email",
+      "notation",
+      "team",
+      "consent"
+    ],
+    "actual": [
+      "name",
+      "email",
+      "notation",
+      "team",
+      "consent"
+    ],
+    "status": "Passed"
+  }
+]

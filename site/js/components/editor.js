@@ -1,29 +1,28 @@
+import { NOTATIONS, TEMPLATES } from '../notations/index.js';
+import { ui } from '../notations/messages.js';
+import { showCode } from './code-lines.js';
+import { initSourceAutosave } from './source-autosave.js';
+
 const VIEWS = ['code', 'canvas'];
 const KEY_STEPS = { ArrowRight: 1, ArrowLeft: -1 };
 
 const isPlainObject = (value) => typeof value === 'object' && value !== null && !Array.isArray(value);
 
-export const initEditor = ({ root = document, storage } = {}) => {
-  const page = root.querySelector('.app-page--editor');
-  const tabs = page ? [...page.querySelectorAll('.editor-tabs__list [role="tab"]')] : [];
-  if (tabs.length === 0) return null;
-
-  const panels = tabs.map((tab) => root.getElementById(tab.getAttribute('aria-controls')));
-  const closeButton = page.querySelector('.editor-tabs__close');
-  const dialog = root.querySelector('#close-tab-modal');
-  const dialogText = dialog?.querySelector('.modal__text');
-  const autosave = page.querySelector('.editor-toolbar__switch');
-  const status = page.querySelector('.editor-status__cursor');
-  const main = page.querySelector('.editor-main');
-  const viewButtons = [...page.querySelectorAll('[data-view]')];
-  const runButtons = [...page.querySelectorAll('.button--run')];
-
-  const readSettings = () => {
+// Settings live under one storage key, a damaged value is treated as "no settings".
+const createSettings = (storage) => {
+  const read = () => {
     const saved = storage.get('settings', {});
     return isPlainObject(saved) ? saved : {};
   };
-  const saveSetting = (key, value) => storage.set('settings', { ...readSettings(), [key]: value });
+  return { read, save: (key, value) => storage.set('settings', { ...read(), [key]: value }) };
+};
 
+const announceRun = (page, root) => page.dispatchEvent(new root.defaultView.CustomEvent('dslkit:run', { bubbles: true }));
+
+// File tabs: selection, arrow-key navigation and the remembered tab.
+const initTabs = ({ page, root, storage, tabs }) => {
+  const panels = tabs.map((tab) => root.getElementById(tab.getAttribute('aria-controls')));
+  const closeButton = page.querySelector('.editor-tabs__close');
   const tabName = (index) => tabs[index].querySelector('span').textContent.trim();
   const current = () => tabs.findIndex((tab) => tab.getAttribute('aria-selected') === 'true');
 
@@ -58,6 +57,17 @@ export const initEditor = ({ root = document, storage } = {}) => {
     select(tabs.indexOf(visible[next]), { focus: true });
   });
 
+  const savedTab = storage.get('editor-tab', null);
+  select(Number.isInteger(savedTab) && tabs[savedTab] ? savedTab : Math.max(0, current()));
+  return { select, current, tabName, panels, closeButton };
+};
+
+// The dialog that asks what to do with unsaved changes when a tab is closed.
+const initCloseDialog = ({ page, root, tabs, tabsApi }) => {
+  const dialog = root.querySelector('#close-tab-modal');
+  const dialogText = dialog?.querySelector('.modal__text');
+  const { select, current, tabName, panels, closeButton } = tabsApi;
+
   const markSaved = () => {
     page.querySelectorAll('.editor-tabs__dot, .editor-topbar__dot').forEach((dot) => dot.remove());
     page.querySelectorAll('.visually-hidden').forEach((note) => {
@@ -65,56 +75,83 @@ export const initEditor = ({ root = document, storage } = {}) => {
     });
   };
 
+  // Closing the last open file leaves the editor: the project list is shown.
+  const announce = (name) => page.dispatchEvent(new root.defaultView.CustomEvent(name, { bubbles: true }));
   const discard = () => {
     const index = current();
     tabs[index].hidden = true;
     panels[index].hidden = true;
     const next = tabs.findIndex((tab) => !tab.hidden);
     if (next >= 0) select(next);
-    else if (closeButton) closeButton.hidden = true;
+    else announce('dslkit:close');
   };
 
   closeButton?.addEventListener('click', () => {
     if (!dialog) return;
     dialog.returnValue = '';
-    if (dialogText) dialogText.textContent = `В файле ${tabName(current())} есть несохранённые изменения.`;
+    if (dialogText) {
+      const name = tabName(current());
+      dialogText.textContent =
+        root.documentElement.lang === 'en'
+          ? `Close the file ${name}? Unsaved changes are lost unless you save.`
+          : `Закрыть файл ${name}? Несохранённые изменения будут потеряны, если не сохранить.`;
+    }
     if (typeof dialog.showModal === 'function') dialog.showModal();
     else dialog.setAttribute('open', '');
   });
   dialog?.addEventListener('close', () => {
-    if (dialog.returnValue === 'save') markSaved();
-    else if (dialog.returnValue === 'discard') discard();
+    if (dialog.returnValue === 'save') {
+      announce('dslkit:save');
+      markSaved();
+      discard();
+    } else if (dialog.returnValue === 'discard') discard();
     dialog.returnValue = '';
   });
+  return { markSaved };
+};
 
-  if (autosave) {
-    const apply = (on) => {
-      autosave.setAttribute('aria-checked', String(on));
-      if (status) status.textContent = status.textContent.replace(/Автосохранение: (?:вкл|выкл)/, `Автосохранение: ${on ? 'вкл' : 'выкл'}`);
-    };
-    const saved = readSettings().autosave;
-    apply(typeof saved === 'boolean' ? saved : autosave.getAttribute('aria-checked') === 'true');
-    autosave.addEventListener('click', () => {
-      const on = autosave.getAttribute('aria-checked') !== 'true';
-      apply(on);
-      saveSetting('autosave', on);
-    });
-  }
+const initAutosave = ({ page, settings }) => {
+  const autosave = page.querySelector('.editor-toolbar__switch');
+  if (!autosave) return;
+  const status = page.querySelector('.editor-status__cursor');
+  const apply = (on) => {
+    autosave.setAttribute('aria-checked', String(on));
+    if (status) status.textContent = status.textContent.replace(/Автосохранение: (?:вкл|выкл)/, `Автосохранение: ${on ? 'вкл' : 'выкл'}`);
+  };
+  const saved = settings.read().autosave;
+  apply(typeof saved === 'boolean' ? saved : autosave.getAttribute('aria-checked') === 'true');
+  autosave.addEventListener('click', () => {
+    const on = autosave.getAttribute('aria-checked') !== 'true';
+    apply(on);
+    settings.save('autosave', on);
+  });
+};
 
+// Code and canvas views (on a phone only one of them is shown).
+const initViews = ({ page, storage }) => {
+  const main = page.querySelector('.editor-main');
+  const viewButtons = [...page.querySelectorAll('[data-view]')];
   const showView = (view) => {
     if (main) main.dataset.view = view;
     viewButtons.forEach((button) => button.setAttribute('aria-pressed', String(button.dataset.view === view)));
     storage.set('editor-view', view);
   };
   viewButtons.forEach((button) => button.addEventListener('click', () => showView(button.dataset.view)));
+  const savedView = storage.get('editor-view', null);
+  showView(VIEWS.includes(savedView) ? savedView : 'canvas');
+  return { showView, view: () => main?.dataset.view };
+};
 
+// The Run button and Ctrl+Enter ask the runner to draw, unless the code has errors: then focus goes to the first problem.
+const initRun = ({ page, root }) => {
+  const runButtons = [...page.querySelectorAll('.button--run')];
   const run = (event) => {
     event.preventDefault();
     if (runButtons.some((button) => button.getAttribute('aria-disabled') === 'true')) {
       page.querySelector('.problems__location')?.focus();
       return false;
     }
-    page.dispatchEvent(new root.defaultView.CustomEvent('dslkit:run', { bubbles: true }));
+    announceRun(page, root);
     return true;
   };
   page.addEventListener('click', (event) => {
@@ -123,11 +160,82 @@ export const initEditor = ({ root = document, storage } = {}) => {
   page.addEventListener('keydown', (event) => {
     if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') run(event);
   });
+};
 
-  const savedTab = storage.get('editor-tab', null);
-  select(Number.isInteger(savedTab) && tabs[savedTab] ? savedTab : Math.max(0, current()));
-  const savedView = storage.get('editor-view', null);
-  showView(VIEWS.includes(savedView) ? savedView : 'canvas');
+// Templates: the buttons and the notation list replace the code with a starter example and ask the runner to draw it.
+const initTemplates = ({ page, root }) => {
+  const lang = root.documentElement.lang === 'en' ? 'en' : 'ru';
+  const codeLines = page.querySelector('.code__lines');
+  const loadTemplate = (key) => {
+    if (!codeLines || !Object.hasOwn(TEMPLATES, key)) return false;
+    showCode(root, codeLines, TEMPLATES[key]);
+    announceRun(page, root);
+    return true;
+  };
+  // The Templates tab lists every notation of the editor, the three most used ones first, with a field that filters the list.
+  const list = page.querySelector('.templates');
+  if (list) {
+    const keys = ['idef0', 'dfd', 'erd', ...Object.keys(NOTATIONS).filter((key) => !['idef0', 'dfd', 'erd'].includes(key))];
+    list.replaceChildren(
+      ...keys.map((key) => {
+        const item = root.createElement('li');
+        const button = root.createElement('button');
+        button.type = 'button';
+        button.className = 'templates__item';
+        button.dataset.template = key;
+        const name = root.createElement('span');
+        name.textContent = NOTATIONS[key].name[lang];
+        const short = root.createElement('span');
+        short.className = 'badge';
+        short.textContent = NOTATIONS[key].short;
+        button.append(name, short);
+        item.append(button);
+        return item;
+      }),
+    );
+    const search = root.createElement('input');
+    search.type = 'search';
+    search.className = 'templates__search settings-row__select';
+    search.placeholder = ui('template', {}, lang);
+    search.setAttribute('aria-label', ui('template', {}, lang));
+    search.addEventListener('input', () => {
+      const query = search.value.trim().toLowerCase();
+      list.querySelectorAll('li').forEach((item) => {
+        item.hidden = query !== '' && !item.textContent.toLowerCase().includes(query);
+      });
+    });
+    list.before(search);
+  }
+  page.querySelectorAll('[data-template]').forEach((button) => button.addEventListener('click', () => loadTemplate(button.dataset.template)));
+  const picker = page.querySelector('[data-notation-select]');
+  if (picker) {
+    picker.setAttribute('aria-label', ui('template', {}, lang));
+    picker.replaceChildren(
+      ...Object.entries(NOTATIONS).map(([key, notation]) => {
+        const option = root.createElement('option');
+        option.value = key;
+        option.textContent = notation.name[lang];
+        return option;
+      }),
+    );
+    picker.addEventListener('change', () => loadTemplate(picker.value));
+  }
+  return loadTemplate;
+};
 
-  return { select, showView, view: () => main?.dataset.view };
+export const initEditor = ({ root = document, storage, ...timing } = {}) => {
+  const page = root.querySelector('.app-page--editor');
+  const tabs = page ? [...page.querySelectorAll('.editor-tabs__list [role="tab"]')] : [];
+  if (tabs.length === 0) return null;
+
+  const settings = createSettings(storage);
+  const tabsApi = initTabs({ page, root, storage, tabs });
+  const { markSaved } = initCloseDialog({ page, root, tabs, tabsApi });
+  initAutosave({ page, settings });
+  initRun({ page, root });
+  const sourceAutosave = initSourceAutosave({ page, root, storage, onSaved: markSaved, ...timing });
+  const loadTemplate = initTemplates({ page, root });
+  const { showView, view } = initViews({ page, storage });
+
+  return { select: tabsApi.select, showView, loadTemplate, view, sourceAutosave };
 };

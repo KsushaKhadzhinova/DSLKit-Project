@@ -1,24 +1,66 @@
 import { initAccordion } from './components/accordion.js';
+import { initAutomation } from './components/automation.js';
+import { initAppSearch } from './components/app-search.js';
+import { initAuthForm, initAuthMenu } from './components/auth.js';
+import { initAuthGate } from './components/auth-gate.js';
 import { initBurger } from './components/burger.js';
+import { initCanvasDrag } from './components/canvas-drag.js';
 import { initDashboard } from './components/dashboard.js';
+import { initDecision } from './components/decision.js';
+import { initDocs } from './components/docs.js';
+import { initExpert } from './components/expert.js';
 import { initDiagramRunner } from './components/diagram-runner.js';
 import { initEditor } from './components/editor.js';
+import { initCodeInput } from './components/code-input.js';
+import { initEditorActions } from './components/editor-actions.js';
+import { initEditorPalette } from './components/editor-palette.js';
+import { initEditorProjects } from './components/editor-projects.js';
+import { initEditorTools } from './components/editor-tools.js';
+import { initExport } from './components/export-menu.js';
+import { initImport } from './components/import-menu.js';
+import { registerServiceWorker } from './components/pwa.js';
 import { initNotationFilter } from './components/notation-filter.js';
+import { initPopups } from './components/popups.js';
 import { initSettings } from './components/settings.js';
 import { initTheme } from './components/theme.js';
+import { initQuota } from './components/quota.js';
+import { initTour } from './components/tour.js';
+import { initToasts } from './components/toast.js';
+import { initWelcome } from './components/welcome.js';
 import { initWaitlistForm } from './components/waitlist-form.js';
 import { getStorage } from './utils/storage.js';
 
 export const COMPONENTS = [
   initTheme,
+  initToasts,
   initBurger,
+  initAuthGate,
+  initAuthMenu,
   initAccordion,
   initNotationFilter,
   initWaitlistForm,
+  initAuthForm,
   initDashboard,
+  initQuota,
+  initWelcome,
+  initDocs,
+  initExpert,
+  initDecision,
+  initAppSearch,
   initSettings,
   initEditor,
+  initEditorProjects,
+  initCodeInput,
+  initEditorActions,
+  initEditorTools,
+  initAutomation,
+  initEditorPalette,
+  initExport,
+  initImport,
+  initTour,
+  initCanvasDrag,
   initDiagramRunner,
+  initPopups,
 ];
 
 // Starts every component that finds its markup on the page; a failing component is reported and does not stop the others.
@@ -32,9 +74,14 @@ export const boot = (root, { components = COMPONENTS, logger = console } = {}) =
       logger.error(`DSLKit: component ${init.name} failed`, error);
     }
   });
+  // The placeholders of the markup stay hidden until the components have written the real content.
+  root.documentElement.classList.add('is-ready');
   return started;
 };
 
 /* node:coverage disable */
-if (typeof document !== 'undefined') boot(document);
+if (typeof document !== 'undefined') {
+  boot(document);
+  registerServiceWorker({ navigator: document.defaultView.navigator });
+}
 /* node:coverage enable */

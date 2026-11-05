@@ -49,6 +49,23 @@ Table 1 – Style files of the DSLKit project
 
 The file `variables.css` defines colours of the light and dark themes, font families, the text size scale, spacing, radii, shadows and the container width. The names required by the assignment (`--font-family-main`, `--font-size-base`, `--spacing-small`, `--container-max-width`, `--breakpoint-mobile` and others) are aliases of the project scales. Spacing of 8, 16, 24, 40, 64 and 104 pixels corresponds to Fibonacci numbers multiplied by 8, so the 8 pixel grid agrees with the golden ratio.
 
+The reasons for the main values are given in table 2.
+
+Table 2 – Rationale of the CSS variable values
+
+| Variables | Value | Rationale |
+|---|---|---|
+| `--phi`, `--phi-root` | 1.618 and 1.272 | The golden ratio and its square root build the type scale: a step of √φ gives small increments for captions and a step of φ gives headings |
+| `--font-size-base` | 16 pixels | The browser default: text never drops below 12 pixels and the user's scaling in `rem` is kept |
+| `--font-size-h1`, `--font-size-h2` | about 53 and 42 pixels | Steps `--step-5` and `--step-4` of the scale: 16 × φ² × √φ and 16 × φ² |
+| `--spacing-small` … `--spacing-xlarge` | 8, 16, 24 and 40 pixels | Fibonacci numbers 1, 2, 3 and 5 multiplied by 8, so spacing stays on the 8 pixel grid. The assignment example uses 48 for the last value, the project uses 40 to keep the Fibonacci series |
+| `--space-5`, `--space-6` | 64 and 104 pixels | Fibonacci numbers 8 and 13 for the vertical spacing of sections |
+| `--container-max-width` | 1200 pixels | The value from the assignment: a line of text stays within `--measure` (62 characters) and the hero columns get about 458 and 742 pixels |
+| `--target-size` | 48 pixels | A tap target above the 24 pixel minimum of WCAG 2.2 (criterion 2.5.8), comfortable for a finger |
+| `--header-height` | 64 pixels | Equal to `--space-5`, so the header fits the 8 pixel grid |
+
+The breakpoints are set in pixels in `--breakpoint-small`, `--breakpoint-medium` and `--breakpoint-large` and repeated in the aliases required by the assignment. CSS variables cannot be used inside an `@media` condition, so the numbers 576, 768 and 1024 are written in `adaptive.css` directly, and a test checks them against the list of allowed breakpoints.
+
 ### 3.4 Base Styles
 
 The file `base.css` resets margins, sets `box-sizing: border-box`, the font, the text colour and the line height. The line height is 1.618 for body text and 1.15 for headings. Every interactive element has a visible focus ring, the `visually-hidden` class hides text visually only, and the `prefers-reduced-motion` rule turns animation off for users who are bothered by it.
@@ -59,13 +76,44 @@ The header is fixed with `position: sticky`. On screens narrower than 768 pixels
 
 ### 3.6 Flexbox and Grid Layouts
 
-Flexbox is used in the header, the footer, rows of buttons and captions. Grid builds the hero block (two columns, 1 to 1.618), the card grid, pricing, steps and the application shell with a 224 pixel sidebar. The editor screen uses the named areas `toolbar`, `activity`, `sidebar`, `main`, `problems` and `status`.
+Flexbox and Grid solve different problems, so the project uses them together: Flexbox arranges content along one axis, Grid defines a two-dimensional layout.
+
+#### 3.6.1 Flexbox
+
+Flexbox is used where items sit side by side or one under another and align along one axis:
+
+- the logo in the header (`.header__logo`), the navigation row (`.nav__list`) and the row of tools (`.header__tools`);
+- rows of buttons in the hero block (`.hero__actions`) and the buttons themselves (`.button`), where the icon and the label are centred;
+- the list of footer links (`.footer__list`);
+- the title and the meta line of a card (`.card__title`, `.card__meta`) and the accordion question (`.faq__question`).
+
+On a phone the navigation is a column, and from 768 pixels it is a wrapping row (`flex-flow: row wrap`).
+
+#### 3.6.2 CSS Grid
+
+Grid is used for two-dimensional layouts:
+
+- the page frame `.page` is described by the areas `header`, `main` and `footer` with `grid-template-areas`, one column and the rows `auto 1fr auto`. The `1fr` row pushes the footer to the bottom of the window on short pages, as the former Flexbox frame did. The public pages have no sidebar, so the `sidebar` area from the assignment example is not needed, and the application shell with its 224 pixel panel is described separately in `app.css`;
+- the hero block `.hero`: one column on a phone and `1fr 1.618fr` from 1024 pixels;
+- the card grid `.cards`: one, two and three columns through `repeat(n, minmax(0, 1fr))`, where `minmax(0, 1fr)` stops a long word from stretching a column;
+- pricing `.plans` and the hero facts `.hero__facts`;
+- the editor screen: the named areas `toolbar`, `activity`, `sidebar`, `main`, `problems` and `status`, with the `sidebar` column added on a wide screen.
+
+After `.page` moved from Flexbox to Grid, comparing the position and size of every element with the previous ones on six pages at the widths 375, 500, 800 and 1440 pixels showed no differences.
 
 ### 3.7 Responsiveness
 
-Three states are implemented with the mobile-first approach and listed in table 2.
+Three states are implemented with the mobile-first approach and listed in table 3.
 
-Table 2 – Breakpoints and page behaviour
+The breakpoints follow the page content and typical devices, not particular phone models:
+
+- 576 pixels: the border between a narrow and a wide phone, for example after a screen rotation. From here the cards have room for two columns, and the burger caption becomes visible;
+- 768 pixels: the width of a tablet in portrait orientation. Five menu items, the language switch and the button fit in one row, so the burger is replaced by a horizontal menu. The assignment names the same border as the limit for the burger;
+- 1024 pixels: a tablet in landscape orientation and a laptop. There is room for three columns of cards and for the hero block in the proportion 1 to 1.618.
+
+The mobile-first approach is used: base styles describe a phone and each `min-width` query only adds rules. A phone never receives desktop rules that would have to be cancelled, and the cascade has fewer overrides than with desktop-first `max-width` queries. The breakpoints are in pixels because dependence on the user's font size is not needed here. The assignment text names 992 pixels for the desktop, and the project uses 1024 as in the media query example of the same assignment. Every query is written in `adaptive.css` as one block, and a test forbids repeats.
+
+Table 3 – Breakpoints and page behaviour
 
 | Width | State | Behaviour |
 |---|---|---|
@@ -98,46 +146,63 @@ The dark theme switches without JavaScript: the rule `:root:has(.theme__input:ch
 
 ### 3.9 Cross-Browser Compatibility
 
-Flexbox and Grid are supported by all modern browsers. Every `color-mix()` declaration is preceded by a fallback value, so a browser without the function uses a plain colour. The `-webkit-` prefix is added for `backdrop-filter`. Autoprefixer is not connected because the project targets current browser versions.
+Flexbox and Grid are supported by all modern browsers, so no fallbacks are needed for them. Every `color-mix()` declaration is preceded by a fallback value, so a browser without the function uses a plain colour. The `-webkit-` prefix is added for `backdrop-filter`. Autoprefixer is not connected because the project targets current browser versions.
+
+The site was opened in real browsers driven through puppeteer-core. The results are in table 4, and the full protocol is in `docs/metrics/browsers/README.md`.
+
+Table 4 – Browser test results
+
+| Browser | Version | Check | Result |
+|---|---|---|---|
+| Google Chrome | current | inspection at 375, 768 and 1280 pixels | layout is correct |
+| Mozilla Firefox | 157.0.1 | 20 scenarios on the landing, the application and the editor | 20 of 20 |
+| Microsoft Edge | 155.0.4283.45 | the same 20 scenarios | 20 of 20 |
+| Safari | not tested | no Apple device | left for the acceptance stage |
+
+Each browser checked page loading, the theme switch, the burger menu, forms, no horizontal scrolling at 375 pixels and no console errors. The check found a defect: at 375 pixels the page scrolled sideways, and it was fixed with the rule `overflow-x: clip` for `html` in `base.css`. A snapshot of the landing page in Firefox at 375 pixels is shown in figure 4.
+
+![Landing page in Firefox at 375 pixels](figures/firefox-landing-375.png)
+
+Figure 4 – The DSLKit landing page in Firefox on a 375 pixel screen
+
+A snapshot of the landing page in Edge at 1280 pixels is shown in figure 5.
+
+![Landing page in Edge at 1280 pixels](figures/edge-landing-1280.png)
+
+Figure 5 – The DSLKit landing page in Edge on a 1280 pixel screen
 
 ### 3.10 Verification and Testing
 
-Automated checks are collected in the tests of `labs/04-responsive-css`. They confirm that every class used in the HTML has a rule in the styles, that the tokens follow the golden ratio, that spacing is a multiple of 8 pixels and forms a Fibonacci series, that colours pass AA contrast in the light and dark themes, that no colours live outside the variables file, that no font is smaller than 12 pixels, and that only `min-width` queries and the breakpoints 576, 768 and 1024 are used.
+Automated checks are collected in the tests of `labs/04-responsive-css`. They confirm that every class used in the HTML has a rule in the styles, that the tokens follow the golden ratio, that spacing is a multiple of 8 pixels and forms a Fibonacci series, that colours pass AA contrast in the light and dark themes, that no colours live outside the variables file, that no font is smaller than 12 pixels, that only `min-width` queries and the breakpoints 576, 768 and 1024 are used, and that no file contains two identical `@media` queries.
 
-All style files passed the W3C CSS validator without errors, and the HTML pages passed the W3C Nu validator. The geometry of all page elements was compared before and after the move to mobile first at the widths 500, 800 and 1440 pixels, and no differences appeared. Visual inspection in Chrome at 375, 768 and 1280 pixels showed a correct layout. Testing in Firefox, Edge and Safari on real devices has not been done and remains a task for the acceptance stage.
+Every style file was checked with the W3C CSS validator (profile CSS 3.0 with SVG, warnings on). The results are in table 5, and the full validator responses are saved in `docs/metrics/css-validator`.
+
+Table 5 – W3C CSS validator results
+
+| File | Errors | Warnings |
+|---|---|---|
+| `variables.css` | 0 | 0 |
+| `base.css` | 0 | 29 |
+| `components.css` | 0 | 98 |
+| `header.css` | 0 | 35 |
+| `main.css` | 0 | 34 |
+| `footer.css` | 0 | 9 |
+| `pages.css` | 0 | 26 |
+| `app.css` | 0 | 236 |
+| `editor.css` | 0 | 170 |
+| `adaptive.css` | 0 | 14 |
+
+Almost all warnings have one cause: the validator cannot evaluate values with `var()` because they depend on the runtime. The rest report vendor prefixes (`-webkit-appearance`, `progress` indicators), the deprecated `clip` property in the `visually-hidden` class, kept as a fallback beside `clip-path`, and the notation `rect(0 0 0 0)` without commas, which browsers understand.
+
+The HTML pages passed the W3C Nu validator. The geometry of all page elements was compared before and after the move to mobile first at the widths 500, 800 and 1440 pixels, and no differences appeared. The same method was applied after the `.page` frame moved to Grid.
 
 ### 3.11 Committing the Changes
 
 The work is done in the branch `feature/responsive-layout`. The commit with the implementation: https://github.com/KsushaKhadzhinova/DSLKit-Project/commit/eb70a59. The commit message: `feat: implement responsive layout according to Figma design`.
 
-## 4 Answers to Control Questions
-
-{{answers}}
-1. **Matching the Figma layout.** Colours, fonts and spacing are moved to variables taken from the layout tokens, and sizes came from a check against the palette and typography in `site/design/figma`. Browser developer tools and automated tests of contrast and scale served as the check.
-2. **Flexbox and Grid.** Flexbox aligns the header, footer and rows of buttons because the layout is one-dimensional. Grid builds the two-dimensional layouts: cards, the hero block, pricing and the application shell.
-3. **The role of BEM.** Blocks, elements and modifiers (`card__title`, `button--primary`) gave predictable names, removed selector conflicts and allowed the styles to be split across files.
-4. **Responsive features.** A burger menu on narrow screens, one, two and three columns of cards, hero columns in the golden ratio and larger tap targets on touch screens. It is implemented with `min-width` and Grid.
-5. **Difficulties when moving the design.** Figma layouts are static and carry no states, so hover, focus and error states had to be designed independently. The Fibonacci spacing scale resolved the differences from the 8 pixel grid.
-6. **Media queries.** The rule `@media (min-width: 768px) { .nav { display: block; } }` shows the menu on wide screens. Queries switch styles on by a condition, so one markup works on different devices.
-7. **Fluid grids.** Percentages are computed from the parent width, while the `fr` unit divides the remaining free space between columns. The value `1fr 1.618fr` sets the hero columns without computing percentages.
-8. **The advantage of Flexbox.** Items distribute space by themselves, wrap onto a new line and align on both axes without fixed sizes.
-9. **CSS Grid and a sidebar.** The rule `grid-template-columns: 224px minmax(0, 1fr)` creates a sidebar and a content area, and `grid-template-areas` places the blocks. The dashboard and the settings of the application are built this way.
-10. **Problems in old browsers.** Old versions do not support Grid, `gap` in Flexbox, `clamp()`, `:has()` and `color-mix()`. The result is a broken layout or lost colours.
-11. **Cross-browser compatibility.** It means the same behaviour of a page in different browsers and on different devices. It matters because the audience uses different browsers.
-12. **Choosing breakpoints.** Breakpoints follow the content: at 576 pixels there is room for two cards, at 768 the horizontal menu fits, and at 1024 the two-column hero block and three columns of cards switch on.
-13. **Autoprefixers.** Autoprefixer adds vendor prefixes from a list of target browsers. In the project the `-webkit-` prefix for `backdrop-filter` is added by hand.
-14. **Relative units.** The units `rem`, `em`, `%` and `vw` scale with user settings and the screen width, so text stays readable when enlarged.
-15. **Checking responsiveness.** The device mode of the developer tools, emulation of 375, 768 and 1280 pixels, comparing element geometry before and after edits, and viewing in the browser. Real devices are required for the final acceptance.
-16. **Responsiveness without media queries.** The value `grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr))` picks the number of columns itself. The project grids of projects and templates in the application work this way.
-17. **Fallbacks.** A fallback declaration before a new property (`color: red; color: color-mix(...)`) leaves a browser without support a working value. The `@supports` rule enables styles only when a feature is supported.
-18. **High-density screens.** Vector SVG graphics stay sharp at any pixel density, while raster images need `@2x` versions or the `srcset` attribute. All illustrations on the site are vector.
-19. **Mobile first.** Base styles describe a phone, and wide screens get additions through `min-width`. The approach reduces overrides and speeds up loading on weak devices.
-20. **A burger menu in CSS and JavaScript.** A hidden checkbox and the rule `.burger__input:checked ~ .nav` open the menu without scripts. In laboratory work No. 5 a script adds closing with the Escape key and updating the `aria-expanded` attribute.
-{{/answers}}
-
 ## Conclusion
 
-The styles of the DSLKit project are split into files following the BEM methodology and built mobile first. Three page states, a burger menu without JavaScript, Flexbox and Grid layouts, CSS variables and a dark theme are implemented. The golden ratio is built into the size scale, the spacing and the columns, and automated tests prevent any drift from it. What remains is to check the page in Firefox, Edge and Safari on real devices.
+The styles of the DSLKit project are split into files following the BEM methodology and built mobile first. Three page states, a burger menu without JavaScript, Flexbox and Grid layouts, CSS variables and a dark theme are implemented. The golden ratio is built into the size scale, the spacing and the columns, and automated tests prevent any drift from it. The page is tested in Chrome, Firefox and Edge, and the check in Safari on an Apple device remains.
 
 ## Appendix A – Listing of variables.css
 
