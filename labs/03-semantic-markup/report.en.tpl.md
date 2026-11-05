@@ -113,22 +113,24 @@ Figure 3 – Structure of the site folder and semantic blocks of index.html
 
 The work is done in the branch `feature/semantic-markup`. The commit: https://github.com/KsushaKhadzhinova/DSLKit-Project/commit/a2b85e0. The commit message: `feat: add semantic HTML markup with Schema.org for a SaaS diagram editor`.
 
+The source code and the tests are given in the appendices. Appendix A contains listing of index.html. Appendix B contains listing of site-checks.js. Appendix C contains listing of site.test.js. Appendix D contains design Tokens.
+
 ## Conclusion
 
 Semantic markup is created for the DSLKit home page and the related pages: Russian and English versions, error pages, the privacy policy and the signup confirmation. The pages use 15 semantic tags, keep the heading hierarchy and accessibility requirements, and carry SoftwareApplication, Offer and FAQPage microdata. The W3C and Schema.org validators found no errors, and automated tests check the markup on every page. The Google Rich Results Test was not run because the site is not published and the domain is not bought.
 
-## Appendix A – Listing of index.html
+## Appendix A (mandatory) Listing of index.html
 
 {{code:site/index.html}}
 
-## Appendix B – Listing of site-checks.js
+## Appendix B (mandatory) Listing of site-checks.js
 
 {{code:labs/03-semantic-markup/site-checks.js}}
 
-## Appendix C – Listing of site.test.js
+## Appendix C (mandatory) Listing of site.test.js
 
 {{code:labs/03-semantic-markup/site.test.js}}
 
-## Appendix D – Design Tokens
+## Appendix D (mandatory) Design Tokens
 
 {{code:site/design/design-tokens.txt}}

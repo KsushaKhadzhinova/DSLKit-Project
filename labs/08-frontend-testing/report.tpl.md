@@ -131,22 +131,24 @@
 
 Рисунок 8 – Консоль приложения
 
+Исходный код и тесты приведены в приложениях. Приложение Б содержит листинг файла helpers.test.js. Приложение Г содержит листинг файла jest.config.js.
+
 ## Заключение
 
 Для React-приложения проекта DSLKit настроены Jest и React Testing Library, написаны unit-тесты пяти чистых функций и тесты всех компонентов. Покрытие равно 100 процентов при пороге 70 и 60. Аудит Lighthouse выявил три замечания, после их исправления доступность выросла до 100, а SEO до 100. Остаётся приложить снимки панелей Sources и React DevTools и проверить приложение в Firefox и Edge.
 
-## Приложение А – Листинг файла helpers.js
+## Приложение А (обязательное) Листинг файла helpers.js
 
 {{code:react-app/src/utils/helpers.js}}
 
-## Приложение Б – Листинг файла helpers.test.js
+## Приложение Б (обязательное) Листинг файла helpers.test.js
 
 {{code:react-app/src/utils/helpers.test.js}}
 
-## Приложение В – Листинг файла ProjectList.test.jsx
+## Приложение В (обязательное) Листинг файла ProjectList.test.jsx
 
 {{code:react-app/src/components/features/ProjectList.test.jsx}}
 
-## Приложение Г – Листинг файла jest.config.js
+## Приложение Г (обязательное) Листинг файла jest.config.js
 
 {{code:react-app/jest.config.js}}

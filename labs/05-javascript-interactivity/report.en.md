@@ -116,11 +116,13 @@ The saved state is shown in Figure 7: after the form is submitted, LocalStorage 
 
 Figure 7 – The Application panel: site LocalStorage
 
+The source code and the tests are given in the appendices. Appendix A contains listing of script.js. Appendix B contains listing of storage.js. Appendix C contains listing of validation.js. Appendix D contains listing of notation-filter.js. Appendix E contains listing of waitlist-form.js. Appendix F contains listing of dashboard.js. Appendix G contains listing of editor.js.
+
 ## Conclusion
 
 Modular JavaScript is written for the DSLKit project: an entry point, storage and validation utilities and eight interactive components. Five event types and delegation are used, the form is validated with clear messages, and state is saved in LocalStorage and restored after a reload. Automated tests cover all the code, and the components are confirmed in a browser. What remains is to check the pages in Firefox and Edge.
 
-## Appendix A – Listing of script.js
+## Appendix A (mandatory) Listing of script.js
 
 ```js
 import { initAccordion } from './components/accordion.js';
@@ -212,7 +214,7 @@ if (typeof document !== 'undefined') {
 /* node:coverage enable */
 ```
 
-## Appendix B – Listing of storage.js
+## Appendix B (mandatory) Listing of storage.js
 
 ```js
 export function createMemoryBackend() {
@@ -277,7 +279,7 @@ export function getStorage(win = globalThis) {
 }
 ```
 
-## Appendix C – Listing of validation.js
+## Appendix C (mandatory) Listing of validation.js
 
 ```js
 export const NOTATIONS = ['idef0', 'dfd', 'erd', 'bpmn', 'uml', 'petri'];
@@ -382,7 +384,7 @@ export function validateRegistration({ name, email, password, confirm } = {}) {
 }
 ```
 
-## Appendix D – Listing of notation-filter.js
+## Appendix D (mandatory) Listing of notation-filter.js
 
 ```js
 const FILTERS = ['all', 'beta', 'planned'];
@@ -459,7 +461,7 @@ export const initNotationFilter = ({ root = document, storage } = {}) => {
 };
 ```
 
-## Appendix E – Listing of waitlist-form.js
+## Appendix E (mandatory) Listing of waitlist-form.js
 
 ```js
 import { validateWaitlist } from '../utils/validation.js';
@@ -553,7 +555,7 @@ export const initWaitlistForm = ({
 };
 ```
 
-## Appendix F – Listing of dashboard.js
+## Appendix F (mandatory) Listing of dashboard.js
 
 ```js
 import { NOTATIONS, NOTATION_KEYS, TEMPLATES, parseDiagram } from '../notations/index.js';
@@ -1000,7 +1002,7 @@ export const initDashboard = ({ root = document, storage, now = () => Date.now()
 };
 ```
 
-## Appendix G – Listing of editor.js
+## Appendix G (mandatory) Listing of editor.js
 
 ```js
 import { NOTATIONS, TEMPLATES } from '../notations/index.js';

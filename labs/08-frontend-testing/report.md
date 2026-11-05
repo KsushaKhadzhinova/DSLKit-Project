@@ -131,11 +131,13 @@
 
 Рисунок 8 – Консоль приложения
 
+Исходный код и тесты приведены в приложениях. Приложение Б содержит листинг файла helpers.test.js. Приложение Г содержит листинг файла jest.config.js.
+
 ## Заключение
 
 Для React-приложения проекта DSLKit настроены Jest и React Testing Library, написаны unit-тесты пяти чистых функций и тесты всех компонентов. Покрытие равно 100 процентов при пороге 70 и 60. Аудит Lighthouse выявил три замечания, после их исправления доступность выросла до 100, а SEO до 100. Остаётся приложить снимки панелей Sources и React DevTools и проверить приложение в Firefox и Edge.
 
-## Приложение А – Листинг файла helpers.js
+## Приложение А (обязательное) Листинг файла helpers.js
 
 ```js
 // Pure helpers used by components and covered by the tests of lab 8.
@@ -168,7 +170,7 @@ export function pluralizeFiles(count) {
 }
 ```
 
-## Приложение Б – Листинг файла helpers.test.js
+## Приложение Б (обязательное) Листинг файла helpers.test.js
 
 ```js
 import { filterByNotation, formatDate, formatPrice, pluralizeFiles, truncateText } from './helpers';
@@ -254,7 +256,7 @@ describe('pluralizeFiles', () => {
 });
 ```
 
-## Приложение В – Листинг файла ProjectList.test.jsx
+## Приложение В (обязательное) Листинг файла ProjectList.test.jsx
 
 ```jsx
 import { fireEvent, render, screen } from '@testing-library/react';
@@ -359,7 +361,7 @@ describe('PlanCard', () => {
 });
 ```
 
-## Приложение Г – Листинг файла jest.config.js
+## Приложение Г (обязательное) Листинг файла jest.config.js
 
 ```js
 export default {

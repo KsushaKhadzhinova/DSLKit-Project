@@ -131,22 +131,24 @@ The console is shown in Figure 8: the handler output is marked with the file nam
 
 Figure 8 – The application console
 
+The source code and the tests are given in the appendices. Appendix A contains listing of helpers.js. Appendix B contains listing of helpers.test.js. Appendix C contains listing of ProjectList.test.jsx. Appendix D contains listing of jest.config.js.
+
 ## Conclusion
 
 Jest and React Testing Library are set up for the React application of the DSLKit project, unit tests of five pure functions and tests of all components are written. Coverage is 100 percent with thresholds of 70 and 60. The Lighthouse audit found three remarks, and after fixing them accessibility rose to 100 and SEO to 100. What remains is to attach screenshots of the Sources panel and React DevTools and to check the application in Firefox and Edge.
 
-## Appendix A – Listing of helpers.js
+## Appendix A (mandatory) Listing of helpers.js
 
 {{code:react-app/src/utils/helpers.js}}
 
-## Appendix B – Listing of helpers.test.js
+## Appendix B (mandatory) Listing of helpers.test.js
 
 {{code:react-app/src/utils/helpers.test.js}}
 
-## Appendix C – Listing of ProjectList.test.jsx
+## Appendix C (mandatory) Listing of ProjectList.test.jsx
 
 {{code:react-app/src/components/features/ProjectList.test.jsx}}
 
-## Appendix D – Listing of jest.config.js
+## Appendix D (mandatory) Listing of jest.config.js
 
 {{code:react-app/jest.config.js}}

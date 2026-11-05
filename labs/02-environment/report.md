@@ -108,11 +108,13 @@
 
 Рисунок 6 – История коммитов ветки main в репозитории DSLKit-Project на GitHub
 
+Исходный код и тесты приведены в приложениях. Приложение А содержит листинг файла check-env.js. Приложение В содержит листинг файла server.js. Приложение Г содержит листинг тестов check-env.test.js.
+
 ## Заключение
 
 Настроено окружение для веб-разработки: установлены и проверены Node.js, npm, Git и VS Code с расширениями, создана структура проекта DSLKit, подключены Git и GitHub, настроены Prettier, nodemon и статический сервер с обработкой ошибок. Подготовлены макеты Figma: палитра, типографика, мудборд и прототип главной страницы для разных ширин экрана. Правильная настройка окружения позволяет одинаково воспроизводить проект на любом компьютере и служит основой для следующих работ и курсового проекта.
 
-## Приложение А – Листинг файла check-env.js
+## Приложение А (обязательное) Листинг файла check-env.js
 
 ```js
 import { HELP, WORDS } from './help.js';
@@ -203,7 +205,7 @@ export const formatResults = (results, lang = 'ru') => {
 };
 ```
 
-## Приложение Б – Листинг файла check.js
+## Приложение Б (обязательное) Листинг файла check.js
 
 ```js
 import { execSync } from 'node:child_process';
@@ -219,7 +221,7 @@ console.log(formatResults(results, process.argv[2]));
 process.exitCode = results.filter((r) => !r.pass).length;
 ```
 
-## Приложение В – Листинг файла server.js
+## Приложение В (обязательное) Листинг файла server.js
 
 ```js
 import * as nodeFs from 'node:fs';
@@ -325,7 +327,7 @@ export const staticServer = (rootDir, fs = nodeFs) => {
 };
 ```
 
-## Приложение Г – Листинг тестов check-env.test.js
+## Приложение Г (обязательное) Листинг тестов check-env.test.js
 
 ```js
 import assert from 'node:assert/strict';

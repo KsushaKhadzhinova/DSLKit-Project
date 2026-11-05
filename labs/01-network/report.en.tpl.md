@@ -170,18 +170,18 @@ The draw.io site uses HTTPS and HTTP/2, serves static resources through the Clou
 
 1. Laboratory work 1 "Network protocol analysis and developer tools": methodical instructions of the course ITiVP, module 01 (task, procedure, review questions).\n2. Module 01 materials "Internet architecture and network protocols", topic "Standardization organizations" (IETF, W3C, RFC): the theoretical basis of section 2.\n3. draw.io, a cloud diagram editor, the analysed site: https://app.diagrams.net/\n4. Network logs in HAR format recorded for this site on 14 October 2026 in Google Chrome 155: `labs/01-network/data/draw-io-normal.har` and `labs/01-network/data/draw-io-fast3g.har`.
 
-## Appendix A – Listing of analyze-har.js
+## Appendix A (mandatory) Listing of analyze-har.js
 
 {{code:labs/01-network/analyze-har.js}}
 
-## Appendix B – Listing of figures.js
+## Appendix B (mandatory) Listing of figures.js
 
 {{code:labs/01-network/figures.js}}
 
-## Appendix C – Listing of cli.js
+## Appendix C (mandatory) Listing of cli.js
 
 {{code:labs/01-network/cli.js}}
 
-## Appendix D – Listing of the tests analyze-har.test.js
+## Appendix D (mandatory) Listing of the tests analyze-har.test.js
 
 {{code:labs/01-network/analyze-har.test.js}}

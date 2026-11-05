@@ -101,11 +101,13 @@ The handler stubs are shown in Figure 7: clicking the buttons prints the project
 
 Figure 7 – Console: the output of the handler stubs
 
+The source code and the tests are given in the appendices. Appendix A contains listing of Button.jsx. Appendix B contains listing of Card.jsx. Appendix C contains listing of NotationCard.jsx. Appendix D contains listing of ProjectList.jsx. Appendix E contains listing of App.jsx.
+
 ## Conclusion
 
 An application on Vite and React with ten components is created for the DSLKit project: base, layout and subject ones. Data is passed through `props`, lists are rendered with `key`, conditional rendering and composition are used in several places, and handlers are stubs. The rule about the absence of `useState` and `useEffect` is checked by an automated test, and the layout is confirmed on three screen widths. What remains is to attach a React DevTools screenshot and to check the application in Firefox and Edge.
 
-## Appendix A – Listing of Button.jsx
+## Appendix A (mandatory) Listing of Button.jsx
 
 ```jsx
 import styles from './Button.module.css';
@@ -122,7 +124,7 @@ function Button({ children, onClick, variant = 'primary', type = 'button', ...pr
 export default Button;
 ```
 
-## Appendix B – Listing of Card.jsx
+## Appendix B (mandatory) Listing of Card.jsx
 
 ```jsx
 import styles from './Card.module.css';
@@ -141,7 +143,7 @@ function Card({ children, title, className = '', headingLevel: Heading = 'h3' })
 export default Card;
 ```
 
-## Appendix C – Listing of NotationCard.jsx
+## Appendix C (mandatory) Listing of NotationCard.jsx
 
 ```jsx
 import { NOTATION_STATUSES } from '../../data/notations';
@@ -164,7 +166,7 @@ function NotationCard({ notation }) {
 export default NotationCard;
 ```
 
-## Appendix D – Listing of ProjectList.jsx
+## Appendix D (mandatory) Listing of ProjectList.jsx
 
 ```jsx
 import { filterByNotation } from '../../utils/helpers';
@@ -207,7 +209,7 @@ function ProjectList({ projects, notation = 'all', notations = [], onOpen, onFil
 export default ProjectList;
 ```
 
-## Appendix E – Listing of App.jsx
+## Appendix E (mandatory) Listing of App.jsx
 
 ```jsx
 import Footer from './components/layout/Footer';

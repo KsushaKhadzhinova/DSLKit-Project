@@ -101,11 +101,13 @@
 
 Рисунок 7 – Консоль: вывод заглушек обработчиков
 
+Исходный код и тесты приведены в приложениях. Приложение А содержит листинг файла Button.jsx. Приложение Б содержит листинг файла Card.jsx. Приложение Г содержит листинг файла ProjectList.jsx. Приложение Д содержит листинг файла App.jsx.
+
 ## Заключение
 
 Для проекта DSLKit создано приложение на Vite и React с десятью компонентами: базовыми, макета и предметными. Данные передаются через `props`, списки выводятся с `key`, условный рендеринг и композиция применены в нескольких местах, а обработчики являются заглушками. Правило об отсутствии `useState` и `useEffect` проверяется автоматическим тестом, а вёрстка подтверждена на трёх ширинах экрана. Остаётся приложить снимок React DevTools и проверить приложение в Firefox и Edge.
 
-## Приложение А – Листинг файла Button.jsx
+## Приложение А (обязательное) Листинг файла Button.jsx
 
 ```jsx
 import styles from './Button.module.css';
@@ -122,7 +124,7 @@ function Button({ children, onClick, variant = 'primary', type = 'button', ...pr
 export default Button;
 ```
 
-## Приложение Б – Листинг файла Card.jsx
+## Приложение Б (обязательное) Листинг файла Card.jsx
 
 ```jsx
 import styles from './Card.module.css';
@@ -141,7 +143,7 @@ function Card({ children, title, className = '', headingLevel: Heading = 'h3' })
 export default Card;
 ```
 
-## Приложение В – Листинг файла NotationCard.jsx
+## Приложение В (обязательное) Листинг файла NotationCard.jsx
 
 ```jsx
 import { NOTATION_STATUSES } from '../../data/notations';
@@ -164,7 +166,7 @@ function NotationCard({ notation }) {
 export default NotationCard;
 ```
 
-## Приложение Г – Листинг файла ProjectList.jsx
+## Приложение Г (обязательное) Листинг файла ProjectList.jsx
 
 ```jsx
 import { filterByNotation } from '../../utils/helpers';
@@ -207,7 +209,7 @@ function ProjectList({ projects, notation = 'all', notations = [], onOpen, onFil
 export default ProjectList;
 ```
 
-## Приложение Д – Листинг файла App.jsx
+## Приложение Д (обязательное) Листинг файла App.jsx
 
 ```jsx
 import Footer from './components/layout/Footer';

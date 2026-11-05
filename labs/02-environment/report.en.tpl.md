@@ -88,22 +88,24 @@ The project repository: https://github.com/KsushaKhadzhinova/DSLKit-Project. The
 
 Figure 6 – Commit history of the main branch in the DSLKit-Project repository on GitHub
 
+The source code and the tests are given in the appendices. Appendix A contains listing of check-env.js. Appendix C contains listing of server.js. Appendix D contains listing of the tests check-env.test.js.
+
 ## Conclusion
 
 The web development environment is set up: Node.js, npm, Git and VS Code with extensions are installed and verified, the DSLKit project structure is created, Git and GitHub are connected, and Prettier, nodemon and a static server with error handling are configured. The Figma designs are ready: palette, typography, moodboard and a home page prototype for several screen widths. A correct environment makes the project reproducible on any computer and is the basis for the next works and the course project.
 
-## Appendix A – Listing of check-env.js
+## Appendix A (mandatory) Listing of check-env.js
 
 {{code:labs/02-environment/check-env.js}}
 
-## Appendix B – Listing of check.js
+## Appendix B (mandatory) Listing of check.js
 
 {{code:labs/02-environment/check.js}}
 
-## Appendix C – Listing of server.js
+## Appendix C (mandatory) Listing of server.js
 
 {{code:tools/server.js}}
 
-## Appendix D – Listing of the tests check-env.test.js
+## Appendix D (mandatory) Listing of the tests check-env.test.js
 
 {{code:labs/02-environment/check-env.test.js}}

@@ -101,26 +101,28 @@
 
 Рисунок 7 – Консоль: вывод заглушек обработчиков
 
+Исходный код и тесты приведены в приложениях. Приложение А содержит листинг файла Button.jsx. Приложение Б содержит листинг файла Card.jsx. Приложение Г содержит листинг файла ProjectList.jsx. Приложение Д содержит листинг файла App.jsx.
+
 ## Заключение
 
 Для проекта DSLKit создано приложение на Vite и React с десятью компонентами: базовыми, макета и предметными. Данные передаются через `props`, списки выводятся с `key`, условный рендеринг и композиция применены в нескольких местах, а обработчики являются заглушками. Правило об отсутствии `useState` и `useEffect` проверяется автоматическим тестом, а вёрстка подтверждена на трёх ширинах экрана. Остаётся приложить снимок React DevTools и проверить приложение в Firefox и Edge.
 
-## Приложение А – Листинг файла Button.jsx
+## Приложение А (обязательное) Листинг файла Button.jsx
 
 {{code:labs/07-react-components/react-app/src/components/ui/Button.jsx}}
 
-## Приложение Б – Листинг файла Card.jsx
+## Приложение Б (обязательное) Листинг файла Card.jsx
 
 {{code:labs/07-react-components/react-app/src/components/ui/Card.jsx}}
 
-## Приложение В – Листинг файла NotationCard.jsx
+## Приложение В (обязательное) Листинг файла NotationCard.jsx
 
 {{code:labs/07-react-components/react-app/src/components/features/NotationCard.jsx}}
 
-## Приложение Г – Листинг файла ProjectList.jsx
+## Приложение Г (обязательное) Листинг файла ProjectList.jsx
 
 {{code:labs/07-react-components/react-app/src/components/features/ProjectList.jsx}}
 
-## Приложение Д – Листинг файла App.jsx
+## Приложение Д (обязательное) Листинг файла App.jsx
 
 {{code:labs/07-react-components/react-app/src/App.jsx}}

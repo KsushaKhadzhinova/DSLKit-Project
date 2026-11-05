@@ -113,11 +113,13 @@ Google Rich Results Test не запускался: сайт не опублик
 
 Работа выполнена в ветке `feature/semantic-markup`. Коммит: https://github.com/KsushaKhadzhinova/DSLKit-Project/commit/a2b85e0. Сообщение коммита: `feat: add semantic HTML markup with Schema.org for a SaaS diagram editor`.
 
+Исходный код и тесты приведены в приложениях. Приложение А содержит листинг файла index.html. Приложение Б содержит листинг файла site-checks.js. Приложение В содержит листинг файла site.test.js. Приложение Г содержит токены дизайна.
+
 ## Заключение
 
 Создана семантическая разметка главной страницы DSLKit и сопутствующих страниц: русская и английская версии, страницы ошибок, политика и подтверждение записи. Использовано 15 семантических тегов, соблюдены иерархия заголовков и требования доступности, добавлена микроразметка SoftwareApplication, Offer и FAQPage. Валидаторы W3C и Schema.org не нашли ошибок, автоматические тесты проверяют разметку на всех страницах. Google Rich Results Test не запускался, так как сайт не опубликован и домен не куплен.
 
-## Приложение А – Листинг файла index.html
+## Приложение А (обязательное) Листинг файла index.html
 
 ```html
 <!doctype html>
@@ -513,7 +515,7 @@ Google Rich Results Test не запускался: сайт не опублик
 </html>
 ```
 
-## Приложение Б – Листинг файла site-checks.js
+## Приложение Б (обязательное) Листинг файла site-checks.js
 
 ```js
 import { JSDOM } from 'jsdom';
@@ -684,7 +686,7 @@ export const parityProblems = (first, second) => {
 };
 ```
 
-## Приложение В – Листинг файла site.test.js
+## Приложение В (обязательное) Листинг файла site.test.js
 
 ```js
 import assert from 'node:assert/strict';
@@ -840,7 +842,7 @@ test('every local href and src resolves to an existing file', () => {
 });
 ```
 
-## Приложение Г – Токены дизайна
+## Приложение Г (обязательное) Токены дизайна
 
 ```txt
 Макет: https://www.figma.com/design/HYmcqqGdcszOt7dGnKrvZg/bsuir-diploma

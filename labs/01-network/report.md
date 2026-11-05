@@ -416,7 +416,7 @@ Cookie не передавались и не устанавливались.
 
 1. Лабораторная работа №1 «Анализ сетевых протоколов и инструменты разработчика»: методические указания по дисциплине «ИТиВП», модуль 01 (задание, порядок выполнения, контрольные вопросы).\n2. Материалы модуля 01 «Архитектура Интернет и сетевые протоколы», тема «Организации по стандартизации» (IETF, W3C, RFC): теоретическая основа раздела 2.\n3. draw.io, облачный редактор диаграмм, исследуемый сайт: https://app.diagrams.net/\n4. Журналы сети в формате HAR, записанные для этого сайта 14 октября 2026 года в Google Chrome 155: `labs/01-network/data/draw-io-normal.har` и `labs/01-network/data/draw-io-fast3g.har`.
 
-## Приложение А – Листинг файла analyze-har.js
+## Приложение А (обязательное) Листинг файла analyze-har.js
 
 ```js
 import { HEADER_DOCS, T } from './i18n.js';
@@ -571,7 +571,7 @@ export const report = (har, slow, lang = 'ru', prefix = '3.3') => {
 };
 ```
 
-## Приложение Б – Листинг файла figures.js
+## Приложение Б (обязательное) Листинг файла figures.js
 
 ```js
 import { PHASES, bytesByType, summary } from './analyze-har.js';
@@ -619,7 +619,7 @@ export const figures = (har, slow, lang = 'ru') => {
 };
 ```
 
-## Приложение В – Листинг файла cli.js
+## Приложение В (обязательное) Листинг файла cli.js
 
 ```js
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
@@ -635,7 +635,7 @@ writeFileSync(join(dir, 'analysis.md'), report(normal, slow, lang));
 for (const [name, svg] of Object.entries(figures(normal, slow, lang))) writeFileSync(join(dir, name), svg);
 ```
 
-## Приложение Г – Листинг тестов analyze-har.test.js
+## Приложение Г (обязательное) Листинг тестов analyze-har.test.js
 
 ```js
 import assert from 'node:assert/strict';

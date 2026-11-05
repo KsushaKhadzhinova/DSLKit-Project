@@ -116,11 +116,13 @@
 
 Рисунок 7 – Панель Application: LocalStorage сайта
 
+Исходный код и тесты приведены в приложениях. Приложение А содержит листинг файла script.js. Приложение Б содержит листинг файла storage.js. Приложение В содержит листинг файла validation.js. Приложение Г содержит листинг файла notation-filter.js. Приложение Д содержит листинг файла waitlist-form.js. Приложение Е содержит листинг файла dashboard.js. Приложение Ж содержит листинг файла editor.js.
+
 ## Заключение
 
 Для проекта DSLKit написан модульный JavaScript: точка входа, утилиты хранилища и валидации, восемь интерактивных компонентов. Использованы пять типов событий и делегирование, форма проверяется с понятными сообщениями, состояние сохраняется в LocalStorage и восстанавливается после перезагрузки. Автоматические тесты покрывают весь код, а работа компонентов подтверждена в браузере. Остаётся проверить страницы в Firefox и Edge.
 
-## Приложение А – Листинг файла script.js
+## Приложение А (обязательное) Листинг файла script.js
 
 ```js
 import { initAccordion } from './components/accordion.js';
@@ -212,7 +214,7 @@ if (typeof document !== 'undefined') {
 /* node:coverage enable */
 ```
 
-## Приложение Б – Листинг файла storage.js
+## Приложение Б (обязательное) Листинг файла storage.js
 
 ```js
 export function createMemoryBackend() {
@@ -277,7 +279,7 @@ export function getStorage(win = globalThis) {
 }
 ```
 
-## Приложение В – Листинг файла validation.js
+## Приложение В (обязательное) Листинг файла validation.js
 
 ```js
 export const NOTATIONS = ['idef0', 'dfd', 'erd', 'bpmn', 'uml', 'petri'];
@@ -382,7 +384,7 @@ export function validateRegistration({ name, email, password, confirm } = {}) {
 }
 ```
 
-## Приложение Г – Листинг файла notation-filter.js
+## Приложение Г (обязательное) Листинг файла notation-filter.js
 
 ```js
 const FILTERS = ['all', 'beta', 'planned'];
@@ -459,7 +461,7 @@ export const initNotationFilter = ({ root = document, storage } = {}) => {
 };
 ```
 
-## Приложение Д – Листинг файла waitlist-form.js
+## Приложение Д (обязательное) Листинг файла waitlist-form.js
 
 ```js
 import { validateWaitlist } from '../utils/validation.js';
@@ -553,7 +555,7 @@ export const initWaitlistForm = ({
 };
 ```
 
-## Приложение Е – Листинг файла dashboard.js
+## Приложение Е (обязательное) Листинг файла dashboard.js
 
 ```js
 import { NOTATIONS, NOTATION_KEYS, TEMPLATES, parseDiagram } from '../notations/index.js';
@@ -1000,7 +1002,7 @@ export const initDashboard = ({ root = document, storage, now = () => Date.now()
 };
 ```
 
-## Приложение Ж – Листинг файла editor.js
+## Приложение Ж (обязательное) Листинг файла editor.js
 
 ```js
 import { NOTATIONS, TEMPLATES } from '../notations/index.js';

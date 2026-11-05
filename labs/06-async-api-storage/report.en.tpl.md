@@ -52,7 +52,7 @@ Generation is not limited to a picture from a server. The engine is chosen on th
 
 ### 3.5 Interface Integration
 
-A single "Run" button in the editor header starts a drawing, and the item "Refresh from the server" sits in the "⋯" menu. The rendering engine is chosen on the settings page, and its name is shown in the status bar at the bottom of the editor. The canvas gets a status line with `aria-live`, a line about service availability and a list of the last runs. While a request runs, the canvas has `aria-busy` and the status line shows the loading text; the buttons stay available so keyboard focus is not lost, and a new run cancels the previous request. The page starts a diagram by itself when it opens, and a new engine chosen in the settings is applied from the next run. A successful result is shown in figure 1.
+A single "Run" button in the editor header starts a drawing, and the item "Refresh from the server" sits in the "⋯" menu. The rendering engine is chosen on the settings page, and its name is shown in the status bar at the bottom of the editor. The canvas gets a status line with `aria-live`, a line about service availability and a list of the last runs. While a request runs, the canvas has `aria-busy` and the status line shows the loading text. The buttons stay available so keyboard focus is not lost, and a new run cancels the previous request. The page starts a diagram by itself when it opens, and a new engine chosen in the settings is applied from the next run. A successful result is shown in figure 1.
 
 ![Diagram received from Kroki](figures/kroki-diagram.jpg)
 
@@ -72,7 +72,7 @@ Kroki needs no key, so the repository holds no secrets. For future APIs the file
 
 ### 3.7 Testing
 
-Automated tests are written for the request service, the storage, the data parsing and the component. The network is replaced by a fake `fetch`, so the tests check success, codes 404, 429 and 503, retries with pauses, a timeout, cancellation, merging of identical requests, a wrong response and corrupted storage. Coverage of all JavaScript files is 100 percent for lines, branches and functions. The integration is additionally checked in Chrome with the real Kroki service: the diagram is received, the entry lands in LocalStorage, and offline mode shows the saved copy. The timeout behaviour was checked without a browser by the script `tools/evidence/l6-timeout.mjs`: it calls the `createApi` client with a Mermaid diagram and counts `fetch` calls. The kroki.io service was reachable: a normal request took one call, and a request with a 1 ms timeout made exactly one call and returned the error `timeout` with the text "Request timed out" after 13 ms. The real service cannot be made to return a 5xx on demand, so the other cases ran against a local stub: with a hanging response and a 300 ms timeout there was one request and a `timeout` error after 335 ms; with two 503 answers followed by 200 the client sent three requests with pauses of 50 and 100 ms and the result arrived; with a permanent 503 the client sent four requests (the first plus three retries) with pauses of 50, 100 and 200 ms, then an `http` error with status 503. Screenshots of the Network and Application tabs and testing in Firefox and Edge remain a task for the acceptance stage.
+Automated tests are written for the request service, the storage, the data parsing and the component. The network is replaced by a fake `fetch`, so the tests check success, codes 404, 429 and 503, retries with pauses, a timeout, cancellation, merging of identical requests, a wrong response and corrupted storage. Coverage of all JavaScript files is 100 percent for lines, branches and functions. The integration is additionally checked in Chrome with the real Kroki service: the diagram is received, the entry lands in LocalStorage, and offline mode shows the saved copy. The timeout behaviour was checked without a browser by the script `tools/evidence/l6-timeout.mjs`: it calls the `createApi` client with a Mermaid diagram and counts `fetch` calls. The kroki.io service was reachable: a normal request took one call, and a request with a 1 ms timeout made exactly one call and returned the error `timeout` with the text "Request timed out" after 13 ms. The real service cannot be made to return a 5xx on demand, so the other cases ran against a local stub: with a hanging response and a 300 ms timeout there was one request and a `timeout` error after 335 ms. With two 503 answers followed by 200 the client sent three requests with pauses of 50 and 100 ms and the result arrived. With a permanent 503 the client sent four requests (the first plus three retries) with pauses of 50, 100 and 200 ms, then an `http` error with status 503. Screenshots of the Network and Application tabs and testing in Firefox and Edge remain a task for the acceptance stage.
 
 ### 3.8 Committing the Changes
 
@@ -106,26 +106,28 @@ The error state is shown in Figure 6: with the service unavailable and an empty 
 
 Figure 6 – The editor with the service unavailable and an empty cache
 
+The source code and the tests are given in the appendices. Appendix A contains listing of config.js. Appendix B contains listing of apiService.js. Appendix C contains listing of localStorage.js. Appendix D contains listing of dataParser.js. Appendix E contains listing of diagram-runner.js.
+
 ## Conclusion
 
 The open Kroki API is connected to the DSLKit project: the diagram code from the editor becomes Graphviz DOT, is sent with a `POST` request, and the received SVG is cleaned and drawn on the canvas. Requests run with a timeout, retries and cancellation, results are saved in LocalStorage for 24 hours, and without a connection a saved copy is shown with a label. Automated tests cover all the code, and the integration is confirmed in a browser with the real service. What remains is to attach screenshots of the developer tools and to check the pages in Firefox and Edge.
 
-## Appendix A – Listing of config.js
+## Appendix A (mandatory) Listing of config.js
 
 {{code:site/js/api/config.js}}
 
-## Appendix B – Listing of apiService.js
+## Appendix B (mandatory) Listing of apiService.js
 
 {{code:site/js/api/apiService.js}}
 
-## Appendix C – Listing of localStorage.js
+## Appendix C (mandatory) Listing of localStorage.js
 
 {{code:site/js/storage/localStorage.js}}
 
-## Appendix D – Listing of dataParser.js
+## Appendix D (mandatory) Listing of dataParser.js
 
 {{code:site/js/utils/dataParser.js}}
 
-## Appendix E – Listing of diagram-runner.js
+## Appendix E (mandatory) Listing of diagram-runner.js
 
 {{code:site/js/components/diagram-runner.js}}

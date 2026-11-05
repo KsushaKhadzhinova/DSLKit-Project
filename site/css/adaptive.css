@@ -24,16 +24,6 @@
     overflow: visible;
     clip-path: none;
   }
-}
-
-@media (min-width: 576px) {
-  .burger__label {
-    position: static;
-    width: auto;
-    height: auto;
-    overflow: visible;
-    clip-path: none;
-  }
 
   .theme__button {
     padding: 0 var(--space-2);

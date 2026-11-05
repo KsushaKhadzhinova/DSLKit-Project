@@ -116,34 +116,36 @@ The saved state is shown in Figure 7: after the form is submitted, LocalStorage 
 
 Figure 7 – The Application panel: site LocalStorage
 
+The source code and the tests are given in the appendices. Appendix A contains listing of script.js. Appendix B contains listing of storage.js. Appendix C contains listing of validation.js. Appendix D contains listing of notation-filter.js. Appendix E contains listing of waitlist-form.js. Appendix F contains listing of dashboard.js. Appendix G contains listing of editor.js.
+
 ## Conclusion
 
 Modular JavaScript is written for the DSLKit project: an entry point, storage and validation utilities and eight interactive components. Five event types and delegation are used, the form is validated with clear messages, and state is saved in LocalStorage and restored after a reload. Automated tests cover all the code, and the components are confirmed in a browser. What remains is to check the pages in Firefox and Edge.
 
-## Appendix A – Listing of script.js
+## Appendix A (mandatory) Listing of script.js
 
 {{code:site/js/script.js}}
 
-## Appendix B – Listing of storage.js
+## Appendix B (mandatory) Listing of storage.js
 
 {{code:site/js/utils/storage.js}}
 
-## Appendix C – Listing of validation.js
+## Appendix C (mandatory) Listing of validation.js
 
 {{code:site/js/utils/validation.js}}
 
-## Appendix D – Listing of notation-filter.js
+## Appendix D (mandatory) Listing of notation-filter.js
 
 {{code:site/js/components/notation-filter.js}}
 
-## Appendix E – Listing of waitlist-form.js
+## Appendix E (mandatory) Listing of waitlist-form.js
 
 {{code:site/js/components/waitlist-form.js}}
 
-## Appendix F – Listing of dashboard.js
+## Appendix F (mandatory) Listing of dashboard.js
 
 {{code:site/js/components/dashboard.js}}
 
-## Appendix G – Listing of editor.js
+## Appendix G (mandatory) Listing of editor.js
 
 {{code:site/js/components/editor.js}}

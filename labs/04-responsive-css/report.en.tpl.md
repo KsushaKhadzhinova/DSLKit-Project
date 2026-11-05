@@ -82,9 +82,9 @@ Flexbox and Grid solve different problems, so the project uses them together: Fl
 
 Flexbox is used where items sit side by side or one under another and align along one axis:
 
-- the logo in the header (`.header__logo`), the navigation row (`.nav__list`) and the row of tools (`.header__tools`);
-- rows of buttons in the hero block (`.hero__actions`) and the buttons themselves (`.button`), where the icon and the label are centred;
-- the list of footer links (`.footer__list`);
+- the logo in the header (`.header__logo`), the navigation row (`.nav__list`) and the row of tools (`.header__tools`).
+- rows of buttons in the hero block (`.hero__actions`) and the buttons themselves (`.button`), where the icon and the label are centred.
+- the list of footer links (`.footer__list`).
 - the title and the meta line of a card (`.card__title`, `.card__meta`) and the accordion question (`.faq__question`).
 
 On a phone the navigation is a column, and from 768 pixels it is a wrapping row (`flex-flow: row wrap`).
@@ -93,10 +93,10 @@ On a phone the navigation is a column, and from 768 pixels it is a wrapping row 
 
 Grid is used for two-dimensional layouts:
 
-- the page frame `.page` is described by the areas `header`, `main` and `footer` with `grid-template-areas`, one column and the rows `auto 1fr auto`. The `1fr` row pushes the footer to the bottom of the window on short pages, as the former Flexbox frame did. The public pages have no sidebar, so the `sidebar` area from the assignment example is not needed, and the application shell with its 224 pixel panel is described separately in `app.css`;
-- the hero block `.hero`: one column on a phone and `1fr 1.618fr` from 1024 pixels;
-- the card grid `.cards`: one, two and three columns through `repeat(n, minmax(0, 1fr))`, where `minmax(0, 1fr)` stops a long word from stretching a column;
-- pricing `.plans` and the hero facts `.hero__facts`;
+- the page frame `.page` is described by the areas `header`, `main` and `footer` with `grid-template-areas`, one column and the rows `auto 1fr auto`. The `1fr` row pushes the footer to the bottom of the window on short pages, as the former Flexbox frame did. The public pages have no sidebar, so the `sidebar` area from the assignment example is not needed, and the application shell with its 224 pixel panel is described separately in `app.css`.
+- the hero block `.hero`: one column on a phone and `1fr 1.618fr` from 1024 pixels.
+- the card grid `.cards`: one, two and three columns through `repeat(n, minmax(0, 1fr))`, where `minmax(0, 1fr)` stops a long word from stretching a column.
+- pricing `.plans` and the hero facts `.hero__facts`.
 - the editor screen: the named areas `toolbar`, `activity`, `sidebar`, `main`, `problems` and `status`, with the `sidebar` column added on a wide screen.
 
 After `.page` moved from Flexbox to Grid, comparing the position and size of every element with the previous ones on six pages at the widths 375, 500, 800 and 1440 pixels showed no differences.
@@ -107,8 +107,8 @@ Three states are implemented with the mobile-first approach and listed in table 
 
 The breakpoints follow the page content and typical devices, not particular phone models:
 
-- 576 pixels: the border between a narrow and a wide phone, for example after a screen rotation. From here the cards have room for two columns, and the burger caption becomes visible;
-- 768 pixels: the width of a tablet in portrait orientation. Five menu items, the language switch and the button fit in one row, so the burger is replaced by a horizontal menu. The assignment names the same border as the limit for the burger;
+- 576 pixels: the border between a narrow and a wide phone, for example after a screen rotation. From here the cards have room for two columns, and the burger caption becomes visible.
+- 768 pixels: the width of a tablet in portrait orientation. Five menu items, the language switch and the button fit in one row, so the burger is replaced by a horizontal menu. The assignment names the same border as the limit for the burger.
 - 1024 pixels: a tablet in landscape orientation and a laptop. There is room for three columns of cards and for the hero block in the proportion 1 to 1.618.
 
 The mobile-first approach is used: base styles describe a phone and each `min-width` query only adds rules. A phone never receives desktop rules that would have to be cancelled, and the cascade has fewer overrides than with desktop-first `max-width` queries. The breakpoints are in pixels because dependence on the user's font size is not needed here. The assignment text names 992 pixels for the desktop, and the project uses 1024 as in the media query example of the same assignment. Every query is written in `adaptive.css` as one block, and a test forbids repeats.
@@ -200,34 +200,36 @@ The HTML pages passed the W3C Nu validator. The geometry of all page elements wa
 
 The work is done in the branch `feature/responsive-layout`. The commit with the implementation: https://github.com/KsushaKhadzhinova/DSLKit-Project/commit/eb70a59. The commit message: `feat: implement responsive layout according to Figma design`.
 
+The source code and the tests are given in the appendices. Appendix A contains listing of variables.css. Appendix B contains listing of base.css. Appendix C contains listing of header.css. Appendix D contains listing of main.css. Appendix E contains listing of footer.css. Appendix F contains listing of adaptive.css. Appendix G contains listing of style.css.
+
 ## Conclusion
 
 The styles of the DSLKit project are split into files following the BEM methodology and built mobile first. Three page states, a burger menu without JavaScript, Flexbox and Grid layouts, CSS variables and a dark theme are implemented. The golden ratio is built into the size scale, the spacing and the columns, and automated tests prevent any drift from it. The page is tested in Chrome, Firefox and Edge, and the check in Safari on an Apple device remains.
 
-## Appendix A – Listing of variables.css
+## Appendix A (mandatory) Listing of variables.css
 
 {{code:site/css/variables.css}}
 
-## Appendix B – Listing of base.css
+## Appendix B (mandatory) Listing of base.css
 
 {{code:site/css/base.css}}
 
-## Appendix C – Listing of header.css
+## Appendix C (mandatory) Listing of header.css
 
 {{code:site/css/header.css}}
 
-## Appendix D – Listing of main.css
+## Appendix D (mandatory) Listing of main.css
 
 {{code:site/css/main.css}}
 
-## Appendix E – Listing of footer.css
+## Appendix E (mandatory) Listing of footer.css
 
 {{code:site/css/footer.css}}
 
-## Appendix F – Listing of adaptive.css
+## Appendix F (mandatory) Listing of adaptive.css
 
 {{code:site/css/adaptive.css}}
 
-## Appendix G – Listing of style.css
+## Appendix G (mandatory) Listing of style.css
 
 {{code:site/css/style.css}}
