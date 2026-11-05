@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>[Прототип] DSLKit: диаграммы как код. UML, BPMN, ERD, DFD, IDEF0</title>
+    <meta
+      name="description"
+      content="DSLKit — веб-редактор диаграмм как кода. Опишите схему текстом на DSL и получите UML, BPMN, ERD, DFD, IDEF0 и сети Петри. Запишитесь в закрытую бета-версию."
+    />
+    <meta name="theme-color" content="#2563eb" />
+    <link rel="icon" href="../../../site/images/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="../../../site/css/style.css" />
+    <link rel="stylesheet" href="r2-landing.css" />
+  </head>
+  <body class="page">
+    <a class="skip-link" href="#main">Перейти к основному содержимому</a>
+    <header class="header">
+      <div class="header__inner">
+        <a class="header__logo" href="../../../site/./">
+          <img class="header__logo-image" src="../../../site/images/logo.svg" alt="" width="32" height="32" />
+          <span class="header__logo-text">DSLKit</span>
+        </a>
+        <input class="burger__input" type="checkbox" id="burger-toggle" />
+        <label class="burger__button" for="burger-toggle">
+          <span class="burger__label">Меню</span>
+          <span class="burger__icon" aria-hidden="true"></span>
+        </label>
+        <nav class="nav" aria-label="Основная навигация">
+          <ul class="nav__list">
+            <li class="nav__item"><a class="nav__link" href="#notations">Нотации</a></li>
+            <li class="nav__item"><a class="nav__link" href="#how">Как это работает</a></li>
+            <li class="nav__item"><a class="nav__link" href="#audience">Для кого</a></li>
+            <li class="nav__item"><a class="nav__link" href="#pricing">Тарифы</a></li>
+            <li class="nav__item"><a class="nav__link" href="#faq">FAQ</a></li>
+          </ul>
+        </nav>
+        <div class="header__tools">
+          <a class="header__lang" href="../../../site/en/" hreflang="en" lang="en">English</a>
+          <input class="theme__input" type="checkbox" id="theme-toggle" />
+          <label class="theme__button" for="theme-toggle">Тёмная тема</label>
+          <a class="button button--primary header__cta" href="#waitlist">В бету</a>
+        </div>
+      </div>
+    </header>
+    <main class="main" id="main">
+      <section class="hero" aria-labelledby="hero-title" itemscope itemtype="https://schema.org/SoftwareApplication">
+        <meta itemprop="name" content="DSLKit" />
+        <meta itemprop="applicationCategory" content="DeveloperApplication" />
+        <meta itemprop="operatingSystem" content="Web" />
+        <meta itemprop="url" content="https://dslkit.io/" />
+        <div class="hero__content">
+          <p class="hero__badge">Скоро: закрытая бета</p>
+          <h1 class="hero__title" id="hero-title">Пишите код — получайте диаграмму</h1>
+          <p class="hero__lead" itemprop="description">
+            Веб-редактор диаграмм как кода: опишите схему текстом на DSL, а DSLKit проверит её по правилам нотации и нарисует.
+          </p>
+          <div class="hero__cta">
+            <a class="button button--primary button--hero" href="../../../site/app/editor.html">Создать диаграмму</a>
+            <p class="hero__cta-note">Откроется редактор: слева код, справа диаграмма</p>
+          </div>
+          <p class="hero__actions">
+            <a class="button" href="#waitlist">Записаться в бету</a>
+            <a class="button" href="#how">Как это работает</a>
+          </p>
+          <p class="hero__note" itemprop="offers" itemscope itemtype="https://schema.org/Offer">
+            <meta itemprop="price" content="0" />
+            <meta itemprop="priceCurrency" content="USD" />
+            <link itemprop="availability" href="https://schema.org/PreOrder" />
+            <link itemprop="url" href="https://dslkit.io/#waitlist" />
+            Бесплатно в бета-версии: до 5 диаграмм в день.
+          </p>
+          <ul class="hero__facts">
+            <li class="hero__fact"><strong class="hero__fact-value">6</strong> <span class="hero__fact-label">нотаций в одном редакторе</span></li>
+            <li class="hero__fact"><strong class="hero__fact-value">3</strong> <span class="hero__fact-label">нотации в первой бете</span></li>
+            <li class="hero__fact"><strong class="hero__fact-value">5</strong> <span class="hero__fact-label">диаграмм в день бесплатно в бете</span></li>
+          </ul>
+        </div>
+        <figure class="hero__figure">
+          <img
+            class="hero__image"
+            src="../../../site/images/hero-diagram.svg"
+            alt="Редактор DSLKit: слева код на DSL, справа диаграмма IDEF0 с блоками A0 и A1"
+            width="809"
+            height="500"
+            itemprop="image"
+          />
+          <figcaption class="hero__caption">Код слева превращается в диаграмму справа</figcaption>
+        </figure>
+      </section>
+
+      <section class="section" id="notations" aria-labelledby="notations-title">
+        <h2 class="section__title" id="notations-title">Нотации</h2>
+        <p class="section__lead">Шесть нотаций в одном редакторе. Первыми в бета-версии появятся IDEF0, DFD и ERD.</p>
+        <ul class="cards" id="notations-list">
+          <li class="cards__item" data-status="beta">
+            <article class="card">
+              <img class="card__icon" src="../../../site/images/notations/idef0.svg" alt="" width="48" height="48" />
+              <h3 class="card__title">IDEF0</h3>
+              <p class="card__meta"><span class="badge">в бете</span></p>
+              <p class="card__text">Функциональное моделирование: блоки, входы, управление, выходы и механизмы.</p>
+              <a class="card__link" href="#waitlist">Записаться в бету: IDEF0</a>
+            </article>
+          </li>
+          <li class="cards__item" data-status="beta">
+            <article class="card">
+              <img class="card__icon" src="../../../site/images/notations/dfd.svg" alt="" width="48" height="48" />
+              <h3 class="card__title">DFD</h3>
+              <p class="card__meta"><span class="badge">в бете</span></p>
+              <p class="card__text">Диаграммы потоков данных: процессы, хранилища и связи между ними.</p>
+              <a class="card__link" href="#waitlist">Записаться в бету: DFD</a>
+            </article>
+          </li>
+          <li class="cards__item" data-status="beta">
+            <article class="card">
+              <img class="card__icon" src="../../../site/images/notations/erd.svg" alt="" width="48" height="48" />
+              <h3 class="card__title">ERD</h3>
+              <p class="card__meta"><span class="badge">в бете</span></p>
+              <p class="card__text">Сущности и связи для проектирования баз данных.</p>
+              <a class="card__link" href="#waitlist">Записаться в бету: ERD</a>
+            </article>
+          </li>
+          <li class="cards__item" data-status="planned">
+            <article class="card">
+              <img class="card__icon" src="../../../site/images/notations/uml.svg" alt="" width="48" height="48" />
+              <h3 class="card__title">UML</h3>
+              <p class="card__meta"><span class="badge badge--planned">в планах</span></p>
+              <p class="card__text">Классы, последовательности и другие диаграммы объектной модели.</p>
+              <a class="card__link" href="#waitlist">Записаться в бету: UML</a>
+            </article>
+          </li>
+          <li class="cards__item" data-status="planned">
+            <article class="card">
+              <img class="card__icon" src="../../../site/images/notations/bpmn.svg" alt="" width="48" height="48" />
+              <h3 class="card__title">BPMN</h3>
+              <p class="card__meta"><span class="badge badge--planned">в планах</span></p>
+              <p class="card__text">Бизнес-процессы: события, задачи и шлюзы.</p>
+              <a class="card__link" href="#waitlist">Записаться в бету: BPMN</a>
+            </article>
+          </li>
+          <li class="cards__item" data-status="planned">
+            <article class="card">
+              <img class="card__icon" src="../../../site/images/notations/petri.svg" alt="" width="48" height="48" />
+              <h3 class="card__title">Сети Петри</h3>
+              <p class="card__meta"><span class="badge badge--planned">в планах</span></p>
+              <p class="card__text">Параллельные процессы: позиции, переходы и фишки.</p>
+              <a class="card__link" href="#waitlist">Записаться в бету: сети Петри</a>
+            </article>
+          </li>
+        </ul>
+      </section>
+
+      <section class="section" id="how" aria-labelledby="how-title">
+        <h2 class="section__title" id="how-title">Как это работает</h2>
+        <ol class="steps">
+          <li class="steps__item">
+            <h3 class="steps__title">Пишете код</h3>
+            <p class="steps__text">Описываете диаграмму на DSL, подсказки и шаблоны помогают начать.</p>
+          </li>
+          <li class="steps__item">
+            <h3 class="steps__title">Видите схему</h3>
+            <p class="steps__text">Холст обновляется сразу, а ошибки подсвечиваются с пояснением.</p>
+          </li>
+          <li class="steps__item">
+            <h3 class="steps__title">Экспортируете</h3>
+            <p class="steps__text">Сохраняете результат в SVG, PNG, PlantUML или Mermaid.</p>
+          </li>
+        </ol>
+      </section>
+
+      <section class="section" id="audience" aria-labelledby="audience-title">
+        <h2 class="section__title" id="audience-title">Для кого</h2>
+        <ul class="cards">
+          <li class="cards__item">
+            <article class="card">
+              <h3 class="card__title">Студентам</h3>
+              <p class="card__text">Лабораторные работы, курсовые и дипломы с диаграммами, которые легко править.</p>
+            </article>
+          </li>
+          <li class="cards__item">
+            <article class="card">
+              <h3 class="card__title">Разработчикам</h3>
+              <p class="card__text">Схемы лежат рядом с кодом и попадают в историю Git.</p>
+            </article>
+          </li>
+          <li class="cards__item">
+            <article class="card">
+              <h3 class="card__title">Аналитикам</h3>
+              <p class="card__text">Процессы и данные описываются текстом без ручного рисования.</p>
+            </article>
+          </li>
+        </ul>
+      </section>
+
+      <section class="section" id="pricing" aria-labelledby="pricing-title">
+        <h2 class="section__title" id="pricing-title">Тарифы</h2>
+        <div class="plans">
+          <article class="plan">
+            <h3 class="plan__title">Free</h3>
+            <ul class="plan__list">
+              <li>До 5 диаграмм в день в бета-версии</li>
+              <li>Все доступные нотации</li>
+              <li>Экспорт в SVG и PNG</li>
+            </ul>
+          </article>
+          <article class="plan">
+            <h3 class="plan__title">Pro</h3>
+            <ul class="plan__list">
+              <li>Без дневного лимита</li>
+              <li>История версий</li>
+              <li>Совместная работа и API</li>
+            </ul>
+          </article>
+        </div>
+        <aside class="note" aria-label="Примечание к тарифам">
+          <p class="note__text">Условия тарифов могут измениться после бета-версии. Обновлено <time datetime="2026-10-11">11 октября 2026</time>.</p>
+        </aside>
+      </section>
+
+      <section class="section" id="faq" aria-labelledby="faq-title" itemscope itemtype="https://schema.org/FAQPage">
+        <h2 class="section__title" id="faq-title">Вопросы и ответы</h2>
+        <details class="faq__item" itemprop="mainEntity" itemscope itemtype="https://schema.org/Question">
+          <summary class="faq__question" itemprop="name">Что такое DSLKit?</summary>
+          <div class="faq__answer" itemprop="acceptedAnswer" itemscope itemtype="https://schema.org/Answer">
+            <p itemprop="text">
+              DSLKit — веб-редактор диаграмм как кода. Вы описываете схему текстом на DSL, а редактор проверяет её по правилам нотации и рисует диаграмму.
+            </p>
+          </div>
+        </details>
+        <details class="faq__item" itemprop="mainEntity" itemscope itemtype="https://schema.org/Question">
+          <summary class="faq__question" itemprop="name">Нужно ли уметь программировать?</summary>
+          <div class="faq__answer" itemprop="acceptedAnswer" itemscope itemtype="https://schema.org/Answer">
+            <p itemprop="text">
+              Нет. Синтаксис короткий, а шаблоны нотаций и подсказки помогают написать первую диаграмму. Для тех, кто не пишет код, планируется режим
+              редактирования кликами.
+            </p>
+          </div>
+        </details>
+        <details class="faq__item" itemprop="mainEntity" itemscope itemtype="https://schema.org/Question">
+          <summary class="faq__question" itemprop="name">Какие нотации будут поддерживаться?</summary>
+          <div class="faq__answer" itemprop="acceptedAnswer" itemscope itemtype="https://schema.org/Answer">
+            <p itemprop="text">В планах шесть нотаций: UML, BPMN, ERD, DFD, IDEF0 и сети Петри. Первыми в бета-версии появятся IDEF0, DFD и ERD.</p>
+          </div>
+        </details>
+        <details class="faq__item" itemprop="mainEntity" itemscope itemtype="https://schema.org/Question">
+          <summary class="faq__question" itemprop="name">Сколько это стоит?</summary>
+          <div class="faq__answer" itemprop="acceptedAnswer" itemscope itemtype="https://schema.org/Answer">
+            <p itemprop="text">В бета-версии бесплатно, до пяти диаграмм в день. Платный тариф Pro с расширенными возможностями появится позже.</p>
+          </div>
+        </details>
+      </section>
+
+      <section class="section" id="waitlist" aria-labelledby="waitlist-title">
+        <div class="cta-card">
+          <h2 class="cta-card__title" id="waitlist-title">Попробуйте раньше всех</h2>
+          <p class="cta-card__lead">Оставьте почту, и мы пришлём приглашение в бету.</p>
+          <form class="cta-card__form" action="#waitlist" method="get">
+            <label class="visually-hidden" for="cta-email">Электронная почта</label>
+            <input class="form__input cta-card__input" id="cta-email" type="email" placeholder="name@example.com" required />
+            <button class="button button--primary" type="submit">Записаться</button>
+          </form>
+        </div>
+      </section>
+    </main>
+    <footer class="footer">
+      <div class="footer__inner">
+        <nav class="footer__nav" aria-label="Нижняя навигация">
+          <ul class="footer__list">
+            <li class="footer__item"><a class="footer__link" href="#notations">Нотации</a></li>
+            <li class="footer__item"><a class="footer__link" href="#pricing">Тарифы</a></li>
+            <li class="footer__item"><a class="footer__link" href="#faq">Вопросы и ответы</a></li>
+            <li class="footer__item"><a class="footer__link" href="../../../site/privacy.html">Политика конфиденциальности</a></li>
+            <li class="footer__item"><a class="footer__link" href="../../../site/en/" hreflang="en" lang="en">English version</a></li>
+          </ul>
+        </nav>
+        <address class="footer__address">Контакты: <a class="footer__link" href="mailto:hello@dslkit.io">hello@dslkit.io</a></address>
+        <p class="footer__copy"><small>© 2026 DSLKit. Дипломный проект БГУИР.</small></p>
+      </div>
+    </footer>
+    <script type="module" src="../../../site/js/script.js"></script>
+  </body>
+</html>

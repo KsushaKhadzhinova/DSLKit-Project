@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DSLKit: макеты страниц, раунд 2</title>
+<style>
+:root{--bg:#f4f5f9;--surface:#fff;--border:#dde1ec;--text:#161a2b;--muted:#5b627a;--primary:#2563eb;--font:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif}
+*{box-sizing:border-box;margin:0}
+body{background:var(--bg);color:var(--text);font:16px/1.6 var(--font)}
+.wrap{max-width:1560px;margin:0 auto;padding:0 24px}
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:24px 0 0}
+h1{font-size:26px;letter-spacing:-.02em}
+.sub{color:var(--muted);margin:6px 0 16px;max-width:90ch}
+.sub a{color:var(--primary)}
+.tabs{display:flex;gap:4px;flex-wrap:wrap}
+.tab{padding:10px 16px;border:1px solid var(--border);border-bottom:0;border-radius:10px 10px 0 0;background:var(--bg);font:600 14px var(--font);cursor:pointer;color:var(--muted)}
+.tab[aria-selected=true]{color:var(--text);box-shadow:inset 0 3px 0 var(--primary)}
+main{padding:20px 0 56px}
+.panel{display:none}.panel.on{display:block}
+.note{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 20px;margin-bottom:14px;color:var(--muted);font-size:15px}
+.note b{color:var(--text)}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.cols--3{grid-template-columns:repeat(3,1fr)}
+.col h2{font-size:14px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
+.col h2 a{font-weight:400;font-size:13px;color:var(--primary);text-decoration:none}
+.col h2 span.tag{font:600 11px var(--font);padding:2px 8px;border-radius:6px;background:#fff1de;color:#b45309}
+.col h2 span.new{background:#dcfce7;color:#15803d}
+.frame{border:1px solid var(--border);border-radius:12px;overflow:hidden;background:#fff;box-shadow:0 8px 30px rgb(22 26 43/.08)}
+.frame iframe{display:block;width:100%;height:74vh;border:0}
+@media(max-width:1100px){.cols,.cols--3{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <h1>DSLKit: макеты страниц, раунд 2</h1>
+  <p class="sub">Слева «было» (настоящая страница сайта), справа «стало». Код сайта не менялся. Лендинг: взяты раскладка карточек нотаций и финальный блок «Попробуйте раньше всех», остальное как сейчас. Первый раунд: <a href="index.html">три варианта лендинга</a>.</p>
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" data-p="land" aria-selected="true">Лендинг</button>
+    <button class="tab" role="tab" data-p="mid" aria-selected="false">Средний: тёмный и светлый</button>
+    <button class="tab" role="tab" data-p="dash" aria-selected="false">Проекты</button>
+    <button class="tab" role="tab" data-p="tpl" aria-selected="false">Шаблоны</button>
+    <button class="tab" role="tab" data-p="ed" aria-selected="false">Редактор</button>
+    <button class="tab" role="tab" data-p="set" aria-selected="false">Настройки</button>
+    <button class="tab" role="tab" data-p="thx" aria-selected="false">Спасибо</button>
+    <button class="tab" role="tab" data-p="err" aria-selected="false">404</button>
+  </div>
+</div></header>
+<main><div class="wrap">
+
+<div class="panel on" id="land">
+  <div class="note"><b>Лендинг: текущий + 2 изменения.</b> Карточки нотаций: две крупные, три средних и одна широкая (Сети Петри), сначала те, что в бете. Внизу вместо длинной анкеты блок со свечением и одним полем e-mail. Шапка, hero, шаги, тарифы, FAQ без изменений. Полная анкета (6 полей) остаётся на живом сайте, в прототипе её заменяет короткое поле.</div>
+  <div class="cols">
+    <div class="col"><h2>Было <span class="tag">текущий сайт</span></h2><div class="frame"><iframe data-src="../../../site/index.html" title="Было"></iframe></div></div>
+    <div class="col"><h2>Стало <a href="r2-landing.html" target="_blank">открыть отдельно ↗</a></h2><div class="frame"><iframe data-src="r2-landing.html" title="Стало"></iframe></div></div>
+  </div>
+</div>
+
+<div class="panel" id="mid">
+  <div class="note"><b>Средний вариант между текущим сайтом и тёмным вариантом 1.</b> Та же структура, что у текущего лендинга, плюс bento-карточки и CTA, а также мягкие приёмы из тёмного варианта: размытая липкая шапка, градиентный заголовок, синяя метка над заголовками секций, подписи «Fig 0.1» у шагов, выделенный тариф Pro, подсветка карточек при наведении. Две версии: тёмная (холоднее и темнее текущей) и светлая (чище, с лёгкими тенями).</div>
+  <div class="cols cols--3">
+    <div class="col"><h2>Было <span class="tag">текущий сайт</span></h2><div class="frame"><iframe data-src="../../../site/index.html" title="Было"></iframe></div></div>
+    <div class="col"><h2>Средний, тёмный <a href="r2-middle-dark.html" target="_blank">↗</a></h2><div class="frame"><iframe data-src="r2-middle-dark.html" title="Средний тёмный"></iframe></div></div>
+    <div class="col"><h2>Средний, светлый <a href="r2-middle-light.html" target="_blank">↗</a></h2><div class="frame"><iframe data-src="r2-middle-light.html" title="Средний светлый"></iframe></div></div>
+  </div>
+</div>
+
+<div class="panel" id="dash">
+  <div class="note"><b>Мои проекты.</b> Те же 8 проектов, фильтры и сортировка. Добавлены превью диаграмм на карточках, три счётчика сверху и подсветка при наведении.</div>
+  <div class="cols">
+    <div class="col"><h2>Было <span class="tag">текущий сайт</span></h2><div class="frame"><iframe data-src="../../../site/app/dashboard.html" title="Было"></iframe></div></div>
+    <div class="col"><h2>Стало <a href="r2-app-dashboard.html" target="_blank">↗</a></h2><div class="frame"><iframe data-src="r2-app-dashboard.html" title="Стало"></iframe></div></div>
+  </div>
+</div>
+
+<div class="panel" id="tpl">
+  <div class="note"><b>Шаблоны.</b> Шесть нотаций в той же bento-раскладке, что и на лендинге (две крупные, три средних, одна широкая), превью диаграммы в каждой карточке, ниже «Пустой файл» и «Импорт PlantUML / Mermaid».</div>
+  <div class="cols">
+    <div class="col"><h2>Было <span class="tag">текущий сайт</span></h2><div class="frame"><iframe data-src="../../../site/app/welcome.html" title="Было"></iframe></div></div>
+    <div class="col"><h2>Стало <a href="r2-app-templates.html" target="_blank">↗</a></h2><div class="frame"><iframe data-src="r2-app-templates.html" title="Стало"></iframe></div></div>
+  </div>
+</div>
+
+<div class="panel" id="ed">
+  <div class="note"><b>Редактор.</b> Три панели: проводник, код с номерами строк и подсветкой, холст с диаграммой. Сверху панель действий с «Запустить Ctrl+Enter», снизу строка проблем. Макет статичный, без работы движков.</div>
+  <div class="cols">
+    <div class="col"><h2>Было <span class="tag">текущий сайт</span></h2><div class="frame"><iframe data-src="../../../site/app/editor.html" title="Было"></iframe></div></div>
+    <div class="col"><h2>Стало <a href="r2-app-editor.html" target="_blank">↗</a></h2><div class="frame"><iframe data-src="r2-app-editor.html" title="Стало"></iframe></div></div>
+  </div>
+</div>
+
+<div class="panel" id="set">
+  <div class="note"><b>Настройки.</b> Те же разделы и параметры (шрифт, номера строк, автодополнение, сетка, движок генерации, тема). Группы собраны в карточки, переключатели вместо чекбоксов, выбор движка и темы плитками.</div>
+  <div class="cols">
+    <div class="col"><h2>Было <span class="tag">текущий сайт</span></h2><div class="frame"><iframe data-src="../../../site/app/settings.html" title="Было"></iframe></div></div>
+    <div class="col"><h2>Стало <a href="r2-app-settings.html" target="_blank">↗</a></h2><div class="frame"><iframe data-src="r2-app-settings.html" title="Стало"></iframe></div></div>
+  </div>
+</div>
+
+<div class="panel" id="thx">
+  <div class="note"><b>Страница «Спасибо».</b> Центральная карточка со свечением и зелёным значком, две кнопки.</div>
+  <div class="cols">
+    <div class="col"><h2>Было <span class="tag">текущий сайт</span></h2><div class="frame"><iframe data-src="../../../site/thanks.html" title="Было"></iframe></div></div>
+    <div class="col"><h2>Стало <a href="r2-page-thanks.html" target="_blank">↗</a></h2><div class="frame"><iframe data-src="r2-page-thanks.html" title="Стало"></iframe></div></div>
+  </div>
+</div>
+
+<div class="panel" id="err">
+  <div class="note"><b>Ошибка 404.</b> Крупный градиентный код, три подсказки списком, кнопка «На главную». Остальные страницы ошибок (400, 403, 405, 500) строятся так же.</div>
+  <div class="cols">
+    <div class="col"><h2>Было <span class="tag">текущий сайт</span></h2><div class="frame"><iframe data-src="../../../site/errors/404.html" title="Было"></iframe></div></div>
+    <div class="col"><h2>Стало <a href="r2-page-404.html" target="_blank">↗</a></h2><div class="frame"><iframe data-src="r2-page-404.html" title="Стало"></iframe></div></div>
+  </div>
+</div>
+
+</div></main>
+<script>
+(function(){
+  var tabs=document.querySelectorAll('.tab'),panels=document.querySelectorAll('.panel');
+  function show(id){
+    tabs.forEach(function(t){t.setAttribute('aria-selected',String(t.dataset.p===id))});
+    panels.forEach(function(p){var on=p.id===id;p.classList.toggle('on',on);
+      if(on)p.querySelectorAll('iframe[data-src]').forEach(function(f){f.src=f.dataset.src;f.removeAttribute('data-src')})});
+    try{history.replaceState(null,'','#'+id)}catch(e){}
+  }
+  tabs.forEach(function(t){t.addEventListener('click',function(){show(t.dataset.p)})});
+  var h=location.hash.slice(1);show(document.getElementById(h)?h:'land');
+})();
+</script>
+</body>
+</html>

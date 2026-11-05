@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DSLKit: вариант 1, тёмный product-first</title>
+<style>
+/* Вариант 1. Референсы: Linear, Supabase, Vercel. Тёмная тема, один акцент, продукт в центре hero. */
+:root{--bg:#0b0c10;--surface:#12141a;--surface-2:#171a22;--border:#262a35;--text:#e8eaf0;--muted:#8d93a5;--accent:#5b8cff;--accent-2:#3ddc97;--radius:14px;--font:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;--mono:'JetBrains Mono',ui-monospace,Consolas,monospace}
+*{box-sizing:border-box;margin:0}
+body{background:var(--bg);color:var(--text);font:16px/1.6 var(--font);-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:1120px;margin:0 auto;padding:0 24px}
+header{position:sticky;top:0;z-index:5;backdrop-filter:blur(12px);background:rgb(11 12 16/.8);border-bottom:1px solid var(--border)}
+header .wrap{display:flex;align-items:center;gap:32px;height:60px}
+.logo{display:flex;align-items:center;gap:10px;font-weight:700}
+.logo img{width:26px;height:26px}
+nav{display:flex;gap:24px;color:var(--muted);font-size:14px;flex:1}
+nav a:hover{color:var(--text)}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border-radius:10px;border:1px solid var(--border);font-weight:600;font-size:14px;transition:.2s}
+.btn:hover{border-color:#3a4050;background:var(--surface-2)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.primary:hover{background:#4a79ec}
+.btn.lg{padding:14px 24px;font-size:15px}
+.hero{text-align:center;padding:88px 0 48px;position:relative}
+.hero::before{content:"";position:absolute;inset:-40px 0 auto;height:520px;background:radial-gradient(ellipse 60% 60% at 50% 0%,rgb(91 140 255/.28),transparent 70%);z-index:-1}
+.pill{display:inline-flex;gap:8px;align-items:center;border:1px solid var(--border);background:var(--surface);border-radius:999px;padding:5px 14px;font-size:13px;color:var(--muted)}
+.pill i{width:7px;height:7px;border-radius:50%;background:var(--accent-2);box-shadow:0 0 0 4px rgb(61 220 151/.18)}
+h1{font-size:clamp(38px,6vw,68px);line-height:1.05;letter-spacing:-.04em;margin:24px auto 20px;max-width:14ch;font-weight:800;background:linear-gradient(180deg,#fff,#9aa3bd);-webkit-background-clip:text;background-clip:text;color:transparent}
+.lead{max-width:60ch;margin:0 auto 32px;color:var(--muted);font-size:18px}
+.cta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.note{margin-top:16px;font-size:13px;color:var(--muted)}
+/* окно редактора */
+.editor{margin:56px auto 0;max-width:980px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);overflow:hidden;box-shadow:0 40px 120px rgb(91 140 255/.12);text-align:left}
+.bar{display:flex;align-items:center;gap:8px;padding:12px 16px;border-bottom:1px solid var(--border);color:var(--muted);font:13px var(--mono)}
+.bar span{width:10px;height:10px;border-radius:50%;background:#2c3040}
+.bar b{margin-left:12px;font-weight:400}
+.bar em{margin-left:auto;font-style:normal;color:var(--accent-2)}
+.panes{display:grid;grid-template-columns:1fr 1.2fr}
+pre{padding:20px;font:13px/1.75 var(--mono);color:#cdd6f4;border-right:1px solid var(--border);overflow:auto}
+.k{color:#c792ea}.s{color:#a5e075}.n{color:#82aaff}.c{color:#5c6370}
+.canvas{padding:20px;display:grid;place-items:center;background:radial-gradient(circle,#232736 1px,transparent 1px) 0 0/18px 18px}
+.canvas svg{width:100%;max-width:420px}
+@media(max-width:720px){.panes{grid-template-columns:1fr}pre{border-right:0;border-bottom:1px solid var(--border)}nav{display:none}}
+/* форматы */
+.formats{display:flex;gap:12px 28px;flex-wrap:wrap;justify-content:center;margin:56px 0 0;color:var(--muted);font:13px var(--mono);text-transform:uppercase;letter-spacing:.08em}
+.formats b{color:var(--text);font-weight:500}
+section{padding:96px 0}
+h2{font-size:clamp(28px,4vw,40px);letter-spacing:-.03em;line-height:1.15;margin-bottom:12px}
+.sec-lead{color:var(--muted);max-width:56ch;margin-bottom:40px}
+.eyebrow{font:12px var(--mono);color:var(--accent);text-transform:uppercase;letter-spacing:.12em;margin-bottom:12px;display:block}
+/* bento */
+.bento{display:grid;grid-template-columns:repeat(6,1fr);gap:16px}
+.cell{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;transition:.25s;position:relative;overflow:hidden}
+.cell:hover{border-color:#3a4a7a;transform:translateY(-2px)}
+.cell img{width:40px;height:40px;filter:invert(.9)}
+.cell h3{font-size:20px;margin:16px 0 6px}
+.cell p{color:var(--muted);font-size:14px}
+.cell.big{grid-column:span 3}
+.cell.mid{grid-column:span 2}
+.tag{position:absolute;top:20px;right:20px;font:11px var(--mono);padding:3px 10px;border-radius:999px;border:1px solid var(--border);color:var(--muted)}
+.tag.beta{color:var(--accent-2);border-color:rgb(61 220 151/.4)}
+@media(max-width:860px){.cell.big,.cell.mid{grid-column:span 6}}
+/* шаги */
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;counter-reset:s}
+.step{border-top:1px solid var(--border);padding-top:20px}
+.step::before{counter-increment:s;content:"Fig 0." counter(s);font:12px var(--mono);color:var(--accent)}
+.step h3{margin:10px 0 6px;font-size:20px}.step p{color:var(--muted)}
+/* тарифы */
+.plans{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+.plan{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:28px}
+.plan.pro{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent),0 20px 60px rgb(91 140 255/.15)}
+.plan h3{font-size:22px}.price{font-size:36px;font-weight:800;letter-spacing:-.03em;margin:8px 0 16px}
+.plan li{list-style:none;padding:6px 0;color:var(--muted);font-size:15px}.plan li::before{content:"✓ ";color:var(--accent-2)}
+/* FAQ */
+details{border-bottom:1px solid var(--border);padding:18px 0}
+summary{cursor:pointer;font-weight:600;list-style:none;display:flex;justify-content:space-between}
+summary::after{content:"+";color:var(--muted)}details[open] summary::after{content:"–"}
+details p{color:var(--muted);margin-top:10px;max-width:70ch}
+/* CTA */
+.final{text-align:center;border:1px solid var(--border);border-radius:24px;padding:72px 24px;background:radial-gradient(ellipse 70% 100% at 50% 0%,rgb(91 140 255/.2),var(--surface) 70%)}
+.final form{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:28px}
+.final input{background:var(--bg);border:1px solid var(--border);color:var(--text);padding:13px 16px;border-radius:10px;min-width:260px;font:inherit}
+footer{border-top:1px solid var(--border);padding:40px 0;color:var(--muted);font-size:14px}
+footer .wrap{display:flex;gap:24px;flex-wrap:wrap;justify-content:space-between}
+footer nav{display:flex!important;gap:20px}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <a class="logo" href="#"><img src="../../../site/images/logo.svg" alt="">DSLKit</a>
+  <nav><a href="#notations">Нотации</a><a href="#how">Как это работает</a><a href="#pricing">Тарифы</a><a href="#faq">FAQ</a></nav>
+  <a class="btn" href="#">Войти</a><a class="btn primary" href="#waitlist">В бету</a>
+</div></header>
+
+<main>
+<div class="wrap hero">
+  <span class="pill"><i></i>Скоро: закрытая бета</span>
+  <h1>Пишите код — получайте диаграмму</h1>
+  <p class="lead">Веб-редактор диаграмм как кода: опишите схему на DSL, DSLKit проверит её по правилам нотации и нарисует.</p>
+  <div class="cta"><a class="btn primary lg" href="#">Создать диаграмму →</a><a class="btn lg" href="#how">Как это работает</a></div>
+  <p class="note">Бесплатно в бете · до 5 диаграмм в день · без карты</p>
+
+  <div class="editor" aria-label="Пример редактора">
+    <div class="bar"><span></span><span></span><span></span><b>order.dsl</b><em>● IDEF0 · ошибок нет</em></div>
+    <div class="panes">
+<pre><span class="k">idef0</span> <span class="s">"Order process"</span> {
+  <span class="n">A0</span> <span class="s">"Process order"</span> {
+    <span class="k">input</span>   Order
+    <span class="k">control</span> Rules
+    <span class="k">output</span>  Invoice
+  }
+  <span class="n">A1</span> <span class="s">"Ship goods"</span> {
+    <span class="k">input</span>   Invoice
+  }
+  <span class="c">// A0 → A1</span>
+}</pre>
+      <div class="canvas">
+        <svg viewBox="0 0 420 240" fill="none" stroke="#5b8cff" stroke-width="1.5" aria-label="Диаграмма IDEF0: блоки A0 и A1">
+          <rect x="30" y="60" width="150" height="80" rx="8" fill="#171c2e"/><text x="105" y="95" fill="#e8eaf0" stroke="none" font-size="13" text-anchor="middle">A0</text><text x="105" y="115" fill="#8d93a5" stroke="none" font-size="12" text-anchor="middle">Process order</text>
+          <rect x="240" y="120" width="150" height="80" rx="8" fill="#171c2e"/><text x="315" y="155" fill="#e8eaf0" stroke="none" font-size="13" text-anchor="middle">A1</text><text x="315" y="175" fill="#8d93a5" stroke="none" font-size="12" text-anchor="middle">Ship goods</text>
+          <path d="M0 100h30M105 20v40M105 140v40M180 100h30v60h30" stroke="#3ddc97"/>
+          <text x="2" y="92" fill="#8d93a5" stroke="none" font-size="11">Order</text><text x="112" y="34" fill="#8d93a5" stroke="none" font-size="11">Rules</text><text x="112" y="176" fill="#8d93a5" stroke="none" font-size="11">Invoice</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+  <div class="formats"><span>Экспорт:</span><b>SVG</b><b>PNG</b><b>PlantUML</b><b>Mermaid</b></div>
+</div>
+
+<section id="notations"><div class="wrap">
+  <span class="eyebrow">Нотации</span><h2>Шесть нотаций в одном редакторе</h2>
+  <p class="sec-lead">Первыми в бете появятся IDEF0, DFD и ERD. Остальные в планах.</p>
+  <div class="bento">
+    <article class="cell big"><span class="tag beta">в бете</span><img src="../../../site/images/notations/idef0.svg" alt=""><h3>IDEF0</h3><p>Функциональное моделирование: блоки, входы, управление, выходы и механизмы.</p></article>
+    <article class="cell big"><span class="tag beta">в бете</span><img src="../../../site/images/notations/dfd.svg" alt=""><h3>DFD</h3><p>Потоки данных: процессы, хранилища и связи между ними.</p></article>
+    <article class="cell mid"><span class="tag beta">в бете</span><img src="../../../site/images/notations/erd.svg" alt=""><h3>ERD</h3><p>Сущности и связи для проектирования баз данных.</p></article>
+    <article class="cell mid"><span class="tag">в планах</span><img src="../../../site/images/notations/uml.svg" alt=""><h3>UML</h3><p>Классы, последовательности и другие диаграммы.</p></article>
+    <article class="cell mid"><span class="tag">в планах</span><img src="../../../site/images/notations/bpmn.svg" alt=""><h3>BPMN</h3><p>События, задачи и шлюзы бизнес-процессов.</p></article>
+  </div>
+</div></section>
+
+<section id="how"><div class="wrap">
+  <span class="eyebrow">Как это работает</span><h2>Три шага от идеи до схемы</h2>
+  <div class="steps" style="margin-top:40px">
+    <div class="step"><h3>Пишете код</h3><p>Описываете диаграмму на DSL, подсказки и шаблоны помогают начать.</p></div>
+    <div class="step"><h3>Видите схему</h3><p>Холст обновляется сразу, ошибки подсвечиваются с пояснением.</p></div>
+    <div class="step"><h3>Экспортируете</h3><p>SVG, PNG, PlantUML или Mermaid.</p></div>
+  </div>
+</div></section>
+
+<section id="pricing"><div class="wrap">
+  <span class="eyebrow">Тарифы</span><h2>Бесплатно в бете</h2>
+  <p class="sec-lead">Условия могут измениться после беты.</p>
+  <div class="plans">
+    <article class="plan"><h3>Free</h3><div class="price">0 $</div><ul><li>До 5 диаграмм в день</li><li>Все доступные нотации</li><li>Экспорт в SVG и PNG</li></ul></article>
+    <article class="plan pro"><h3>Pro</h3><div class="price">скоро</div><ul><li>Без дневного лимита</li><li>История версий</li><li>Совместная работа и API</li></ul></article>
+  </div>
+</div></section>
+
+<section id="faq"><div class="wrap" style="max-width:800px">
+  <span class="eyebrow">FAQ</span><h2>Вопросы и ответы</h2>
+  <details><summary>Что такое DSLKit?</summary><p>Веб-редактор диаграмм как кода. Вы описываете схему текстом, а редактор проверяет её по правилам нотации и рисует.</p></details>
+  <details><summary>Нужно ли уметь программировать?</summary><p>Нет. Синтаксис короткий, шаблоны и подсказки помогают написать первую диаграмму.</p></details>
+  <details><summary>Какие нотации будут поддерживаться?</summary><p>UML, BPMN, ERD, DFD, IDEF0 и сети Петри. Первыми — IDEF0, DFD и ERD.</p></details>
+  <details><summary>Сколько это стоит?</summary><p>В бете бесплатно, до пяти диаграмм в день. Pro появится позже.</p></details>
+</div></section>
+
+<section id="waitlist"><div class="wrap"><div class="final">
+  <h2>Попробуйте раньше всех</h2><p class="sec-lead" style="margin:0 auto">Оставьте почту, и мы пришлём приглашение в бету.</p>
+  <form onsubmit="return false"><input type="email" placeholder="name@example.com" aria-label="Электронная почта"><button class="btn primary lg">Записаться</button></form>
+</div></div></section>
+</main>
+<footer><div class="wrap"><span>© 2026 DSLKit</span><nav><a href="#">Конфиденциальность</a><a href="#">English</a><a href="mailto:hello@dslkit.io">hello@dslkit.io</a></nav></div></footer>
+</body>
+</html>

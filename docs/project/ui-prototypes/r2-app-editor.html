@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>[Прототип] Редактор</title>
+<link rel="stylesheet" href="r2-app.css">
+</head>
+<body class="app app--noside">
+<header class="top">
+  <a class="logo" href="r2-landing.html"><img src="../../../site/images/logo.svg" alt="" width="24" height="24">DSLKit</a>
+  <div class="search"><input type="search" placeholder="Поиск диаграмм… Ctrl+K" aria-label="Поиск диаграмм"></div>
+  <a class="btn primary" href="r2-app-templates.html"><svg class="icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M10 4v12M4 10h12"/></svg>Новая диаграмма</a>
+  <button class="avatar" aria-label="Профиль">KX</button>
+</header>
+
+<main class="main main--editor" id="main">
+<div class="ed">
+<div class="ed__bar"><span class="ed__file">order.dsl <em>не сохранено</em></span><span class="spacer"></span><span class="ok">● ошибок нет · автосохранение</span>
+<a class="btn" href="#">Проверить</a><a class="btn primary" href="#">▶ Запустить <kbd>Ctrl+Enter</kbd></a><a class="btn" href="#">Поделиться</a><a class="btn" href="#">Сохранить</a></div>
+<div class="ed__body">
+ <nav class="files" aria-label="Проводник"><h2>Проводник</h2><ul><li class="is-on">order.dsl</li><li>rules.dsl</li><li>invoice.dsl</li></ul><h2>Шаблоны</h2><ul><li>IDEF0 <span class="chip chip--beta">в бете</span></li><li>DFD <span class="chip chip--beta">в бете</span></li><li>ERD <span class="chip chip--beta">в бете</span></li></ul></nav>
+ <section class="code" aria-label="Код"><div class="tabs"><span class="is-on">order.dsl</span><span>rules.dsl</span></div><pre><div><i>1</i><span><span class="k">diagram</span> <span class="n">idef0</span> <span class="s">"Order process"</span> {</span></div><div><i>2</i><span>  <span class="k">box</span> A0 <span class="s">"Process order"</span> {</span></div><div><i>3</i><span>    <span class="k">input</span>:   Order</span></div><div><i>4</i><span>    <span class="k">control</span>: Rules</span></div><div><i>5</i><span>    <span class="k">output</span>:  Invoice</span></div><div><i>6</i><span>  }</span></div><div><i>7</i><span>  <span class="k">box</span> A1 <span class="s">"Ship goods"</span> {</span></div><div><i>8</i><span>    <span class="k">input</span>:   Invoice</span></div><div><i>9</i><span>  }</span></div><div><i>10</i><span>  <span class="k">arrow</span> A0.output -&gt; A1.input</span></div><div><i>11</i><span>}</span></div></pre></section>
+ <section class="canvas" aria-label="Холст"><div class="tabs"><span class="is-on">Холст</span><span>A-0 › A0</span><span class="spacer"></span><span>Автораскладка</span><span>Движок: в настройках</span></div>
+ <div class="canvas__area"><svg viewBox="0 0 460 280" fill="none" stroke="#5b8cff" stroke-width="1.5" role="img" aria-label="Диаграмма IDEF0: A0 Process order, Invoice, A1 Ship goods"><rect x="40" y="50" width="160" height="90" rx="8" fill="#171c2e"/><text x="120" y="92" fill="#e8eaf0" stroke="none" font-size="14" text-anchor="middle">A0</text><text x="120" y="114" fill="#8d93a5" stroke="none" font-size="12" text-anchor="middle">Process order</text><rect x="260" y="150" width="160" height="90" rx="8" fill="#171c2e"/><text x="340" y="192" fill="#e8eaf0" stroke="none" font-size="14" text-anchor="middle">A1</text><text x="340" y="214" fill="#8d93a5" stroke="none" font-size="12" text-anchor="middle">Ship goods</text><path d="M0 95h40M120 10v40M120 140v40M200 95h30v100h30" stroke="#3ddc97"/><text x="4" y="86" fill="#8d93a5" stroke="none" font-size="11">Order</text><text x="128" y="30" fill="#8d93a5" stroke="none" font-size="11">Rules</text><text x="128" y="170" fill="#8d93a5" stroke="none" font-size="11">Invoice</text></svg></div></section>
+</div>
+<div class="ed__problems"><b>Проблемы</b><span class="ok">0 ошибок</span><span class="muted">Диаграмма IDEF0 · 2 блока · 1 стрелка</span></div>
+</div>
+</main>
+</body>
+</html>
