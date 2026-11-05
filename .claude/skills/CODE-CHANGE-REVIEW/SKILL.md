@@ -275,3 +275,17 @@ converts a review into a rubber stamp, and the next person will trust it.
   risky" without a mechanism wastes the author's time and dilutes the real findings.
 - When you do not understand a piece of code, ask. An unasked question becomes an
   approval of code nobody reviewed.
+
+<!-- >>> project adaptation >>> -->
+## Project context
+
+Paths below are relative to the project root. These bindings specialize this
+skill's generic examples; existing project rules and correctness checks still apply.
+Commands were read from configuration and not executed during adaptation.
+
+- Areas: `site/` (HTML, CSS and JS without a build step), `tools/` (server, build, report tooling), `labs/` (lab code, tests and reports), `react-app/` (Vite and React). Source: repository layout, `package.json`.
+- Blast radius: pages exist in pairs, `site/app/*.html` and `site/en/app/*.html`; a change to one without the other is a finding. Reports are generated from `*.tpl.md`; an edit to `report.md` alone is lost on the next build. Source: `site/`, `tools/build.js`.
+- A change that lowers coverage below 100% fails CI. Source: `package.json`.
+- Owner rules to check in the diff: no AI attributions or `Co-Authored-By`, English commit messages, nothing aimed at `main` without the owner, no `.claude/admin-test-account.txt`, `.claude/worktrees/`, `.playwright-mcp/`, `.accelerator/profile.user.json`. Source: `CLAUDE.md`.
+- Review checks: `npm run format:check`, `npm test`. Source: `.github/workflows/ci.yml`.
+<!-- <<< project adaptation <<< -->

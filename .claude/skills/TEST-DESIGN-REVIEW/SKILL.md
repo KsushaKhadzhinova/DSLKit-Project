@@ -180,3 +180,17 @@ or environment-dependent failures.
 - Do not propose deleting a test you do not understand. An odd-looking test is
   often a regression test for a bug that is not obvious from the code.
 - Do not add tests purely to raise a coverage number.
+
+<!-- >>> project adaptation >>> -->
+## Project context
+
+Paths below are relative to the project root. These bindings specialize this
+skill's generic examples; existing project rules and correctness checks still apply.
+Commands were read from configuration and not executed during adaptation.
+
+- Placement: `*.test.js` beside the code under test, in `labs/<NN-name>/` and `tools/`; runner is `node --test` with `node:assert`. React tests: `react-app/src/**/*.test.jsx` (jest). Browser scenarios: `testing-course/full/*-e2e.py`. Source: `package.json`, `react-app/package.json`, `testing-course/full/`.
+- Coverage gate is 100% for lines, branches and functions, so a new branch without a test fails `npm test`. Source: `package.json`.
+- Every lab has negative and attack tests; failure paths are expected, not optional. Source: `SECURITY.md`.
+- Representative examples: `labs/05-javascript-interactivity/projects.test.js` (storage), `tools/server.test.js` (server).
+- Command for one file: `node --test <file>` (coverage flags are only in `npm test`).
+<!-- <<< project adaptation <<< -->

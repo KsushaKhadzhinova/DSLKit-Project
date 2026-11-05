@@ -151,3 +151,15 @@ in-progress work clearly marked, no half-applied edits with no explanation.
   expensive than a question.
 - When the requester has heard your concern and reaffirmed the original plan, that
   is their call — proceed with it and note the concern.
+
+<!-- >>> project adaptation >>> -->
+## Project context
+
+Paths below are relative to the project root. These bindings specialize this
+skill's generic examples; existing project rules and correctness checks still apply.
+Commands were read from configuration and not executed during adaptation.
+
+- After each step run `npm test`; the 100% coverage gate makes a skipped test visible. Source: `package.json`.
+- Record progress in `docs/PROJECT-STATE.md`; hand-over notes for a session go to `docs/HANDOVER-SESSION-<date>.md`. Source: `docs/README.md`, `CLAUDE.md`.
+- Commit only on the owner's request, as the owner, with English messages and no tool attributions; do not push to or merge into `main`. Source: `CLAUDE.md`.
+<!-- <<< project adaptation <<< -->

@@ -141,3 +141,16 @@ metrics, not secrets or raw data dumps.
 The skipped-layers section is not paperwork. A required layer that was skipped
 because the environment was unavailable is an accepted risk, and it needs someone's
 name on it — never a silent `PASS`.
+
+<!-- >>> project adaptation >>> -->
+## Project context
+
+Paths below are relative to the project root. These bindings specialize this
+skill's generic examples; existing project rules and correctness checks still apply.
+Commands were read from configuration and not executed during adaptation.
+
+- Layers available here: unit and integration tests (`npm test`), format check (`npm run format:check`), production build (`npm run build`), static security and performance check (`node testing-course/full/static-sec-perf.js`), browser e2e (`npm run tc:full`, Python). Source: `package.json`, `testing-course/full/`.
+- CI runs only format check, `npm test` and `npm audit`; the build and e2e layers are manual. Source: `.github/workflows/ci.yml`.
+- A change to lab 1 data tooling needs `npm run lab1:generate` and a diff of `labs/01-network/generated/`. Source: `package.json`.
+- There is no canary or deployment stage.
+<!-- <<< project adaptation <<< -->

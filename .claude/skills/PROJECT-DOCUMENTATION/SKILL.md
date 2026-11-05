@@ -199,3 +199,17 @@ to be required by the export job — unverified" rather than stating it flatly.
   confidently wrong
 - Fabricating the reason behind a decision nobody recorded
 - Leaving known-false statements in place because fixing them was not in scope
+
+<!-- >>> project adaptation >>> -->
+## Project context
+
+Paths below are relative to the project root. These bindings specialize this
+skill's generic examples; existing project rules and correctness checks still apply.
+Commands were read from configuration and not executed during adaptation.
+
+- Where things go: project documents in `docs/` (index `docs/README.md`), explanations of finished work in `docs/study/`, requirements and plans in `docs/notes/`, results of checks in `docs/agent-reports/`, each work's own `README.md` beside its code. Source: `docs/README.md`.
+- Decisions, rules and the branch map live in `docs/PROJECT-STATE.md`. Update it when a decision changes. Source: `CLAUDE.md`.
+- Language: Russian and English versions at the same time (`X.md` and `X.en.md`). Source: `CLAUDE.md`, `docs/PROJECT-STATE.en.md`.
+- Lab reports are generated: edit `report.tpl.md` and `report.en.tpl.md`, then run `node tools/build.js labs/<NN-name>`. Source: `tools/build.js`.
+- Style: short, in the owner's voice, no tool or AI marks. Source: `docs/HANDOVER.md` section 2.
+<!-- <<< project adaptation <<< -->

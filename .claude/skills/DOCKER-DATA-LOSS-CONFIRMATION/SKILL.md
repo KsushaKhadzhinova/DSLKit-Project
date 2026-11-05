@@ -97,3 +97,14 @@ yes in one word, and the answer is informed.
 - `DOCKER-COMPOSE-LOCAL-STACK` for `down -v` and volumes managed by a Compose project.
 - `DOCKER-IMAGE-BUILD` and `DOCKER-PROJECT-SETUP` for the non-destructive work
   that usually comes first.
+
+<!-- >>> project adaptation >>> -->
+## Project context
+
+Paths below are relative to the project root. These bindings specialize this
+skill's generic examples; existing project rules and correctness checks still apply.
+Commands were read from configuration and not executed during adaptation.
+
+- Docker stacks of this project belong to other branches (`course-app`, `lab12`, `25`); the compose file on `course-app` keeps PostgreSQL data in the named volume `pgdata`, so `docker compose down -v` or `docker volume prune` would delete the database. Source: `course-project/app/docker/docker-compose.yml` on `course-app`.
+- Ask first and prefer a narrower command (`docker compose stop`, `docker compose down` without `-v`). Images for lab 8 are an owner task; do not run `docker rm` or `prune` for the owner. Source: `docs/HANDOVER.md` section 5, `CLAUDE.md`.
+<!-- <<< project adaptation <<< -->

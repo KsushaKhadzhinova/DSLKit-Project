@@ -186,3 +186,16 @@ more than an abandoned large one, and large refactors are abandoned regularly.
 - Do not let a green suite substitute for a suite that actually covers the code.
 - If the tests fail mid-refactor and the cause is not immediately clear, revert to
   the last green commit rather than debugging forward.
+
+<!-- >>> project adaptation >>> -->
+## Project context
+
+Paths below are relative to the project root. These bindings specialize this
+skill's generic examples; existing project rules and correctness checks still apply.
+Commands were read from configuration and not executed during adaptation.
+
+- Baseline before any step: `npm test` and `npm run format:check` green; if `react-app/` is involved, also `npm run react:test`. Source: `package.json`, `.github/workflows/ci.yml`.
+- Interfaces to keep: modules in `site/js/components/`, `site/js/storage/`, `site/js/utils/` are exercised by `labs/05-javascript-interactivity/*.test.js`; the saved-project format (`localStorage` key `projects`) is data users already have. Source: `site/js/storage/projects.js`.
+- The site has no build step in development (ES modules loaded as they are); do not introduce one while refactoring. `tools/build-site.js` only bundles for production. Source: `package.json`, `tools/build-site.js`.
+- Coverage must stay at 100% after every step. Source: `package.json`.
+<!-- <<< project adaptation <<< -->

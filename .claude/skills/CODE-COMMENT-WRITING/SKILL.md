@@ -278,3 +278,16 @@ failure case you traced. Nothing should point at another file, section or line. 
 file whose columns a helper builds should list those columns. Nothing in the code
 should be an argument that belongs in docs. Every comment you touched should describe
 the code after your change, not before it.
+
+<!-- >>> project adaptation >>> -->
+## Project context
+
+Paths below are relative to the project root. These bindings specialize this
+skill's generic examples; existing project rules and correctness checks still apply.
+Commands were read from configuration and not executed during adaptation.
+
+- Language and style: comments in code are English prose placed above the block they explain, saying why, not what. Representative files: `tools/server.js`, `tools/build-site.js`. Source: those files.
+- Formatting is enforced by prettier (`.prettierrc`); run `npm run format:check`. Source: `package.json`.
+- Docs for a lab or practical go into its `README.md` or `docs/study/`, not into long code comments. Source: `docs/README.md`.
+- The dbt and Dataform references in this skill do not apply; there is no dbt or Dataform in the project.
+<!-- <<< project adaptation <<< -->

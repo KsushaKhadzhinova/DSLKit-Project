@@ -242,3 +242,17 @@ decision be made by the person who is accountable for it.
 - Reporting a deletion complete without checking time travel and downstream copies
 - Granting pipeline service accounts blanket read because it was quicker
 - Pasting real rows into a ticket, a document, or a model prompt
+
+<!-- >>> project adaptation >>> -->
+## Project context
+
+Paths below are relative to the project root. These bindings specialize this
+skill's generic examples; existing project rules and correctness checks still apply.
+Commands were read from configuration and not executed during adaptation.
+
+- Secrets live only in `.env` on the owner's machine (listed in `.gitignore`); never in chat, code or the repository. Source: `CLAUDE.md`, `.gitignore`.
+- Do not commit `.claude/admin-test-account.txt` (test admin account) or `.accelerator/profile.user.json`. Source: `CLAUDE.md`.
+- Personal data touched by the product: accounts and sign-in (`site/js/components/auth.js`, `auth-gate.js`), saved projects in browser storage (`site/js/storage/`), the server in `tools/server.js`. Source: those files.
+- Security policy and the audit checklists: `SECURITY.md`, `docs/study/02-SECURITY-AUDIT.md`. CI fails on a high production vulnerability (`npm audit --omit=dev --audit-level=high`). Source: `SECURITY.md`, `.github/workflows/ci.yml`.
+- Open: whether the warehouse-oriented parts of this skill (tokenising, lower environments) apply; the project has no warehouse.
+<!-- <<< project adaptation <<< -->

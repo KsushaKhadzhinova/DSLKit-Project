@@ -163,3 +163,15 @@ corrective updates are their own decision, made by someone who has read the repo
 Fill these in for the repository this is installed in: where pipeline code and data
 models live, where run logs and run metadata are read from, the approved read-only
 query command, the environment names, and where incident documents belong.
+
+<!-- >>> project adaptation >>> -->
+## Project context
+
+Paths below are relative to the project root. These bindings specialize this
+skill's generic examples; existing project rules and correctness checks still apply.
+Commands were read from configuration and not executed during adaptation.
+
+- The one multi-step data path is lab 1: HAR files in `labs/01-network/data/` go through `analyze-har.js` and `figures.js` (run by `cli.js`) into `labs/01-network/generated/`, then into the report. Commands: `npm run lab1:generate`, `npm run lab1:report`. Source: `package.json`, `labs/01-network/cli.js`.
+- For wrong output on the site, trace from the rendered page back through `site/js/components/` to `site/js/storage/` and the engines in `site/js/engines/`. Source: repository layout.
+- Generated files are committed, so `git diff` against the last commit shows what a run changed. Source: `git ls-files labs/01-network/generated`.
+<!-- <<< project adaptation <<< -->

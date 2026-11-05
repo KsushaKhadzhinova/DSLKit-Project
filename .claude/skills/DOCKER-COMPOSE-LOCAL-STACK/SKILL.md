@@ -174,3 +174,16 @@ keeps the data. A volume declared `external: true` is not owned by the project a
 
 - A project with no Docker setup yet starts from `DOCKER-PROJECT-SETUP`.
 - How the images in the stack are built is `DOCKER-IMAGE-BUILD`.
+
+<!-- >>> project adaptation >>> -->
+## Project context
+
+Paths below are relative to the project root. These bindings specialize this
+skill's generic examples; existing project rules and correctness checks still apply.
+Commands were read from configuration and not executed during adaptation.
+
+- Scope: this checkout (`testing-course-full`) has no `compose.yaml`. Compose files exist on other branches: `course-project/app/docker/docker-compose.yml` on `course-app` (Nginx client, Express API, PostgreSQL 16), `part-2/lab-02-sequelize/docker-compose.yml` on `lab12` and `25`, `part-2/lab-03-auth/docker-compose.yml` on `25`. Source: `git ls-tree -r --name-only <branch>`.
+- Representative file: `course-project/app/docker/docker-compose.yml` on `course-app`: named volume `pgdata`, a `pg_isready` healthcheck with `depends_on`, `${VAR:?message}` for required secrets in `.env`, rotated logs. Source: that file.
+- Start command in that file's header: `docker compose up --build`, from `course-project/app/docker/`. Read from the file, not executed.
+- Read the file on its own branch (`git show <branch>:<path>`), do not switch the owner's checkout. Source: `CLAUDE.md` (own branch per work).
+<!-- <<< project adaptation <<< -->

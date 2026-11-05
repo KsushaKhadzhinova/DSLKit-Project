@@ -16,15 +16,15 @@ Saying yes to a questionnaire topic only opens its cards and installs nothing. O
 
 ## 2 Scan result
 
-| Field           | Value                       |
-| --------------- | --------------------------- |
-| languages       | javascript                  |
-| frameworks      | docker                      |
-| test runner     | not detected                |
-| package manager | npm                         |
+| Field           | Value                         |
+| --------------- | ----------------------------- |
+| languages       | javascript                    |
+| frameworks      | docker                        |
+| test runner     | not detected                  |
+| package manager | npm                           |
 | layout          | regular project (no monorepo) |
-| CI              | github-actions              |
-| agents          | claude-code                 |
+| CI              | github-actions                |
+| agents          | claude-code                   |
 
 The scan did not see React because `react-app/` is a nested folder. This does not affect the choice, because only cards without a React condition were selected.
 
@@ -42,15 +42,15 @@ Personal skills (4), local to the owner and not in the repository: `DAILY-STANDU
 
 ## 4 Which files are where
 
-| File                                  | In git | Purpose                                                      |
-| ------------------------------------- | ------ | ------------------------------------------------------------ |
-| `.accelerator/profile.json`           | yes    | The completed project profile: stack, topics, chosen ids.    |
-| `.accelerator/registry.json`          | yes    | What `install` put in and why.                               |
-| `.claude/skills/<ID>/SKILL.md`        | yes    | The skills themselves.                                       |
-| `.accelerator/profile.user.json`      | no     | The owner's personal choice (the 4 ids above), local only.   |
-| `.accelerator/registry.user.json`     | no     | Registry of the personal skills.                             |
-| `.accelerator/profile.draft.json`     | no     | Scan draft, regenerated.                                     |
-| `.accelerator/catalog-topics.json`    | no     | Catalog cards for the questionnaire, regenerated.            |
+| File                               | In git | Purpose                                                    |
+| ---------------------------------- | ------ | ---------------------------------------------------------- |
+| `.accelerator/profile.json`        | yes    | The completed project profile: stack, topics, chosen ids.  |
+| `.accelerator/registry.json`       | yes    | What `install` put in and why.                             |
+| `.claude/skills/<ID>/SKILL.md`     | yes    | The skills themselves.                                     |
+| `.accelerator/profile.user.json`   | no     | The owner's personal choice (the 4 ids above), local only. |
+| `.accelerator/registry.user.json`  | no     | Registry of the personal skills.                           |
+| `.accelerator/profile.draft.json`  | no     | Scan draft, regenerated.                                   |
+| `.accelerator/catalog-topics.json` | no     | Catalog cards for the questionnaire, regenerated.          |
 
 A local `.git/info/exclude` rule hides `.accelerator/`. The committed files from that folder were added with `git add -f`.
 
@@ -76,13 +76,17 @@ To change the set, edit `selected_artifacts` in `.accelerator/profile.json` and 
 {
   "schema_version": "1",
   "toolset_ref": "refs/tags/v1.4.1",
-  "selected_artifacts": [
-    "DAILY-STANDUP-UPDATE",
-    "RECENT-DISCUSSION-RESEARCH",
-    "REQUEST-REFINEMENT",
-    "TECHNICAL-PROSE-EDITING"
-  ]
+  "selected_artifacts": ["DAILY-STANDUP-UPDATE", "RECENT-DISCUSSION-RESEARCH", "REQUEST-REFINEMENT", "TECHNICAL-PROSE-EDITING"]
 }
 ```
 
 To update the catalog version, put a new `vX.Y.Z` tag in `toolset_ref` of both profiles and install again. Branches and short SHAs are not allowed in `toolset_ref`.
+
+## 7 Adaptation to the project
+
+On 5 November 2026 the `PROJECT-ADAPTATION` skill appended a "Project context" section to the `SKILL.md` of each of the 18 project skills, between the markers `<!-- >>> project adaptation >>> -->` and `<!-- <<< project adaptation <<< -->`: check commands, paths and the owner's rules. The commands were read from configuration and not run. The Docker and data skills (`DOCKER-*`, `DATA-*`, `PIPELINE-*`) have little to work on yet: this branch has no Dockerfile (they live on other branches: `course-app`, `lab12`, `25`) and the project has no warehouse, so their section says what applies today and what the owner still has to confirm.
+
+What this means for the installer:
+
+- `accelerator update` treats the adapted copies as locally edited, does not update them and reports them as retained on every run.
+- `accelerator update -Force` and a repeated `accelerator install` replace the copies with the catalog version and the "Project context" section is lost. Then run the adaptation again (the text in git is input for it).

@@ -203,3 +203,17 @@ drops the inconvenient symptom is how a partial fix gets treated as complete.
   before running anything that mutates state.
 - Never invent log output, timings, or results you did not observe. If a check could
   not be run, that is what the report says.
+
+<!-- >>> project adaptation >>> -->
+## Project context
+
+Paths below are relative to the project root. These bindings specialize this
+skill's generic examples; existing project rules and correctness checks still apply.
+Commands were read from configuration and not executed during adaptation.
+
+- Reproduce in the browser: `npm start` serves `site/` on http://localhost:5173; `npm run dev` restarts on change. Source: `package.json`.
+- Reproduce in tests: `node --test <file>` for one test file; `npm test` for everything. Source: `package.json`.
+- The production bundle can differ from the source: `npm run build` writes `dist/`, `npm run start:prod` serves it. Compare both before blaming the code. Source: `package.json`, `tools/build-site.js`.
+- Known environment traps are listed in `docs/PROJECT-STATE.md`; read them before treating a failure as a code defect.
+- Open: no standard log location was found; do not assume one.
+<!-- <<< project adaptation <<< -->

@@ -167,3 +167,18 @@ results makes real uncertainty harder to spot.
 - Do not verify only the parts that are easy to check.
 - If a check is impossible in this environment, say so — and say what would be
   needed to run it.
+
+<!-- >>> project adaptation >>> -->
+## Project context
+
+Paths below are relative to the project root. These bindings specialize this
+skill's generic examples; existing project rules and correctness checks still apply.
+Commands were read from configuration and not executed during adaptation.
+
+- Check commands (root): `npm run format:check`, then `npm test` (node:test with 100% line, branch and function coverage over `labs/**/*.test.js` and `tools/**/*.test.js`). Source: `package.json`, `.github/workflows/ci.yml`.
+- If `react-app/` changed: `npm run react:test` (jest, `react-app/src/**/*.test.jsx`). Source: `package.json`, `react-app/package.json`.
+- If a lab changed: rebuild its reports with `node tools/build.js labs/<NN-name>`; the `report.md` and `report.en.md` files are generated from `report.tpl.md` and `report.en.tpl.md`. Source: `tools/build.js`, `docs/HANDOVER.md` section 2 (rule 4).
+- If the site changed: `npm run build` must still produce `dist/`. Source: `package.json`, `tools/build-site.js`.
+- CI also runs `npm audit --omit=dev --audit-level=high`. Source: `.github/workflows/ci.yml`.
+- Report separately what was run and what was not; e2e (`npm run tc:full`, needs Python) is not part of CI. Source: `package.json`.
+<!-- <<< project adaptation <<< -->

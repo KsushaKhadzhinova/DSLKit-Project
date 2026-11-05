@@ -173,3 +173,16 @@ could already be done and reviewed.
   frequently change; sketch them and refine as the earlier work lands.
 - A plan is a hypothesis about the work, not a contract. When execution shows it is
   wrong, the plan changes — see [plan-execution](../PLAN-EXECUTION/SKILL.md).
+
+<!-- >>> project adaptation >>> -->
+## Project context
+
+Paths below are relative to the project root. These bindings specialize this
+skill's generic examples; existing project rules and correctness checks still apply.
+Commands were read from configuration and not executed during adaptation.
+
+- Existing plans: `docs/notes/17-plan-2026-10-22.md` (and `.en.md`); project state and the branch map: `docs/PROJECT-STATE.md`. Source: `docs/README.md`.
+- Every plan step names its check: `npm test`, `npm run format:check`, or `npm run react:test`. Source: `package.json`.
+- Each piece of work lives on its own branch and ends as a pull request; a plan must not include a merge into `main`. Source: `CLAUDE.md`.
+- Plans and reports are written in Russian and English together. Source: `CLAUDE.md`.
+<!-- <<< project adaptation <<< -->

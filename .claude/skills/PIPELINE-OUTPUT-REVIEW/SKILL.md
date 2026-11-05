@@ -173,3 +173,16 @@ review becomes a rubber stamp.
 Treat unexplained row loss, key duplication, broken accounting and cross-output
 inconsistency as blockers. Keep code correctness, contract correctness and business
 semantics separate in the findings — they have different owners and different fixes.
+
+<!-- >>> project adaptation >>> -->
+## Project context
+
+Paths below are relative to the project root. These bindings specialize this
+skill's generic examples; existing project rules and correctness checks still apply.
+Commands were read from configuration and not executed during adaptation.
+
+- Outputs worth reviewing: `labs/*/generated/` and `report.md`, `report.en.md` (built by `node tools/build.js`), and `dist/` (built by `npm run build`). Source: `package.json`, `tools/build.js`.
+- Baseline: the committed versions of those files; compare with `git diff` after a rebuild. Source: repository layout.
+- Green tests do not prove a report is right: the report numbers come from real data (`labs/01-network/data/*.har`), so spot-check a number against the source. Source: `labs/01-network/cli.js`.
+- Row accounting and contracts for warehouse tables do not apply; there is no warehouse.
+<!-- <<< project adaptation <<< -->

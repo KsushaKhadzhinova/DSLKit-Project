@@ -160,3 +160,17 @@ reasonable for its dependencies.
 - Wiring the image into a stack with a database is `DOCKER-COMPOSE-LOCAL-STACK`.
 - Anything that removes images, containers or volumes goes through
   `DOCKER-DATA-LOSS-CONFIRMATION`.
+
+<!-- >>> project adaptation >>> -->
+## Project context
+
+Paths below are relative to the project root. These bindings specialize this
+skill's generic examples; existing project rules and correctness checks still apply.
+Commands were read from configuration and not executed during adaptation.
+
+- Scope: no Dockerfile in this checkout. Dockerfiles exist on branch `course-app`: `course-project/app/docker/backend/Dockerfile` and `course-project/app/docker/frontend/Dockerfile`, each with a `Dockerfile.dockerignore`. Source: `git ls-tree -r --name-only course-app`.
+- The base image is taken through a `REGISTRY` build argument, so a mirror can be used. Source: `course-project/app/docker/docker-compose.yml` on `course-app`.
+- Keep `.env`, `.claude/`, `.accelerator/`, `node_modules/` out of any image. Source: `.gitignore`, `CLAUDE.md`.
+- Node is `>=20` for the project, CI uses Node 24. Source: `package.json`, `.github/workflows/ci.yml`.
+- Open: images for lab 8 on Docker Hub are an owner task and not built yet; their requirements are not settled. Source: `docs/HANDOVER.md` section 5.
+<!-- <<< project adaptation <<< -->

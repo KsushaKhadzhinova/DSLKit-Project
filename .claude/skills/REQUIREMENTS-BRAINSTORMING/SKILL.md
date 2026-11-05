@@ -173,3 +173,15 @@ the reader precisely what is needed from them and lets everything else proceed.
 - When the requester reaffirms their original request after you have raised a
   concern, that is their decision. Record the concern and proceed with what they
   asked for.
+
+<!-- >>> project adaptation >>> -->
+## Project context
+
+Paths below are relative to the project root. These bindings specialize this
+skill's generic examples; existing project rules and correctness checks still apply.
+Commands were read from configuration and not executed during adaptation.
+
+- Requirements come from the teacher and the owner: `docs/notes/06-teacher-requirements.md`, `docs/notes/07-possible-teacher-extras.md`, `docs/notes/18-scope-vs-state.md`. Course materials: `materials/`. Source: `docs/README.md`.
+- Two levels exist, study work (labs, practicals, course project) and the diploma; ask which one a request belongs to. Source: `docs/HANDOVER.md` section 1.
+- The owner decides on scope; unsettled questions go to her, not into assumptions. Source: `CLAUDE.md`.
+<!-- <<< project adaptation <<< -->

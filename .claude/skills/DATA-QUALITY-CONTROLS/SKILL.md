@@ -154,3 +154,16 @@ editing the quarantine by hand.
 
 Produce one segment's export and confirm that it contains only that segment's
 records, by querying for any other segment's key in it, not by reading it.
+
+<!-- >>> project adaptation >>> -->
+## Project context
+
+Paths below are relative to the project root. These bindings specialize this
+skill's generic examples; existing project rules and correctness checks still apply.
+Commands were read from configuration and not executed during adaptation.
+
+- Scope here: there is no warehouse or batch pipeline. The data that can be wrong is (a) saved projects in browser storage, checked by `valid()` and a limit of 200 in `site/js/storage/projects.js`; (b) imported Mermaid and PlantUML files (`site/js/components/import-menu.js`); (c) the HAR analysis in `labs/01-network/`. Source: those files.
+- Field rules sit in `site/js/utils/validation.js`; tests in `labs/05-javascript-interactivity/*.test.js`. Source: those files.
+- Rejected input should be reported with a readable reason, not dropped silently. Source: the skill's own rule; the existing toasts in `site/js/components/toast.js` are the way to show it.
+- Open: no quarantine or pre-publish comparison exists; do not assume one.
+<!-- <<< project adaptation <<< -->
