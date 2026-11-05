@@ -1,3 +1,5 @@
+import { translate } from '../i18n.js';
+
 export const NOTATIONS = ['UML', 'BPMN', 'ERD', 'DFD', 'IDEF0', 'Petri'];
 
 const seed = () => [
@@ -75,30 +77,36 @@ const CONTROL_IN_CODE = /[\u0000-\u0008\u000b-\u001f\u007f-\u009f\u2028\u2029\u2
 // Zero-width and filler characters look like nothing: a title made only of them would be an empty-looking line in every list.
 const INVISIBLE_ONLY = /^[\p{Z}\p{Cf}\u115f\u1160\u3164\uffa0]*$/u;
 
-const required = (label, value, max) => {
-  if (value === '') return `${label} is required`;
-  if (value.length > max) return `${label} must be at most ${max} characters`;
+// The default translator is plain English, byte-for-byte the text this module always returned before
+// the translation layer existed, so a caller that does not pass `t` (every existing test, for one) sees
+// no change at all.
+const defaultT = (key, vars) => translate('en', key, vars);
+
+const required = (t, field, value, max) => {
+  if (value === '') return t(`validation.${field}.required`);
+  if (value.length > max) return t(`validation.${field}.maxLength`, { max });
   return null;
 };
 
 // Values arrive already trimmed, so a whitespace-only value is an empty one.
 // Returns an object of field errors, empty when the input is valid. Limits come from limits.json.
-export const validateDiagram = (input, limits) => {
+// `t` is the translator of the request (res.locals.t); callers that omit it get English, as before.
+export const validateDiagram = (input, limits, t = defaultT) => {
   const errors = {};
   const set = (field, message) => message && (errors[field] = message);
-  set('title', required('Title', input.title, limits.title.maxLength));
+  set('title', required(t, 'title', input.title, limits.title.maxLength));
   // Control characters (NUL, escape) and text-direction overrides are not part of a title: they break lists and can flip the text around it.
-  if (!errors.title && CONTROL.test(input.title)) errors.title = 'Title must not contain control characters';
-  if (!errors.title && INVISIBLE_ONLY.test(input.title)) errors.title = 'Title must contain a visible character';
-  set('description', required('Description', input.description, limits.description.maxLength));
-  if (!errors.description && CONTROL.test(input.description)) errors.description = 'Description must not contain control characters';
-  if (input.code.length > limits.code.maxLength) errors.code = `Code must be at most ${limits.code.maxLength} characters`;
-  if (!errors.code && CONTROL_IN_CODE.test(input.code)) errors.code = 'Code must not contain control characters';
-  if (!NOTATIONS.includes(input.notation)) errors.notation = 'Choose a notation from the list';
+  if (!errors.title && CONTROL.test(input.title)) errors.title = t('validation.title.control');
+  if (!errors.title && INVISIBLE_ONLY.test(input.title)) errors.title = t('validation.title.invisible');
+  set('description', required(t, 'description', input.description, limits.description.maxLength));
+  if (!errors.description && CONTROL.test(input.description)) errors.description = t('validation.description.control');
+  if (input.code.length > limits.code.maxLength) errors.code = t('validation.code.maxLength', { max: limits.code.maxLength });
+  if (!errors.code && CONTROL_IN_CODE.test(input.code)) errors.code = t('validation.code.control');
+  if (!NOTATIONS.includes(input.notation)) errors.notation = t('validation.notation.invalid');
   const { min, max } = limits.revision;
-  if (input.revision === '') errors.revision = 'Revision is required';
+  if (input.revision === '') errors.revision = t('validation.revision.required');
   else if (!/^\d+$/.test(input.revision) || Number(input.revision) < min || Number(input.revision) > max) {
-    errors.revision = `Revision must be a whole number from ${min} to ${max}`;
+    errors.revision = t('validation.revision.range', { min, max });
   }
   return errors;
 };

@@ -195,6 +195,7 @@ For the DSLKit project an Express application with EJS templates was built: the 
 ```js
 import { UserError } from '../errors.js';
 import { safeLogText } from './security.js';
+import { translate } from '../i18n.js';
 
 // Writes the request into the request_log table BEFORE the route runs, so a database failure
 // reaches the error handler and the user sees the styled 500 page. Status and duration are added
@@ -233,7 +234,8 @@ export const requestLogger =
     } catch (cause) {
       // The database layer already names the problem (UserError); anything else is wrapped in a plain error.
       const error = cause instanceof UserError ? cause : new Error('Request log write failed', { cause });
-      error.publicMessage = 'The request log table could not be written. Check the database file and try again.';
+      const t = res.locals?.t ?? ((key, vars) => translate('en', key, vars));
+      error.publicMessage = t('error.logWriteFailed');
       return next(error);
     }
     res.on('finish', () => {
@@ -372,11 +374,15 @@ export const requireAuth = (req, res, next) => {
 ## Appendix D (mandatory) Listing of the file errorHandlers.js
 
 ```js
-import { CATALOG, entryFor } from '../errors.js';
+import { entryFor } from '../errors.js';
 import { safeLogText } from './security.js';
+import { translate } from '../i18n.js';
 
 export const notFound = (req, res) => {
-  res.status(404).render('404', { title: 'Not found', url: req.originalUrl, ...CATALOG[404] });
+  const lang = res.locals.lang ?? 'en';
+  const t = res.locals.t ?? ((key, vars) => translate(lang, key, vars));
+  const entry = entryFor({ userCode: undefined }, 404, lang);
+  res.status(404).render('404', { title: t('title.notFound'), url: req.originalUrl, ...entry });
 };
 
 // Last resort when even the 500 template fails: still a styled page, never a bare text screen.
@@ -398,8 +404,10 @@ export const serverError =
     else write(line);
     if (res.headersSent) return res.end();
     if (err.retryAfter) res.set('Retry-After', String(err.retryAfter));
+    // The failure may happen before the i18n middleware ran (a very early crash), so the page needs its own default.
+    const lang = res.locals.lang ?? 'en';
     // The page tells what the error is, why it happened and how to solve it (see errors.js).
-    const { heading, what, why, fix } = entryFor(err, status);
+    const { heading, what, why, fix } = entryFor(err, status, lang);
     const locals = {
       title: heading,
       heading,
@@ -412,6 +420,9 @@ export const serverError =
       user: res.locals.user ?? { name: 'Guest', guest: true },
       authQuery: res.locals.authQuery ?? '',
       path: '',
+      lang,
+      t: res.locals.t ?? ((key, vars) => translate(lang, key, vars)),
+      langHref: res.locals.langHref ?? { ru: `${req.originalUrl}?lang=ru`, en: `${req.originalUrl}?lang=en` },
     };
     return res.status(status).render('500', locals, (renderError, html) => {
       if (renderError) {
@@ -426,6 +437,8 @@ export const serverError =
 ## Appendix E (mandatory) Listing of the file diagrams.js with the form checks
 
 ```js
+import { translate } from '../i18n.js';
+
 export const NOTATIONS = ['UML', 'BPMN', 'ERD', 'DFD', 'IDEF0', 'Petri'];
 
 const seed = () => [
@@ -503,30 +516,36 @@ const CONTROL_IN_CODE = /[\u0000-\u0008\u000b-\u001f\u007f-\u009f\u2028\u2029\u2
 // Zero-width and filler characters look like nothing: a title made only of them would be an empty-looking line in every list.
 const INVISIBLE_ONLY = /^[\p{Z}\p{Cf}\u115f\u1160\u3164\uffa0]*$/u;
 
-const required = (label, value, max) => {
-  if (value === '') return `${label} is required`;
-  if (value.length > max) return `${label} must be at most ${max} characters`;
+// The default translator is plain English, byte-for-byte the text this module always returned before
+// the translation layer existed, so a caller that does not pass `t` (every existing test, for one) sees
+// no change at all.
+const defaultT = (key, vars) => translate('en', key, vars);
+
+const required = (t, field, value, max) => {
+  if (value === '') return t(`validation.${field}.required`);
+  if (value.length > max) return t(`validation.${field}.maxLength`, { max });
   return null;
 };
 
 // Values arrive already trimmed, so a whitespace-only value is an empty one.
 // Returns an object of field errors, empty when the input is valid. Limits come from limits.json.
-export const validateDiagram = (input, limits) => {
+// `t` is the translator of the request (res.locals.t); callers that omit it get English, as before.
+export const validateDiagram = (input, limits, t = defaultT) => {
   const errors = {};
   const set = (field, message) => message && (errors[field] = message);
-  set('title', required('Title', input.title, limits.title.maxLength));
+  set('title', required(t, 'title', input.title, limits.title.maxLength));
   // Control characters (NUL, escape) and text-direction overrides are not part of a title: they break lists and can flip the text around it.
-  if (!errors.title && CONTROL.test(input.title)) errors.title = 'Title must not contain control characters';
-  if (!errors.title && INVISIBLE_ONLY.test(input.title)) errors.title = 'Title must contain a visible character';
-  set('description', required('Description', input.description, limits.description.maxLength));
-  if (!errors.description && CONTROL.test(input.description)) errors.description = 'Description must not contain control characters';
-  if (input.code.length > limits.code.maxLength) errors.code = `Code must be at most ${limits.code.maxLength} characters`;
-  if (!errors.code && CONTROL_IN_CODE.test(input.code)) errors.code = 'Code must not contain control characters';
-  if (!NOTATIONS.includes(input.notation)) errors.notation = 'Choose a notation from the list';
+  if (!errors.title && CONTROL.test(input.title)) errors.title = t('validation.title.control');
+  if (!errors.title && INVISIBLE_ONLY.test(input.title)) errors.title = t('validation.title.invisible');
+  set('description', required(t, 'description', input.description, limits.description.maxLength));
+  if (!errors.description && CONTROL.test(input.description)) errors.description = t('validation.description.control');
+  if (input.code.length > limits.code.maxLength) errors.code = t('validation.code.maxLength', { max: limits.code.maxLength });
+  if (!errors.code && CONTROL_IN_CODE.test(input.code)) errors.code = t('validation.code.control');
+  if (!NOTATIONS.includes(input.notation)) errors.notation = t('validation.notation.invalid');
   const { min, max } = limits.revision;
-  if (input.revision === '') errors.revision = 'Revision is required';
+  if (input.revision === '') errors.revision = t('validation.revision.required');
   else if (!/^\d+$/.test(input.revision) || Number(input.revision) < min || Number(input.revision) > max) {
-    errors.revision = `Revision must be a whole number from ${min} to ${max}`;
+    errors.revision = t('validation.revision.range', { min, max });
   }
   return errors;
 };
@@ -556,10 +575,10 @@ export const validateDiagram = (input, limits) => {
 ```ejs
 <%- include('partials/header') %>
 <section class="section" aria-labelledby="page-title">
-  <h1 class="section__title" id="page-title">Diagrams</h1>
-  <p class="section__lead">The catalogue of diagrams stored by the server. Every record shows when it was created.</p>
+  <h1 class="section__title" id="page-title"><%= t('page.index.heading') %></h1>
+  <p class="section__lead"><%= t('page.index.lead') %></p>
   <% if (items.length === 0) { %>
-    <p class="note">No diagrams yet.</p>
+    <p class="note"><%= t('page.index.empty') %></p>
   <% } else { %>
     <ul class="cards">
       <% items.forEach((item) => { %>
@@ -569,17 +588,17 @@ export const validateDiagram = (input, limits) => {
             <p class="card__meta">
               <span class="badge"><%= item.notation %></span>
               <span>#<%= item.id %></span>
-              <span>Created <time datetime="<%= item.createdAt %>"><%= formatTime(item.createdAt) %></time></span>
+              <span><%= t('page.index.created') %> <time datetime="<%= item.createdAt %>"><%= formatTime(item.createdAt) %></time></span>
             </p>
             <p class="card__text"><%= item.description %></p>
-            <a class="card__link" href="/item/<%= item.id %><%= authQuery %>">Open<span class="visually-hidden"> <%= item.title %></span></a>
+            <a class="card__link" href="/item/<%= item.id %><%= authQuery %>"><%= t('page.index.open') %><span class="visually-hidden"> <%= item.title %></span></a>
           </article>
         </li>
       <% }) %>
     </ul>
   <% } %>
   <div class="page-actions">
-    <a class="button button--primary" href="/add<%= authQuery %>">Add diagram</a>
+    <a class="button button--primary" href="/add<%= authQuery %>"><%= t('page.index.addButton') %></a>
   </div>
 </section>
 <%- include('partials/footer') %>
@@ -598,6 +617,7 @@ import { loadLimits } from './limits.js';
 import { fakeAuth, requireAuth } from './middleware/fakeAuth.js';
 import { notFound, serverError } from './middleware/errorHandlers.js';
 import { csrf, rateLimit, securityHeaders } from './middleware/security.js';
+import { i18n } from './i18n.js';
 
 const dir = (path) => fileURLToPath(new URL(path, import.meta.url));
 
@@ -642,6 +662,9 @@ export const createApp = ({
     res.locals.path = req.path;
     next();
   });
+  // Language before everything else that can render a page or build an error message, so even an
+  // early refusal (CSRF, rate limit) can show its text in the visitor's chosen language.
+  app.use(i18n);
   app.use(fakeAuth);
   app.use(rateLimit({ ...limits.rateLimit.all, now }));
   app.use(rateLimit({ ...limits.rateLimit.write, only: ['POST'], now }));
@@ -652,7 +675,7 @@ export const createApp = ({
   app.use((err, req, res, next) => next(err?.type === 'parameters.too.many' ? Object.assign(err, { status: 400, statusCode: 400 }) : err));
   app.use(csrf);
 
-  app.get('/', (req, res) => res.render('index', { title: 'Diagrams', items: store.all() }));
+  app.get('/', (req, res) => res.render('index', { title: res.locals.t('title.diagrams'), items: store.all() }));
 
   // Only plain digits are a number: Number() would also accept "0x1" or "1e0". A leading zero is refused
   // (except "0" itself), so "/item/01" is not a second, hidden address for "/item/1".
@@ -660,8 +683,8 @@ export const createApp = ({
   const findItem = (req) => (ITEM_ID.test(req.params.id) ? store.find(Number(req.params.id)) : undefined);
 
   // Adding and editing share one template, only the texts and the address differ.
-  const formView = { notations: NOTATIONS, heading: 'Add diagram', action: '/add', submit: 'Save diagram' };
-  const editView = (item) => ({ ...formView, heading: 'Edit diagram', action: `/item/${item.id}/edit`, submit: 'Save changes' });
+  const formView = (t) => ({ notations: NOTATIONS, heading: t('form.headingAdd'), action: '/add', submit: t('form.submitAdd') });
+  const editView = (item, t) => ({ ...formView(t), heading: t('form.headingEdit'), action: `/item/${item.id}/edit`, submit: t('form.submitEdit') });
 
   // Repeated keys (arrays) must not crash: only plain strings count.
   const readForm = (body) => {
@@ -684,18 +707,18 @@ export const createApp = ({
   app.all('/item/:id', (req, res, next) => {
     if (req.method === 'GET' || req.method === 'HEAD') return next();
     res.set('Allow', 'GET, HEAD');
-    return next(
-      Object.assign(new Error('Method not allowed'), { status: 405, publicMessage: 'This address only answers GET. To change the record use its edit form.' }),
-    );
+    return next(Object.assign(new Error('Method not allowed'), { status: 405, publicMessage: res.locals.t('error.methodNotAllowed') }));
   });
 
-  app.get('/add', requireAuth, (req, res) => res.render('add', { ...formView, title: 'Add diagram', errors: {}, values: { revision: '1' } }));
+  app.get('/add', requireAuth, (req, res) =>
+    res.render('add', { ...formView(res.locals.t), title: res.locals.t('title.addDiagram'), errors: {}, values: { revision: '1' } }),
+  );
 
   app.post('/add', requireAuth, (req, res) => {
     const values = readForm(req.body); // the CSRF check has already proved that the form body exists
-    const errors = validateDiagram(values, limits);
+    const errors = validateDiagram(values, limits, res.locals.t);
     if (Object.keys(errors).length) {
-      return res.status(400).render('add', { ...formView, title: 'Add diagram', errors, values });
+      return res.status(400).render('add', { ...formView(res.locals.t), title: res.locals.t('title.addDiagram'), errors, values });
     }
     store.add({ ...values, revision: Number(values.revision) });
     return res.redirect(`/${res.locals.authQuery}`);
@@ -705,16 +728,21 @@ export const createApp = ({
   app.get('/item/:id/edit', requireAuth, (req, res, next) => {
     const item = findItem(req);
     if (!item) return next();
-    return res.render('add', { ...editView(item), title: 'Edit diagram', errors: {}, values: { ...item, revision: String(item.revision) } });
+    return res.render('add', {
+      ...editView(item, res.locals.t),
+      title: res.locals.t('title.editDiagram'),
+      errors: {},
+      values: { ...item, revision: String(item.revision) },
+    });
   });
 
   app.post('/item/:id/edit', requireAuth, (req, res, next) => {
     const item = findItem(req);
     if (!item) return next();
     const values = readForm(req.body);
-    const errors = validateDiagram(values, limits);
+    const errors = validateDiagram(values, limits, res.locals.t);
     if (Object.keys(errors).length) {
-      return res.status(400).render('add', { ...editView(item), title: 'Edit diagram', errors, values });
+      return res.status(400).render('add', { ...editView(item, res.locals.t), title: res.locals.t('title.editDiagram'), errors, values });
     }
     store.update(item.id, { ...values, revision: Number(values.revision) });
     return res.redirect(`/item/${item.id}${res.locals.authQuery}`);
@@ -727,10 +755,15 @@ export const createApp = ({
     return res.redirect(`/${res.locals.authQuery}`);
   });
 
-  app.get('/login', (req, res) => res.render('login', { title: 'Sign in' }));
+  app.get('/login', (req, res) => res.render('login', { title: res.locals.t('title.signIn') }));
   app.get('/log', requireAuth, async (req, res, next) => {
     try {
-      res.render('log', { title: 'Request log', rows: log.recent(limits.logRows), file: await describeFile(logFile), exported: req.query.exported === '1' });
+      res.render('log', {
+        title: res.locals.t('title.requestLog'),
+        rows: log.recent(limits.logRows),
+        file: await describeFile(logFile),
+        exported: req.query.exported === '1',
+      });
     } catch (error) {
       next(error);
     }
@@ -770,6 +803,7 @@ export const createApp = ({
 
 ```js
 import { randomBytes, timingSafeEqual, createHmac } from 'node:crypto';
+import { translate } from '../i18n.js';
 
 // Security headers set by hand, no extra package. The pages use only files from the same origin,
 // so the policy can be strict: no inline script or style, no framing, forms post only to this site.
@@ -847,12 +881,13 @@ const refused = (message) => Object.assign(new Error(message), { status: 403, pu
 // it with a self-chosen value: only "shape and signature both correct" counts as a known token.
 // It runs after the form parser, because the token is a field of the form body.
 export const csrf = (req, res, next) => {
+  const t = res.locals?.t ?? ((key, vars) => translate('en', key, vars));
   let token = readCookie(req.headers.cookie, COOKIE);
   const known = validToken(token);
   if (UNSAFE.has(req.method)) {
     const origin = req.headers.origin;
-    if (origin && origin !== `${req.protocol}://${req.headers.host}`) return next(refused('The request comes from another site and was refused.'));
-    if (!known || !sameToken(token, req.body?._csrf)) return next(refused('The form token is missing or wrong. Open the form again and resend it.'));
+    if (origin && origin !== `${req.protocol}://${req.headers.host}`) return next(refused(t('refused.csrf')));
+    if (!known || !sameToken(token, req.body?._csrf)) return next(refused(t('refused.badToken')));
   }
   if (!known) {
     token = newToken();
@@ -862,8 +897,7 @@ export const csrf = (req, res, next) => {
   next();
 };
 
-const tooMany = (retryAfter) =>
-  Object.assign(new Error('Too many requests'), { status: 429, retryAfter, publicMessage: `Too many requests. Try again in ${retryAfter} s.` });
+const tooMany = (retryAfter, t) => Object.assign(new Error('Too many requests'), { status: 429, retryAfter, publicMessage: t('error.tooManyRequests', { retryAfter }) });
 
 // Fixed-window rate limit per client address, kept in memory. `only` limits it to some methods.
 export const rateLimit = ({ windowMs, max, only, now = Date.now }) => {
@@ -882,7 +916,8 @@ export const rateLimit = ({ windowMs, max, only, now = Date.now }) => {
     if (entry.count <= max) return next();
     const retryAfter = Math.max(1, Math.ceil((entry.reset - time) / 1000));
     res.set('Retry-After', String(retryAfter));
-    return next(tooMany(retryAfter));
+    const t = res.locals?.t ?? ((key2, vars) => translate('en', key2, vars));
+    return next(tooMany(retryAfter, t));
   };
 };
 
@@ -908,24 +943,24 @@ export const safeLogText = (text, max = 500) => {
   <p><span class="badge"><%= item.notation %></span></p>
   <p class="section__lead"><%= item.description %></p>
   <dl class="facts">
-    <dt>Number</dt>
+    <dt><%= t('page.item.number') %></dt>
     <dd><%= item.id %></dd>
-    <dt>Revision</dt>
+    <dt><%= t('page.item.revision') %></dt>
     <dd><%= item.revision %></dd>
-    <dt>Created</dt>
+    <dt><%= t('page.item.created') %></dt>
     <dd><time datetime="<%= item.createdAt %>"><%= formatTime(item.createdAt) %></time></dd>
   </dl>
   <% if (item.code) { %>
-    <h2>Source</h2>
+    <h2><%= t('page.item.source') %></h2>
     <pre class="code"><%= item.code %></pre>
   <% } %>
   <div class="page-actions">
-    <a class="button button--primary" href="/<%= authQuery %>">Back to the list</a>
+    <a class="button button--primary" href="/<%= authQuery %>"><%= t('page.item.back') %></a>
     <% if (!user.guest) { %>
-      <a class="button button--tonal" href="/item/<%= item.id %>/edit<%= authQuery %>">Edit<span class="visually-hidden"> <%= item.title %></span></a>
+      <a class="button button--tonal" href="/item/<%= item.id %>/edit<%= authQuery %>"><%= t('page.item.edit') %><span class="visually-hidden"> <%= item.title %></span></a>
       <form class="inline-form" method="post" action="/item/<%= item.id %>/delete<%= authQuery %>">
         <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-        <button class="button button--quiet" type="submit">Delete<span class="visually-hidden"> <%= item.title %></span></button>
+        <button class="button button--quiet" type="submit"><%= t('page.item.delete') %><span class="visually-hidden"> <%= item.title %></span></button>
       </form>
     <% } %>
   </div>

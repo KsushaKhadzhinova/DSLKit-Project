@@ -4,24 +4,24 @@
   <p><span class="badge"><%= item.notation %></span></p>
   <p class="section__lead"><%= item.description %></p>
   <dl class="facts">
-    <dt>Number</dt>
+    <dt><%= t('page.item.number') %></dt>
     <dd><%= item.id %></dd>
-    <dt>Revision</dt>
+    <dt><%= t('page.item.revision') %></dt>
     <dd><%= item.revision %></dd>
-    <dt>Created</dt>
+    <dt><%= t('page.item.created') %></dt>
     <dd><time datetime="<%= item.createdAt %>"><%= formatTime(item.createdAt) %></time></dd>
   </dl>
   <% if (item.code) { %>
-    <h2>Source</h2>
+    <h2><%= t('page.item.source') %></h2>
     <pre class="code"><%= item.code %></pre>
   <% } %>
   <div class="page-actions">
-    <a class="button button--primary" href="/<%= authQuery %>">Back to the list</a>
+    <a class="button button--primary" href="/<%= authQuery %>"><%= t('page.item.back') %></a>
     <% if (!user.guest) { %>
-      <a class="button button--tonal" href="/item/<%= item.id %>/edit<%= authQuery %>">Edit<span class="visually-hidden"> <%= item.title %></span></a>
+      <a class="button button--tonal" href="/item/<%= item.id %>/edit<%= authQuery %>"><%= t('page.item.edit') %><span class="visually-hidden"> <%= item.title %></span></a>
       <form class="inline-form" method="post" action="/item/<%= item.id %>/delete<%= authQuery %>">
         <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-        <button class="button button--quiet" type="submit">Delete<span class="visually-hidden"> <%= item.title %></span></button>
+        <button class="button button--quiet" type="submit"><%= t('page.item.delete') %><span class="visually-hidden"> <%= item.title %></span></button>
       </form>
     <% } %>
   </div>

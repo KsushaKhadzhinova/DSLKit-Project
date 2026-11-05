@@ -8,6 +8,7 @@ import { loadLimits } from './limits.js';
 import { fakeAuth, requireAuth } from './middleware/fakeAuth.js';
 import { notFound, serverError } from './middleware/errorHandlers.js';
 import { csrf, rateLimit, securityHeaders } from './middleware/security.js';
+import { i18n } from './i18n.js';
 
 const dir = (path) => fileURLToPath(new URL(path, import.meta.url));
 
@@ -52,6 +53,9 @@ export const createApp = ({
     res.locals.path = req.path;
     next();
   });
+  // Language before everything else that can render a page or build an error message, so even an
+  // early refusal (CSRF, rate limit) can show its text in the visitor's chosen language.
+  app.use(i18n);
   app.use(fakeAuth);
   app.use(rateLimit({ ...limits.rateLimit.all, now }));
   app.use(rateLimit({ ...limits.rateLimit.write, only: ['POST'], now }));
@@ -62,7 +66,7 @@ export const createApp = ({
   app.use((err, req, res, next) => next(err?.type === 'parameters.too.many' ? Object.assign(err, { status: 400, statusCode: 400 }) : err));
   app.use(csrf);
 
-  app.get('/', (req, res) => res.render('index', { title: 'Diagrams', items: store.all() }));
+  app.get('/', (req, res) => res.render('index', { title: res.locals.t('title.diagrams'), items: store.all() }));
 
   // Only plain digits are a number: Number() would also accept "0x1" or "1e0". A leading zero is refused
   // (except "0" itself), so "/item/01" is not a second, hidden address for "/item/1".
@@ -70,8 +74,8 @@ export const createApp = ({
   const findItem = (req) => (ITEM_ID.test(req.params.id) ? store.find(Number(req.params.id)) : undefined);
 
   // Adding and editing share one template, only the texts and the address differ.
-  const formView = { notations: NOTATIONS, heading: 'Add diagram', action: '/add', submit: 'Save diagram' };
-  const editView = (item) => ({ ...formView, heading: 'Edit diagram', action: `/item/${item.id}/edit`, submit: 'Save changes' });
+  const formView = (t) => ({ notations: NOTATIONS, heading: t('form.headingAdd'), action: '/add', submit: t('form.submitAdd') });
+  const editView = (item, t) => ({ ...formView(t), heading: t('form.headingEdit'), action: `/item/${item.id}/edit`, submit: t('form.submitEdit') });
 
   // Repeated keys (arrays) must not crash: only plain strings count.
   const readForm = (body) => {
@@ -94,18 +98,18 @@ export const createApp = ({
   app.all('/item/:id', (req, res, next) => {
     if (req.method === 'GET' || req.method === 'HEAD') return next();
     res.set('Allow', 'GET, HEAD');
-    return next(
-      Object.assign(new Error('Method not allowed'), { status: 405, publicMessage: 'This address only answers GET. To change the record use its edit form.' }),
-    );
+    return next(Object.assign(new Error('Method not allowed'), { status: 405, publicMessage: res.locals.t('error.methodNotAllowed') }));
   });
 
-  app.get('/add', requireAuth, (req, res) => res.render('add', { ...formView, title: 'Add diagram', errors: {}, values: { revision: '1' } }));
+  app.get('/add', requireAuth, (req, res) =>
+    res.render('add', { ...formView(res.locals.t), title: res.locals.t('title.addDiagram'), errors: {}, values: { revision: '1' } }),
+  );
 
   app.post('/add', requireAuth, (req, res) => {
     const values = readForm(req.body); // the CSRF check has already proved that the form body exists
-    const errors = validateDiagram(values, limits);
+    const errors = validateDiagram(values, limits, res.locals.t);
     if (Object.keys(errors).length) {
-      return res.status(400).render('add', { ...formView, title: 'Add diagram', errors, values });
+      return res.status(400).render('add', { ...formView(res.locals.t), title: res.locals.t('title.addDiagram'), errors, values });
     }
     store.add({ ...values, revision: Number(values.revision) });
     return res.redirect(`/${res.locals.authQuery}`);
@@ -115,16 +119,21 @@ export const createApp = ({
   app.get('/item/:id/edit', requireAuth, (req, res, next) => {
     const item = findItem(req);
     if (!item) return next();
-    return res.render('add', { ...editView(item), title: 'Edit diagram', errors: {}, values: { ...item, revision: String(item.revision) } });
+    return res.render('add', {
+      ...editView(item, res.locals.t),
+      title: res.locals.t('title.editDiagram'),
+      errors: {},
+      values: { ...item, revision: String(item.revision) },
+    });
   });
 
   app.post('/item/:id/edit', requireAuth, (req, res, next) => {
     const item = findItem(req);
     if (!item) return next();
     const values = readForm(req.body);
-    const errors = validateDiagram(values, limits);
+    const errors = validateDiagram(values, limits, res.locals.t);
     if (Object.keys(errors).length) {
-      return res.status(400).render('add', { ...editView(item), title: 'Edit diagram', errors, values });
+      return res.status(400).render('add', { ...editView(item, res.locals.t), title: res.locals.t('title.editDiagram'), errors, values });
     }
     store.update(item.id, { ...values, revision: Number(values.revision) });
     return res.redirect(`/item/${item.id}${res.locals.authQuery}`);
@@ -137,10 +146,15 @@ export const createApp = ({
     return res.redirect(`/${res.locals.authQuery}`);
   });
 
-  app.get('/login', (req, res) => res.render('login', { title: 'Sign in' }));
+  app.get('/login', (req, res) => res.render('login', { title: res.locals.t('title.signIn') }));
   app.get('/log', requireAuth, async (req, res, next) => {
     try {
-      res.render('log', { title: 'Request log', rows: log.recent(limits.logRows), file: await describeFile(logFile), exported: req.query.exported === '1' });
+      res.render('log', {
+        title: res.locals.t('title.requestLog'),
+        rows: log.recent(limits.logRows),
+        file: await describeFile(logFile),
+        exported: req.query.exported === '1',
+      });
     } catch (error) {
       next(error);
     }

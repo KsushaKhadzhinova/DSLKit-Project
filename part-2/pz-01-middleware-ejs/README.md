@@ -47,6 +47,10 @@ DB_FILE=package.json/blocked/log.db npm start
 
 Коды ошибок со страницей в стиле сайта: 400 (поле или адрес), 403 (нет токена CSRF), 404, 413 (слишком большое тело формы), 429 (слишком много запросов), 500.
 
+## Русский интерфейс
+
+Весь интерфейс переведён на русский: добавьте к адресу `?lang=ru` (вернуться на английский — `?lang=en`). Выбор языка запоминается в cookie `lang` (не критичной для безопасности, не `HttpOnly`) до следующего запроса с явным `?lang`; без параметра и без cookie сервер отвечает по-английски, как раньше — это сохраняет обратную совместимость с существующими тестами. Переключатель RU/EN есть в шапке каждой страницы, рядом с переключателем темы, и сохраняет текущий адрес и остальные параметры (например `?auth=1`). Словари лежат в `src/locales/en.js` и `src/locales/ru.js`, функция перевода — в `src/i18n.js`, термины взяты из существующего русского сайта (`site/`, Часть 1 проекта). Названия нотаций и технологий (UML, BPMN, ERD, DFD, IDEF0, Petri, CSRF, HTTP, SQLite, DSLKit) не переводятся.
+
 ## Проверка ввода и пределы
 
 Все пределы лежат в [`limits.json`](limits.json): длина названия, описания и кода, границы ревизии, размер тела формы, число полей, число строк журнала, длина адреса в журнале, частота запросов. Значения обрезаются по краям, поэтому поле из одних пробелов считается пустым. Числа не меньше 0. Те же пределы передаются в форму атрибутами `maxlength`, `min`, `max`, а сервер проверяет их заново.
@@ -68,6 +72,7 @@ DB_FILE=package.json/blocked/log.db npm start
 | `src/middleware/fakeAuth.js`      | Имитация авторизации по `?auth=1` и защита маршрута `requireAuth`               |
 | `src/middleware/security.js`      | Заголовки безопасности, токен CSRF, ограничение частоты, экранирование журнала  |
 | `src/middleware/errorHandlers.js` | Обработчики 404 и 500 (четыре параметра, ошибка пишется в журнал ошибок)        |
+| `src/i18n.js`, `src/locales/*.js` | Выбор языка (`?lang`/cookie `lang`), функция перевода `t`, словари en/ru        |
 | `src/data/diagrams.js`            | Хранилище в памяти и проверка полей                                             |
 | `src/data/requestLog.js`          | Таблица `request_log` в SQLite                                                  |
 | `views/`                          | Шаблоны EJS: `index`, `item`, `add`, `login`, `log`, `404`, `500`, `partials/`  |
@@ -77,6 +82,8 @@ DB_FILE=package.json/blocked/log.db npm start
 ---
 
 **English.** Branch: `pz21`. Express 5 + EJS server for the DSLKit diagram catalogue. Catalogue data is in memory (as the task requires), the request log is a SQLite table (variant 26 is even). The look comes from Part 1 of the project (same header, footer, buttons, cards, form fields and theme switch). Run `npm install && npm start` (Node.js 22.13 or newer, port 3000; `PORT` and `DB_FILE` are in `.env.example`, load them with `node --env-file=.env src/server.js`), test with `npm test`. Records can be edited and deleted with the buttons on the detail page (the delete button is a `POST` form with the CSRF field). Simulated auth: add `?auth=1` to open `/add` and `/log`, guests are redirected to `/login`. The 500 page is caused by a real failure, not by a button: start with `DB_FILE=package.json/blocked/log.db npm start` and every request ends with the styled 500 page. Limits live in `limits.json`. Protection: CSRF token, security headers with a strict Content-Security-Policy, rate limit, escaped log lines. Audit notes: `AUDIT.md`.
+
+**Russian interface.** The whole interface has a Russian translation: add `?lang=ru` to the address (`?lang=en` goes back). The choice is kept in a plain `lang` cookie (not security-critical, not `HttpOnly`) until the next request names a language explicitly; with neither the parameter nor the cookie the server answers in English exactly as before, so the 151 existing tests stay unaffected. A RU/EN switch sits in the header of every page, next to the theme switch, and keeps the current address and its other parameters (such as `?auth=1`). Dictionaries live in `src/locales/en.js` and `src/locales/ru.js`, the translator in `src/i18n.js`; terms come from the project's own Russian site (`site/`, Part 1). Notation and technology names (UML, BPMN, ERD, DFD, IDEF0, Petri, CSRF, HTTP, SQLite, DSLKit) are left untranslated.
 
 ## Проверка стиля
 

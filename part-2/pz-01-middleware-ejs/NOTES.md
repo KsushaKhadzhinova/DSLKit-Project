@@ -56,3 +56,40 @@
   for F1, F3–F12 and the CSRF fix), coverage stays effectively 100 percent (one pre-existing branch in
   `/log`'s own catch block, unrelated to this pass, is still uncovered). Reports rebuilt with
   `node tools/build.js part-2/pz-01-middleware-ejs`, lint is clean.
+
+## Russian localization (?lang=ru)
+
+- The whole interface now has a Russian translation, picked with the query parameter `?lang=ru` (or
+  `?lang=en` to go back), remembered in a plain `lang` cookie (not `HttpOnly`, `SameSite=Lax`, no
+  security role, unlike the CSRF cookie). With neither the parameter nor the cookie the server answers
+  exactly as before: English text, `<html lang="en">`, no new cookie - the default visitor sees no change.
+  The switch is `?auth=1`'s opposite in one way on purpose: `?auth=1` is deliberately not persisted
+  (it is the simulated sign-in of the practical, see F2 above), `?lang` deliberately is, since a real
+  visitor's language is not something to re-type on every click.
+- `src/i18n.js`: the `i18n` middleware (mounted right after `res.locals.path`, before `fakeAuth` and the
+  rate limits, so even an early 403/429 can answer in the chosen language) reads `?lang`, falls back to
+  the cookie, defaults to English, sets `res.locals.lang` and `res.locals.t` (the translator) and builds
+  `res.locals.langHref` for the RU/EN links in the header. `src/locales/en.js` and `src/locales/ru.js` are
+  flat dictionaries, dotted keys to strings or `(vars) => string` functions; English is also the fallback
+  for a key missing from another language. Terms follow the vocabulary already settled on the site
+  (`site/`) in Part 1: "Диаграммы", "Добавить", "Нотация", "Войти"... not invented here.
+- Every view (`index`, `item`, `add`, `log`, `login`, `404`, `500`, `partials/header`, `partials/footer`)
+  calls `t('key')` instead of hard-coded English; `<html lang="<%= lang %>">` and a `<meta
+  name="description">` were added. `src/data/diagrams.js`'s `validateDiagram` takes an optional third
+  `t` argument (default: the English translator, so every existing call and test keeps its old English
+  messages unchanged) and translates every field error. The CSRF refusal, the rate-limit message, the
+  405 on `/item/:id` and the request-log write failure (`requestLogger.js`) are translated the same way.
+  `src/errors.js` gained `CATALOG_RU`, a full Russian mirror of the error catalog (400, 403, 404, 405,
+  413, 429, 500 and every `log-*` code); `entryFor` now takes the language and picks the matching catalog.
+- The header's RU/EN switch (`.header__lang`, the class already bundled from Part 1 but never shown
+  there with both links together - CSS override in `pz.css`) keeps the current path and every other
+  query parameter (so `?auth=1` survives a language switch) and only changes `lang`.
+- Not translated, on purpose: the seed diagram data (titles, descriptions, code - this is content, not
+  interface), notation and technology names (UML, BPMN, ERD, DFD, IDEF0, Petri, CSRF, HTTP, SQLite, URL,
+  `request_log`, `DB_FILE`, `LOG_EXPORT_FILE`), and the very last resort `fallbackPage` in
+  `errorHandlers.js` (used only when the 500 template itself fails to render - English only, to keep that
+  one code path as small and dependency-free as possible).
+- Tests: `test/i18n.test.js` added - one check per page with `?lang=ru` (Russian text present, the
+  matching English UI words absent) plus the cookie's round trip and an explicit regression test that a
+  plain request with neither `?lang` nor the cookie is still English, byte for byte. All existing 150
+  tests still pass unchanged; lint is clean.

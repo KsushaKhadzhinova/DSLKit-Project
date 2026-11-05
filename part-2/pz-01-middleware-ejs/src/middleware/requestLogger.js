@@ -1,5 +1,6 @@
 import { UserError } from '../errors.js';
 import { safeLogText } from './security.js';
+import { translate } from '../i18n.js';
 
 // Writes the request into the request_log table BEFORE the route runs, so a database failure
 // reaches the error handler and the user sees the styled 500 page. Status and duration are added
@@ -38,7 +39,8 @@ export const requestLogger =
     } catch (cause) {
       // The database layer already names the problem (UserError); anything else is wrapped in a plain error.
       const error = cause instanceof UserError ? cause : new Error('Request log write failed', { cause });
-      error.publicMessage = 'The request log table could not be written. Check the database file and try again.';
+      const t = res.locals?.t ?? ((key, vars) => translate('en', key, vars));
+      error.publicMessage = t('error.logWriteFailed');
       return next(error);
     }
     res.on('finish', () => {

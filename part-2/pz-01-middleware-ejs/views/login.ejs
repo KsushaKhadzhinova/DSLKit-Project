@@ -1,9 +1,9 @@
 <%- include('partials/header') %>
 <section class="section" aria-labelledby="page-title">
-  <h1 class="section__title" id="page-title">Sign in</h1>
-  <p class="section__lead">Authorization is simulated. Adding diagrams and reading the request log need the query parameter <code>?auth=1</code>.</p>
+  <h1 class="section__title" id="page-title"><%= t('page.login.heading') %></h1>
+  <p class="section__lead"><%= t('page.login.leadPrefix') %> <code>?auth=1</code>.</p>
   <div class="page-actions">
-    <a class="button button--primary" href="/add?auth=1">Continue as Owner</a>
+    <a class="button button--primary" href="/add?auth=1"><%= t('page.login.continueAsOwner') %></a>
   </div>
 </section>
 <%- include('partials/footer') %>

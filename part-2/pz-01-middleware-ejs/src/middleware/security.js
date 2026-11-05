@@ -1,4 +1,5 @@
 import { randomBytes, timingSafeEqual, createHmac } from 'node:crypto';
+import { translate } from '../i18n.js';
 
 // Security headers set by hand, no extra package. The pages use only files from the same origin,
 // so the policy can be strict: no inline script or style, no framing, forms post only to this site.
@@ -76,12 +77,13 @@ const refused = (message) => Object.assign(new Error(message), { status: 403, pu
 // it with a self-chosen value: only "shape and signature both correct" counts as a known token.
 // It runs after the form parser, because the token is a field of the form body.
 export const csrf = (req, res, next) => {
+  const t = res.locals?.t ?? ((key, vars) => translate('en', key, vars));
   let token = readCookie(req.headers.cookie, COOKIE);
   const known = validToken(token);
   if (UNSAFE.has(req.method)) {
     const origin = req.headers.origin;
-    if (origin && origin !== `${req.protocol}://${req.headers.host}`) return next(refused('The request comes from another site and was refused.'));
-    if (!known || !sameToken(token, req.body?._csrf)) return next(refused('The form token is missing or wrong. Open the form again and resend it.'));
+    if (origin && origin !== `${req.protocol}://${req.headers.host}`) return next(refused(t('refused.csrf')));
+    if (!known || !sameToken(token, req.body?._csrf)) return next(refused(t('refused.badToken')));
   }
   if (!known) {
     token = newToken();
@@ -91,8 +93,7 @@ export const csrf = (req, res, next) => {
   next();
 };
 
-const tooMany = (retryAfter) =>
-  Object.assign(new Error('Too many requests'), { status: 429, retryAfter, publicMessage: `Too many requests. Try again in ${retryAfter} s.` });
+const tooMany = (retryAfter, t) => Object.assign(new Error('Too many requests'), { status: 429, retryAfter, publicMessage: t('error.tooManyRequests', { retryAfter }) });
 
 // Fixed-window rate limit per client address, kept in memory. `only` limits it to some methods.
 export const rateLimit = ({ windowMs, max, only, now = Date.now }) => {
@@ -111,7 +112,8 @@ export const rateLimit = ({ windowMs, max, only, now = Date.now }) => {
     if (entry.count <= max) return next();
     const retryAfter = Math.max(1, Math.ceil((entry.reset - time) / 1000));
     res.set('Retry-After', String(retryAfter));
-    return next(tooMany(retryAfter));
+    const t = res.locals?.t ?? ((key2, vars) => translate('en', key2, vars));
+    return next(tooMany(retryAfter, t));
   };
 };
 

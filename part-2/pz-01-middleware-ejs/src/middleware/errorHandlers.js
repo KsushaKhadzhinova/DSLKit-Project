@@ -1,8 +1,12 @@
-import { CATALOG, entryFor } from '../errors.js';
+import { entryFor } from '../errors.js';
 import { safeLogText } from './security.js';
+import { translate } from '../i18n.js';
 
 export const notFound = (req, res) => {
-  res.status(404).render('404', { title: 'Not found', url: req.originalUrl, ...CATALOG[404] });
+  const lang = res.locals.lang ?? 'en';
+  const t = res.locals.t ?? ((key, vars) => translate(lang, key, vars));
+  const entry = entryFor({ userCode: undefined }, 404, lang);
+  res.status(404).render('404', { title: t('title.notFound'), url: req.originalUrl, ...entry });
 };
 
 // Last resort when even the 500 template fails: still a styled page, never a bare text screen.
@@ -24,8 +28,10 @@ export const serverError =
     else write(line);
     if (res.headersSent) return res.end();
     if (err.retryAfter) res.set('Retry-After', String(err.retryAfter));
+    // The failure may happen before the i18n middleware ran (a very early crash), so the page needs its own default.
+    const lang = res.locals.lang ?? 'en';
     // The page tells what the error is, why it happened and how to solve it (see errors.js).
-    const { heading, what, why, fix } = entryFor(err, status);
+    const { heading, what, why, fix } = entryFor(err, status, lang);
     const locals = {
       title: heading,
       heading,
@@ -38,6 +44,9 @@ export const serverError =
       user: res.locals.user ?? { name: 'Guest', guest: true },
       authQuery: res.locals.authQuery ?? '',
       path: '',
+      lang,
+      t: res.locals.t ?? ((key, vars) => translate(lang, key, vars)),
+      langHref: res.locals.langHref ?? { ru: `${req.originalUrl}?lang=ru`, en: `${req.originalUrl}?lang=en` },
     };
     return res.status(status).render('500', locals, (renderError, html) => {
       if (renderError) {
