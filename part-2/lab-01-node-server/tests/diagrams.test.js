@@ -3,6 +3,7 @@ const assert = require('node:assert/strict');
 const { createApp } = require('../src/app');
 const { createDiagramStore } = require('../src/models/diagram.model');
 
+const limits = require('../limits.json');
 const valid = { title: 'Login flow', notation: 'UML', sourceCode: 'user -> server', priority: 'low', owner: 'carol' };
 
 let server;
@@ -64,7 +65,7 @@ test('POST /diagrams creates a diagram, answers 201 with Location', async () => 
   const { res, body } = await call('POST', '/diagrams', valid);
   assert.equal(res.status, 201);
   assert.equal(res.headers.get('location'), `/diagrams/${body.id}`);
-  assert.deepEqual({ ...body, id: undefined }, { ...valid, id: undefined });
+  assert.deepEqual({ ...body, id: undefined, createdAt: undefined }, { ...valid, id: undefined, createdAt: undefined });
   assert.equal(store.findById(body.id).title, 'Login flow');
 });
 
@@ -105,7 +106,7 @@ test('PUT /diagrams/:id replaces the whole diagram', async () => {
   const id = store.findAll()[0].id;
   const { res, body } = await call('PUT', `/diagrams/${id}`, valid);
   assert.equal(res.status, 200);
-  assert.deepEqual(body, { id, ...valid });
+  assert.deepEqual(body, { id, ...valid, createdAt: store.findById(id).createdAt });
   assert.equal(store.findAll().length, 1);
 });
 
@@ -153,7 +154,7 @@ test('an id in the body is ignored on POST and PUT', async () => {
 test('PUT stores the new state, which GET then returns', async () => {
   const id = store.findAll()[0].id;
   await call('PUT', `/diagrams/${id}`, valid);
-  assert.deepEqual((await call('GET', `/diagrams/${id}`)).body, { id, ...valid });
+  assert.deepEqual((await call('GET', `/diagrams/${id}`)).body, { id, ...valid, createdAt: store.findById(id).createdAt });
 });
 
 test('a body over the size limit answers 413', async () => {
@@ -164,14 +165,177 @@ test('a body over the size limit answers 413', async () => {
 
 test('unsupported methods answer 405 with an Allow header', async () => {
   for (const [method, path, allow] of [
-    ['PATCH', '/diagrams/1', 'GET, PUT, DELETE'],
-    ['POST', '/diagrams/1', 'GET, PUT, DELETE'],
-    ['DELETE', '/diagrams', 'GET, POST'],
-    ['PUT', '/diagrams', 'GET, POST'],
+    ['PATCH', '/diagrams', 'GET, POST, HEAD, OPTIONS'],
+    ['POST', '/diagrams/1', 'GET, PUT, PATCH, DELETE, HEAD, OPTIONS'],
+    ['DELETE', '/diagrams', 'GET, POST, HEAD, OPTIONS'],
+    ['PUT', '/diagrams', 'GET, POST, HEAD, OPTIONS'],
   ]) {
     const { res, body } = await call(method, path, valid);
     assert.equal(res.status, 405, `${method} ${path}`);
     assert.equal(res.headers.get('allow'), allow);
     assert.match(body.error, /not allowed/);
   }
+});
+
+test('a title, owner or source of only spaces or tabs is rejected like an empty one', async () => {
+  for (const blank of ['', ' ', '   ', '\t\n ', '\u00a0\u2003']) {
+    const { res, body } = await call('POST', '/diagrams', { ...valid, title: blank, owner: blank, sourceCode: blank });
+    assert.equal(res.status, 400, JSON.stringify(blank));
+    assert.deepEqual(
+      body.details.map((d) => d.field),
+      ['title', 'sourceCode', 'owner'],
+    );
+  }
+});
+
+test('the length limits from limits.json are enforced after trimming and spaces are cut from title and owner', async () => {
+  const { title, owner, sourceCode } = limits;
+  const tooLong = await call('POST', '/diagrams', { ...valid, title: 'x'.repeat(title + 1), owner: 'o'.repeat(owner + 1), sourceCode: 's'.repeat(sourceCode + 1) });
+  assert.equal(tooLong.res.status, 400);
+  assert.deepEqual(
+    tooLong.body.details.map((d) => d.message),
+    [`must be at most ${title} characters`, `must be at most ${sourceCode} characters`, `must be at most ${owner} characters`],
+  );
+  const edge = await call('POST', '/diagrams', { ...valid, title: `  ${'x'.repeat(title)}  `, owner: ` ${'o'.repeat(owner)} `, sourceCode: 's'.repeat(sourceCode) });
+  assert.equal(edge.res.status, 201);
+  assert.equal(edge.body.title.length, title);
+  assert.equal(edge.body.owner.length, owner);
+});
+
+test('a field of the wrong type is a 400, never a crash', async () => {
+  for (const bad of [123, true, null, {}, [], ['a']]) {
+    const { res } = await call('POST', '/diagrams', { ...valid, title: bad, sourceCode: bad, owner: bad, notation: bad, priority: bad === null ? 'low' : bad });
+    assert.equal(res.status, 400, JSON.stringify(bad));
+  }
+});
+
+test('a body that is not JSON data answers 400, an empty body too', async () => {
+  for (const raw of ['null', '"text"', '5', '[]', '{"title":', '']) {
+    const { res } = await call('POST', '/diagrams', {}, raw);
+    assert.equal(res.status, 400, JSON.stringify(raw));
+  }
+});
+
+test('a request with a body in another Content-Type answers 415', async () => {
+  for (const type of ['text/plain', 'application/x-www-form-urlencoded', 'application/xml']) {
+    const res = await fetch(`${base}/diagrams`, { method: 'POST', headers: { 'Content-Type': type }, body: JSON.stringify(valid) });
+    assert.equal(res.status, 415, type);
+    assert.match((await res.json()).error, /application\/json/);
+  }
+  const put = await fetch(`${base}/diagrams/1`, { method: 'PUT', headers: { 'Content-Type': 'text/plain' }, body: 'x' });
+  assert.equal(put.status, 415);
+  const ok = await fetch(`${base}/diagrams`, { method: 'POST', headers: { 'Content-Type': 'Application/JSON; charset=utf-8' }, body: JSON.stringify(valid) });
+  assert.equal(ok.status, 201);
+});
+
+test('PUT is idempotent: the same request twice leaves the same state and answers the same', async () => {
+  const id = store.findAll()[0].id;
+  const first = await call('PUT', `/diagrams/${id}`, valid);
+  const second = await call('PUT', `/diagrams/${id}`, valid);
+  assert.equal(first.res.status, 200);
+  assert.equal(second.res.status, 200);
+  assert.deepEqual(first.body, second.body);
+  assert.equal(store.findAll().length, 1);
+});
+
+test('POST is not idempotent: the same request twice creates two records with different ids', async () => {
+  const first = await call('POST', '/diagrams', valid);
+  const second = await call('POST', '/diagrams', valid);
+  assert.notEqual(first.body.id, second.body.id);
+  assert.equal(second.res.headers.get('location'), `/diagrams/${second.body.id}`);
+});
+
+test('HEAD answers like GET without a body and OPTIONS lists the methods with 204', async () => {
+  const head = await fetch(`${base}/diagrams`, { method: 'HEAD' });
+  assert.equal(head.status, 200);
+  assert.equal(await head.text(), '');
+  assert.match(head.headers.get('content-type'), /json/);
+  assert.equal((await fetch(`${base}/diagrams/9999`, { method: 'HEAD' })).status, 404);
+  for (const [path, allow] of [
+    ['/diagrams', 'GET, POST, HEAD, OPTIONS'],
+    ['/diagrams/1', 'GET, PUT, PATCH, DELETE, HEAD, OPTIONS'],
+  ]) {
+    const res = await fetch(base + path, { method: 'OPTIONS' });
+    assert.equal(res.status, 204, path);
+    assert.equal(res.headers.get('allow'), allow);
+  }
+});
+
+test('security headers are set on every answer, errors included, and the framework is not named', async () => {
+  for (const path of ['/diagrams', '/nothing']) {
+    const res = await fetch(base + path);
+    assert.equal(res.headers.get('x-content-type-options'), 'nosniff');
+    assert.equal(res.headers.get('x-frame-options'), 'DENY');
+    assert.equal(res.headers.get('referrer-policy'), 'no-referrer');
+    assert.match(res.headers.get('content-security-policy'), /default-src 'none'/);
+    assert.equal(res.headers.get('x-powered-by'), null);
+  }
+});
+
+test('a malformed percent sequence in the path does not crash the server', async () => {
+  const { res } = await call('GET', '/diagrams/%E0%A4%A');
+  assert.ok([400, 404].includes(res.status));
+});
+
+test('the 413 limit comes from limits.json', async () => {
+  assert.equal(limits.bodyBytes, '100kb');
+  const raw = JSON.stringify({ ...valid, sourceCode: 'x'.repeat(100 * 1024 - 200) });
+  assert.ok(raw.length < 100 * 1024);
+  assert.equal((await call('POST', '/diagrams', {}, raw)).res.status, 400);
+});
+
+test('every record gets a creation time and no two records share one', async () => {
+  const first = (await call('POST', '/diagrams', valid)).body;
+  const second = (await call('POST', '/diagrams', valid)).body;
+  assert.match(first.createdAt, /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/);
+  assert.ok(second.createdAt > first.createdAt);
+  const fast = createDiagramStore([]);
+  const stamps = Array.from({ length: 50 }, () => fast.create(valid).createdAt);
+  assert.equal(new Set(stamps).size, 50);
+  assert.deepEqual([...stamps].sort(), stamps);
+});
+
+test('a client cannot set the creation time, and PUT keeps the first one', async () => {
+  const created = (await call('POST', '/diagrams', { ...valid, createdAt: '2000-01-01T00:00:00.000Z' })).body;
+  assert.notEqual(created.createdAt, '2000-01-01T00:00:00.000Z');
+  const replaced = (await call('PUT', `/diagrams/${created.id}`, { ...valid, createdAt: '1999-01-01T00:00:00.000Z' })).body;
+  assert.equal(replaced.createdAt, created.createdAt);
+});
+
+test('the list can be sorted by creation time', async () => {
+  await call('POST', '/diagrams', valid);
+  const { body } = await call('GET', '/diagrams?sort=createdAt&order=desc');
+  assert.ok(body[0].createdAt > body[1].createdAt);
+});
+
+test('PATCH changes only the sent fields and keeps the rest', async () => {
+  const before = store.findAll()[0];
+  const { res, body } = await call('PATCH', `/diagrams/${before.id}`, { title: '  New title  ', priority: 'low' });
+  assert.equal(res.status, 200);
+  assert.deepEqual(body, { ...before, title: 'New title', priority: 'low' });
+  assert.equal(store.findById(before.id).owner, 'anna');
+});
+
+test('PATCH is checked like PUT: bad values, unknown fields only, empty body, wrong types and missing id', async () => {
+  const id = store.findAll()[0].id;
+  const bad = await call('PATCH', `/diagrams/${id}`, { title: '   ', notation: 'XYZ' });
+  assert.equal(bad.res.status, 400);
+  assert.deepEqual(bad.body.details.map((d) => d.field), ['title', 'notation']);
+  for (const body of [{}, { admin: true }, { id: 7, createdAt: 'x' }]) {
+    assert.equal((await call('PATCH', `/diagrams/${id}`, body)).res.status, 400, JSON.stringify(body));
+  }
+  for (const raw of ['[]', 'null', '"text"', '5']) {
+    assert.equal((await call('PATCH', `/diagrams/${id}`, {}, raw)).res.status, 400, raw);
+  }
+  assert.equal((await call('PATCH', '/diagrams/9999', { title: 'x' })).res.status, 404);
+  assert.equal((await call('PATCH', '/diagrams/abc', { title: 'x' })).res.status, 400);
+  assert.equal(store.findById(id).title, 'Order processing');
+});
+
+test('PATCH cannot change the id or the creation time', async () => {
+  const before = store.findAll()[0];
+  const { body } = await call('PATCH', `/diagrams/${before.id}`, { owner: 'dan', id: 99, createdAt: '2001-01-01T00:00:00.000Z' });
+  assert.equal(body.id, before.id);
+  assert.equal(body.createdAt, before.createdAt);
+  assert.equal(body.owner, 'dan');
 });
