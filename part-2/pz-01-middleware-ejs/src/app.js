@@ -28,6 +28,14 @@ export const createApp = ({
   app.set('views', dir('../views'));
 
   app.disable('x-powered-by');
+  // Off by default (the server cannot tell a real client address or a real HTTPS request from a forged header
+  // unless it is told which hop to trust). Behind a reverse proxy, set TRUST_PROXY to the number of hops to
+  // trust (usually 1), to an IP/subnet, or to "true"; then req.ip, req.secure, the Secure cookie and HSTS all
+  // follow the proxy's X-Forwarded-* headers instead of the raw socket.
+  if (process.env.TRUST_PROXY) {
+    const value = process.env.TRUST_PROXY;
+    app.set('trust proxy', value === 'true' ? true : value === 'false' ? false : /^\d+$/.test(value) ? Number(value) : value);
+  }
   app.locals.limits = limits;
   // Records keep the exact ISO time for the machine; people read "2026-10-01 09:00:00.000 UTC".
   app.locals.formatTime = (iso) => String(iso).replace('T', ' ').replace('Z', ' UTC');
@@ -49,12 +57,17 @@ export const createApp = ({
   app.use(rateLimit({ ...limits.rateLimit.write, only: ['POST'], now }));
   app.use(requestLogger(log, write, limits.logUrlMax));
   app.use(express.urlencoded({ extended: false, limit: limits.bodyLimit, parameterLimit: limits.parameterLimit }));
+  // body-parser answers too many form fields with 413 ("payload too large"), but the body itself can be tiny:
+  // the actual problem is a malformed request, so it is turned into the 400 it should have been.
+  app.use((err, req, res, next) => next(err?.type === 'parameters.too.many' ? Object.assign(err, { status: 400, statusCode: 400 }) : err));
   app.use(csrf);
 
   app.get('/', (req, res) => res.render('index', { title: 'Diagrams', items: store.all() }));
 
-  // Only plain digits are a number: Number() would also accept "0x1" or "1e0".
-  const findItem = (req) => (/^\d{1,9}$/.test(req.params.id) ? store.find(Number(req.params.id)) : undefined);
+  // Only plain digits are a number: Number() would also accept "0x1" or "1e0". A leading zero is refused
+  // (except "0" itself), so "/item/01" is not a second, hidden address for "/item/1".
+  const ITEM_ID = /^(0|[1-9]\d{0,8})$/;
+  const findItem = (req) => (ITEM_ID.test(req.params.id) ? store.find(Number(req.params.id)) : undefined);
 
   // Adding and editing share one template, only the texts and the address differ.
   const formView = { notations: NOTATIONS, heading: 'Add diagram', action: '/add', submit: 'Save diagram' };

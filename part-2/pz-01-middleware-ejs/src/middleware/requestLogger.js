@@ -5,7 +5,26 @@ import { safeLogText } from './security.js';
 // reaches the error handler and the user sees the styled 500 page. Status and duration are added
 // to the same row when the response finishes.
 // The sign-in flag of the imitation must not be copied into the log, so a reader of the log cannot reuse it.
-export const hideAuth = (url) => String(url).replace(/([?&]auth=)[^&#]*/gi, '$1***');
+// Express decodes the query string before it looks at parameter names, so "%61uth=1" signs a visitor in just
+// like "auth=1" does; masking has to work on the decoded name too, not on the raw text of the address.
+export const hideAuth = (url) => {
+  const text = String(url);
+  const mark = text.indexOf('?');
+  if (mark === -1) return text;
+  const query = text.slice(mark + 1);
+  if (query === '') return text;
+  const masked = new URLSearchParams();
+  let changed = false;
+  for (const [key, value] of new URLSearchParams(query)) {
+    if (key.toLowerCase() === 'auth') {
+      masked.append(key, '***');
+      changed = true;
+    } else {
+      masked.append(key, value);
+    }
+  }
+  return changed ? `${text.slice(0, mark)}?${masked.toString()}` : text;
+};
 
 export const requestLogger =
   (log, write = console.log, urlMax = 500) =>

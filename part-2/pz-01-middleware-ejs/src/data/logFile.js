@@ -12,22 +12,48 @@ const ROW_LIMIT = 100000;
 
 const lineOf = (row) => `${row.time}\t${row.method}\t${String(row.url).replace(/[\u0000-\u001f\u007f-\u009f]/g, '?')}\t${row.status ?? ''}\t${row.ms ?? ''}\n`;
 
+// One export at a time per destination file: two requests racing to write and rename the very same
+// `${file}.part` otherwise step on each other (one renames the file out from under the other, which then
+// fails with ENOENT and a 500 the person did not cause). A second export for the same file waits its turn
+// instead of racing; an export to another file is never held up by this one.
+const queues = new Map();
+const exclusive = (key, task) => {
+  const previous = queues.get(key) ?? Promise.resolve();
+  const current = previous.then(task, task);
+  queues.set(key, current.then(() => undefined, () => undefined));
+  return current;
+};
+
 // Writes the rows to a temporary file through a stream and renames it over the old file only when the whole file is written,
-// so a failure in the middle never leaves a half-written log in the place of a good one.
-export const exportLog = async (log, file) => {
+// so a failure in the middle never leaves a half-written log in the place of a good one. The rows are read from the
+// database and written to the file one at a time (see requestLog.js's `iterate`), so even the full table is
+// never held in memory as one array, unlike a plain `log.recent(ROW_LIMIT)` would be.
+export const exportLog = (log, file) => exclusive(file, () => doExport(log, file));
+
+const doExport = async (log, file) => {
   const temporary = `${file}.part`;
-  const rows = log.recent(ROW_LIMIT);
+  // Reading the table happens before the try: a database failure here is "the log database could not be
+  // reached" (see requestLog.js), not "the export failed", and the two have different pages to explain them.
+  const rows = log.iterate(ROW_LIMIT);
+  let count = 0;
+  const lines = async function* () {
+    yield 'time\tmethod\turl\tstatus\tms\n';
+    for (const row of rows) {
+      count += 1;
+      yield lineOf(row);
+    }
+  };
   try {
     // A deleted folder is made again; a folder with the name of the file is refused with its own page.
     await mkdir(dirname(file), { recursive: true });
     if ((await describeFile(file))?.folder) throw Object.assign(new Error('a folder stands in the place of the file'), { code: 'EISDIR' });
-    await pipeline(Readable.from(['time\tmethod\turl\tstatus\tms\n', ...rows.map(lineOf)]), createWriteStream(temporary, { flags: 'w' }));
+    await pipeline(Readable.from(lines()), createWriteStream(temporary, { flags: 'w' }));
     await rename(temporary, file);
   } catch (error) {
     await rm(temporary, { force: true }).catch(() => {});
     throw new UserError(fileFailure(error, 'log-export-failed'), error);
   }
-  return rows.length;
+  return count;
 };
 
 // Size and time of the exported file, null when there is no file (never made, deleted or renamed), { folder: true } when a folder has its name.

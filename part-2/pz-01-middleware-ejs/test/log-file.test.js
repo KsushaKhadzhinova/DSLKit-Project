@@ -81,6 +81,27 @@ test('export writes the log to a file through a stream, with a header, one line 
   }
 });
 
+// F1: fifteen exports racing for the same destination file used to collide on the shared `${file}.part`
+// temporary name (one request would rename it out from under another, which then failed with ENOENT and
+// a 500 the visitor did not cause). They are now serialized per destination file, so every one of them
+// finishes on its own turn instead of racing.
+test('many parallel exports to the same file are serialized: every one of them succeeds, none answers 500', async () => {
+  const app = await start();
+  try {
+    for (let i = 0; i < 20; i += 1) app.log.start({ time: '2026-10-24T10:00:00.000Z', method: 'GET', url: `/${i}` });
+    const s = await app.session();
+    const results = await Promise.all(Array.from({ length: 15 }, () => app.post('/log/export?auth=1', s)));
+    const statuses = results.map((res) => res.status);
+    assert.deepEqual(statuses, statuses.map(() => 302), statuses.join(','));
+    assert.ok(!existsSync(`${app.logFile}.part`), 'a temporary file was left behind');
+    assert.equal(app.errors.length, 0, JSON.stringify(app.errors));
+    const res = await fetch(`${app.base}/log/download?auth=1`);
+    assert.equal(res.status, 200);
+  } finally {
+    await app.close();
+  }
+});
+
 test('the export needs the sign-in and the form token', async () => {
   const app = await start();
   try {
@@ -339,4 +360,55 @@ test('a request log in a folder that already exists is opened without trying to 
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
+});
+
+// F4: the exported log (plain request URLs, possibly query strings) and its temporary file must never be
+// offered to git, or an export run on somebody's machine could end up committed by accident.
+test('.gitignore keeps the exported log and its temporary file out of git, alongside the database files', () => {
+  const text = readFileSync(new URL('../.gitignore', import.meta.url), 'utf8');
+  assert.match(text, /^data\/\*\.txt$/m);
+  assert.match(text, /^data\/\*\.part$/m);
+});
+
+// F6: node:sqlite runs every statement synchronously, so the insert on every request always blocks the
+// event loop for as long as the write itself takes; WAL plus NORMAL synchronous shortens that write
+// (readers and the writer no longer take turns, and the fsync is lighter), it does not remove the block.
+// A full asynchronous engine is out of scope for this practical; this is documented as a known limit in
+// NOTES.md.
+test('a file-backed request log opens in WAL mode (seen as a -wal file next to the database while it is open)', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'pz1-wal-'));
+  const file = join(dir, 'log.db');
+  try {
+    const log = openRequestLog(file);
+    log.start({ time: '2026-10-24T10:00:00.000Z', method: 'GET', url: '/' });
+    assert.ok(existsSync(`${file}-wal`), 'no -wal file: the database did not open in WAL mode');
+    log.close();
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+// F7: nothing ever removed an old row from request_log on its own; left running, the table would grow
+// without bound. Every insert past MAX_ROWS now trims the oldest rows back down automatically.
+test('the request log table trims itself back down once it grows past its cap', () => {
+  const log = openRequestLog();
+  for (let i = 0; i < 20500; i += 1) log.start({ time: '2026-10-24T10:00:00.000Z', method: 'GET', url: `/${i}` });
+  const rows = log.recent(1000000);
+  assert.ok(rows.length <= 20000, `the table holds ${rows.length} rows`);
+  assert.ok(rows.length > 19000, `the trim removed too much: ${rows.length} rows left`);
+  // The most recent rows survive the trim, the oldest ones are the ones removed.
+  assert.equal(rows[0].url, '/20499');
+  log.close();
+});
+
+// F7 (export side): `log.iterate` hands out a lazy iterator, the same rows as `recent` but never
+// materialized into one array, so a big log is written to the exported file one line at a time.
+test('log.iterate is a lazy iterator, not a pre-built array, so the export never holds the whole table in memory at once', () => {
+  const log = openRequestLog();
+  for (let i = 0; i < 10; i += 1) log.start({ time: '2026-10-24T10:00:00.000Z', method: 'GET', url: `/${i}` });
+  const rows = log.iterate(1000000);
+  assert.equal(Array.isArray(rows), false);
+  assert.equal(typeof rows[Symbol.iterator], 'function');
+  assert.equal([...rows].length, 10);
+  log.close();
 });

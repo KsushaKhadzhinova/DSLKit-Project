@@ -15,11 +15,15 @@ const fallbackPage = (status) =>
 export const serverError =
   (write = console.error) =>
   (err, req, res, _next) => {
-    write(`[error] ${safeLogText(req.method)} ${safeLogText(req.originalUrl)}`, err);
-    if (res.headersSent) return res.end();
-    if (err.retryAfter) res.set('Retry-After', String(err.retryAfter));
     // Errors from body-parser and others carry their own 4xx/5xx status.
     const status = err.status >= 400 && err.status < 600 ? err.status : 500;
+    // An ordinary 4xx (a bad address, a missing token, too many requests) is one line with no stack:
+    // it is expected traffic, not a server fault, and a flood of them must not flood the console.
+    const line = `[error] ${safeLogText(req.method)} ${safeLogText(req.originalUrl)} ${status}`;
+    if (status >= 500) write(line, err);
+    else write(line);
+    if (res.headersSent) return res.end();
+    if (err.retryAfter) res.set('Retry-After', String(err.retryAfter));
     // The page tells what the error is, why it happened and how to solve it (see errors.js).
     const { heading, what, why, fix } = entryFor(err, status);
     const locals = {

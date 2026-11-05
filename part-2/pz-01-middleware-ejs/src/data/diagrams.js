@@ -30,6 +30,11 @@ const seed = () => [
   },
 ];
 
+// Nothing deletes a record on its own, so without a ceiling the store would grow for as long as the
+// server runs; one write every few seconds, forever, is still only a few megabytes a year, but a cap
+// keeps that true instead of assumed. The oldest record is dropped first, like a ring buffer.
+const MAX_ITEMS = 5000;
+
 // Data lives in memory only, as the practical requires: no database for the diagrams.
 // Every record gets its own creation time: it is always later than the previous one, even within one millisecond.
 export const createDiagramStore = (now = Date.now) => {
@@ -44,6 +49,7 @@ export const createDiagramStore = (now = Date.now) => {
       const item = { id: nextId, title, notation, description, code, revision, createdAt: new Date(last).toISOString() };
       nextId += 1;
       items.push(item);
+      if (items.length > MAX_ITEMS) items.shift();
       return item;
     },
     // Edit keeps the id and the creation time, only the form fields change.
@@ -63,6 +69,9 @@ export const createDiagramStore = (now = Date.now) => {
 };
 
 const CONTROL = /[\p{Cc}\u2028\u2029\u202a-\u202e\u2066-\u2069]/u;
+// Code keeps its line breaks and tabs (code is written on more than one line); every other control
+// character and direction override is refused, the same as for the title and the description.
+const CONTROL_IN_CODE = /[\u0000-\u0008\u000b-\u001f\u007f-\u009f\u2028\u2029\u202a-\u202e\u2066-\u2069]/u;
 // Zero-width and filler characters look like nothing: a title made only of them would be an empty-looking line in every list.
 const INVISIBLE_ONLY = /^[\p{Z}\p{Cf}\u115f\u1160\u3164\uffa0]*$/u;
 
@@ -82,7 +91,9 @@ export const validateDiagram = (input, limits) => {
   if (!errors.title && CONTROL.test(input.title)) errors.title = 'Title must not contain control characters';
   if (!errors.title && INVISIBLE_ONLY.test(input.title)) errors.title = 'Title must contain a visible character';
   set('description', required('Description', input.description, limits.description.maxLength));
+  if (!errors.description && CONTROL.test(input.description)) errors.description = 'Description must not contain control characters';
   if (input.code.length > limits.code.maxLength) errors.code = `Code must be at most ${limits.code.maxLength} characters`;
+  if (!errors.code && CONTROL_IN_CODE.test(input.code)) errors.code = 'Code must not contain control characters';
   if (!NOTATIONS.includes(input.notation)) errors.notation = 'Choose a notation from the list';
   const { min, max } = limits.revision;
   if (input.revision === '') errors.revision = 'Revision is required';

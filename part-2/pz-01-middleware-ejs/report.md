@@ -200,7 +200,26 @@ import { safeLogText } from './security.js';
 // reaches the error handler and the user sees the styled 500 page. Status and duration are added
 // to the same row when the response finishes.
 // The sign-in flag of the imitation must not be copied into the log, so a reader of the log cannot reuse it.
-export const hideAuth = (url) => String(url).replace(/([?&]auth=)[^&#]*/gi, '$1***');
+// Express decodes the query string before it looks at parameter names, so "%61uth=1" signs a visitor in just
+// like "auth=1" does; masking has to work on the decoded name too, not on the raw text of the address.
+export const hideAuth = (url) => {
+  const text = String(url);
+  const mark = text.indexOf('?');
+  if (mark === -1) return text;
+  const query = text.slice(mark + 1);
+  if (query === '') return text;
+  const masked = new URLSearchParams();
+  let changed = false;
+  for (const [key, value] of new URLSearchParams(query)) {
+    if (key.toLowerCase() === 'auth') {
+      masked.append(key, '***');
+      changed = true;
+    } else {
+      masked.append(key, value);
+    }
+  }
+  return changed ? `${text.slice(0, mark)}?${masked.toString()}` : text;
+};
 
 export const requestLogger =
   (log, write = console.log, urlMax = 500) =>
@@ -248,6 +267,12 @@ const CREATE_TABLE = `
     duration_ms INTEGER
   )`;
 
+// Nothing ever deleted an old row on its own: a server left running would grow the table forever.
+// Every TRIM_EVERY-th insert removes rows past MAX_ROWS, so the table stays bounded without a cron job
+// or a visit to the "clear the log" button.
+const MAX_ROWS = 20000;
+const TRIM_EVERY = 500;
+
 // The request log is a table in a SQLite database. The connection opens lazily on first use,
 // so a database that cannot be opened fails the request (and shows the 500 page), not the whole server.
 export const openRequestLog = (file = ':memory:') => {
@@ -261,11 +286,18 @@ export const openRequestLog = (file = ':memory:') => {
     const opened = new DatabaseSync(file);
     try {
       opened.exec(CREATE_TABLE);
+      // WAL lets readers (the log page) and the writer (every request) work at the same time instead of
+      // taking turns, and NORMAL synchronous trades a little durability on a power loss for a much shorter
+      // fsync on every insert; node:sqlite still runs each statement synchronously (it blocks the event loop
+      // for as long as the write itself takes), so this shortens that block rather than removing it. A
+      // :memory: database has no file to hold a WAL, so it keeps its own default journal.
+      if (file !== ':memory:') opened.exec('PRAGMA journal_mode = WAL; PRAGMA synchronous = NORMAL;');
       statements = {
         insert: opened.prepare('INSERT INTO request_log (created_at, method, url) VALUES (?, ?, ?)'),
         finish: opened.prepare('UPDATE request_log SET status = ?, duration_ms = ? WHERE id = ?'),
         clear: opened.prepare('DELETE FROM request_log'),
         recent: opened.prepare('SELECT id, created_at AS time, method, url, status, duration_ms AS ms FROM request_log ORDER BY id DESC LIMIT ?'),
+        trim: opened.prepare('DELETE FROM request_log WHERE id <= (SELECT MAX(id) FROM request_log) - ?'),
       };
     } catch (error) {
       opened.close();
@@ -285,7 +317,11 @@ export const openRequestLog = (file = ':memory:') => {
       }
     };
   return {
-    start: guard(({ time, method, url }) => Number(connect().insert.run(time, method, url).lastInsertRowid)),
+    start: guard(({ time, method, url }) => {
+      const id = Number(connect().insert.run(time, method, url).lastInsertRowid);
+      if (id % TRIM_EVERY === 0) connect().trim.run(MAX_ROWS);
+      return id;
+    }),
     finish: guard((id, status, ms) => connect().finish.run(status, ms, id)),
     // Removes every row and returns how many were removed.
     clear: guard(() => Number(connect().clear.run().changes)),
@@ -294,6 +330,15 @@ export const openRequestLog = (file = ':memory:') => {
         .recent.all(limit)
         .map((row) => ({ ...row })),
     ),
+    // A lazy, row-by-row view of the same rows `recent` returns, for the export: the file is written
+    // one line at a time, so even the full table is never held in memory as one array. The database is
+    // opened (and can fail) the moment this is called, same as `recent`; only the row fetching itself is lazy.
+    iterate: guard((limit) => {
+      const statement = connect().recent;
+      return (function* () {
+        for (const row of statement.iterate(limit)) yield { ...row };
+      })();
+    }),
     close: () => {
       // A second close must not throw: the connection is closed once and then forgotten.
       if (db) db.close();
@@ -316,7 +361,12 @@ export const fakeAuth = (req, res, next) => {
 };
 
 // Guards a single route: guests are redirected to /login.
-export const requireAuth = (req, res, next) => (req.user.guest ? res.redirect('/login') : next());
+// Every page behind this guard can hold another visitor's data (the request log) or only makes sense for
+// one visitor at one moment (an edit form), so it must never be kept by a shared cache or the browser's own.
+export const requireAuth = (req, res, next) => {
+  res.set('Cache-Control', 'no-store');
+  return req.user.guest ? res.redirect('/login') : next();
+};
 ```
 
 ## Приложение Г (обязательное) Листинг файла errorHandlers.js
@@ -339,11 +389,15 @@ const fallbackPage = (status) =>
 export const serverError =
   (write = console.error) =>
   (err, req, res, _next) => {
-    write(`[error] ${safeLogText(req.method)} ${safeLogText(req.originalUrl)}`, err);
-    if (res.headersSent) return res.end();
-    if (err.retryAfter) res.set('Retry-After', String(err.retryAfter));
     // Errors from body-parser and others carry their own 4xx/5xx status.
     const status = err.status >= 400 && err.status < 600 ? err.status : 500;
+    // An ordinary 4xx (a bad address, a missing token, too many requests) is one line with no stack:
+    // it is expected traffic, not a server fault, and a flood of them must not flood the console.
+    const line = `[error] ${safeLogText(req.method)} ${safeLogText(req.originalUrl)} ${status}`;
+    if (status >= 500) write(line, err);
+    else write(line);
+    if (res.headersSent) return res.end();
+    if (err.retryAfter) res.set('Retry-After', String(err.retryAfter));
     // The page tells what the error is, why it happened and how to solve it (see errors.js).
     const { heading, what, why, fix } = entryFor(err, status);
     const locals = {
@@ -404,6 +458,11 @@ const seed = () => [
   },
 ];
 
+// Nothing deletes a record on its own, so without a ceiling the store would grow for as long as the
+// server runs; one write every few seconds, forever, is still only a few megabytes a year, but a cap
+// keeps that true instead of assumed. The oldest record is dropped first, like a ring buffer.
+const MAX_ITEMS = 5000;
+
 // Data lives in memory only, as the practical requires: no database for the diagrams.
 // Every record gets its own creation time: it is always later than the previous one, even within one millisecond.
 export const createDiagramStore = (now = Date.now) => {
@@ -418,6 +477,7 @@ export const createDiagramStore = (now = Date.now) => {
       const item = { id: nextId, title, notation, description, code, revision, createdAt: new Date(last).toISOString() };
       nextId += 1;
       items.push(item);
+      if (items.length > MAX_ITEMS) items.shift();
       return item;
     },
     // Edit keeps the id and the creation time, only the form fields change.
@@ -437,6 +497,9 @@ export const createDiagramStore = (now = Date.now) => {
 };
 
 const CONTROL = /[\p{Cc}\u2028\u2029\u202a-\u202e\u2066-\u2069]/u;
+// Code keeps its line breaks and tabs (code is written on more than one line); every other control
+// character and direction override is refused, the same as for the title and the description.
+const CONTROL_IN_CODE = /[\u0000-\u0008\u000b-\u001f\u007f-\u009f\u2028\u2029\u202a-\u202e\u2066-\u2069]/u;
 // Zero-width and filler characters look like nothing: a title made only of them would be an empty-looking line in every list.
 const INVISIBLE_ONLY = /^[\p{Z}\p{Cf}\u115f\u1160\u3164\uffa0]*$/u;
 
@@ -456,7 +519,9 @@ export const validateDiagram = (input, limits) => {
   if (!errors.title && CONTROL.test(input.title)) errors.title = 'Title must not contain control characters';
   if (!errors.title && INVISIBLE_ONLY.test(input.title)) errors.title = 'Title must contain a visible character';
   set('description', required('Description', input.description, limits.description.maxLength));
+  if (!errors.description && CONTROL.test(input.description)) errors.description = 'Description must not contain control characters';
   if (input.code.length > limits.code.maxLength) errors.code = `Code must be at most ${limits.code.maxLength} characters`;
+  if (!errors.code && CONTROL_IN_CODE.test(input.code)) errors.code = 'Code must not contain control characters';
   if (!NOTATIONS.includes(input.notation)) errors.notation = 'Choose a notation from the list';
   const { min, max } = limits.revision;
   if (input.revision === '') errors.revision = 'Revision is required';
@@ -553,6 +618,14 @@ export const createApp = ({
   app.set('views', dir('../views'));
 
   app.disable('x-powered-by');
+  // Off by default (the server cannot tell a real client address or a real HTTPS request from a forged header
+  // unless it is told which hop to trust). Behind a reverse proxy, set TRUST_PROXY to the number of hops to
+  // trust (usually 1), to an IP/subnet, or to "true"; then req.ip, req.secure, the Secure cookie and HSTS all
+  // follow the proxy's X-Forwarded-* headers instead of the raw socket.
+  if (process.env.TRUST_PROXY) {
+    const value = process.env.TRUST_PROXY;
+    app.set('trust proxy', value === 'true' ? true : value === 'false' ? false : /^\d+$/.test(value) ? Number(value) : value);
+  }
   app.locals.limits = limits;
   // Records keep the exact ISO time for the machine; people read "2026-10-01 09:00:00.000 UTC".
   app.locals.formatTime = (iso) => String(iso).replace('T', ' ').replace('Z', ' UTC');
@@ -574,12 +647,17 @@ export const createApp = ({
   app.use(rateLimit({ ...limits.rateLimit.write, only: ['POST'], now }));
   app.use(requestLogger(log, write, limits.logUrlMax));
   app.use(express.urlencoded({ extended: false, limit: limits.bodyLimit, parameterLimit: limits.parameterLimit }));
+  // body-parser answers too many form fields with 413 ("payload too large"), but the body itself can be tiny:
+  // the actual problem is a malformed request, so it is turned into the 400 it should have been.
+  app.use((err, req, res, next) => next(err?.type === 'parameters.too.many' ? Object.assign(err, { status: 400, statusCode: 400 }) : err));
   app.use(csrf);
 
   app.get('/', (req, res) => res.render('index', { title: 'Diagrams', items: store.all() }));
 
-  // Only plain digits are a number: Number() would also accept "0x1" or "1e0".
-  const findItem = (req) => (/^\d{1,9}$/.test(req.params.id) ? store.find(Number(req.params.id)) : undefined);
+  // Only plain digits are a number: Number() would also accept "0x1" or "1e0". A leading zero is refused
+  // (except "0" itself), so "/item/01" is not a second, hidden address for "/item/1".
+  const ITEM_ID = /^(0|[1-9]\d{0,8})$/;
+  const findItem = (req) => (ITEM_ID.test(req.params.id) ? store.find(Number(req.params.id)) : undefined);
 
   // Adding and editing share one template, only the texts and the address differ.
   const formView = { notations: NOTATIONS, heading: 'Add diagram', action: '/add', submit: 'Save diagram' };
@@ -691,7 +769,7 @@ export const createApp = ({
 ## Приложение И (обязательное) Листинг файла security.js
 
 ```js
-import { randomBytes, timingSafeEqual } from 'node:crypto';
+import { randomBytes, timingSafeEqual, createHmac } from 'node:crypto';
 
 // Security headers set by hand, no extra package. The pages use only files from the same origin,
 // so the policy can be strict: no inline script or style, no framing, forms post only to this site.
@@ -716,12 +794,25 @@ export const securityHeaders = (req, res, next) => {
     'Cross-Origin-Opener-Policy': 'same-origin',
     'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
   });
+  // Told apart from plain HTTP only through `req.secure` (true behind a reverse proxy only once
+  // `app.set('trust proxy', ...)` is configured, see TRUST_PROXY in app.js): browsers must not be told to
+  // require HTTPS on a server that cannot tell HTTPS from HTTP.
+  if (req.secure) res.set('Strict-Transport-Security', 'max-age=63072000; includeSubDomains');
   next();
 };
 
 const COOKIE = 'dslkit_csrf';
+const NONCE_LEN = 32; // hex characters of the random half of the token
 const TOKEN = /^[0-9a-f]{48}$/;
 const UNSAFE = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
+
+// The secret that signs every CSRF token, generated once when the server starts.
+// A visitor who only controls the cookie (cookie fixation through a sibling subdomain, a response-splitting
+// bug elsewhere, or simply typing one in devtools) cannot forge a token that carries a valid signature,
+// so a double-submit of a self-chosen value is refused even though the cookie and the field match each other.
+const CSRF_SECRET = randomBytes(32);
+
+const signature = (nonce) => createHmac('sha256', CSRF_SECRET).update(nonce).digest('hex').slice(0, NONCE_LEN / 2);
 
 const readCookie = (header = '', name) => {
   for (const part of header.split(';')) {
@@ -733,22 +824,38 @@ const readCookie = (header = '', name) => {
 
 const sameToken = (a, b) => typeof a === 'string' && typeof b === 'string' && a.length === b.length && timingSafeEqual(Buffer.from(a), Buffer.from(b));
 
+// A token is only genuine when its tag matches the signature of its own nonce: the shape (48 hex characters)
+// is not enough by itself, unlike a plain double-submit token.
+const validToken = (value) => {
+  if (!TOKEN.test(value ?? '')) return false;
+  const nonce = value.slice(0, NONCE_LEN);
+  const tag = value.slice(NONCE_LEN);
+  return sameToken(tag, signature(nonce));
+};
+
+const newToken = () => {
+  const nonce = randomBytes(NONCE_LEN / 2).toString('hex');
+  return nonce + signature(nonce);
+};
+
 const refused = (message) => Object.assign(new Error(message), { status: 403, publicMessage: message });
 
-// CSRF protection with a double-submit token: the server puts a random token into a SameSite=Strict cookie
+// CSRF protection with a double-submit token: the server puts a token into a SameSite=Strict cookie
 // and into a hidden field of every form. A state-changing request must send both and they must match.
 // A page of another site can neither read the cookie nor guess the token. The Origin header is checked as well when it is present.
+// The token itself is signed with a server secret (see CSRF_SECRET above), so cookie fixation cannot replace
+// it with a self-chosen value: only "shape and signature both correct" counts as a known token.
 // It runs after the form parser, because the token is a field of the form body.
 export const csrf = (req, res, next) => {
   let token = readCookie(req.headers.cookie, COOKIE);
-  const known = TOKEN.test(token ?? '');
+  const known = validToken(token);
   if (UNSAFE.has(req.method)) {
     const origin = req.headers.origin;
     if (origin && origin !== `${req.protocol}://${req.headers.host}`) return next(refused('The request comes from another site and was refused.'));
     if (!known || !sameToken(token, req.body?._csrf)) return next(refused('The form token is missing or wrong. Open the form again and resend it.'));
   }
   if (!known) {
-    token = randomBytes(24).toString('hex');
+    token = newToken();
     res.append('Set-Cookie', `${COOKIE}=${token}; Path=/; HttpOnly; SameSite=Strict${req.secure ? '; Secure' : ''}`);
   }
   res.locals.csrfToken = token;

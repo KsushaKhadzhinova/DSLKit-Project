@@ -8,4 +8,9 @@ export const fakeAuth = (req, res, next) => {
 };
 
 // Guards a single route: guests are redirected to /login.
-export const requireAuth = (req, res, next) => (req.user.guest ? res.redirect('/login') : next());
+// Every page behind this guard can hold another visitor's data (the request log) or only makes sense for
+// one visitor at one moment (an edit form), so it must never be kept by a shared cache or the browser's own.
+export const requireAuth = (req, res, next) => {
+  res.set('Cache-Control', 'no-store');
+  return req.user.guest ? res.redirect('/login') : next();
+};

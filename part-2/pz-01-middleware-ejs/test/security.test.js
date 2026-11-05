@@ -108,6 +108,73 @@ test('csrf marks the cookie Secure behind https and ignores a malformed cookie',
   assert.match(res.locals.csrfToken, /^[0-9a-f]{48}$/);
 });
 
+// F: cookie fixation cannot forge a valid CSRF token. A visitor who can only set the cookie (not read
+// the server's secret) sends a value they chose themselves as both the cookie and the form field: the
+// double submit matches itself, but the signature does not match the server's secret, so it is refused.
+withServer('a self-chosen cookie value used as both the cookie and the form field is refused, not accepted as a matching double submit', async ({ base }) => {
+  const forged = '0'.repeat(48);
+  const res = await fetch(`${base}/add?auth=1`, {
+    method: 'POST',
+    redirect: 'manual',
+    headers: { cookie: `dslkit_csrf=${forged}`, 'content-type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({ ...valid, _csrf: forged }),
+  });
+  assert.equal(res.status, 403);
+  assert.match(await res.text(), /Request refused/);
+});
+
+withServer('a genuine token is still accepted after the fixation attempt, so the fix does not just break every submit', async ({ base }) => {
+  const s = await session(base);
+  const res = await fetch(`${base}/add?auth=1`, {
+    method: 'POST',
+    redirect: 'manual',
+    headers: { cookie: s.cookie, 'content-type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({ ...valid, _csrf: s.token }),
+  });
+  assert.equal(res.status, 302);
+});
+
+test('securityHeaders sets Strict-Transport-Security only when the connection is already seen as secure', () => {
+  const setter = (target) => (a, b) => (typeof a === 'object' ? Object.assign(target, a) : (target[a] = b));
+  const secure = {};
+  securityHeaders({ secure: true }, { set: setter(secure) }, () => {});
+  assert.match(secure['Strict-Transport-Security'], /max-age=\d+/);
+  const plain = {};
+  securityHeaders({ secure: false }, { set: setter(plain) }, () => {});
+  assert.equal(plain['Strict-Transport-Security'], undefined);
+});
+
+// F10: TRUST_PROXY makes req.secure (and so the Secure cookie and HSTS) follow X-Forwarded-Proto from a
+// reverse proxy, instead of only the raw socket, which is never TLS when a proxy terminates HTTPS.
+test('TRUST_PROXY makes a forwarded HTTPS request get a Secure cookie and the HSTS header', async () => {
+  process.env.TRUST_PROXY = '1';
+  try {
+    const log = openRequestLog();
+    const server = createApp({ limits: loadLimits(), log, write: () => {}, writeError: () => {} }).listen(0);
+    await new Promise((resolve) => server.once('listening', resolve));
+    const base = `http://127.0.0.1:${server.address().port}`;
+    const res = await fetch(`${base}/`, { headers: { 'x-forwarded-proto': 'https' } });
+    assert.match(res.headers.get('set-cookie') ?? '', /Secure/);
+    assert.match(res.headers.get('strict-transport-security') ?? '', /max-age=\d+/);
+    const plain = await fetch(`${base}/`);
+    assert.doesNotMatch(plain.headers.get('set-cookie') ?? '', /Secure/);
+    server.closeAllConnections();
+    await new Promise((resolve) => server.close(resolve));
+  } finally {
+    delete process.env.TRUST_PROXY;
+  }
+});
+
+// F11: a page that only makes sense for the exact visitor who requested it (or that holds another
+// visitor's data, like the request log) must never be kept by a shared cache or the browser's own.
+withServer('every page behind the simulated sign-in answers with Cache-Control: no-store', async ({ base }) => {
+  for (const path of ['/log?auth=1', '/add?auth=1']) {
+    assert.equal((await fetch(`${base}${path}`)).headers.get('cache-control'), 'no-store', path);
+  }
+  // A guest redirected to /login also gets it: the redirect itself must not be cached either.
+  assert.equal((await fetch(`${base}/add`, { redirect: 'manual' })).headers.get('cache-control'), 'no-store');
+});
+
 test('securityHeaders sets the headers and passes on', () => {
   const set = {};
   let passed = false;
@@ -207,12 +274,38 @@ withServer('huge and hostile values give 400 or 413 and never a crash or a store
   assert.equal((await send({ title: '\u0000‮<script>alert(1)</script>' })).status, 400);
   assert.equal((await send({ title: '<script>alert(1)</script>' })).status, 302);
   assert.equal((await post(`${base}/add?auth=1`, { ...valid, code: 'z'.repeat(30000) })).status, 413);
+  // F12: too many form fields is a malformed request (400), not a body that is too large (413) - the
+  // body itself can be tiny; body-parser used to answer it with 413, which named the wrong problem.
   const many = Object.fromEntries(Array.from({ length: 40 }, (_, i) => [`f${i}`, 'v']));
-  assert.equal((await post(`${base}/add?auth=1`, { ...valid, ...many })).status, 413);
+  assert.equal((await post(`${base}/add?auth=1`, { ...valid, ...many })).status, 400);
   const html = await (await fetch(`${base}/`)).text();
   assert.doesNotMatch(html, /<script>alert/);
   assert.match(html, /&lt;script&gt;alert\(1\)&lt;\/script&gt;/);
   assert.equal(html.match(/<article class="card">/g).length, 4);
+});
+
+// F8: the description and the code get the same control-character check as the title, except that
+// code keeps its line breaks and tabs (it is written on more than one line); a right-to-left override
+// or a NUL byte hidden in either field used to be stored unchanged.
+withServer('a NUL byte or a direction override in the description or the code is refused, not stored', async ({ base }) => {
+  const rlo = '‮evil\u0000x';
+  assert.equal((await post(`${base}/add?auth=1`, { ...valid, description: rlo })).status, 400);
+  assert.equal((await post(`${base}/add?auth=1`, { ...valid, code: rlo })).status, 400);
+  const html = await (await fetch(`${base}/`)).text();
+  assert.doesNotMatch(html, /evilx/);
+});
+
+withServer('a line break and a tab in the code are still accepted, only the other control characters are refused', async ({ base }) => {
+  assert.equal((await post(`${base}/add?auth=1`, { ...valid, code: 'a -> b\n\tc -> d' })).status, 302);
+});
+
+// F9: "/item/000000001" is not a second, hidden address for "/item/1" (a leading zero is refused);
+// the plain, canonical address still works.
+withServer('an item address with a leading zero answers 404, the plain address still answers 200', async ({ base }) => {
+  for (const id of ['01', '000000001', '00']) {
+    assert.equal((await fetch(`${base}/item/${id}`)).status, 404, id);
+  }
+  assert.equal((await fetch(`${base}/item/1`)).status, 200);
 });
 
 withServer('a very long address and a broken escape give a styled page, not a crash', async ({ base }) => {

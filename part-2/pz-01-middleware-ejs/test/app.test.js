@@ -96,6 +96,16 @@ withServer('add form redirects guests to /login and opens with ?auth=1', async (
   assert.equal((await fetch(`${base}/log`, { redirect: 'manual' })).status, 302);
 });
 
+// Footer fix: "Sign in" must not be offered to a visitor who is already signed in (the owner), in the
+// footer any more than in the header - it used to show up there even for the owner.
+withServer('the footer offers "Sign in" to a guest and hides it from the signed-in owner, like the header already did', async ({ base }) => {
+  const guest = await (await fetch(`${base}/`)).text();
+  assert.match(guest, /footer__link" href="\/login">Sign in/);
+  const owner = await (await fetch(`${base}/?auth=1`)).text();
+  assert.doesNotMatch(owner, /footer__link" href="\/login">Sign in/);
+  assert.doesNotMatch(owner, /nav__link" href="\/login">Sign in/);
+});
+
 withServer('POST /add stores the item and redirects to the list', async ({ base }) => {
   const res = await post(`${base}/add?auth=1`, { title: 'New <b>one</b>', notation: 'DFD', description: 'd', code: 'c', revision: '2' });
   assert.equal(res.status, 302);
@@ -226,6 +236,23 @@ test('error handler ends the response when headers were already sent', () => {
   assert.equal(ended, true);
 });
 
+// F5: an expected 4xx (one wrong form token, one flood of requests) is one line with no error object and
+// no stack, so a burst of ordinary client mistakes cannot flood the console the way a burst of real
+// server faults would; a genuine 5xx still carries its error, since that one is worth investigating.
+test('a 4xx error writes one line with no error object, a 5xx error still carries it', () => {
+  const lines = [];
+  const write = (...args) => lines.push(args);
+  const res = { locals: {}, status: () => res, render: (view, locals, done) => done(null, 'page'), send: () => {} };
+  serverError(write)(Object.assign(new Error('too many'), { status: 429, retryAfter: 1 }), { method: 'GET', originalUrl: '/' }, { ...res, set: () => {} });
+  assert.equal(lines.length, 1);
+  assert.equal(lines[0].length, 1, 'a 4xx must not carry the error object');
+  assert.match(lines[0][0], /GET \/ 429/);
+  lines.length = 0;
+  serverError(write)(new Error('disk gone'), { method: 'GET', originalUrl: '/' }, { ...res, set: () => {} });
+  assert.equal(lines[0].length, 2, 'a 5xx must still carry the error object for the console');
+  assert.match(lines[0][0], /GET \/ 500/);
+});
+
 test('store hands out a unique, increasing creation time', () => {
   const store = createDiagramStore(() => Date.parse('2026-10-05T00:00:00.000Z'));
   const first = store.add({ title: 'a', notation: 'UML', description: 'd', code: '', revision: 0 });
@@ -341,4 +368,20 @@ test('the sign-in flag of the imitation never reaches the request log', () => {
   );
   handlers.finish();
   assert.match(lines[0], /\/add\?auth=\*\*\*/);
+});
+
+// F3: the parameter name can be percent-encoded ("%61uth" decodes to "auth") and the server still signs
+// the visitor in with it (Express decodes query keys before fakeAuth reads them), so masking has to work
+// on the decoded name, not on the raw characters of the address, or the flag leaks into the log unmasked.
+test('a percent-encoded parameter name still gets masked, because Express decodes it before fakeAuth reads it', () => {
+  assert.equal(hideAuth('/log?%61uth=1'), '/log?auth=***');
+  assert.equal(hideAuth('/log?a%75th=1&x=1'), '/log?auth=***&x=1');
+});
+
+withServer('signing in with a percent-encoded "auth" parameter name still hides the flag in the log', async ({ base, log }) => {
+  const res = await fetch(`${base}/log?%61uth=1`);
+  assert.equal(res.status, 200);
+  const row = log.recent(1)[0];
+  assert.doesNotMatch(row.url, /auth=1/);
+  assert.match(row.url, /auth=\*\*\*/);
 });
