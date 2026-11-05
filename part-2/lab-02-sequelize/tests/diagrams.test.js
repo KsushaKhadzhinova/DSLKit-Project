@@ -4,7 +4,6 @@ const { createApp } = require('../src/app');
 const { createModels } = require('../src/models');
 const { createTempDatabase } = require('./helpers');
 
-const limits = require('../limits.json');
 const valid = { title: 'Login flow', notation: 'UML', sourceCode: 'user -> server', priority: 'low', owner: 'carol' };
 
 const db = createTempDatabase();

@@ -3,10 +3,11 @@ const { createModels } = require('./src/models');
 const { startLogRetention } = require('./src/middleware/request-log');
 
 const port = Number(process.env.PORT) || 3000;
-const { JWT_SECRET, JWT_EXPIRES_IN, TRUST_PROXY } = process.env;
+const { JWT_SECRET, JWT_EXPIRES_IN, TRUST_PROXY, CORS_ORIGIN } = process.env;
 const settings = {
   jwtSecret: JWT_SECRET,
   jwtExpiresIn: JWT_EXPIRES_IN || '1h',
+  corsOrigin: CORS_ORIGIN || 'http://localhost:5178',
   // TRUST_PROXY=1 when exactly one reverse proxy stands in front of the server.
   ...(TRUST_PROXY && { trustProxy: /^\d+$/.test(TRUST_PROXY) ? Number(TRUST_PROXY) : TRUST_PROXY }),
 };

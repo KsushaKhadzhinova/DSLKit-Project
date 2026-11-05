@@ -140,7 +140,7 @@ The `PATCH /diagrams/:id` route changes only the fields that are sent. The check
 
 ### 3.9 How to trigger a 500 response with a real failure
 
-A 500 response is caused by a database failure, not by a button. For SQLite, start the server with `npm start`, then run `npx sequelize-cli db:migrate:undo:all` in a second window. The tables vanish under the running server, and the very first request cannot write a row to the `RequestLogs` log. The client gets 500 with the body `{ "error": "Internal server error" }`, and the details stay only in the server console. For PostgreSQL it is enough to stop the database service or container: requests give 500, and `GET /health` answers 503. The commands `npm run db:migrate` and `npm run db:seed` restore the work. The same failure is reproduced in an automated test by dropping the `Diagrams` table while the server runs.
+A 500 response is caused by a database failure, not by a button. The shortest way is a temporary SQLite database: set `SQLITE_STORAGE` instead of `DATABASE_URL`, start the server with `npm start`, then run `npx sequelize-cli db:migrate:undo:all` in a second window. The tables vanish under the running server, and the very first request cannot write a row to the `RequestLogs` log. The client gets 500 with the body `{ "error": "Internal server error" }`, and the details stay only in the server console. On the main PostgreSQL database it is enough to stop the service or container (`docker compose stop db`): requests give 500, and `GET /health` answers 503. The commands `npm run db:migrate` and `npm run db:seed` restore the work. The same failure is reproduced in an automated test by dropping the `Diagrams` table while the server runs.
 
 The migrations are undone with `npx sequelize-cli db:migrate:undo:all` under the running server, and the very first request to `http://localhost:3000/diagrams` gets the answer 500, as in figure 11.
 
@@ -470,7 +470,7 @@ module.exports = { createUsersRouter };
 ## Appendix G (mandatory) Listing of diagrams.controller.js
 
 ```js
-const { notFound, forbidden } = require('../errors');
+const { notFound, forbidden, badRequest } = require('../errors');
 const { Op, fn, col, where } = require('sequelize');
 const { parseListQuery } = require('../middleware/list-query');
 const { NOTATIONS, LIMITS } = require('../models/diagram.constants');
@@ -494,8 +494,15 @@ const mayChange = (user, diagram) => user.role === 'admin' || diagram.ownerId ==
 // Express 5 forwards a rejected promise to the error handler, so no try/catch is needed here.
 const createDiagramsController = ({ Diagram }) => ({
   // ?limit=&offset=&sort=&order= (see list-query.js) page and sort the result, the answer stays an array and X-Total-Count holds the full size.
-  list: async (req, res) => {
-    const { limit, offset, sort, order, notation, q } = parseListQuery(req.query, SORTABLE, { notations: NOTATIONS, maxQuery: LIMITS.title });
+  list: async (req, res, next) => {
+    // The client of lab 5 sends the search text as ?search=. It means the same as ?q=, but a blank text keeps every diagram.
+    const { search, ...rest } = req.query;
+    if (search !== undefined && (typeof search !== 'string' || search.trim().length > LIMITS.title)) {
+      return next(badRequest(`search must be a string of at most ${LIMITS.title} characters`));
+    }
+    const term = (search ?? '').trim();
+    const query = term && rest.q === undefined ? { ...rest, q: term } : rest;
+    const { limit, offset, sort, order, notation, q } = parseListQuery(query, SORTABLE, { notations: NOTATIONS, maxQuery: LIMITS.title });
     const { count, rows } = await Diagram.findAndCountAll({
       where: filterFor(Diagram.sequelize.getDialect(), { notation, q }),
       order: [
@@ -506,7 +513,7 @@ const createDiagramsController = ({ Diagram }) => ({
       offset,
     });
     res.set('X-Total-Count', String(count));
-    res.json(rows);
+    return res.json(rows);
   },
 
   get: async (req, res, next) => {

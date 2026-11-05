@@ -1,4 +1,4 @@
-const { notFound, forbidden } = require('../errors');
+const { notFound, forbidden, badRequest } = require('../errors');
 const { Op, fn, col, where } = require('sequelize');
 const { parseListQuery } = require('../middleware/list-query');
 const { NOTATIONS, LIMITS } = require('../models/diagram.constants');
@@ -22,8 +22,15 @@ const mayChange = (user, diagram) => user.role === 'admin' || diagram.ownerId ==
 // Express 5 forwards a rejected promise to the error handler, so no try/catch is needed here.
 const createDiagramsController = ({ Diagram }) => ({
   // ?limit=&offset=&sort=&order= (see list-query.js) page and sort the result, the answer stays an array and X-Total-Count holds the full size.
-  list: async (req, res) => {
-    const { limit, offset, sort, order, notation, q } = parseListQuery(req.query, SORTABLE, { notations: NOTATIONS, maxQuery: LIMITS.title });
+  list: async (req, res, next) => {
+    // The client of lab 5 sends the search text as ?search=. It means the same as ?q=, but a blank text keeps every diagram.
+    const { search, ...rest } = req.query;
+    if (search !== undefined && (typeof search !== 'string' || search.trim().length > LIMITS.title)) {
+      return next(badRequest(`search must be a string of at most ${LIMITS.title} characters`));
+    }
+    const term = (search ?? '').trim();
+    const query = term && rest.q === undefined ? { ...rest, q: term } : rest;
+    const { limit, offset, sort, order, notation, q } = parseListQuery(query, SORTABLE, { notations: NOTATIONS, maxQuery: LIMITS.title });
     const { count, rows } = await Diagram.findAndCountAll({
       where: filterFor(Diagram.sequelize.getDialect(), { notation, q }),
       order: [
@@ -34,7 +41,7 @@ const createDiagramsController = ({ Diagram }) => ({
       offset,
     });
     res.set('X-Total-Count', String(count));
-    res.json(rows);
+    return res.json(rows);
   },
 
   get: async (req, res, next) => {
