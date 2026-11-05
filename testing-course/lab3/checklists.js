@@ -2,7 +2,18 @@ import { parseDsl, toDot, toMermaid, sourceKey } from '../../site/js/utils/dataP
 import { createStorage, createMemoryBackend } from '../../site/js/utils/storage.js';
 import { validateWaitlist } from '../../site/js/utils/validation.js';
 
-const PAGES = ['/', '/privacy.html', '/thanks.html', '/app/dashboard.html', '/app/editor.html', '/app/settings.html', '/app/welcome.html', '/en/', '/en/privacy.html', '/en/thanks.html'];
+const PAGES = [
+  '/',
+  '/privacy.html',
+  '/thanks.html',
+  '/app/dashboard.html',
+  '/app/editor.html',
+  '/app/settings.html',
+  '/app/welcome.html',
+  '/en/',
+  '/en/privacy.html',
+  '/en/thanks.html',
+];
 const DSL = 'diagram idef0 "Тест"\nbox A "Приём" {\n  input: Заявка\n  output: Результат\n}\nbox B "Проверка"\narrow A.output -> B.input';
 
 const eq = (a, b) => {
@@ -100,7 +111,12 @@ export const critical = [
       for (const p of PAGES) yes(!/<script(?![^>]*\bsrc=)[^>]*>\s*\S/.test((await get(p)).text), p);
     },
   ],
-  ['CP-17', 'R7', 'Заголовок Content-Security-Policy присутствует', async ({ get }) => yes((await get('/')).headers.get('content-security-policy')?.includes("default-src 'self'"), 'CSP')],
+  [
+    'CP-17',
+    'R7',
+    'Заголовок Content-Security-Policy присутствует',
+    async ({ get }) => yes((await get('/')).headers.get('content-security-policy')?.includes("default-src 'self'"), 'CSP'),
+  ],
   ['CP-18', 'R7', 'X-Frame-Options = DENY', async ({ get }) => eq((await get('/')).headers.get('x-frame-options'), 'DENY')],
   ['CP-19', 'R7', 'X-Content-Type-Options = nosniff', async ({ get }) => eq((await get('/')).headers.get('x-content-type-options'), 'nosniff')],
   ['CP-20', 'R5', 'POST на статику даёт 405', async ({ base }) => eq((await fetch(`${base}/`, { method: 'POST' })).status, 405)],
@@ -185,7 +201,12 @@ export const critical = [
       eq(s.get('k', 'def'), 'def');
     },
   ],
-  ['CP-35', 'R4', 'Валидация заявки: корректные данные дают пустой список ошибок', async () => eq(validateWaitlist({ name: 'Анна', email: 'a@b.co', notation: 'erd', team: 3, comment: '', consent: true }), [])],
+  [
+    'CP-35',
+    'R4',
+    'Валидация заявки: корректные данные дают пустой список ошибок',
+    async () => eq(validateWaitlist({ name: 'Анна', email: 'a@b.co', notation: 'erd', team: 3, comment: '', consent: true }), []),
+  ],
   [
     'CP-36',
     'R4',

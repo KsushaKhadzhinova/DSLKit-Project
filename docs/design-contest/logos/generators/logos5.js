@@ -9,13 +9,30 @@ const MONOW = { a: '#ffffff', b: '#ffffff', bg: '#111111' };
 
 // Compact icons in a 64 x 64 box. Classes (spin, pulse, chev, draw, guide) animate only inside .load.
 const concepts = [
-{name:"D-поток",idea:"Любимый знак из теста: плотная D с вырезанной стрелкой потока и зелёной точкой-искрой. Цвет и форма главные, буква читается сразу",mark:({a,b,bg})=>`<path d="M6 4h24c20 0 28 12 28 28S50 60 30 60H6z" fill="${a}"/><path class="slide" d="M18 24v16h12v7l16-15-16-15v7z" fill="${bg}"/><circle class="hop" cx="12" cy="10" r="4" fill="${b}"/>`},
-{name:"Скобка-узел",idea:"Второй любимый: крупная скобка кода и зелёный узел. Самый заметный издалека",mark:({a,b,bg})=>`<path d="M34 8L10 32l24 24" fill="none" stroke="${a}" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/><circle class="hop" cx="48" cy="32" r="12" fill="${b}"/>`},
-{name:"K-скобка",idea:"Объединение: стойка K плюс скобка кода, зелёный узел на конце. Читается как K (твоё имя), как код и как граф",mark:({a,b,bg})=>`<rect x="8" y="6" width="13" height="52" rx="5" fill="${a}"/><path d="M52 8L28 32l24 24" fill="none" stroke="${a}" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/><circle class="hop" cx="53" cy="32" r="9" fill="${b}"/>`}
+  {
+    name: 'D-поток',
+    idea: 'Любимый знак из теста: плотная D с вырезанной стрелкой потока и зелёной точкой-искрой. Цвет и форма главные, буква читается сразу',
+    mark: ({ a, b, bg }) =>
+      `<path d="M6 4h24c20 0 28 12 28 28S50 60 30 60H6z" fill="${a}"/><path class="slide" d="M18 24v16h12v7l16-15-16-15v7z" fill="${bg}"/><circle class="hop" cx="12" cy="10" r="4" fill="${b}"/>`,
+  },
+  {
+    name: 'Скобка-узел',
+    idea: 'Второй любимый: крупная скобка кода и зелёный узел. Самый заметный издалека',
+    mark: ({ a, b, bg }) =>
+      `<path d="M34 8L10 32l24 24" fill="none" stroke="${a}" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/><circle class="hop" cx="48" cy="32" r="12" fill="${b}"/>`,
+  },
+  {
+    name: 'K-скобка',
+    idea: 'Объединение: стойка K плюс скобка кода, зелёный узел на конце. Читается как K (твоё имя), как код и как граф',
+    mark: ({ a, b, bg }) =>
+      `<rect x="8" y="6" width="13" height="52" rx="5" fill="${a}"/><path d="M52 8L28 32l24 24" fill="none" stroke="${a}" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/><circle class="hop" cx="53" cy="32" r="9" fill="${b}"/>`,
+  },
 ];
 
-const svg = (c, pal, size = 64, cls = '') => `<svg class="${cls}" xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 64 64" role="img" aria-label="${c.name}">${c.mark(pal)}</svg>`;
-const lock = (c, pal, text) => `<span class="lock" style="color:${text}"><span class="m">${svg(c, pal, 48)}</span><span class="w"><b style="color:${pal.a}">DSL</b><b style="color:${pal.b}">K</b><span>it</span></span></span>`;
+const svg = (c, pal, size = 64, cls = '') =>
+  `<svg class="${cls}" xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 64 64" role="img" aria-label="${c.name}">${c.mark(pal)}</svg>`;
+const lock = (c, pal, text) =>
+  `<span class="lock" style="color:${text}"><span class="m">${svg(c, pal, 48)}</span><span class="w"><b style="color:${pal.a}">DSL</b><b style="color:${pal.b}">K</b><span>it</span></span></span>`;
 
 concepts.forEach((c, i) => {
   const n = String(i + 1).padStart(2, '0');

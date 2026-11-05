@@ -41,17 +41,17 @@ Effort: S under an hour, M half a day, L more than a day.
 
 ## Summary table
 
-| What | Where | Now | Proposal | Why | Effort |
-| --- | --- | --- | --- | --- | --- |
-| Developer role | `site/js/config/roles.js`, `accounts.js` | SHA-256 check in browser | Call it developer mode; server role in course project | Client is not an access boundary | S |
-| PBKDF2 | `site/js/storage/accounts.js` | 100 000 iterations | 600 000 with rehash | OWASP; `iterations` field exists | S |
-| Work versions | branches `23` to `28`, `course-app`, 23 worktrees | Copies in several branches | `WORK-MAP.md`, tags | Defend the right version | S |
-| Real `.env` | `.claude/worktrees/*`, `DSLKit-Project/` | Ignored locally only | Root `.gitignore`, pre-commit check | Accidental commit | S |
-| Duplicate variable | `course-app: app/docker/.env.example` | `DEMO_USER_PASSWORD` twice | Keep one | Last silently wins | S |
-| Env schema | `lab-03-auth/server.js`, course project | No format checks | `src/env.js` | Fail fast | M |
-| CORS and proxy vars | `lab-03-auth/.env.example` | Missing, hard-coded | Document, one constant | Example matches code | S |
-| Ports | all `.env.example` | 3000 everywhere | Port table, port 0 in tests | Parallel runs | S |
-| Node | `package.json` | `>=20` | `>=22`, `.nvmrc` | Node 20 unsupported | S |
-| Lab 2 variants | `23` vs `25`/`28`/`lab12` | SQLite vs PostgreSQL | One PostgreSQL example | One lab, one config | M |
-| CSP and Kroki | `tools/server.js`, `config.js` | Fixed `connect-src` | Build CSP from `KROKI_URL` | Consistency | S |
-| Part 2 audit | worktrees | Not run | Loop `npm audit --omit=dev` | No data | M |
+| What                | Where                                             | Now                        | Proposal                                              | Why                              | Effort |
+| ------------------- | ------------------------------------------------- | -------------------------- | ----------------------------------------------------- | -------------------------------- | ------ |
+| Developer role      | `site/js/config/roles.js`, `accounts.js`          | SHA-256 check in browser   | Call it developer mode; server role in course project | Client is not an access boundary | S      |
+| PBKDF2              | `site/js/storage/accounts.js`                     | 100 000 iterations         | 600 000 with rehash                                   | OWASP; `iterations` field exists | S      |
+| Work versions       | branches `23` to `28`, `course-app`, 23 worktrees | Copies in several branches | `WORK-MAP.md`, tags                                   | Defend the right version         | S      |
+| Real `.env`         | `.claude/worktrees/*`, `DSLKit-Project/`          | Ignored locally only       | Root `.gitignore`, pre-commit check                   | Accidental commit                | S      |
+| Duplicate variable  | `course-app: app/docker/.env.example`             | `DEMO_USER_PASSWORD` twice | Keep one                                              | Last silently wins               | S      |
+| Env schema          | `lab-03-auth/server.js`, course project           | No format checks           | `src/env.js`                                          | Fail fast                        | M      |
+| CORS and proxy vars | `lab-03-auth/.env.example`                        | Missing, hard-coded        | Document, one constant                                | Example matches code             | S      |
+| Ports               | all `.env.example`                                | 3000 everywhere            | Port table, port 0 in tests                           | Parallel runs                    | S      |
+| Node                | `package.json`                                    | `>=20`                     | `>=22`, `.nvmrc`                                      | Node 20 unsupported              | S      |
+| Lab 2 variants      | `23` vs `25`/`28`/`lab12`                         | SQLite vs PostgreSQL       | One PostgreSQL example                                | One lab, one config              | M      |
+| CSP and Kroki       | `tools/server.js`, `config.js`                    | Fixed `connect-src`        | Build CSP from `KROKI_URL`                            | Consistency                      | S      |
+| Part 2 audit        | worktrees                                         | Not run                    | Loop `npm audit --omit=dev`                           | No data                          | M      |

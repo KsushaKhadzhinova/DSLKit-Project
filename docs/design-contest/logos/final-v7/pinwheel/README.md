@@ -1,11 +1,11 @@
 # Логотип DSLKit: простая вертушка, индиго и янтарь (выбран владельцем 24.10.2026)
 
-| Файл | Назначение |
-|---|---|
-| `mark-light.svg`, `mark-dark.svg` | знак на светлом и тёмном фоне (тёмная версия: светлая плитка, индиго-бруски) |
-| `mark-mono-black.svg`, `mark-mono-white.svg` | одноцветные |
-| `lockup-horizontal-{light,dark,mono-black,mono-white}.svg`, `lockup-horizontal-light@2x.png` | знак + DSLKit |
-| `favicon.svg`, `favicon-{16,32,48,180,512}.png`, `favicon.ico` | favicon и иконки |
+| Файл                                                                                         | Назначение                                                                   |
+| -------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| `mark-light.svg`, `mark-dark.svg`                                                            | знак на светлом и тёмном фоне (тёмная версия: светлая плитка, индиго-бруски) |
+| `mark-mono-black.svg`, `mark-mono-white.svg`                                                 | одноцветные                                                                  |
+| `lockup-horizontal-{light,dark,mono-black,mono-white}.svg`, `lockup-horizontal-light@2x.png` | знак + DSLKit                                                                |
+| `favicon.svg`, `favicon-{16,32,48,180,512}.png`, `favicon.ico`                               | favicon и иконки                                                             |
 
 Цвета: индиго #312E81 (плитка), светло-индиго #EEF2FF (бруски), янтарь #FBBF24 (акцентный брусок). Контраст светлого на плитке 10,2:1, янтаря 6,8:1; в серой шкале бруски и акцент различаются (0,31); бруски на 16 px толщиной 2,5 px.
 

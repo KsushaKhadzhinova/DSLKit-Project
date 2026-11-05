@@ -42,6 +42,7 @@ flowchart LR
 ## 4 Main parts explained
 
 ### State and actions (`App.jsx`)
+
 - `useState` holds the query, the status and the sort. The diagram list is held by `useLocalStorage`.
 - Actions use the functional form `setDiagrams((prev) => ...)`. It reads the latest value, so two quick clicks in a row do not lose changes. `setDiagrams([...diagrams, x])` would use the value from the moment of the render.
 - State is never mutated: `map` and `filter` return new arrays and a changed record becomes a new object `{ ...d, title }`. React compares references and would not react to a mutation.
@@ -49,23 +50,29 @@ flowchart LR
 - The `document.title` effect depends only on `diagrams.length`.
 
 ### The `useLocalStorage` hook
+
 - The initial value is read once by the lazy initializer `useState(() => readStorage(...))`: the function runs only on the first render, not on each one.
 - Reading is guarded: `try/catch` for broken JSON and a `validate` function that rejects data of the wrong shape. Then the initial value is used.
 - Writing is a `useEffect` with dependencies `[key, value]`: it runs on every value change. A write error (disk full, storage blocked) is swallowed and the app keeps working in memory.
 
 ### Validation of foreign data (`validation.js`)
+
 `localStorage` may hold anything: a manual edit, an old format, another script. So `isDiagramList` checks the whole array: size at most `maxCount`; every record has a valid `id`, a title, a notation from the list, a boolean `published`, parsable dates; and all `id` values are unique. If the whole list does not fit, `repairDiagramList` keeps the good records, drops damaged and repeated ones and cuts the list to the cap; if no record is usable, the initial data is used.
 
 ### Title validation
+
 `validateTitle` treats whitespace-only input as empty, measures the length after `trim()` and takes the limits from `limits.json`. The form is submitted through `onSubmit`, so Enter works without a separate handler, and `noValidate` turns off the browser's built-in hints in favour of our own messages with `role="alert"`.
 
 ### Autosave (`useAutosaveStatus`)
+
 A timer-based debounce: on each change it sets "saving" and starts a `setTimeout` of 500 ms; the cleanup function returned from the effect (`return () => clearTimeout(timer)`) cancels the previous timer if the value changes sooner. "Saved" appears once the data has been quiet for 500 ms.
 
 ### Unique creation time
+
 `uniqueCreatedAt` ensures two records never share a second: if a record is created in the same second as the latest one, a second is added. `newId` uses `crypto.randomUUID`, and if it is missing (plain http outside localhost) it falls back to another generator.
 
 ### Accessibility
+
 Field labels are tied through `useId`, card buttons have an `aria-label` with the diagram title, the publish toggle has `aria-pressed`, errors are shown with `role="alert"`, and there is a "skip to main content" link.
 
 ## 5 Likely defence questions

@@ -9,14 +9,36 @@ const MONOW = { a: '#ffffff', b: '#ffffff', c: '#ffffff', bg: '#111111' };
 
 // Compact icons in a 64 x 64 box. Classes (spin, pulse, chev, draw, guide) animate only inside .load.
 const concepts = [
-{name:"K из трёх узлов",idea:"Стойка и две ветви заканчиваются цветными точками: синяя, зелёная, янтарная. Как граф, как твои инициалы, тёплый акцент вместо холодной «технарской» гаммы",mark:({a,b,c,bg})=>`<rect x="8" y="6" width="13" height="52" rx="5" fill="${a}"/><path d="M21 32L46 13M21 32L46 51" fill="none" stroke="${a}" stroke-width="9" stroke-linecap="round"/><circle class="hop" cx="50" cy="12" r="9" fill="${b}"/><circle class="hop" cx="50" cy="52" r="9" fill="${c}"/>`},
-{name:"K и галочка",idea:"Стойка K и зелёная галочка «сделано»: автоматизация, которая закрывает задачу за тебя",mark:({a,b,c,bg})=>`<rect x="8" y="6" width="13" height="52" rx="5" fill="${a}"/><path class="draw" d="M24 38l12 12L56 14" fill="none" stroke="${b}" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>`},
-{name:"Штамп-K",idea:"Круглая печать с зубчатым краем, как наклейка в планере или трекере. Личная вещь, а не корпоративный знак",mark:({a,b,c,bg})=>`${[...Array(12)].map((_,k)=>`<circle cx="${32+26*Math.cos(k*Math.PI/6)}" cy="${32+26*Math.sin(k*Math.PI/6)}" r="6.500" fill="${a}"/>`).join("")}<circle cx="32" cy="32" r="26" fill="${a}"/><rect x="21" y="17" width="8" height="30" rx="3" fill="${bg}"/><path d="M29 32L43 18M29 32L43 46" fill="none" stroke="${bg}" stroke-width="7" stroke-linecap="round"/><circle class="hop" cx="50" cy="12" r="6" fill="${b}"/>`},
-{name:"Закладка-K",idea:"Закладка с вырезом, внутри K и зелёная точка: «моё», сохранённое, как в планере или читалке",mark:({a,b,c,bg})=>`<path d="M12 4h40v56L32 46 12 60z" fill="${a}"/><rect x="22" y="14" width="8" height="24" rx="3" fill="${bg}"/><path d="M30 26L42 16M30 26L42 36" fill="none" stroke="${bg}" stroke-width="6" stroke-linecap="round"/><circle class="hop" cx="32" cy="46" r="0" fill="${b}"/><circle class="hop" cx="47" cy="12" r="5" fill="${c}"/>`}
+  {
+    name: 'K из трёх узлов',
+    idea: 'Стойка и две ветви заканчиваются цветными точками: синяя, зелёная, янтарная. Как граф, как твои инициалы, тёплый акцент вместо холодной «технарской» гаммы',
+    mark: ({ a, b, c, bg }) =>
+      `<rect x="8" y="6" width="13" height="52" rx="5" fill="${a}"/><path d="M21 32L46 13M21 32L46 51" fill="none" stroke="${a}" stroke-width="9" stroke-linecap="round"/><circle class="hop" cx="50" cy="12" r="9" fill="${b}"/><circle class="hop" cx="50" cy="52" r="9" fill="${c}"/>`,
+  },
+  {
+    name: 'K и галочка',
+    idea: 'Стойка K и зелёная галочка «сделано»: автоматизация, которая закрывает задачу за тебя',
+    mark: ({ a, b, c, bg }) =>
+      `<rect x="8" y="6" width="13" height="52" rx="5" fill="${a}"/><path class="draw" d="M24 38l12 12L56 14" fill="none" stroke="${b}" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>`,
+  },
+  {
+    name: 'Штамп-K',
+    idea: 'Круглая печать с зубчатым краем, как наклейка в планере или трекере. Личная вещь, а не корпоративный знак',
+    mark: ({ a, b, c, bg }) =>
+      `${[...Array(12)].map((_, k) => `<circle cx="${32 + 26 * Math.cos((k * Math.PI) / 6)}" cy="${32 + 26 * Math.sin((k * Math.PI) / 6)}" r="6.500" fill="${a}"/>`).join('')}<circle cx="32" cy="32" r="26" fill="${a}"/><rect x="21" y="17" width="8" height="30" rx="3" fill="${bg}"/><path d="M29 32L43 18M29 32L43 46" fill="none" stroke="${bg}" stroke-width="7" stroke-linecap="round"/><circle class="hop" cx="50" cy="12" r="6" fill="${b}"/>`,
+  },
+  {
+    name: 'Закладка-K',
+    idea: 'Закладка с вырезом, внутри K и зелёная точка: «моё», сохранённое, как в планере или читалке',
+    mark: ({ a, b, c, bg }) =>
+      `<path d="M12 4h40v56L32 46 12 60z" fill="${a}"/><rect x="22" y="14" width="8" height="24" rx="3" fill="${bg}"/><path d="M30 26L42 16M30 26L42 36" fill="none" stroke="${bg}" stroke-width="6" stroke-linecap="round"/><circle class="hop" cx="32" cy="46" r="0" fill="${b}"/><circle class="hop" cx="47" cy="12" r="5" fill="${c}"/>`,
+  },
 ];
 
-const svg = (c, pal, size = 64, cls = '') => `<svg class="${cls}" xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 64 64" role="img" aria-label="${c.name}">${c.mark(pal)}</svg>`;
-const lock = (c, pal, text) => `<span class="lock" style="color:${text}"><span class="m">${svg(c, pal, 48)}</span><span class="w"><b style="color:${pal.a}">DSL</b><b style="color:${pal.b}">K</b><span>it</span></span></span>`;
+const svg = (c, pal, size = 64, cls = '') =>
+  `<svg class="${cls}" xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 64 64" role="img" aria-label="${c.name}">${c.mark(pal)}</svg>`;
+const lock = (c, pal, text) =>
+  `<span class="lock" style="color:${text}"><span class="m">${svg(c, pal, 48)}</span><span class="w"><b style="color:${pal.a}">DSL</b><b style="color:${pal.b}">K</b><span>it</span></span></span>`;
 
 concepts.forEach((c, i) => {
   const n = String(i + 1).padStart(2, '0');

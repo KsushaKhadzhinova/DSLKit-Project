@@ -41,32 +41,38 @@ flowchart TD
 ## 4 Main parts explained
 
 ### The reducer (`favoritesReducer`)
+
 A pure function `(state, action) → new state`: no side effects and no change to the previous value, every answer is a new array. The state is an array of `{ id, qty }`.
 
-| Action | What it does |
-| --- | --- |
-| `ADD` | adds a template with quantity 1 (a repeat and an unknown `id` are ignored) |
-| `REMOVE` | removes the entry |
-| `TOGGLE` | adds or removes (the star button) |
-| `INCREMENT`, `DECREMENT` | change the quantity by 1 |
-| `SET_QTY` | sets the quantity by direct input |
-| `CLEAR` | empties the favorites |
+| Action                   | What it does                                                               |
+| ------------------------ | -------------------------------------------------------------------------- |
+| `ADD`                    | adds a template with quantity 1 (a repeat and an unknown `id` are ignored) |
+| `REMOVE`                 | removes the entry                                                          |
+| `TOGGLE`                 | adds or removes (the star button)                                          |
+| `INCREMENT`, `DECREMENT` | change the quantity by 1                                                   |
+| `SET_QTY`                | sets the quantity by direct input                                          |
+| `CLEAR`                  | empties the favorites                                                      |
 
 The quantity always goes through `clampQty`: a whole number from 1 to 99, a fraction is cut off, and junk is replaced by the nearest valid value. So neither `-5`, nor `1e999`, nor `abc` breaks the list. An unknown action and an unknown `id` return the state unchanged, and a broken state (`null`) is replaced by an empty array. This is easy to test: call the function directly.
 
 ### Two contexts: data and `dispatch` (`FavoritesContext.jsx`)
+
 `useReducer` returns `[favorites, dispatch]`. The data changes often, `dispatch` never changes. If both are put into one context, every data change also re-renders components that need only `dispatch`. So there are two contexts: `FavoritesStateContext` (data) and `FavoritesDispatchContext` (the function). The hooks `useFavorites()` and `useFavoritesDispatch()` each read their own; a component that only sends actions subscribes to the second and is not re-rendered when the data changes (questions 5, 16, 27, 29). Outside `FavoritesProvider` the hooks throw an error naming the provider rather than silently returning `undefined`.
 
 ### Initial state and saving
+
 `useReducer(favoritesReducer, undefined, loadFavorites)`: the third argument is a lazy-initialization function (question 20) called once on the first render. `loadFavorites` reads `localStorage` and passes the data through `sanitizeFavorites`: only known `id` values stay, each once, with a valid quantity; the first version's format (a plain list of ids) is accepted as quantity 1. A `useEffect` writes to `localStorage` on every change; a write error is swallowed and the app works in memory.
 
 ### Theme and language
+
 `ThemeContext` holds `theme`, `setTheme` and `toggleTheme`; the value is wrapped in `useMemo` so consumers do not re-render without cause (question 21). The default theme is the system one (`prefers-color-scheme`), a saved choice wins, foreign values in storage are ignored; the `data-theme` attribute on the root element switches the colour variables of the whole page. `LanguageContext` holds the `ru` and `en` dictionary and a function `t(key)`; a language code is taken from storage only if it is in the known list.
 
 ### Prop drilling: the problem and the solution (`PropDrilling.jsx`)
+
 The problem: the user name is needed only by `UserAvatar`, but it passes through `Header`, `Navigation` and `UserMenu` as `props` at every level. The solution: the same tree, but the name lives in `UserContext` and `UserAvatar` reads it with the `useUser()` hook; the middle components get no props. An empty name does not break the page (a `?` is shown).
 
 ### Accessibility
+
 The "Add to favorites" button has `aria-pressed` and a label with the template name; there is a "skip to main content" link; interface labels come from the dictionary, not hard-coded.
 
 ## 5 Likely defence questions

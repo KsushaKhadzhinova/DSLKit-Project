@@ -12,32 +12,39 @@ const concepts = [
   {
     name: 'Шестерня D',
     idea: 'Шестерня значит автоматизация, внутри буква D, зелёная искра сверху справа значит изобретательность',
-    mark: ({ a, b, bg }) => `<g class="spin">${[0, 45, 90, 135].map((r) => `<rect x="28" y="3" width="8" height="58" rx="3" fill="${a}" transform="rotate(${r} 32 32)"/>`).join('')}<circle cx="32" cy="32" r="21" fill="${a}"/><circle cx="32" cy="32" r="13" fill="${bg}"/></g><path d="M26 25h6c5.5 0 8 3 8 7s-2.500 7-8 7h-6z" fill="${a}"/><circle cx="53" cy="11" r="6" fill="${b}"/>`,
+    mark: ({ a, b, bg }) =>
+      `<g class="spin">${[0, 45, 90, 135].map((r) => `<rect x="28" y="3" width="8" height="58" rx="3" fill="${a}" transform="rotate(${r} 32 32)"/>`).join('')}<circle cx="32" cy="32" r="21" fill="${a}"/><circle cx="32" cy="32" r="13" fill="${bg}"/></g><path d="M26 25h6c5.5 0 8 3 8 7s-2.500 7-8 7h-6z" fill="${a}"/><circle cx="53" cy="11" r="6" fill="${b}"/>`,
   },
   {
     name: 'Конвейер DSL',
     idea: 'Плитка D и три стрелки вправо: данные идут по цепочке, автоматизация читается без слов',
-    mark: ({ a, b, bg }) => `<rect x="3" y="9" width="36" height="46" rx="9" fill="${a}"/><path d="M14 22h8c8 0 12 4 12 10s-4 10-12 10h-8z" fill="${bg}"/><path class="chev c1" d="M43 24l7 8-7 8" fill="none" stroke="${b}" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path class="chev c2" d="M52 24l7 8-7 8" fill="none" stroke="${b}" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>`,
+    mark: ({ a, b, bg }) =>
+      `<rect x="3" y="9" width="36" height="46" rx="9" fill="${a}"/><path d="M14 22h8c8 0 12 4 12 10s-4 10-12 10h-8z" fill="${bg}"/><path class="chev c1" d="M43 24l7 8-7 8" fill="none" stroke="${b}" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path class="chev c2" d="M52 24l7 8-7 8" fill="none" stroke="${b}" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>`,
   },
   {
     name: 'K-стрела',
     idea: 'Буква K как отражение имени: стойка и две ветви, верхняя заканчивается стрелкой, нижняя узлом',
-    mark: ({ a, b }) => `<rect x="10" y="6" width="11" height="52" rx="4" fill="${a}"/><path class="draw" d="M22 34L46 14" fill="none" stroke="${b}" stroke-width="10" stroke-linecap="round"/><path d="M37 11h14v14" fill="none" stroke="${b}" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/><path d="M24 34l22 20" fill="none" stroke="${a}" stroke-width="10" stroke-linecap="round"/><circle cx="52" cy="55" r="6" fill="${a}"/>`,
+    mark: ({ a, b }) =>
+      `<rect x="10" y="6" width="11" height="52" rx="4" fill="${a}"/><path class="draw" d="M22 34L46 14" fill="none" stroke="${b}" stroke-width="10" stroke-linecap="round"/><path d="M37 11h14v14" fill="none" stroke="${b}" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/><path d="M24 34l22 20" fill="none" stroke="${a}" stroke-width="10" stroke-linecap="round"/><circle cx="52" cy="55" r="6" fill="${a}"/>`,
   },
   {
     name: 'Лампа-схема',
     idea: 'Лампочка значит идея и изобретательность, внутри мини-схема из трёх узлов',
-    mark: ({ a, b, bg }) => `<circle class="pulse" cx="32" cy="27" r="22" fill="${b}" opacity=".0"/><circle cx="32" cy="27" r="20" fill="${a}"/><rect x="23" y="47" width="18" height="7" rx="3.500" fill="${a}"/><rect x="26" y="56" width="12" height="5" rx="2.500" fill="${a}"/><path d="M23 33L32 20l9 13z" fill="none" stroke="${bg}" stroke-width="3" stroke-linejoin="round"/><circle cx="32" cy="20" r="4.500" fill="${b}"/><circle cx="23" cy="33" r="4" fill="${bg}"/><circle cx="41" cy="33" r="4" fill="${bg}"/>`,
+    mark: ({ a, b, bg }) =>
+      `<circle class="pulse" cx="32" cy="27" r="22" fill="${b}" opacity=".0"/><circle cx="32" cy="27" r="20" fill="${a}"/><rect x="23" y="47" width="18" height="7" rx="3.500" fill="${a}"/><rect x="26" y="56" width="12" height="5" rx="2.500" fill="${a}"/><path d="M23 33L32 20l9 13z" fill="none" stroke="${bg}" stroke-width="3" stroke-linejoin="round"/><circle cx="32" cy="20" r="4.500" fill="${b}"/><circle cx="23" cy="33" r="4" fill="${bg}"/><circle cx="41" cy="33" r="4" fill="${bg}"/>`,
   },
   {
     name: 'Направляющие D',
     idea: 'Плотная D и направляющие как в редакторе: линии выравнивания значат чёткость и точность',
-    mark: ({ a, b, bg }) => `<path class="guide" d="M4 12H60M4 52H60M14 3V61" fill="none" stroke="${b}" stroke-width="3" stroke-linecap="round"/><path d="M14 12h14c14 0 22 8 22 20s-8 20-22 20H14z" fill="${a}"/><path d="M24 22v20h4c7 0 10-4 10-10s-3-10-10-10z" fill="${bg}"/><rect x="11" y="9" width="6" height="6" rx="1.500" fill="${bg}" stroke="${b}" stroke-width="2"/><rect x="11" y="49" width="6" height="6" rx="1.500" fill="${bg}" stroke="${b}" stroke-width="2"/>`,
+    mark: ({ a, b, bg }) =>
+      `<path class="guide" d="M4 12H60M4 52H60M14 3V61" fill="none" stroke="${b}" stroke-width="3" stroke-linecap="round"/><path d="M14 12h14c14 0 22 8 22 20s-8 20-22 20H14z" fill="${a}"/><path d="M24 22v20h4c7 0 10-4 10-10s-3-10-10-10z" fill="${bg}"/><rect x="11" y="9" width="6" height="6" rx="1.500" fill="${bg}" stroke="${b}" stroke-width="2"/><rect x="11" y="49" width="6" height="6" rx="1.500" fill="${bg}" stroke="${b}" stroke-width="2"/>`,
   },
 ];
 
-const svg = (c, pal, size = 64, cls = '') => `<svg class="${cls}" xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 64 64" role="img" aria-label="${c.name}">${c.mark(pal)}</svg>`;
-const lock = (c, pal, text) => `<span class="lock" style="color:${text}"><span class="m">${svg(c, pal, 48)}</span><span class="w"><b style="color:${pal.a}">DSL</b><b style="color:${pal.b}">K</b><span>it</span></span></span>`;
+const svg = (c, pal, size = 64, cls = '') =>
+  `<svg class="${cls}" xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 64 64" role="img" aria-label="${c.name}">${c.mark(pal)}</svg>`;
+const lock = (c, pal, text) =>
+  `<span class="lock" style="color:${text}"><span class="m">${svg(c, pal, 48)}</span><span class="w"><b style="color:${pal.a}">DSL</b><b style="color:${pal.b}">K</b><span>it</span></span></span>`;
 
 concepts.forEach((c, i) => {
   const n = String(i + 1).padStart(2, '0');

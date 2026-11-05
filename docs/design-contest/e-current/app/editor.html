@@ -20,21 +20,48 @@
         <div class="editor-toolbar__file"><span class="editor-toolbar__file-name">order.dsl</span><span class="badge">IDEF0</span></div>
         <div class="editor-toolbar__spacer"></div>
         <div class="editor-toolbar__group">
-          <button type="button" class="button button--icon" aria-label="Отменить"><svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 5L4 9l4 4" /><path d="M4 9h7a4 4 0 010 8H9" /></svg></button>
-          <button type="button" class="button button--icon" aria-label="Повторить"><svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 5l4 4-4 4" /><path d="M16 9H9a4 4 0 000 8h2" /></svg></button>
+          <button type="button" class="button button--icon" aria-label="Отменить">
+            <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M8 5L4 9l4 4" />
+              <path d="M4 9h7a4 4 0 010 8H9" />
+            </svg>
+          </button>
+          <button type="button" class="button button--icon" aria-label="Повторить">
+            <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M12 5l4 4-4 4" />
+              <path d="M16 9H9a4 4 0 000 8h2" />
+            </svg>
+          </button>
         </div>
-        <button type="button" class="button button--quiet"><svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4h10l2 2v10H4z" /><path d="M7 4v4h5V4M7 16v-5h6v5" /></svg><span>Сохранить</span></button>
+        <button type="button" class="button button--quiet">
+          <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M4 4h10l2 2v10H4z" />
+            <path d="M7 4v4h5V4M7 16v-5h6v5" /></svg
+          ><span>Сохранить</span>
+        </button>
         <div class="editor-toolbar__run">
-          <button type="button" class="button button--run" aria-disabled="true" aria-describedby="run-reason"><svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 4l10 6-10 6z" /></svg><span>Запустить</span><kbd>Ctrl+Enter</kbd></button>
+          <button type="button" class="button button--run" aria-disabled="true" aria-describedby="run-reason">
+            <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M6 4l10 6-10 6z" /></svg
+            ><span>Запустить</span><kbd>Ctrl+Enter</kbd>
+          </button>
           <p class="editor-toolbar__reason" id="run-reason">Исправьте ошибки в коде, чтобы запустить</p>
         </div>
         <details class="editor-menu">
-          <summary class="button button--icon editor-menu__summary" aria-label="Ещё действия"><svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="4" cy="10" r="1.5" /><circle cx="10" cy="10" r="1.5" /><circle cx="16" cy="10" r="1.5" /></svg></summary>
+          <summary class="button button--icon editor-menu__summary" aria-label="Ещё действия">
+            <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+              <circle cx="4" cy="10" r="1.5" />
+              <circle cx="10" cy="10" r="1.5" />
+              <circle cx="16" cy="10" r="1.5" />
+            </svg>
+          </summary>
           <div class="editor-menu__panel">
             <button type="button" class="button button--quiet">Проверить</button>
             <button type="button" class="button button--quiet">Форматировать</button>
             <button type="button" class="button button--quiet">Поделиться</button>
-            <button type="button" class="editor-toolbar__switch" role="switch" aria-checked="true"><span class="editor-toolbar__switch-track" aria-hidden="true"></span><span>Автосохранение</span></button>
+            <button type="button" class="editor-toolbar__switch" role="switch" aria-checked="true">
+              <span class="editor-toolbar__switch-track" aria-hidden="true"></span><span>Автосохранение</span>
+            </button>
           </div>
         </details>
       </div>
@@ -200,7 +227,13 @@
           <nav class="canvas__breadcrumb" aria-label="Путь диаграммы">A-0 › A0</nav>
           <button type="button" class="button button--quiet canvas__render">Нарисовать через Kroki</button>
           <details class="editor-menu canvas__menu">
-            <summary class="button button--icon editor-menu__summary" aria-label="Ещё действия с диаграммой"><svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="4" cy="10" r="1.5" /><circle cx="10" cy="10" r="1.5" /><circle cx="16" cy="10" r="1.5" /></svg></summary>
+            <summary class="button button--icon editor-menu__summary" aria-label="Ещё действия с диаграммой">
+              <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+                <circle cx="4" cy="10" r="1.5" />
+                <circle cx="10" cy="10" r="1.5" />
+                <circle cx="16" cy="10" r="1.5" />
+              </svg>
+            </summary>
             <div class="editor-menu__panel">
               <button type="button" class="button button--quiet">Автораскладка</button>
               <button type="button" class="button button--quiet canvas__refresh">Обновить с сервера</button>

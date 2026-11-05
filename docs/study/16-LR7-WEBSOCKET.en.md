@@ -8,14 +8,14 @@ A user logs in under a name (and receives a signed token), connects to the serve
 
 The HTTP part is small: the static client, `POST /login`, `GET /health`, `GET /limits.json`, and the 404 and 500 pages.
 
-| Client event | Data | Reply (acknowledgement) |
-| --- | --- | --- |
-| `room:join` | `{ room }` | `{ ok, room, history, users }` |
-| `room:leave` | `{ room }` | `{ ok }` |
-| `chat:message` | `{ room, text }` | `{ ok, id }` |
-| `private:message` | `{ to, text }` | `{ ok, message }` |
-| `typing` | `{ room, typing }` | none |
-| `editing` | `{ room, editing }` | `{ ok, editing }` |
+| Client event      | Data                | Reply (acknowledgement)        |
+| ----------------- | ------------------- | ------------------------------ |
+| `room:join`       | `{ room }`          | `{ ok, room, history, users }` |
+| `room:leave`      | `{ room }`          | `{ ok }`                       |
+| `chat:message`    | `{ room, text }`    | `{ ok, id }`                   |
+| `private:message` | `{ to, text }`      | `{ ok, message }`              |
+| `typing`          | `{ room, typing }`  | none                           |
+| `editing`         | `{ room, editing }` | `{ ok, editing }`              |
 
 Server events: `welcome`, `user:online`, `user:offline`, `room:joined`, `room:left`, `presence:update`, `chat:message`, `private:message`, `typing`.
 
@@ -63,33 +63,40 @@ sequenceDiagram
 ## 4 Main parts explained
 
 ### Connection and protection (`createHandshake`, `origin.js`)
+
 - `allowRequest` checks the `Origin` header: a browser always sends it on connection, so a page from another site cannot open a socket on a visitor's behalf (cross-site WebSocket hijacking). Requests without `Origin` (not a browser) pass.
 - The name comes from the signed token `auth.token`; without a token `auth.username` is accepted unless `REQUIRE_TOKEN=1` is set. The token is signed with HMAC-SHA256 and compared in constant time (`timingSafeEqual`); it holds the name and an expiry. This is a simplified token for the lab; a real service would use JWT (as in lab 3).
 - The name is checked (`cleanName`: letters, digits, dot, dash, underscore, up to 24 characters), must be free, and the number of users and connections per address are capped.
 - A refusal in `io.use` reaches the client as a `connect_error` event.
 
 ### Rooms and presence (`createRoomActions`)
+
 - A room is a named group of sockets: `socket.join(room)`, `io.to(room).emit(...)`. The name is lowercased and checked by a regular expression.
 - The server keeps its own `rooms: Map<room, Map<socket, user>>`, so the "who is in the room" list is built without queries.
 - Limits: five rooms per user, 50 participants per room. An empty room is removed from the table.
 - `editing` marks the user as "editing now"; `typing` goes to everyone in the room except the sender (`socket.to(room)`).
 
 ### Messages (`createMessageActions`)
+
 - The text is cleaned (`cleanText`): hidden control characters and text-direction override characters are removed, whitespace-only input is rejected, length is at most 500.
 - The sender is always taken from the connection, never from the payload, so "from whom" cannot be forged.
 - To a room: `io.to(room).emit('chat:message', message)` reaches everyone including the sender; for a private one `target.emit('private:message', ...)` reaches only the addressee, and the sender sees a copy from the acknowledgement.
 - The acknowledgement (`ack`) is the last argument of the event; the server calls it through `succeed` or `fail`. Every event first checks that `ack` is actually a function.
 
 ### Load limiting
+
 Two limiters: chat at most 5 messages per 2 seconds, any events at most 40 per 2 seconds. Packet size is capped by `maxHttpBufferSize` (10000 bytes), so a huge message closes the connection. Handlers of one socket run one after another (`tail = tail.then(...)`), so a leave sent right after a join waits for the history to load.
 
 ### History
+
 `createHistory` keeps one list per room in memory (the last 50, at most 200 rooms). `createMongoHistory` inserts a document `{ ...message, room }` and reads the 50 latest by `_id`, giving them to the client in ascending order. If the database is unavailable, joining a room and sending answer with a clear error through `ack`.
 
 ### Disconnect
+
 On `disconnect` the user leaves all rooms (with a `room:left` broadcast and a presence update), is removed from the online list and the address counter, and the others get `user:offline`. Nothing is left behind for a disconnected socket.
 
 ### Client (`public/client.js`)
+
 Message text is inserted as text, not as markup (protection from code injection), and the CSP forbids inline scripts. When the connection is restored, the client joins its rooms again (`connect`).
 
 ## 5 Likely defence questions

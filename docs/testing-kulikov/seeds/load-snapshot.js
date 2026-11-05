@@ -8,10 +8,12 @@
   for (const [key, value] of Object.entries(data)) {
     let out = value;
     if (delta && /^dslkit\.(projects|templates)\./.test(key)) {
-      out = JSON.stringify(JSON.parse(value).map((p) => {
-        for (const f of ['created', 'updated', 'trashedAt']) if (typeof p[f] === 'number') p[f] += delta;
-        return p;
-      }));
+      out = JSON.stringify(
+        JSON.parse(value).map((p) => {
+          for (const f of ['created', 'updated', 'trashedAt']) if (typeof p[f] === 'number') p[f] += delta;
+          return p;
+        }),
+      );
     }
     localStorage.setItem(key, out);
   }

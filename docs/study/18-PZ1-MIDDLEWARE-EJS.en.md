@@ -6,16 +6,16 @@ Branch `pz21`, folder `part-2/pz-01-middleware-ejs`. Russian version: `18-PZ1-MI
 
 A catalogue of diagrams as plain HTML pages: a list, a record page, an add and edit form, delete, and a request log. The diagram data lives in an in-memory array (the practical requires that), while every request is logged to a SQLite table (requirement of even variant 26). Sign-in is imitated by the `?auth=1` parameter: a teaching stub, not real authorization.
 
-| Method | Path | Access | What it does |
-| --- | --- | --- | --- |
-| GET | `/` | everyone | list |
-| GET | `/item/:id` | everyone | record page (404 if missing) |
-| GET, POST | `/add` | "signed in" | form and create |
-| GET, POST | `/item/:id/edit` | "signed in" | form and save the edit |
-| POST | `/item/:id/delete` | "signed in" | delete |
-| GET | `/login` | everyone | "sign in" page |
-| GET | `/log` | "signed in" | latest log rows |
-| GET | `/health` | everyone | server check, not written to the log and not counted by the limit |
+| Method    | Path               | Access      | What it does                                                      |
+| --------- | ------------------ | ----------- | ----------------------------------------------------------------- |
+| GET       | `/`                | everyone    | list                                                              |
+| GET       | `/item/:id`        | everyone    | record page (404 if missing)                                      |
+| GET, POST | `/add`             | "signed in" | form and create                                                   |
+| GET, POST | `/item/:id/edit`   | "signed in" | form and save the edit                                            |
+| POST      | `/item/:id/delete` | "signed in" | delete                                                            |
+| GET       | `/login`           | everyone    | "sign in" page                                                    |
+| GET       | `/log`             | "signed in" | latest log rows                                                   |
+| GET       | `/health`          | everyone    | server check, not written to the log and not counted by the limit |
 
 A guest who opens a protected path is redirected to `/login`. Any failure ends on a styled 404 or 500 page, never bare text.
 
@@ -60,26 +60,32 @@ The order is the main idea of the work (question 27): headers first so every ans
 ## 4 Main parts explained
 
 ### Simulated sign-in (`fakeAuth.js`)
+
 The `?auth=1` parameter makes `req.user = { name: 'Owner' }`, otherwise the user is a guest. `res.locals.authQuery` is appended to links so the sign-in flag is not lost between pages. `requireAuth` guards one route: a guest is redirected to `/login`. This is a teaching model, not protection; lab 3 has a real login. In the log the `auth` value is replaced with `***` (`hideAuth`) so a reader of the log cannot reuse the flag.
 
 ### Request log in a table (`requestLogger.js`, `requestLog.js`)
+
 - The row is written **before** the route runs. If the write fails (an unreachable database file), the error goes to the error handler and the user sees a styled 500 page with an explanation. This reproduces "a real failure", not a button.
 - Status and duration are added to the same row on the response `finish` event; if that also fails, the server does not crash but writes a console message.
 - `node:sqlite` opens the database lazily on first use: an unreachable database breaks the request (a 500 page), not the server start.
 - The request address is user-controlled, so `safeLogText` escapes line breaks and control characters and cuts the length: otherwise an extra log line could be forged (log injection).
 
 ### Protection (`security.js`)
+
 - **Headers.** A strict CSP without inline scripts or styles, no framing, `nosniff`, `Permissions-Policy`. All set by hand without a package. `Referrer-Policy: same-origin`, not `no-referrer`, otherwise browsers send `Origin: null` and the site's own forms would be rejected.
 - **CSRF (question 25).** Double-submit token: the server puts a random token into a cookie with `HttpOnly` and `SameSite=Strict` and into the hidden `_csrf` field of every form. A state-changing request (POST, PUT, PATCH, DELETE) must send both values and they must match (compared in constant time with `timingSafeEqual`). A foreign site can neither read the cookie nor guess the token. `Origin` is also checked when present.
 - **Rate limiter.** A fixed window per address: 300 requests per minute overall and 20 writing (POST) requests per minute; when exceeded, a 429 page with `Retry-After`.
 
 ### Form validation (`diagrams.js`)
+
 `validateDiagram` checks all fields on the server with the same limits as the form's `maxlength`, from `limits.json`: title up to 80 characters, description 500, code 5000, revision a whole number from 0 to 100000, notation from the list. Whitespace-only values count as empty. On an error the form is shown again with the entered values and messages at the fields, status 400. The form body is capped (`20kb`, at most 20 parameters), and repeated keys (arrays) do not crash the server: only plain strings count.
 
 ### EJS templates
+
 `<%= x %>` prints a value with HTML escaping (protection from code injection), `<%- x %>` prints raw, so it is used only for the template's own markup (for example the `aria-invalid` attributes) and never for user text. `<%- include('partials/header') %>` brings in the shared header. The `formatTime` function in `app.locals` is available to all templates: this is the answer to question 26 (a helper for date formatting).
 
 ### Error pages
+
 `notFound` serves a styled 404. `serverError` picks the code (400, 403, 413, 429 or 500), shows a clear `publicMessage`, and writes details only to the console. If even the 500 page fails to render, the `fallbackPage` takes over: the user never sees bare text.
 
 ## 5 Likely defence questions

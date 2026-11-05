@@ -6,11 +6,11 @@ Branch `28`, folder `part-2/lab-08-docker`. Russian version: `17-LR8-DOCKER.md`.
 
 The command `docker compose up --build` builds two images and starts three services:
 
-| Service | Image | Role | Host port |
-| --- | --- | --- | --- |
-| `frontend` | own: unprivileged Nginx and the built React app | serves pages, proxies `/api/` to the server | 8080 |
-| `backend` | own: Node.js 22 Alpine, the lab 3 server | REST API with token login | 127.0.0.1:3000 (this computer only) |
-| `db` | `postgres:16-alpine` | the database, data in the `pgdata` volume | not published |
+| Service    | Image                                           | Role                                        | Host port                           |
+| ---------- | ----------------------------------------------- | ------------------------------------------- | ----------------------------------- |
+| `frontend` | own: unprivileged Nginx and the built React app | serves pages, proxies `/api/` to the server | 8080                                |
+| `backend`  | own: Node.js 22 Alpine, the lab 3 server        | REST API with token login                   | 127.0.0.1:3000 (this computer only) |
+| `db`       | `postgres:16-alpine`                            | the database, data in the `pgdata` volume   | not published                       |
 
 The browser opens `http://localhost:8080`. API requests go to the same address under `/api/` and Nginx forwards them to the server. So CORS is not needed and the server address is not baked into the client build.
 
@@ -52,6 +52,7 @@ Start order: `db` (readiness checked by `pg_isready`) → `backend` (waits for `
 ## 4 Main parts explained
 
 ### Server Dockerfile
+
 - Two-stage build: the first stage runs `npm ci --omit=dev` to install runtime dependencies only, and the second image receives `node_modules` through `COPY --from=deps`. The final image has no npm cache, tests or reports (`Dockerfile.dockerignore` filters them).
 - `package.json` and `package-lock.json` are copied separately before the rest of the code: the dependency layer is cached and not rebuilt when the code changes.
 - The Alpine base image is small; `USER node` runs the server without root rights.
@@ -59,10 +60,12 @@ Start order: `db` (readiness checked by `pg_isready`) → `backend` (waits for `
 - `CMD` runs the migrations, then the admin seed (skipped without `ADMIN_EMAIL`) and, through `exec`, the server itself: `exec` makes Node the main process of the container, so it receives the stop signal.
 
 ### Client Dockerfile
+
 - The `builder` stage builds the Vite static files with `VITE_API_URL=/api`. Only Nginx and the `dist` folder reach the final image; Node.js and the sources stay in the builder.
 - `nginx-unprivileged` runs as non-root and listens on port 8080.
 
 ### Nginx (`nginx.conf`)
+
 - `location /api/` with `proxy_pass http://backend:3000/`: the trailing `/` strips the `/api` prefix, so `/api/health` becomes `/health`.
 - `limit_req` allows 10 requests per second per address (a burst of 20) and `client_max_body_size 100k` caps the body.
 - Security headers and a strict CSP; `server_tokens off` hides the Nginx version.
@@ -70,6 +73,7 @@ Start order: `db` (readiness checked by `pg_isready`) → `backend` (waits for `
 - Hashed `assets/` files are cached for a year.
 
 ### Compose (`docker-compose.yml`)
+
 - `${POSTGRES_PASSWORD:?...}` and `${JWT_SECRET:?...}` stop the start with a clear message if the value is missing from `.env`. There are no ready-made passwords in the repository.
 - `depends_on` with `condition: service_healthy` waits not for the container to start but for it to be ready.
 - The `internal` network is marked `internal: true`: it has no way out, and the database is reachable only from the server. The database port is not published.

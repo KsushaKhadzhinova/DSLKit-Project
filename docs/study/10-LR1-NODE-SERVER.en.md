@@ -6,14 +6,14 @@ Branch `lab21`, folder `part-2/lab-01-node-server`. Russian version: `10-LR1-NOD
 
 The server keeps diagrams (title, notation, source code, priority, owner) in an in-memory array and serves them over HTTP as JSON. Six routes:
 
-| Method | Path | What it does | Success | Errors |
-| --- | --- | --- | --- | --- |
-| GET | `/diagrams` | list (`limit`, `offset`, `sort`, `order`) | 200, array, `X-Total-Count` | 400 |
-| GET | `/diagrams/:id` | one record | 200 | 400, 404 |
-| POST | `/diagrams` | create | 201, `Location` | 400, 415 |
-| PUT | `/diagrams/:id` | replace entirely | 200 | 400, 404, 415 |
-| PATCH | `/diagrams/:id` | change the sent fields | 200 | 400, 404, 415 |
-| DELETE | `/diagrams/:id` | delete | 204 no body | 400, 404 |
+| Method | Path            | What it does                              | Success                     | Errors        |
+| ------ | --------------- | ----------------------------------------- | --------------------------- | ------------- |
+| GET    | `/diagrams`     | list (`limit`, `offset`, `sort`, `order`) | 200, array, `X-Total-Count` | 400           |
+| GET    | `/diagrams/:id` | one record                                | 200                         | 400, 404      |
+| POST   | `/diagrams`     | create                                    | 201, `Location`             | 400, 415      |
+| PUT    | `/diagrams/:id` | replace entirely                          | 200                         | 400, 404, 415 |
+| PATCH  | `/diagrams/:id` | change the sent fields                    | 200                         | 400, 404, 415 |
+| DELETE | `/diagrams/:id` | delete                                    | 204 no body                 | 400, 404      |
 
 Also: `GET /health` (liveness check); any other method on these paths gets 405 with an `Allow` header; `OPTIONS` answers 204.
 
@@ -59,15 +59,19 @@ The order of `app.use` matters: security headers go first so they reach error re
 ## 4 File walk-through
 
 ### `server.js`
+
 `process.loadEnvFile()` reads `.env` if present (inside `try`, the file is optional). The port comes from `PORT`, default 3000. `createApp().listen(...)` starts the server.
 
 ### `src/app.js`
+
 `app.disable('x-powered-by')` removes the header that gives away Express. `express.json({ limit })` parses JSON and rejects a body above the `limits.json` cap (413). `app.use('/diagrams', ...)` mounts the router; inside it, paths are written without the prefix.
 
 ### `src/routes/diagrams.routes.js`
+
 `router.route('/:id')` gathers all methods of one path. A chain such as `.get(parseId, controller.get)` reads left to right: id check first, then the controller. The final `.all(allowMethods([...]))` fires only for methods that had no handler above, so it answers 405 and `OPTIONS`.
 
 ### `src/middleware/validate.js`
+
 - `parseId` checks the string with `^[1-9]\d*$` rather than plain `Number(...)`, because `Number('0x1')`, `Number('1e0')` and `Number(' 1')` also give numbers. `Number.isSafeInteger` rejects huge values.
 - `text(name, singleLine)` returns a check function. A whitespace-only string (including zero-width characters) counts as empty; length is measured after `trim()`, so what is checked is exactly what is stored. Single-line fields reject control characters.
 - `validateDiagram` serves POST and PUT: full body, optional `priority` gets a default, unknown fields are dropped (only fields from `checks` reach `req.diagramFields`).
@@ -75,12 +79,15 @@ The order of `app.use` matters: security headers go first so they reach error re
 - Errors are collected into a `details` list per field, so the client sees all problems at once.
 
 ### `src/models/diagram.model.js`
+
 `createDiagramStore` keeps `diagrams` and the `nextId` counter in a closure: the array is not reachable from outside. `stamp()` returns a `createdAt` strictly later than the previous one, even for two creations in the same millisecond. `replace` keeps the old `createdAt` (PUT replaces fields, not history); `update` does `{ ...old, ...sent }`.
 
 ### `src/controllers/diagrams.controller.js`
+
 `list` sorts a copy (`[...store.findAll()]`, so the store is not mutated), compares numbers as numbers and text with `localeCompare`, and breaks ties by `id` so pages never overlap. The total size goes into `X-Total-Count`; the body stays an array, as clients of earlier labs expect. `create` answers 201 with `Location`. `remove` answers 204 with no body.
 
 ### `src/middleware/error-handler.js`
+
 Every error becomes `{ "error": "..." }` with the right status. For 5xx the client gets the generic `Internal server error`; details stay in the server console, so the cause never leaks. Malformed JSON (`entity.parse.failed`) gives 400, not 500.
 
 ## 5 Likely defence questions

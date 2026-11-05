@@ -22,32 +22,39 @@ const concepts = [
   {
     name: 'Блок и улыбка-стрелка',
     idea: 'Чёрный блок диаграммы, под ним дуга-улыбка со стрелками на обоих концах: правка идёт и от кода к схеме, и обратно. Дружелюбно и вежливо, как ты описала продукт',
-    mark: ({ a, b }) => `<rect x="14" y="5" width="36" height="30" rx="8" fill="${a}"/>${line('M11 44Q32 64 53 44', b, 6)}${head(9, 41.5, 230, b)}${head(55, 41.5, -50, b)}`,
+    mark: ({ a, b }) =>
+      `<rect x="14" y="5" width="36" height="30" rx="8" fill="${a}"/>${line('M11 44Q32 64 53 44', b, 6)}${head(9, 41.5, 230, b)}${head(55, 41.5, -50, b)}`,
   },
   {
     name: 'Туда и обратно',
     idea: 'Блок слева и круг справа, между ними две стрелки в разные стороны. Буквально: код и холст, которые меняют друг друга',
-    mark: ({ a, b }) => `<rect x="3" y="16" width="20" height="32" rx="6" fill="${a}"/><circle cx="52" cy="32" r="11" fill="${b}"/>${line('M27 25H36', a, 5)}${head(38, 25, 0, a, 5, 8)}${line('M37 39H28', a, 5)}${head(26, 39, 180, a, 5, 8)}`,
+    mark: ({ a, b }) =>
+      `<rect x="3" y="16" width="20" height="32" rx="6" fill="${a}"/><circle cx="52" cy="32" r="11" fill="${b}"/>${line('M27 25H36', a, 5)}${head(38, 25, 0, a, 5, 8)}${line('M37 39H28', a, 5)}${head(26, 39, 180, a, 5, 8)}`,
   },
   {
     name: 'D-петля',
     idea: 'Буква D собрана как блок и стрелка: стойка и дуга, которая возвращается обратно к стойке. Буква, поток и двусторонняя связь в одной фигуре',
-    mark: ({ a, b }) => `<rect x="7" y="6" width="12" height="52" rx="4" fill="${a}"/>${line('M19 10H28C47 10 56 20 56 32S47 54 28 54H25', b, 10)}${head(21, 54, 180, b, 7, 10)}`,
+    mark: ({ a, b }) =>
+      `<rect x="7" y="6" width="12" height="52" rx="4" fill="${a}"/>${line('M19 10H28C47 10 56 20 56 32S47 54 28 54H25', b, 10)}${head(21, 54, 180, b, 7, 10)}`,
   },
   {
     name: 'Курсор и узел',
     idea: 'Мигающий текстовый курсор (код) и рядом блок (диаграмма), от курсора к блоку идёт стрелка. Два способа правки в одном знаке',
-    mark: ({ a, b }) => `<g class="blink"><rect x="11" y="6" width="8" height="52" rx="3" fill="${a}"/><rect x="5" y="6" width="20" height="7" rx="2.5" fill="${a}"/><rect x="5" y="51" width="20" height="7" rx="2.5" fill="${a}"/></g>${line('M28 32H34', b, 5)}${head(36, 32, 0, b, 5, 8)}<rect x="38" y="17" width="22" height="30" rx="7" fill="${b}"/>`,
+    mark: ({ a, b }) =>
+      `<g class="blink"><rect x="11" y="6" width="8" height="52" rx="3" fill="${a}"/><rect x="5" y="6" width="20" height="7" rx="2.5" fill="${a}"/><rect x="5" y="51" width="20" height="7" rx="2.5" fill="${a}"/></g>${line('M28 32H34', b, 5)}${head(36, 32, 0, b, 5, 8)}<rect x="38" y="17" width="22" height="30" rx="7" fill="${b}"/>`,
   },
   {
     name: 'Наклейка-блок',
     idea: 'Чёрный блок с небольшим наклоном и толстая синяя стрелка, которая выходит из него. Простой знак как на наклейке или футболке группы',
-    mark: ({ a, b }) => `<rect x="5" y="15" width="36" height="36" rx="9" fill="${a}" transform="rotate(-8 23 33)"/>${line('M32 40L54 17', b, 10)}${head(57, 14, -46, b, 9, 15)}`,
+    mark: ({ a, b }) =>
+      `<rect x="5" y="15" width="36" height="36" rx="9" fill="${a}" transform="rotate(-8 23 33)"/>${line('M32 40L54 17', b, 10)}${head(57, 14, -46, b, 9, 15)}`,
   },
 ];
 
-const svg = (c, pal, size = 64, cls = '') => `<svg class="${cls}" xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 64 64" role="img" aria-label="${c.name}">${c.mark(pal)}</svg>`;
-const lock = (c, pal, text) => `<span class="lock" style="color:${text}"><span class="m">${svg(c, pal, 48)}</span><span class="w"><b style="color:${pal.a}">DSL</b><b style="color:${pal.b}">K</b><span>it</span></span></span>`;
+const svg = (c, pal, size = 64, cls = '') =>
+  `<svg class="${cls}" xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 64 64" role="img" aria-label="${c.name}">${c.mark(pal)}</svg>`;
+const lock = (c, pal, text) =>
+  `<span class="lock" style="color:${text}"><span class="m">${svg(c, pal, 48)}</span><span class="w"><b style="color:${pal.a}">DSL</b><b style="color:${pal.b}">K</b><span>it</span></span></span>`;
 
 concepts.forEach((c, i) => {
   const n = String(i + 1).padStart(2, '0');

@@ -18,14 +18,14 @@ Three functional modules, as the assignment requires: authentication (registrati
 
 ## 2 How the note is built
 
-| Section | What is inside | Where to check |
-| --- | --- | --- |
-| Introduction | relevance, goal, five tasks, object and subject, significance | `note.md`, "Введение" |
-| Chapter 1 | requirements FR1–FR12 and NFR1–NFR9, use case diagram, C4 scheme, REST API table, ER diagram | `diagrams/*.mmd` |
-| Chapter 2 | stack and its justification, server (structure, models, API, JWT, errors), client (routes, state, axios, responsiveness), Docker, deployment, tests | code in appendices A–C |
-| Chapter 3 | user guide, 18 test cases | table 7 |
-| Conclusion, sources | results, 20 sources | list at the end |
-| Appendices A–G | code, Docker, test data, diagrams, service recommendations, screenshots | |
+| Section             | What is inside                                                                                                                                      | Where to check         |
+| ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------- |
+| Introduction        | relevance, goal, five tasks, object and subject, significance                                                                                       | `note.md`, "Введение"  |
+| Chapter 1           | requirements FR1–FR12 and NFR1–NFR9, use case diagram, C4 scheme, REST API table, ER diagram                                                        | `diagrams/*.mmd`       |
+| Chapter 2           | stack and its justification, server (structure, models, API, JWT, errors), client (routes, state, axios, responsiveness), Docker, deployment, tests | code in appendices A–C |
+| Chapter 3           | user guide, 18 test cases                                                                                                                           | table 7                |
+| Conclusion, sources | results, 20 sources                                                                                                                                 | list at the end        |
+| Appendices A–G      | code, Docker, test data, diagrams, service recommendations, screenshots                                                                             |                        |
 
 ## 3 What to understand and be able to explain
 

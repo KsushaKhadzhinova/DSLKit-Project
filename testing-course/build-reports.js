@@ -9,7 +9,8 @@ const lab3 = JSON.parse(readFileSync(join(root, 'lab3/results.json'), 'utf8'));
 const lab2 = runLab2();
 
 const cell = (v) => String(v).replace(/\|/g, '\\|').replace(/\n/g, ' ');
-const table = (title, head, rows) => `Таблица: ${title}\n\n| ${head.join(' | ')} |\n|${head.map(() => '---').join('|')}|\n${rows.map((r) => `| ${r.map(cell).join(' | ')} |`).join('\n')}\n`;
+const table = (title, head, rows) =>
+  `Таблица: ${title}\n\n| ${head.join(' | ')} |\n|${head.map(() => '---').join('|')}|\n${rows.map((r) => `| ${r.map(cell).join(' | ')} |`).join('\n')}\n`;
 const BASE = { name: 'Анна Иванова', email: 'anna@example.com', notation: 'idef0', team: 5, comment: '', consent: true };
 const val = (x) => (typeof x === 'string' && x.length > 14 ? `${x.slice(0, 5)}… (${x.length})` : JSON.stringify(x));
 const diff = (d) => {
@@ -23,7 +24,12 @@ const write = (lab, meta, sections) => {
   mkdirSync(join(dir, 'content'), { recursive: true });
   mkdirSync(join(dir, 'screenshots'), { recursive: true });
   copyFileSync(join(root, 'diagrams', 'flow.png'), join(dir, 'screenshots', 'flow.png'));
-  for (const [n, f] of [['shot-errors', '03-form-errors'], ['shot-filled', '04-form-filled'], ['shot-thanks', '05-form-submitted']]) copyFileSync(join(root, 'screens', `${f}.png`), join(dir, 'screenshots', `${n}.png`));
+  for (const [n, f] of [
+    ['shot-errors', '03-form-errors'],
+    ['shot-filled', '04-form-filled'],
+    ['shot-thanks', '05-form-submitted'],
+  ])
+    copyFileSync(join(root, 'screens', `${f}.png`), join(dir, 'screenshots', `${n}.png`));
   writeFileSync(join(dir, 'meta.yaml'), meta);
   sections.sort((a, b) => Number(b.startsWith('# ЦЕЛЬ')) - Number(a.startsWith('# ЦЕЛЬ')));
   sections.forEach((text, i) => writeFileSync(join(dir, 'content', `${String(i).padStart(2, '0')}.md`), text));
@@ -49,16 +55,27 @@ toc: false
 `;
 
 const useCase = JSON.parse(readFileSync(join(root, 'use-case.json'), 'utf8'))
-  .map(([k, v]) => `**${k}.**\n\n${v.split('\n').map((l) => (l.endsWith(':') ? `**${l}**` : `- ${l}`)).join('\n')}\n`)
+  .map(
+    ([k, v]) =>
+      `**${k}.**\n\n${v
+        .split('\n')
+        .map((l) => (l.endsWith(':') ? `**${l}**` : `- ${l}`))
+        .join('\n')}\n`,
+  )
   .join('\n');
 
 const fields = JSON.parse(readFileSync(join(root, 'fields.json'), 'utf8'));
 const fieldsMd = table('Данные формы: типы и допустимые значения', ['Поле', 'Тип', 'Обяз.', 'По умолч.', 'Допустимо', 'Недопустимо'], fields);
-const figs = [['flow', 'Блок-схема сценария UC-01'], ['shot-errors', 'Форма: ошибки при пустой отправке'], ['shot-filled', 'Форма заполнена корректными данными'], ['shot-thanks', 'Страница благодарности']];
+const figs = [
+  ['flow', 'Блок-схема сценария UC-01'],
+  ['shot-errors', 'Форма: ошибки при пустой отправке'],
+  ['shot-filled', 'Форма заполнена корректными данными'],
+  ['shot-thanks', 'Страница благодарности'],
+];
 const figsMd = figs.map(([n, c]) => `![${c}](screenshots/${n}.png)`).join('\n\n');
 const dbRows = JSON.parse(readFileSync(join(root, 'db.json'), 'utf8')).map((r) => r.map((v) => String(v).replace(/\*/g, '\\*')));
 const dbMd = `${table('Структура данных заявки (сущность WaitlistEntry)', ['Поле', 'Тип', 'Длина', 'Обязат.', 'Уник.', 'Маска', 'Связь'], dbRows)}\nХранилище: массив JSON в LocalStorage, ключ dslkit.waitlist. Первичного ключа нет. Звёздочка означает обязательное поле.\n`;
-const extras =`${dbMd}\n## Диаграмма и скриншоты\n\n${figsMd}\n`;
+const extras = `${dbMd}\n## Диаграмма и скриншоты\n\n${figsMd}\n`;
 
 const passed2 = lab2.filter((r) => r.status === 'Passed').length;
 const kinds = { P: 'позитивный', N: 'негативный', B: 'граничный' };
@@ -88,31 +105,50 @@ ${extras}
 
 Требования к полям приведены в таблице ниже.
 
-${table('Требования к полям формы', ['Поле', 'Правило'], [
+${table(
+  'Требования к полям формы',
+  ['Поле', 'Правило'],
+  [
     ['name', 'Начинается с буквы; буквы, пробел, апостроф, дефис; длина от 2 до 60'],
     ['email', 'Формат адреса с доменом верхнего уровня; длина не более 120'],
     ['notation', 'Одно из: idef0, dfd, erd, bpmn, uml, petri'],
     ['team', 'Целое число от 0 до 500 (допустима строка из цифр)'],
     ['comment', 'Не более 500 символов, необязательное'],
     ['consent', 'Только true'],
-  ])}
+  ],
+)}
 ## Классы эквивалентности и границы
 
 Для каждого поля выделены допустимый и недопустимые классы; границы проверяются парами «последнее допустимое и первое недопустимое» значение (таблица ниже).
 
-${table('Классы эквивалентности и граничные значения', ['Поле', 'Допустимые', 'Недопустимые', 'Границы'], [
+${table(
+  'Классы эквивалентности и граничные значения',
+  ['Поле', 'Допустимые', 'Недопустимые', 'Границы'],
+  [
     ['name', 'Буквы 2–60', 'Цифры, 1 символ, более 60', '1 / 2 / 60 / 61'],
     ['email', 'Корректный адрес', 'Без @, без домена, более 120', '120 / 121'],
     ['team', '0–500', 'Отрицательное, больше 500, не число', '-1 / 0 / 500 / 501'],
     ['notation', 'Из списка', 'Любое другое значение', '—'],
     ['comment', '0–500', 'Более 500', '500 / 501'],
     ['consent', 'true', 'false, отсутствует', '—'],
-  ])}`,
+  ],
+)}`,
   `## Тест-кейсы и результаты
 
 Разработано ${lab2.length} тест-кейсов: позитивные, негативные и граничные. Идентификаторы в таблице сокращены: полный вид TC-WL-NNN. В столбце «Данные» указаны только поля, отличающиеся от базового корректного набора (name=Анна Иванова, email=anna@example.com, notation=idef0, team=5, comment пустой, consent=true). Общие предусловия: проект запущен, форма открыта, поля пусты. Постусловие: данные не сохраняются, состояние системы не меняется. Шаги общие: 1) подать набор данных на вход проверки формы; 2) получить список неверных полей. Ожидаемый результат указан в таблице.
 
-${table('Тест-кейсы и результаты выполнения', ['ID', 'Тип, приоритет', 'Заголовок', 'Данные', 'Ожидаемый', 'Фактический'], lab2.map((r) => [r.id.slice(3), `${kinds[r.kind]}, ${r.priority}`, r.title, diff(r.data), r.expected.join(', ') || 'ошибок нет', `${r.actual.join(', ') || 'ошибок нет'} (${r.status})`]))}`,
+${table(
+  'Тест-кейсы и результаты выполнения',
+  ['ID', 'Тип, приоритет', 'Заголовок', 'Данные', 'Ожидаемый', 'Фактический'],
+  lab2.map((r) => [
+    r.id.slice(3),
+    `${kinds[r.kind]}, ${r.priority}`,
+    r.title,
+    diff(r.data),
+    r.expected.join(', ') || 'ошибок нет',
+    `${r.actual.join(', ') || 'ошибок нет'} (${r.status})`,
+  ]),
+)}`,
   `# АНАЛИЗ РЕЗУЛЬТАТОВ
 
 Выполнено ${lab2.length} тест-кейсов, пройдено ${passed2}, не пройдено ${lab2.length - passed2}. Дефектов не выявлено: проверка полей соответствует требованиям на всех границах. Попутно исправлена ошибка самих тестов на этапе отладки (неверный формат тестовых данных), к продукту она отношения не имеет.
@@ -154,7 +190,10 @@ ${extras}
 
 Тестируется статический сайт DSLKit, запущенный локальным сервером tools/server.js. Требования и модули приведены в таблице ниже.
 
-${table('Требования и модули', ['ID', 'Модуль и требование'], [
+${table(
+  'Требования и модули',
+  ['ID', 'Модуль и требование'],
+  [
     ['R1', 'Доступность страниц (главная, редактор, панель, настройки, английская версия)'],
     ['R2', 'Загрузка стилей и скриптов'],
     ['R3', 'Разбор DSL и преобразование в DOT и Mermaid'],
@@ -164,7 +203,8 @@ ${table('Требования и модули', ['ID', 'Модуль и треб
     ['R7', 'Безопасность: CSP и защитные заголовки'],
     ['R8', 'PWA: манифест, service worker, robots, sitemap'],
     ['R9', 'Локальное хранилище'],
-  ])}
+  ],
+)}
 ## Дымовой чек-лист
 
 Минимальный набор из ${lab3.smoke.length} проверок. Критический путь запускается только при его успешном прохождении (иначе статус Blocked).
@@ -183,12 +223,16 @@ ${table('Чек-лист критического пути', ['ID', 'Треб.',
 
 ## Метрики
 
-${table('Метрики тестирования', ['Метрика', 'Формула', 'Значение'], [
+${table(
+  'Метрики тестирования',
+  ['Метрика', 'Формула', 'Значение'],
+  [
     ['Выполнено тестов', 'Выполненные / Всего × 100%', `${c3.executedPct}%`],
     ['Успешные тесты', 'Passed / Выполненные × 100%', `${c3.passedPct}%`],
     ['Плотность дефектов', 'Дефекты / Количество тестов', c3.defectDensity],
     ['Покрытие требований', 'Покрытые / Всего × 100%', `${c3.coveragePct}% (${c3.requirements} из ${c3.requirements})`],
-  ])}
+  ],
+)}
 Всего проверок ${c3.total}: Passed ${c3.passed}, Failed ${c3.failed}, Blocked ${c3.blocked}.
 
 ## Дефекты, риски и выводы

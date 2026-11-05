@@ -28,16 +28,16 @@ string     = '"' , { char | "\\" , any } , '"' ;
 
 ## API
 
-| Method | Path | Body and answer |
-| --- | --- | --- |
-| GET | `/api/notations` | { notations: [{ id, short, name, header, formats, nodes, edges }] } |
-| GET | `/api/grammar` | { grammar, header } |
-| GET | `/api/engines` | { own, external: [{ id, endpoint }] } |
-| POST | `/api/validate` | { source, lang } -> { notation, valid, problems: [{ line, severity, code, message }] } |
-| POST | `/api/parse` | { source, lang } -> { notation, valid, problems, model } |
-| POST | `/api/generate` | { source, format, lang } -> { notation, format, text } |
-| POST | `/api/render` | { source, lang } -> { notation, valid, problems, svg } (Accept: image/svg+xml gives the bare SVG) |
-| POST | `/api/external/<language>` | { source } -> SVG of the external service (Kroki-compatible, KROKI_URL) |
+| Method | Path                       | Body and answer                                                                                   |
+| ------ | -------------------------- | ------------------------------------------------------------------------------------------------- |
+| GET    | `/api/notations`           | { notations: [{ id, short, name, header, formats, nodes, edges }] }                               |
+| GET    | `/api/grammar`             | { grammar, header }                                                                               |
+| GET    | `/api/engines`             | { own, external: [{ id, endpoint }] }                                                             |
+| POST   | `/api/validate`            | { source, lang } -> { notation, valid, problems: [{ line, severity, code, message }] }            |
+| POST   | `/api/parse`               | { source, lang } -> { notation, valid, problems, model }                                          |
+| POST   | `/api/generate`            | { source, format, lang } -> { notation, format, text }                                            |
+| POST   | `/api/render`              | { source, lang } -> { notation, valid, problems, svg } (Accept: image/svg+xml gives the bare SVG) |
+| POST   | `/api/external/<language>` | { source } -> SVG of the external service (Kroki-compatible, KROKI_URL)                           |
 
 ## Нотации
 

@@ -6,15 +6,15 @@ Branch `pz22`, folder `part-2/pz-02-rest-api`. Russian version: `19-PZ2-REST-API
 
 Three resources with one-to-many links: a user (`users`) owns projects (`projects`), and a project contains diagrams (`diagrams`). Every resource has the same six routes, so they are created by one function. The data lives in in-memory arrays (the practical requires that); the seed is 2 users, 2 projects and a few diagrams. All paths start with `/api`.
 
-| Method | Path | What it does |
-| --- | --- | --- |
-| GET, POST | `/api/{users,projects,diagrams}` | list with filters, and create |
-| GET, PUT, PATCH, DELETE | `/api/{...}/:id` | one record, replace, partial change, delete |
-| GET | `/api/users/:id/projects` | projects of a user (cross-resource link) |
-| GET | `/api/projects/:id/diagrams` | diagrams of a project |
-| POST | `/api/diagrams/:id/publish` | set the status to `published` |
-| POST | `/api/diagrams/:id/duplicate` | copy a diagram (201) |
-| GET | `/health` | server check |
+| Method                  | Path                             | What it does                                |
+| ----------------------- | -------------------------------- | ------------------------------------------- |
+| GET, POST               | `/api/{users,projects,diagrams}` | list with filters, and create               |
+| GET, PUT, PATCH, DELETE | `/api/{...}/:id`                 | one record, replace, partial change, delete |
+| GET                     | `/api/users/:id/projects`        | projects of a user (cross-resource link)    |
+| GET                     | `/api/projects/:id/diagrams`     | diagrams of a project                       |
+| POST                    | `/api/diagrams/:id/publish`      | set the status to `published`               |
+| POST                    | `/api/diagrams/:id/duplicate`    | copy a diagram (201)                        |
+| GET                     | `/health`                        | server check                                |
 
 A list accepts `?page=`, `?limit=` (1–100), `?sort=-title`, `?q=text` and a filter on any schema field (`?status=draft`). The list answer is `{ data: [...], meta: { page, limit, total } }`. Errors always have one shape: `{ error: { code, message, details? } }`.
 
@@ -55,23 +55,30 @@ Custom routes (`/users/:id/projects`, `/projects/:id/diagrams`, `publish`, `dupl
 ## 4 Main parts explained
 
 ### The schema as the single source of rules (`app.js`, `validation.js`)
+
 Each resource is described by an object: field type, required, maximum, allowed values, pattern, default. One `validate` function checks any body against such a schema and returns a list of `{ field, message }`; the same schema serves as the filter and the whitelist of sortable fields. Consequences:
+
 - an unknown field in the body is an error, not a silent skip;
 - strings are trimmed before checking, and a whitespace-only value of a required field counts as empty;
 - length is counted in Unicode characters (an emoji is one character), and the NUL character is forbidden;
 - integers are checked for type and range (identifiers 1–2147483647).
 
 ### The generic router (`resource.js`)
+
 `createResourceRouter({ label, collection, schema, hooks })` builds GET list, GET record, POST, PUT, PATCH, DELETE and the 405 handlers. Differences between resources are moved into **hooks**: `check` verifies references and uniqueness (does `ownerId` exist, is the email taken), and `beforeRemove` forbids deletion while dependent records exist (a user with projects or a project with diagrams gives 409). PUT vs PATCH: PUT needs all required fields and replaces the record, keeping `id` and `createdAt`; PATCH checks only the sent fields and refuses an empty body.
 
 ### Identifiers and list parameters
+
 `parseId` accepts only a string of digits without a leading zero, up to 15 characters: `0x1`, `1e0`, `-1` and huge numbers give 400 `invalid_id`. `page` and `limit` are parsed the same way and capped (`limit` at most 100). The sort field is checked against the schema, so a field name never enters the comparison unchecked.
 
 ### Cross-resource links (question 25)
+
 A link is a reference by id (`projects.ownerId`, `diagrams.projectId`) plus two techniques in the API: **nested paths** (`/users/:id/projects`, `/projects/:id/diagrams`) to read the subordinate records, and **reference checks on write** (a missing `ownerId` gives 400 `validation_failed`, not a dangling reference). Deleting a parent that has children is refused with 409; the alternatives are cascade delete and clearing the reference.
 
 ### Errors (`errors.js`, the handler in `app.js`)
+
 `ApiError` carries a status, a code and a message; one four-parameter handler turns everything into JSON of one shape. The cases are:
+
 - 400 `validation_failed` (with `details` per field), `invalid_id`, `invalid_query`, `invalid_json`;
 - 404 `not_found`;
 - 405 `method_not_allowed` with an `Allow` header (OPTIONS answers 204);
@@ -80,9 +87,10 @@ A link is a reference by id (`projects.ownerId`, `diagrams.projectId`) plus two 
 - 415 a body is present but is not JSON;
 - 429 too many requests (with `Retry-After`);
 - 500 `internal_error` without details (they go to the console only).
-Client errors raised by Express (for example a broken percent escape in the path) keep their own 4xx and are not turned into 500.
+  Client errors raised by Express (for example a broken percent escape in the path) keep their own 4xx and are not turned into 500.
 
 ### Protection
+
 Headers for a JSON API (a forbidding CSP, `nosniff`, `no-store`), a rate limiter per address (300 per minute, and `/health` is exempt so monitoring does not use up the limit), a body size cap, text cleaning for the log. There is no login in this work by the assignment.
 
 ## 5 Likely defence questions

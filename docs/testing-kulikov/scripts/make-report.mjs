@@ -1,8 +1,15 @@
 // Builds docs/testing-kulikov/30-api-test-run.md from results.json written by run-all.mjs.
 import { readFileSync, writeFileSync } from 'node:fs';
 
-const results = [...JSON.parse(readFileSync(new URL('./results.json', import.meta.url), 'utf8')), ...JSON.parse(readFileSync(new URL('./results-external.json', import.meta.url), 'utf8'))];
-const cell = (s) => String(s ?? '').replace(/\|/g, '\\|').replace(/\r?\n/g, ' ').replace(/`/g, "'");
+const results = [
+  ...JSON.parse(readFileSync(new URL('./results.json', import.meta.url), 'utf8')),
+  ...JSON.parse(readFileSync(new URL('./results-external.json', import.meta.url), 'utf8')),
+];
+const cell = (s) =>
+  String(s ?? '')
+    .replace(/\|/g, '\\|')
+    .replace(/\r?\n/g, ' ')
+    .replace(/`/g, "'");
 const groups = [...new Set(results.map((r) => r.group))];
 const pass = results.filter((r) => r.pass).length;
 const date = process.env.RUN_DATE ?? new Date().toISOString().slice(0, 10);
@@ -21,7 +28,9 @@ for (const g of groups) {
 md += `\nОжидание в таблицах - требование, которое тестировщик считает правильным для HTTP/REST и для заявленного поведения API (лимит 100000 символов, коды 200/400/404/405/413/422/500). Fail означает расхождение факта с ожиданием; расхождения разобраны в \`31-api-bug-reports.md\`. Строки с пометкой \`Informational\` ничего не утверждают и всегда Pass.\n\n`;
 md += `## Провалы\n\n| ID | Проверка | Факт | Баг-репорт |\n|---|---|---|---|\n`;
 let bugMap = {};
-try { bugMap = JSON.parse(readFileSync(new URL('./bug-map.json', import.meta.url), 'utf8')); } catch {}
+try {
+  bugMap = JSON.parse(readFileSync(new URL('./bug-map.json', import.meta.url), 'utf8'));
+} catch {}
 for (const r of results.filter((x) => !x.pass)) md += `| ${r.id} | ${cell(r.title)} | ${cell(r.actual).slice(0, 140)} | ${bugMap[r.id] ?? ''} |\n`;
 for (const g of groups) {
   md += `\n## ${g}\n\n| ID | Проверка | Запрос | Ожидание | Факт | Результат |\n|---|---|---|---|---|---|\n`;

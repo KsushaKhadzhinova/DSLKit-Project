@@ -2,24 +2,24 @@
 
 Папки: `pinwheel`, `pinwheel-arrows`, `pinwheel-drag`, `pinwheel-tile`. В каждой:
 
-| Файл | Назначение |
-|---|---|
-| `mark-light.svg`, `mark-dark.svg` | знак на светлом и тёмном фоне |
-| `mark-mono-black.svg`, `mark-mono-white.svg` | одноцветные: печать, штамп, вышивка |
-| `lockup-horizontal-{light,dark,mono-black,mono-white}.svg` | знак + DSLKit для шапки |
-| `lockup-horizontal-{light,dark}@2x.png` | то же растром 544×128 |
+| Файл                                                           | Назначение                                         |
+| -------------------------------------------------------------- | -------------------------------------------------- |
+| `mark-light.svg`, `mark-dark.svg`                              | знак на светлом и тёмном фоне                      |
+| `mark-mono-black.svg`, `mark-mono-white.svg`                   | одноцветные: печать, штамп, вышивка                |
+| `lockup-horizontal-{light,dark,mono-black,mono-white}.svg`     | знак + DSLKit для шапки                            |
+| `lockup-horizontal-{light,dark}@2x.png`                        | то же растром 544×128                              |
 | `favicon.svg`, `favicon-{16,32,48,180,512}.png`, `favicon.ico` | упрощённый знак (без пунктира и центральной точки) |
-| `../contact-sheet.png` | все версии рядом, включая 16 px |
+| `../contact-sheet.png`                                         | все версии рядом, включая 16 px                    |
 
 Пересборка: `LAB7_DIR=<папка с puppeteer-core> node make-final.mjs`.
 
 ## Цвета
 
-| Роль | HEX | RGB |
-|---|---|---|
-| Чернила | #14161F | 20, 22, 31 |
-| Коралл | #FF5A36 | 255, 90, 54 |
-| Тёмный фон | #0F172A | 15, 23, 42 |
+| Роль                   | HEX     | RGB           |
+| ---------------------- | ------- | ------------- |
+| Чернила                | #14161F | 20, 22, 31    |
+| Коралл                 | #FF5A36 | 255, 90, 54   |
+| Тёмный фон             | #0F172A | 15, 23, 42    |
 | Светлый знак на тёмном | #F3F4F8 | 243, 244, 248 |
 
 CMYK и Pantone не заданы: подобрать при печати по пробному оттиску.

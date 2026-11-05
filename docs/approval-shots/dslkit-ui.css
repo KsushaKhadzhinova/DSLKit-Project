@@ -232,7 +232,9 @@ button,
   font: 600 1rem/1 var(--font-sans);
   text-decoration: none;
   cursor: pointer;
-  transition: background 0.15s, border-color 0.15s;
+  transition:
+    background 0.15s,
+    border-color 0.15s;
 }
 
 button:hover:not(:disabled),

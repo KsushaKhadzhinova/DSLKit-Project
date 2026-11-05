@@ -7,7 +7,10 @@ const require = createRequire(process.env.LAB7_DIR ?? new URL('../../part-2/lab-
 const puppeteer = require('puppeteer-core');
 
 const out = process.argv[2] ?? 'docs/design-contest/mockups';
-const NOTATIONS = (process.argv[3] || 'idef0,idef1,idef1x,idef3,idef4,idef5,dfd,erd,bpmn,petri,gost,graph,dag,uml-class,uml-object,uml-component,uml-composite,uml-deployment,uml-package,uml-profile,uml-usecase,uml-activity,uml-state,uml-sequence,uml-communication,uml-timing,uml-overview').split(',');
+const NOTATIONS = (
+  process.argv[3] ||
+  'idef0,idef1,idef1x,idef3,idef4,idef5,dfd,erd,bpmn,petri,gost,graph,dag,uml-class,uml-object,uml-component,uml-composite,uml-deployment,uml-package,uml-profile,uml-usecase,uml-activity,uml-state,uml-sequence,uml-communication,uml-timing,uml-overview'
+).split(',');
 const ENGINES = (process.argv[4] ?? 'graphviz,mermaid,plantuml,local').split(',');
 const LANGS = { ru: '/app/editor.html', en: '/en/app/editor.html' };
 
@@ -15,7 +18,10 @@ mkdirSync(out, { recursive: true });
 const browser = await puppeteer.launch({ executablePath: 'C:/Program Files (x86)/Google/Chrome/Application/chrome.exe', headless: true });
 const settle = (page) =>
   page
-    .waitForFunction(() => !document.querySelector('.canvas')?.hasAttribute('aria-busy') || document.querySelector('.canvas').getAttribute('aria-busy') === 'false', { timeout: 12000 })
+    .waitForFunction(
+      () => !document.querySelector('.canvas')?.hasAttribute('aria-busy') || document.querySelector('.canvas').getAttribute('aria-busy') === 'false',
+      { timeout: 12000 },
+    )
     .catch(() => {});
 
 const drawn = (page) =>

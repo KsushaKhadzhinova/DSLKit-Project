@@ -8,16 +8,16 @@ Legend: **done** (built and checked), **works with a caveat**, **in progress** (
 
 ## 1 In short
 
-| Area | State |
-| --- | --- |
-| ITWP Part 1 (site, labs 1–8) | done, `npm test` green, editor work continues |
-| ITWP Part 2 (labs 1–8, practicals 1–4) | code and reports done, some paperwork waits for the owner |
-| Course project | note done, app being extended, Word formatting is the owner's |
-| Mockups and Figma | 432 frames uploaded, 28 new frames not uploaded |
-| Logo and brand | decided: old blue `</>` mark, cat mascot, Kubik fonts |
-| MBP (business processes) | labs 1 and 2 done, lab 3 onward not received |
-| Other subjects | see section 9, status not checked |
-| Diploma (June 2027) | no code yet |
+| Area                                   | State                                                         |
+| -------------------------------------- | ------------------------------------------------------------- |
+| ITWP Part 1 (site, labs 1–8)           | done, `npm test` green, editor work continues                 |
+| ITWP Part 2 (labs 1–8, practicals 1–4) | code and reports done, some paperwork waits for the owner     |
+| Course project                         | note done, app being extended, Word formatting is the owner's |
+| Mockups and Figma                      | 432 frames uploaded, 28 new frames not uploaded               |
+| Logo and brand                         | decided: old blue `</>` mark, cat mascot, Kubik fonts         |
+| MBP (business processes)               | labs 1 and 2 done, lab 3 onward not received                  |
+| Other subjects                         | see section 9, status not checked                             |
+| Diploma (June 2027)                    | no code yet                                                   |
 
 ## 2 Goal, context, rules
 
@@ -83,20 +83,20 @@ Not planned in the coursework: AI panel and "Fix with AI", collaboration, Git an
 
 Each work lives in its own branch, with RU and EN reports, negative tests and a defence write-up in `docs/study/`. Assignments are in `materials/`.
 
-| Work | Branch | Tests | Contents |
-| --- | --- | --- | --- |
-| Lab 1 Express | `lab21` | 67 | diagram REST API, data in an array, layers, input validation, one error format, `PATCH`, `?notation=` filter, `?q=` search, pages and sorting, graceful shutdown, ESLint |
-| Lab 2 Sequelize | `lab12` | 102 | PostgreSQL by default (SQLite for tests only), migrations, one-to-many, 409 |
-| Lab 3 Authentication | `23` | 126 | bcrypt, JWT, roles, login lockout (limits in `limits.json`) |
-| Lab 4 React state | `24` | 87 | `useState`, `useEffect`, `localStorage`, notation filter, `memo` |
-| Lab 5 React and server | `25` | 100 client, 136 server | axios, optimistic updates with rollback, request cancelling, debounced search, "Load more", `useSession` hook |
-| Lab 6 MongoDB | `26` | 136 | Mongoose, nested documents, indexes, aggregations, log into a collection |
-| Lab 7 WebSocket | `27` | 93 | Socket.IO: rooms, presence, chat, private messages, token, `Origin` check |
-| Lab 8 Docker | `28` | 11 | Nginx with React, Express, PostgreSQL, healthchecks, closed network, limits, pgAdmin and Redis profiles |
-| Practical 1 Middleware and EJS | `pz21` | 103 | middleware order, CSRF, request log in SQLite, 404 and 500 pages, `/health` |
-| Practical 2 REST API | `pz22` | 69 | three linked resources, schema as the single source of rules, OpenAPI at `/api/openapi.json` |
-| Practical 3 Routing | `pz23` | 91 | protected routes and roles, lazy loading, `HashRouter`, two router variants |
-| Practical 4 Context and reducer | `pz24` | 65 | two contexts, `useReducer`, undo and redo, "prop drilling" block |
+| Work                            | Branch  | Tests                  | Contents                                                                                                                                                                 |
+| ------------------------------- | ------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Lab 1 Express                   | `lab21` | 67                     | diagram REST API, data in an array, layers, input validation, one error format, `PATCH`, `?notation=` filter, `?q=` search, pages and sorting, graceful shutdown, ESLint |
+| Lab 2 Sequelize                 | `lab12` | 102                    | PostgreSQL by default (SQLite for tests only), migrations, one-to-many, 409                                                                                              |
+| Lab 3 Authentication            | `23`    | 126                    | bcrypt, JWT, roles, login lockout (limits in `limits.json`)                                                                                                              |
+| Lab 4 React state               | `24`    | 87                     | `useState`, `useEffect`, `localStorage`, notation filter, `memo`                                                                                                         |
+| Lab 5 React and server          | `25`    | 100 client, 136 server | axios, optimistic updates with rollback, request cancelling, debounced search, "Load more", `useSession` hook                                                            |
+| Lab 6 MongoDB                   | `26`    | 136                    | Mongoose, nested documents, indexes, aggregations, log into a collection                                                                                                 |
+| Lab 7 WebSocket                 | `27`    | 93                     | Socket.IO: rooms, presence, chat, private messages, token, `Origin` check                                                                                                |
+| Lab 8 Docker                    | `28`    | 11                     | Nginx with React, Express, PostgreSQL, healthchecks, closed network, limits, pgAdmin and Redis profiles                                                                  |
+| Practical 1 Middleware and EJS  | `pz21`  | 103                    | middleware order, CSRF, request log in SQLite, 404 and 500 pages, `/health`                                                                                              |
+| Practical 2 REST API            | `pz22`  | 69                     | three linked resources, schema as the single source of rules, OpenAPI at `/api/openapi.json`                                                                             |
+| Practical 3 Routing             | `pz23`  | 91                     | protected routes and roles, lazy loading, `HashRouter`, two router variants                                                                                              |
+| Practical 4 Context and reducer | `pz24`  | 65                     | two contexts, `useReducer`, undo and redo, "prop drilling" block                                                                                                         |
 
 Part 2 branches contain overlapping copies of earlier works. For lab 3 the version from branch `25` is current (it has CORS and `?search=`).
 
@@ -178,11 +178,11 @@ Planned, after the topic and scope are approved with the supervisor:
 
 The subject area of all labs is DSLKit (the first version about an online shop was rejected). Teacher: Rusak T.V.; reports are built with the `report-gen` tool (`E:\report-gen`, commands `init`, `build`, `lint`).
 
-| Work | Topic | State |
-| --- | --- | --- |
-| Lab 1 | Org structure and IDEF0 (A-0, A0, A2, node tree, org structure) | done: `E:\ИИТ\МБП_ЛР1\Отчет_ЛР1_МБП.docx` and `.pdf`, branch `docs/mbp-lr1` |
-| Lab 2 | BPMN, process "Writing and checking DSL code" | done: `E:\ИИТ\МБП_ЛР2\Отчет_ЛР2_МБП.docx` and `.pdf`, branch `docs/mbp-lr2` |
-| Lab 3 onward | not received | wait for new assignments on Google Drive |
+| Work         | Topic                                                           | State                                                                       |
+| ------------ | --------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| Lab 1        | Org structure and IDEF0 (A-0, A0, A2, node tree, org structure) | done: `E:\ИИТ\МБП_ЛР1\Отчет_ЛР1_МБП.docx` and `.pdf`, branch `docs/mbp-lr1` |
+| Lab 2        | BPMN, process "Writing and checking DSL code"                   | done: `E:\ИИТ\МБП_ЛР2\Отчет_ЛР2_МБП.docx` and `.pdf`, branch `docs/mbp-lr2` |
+| Lab 3 onward | not received                                                    | wait for new assignments on Google Drive                                    |
 
 Waiting for the owner: permission to push the branches (in `origin` branch `docs/mbp-lr1` holds the old shop version), the group number on the title page, confirmation of the invented org structure, removal of downloaded copies from `E:\Downloads` (the environment protection blocks deleting them). Lectures 1–4 and the end of lecture 5 were not read.
 
@@ -210,16 +210,16 @@ Environment traps (details in `PROJECT-STATE.md`, section 7):
 
 Sessions at the snapshot:
 
-| Session | State |
-| --- | --- |
-| Course project: add more entities | running |
-| Editor: properties panel, code export, Gantt | running |
-| Rebuild LR3 reports in branches 25 and 28 | running |
-| Оставшиеся задачи проекта (remaining tasks) | finished, started the three above plus the course and Figma sessions |
-| Курсовой: комментарии, маршруты v6, экран админа | finished, found the router conflict |
-| Upload new notations and feature frames to Figma | stopped, waits for the owner |
-| Недоступные функции и кнопки (unavailable features and buttons) | finished, commits `34edec0` and `40494d3` |
-| Логотипы и документация проекта (logos and docs) | finished |
+| Session                                                         | State                                                                |
+| --------------------------------------------------------------- | -------------------------------------------------------------------- |
+| Course project: add more entities                               | running                                                              |
+| Editor: properties panel, code export, Gantt                    | running                                                              |
+| Rebuild LR3 reports in branches 25 and 28                       | running                                                              |
+| Оставшиеся задачи проекта (remaining tasks)                     | finished, started the three above plus the course and Figma sessions |
+| Курсовой: комментарии, маршруты v6, экран админа                | finished, found the router conflict                                  |
+| Upload new notations and feature frames to Figma                | stopped, waits for the owner                                         |
+| Недоступные функции и кнопки (unavailable features and buttons) | finished, commits `34edec0` and `40494d3`                            |
+| Логотипы и документация проекта (logos and docs)                | finished                                                             |
 
 ## 11 Checklist of decisions and actions
 

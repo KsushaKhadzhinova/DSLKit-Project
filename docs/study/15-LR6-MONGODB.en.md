@@ -5,6 +5,7 @@ Branch `26`, folder `part-2/lab-06-mongodb`. Russian version: `15-LR6-MONGODB.md
 ## 1 What the lab does in one minute
 
 A REST API of diagrams on top of MongoDB (local or Atlas). New compared with lab 2:
+
 - nested data: a `tags` array and a `comments` array inside the diagram document;
 - filters `?owner=`, `?tag=`, `?commentAuthor=` (search by a nested field), `?q=` (text index over title and code);
 - sorting `?sort=title` or `?sort=-priority`, paging with `limit` and `skip`, a record counter;
@@ -12,16 +13,16 @@ A REST API of diagrams on top of MongoDB (local or Atlas). New compared with lab
 - a log of every request in the `requestlogs` collection (requirement of even variant 26);
 - protection from injecting Mongo operators (`$ne`, `$gt`) through `sanitizeFilter`.
 
-| Method | Path | What it does |
-| --- | --- | --- |
-| GET | `/diagrams` | list with filters, sorting, `limit`, `skip`; `X-Total-Count` |
-| GET | `/diagrams/count` | `{ "count": N }` for the same filters |
-| GET | `/diagrams/stats` | aggregation by notation |
-| POST | `/diagrams` | create (201) |
-| GET, PUT, PATCH, DELETE | `/diagrams/:id` | a record; the id is an ObjectId |
-| POST | `/diagrams/:id/comments` | add a comment to the array |
-| PUT, DELETE | `/diagrams/:id/comments/:commentId` | change or delete a comment |
-| GET | `/health` | 200, or 503 if the database is unreachable |
+| Method                  | Path                                | What it does                                                 |
+| ----------------------- | ----------------------------------- | ------------------------------------------------------------ |
+| GET                     | `/diagrams`                         | list with filters, sorting, `limit`, `skip`; `X-Total-Count` |
+| GET                     | `/diagrams/count`                   | `{ "count": N }` for the same filters                        |
+| GET                     | `/diagrams/stats`                   | aggregation by notation                                      |
+| POST                    | `/diagrams`                         | create (201)                                                 |
+| GET, PUT, PATCH, DELETE | `/diagrams/:id`                     | a record; the id is an ObjectId                              |
+| POST                    | `/diagrams/:id/comments`            | add a comment to the array                                   |
+| PUT, DELETE             | `/diagrams/:id/comments/:commentId` | change or delete a comment                                   |
+| GET                     | `/health`                           | 200, or 503 if the database is unreachable                   |
 
 ## 2 Project layout
 
@@ -60,6 +61,7 @@ The server starts even with MongoDB switched off: requests then get an immediate
 ## 4 Main parts explained
 
 ### Document model (`models/diagram.js`)
+
 - A comment is an **embedded document** (`commentSchema`): there is no separate collection and no join, everything is read with one query. Pros: fast reads and atomic writes of a document. Cons: the document grows, so the number of comments is capped (100), and a MongoDB document may not exceed 16 MB.
 - `priority` is an integer from 0 to 2 (`min`, `max` and a custom `Number.isInteger` validator), unlike the string in lab 2.
 - `timestamps: true` keeps `createdAt` and `updatedAt` by itself.
@@ -67,11 +69,13 @@ The server starts even with MongoDB switched off: requests then get an immediate
 - The `strict: true` schema drops unknown fields.
 
 ### Indexes
+
 - `index: true` on `owner` and `tags`: fast lookup by them.
 - `diagramSchema.index({ 'comments.author': 1 })`: an index on a nested array field (multikey), used by `?commentAuthor=`.
 - `diagramSchema.index({ title: 'text', sourceCode: 'text' })`: a text index, used by `?q=` through `$text`.
 
 ### Queries (`diagrams.controller.js`)
+
 - `listFilter` builds the condition: `{ owner }`, `{ tags: tag }` (for an array it means "the array contains the value"), `{ 'comments.author': ... }` (a dotted path for the nested field).
 - The list runs `countDocuments(filter)` for the `X-Total-Count` header and then `find(filter).sort(...).skip(...).limit(...)`; `_id` is the second sort key so the order is stable.
 - `stats` is an **aggregation pipeline**: `$group` by notation (a count, the `$avg` of the priority, the sum of comment array sizes), `$project` to rename, `$sort`.
@@ -80,9 +84,11 @@ The server starts even with MongoDB switched off: requests then get an immediate
 - `addComment`: the `$push` operator appends to the array atomically. The array length check is part of the filter (`comments.99` must not exist), because update validators do not check the length on `$push`.
 
 ### Operator injection protection
+
 `mongoose.set('sanitizeFilter', true)` strips operators such as `{ "$ne": null }` that arrive as values. The server's own operators (`$text`, `$exists`) are marked explicitly with `mongoose.trusted(...)`. List parameters are checked by `validateListQuery`: numbers as short digit strings, the sort field from a whitelist; identifiers are checked as ObjectId (24 hexadecimal characters). Keys such as `__proto__` are dropped.
 
 ### Errors and an unreachable database
+
 `503` when MongoDB is off, `500` without the cause text when the log write fails, `400` on validation errors (Mongoose error text is never sent to the client), `404`, `405`, `413` for a body that is too large.
 
 ## 5 Likely defence questions

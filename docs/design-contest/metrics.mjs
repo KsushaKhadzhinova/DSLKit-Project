@@ -8,7 +8,11 @@ const puppeteer = require('puppeteer-core');
 const target = process.argv[2];
 const label = process.argv[3] || target;
 const url = /^https?:|^file:/.test(target) ? target : 'file:///' + path.resolve(target).replace(/\\/g, '/');
-const views = [['desktop', 1280, 800], ['tablet', 768, 1024], ['mobile', 375, 812]];
+const views = [
+  ['desktop', 1280, 800],
+  ['tablet', 768, 1024],
+  ['mobile', 375, 812],
+];
 const browser = await puppeteer.launch({ executablePath: 'C:/Program Files (x86)/Google/Chrome/Application/chrome.exe', headless: true });
 const page = await browser.newPage();
 const rows = [];
@@ -20,9 +24,22 @@ for (const [name, w, h] of views) {
     const visible = (el) => {
       const r = el.getBoundingClientRect();
       const s = getComputedStyle(el);
-      return r.width > 0 && r.height > 0 && s.visibility !== 'hidden' && s.display !== 'none' && r.bottom > 0 && r.top < vh && el.closest('[hidden]') === null && !(r.width <= 1 && r.height <= 1);
+      return (
+        r.width > 0 &&
+        r.height > 0 &&
+        s.visibility !== 'hidden' &&
+        s.display !== 'none' &&
+        r.bottom > 0 &&
+        r.top < vh &&
+        el.closest('[hidden]') === null &&
+        !(r.width <= 1 && r.height <= 1)
+      );
     };
-    const interactive = [...document.querySelectorAll('a[href], button, input:not([type=hidden]), select, textarea, summary, [role=button], [role=tab], [role=switch], [tabindex]:not([tabindex="-1"])')].filter(visible);
+    const interactive = [
+      ...document.querySelectorAll(
+        'a[href], button, input:not([type=hidden]), select, textarea, summary, [role=button], [role=tab], [role=switch], [tabindex]:not([tabindex="-1"])',
+      ),
+    ].filter(visible);
     const sizes = interactive.map((el) => el.getBoundingClientRect());
     const small = sizes.filter((r) => Math.min(r.width, r.height) < 44).length;
     const tooSmall24 = sizes.filter((r) => Math.min(r.width, r.height) < 24).length;
@@ -41,7 +58,9 @@ for (const [name, w, h] of views) {
       const n = walker.currentNode;
       if (n.textContent.trim() && n.parentElement && visible(n.parentElement)) fonts.push(parseFloat(getComputedStyle(n.parentElement).fontSize));
     }
-    const noName = interactive.filter((el) => !(el.getAttribute('aria-label') || el.textContent.trim() || el.getAttribute('title') || el.labels?.length)).length;
+    const noName = interactive.filter(
+      (el) => !(el.getAttribute('aria-label') || el.textContent.trim() || el.getAttribute('title') || el.labels?.length),
+    ).length;
     const errMentions = (document.body.innerText.match(/ошиб|error/gi) || []).length;
     return {
       interactiveVisible: interactive.length,

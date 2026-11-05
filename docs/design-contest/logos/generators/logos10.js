@@ -71,8 +71,10 @@ const concepts = [
   },
 ];
 
-const svg = (c, pal, size = 64, cls = '') => `<svg class="${cls}" xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 64 64" role="img" aria-label="${c.name}">${c.mark(pal)}</svg>`;
-const lock = (c, pal) => `<span class="lock" style="color:${pal.t}"><span class="m">${svg(c, pal, 48)}</span><span class="w"><b>DSL</b><b style="color:${pal.a}">K</b><span>it</span></span></span>`;
+const svg = (c, pal, size = 64, cls = '') =>
+  `<svg class="${cls}" xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 64 64" role="img" aria-label="${c.name}">${c.mark(pal)}</svg>`;
+const lock = (c, pal) =>
+  `<span class="lock" style="color:${pal.t}"><span class="m">${svg(c, pal, 48)}</span><span class="w"><b>DSL</b><b style="color:${pal.a}">K</b><span>it</span></span></span>`;
 
 concepts.forEach((c, i) => {
   const n = String(i + 1).padStart(2, '0');
@@ -82,7 +84,25 @@ concepts.forEach((c, i) => {
 });
 
 const swatch = (name, hex) => `<span class="sw"><i style="background:${hex}"></i>${name}<br><small>${hex}</small></span>`;
-const palette = `<section class="card"><h2>Цвета знаков: палитра сайта</h2><p class="idea">Основной синий, акцентный зелёный, предупреждение янтарное, ошибка красная, дополнительный светло-синий и цвет текста. Для тёмной темы взяты их тёмные пары.</p><div class="swr">${[['синий', LIGHT.a], ['зелёный', LIGHT.b], ['янтарный', LIGHT.c], ['красный', LIGHT.d], ['светло-синий', LIGHT.e], ['текст', LIGHT.t]].map(([n, h]) => swatch(n, h)).join('')}</div><div class="swr dk">${[['синий', DARK.a], ['зелёный', DARK.b], ['янтарный', DARK.c], ['красный', DARK.d], ['фон', DARK.e], ['текст', DARK.t]].map(([n, h]) => swatch(n, h)).join('')}</div></section>`;
+const palette = `<section class="card"><h2>Цвета знаков: палитра сайта</h2><p class="idea">Основной синий, акцентный зелёный, предупреждение янтарное, ошибка красная, дополнительный светло-синий и цвет текста. Для тёмной темы взяты их тёмные пары.</p><div class="swr">${[
+  ['синий', LIGHT.a],
+  ['зелёный', LIGHT.b],
+  ['янтарный', LIGHT.c],
+  ['красный', LIGHT.d],
+  ['светло-синий', LIGHT.e],
+  ['текст', LIGHT.t],
+]
+  .map(([n, h]) => swatch(n, h))
+  .join('')}</div><div class="swr dk">${[
+  ['синий', DARK.a],
+  ['зелёный', DARK.b],
+  ['янтарный', DARK.c],
+  ['красный', DARK.d],
+  ['фон', DARK.e],
+  ['текст', DARK.t],
+]
+  .map(([n, h]) => swatch(n, h))
+  .join('')}</div></section>`;
 const card = (c, i) => {
   const n = String(i + 1).padStart(2, '0');
   return `<section class="card"><h2>${n}. ${c.name}</h2><p class="idea">${c.idea}</p>

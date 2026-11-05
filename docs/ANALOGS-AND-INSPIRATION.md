@@ -8,14 +8,14 @@
 
 Ближе всего к идее DSLKit («перетащил блок — поменялся текст»).
 
-| Продукт | Что делает | Ссылка | Статус |
-|---|---|---|---|
-| visimer | Редактор Mermaid: перетаскивание на холсте превращается в минимальную правку текста, один общий undo | https://github.com/inkeep/visimer | проверено |
-| oxdraw | Mermaid + перетаскиваемый веб-редактор, позиции сохраняются в `.mmd` комментариями, привязка к сетке | https://github.com/RohanAdwankar/oxdraw | проверено |
-| DrakoFlow | В браузере, координаты холста пишутся в редактор кода, подсветка строки при наведении | поиск «DrakoFlow diagram» | проверено (адрес не получен) |
-| Visual Paradigm (VPasCode, D2-редактор) | Код и предпросмотр рядом, обратной записи с холста не описано | https://online.visual-paradigm.com | проверено |
-| Eraser | Текст и мышь, DiagramGPT | https://www.eraser.io | в анализе |
-| D2 Playground | Текст слева, схема справа | https://play.d2lang.com | по памяти |
+| Продукт                                 | Что делает                                                                                           | Ссылка                                  | Статус                       |
+| --------------------------------------- | ---------------------------------------------------------------------------------------------------- | --------------------------------------- | ---------------------------- |
+| visimer                                 | Редактор Mermaid: перетаскивание на холсте превращается в минимальную правку текста, один общий undo | https://github.com/inkeep/visimer       | проверено                    |
+| oxdraw                                  | Mermaid + перетаскиваемый веб-редактор, позиции сохраняются в `.mmd` комментариями, привязка к сетке | https://github.com/RohanAdwankar/oxdraw | проверено                    |
+| DrakoFlow                               | В браузере, координаты холста пишутся в редактор кода, подсветка строки при наведении                | поиск «DrakoFlow diagram»               | проверено (адрес не получен) |
+| Visual Paradigm (VPasCode, D2-редактор) | Код и предпросмотр рядом, обратной записи с холста не описано                                        | https://online.visual-paradigm.com      | проверено                    |
+| Eraser                                  | Текст и мышь, DiagramGPT                                                                             | https://www.eraser.io                   | в анализе                    |
+| D2 Playground                           | Текст слева, схема справа                                                                            | https://play.d2lang.com                 | по памяти                    |
 
 ## 2 Диаграммы «как код»
 
@@ -29,13 +29,13 @@ Excalidraw https://excalidraw.com · tldraw https://www.tldraw.com · Miro https
 
 IDEF0 / DFD — самый узкий рынок, то есть пробел для DSLKit:
 
-| Продукт | Заметка | Ссылка | Статус |
-|---|---|---|---|
-| ChatDiagram — IDEF0 Diagram Maker | Текстовое описание → IDEF0, первые 3 диаграммы без регистрации; DFD не найдено | https://www.chatdiagram.com/tool/idef0-diagram-maker | проверено |
-| EdrawMax | Шаблоны IDEF0, перетаскивание, 200+ типов диаграмм | https://www.edrawsoft.com/idef0-solutions.html | проверено |
-| ConceptDraw DIAGRAM | Решение IDEF0 и DFD, настольное, Visio-экспорт | https://www.conceptdraw.com/How-To-Guide/idef0-software | проверено |
-| Ramus Educational | Бесплатный IDEF0/DFD (русская учебная среда) | поиск «Ramus Educational» | по памяти |
-| Business Studio, ARIS Express | Российские/европейские пакеты моделирования | https://www.businessstudio.ru · https://www.ariscommunity.com | по памяти |
+| Продукт                           | Заметка                                                                        | Ссылка                                                        | Статус    |
+| --------------------------------- | ------------------------------------------------------------------------------ | ------------------------------------------------------------- | --------- |
+| ChatDiagram — IDEF0 Diagram Maker | Текстовое описание → IDEF0, первые 3 диаграммы без регистрации; DFD не найдено | https://www.chatdiagram.com/tool/idef0-diagram-maker          | проверено |
+| EdrawMax                          | Шаблоны IDEF0, перетаскивание, 200+ типов диаграмм                             | https://www.edrawsoft.com/idef0-solutions.html                | проверено |
+| ConceptDraw DIAGRAM               | Решение IDEF0 и DFD, настольное, Visio-экспорт                                 | https://www.conceptdraw.com/How-To-Guide/idef0-software       | проверено |
+| Ramus Educational                 | Бесплатный IDEF0/DFD (русская учебная среда)                                   | поиск «Ramus Educational»                                     | по памяти |
+| Business Studio, ARIS Express     | Российские/европейские пакеты моделирования                                    | https://www.businessstudio.ru · https://www.ariscommunity.com | по памяти |
 
 Остальные нотации: bpmn.io https://bpmn.io · Camunda Modeler https://camunda.com/download/modeler · Signavio https://www.signavio.com · Bizagi https://www.bizagi.com · ARIS https://www.ariscommunity.com · Enterprise Architect https://sparxsystems.com · StarUML https://staruml.io · Archi https://www.archimatetool.com · DrawSQL https://drawsql.app · XMind https://xmind.app · MindMeister https://www.mindmeister.com · Gaphor https://gaphor.org (по памяти).
 

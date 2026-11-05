@@ -6,16 +6,16 @@ Branch `pz23`, folder `part-2/pz-03-routing`. Russian version: `20-PZ3-ROUTING.m
 
 A site of pages: home, a catalogue of diagram templates with search and sorting, a template page by number, "About", login, a personal dashboard and an admin section. The dashboard is open only to a "signed-in" user (sign-in is imitated, no password is asked), the admin section only to the admin role (the name `admin` gives that role). An unknown path shows a 404 page, a forbidden section a 403 page.
 
-| Path | Page | Access |
-| --- | --- | --- |
-| `/` | home | everyone |
-| `/catalog` | catalogue; the filter is in the address `?q=...&sort=...` | everyone |
-| `/catalog/:id` | a template by number (a not-found page if missing) | everyone |
-| `/about` | about | everyone |
-| `/login`, `/logout` | sign in and out | everyone |
-| `/dashboard` | personal dashboard | signed in |
-| `/admin` | administrator | admin role (else 403) |
-| `*` | page not found | everyone |
+| Path                | Page                                                      | Access                |
+| ------------------- | --------------------------------------------------------- | --------------------- |
+| `/`                 | home                                                      | everyone              |
+| `/catalog`          | catalogue; the filter is in the address `?q=...&sort=...` | everyone              |
+| `/catalog/:id`      | a template by number (a not-found page if missing)        | everyone              |
+| `/about`            | about                                                     | everyone              |
+| `/login`, `/logout` | sign in and out                                           | everyone              |
+| `/dashboard`        | personal dashboard                                        | signed in             |
+| `/admin`            | administrator                                             | admin role (else 403) |
+| `*`                 | page not found                                            | everyone              |
 
 An important caveat: the sign-in and role checks in the browser only hide pages in the interface and **do not protect data**. A real check is possible only on a server (as in lab 3).
 
@@ -59,32 +59,40 @@ Wrapper routes (`Layout`, `PrivateRoute`, `RoleRoute`) have no path of their own
 ## 4 Main parts explained
 
 ### The route table (`App.jsx`)
+
 - `<Route index>` is the parent's home page; `path="catalog/:id"` is a dynamic segment, its value is read with the `useParams()` hook.
 - `path="*"` catches everything unmatched (the 404 page). The router picks the most specific match, not the first in order, so `*` can be written anywhere.
 - `Catalog`, `Dashboard` and `Admin` are imported with `lazy(() => import(...))`: their code downloads on the first visit, and the `Suspense` in `Layout` shows a spinner while it loads (question 21).
 - In `main.jsx` the `BrowserRouter` sits outside `App`: tests replace it with `MemoryRouter`, so `App` itself does not depend on a particular router.
 
 ### The menu (`Layout.jsx`)
+
 `NavLink` differs from `Link` in that it knows whether the link is active: it adds an `active` class and `aria-current="page"`. The home link has `end`, otherwise "Home" would be active on every page (the address `/` begins every address). A double click on "Sign in" and "Sign out" is swallowed so the second click does not land on the new link.
 
 ### Protected route and return (`PrivateRoute.jsx`, `Login`)
+
 `PrivateRoute` checks `isAuth`. It sends a guest through `<Navigate to="/login" replace state={{ from }} />`. `replace` replaces the history entry, so the "Back" button does not return to the closed page and does not create a loop. The `state` holds the whole requested address (path, query and hash), and it is **not visible in the address bar**. After sign-in, `Login` reads `location.state.from` and calls `navigate(target, { replace: true })`.
 
 The return address is checked by `safeReturnPath`: it must start with a single `/`; `//host`, `https://host`, `/\` and the login page itself are rejected and replaced by the dashboard. Otherwise a planted address could take the user to a foreign site (an open redirect).
 
 ### Roles (`RoleRoute.jsx`)
+
 `RoleRoute` compares `auth.role` with the required role and renders either `<Outlet />` or the 403 page. It sits inside `PrivateRoute`, so a guest first goes to sign-in, not to a 403. The role in the work is a convention: `roleFor(name)` gives `admin` for the name `admin` in any letter case and `user` to everyone else.
 
 ### Sign-in state (`auth.jsx`)
+
 The session lives in `useState` and in `localStorage`; the value is wrapped in `useMemo`, and `login` and `logout` in `useCallback`, so the context does not change needlessly. A stored flag is accepted only together with a valid name: a hand-written `true` opens nothing. The `storage` event synchronizes sign-out between tabs. It is the same provider-context technique as in practical 4.
 
 ### The catalogue filter in the address (`Catalog.jsx`)
+
 `useSearchParams()` returns the query parameters and a function to change them, like `useState`. The filter and sorting live in the address (`/catalog?q=BPMN&sort=title`), so the result can be shared as a link and survives a reload. A value from the address is cut to the limit, a whitespace-only query and an unknown sort are ignored; `{ replace: true }` does not clutter the history on every keystroke.
 
 ### Breadcrumbs (`Breadcrumbs.jsx`)
+
 `buildCrumbs` splits `pathname` by `/` and builds the chain "Home / Catalogue / Template name". For an unknown segment (the 404 page, a missing number) no chain is built at all, so a wrong path is never shown.
 
 ### Error pages
+
 The 404 page sits on `path="*"`; `RoleRoute` renders the 403; the `ErrorBoundary` in `main.jsx` catches rendering failures. `usePageTitle` sets the tab title of every page.
 
 ## 5 Likely defence questions

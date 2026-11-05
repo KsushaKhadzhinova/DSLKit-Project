@@ -48,6 +48,7 @@ sequenceDiagram
 ## 4 Main parts explained
 
 ### API service (`api.js`)
+
 - `axios.create({ baseURL, timeout })`: a shared address from `VITE_API_URL` and an 8-second timeout so a request does not hang forever.
 - The request interceptor adds `Authorization: Bearer <token>` to every request, so components know nothing about the token.
 - The response interceptor: if the server answers 401 while a token exists, the token is removed and an `auth:logout` event is dispatched; the app shows the login form. An expired token never leaves the user in front of a broken list.
@@ -55,13 +56,16 @@ sequenceDiagram
 - `errorMessage(error)`: if there is a response, it takes the server's text and fields; with no response: "Server did not answer in time" (`ECONNABORTED`) or "Server unavailable".
 
 ### Loading the list (`usePagedList`)
+
 - `useEffect` depends on `search` and an attempt counter. When the search text changes and on unmount, `AbortController` cancels the previous request, so the answer to an old search never reaches the new list (a request race).
 - The response is checked: if it is not an array (HTML from a proxy, an empty body), an error is shown and the list does not break.
 - `X-Total-Count` is read from the header: it tells whether a next page exists. A value that cannot be read means "unknown", and the "Load more" button is not shown.
 - "Load more" (`loadMore`) appends the next page with `offset = fetched`; a second click while loading is ignored, and records already shown are not duplicated.
 
 ### Optimistic updates (`useDiagrams`)
+
 The common technique: change the screen first, ask the server, and roll back on refusal.
+
 - `add`: the record appears at once with a temporary id `temp-N` and a `pending` flag; on success the real record from the server replaces it, on error it is removed and the user sees a message.
 - `remove`: the record disappears at once; on refusal it returns to its old place, unless the answer is 404 (already deleted, nothing to restore).
 - `update`: sends `PUT` with all fields (PUT replaces the whole record); on refusal the previous value is restored.
@@ -69,9 +73,11 @@ The common technique: change the screen first, ask the server, and roll back on 
 - "Saving on the server…" is the sum of records in flight and records with `pending`.
 
 ### Search debounce
+
 `useDebouncedValue(search.trim(), 400)` returns the value only after a pause in typing, so a request is not sent per letter. The principle is the same as the autosave in lab 4: a timer and cleanup.
 
 ### CORS
+
 The lab 3 server allows exactly one client address (`CORS_ORIGIN`, default `http://localhost:5178`), a wildcard is forbidden, and the answer to the `OPTIONS` preflight needs no token.
 
 ## 5 Likely defence questions
