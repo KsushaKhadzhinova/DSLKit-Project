@@ -1,0 +1,624 @@
+# Практическое занятие №2. Проектирование и реализация REST API
+
+## 1 Цель работы
+
+Освоить принципы проектирования RESTful API, реализовать эндпоинты для операций CRUD и дополнительных операций, добавить проверку входных данных и описать API на примере проекта DSLKit, веб-редактора диаграмм как кода, тематика которого соответствует направлению SaaS и будущему курсовому проекту.
+
+## 2 Краткие теоретические сведения
+
+**Ресурсы и методы.** REST описывает предметную область как набор ресурсов с адресами во множественном числе, например `/api/diagrams`. Операции выражаются методами HTTP: `GET` читает, `POST` создаёт, `PUT` заменяет запись целиком, `PATCH` меняет часть полей, `DELETE` удаляет. Методы `GET`, `PUT` и `DELETE` идемпотентны: повтор запроса не меняет результат.
+
+**Коды состояния.** Код 200 означает успех, 201 создание с заголовком `Location`, 204 успех без тела, 400 ошибку клиента в запросе, 404 отсутствие записи, 409 конфликт с текущим состоянием данных, 413 слишком большое тело, 500 сбой сервера.
+
+**Проверка данных.** Сервер не доверяет клиенту: обязательные поля, типы, длина и допустимые значения проверяются до записи, а ответ с ошибкой имеет единый формат.
+
+## 3 Ход работы
+
+### 3.1 Проектирование API
+
+Выбраны три связанных ресурса: пользователи `users`, проекты `projects` и диаграммы `diagrams`. Пользователь владеет проектами, проект содержит диаграммы. Поля и правила проверки сведены в таблице 1.
+
+Таблица 1 – Ресурсы и поля API
+
+| Ресурс     | Поля                                                                      |
+| ---------- | ------------------------------------------------------------------------- |
+| `users`    | `name`, `email`, `role` (`owner`, `editor`, `viewer`)                     |
+| `projects` | `name`, `description`, `ownerId`                                          |
+| `diagrams` | `title`, `notation`, `code`, `projectId`, `status` (`draft`, `published`) |
+
+У каждой записи есть служебные поля `id` и `createdAt`, которые клиент изменить не может. Данные лежат в массивах в памяти, как требует условие, поэтому после перезапуска сервера возвращаются начальные записи.
+
+### 3.2 Эндпоинты
+
+Для каждого ресурса реализованы шесть стандартных операций, а для диаграмм и проектов три дополнительные. Все адреса приведены в таблице 2. Сборка приложения показана в приложении А, общая логика ресурсов в приложении Б, а проверка полей в приложении В.
+
+Таблица 2 – Эндпоинты API
+
+| Метод и адрес                      | Назначение                                           | Успех |
+| ---------------------------------- | ---------------------------------------------------- | ----- |
+| `GET /api/{ресурс}`                | Список с фильтром, поиском, сортировкой и страницами | 200   |
+| `GET /api/{ресурс}/:id`            | Одна запись                                          | 200   |
+| `POST /api/{ресурс}`               | Создание                                             | 201   |
+| `PUT /api/{ресурс}/:id`            | Полная замена                                        | 200   |
+| `PATCH /api/{ресурс}/:id`          | Частичное изменение                                  | 200   |
+| `DELETE /api/{ресурс}/:id`         | Удаление                                             | 204   |
+| `GET /api/users/:id/projects`      | Проекты одного пользователя                          | 200   |
+| `GET /api/projects/:id/diagrams`   | Диаграммы одного проекта                             | 200   |
+| `POST /api/diagrams/:id/publish`   | Публикация, повтор ничего не меняет                  | 200   |
+| `POST /api/diagrams/:id/duplicate` | Копия диаграммы в статусе черновика                  | 201   |
+
+Примеры тела запроса и ожидаемого ответа для основных операций приведены в таблице 3. Данные взяты из `API.md` и проверены на запущенном сервере (порт 3962). Поле `createdAt` сокращено до `…`, а `id` зависит от числа уже созданных записей.
+
+Таблица 3 – Примеры запросов и ответов
+
+| Запрос | Тело запроса | Ожидаемый ответ |
+| ------ | ------------ | --------------- |
+| `POST /api/users` | `{"name":"Anna","email":"anna@example.com","role":"owner"}` | 201, `{"id":3,"name":"Anna","email":"anna@example.com","role":"owner","createdAt":"…"}` |
+| `POST /api/diagrams` | `{"title":"Billing schema","notation":"ERD","code":"invoice -> payment","projectId":1}` | 201, `{"id":4,"title":"Billing schema","notation":"ERD","code":"invoice -> payment","projectId":1,"status":"draft","createdAt":"…"}` |
+| `GET /api/diagrams?q=billing&sort=-title` | нет | 200, `{"data":[{…},{…}],"meta":{"page":1,"limit":20,"total":2}}` |
+| `PATCH /api/users/1` | `{"role":"editor"}` | 200, пользователь с `"role":"editor"` |
+| `POST /api/diagrams/1/publish` | нет | 200, диаграмма с `"status":"published"` |
+| `POST /api/diagrams/1/duplicate` | нет | 201, копия с `"title":"Checkout sequence (copy)"` и `"status":"draft"` |
+| `DELETE /api/diagrams/2` | нет | 204, тела нет |
+| `DELETE /api/users/1` | нет | 409, `{"error":{"code":"conflict","message":"User still owns projects"}}` |
+| `POST /api/users` | `{"name":"","email":"x"}` | 400, `{"error":{"code":"validation_failed","message":"Request body is invalid","details":[{"field":"name",…},{"field":"email",…}]}}` |
+
+Списки принимают параметры `page` и `limit` для страниц, `sort` для сортировки (знак минус означает убывание), `q` для поиска по текстовым полям и любое имя поля для точного фильтра. Ответ списка содержит массив `data` и объект `meta` с общим числом записей. Маршрут `GET /api/users/:id/projects` отдаёт проекты одного пользователя с теми же параметрами списка, а для неизвестного пользователя отвечает 404. Подробные примеры запросов и ответов собраны в файле `API.md`.
+
+### 3.3 Проверка входных данных и ошибки
+
+Схема каждого ресурса задаёт тип, обязательность, предельную длину, список допустимых значений и значение по умолчанию. Проверка возвращает все найденные проблемы сразу, отвергает неизвестные поля и проверяет, что `ownerId` и `projectId` указывают на существующие записи. Метод `PATCH` проверяет только присланные поля. Удаление пользователя с проектами и проекта с диаграммами отклоняется кодом 409. Все ошибки, включая неверный JSON, неизвестный адрес и неожиданный сбой, возвращаются в одном формате с полями `code` и `message`. Листинги приведены в приложениях А и Б.
+
+### 3.4 Проверка
+
+Автоматические тесты запускают сервер на свободном порту и проверяют каждый метод, коды ответов, фильтры, сортировку, страницы, ошибки проверки, связи между ресурсами, дополнительные операции и ответ 500. Покрытие строк и функций равно 100 процентам, покрытие ветвей выше 98 процентов. Команда запуска: `npm test` в каталоге проекта. Ручную проверку в Postman или Insomnia можно выполнить запросами из `API.md`.
+
+Сервер запущен командой `npm start`, сообщение консоли показано на рисунке 1.
+
+![Консоль сервера](figures/01-server-start.png)
+
+Рисунок 1 – Сообщение консоли после запуска сервера на порту 3000 (вывод процесса, снятый как текст)
+
+Браузер не отправляет запросы `POST`, `PUT`, `PATCH` и `DELETE` из адресной строки, поэтому такие запросы отправил скрипт `shots/shots.mjs`, а настоящие запросы и ответы сервера выведены на странице. Создание пользователя, проекта и диаграммы показано на рисунке 2.
+
+![Создание ресурсов](figures/08-post-create.png)
+
+Рисунок 2 – Запросы POST и ответы 201 для пользователя, проекта и диаграммы, записанные скриптом (не окно Postman)
+
+Запрос `GET /api/users` открыт в браузере по адресу `http://localhost:3000/api/users`, ответ показан на рисунке 3.
+
+![Список пользователей](figures/02-users-list.png)
+
+Рисунок 3 – Ответ GET /api/users в окне браузера: массив пользователей
+
+Одна запись по адресу `http://localhost:3000/api/users/1` показана на рисунке 4.
+
+![Один пользователь](figures/03-user-one.png)
+
+Рисунок 4 – Ответ GET /api/users/1 в окне браузера: объект одного пользователя
+
+Запрос несуществующей записи по адресу `http://localhost:3000/api/users/999` даёт ошибку, показанную на рисунке 5.
+
+![Ответ 404](figures/04-user-404.png)
+
+Рисунок 5 – Ответ GET /api/users/999 в окне браузера: JSON с кодом not_found (код 404)
+
+Неверный номер в адресе `http://localhost:3000/api/users/abc` отклоняется, как на рисунке 6.
+
+![Ответ 400](figures/05-user-400.png)
+
+Рисунок 6 – Ответ GET /api/users/abc в окне браузера: JSON с сообщением о неверном номере (код 400)
+
+Поиск, сортировка и страницы работают через параметры адреса `?q=billing&sort=-title&page=1&limit=10`, результат показан на рисунке 7.
+
+![Поиск и сортировка](figures/06-diagrams-search.png)
+
+Рисунок 7 – Ответ GET /api/diagrams с параметрами q, sort, page и limit в окне браузера
+
+Дополнительный маршрут `GET /api/users/1/projects` возвращает проекты одного пользователя, как на рисунке 8.
+
+![Проекты пользователя](figures/07-user-projects.png)
+
+Рисунок 8 – Ответ GET /api/users/1/projects в окне браузера: проекты пользователя
+
+Ошибки проверки данных, в том числе неизвестное поле и несуществующий проект, показаны на рисунке 9.
+
+![Неверные данные](figures/09-validation-400.png)
+
+Рисунок 9 – Ответы 400 с перечнем проблем полей, записанные скриптом (не окно Postman)
+
+Частичное изменение и полная замена записи показаны на рисунке 10.
+
+![Запросы PATCH и PUT](figures/10-patch-put.png)
+
+Рисунок 10 – Запросы PATCH и PUT и ответы сервера, записанные скриптом (не окно Postman)
+
+Дополнительные операции с диаграммой показаны на рисунке 11: повторная публикация ничего не меняет, копия создаётся черновиком.
+
+![Публикация и копирование](figures/11-publish-duplicate.png)
+
+Рисунок 11 – Запросы publish и duplicate и ответы сервера, записанные скриптом (не окно Postman)
+
+Удаление пользователя с проектами отклоняется, а удаление диаграммы проходит, как на рисунке 12.
+
+![Удаление](figures/12-delete-409-204.png)
+
+Рисунок 12 – Запросы DELETE: ответ 409 для пользователя с проектами и ответ 204 для диаграммы, записанные скриптом (не окно Postman)
+
+Результат команды `npm test` с числом тестов и покрытием кода показан на рисунке 13.
+
+![Результат тестов](figures/13-tests.png)
+
+Рисунок 13 – Конец вывода команды npm test: число пройденных тестов и таблица покрытия (вывод процесса, снятый как текст)
+
+### 3.5 Ответы на контрольные вопросы
+
+25. Что такое «межресурсные связи» и как их реализовать в REST API (например, получить заказы пользователя)?
+
+    Это связи между записями разных ресурсов, например проект принадлежит пользователю, а диаграмма проекту. В API связь выражают тремя способами. Первый способ: поле-ссылка в записи, в работе это `ownerId` у проекта и `projectId` у диаграммы, и сервер проверяет, что такая запись существует. Второй способ: вложенный маршрут для чтения, например `GET /api/users/:id/projects` отдаёт проекты пользователя, а `GET /api/projects/:id/diagrams` диаграммы проекта. Третий способ: фильтр списка, то же самое даёт `GET /api/projects?ownerId=1`. Вложенность стараются держать не глубже двух уровней, а имена ресурсов пишут во множественном числе. Связь защищает и удаление: пользователь с проектами и проект с диаграммами не удаляются, ответ 409.
+
+26. Какие статус коды используются для редиректов (3xx)? Нужны ли они в REST API?
+
+    Код 301 означает постоянный перенос адреса, код 302 временный, коды 307 и 308 делают то же, но сохраняют метод запроса, код 303 отправляет клиента к другому адресу методом `GET`, а код 304 сообщает, что кэшированный ответ ещё актуален. В Express редирект делает `res.redirect(status, url)`. В REST API редиректы нужны редко: после `POST` возвращают 201 с заголовком `Location` и самой записью, а не перенаправляют клиента. Применяют их при переезде адреса или версии API и код 304 при условных запросах с `ETag`. В этой работе редиректов нет.
+
+27. Как в документации API указать возможные коды ошибок и их описание?
+
+    В OpenAPI у каждой операции в разделе `responses` перечисляют коды, например `400`, `404` и `409`, и для каждого дают описание и схему тела. Общую схему ошибки описывают один раз в `components` и подключают ссылкой. В работе документация лежит в файле `API.md`: в таблице каждого маршрута есть столбец с возможными кодами ошибок, а раздел «Errors» показывает единый вид ответа `{ "error": { "code", "message", "details" } }` и перечисляет значения `code` с кодами состояния. Так клиент знает, какие ошибки ждать и как их разобрать.
+
+### 3.6 Описание OpenAPI
+
+Маршрут `GET /api/openapi.json` отдаёт описание API в формате OpenAPI 3.0. Оно строится из тех же схем, которые проверяют запросы, поэтому длины полей, списки допустимых значений и обязательные поля в документе совпадают с кодом. Поле `email` не предлагается как фильтр списка пользователей. Документ можно открыть в Swagger UI или импортировать в Postman.
+
+Фрагмент документации API показан на рисунке 14.
+
+![Документация API](figures/14-api-docs.png)
+
+Рисунок 14 – Фрагмент файла `API.md` и ответа `GET /api/openapi.json` (текст, снятый скриптом `shots/docs-shot.mjs`, не окно Swagger UI)
+
+Окно Postman в этой работе не снималось: настоящие снимки окна программы здесь получить нельзя, поэтому запросы на рисунках 2, 9–12 отправлены скриптом, и это указано в подписях. Готовая коллекция `postman_collection.json` и файл `requests.http` позволяют повторить проверку и сделать такие снимки вручную.
+
+## Заключение
+
+Для проекта DSLKit спроектирован и реализован REST API с тремя связанными ресурсами. Он поддерживает операции CRUD, фильтрацию, поиск, сортировку, страницы, публикацию и копирование диаграмм, проверяет входные данные и связи между записями и отвечает ошибками единого формата. Описание API и примеры запросов собраны в `API.md`, автоматические тесты покрывают весь код. Остаётся приложить снимки запросов из Postman и фрагменты документации.
+
+## Приложение А (обязательное) Листинг файла app.js
+
+```js
+import { readFileSync } from 'node:fs';
+import express from 'express';
+import { ApiError, errorBody, notFound } from './errors.js';
+import { createResourceRouter, listItems, methodsOnly, parseId } from './resource.js';
+import { logSafe, rateLimit, securityHeaders } from './security.js';
+import { buildOpenApi } from './openapi.js';
+import { createStores } from './store.js';
+import { normalizeEmail } from './validation.js';
+
+// All sizes live in limits.json, not in the code.
+export const LIMITS = JSON.parse(readFileSync(new URL('../limits.json', import.meta.url), 'utf8'));
+
+export const NOTATIONS = ['UML', 'BPMN', 'ERD', 'DFD', 'IDEF0', 'Petri'];
+
+const ID = { type: 'integer', required: true, min: 1, max: LIMITS.idMax };
+
+// Local part: ASCII, no leading/trailing/doubled dot. Domain: one or more dot-separated labels, no leading,
+// trailing or doubled hyphen or dot. Every alternation below is a single, disjoint character class repeated
+// with its own quantifier, so there is no ambiguity for the engine to backtrack over; matching stays linear
+// in the length of the string even for a deliberately pathological input.
+const LOCAL_PART = "[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+)*";
+const DOMAIN_LABEL = '[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?';
+const EMAIL_PATTERN = new RegExp(`^${LOCAL_PART}@${DOMAIN_LABEL}(?:\\.${DOMAIN_LABEL})+$`);
+
+export const schemas = {
+  users: {
+    name: { type: 'string', required: true, max: LIMITS.userName },
+    email: { type: 'string', required: true, max: LIMITS.userEmail, pattern: EMAIL_PATTERN, transform: normalizeEmail },
+    role: { type: 'string', enum: ['owner', 'editor', 'viewer'], default: 'viewer' },
+  },
+  projects: {
+    name: { type: 'string', required: true, max: LIMITS.projectName },
+    description: { type: 'string', max: LIMITS.projectDescription, default: '', multiline: true },
+    ownerId: ID,
+  },
+  diagrams: {
+    title: { type: 'string', required: true, max: LIMITS.diagramTitle },
+    notation: { type: 'string', enum: NOTATIONS, required: true },
+    code: { type: 'string', max: LIMITS.diagramCode, default: '', multiline: true },
+    projectId: ID,
+    status: { type: 'string', enum: ['draft', 'published'], default: 'draft' },
+  },
+};
+
+const CLIENT_ERRORS = {
+  400: ['bad_request', 'The request URL or headers are malformed'],
+  415: ['unsupported_media_type', 'The request encoding or charset is not supported'],
+};
+
+const missingReference = (field, collection, value) =>
+  value !== undefined && !collection.find(value) ? [{ field, message: `${field} refers to a record that does not exist` }] : [];
+
+const conflict = (message) => new ApiError(409, 'conflict', message);
+
+// Methods that normally send no body; a body on one of these is simply not read rather than being a reason
+// to reject the request (a non-JSON Content-Type is only an error on a request that is meant to carry JSON).
+const BODYLESS_METHODS = new Set(['GET', 'HEAD', 'DELETE']);
+
+export const createApp = ({
+  stores = createStores(undefined, LIMITS.maxRecordsPerCollection),
+  writeError = console.error,
+  limit = { windowMs: LIMITS.rateWindowMs, max: LIMITS.rateMax, maxClients: LIMITS.rateMaxClients },
+  now = Date.now,
+} = {}) => {
+  const { users, projects, diagrams } = stores;
+  const app = express();
+  app.disable('x-powered-by');
+  app.use(securityHeaders);
+  // Liveness probe, before the rate limit so monitoring never uses up the quota.
+  app.get('/health', (req, res) => res.json({ status: 'ok' }));
+  // Refused before the body is read, so a flood costs little.
+  app.use(rateLimit({ ...limit, now }));
+  // This API answers only JSON; a client that explicitly asks for something else gets 406 instead of JSON it
+  // did not ask for. A request with no Accept header, or "*/*", is always welcome.
+  app.use((req, res, next) => {
+    const accept = req.headers.accept;
+    if (!accept) return next();
+    const acceptsJson = accept.split(',').some((part) => {
+      const type = part.split(';')[0].trim().toLowerCase();
+      return type === '*/*' || type === 'application/*' || type === 'application/json';
+    });
+    if (!acceptsJson) return next(new ApiError(406, 'not_acceptable', 'This API only returns application/json'));
+    return next();
+  });
+  // A declared charset other than UTF-8 is rejected up front with 415, instead of being read as UTF-8 anyway
+  // and failing JSON parsing later with the unrelated 400 invalid_json.
+  app.use((req, res, next) => {
+    const match = /charset=("?)([^;"]+)\1/i.exec(req.headers['content-type'] ?? '');
+    if (match && match[2].trim().toLowerCase() !== 'utf-8') return next(new ApiError(415, 'unsupported_media_type', 'Only charset=utf-8 is supported'));
+    return next();
+  });
+  app.use(express.json({ limit: LIMITS.bodyBytes }));
+  // A body that express.json did not read (another Content-Type) is refused with 415, not taken as a missing
+  // body - but only for a method that is meant to carry one; GET/HEAD/DELETE never need a JSON body, so any
+  // body they do carry is simply ignored instead of failing the request over an unrelated Content-Type.
+  app.use((req, res, next) => {
+    if (BODYLESS_METHODS.has(req.method)) return next();
+    const hasBody = Number(req.headers['content-length'] ?? 0) > 0 || req.headers['transfer-encoding'] !== undefined;
+    if (hasBody && req.body === undefined) return next(new ApiError(415, 'unsupported_media_type', 'Content-Type must be application/json'));
+    return next();
+  });
+
+  const api = express.Router();
+  // The machine-readable description of the API, built from the schemas above.
+  api.get('/openapi.json', (req, res) => res.json(buildOpenApi(schemas, { hidden: { users: ['email'] } })));
+  api.all('/openapi.json', methodsOnly('GET'));
+  // Link between resources: the projects that belong to one user. It is mounted before the standard router so it wins over /:id.
+  api.get('/users/:id/projects', (req, res) => {
+    const user = users.find(parseId(req.params.id));
+    if (!user) throw notFound('User');
+    res.json(
+      listItems(
+        projects.all().filter((p) => p.ownerId === user.id),
+        schemas.projects,
+        req.query,
+      ),
+    );
+  });
+  api.all('/users/:id/projects', methodsOnly('GET'));
+  api.use(
+    '/users',
+    createResourceRouter({
+      label: 'User',
+      collection: users,
+      schema: schemas.users,
+      // The email is personal data: the list shows id, name and role, the email only comes with one user.
+      hiddenInList: ['email'],
+      hooks: {
+        check: (data, current) => {
+          const taken = data.email !== undefined && users.all().some((user) => user !== current && user.email.toLowerCase() === data.email.toLowerCase());
+          if (taken) throw conflict('A user with this email already exists');
+          return [];
+        },
+        beforeRemove: (user) => {
+          if (projects.all().some((project) => project.ownerId === user.id)) throw conflict('User still owns projects');
+        },
+      },
+    }),
+  );
+
+  // Extra operations are mounted before the standard routers so they win over /:id.
+  api.get('/projects/:id/diagrams', (req, res) => {
+    const project = projects.find(parseId(req.params.id));
+    if (!project) throw notFound('Project');
+    res.json(
+      listItems(
+        diagrams.all().filter((d) => d.projectId === project.id),
+        schemas.diagrams,
+        req.query,
+      ),
+    );
+  });
+  api.all('/projects/:id/diagrams', methodsOnly('GET'));
+  api.use(
+    '/projects',
+    createResourceRouter({
+      label: 'Project',
+      collection: projects,
+      schema: schemas.projects,
+      hooks: {
+        check: (data) => missingReference('ownerId', users, data.ownerId),
+        beforeRemove: (project) => {
+          if (diagrams.all().some((diagram) => diagram.projectId === project.id)) throw conflict('Project still has diagrams');
+        },
+      },
+    }),
+  );
+
+  const diagram = (req) => {
+    const found = diagrams.find(parseId(req.params.id));
+    if (!found) throw notFound('Diagram');
+    return found;
+  };
+  api.post('/diagrams/:id/publish', (req, res) => res.json(diagrams.update(diagram(req), { status: 'published' })));
+  api.post('/diagrams/:id/duplicate', (req, res) => {
+    const { id, createdAt, ...rest } = diagram(req);
+    // Cut by code points, not by UTF-16 units: slicing a surrogate pair in half would store (and re-serve) a
+    // lone surrogate, which is not valid Unicode text.
+    const title = [...`${rest.title} (copy)`].slice(0, LIMITS.diagramTitle).join('');
+    res.status(201).json(diagrams.create({ ...rest, title, status: 'draft' }));
+  });
+  api.all('/diagrams/:id/publish', methodsOnly('POST'));
+  api.all('/diagrams/:id/duplicate', methodsOnly('POST'));
+  api.use(
+    '/diagrams',
+    createResourceRouter({
+      label: 'Diagram',
+      collection: diagrams,
+      schema: schemas.diagrams,
+      hooks: { check: (data) => missingReference('projectId', projects, data.projectId) },
+    }),
+  );
+
+  app.use('/api', api);
+  app.use((req, res, next) => next(notFound('Route')));
+
+  // Four parameters: the single place where every error becomes JSON.
+  app.use((err, req, res, _next) => {
+    if (err instanceof ApiError) return res.status(err.status).json(errorBody(err));
+    if (err.type === 'entity.parse.failed') return res.status(400).json(errorBody(new ApiError(400, 'invalid_json', 'Request body is not valid JSON')));
+    if (err.type === 'entity.too.large') return res.status(413).json(errorBody(new ApiError(413, 'payload_too_large', 'Request body is too large')));
+    // Errors of the framework and of the body parser that blame the client keep their 4xx status: a broken
+    // percent escape in the URL is 400 and an unsupported Content-Encoding is 415, neither is a server failure.
+    const status = err.status ?? err.statusCode;
+    if (status >= 400 && status < 500) {
+      const known = CLIENT_ERRORS[status] ?? ['bad_request', 'The request cannot be processed'];
+      return res.status(status).json(errorBody(new ApiError(status, known[0], known[1])));
+    }
+    writeError(`[error] ${logSafe(req.method)} ${logSafe(req.originalUrl)}`, err);
+    return res.status(500).json(errorBody(new ApiError(500, 'internal_error', 'Internal server error')));
+  });
+  return app;
+};
+```
+
+## Приложение Б (обязательное) Листинг файла resource.js
+
+```js
+import { Router } from 'express';
+import { ApiError, notFound, validationFailed } from './errors.js';
+import { applyDefaults, trimStrings, validate } from './validation.js';
+
+// Answers 405 with an Allow header for methods a known path does not support; OPTIONS lists them.
+export const methodsOnly = (...methods) => {
+  const allow = [...methods, ...(methods.includes('GET') ? ['HEAD'] : []), 'OPTIONS'].join(', ');
+  return (req, res, next) => {
+    res.set('Allow', allow);
+    if (req.method === 'OPTIONS') return res.status(204).end();
+    return next(new ApiError(405, 'method_not_allowed', `${req.method} is not allowed here, use: ${allow}`));
+  };
+};
+
+const DIGITS = /^[1-9]\d{0,14}$/;
+
+export const parseId = (raw) => {
+  if (!DIGITS.test(String(raw))) throw new ApiError(400, 'invalid_id', 'id must be a positive integer');
+  return Number(raw);
+};
+
+// The largest integer `DIGITS` can ever match (15 nines): the real ceiling for page/limit/id, below
+// Number.MAX_SAFE_INTEGER. Error messages quote this instead of a bound that is never actually enforced.
+const MAX_QUERY_INT = 999999999999999;
+
+const scalar = (raw, name) => {
+  if (Array.isArray(raw)) throw new ApiError(400, 'invalid_query', `${name} must not be repeated`);
+  return raw;
+};
+
+const parsePositive = (raw, name, fallback, max = MAX_QUERY_INT) => {
+  if (raw === undefined) return fallback;
+  if (!DIGITS.test(String(scalar(raw, name))) || Number(raw) > max) throw new ApiError(400, 'invalid_query', `${name} must be an integer from 1 to ${max}`);
+  return Number(raw);
+};
+
+// Filtering by any schema field (?status=draft), search (?q=text), sorting (?sort=-title), pagination (?page=2&limit=10).
+// hidden: fields that never appear in a list; filtering, searching or sorting by one is silently a no-op
+// (otherwise ?email= or ?sort=email would reveal it) rather than an error, so it still cannot be used as an oracle.
+// Any OTHER query key that is not a schema field, page, limit, sort or q is unknown and answers 400, instead of
+// being read and then quietly ignored.
+export const listItems = (items, schema, query, hidden = []) => {
+  const known = new Set(['page', 'limit', 'sort', 'q', ...Object.keys(schema)]);
+  for (const key of Object.keys(query)) {
+    if (!known.has(key)) throw new ApiError(400, 'invalid_query', `${key} is not a known query parameter`);
+  }
+  const page = parsePositive(query.page, 'page', 1);
+  const limit = parsePositive(query.limit, 'limit', 20, 100);
+  let result = items.filter((item) =>
+    Object.keys(schema).every((field) => {
+      if (hidden.includes(field) || query[field] === undefined) return true;
+      const raw = scalar(query[field], field);
+      const rule = schema[field];
+      if (rule.type === 'integer' && !DIGITS.test(String(raw))) throw new ApiError(400, 'invalid_query', `${field} must be a positive integer`);
+      if (rule.enum && !rule.enum.includes(String(raw))) throw new ApiError(400, 'invalid_query', `${field} must be one of: ${rule.enum.join(', ')}`);
+      return String(item[field]) === String(raw);
+    }),
+  );
+  if (query.q !== undefined) {
+    const needle = String(scalar(query.q, 'q')).toLowerCase();
+    const textFields = Object.keys(schema).filter((field) => schema[field].type === 'string' && !hidden.includes(field));
+    result = result.filter((item) =>
+      textFields.some((field) =>
+        String(item[field] ?? '')
+          .toLowerCase()
+          .includes(needle),
+      ),
+    );
+  }
+  if (query.sort !== undefined) {
+    const raw = String(scalar(query.sort, 'sort'));
+    const desc = raw.startsWith('-');
+    const field = raw.replace(/^-/, '');
+    if (hidden.includes(field) || (field !== 'id' && field !== 'createdAt' && !Object.hasOwn(schema, field))) throw new ApiError(400, 'invalid_query', `cannot sort by ${field}`);
+    // Locale-aware for text (so case and accents sort the way a reader expects), tie-broken by id so equal
+    // keys keep a fixed, repeatable order instead of whatever order the sort happened to leave them in.
+    const compare = (a, b) => (typeof a[field] === 'string' && typeof b[field] === 'string' ? a[field].localeCompare(b[field]) : a[field] > b[field] ? 1 : a[field] < b[field] ? -1 : 0);
+    result = [...result].sort((a, b) => {
+      const primary = compare(a, b) * (desc ? -1 : 1);
+      return primary !== 0 ? primary : a.id - b.id;
+    });
+  }
+  const total = result.length;
+  const data = result.slice((page - 1) * limit, page * limit).map((item) => Object.fromEntries(Object.entries(item).filter(([field]) => !hidden.includes(field))));
+  return { data, meta: { page, limit, total } };
+};
+
+// Builds the six standard routes for one resource.
+// hooks.check(data, current) returns extra validation details for the fields present (references)
+// and may throw a conflict; current is the record being changed, undefined on create.
+//
+// hooks.beforeRemove(item) may throw.
+export const createResourceRouter = ({ label, collection, schema, hooks = {}, hiddenInList = [] }) => {
+  const router = Router();
+  const body = (req, partial, current) => {
+    const input = trimStrings(schema, req.body);
+    const errors = validate(schema, input, { partial });
+    const data = partial ? input : applyDefaults(schema, input, current);
+    const details = errors.length ? errors : (hooks.check?.(data, current) ?? []);
+    if (details.length) throw validationFailed(details);
+    return data;
+  };
+  const load = (req) => {
+    const item = collection.find(parseId(req.params.id));
+    if (!item) throw notFound(label);
+    return item;
+  };
+
+  router.get('/', (req, res) => res.json(listItems(collection.all(), schema, req.query, hiddenInList)));
+  router.get('/:id', (req, res) => res.json(load(req)));
+  router.post('/', (req, res) => {
+    const item = collection.create(body(req, false));
+    res.status(201).location(`${req.baseUrl}/${item.id}`).json(item);
+  });
+  router.put('/:id', (req, res) => {
+    const item = load(req);
+    res.json(collection.replace(item, body(req, false, item)));
+  });
+  router.patch('/:id', (req, res) => {
+    const item = load(req);
+    res.json(collection.update(item, body(req, true, item)));
+  });
+  router.delete('/:id', (req, res) => {
+    const item = load(req);
+    hooks.beforeRemove?.(item);
+    collection.remove(item);
+    res.status(204).end();
+  });
+  router.all('/', methodsOnly('GET', 'POST'));
+  router.all('/:id', methodsOnly('GET', 'PUT', 'PATCH', 'DELETE'));
+  return router;
+};
+```
+
+## Приложение В (обязательное) Листинг файла validation.js
+
+```js
+// C0/C1 control characters (NUL, BEL, newline, ...) minus tab/newline/CR, which `multiline` fields allow.
+const CONTROL_STRICT = /[\u0000-\u001F\u007F-\u009F]/;
+const CONTROL_MULTILINE = /[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F-\u009F]/;
+// Invisible formatting characters that a reader cannot see and that a plain `trim()` does not remove:
+// zero-width space, bidi marks and overrides, byte-order mark, soft hyphen. The zero-width joiner/non-joiner
+// are left out on purpose, they are part of ordinary emoji and script text (e.g. "👩‍💻").
+const INVISIBLE_CODE_POINTS = [0x00ad, 0x200b, 0x200e, 0x200f, 0x202a, 0x202b, 0x202c, 0x202d, 0x202e, 0x2066, 0x2067, 0x2068, 0x2069, 0xfeff];
+const INVISIBLE_FORMAT = new RegExp(`[${INVISIBLE_CODE_POINTS.map((cp) => String.fromCodePoint(cp)).join('')}]`, 'u');
+
+// A schema maps a field name to { type, required, max, enum, pattern, default, multiline }.
+// Types: 'string', 'integer'. Returns a list of { field, message }.
+const checkField = (name, rule, value) => {
+  if (rule.type === 'integer') {
+    if (!Number.isInteger(value)) return `${name} must be an integer`;
+    if (value < rule.min || value > rule.max) return `${name} must be between ${rule.min} and ${rule.max}`;
+  }
+  if (rule.type === 'string') {
+    if (typeof value !== 'string') return `${name} must be a string`;
+    // Rejects an unpaired (lone) surrogate: valid in a JS string and in JSON, but not valid Unicode text.
+    if (!value.isWellFormed()) return `${name} contains an invalid character (an unpaired surrogate)`;
+    if ((rule.multiline ? CONTROL_MULTILINE : CONTROL_STRICT).test(value) || INVISIBLE_FORMAT.test(value)) {
+      return `${name} must not contain control or invisible characters`;
+    }
+    if (rule.required && value.trim() === '') return `${name} must not be empty`;
+    // Counted by code points, so an emoji is one character as the user sees it, not two UTF-16 units.
+    if (rule.max && [...value].length > rule.max) return `${name} must be at most ${rule.max} characters`;
+    if (rule.pattern && !rule.pattern.test(value)) return `${name} has an invalid format`;
+  }
+  if (rule.enum && !rule.enum.includes(value)) return `${name} must be one of: ${rule.enum.join(', ')}`;
+  return null;
+};
+
+// partial=true is used by PATCH: required fields may be missing, present ones are still checked.
+export const validate = (schema, body, { partial = false } = {}) => {
+  if (body === null || typeof body !== 'object' || Array.isArray(body)) return [{ field: 'body', message: 'body must be a JSON object' }];
+  if (partial && Object.keys(body).length === 0) return [{ field: 'body', message: 'send at least one field to change' }];
+  const errors = [];
+  for (const field of Object.keys(body)) {
+    if (!Object.hasOwn(schema, field)) errors.push({ field, message: `${field} is not a known field` });
+  }
+  for (const [field, rule] of Object.entries(schema)) {
+    const value = body[field];
+    if (value === undefined) {
+      if (rule.required && !partial && rule.default === undefined) errors.push({ field, message: `${field} is required` });
+      continue;
+    }
+    const message = checkField(field, rule, value);
+    if (message) errors.push({ field, message });
+  }
+  return errors;
+};
+
+// current: the record being replaced (PUT) so a field left out of the body keeps its current value instead of
+// being silently reset to the schema default (a role, for example, must not be lowered just by omitting it).
+// undefined on create (POST), where an omitted field does take the schema default.
+export const applyDefaults = (schema, body, current) => {
+  const result = { ...body };
+  for (const [field, rule] of Object.entries(schema)) {
+    if (result[field] !== undefined) continue;
+    if (current && Object.hasOwn(current, field)) result[field] = current[field];
+    else if (rule.default !== undefined) result[field] = rule.default;
+  }
+  return result;
+};
+
+// Unicode compatibility normalization so "é" (one code point) and "e" + combining acute (two code points) become
+// the same text, then strips invisible formatting characters a `trim()` would miss, then lower-cases: two emails
+// that render identically can no longer be told apart or used to register two look-alike accounts.
+export const normalizeEmail = (value) => value.normalize('NFKC').replace(/[\u0000-\u001F\u007F-\u009F\p{Cf}]/gu, '').toLowerCase();
+
+// Trims surrounding whitespace of known string fields, so " Ada " is stored as "Ada", then applies the field's
+// own transform (e-mails are normalized) so validation and storage see the same, final text.
+export const trimStrings = (schema, body) => {
+  if (body === null || typeof body !== 'object' || Array.isArray(body)) return body;
+  const result = { ...body };
+  for (const field of Object.keys(result)) {
+    if (!Object.hasOwn(schema, field) || typeof result[field] !== 'string') continue;
+    const trimmed = result[field].trim();
+    result[field] = schema[field].transform ? schema[field].transform(trimmed) : trimmed;
+  }
+  return result;
+};
+```
