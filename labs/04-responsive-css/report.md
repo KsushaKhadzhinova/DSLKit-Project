@@ -1140,6 +1140,21 @@ label > span {
   }
 }
 
+@media (min-width: 576px) {
+  .burger__label {
+    position: static;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    clip-path: none;
+  }
+
+  .theme__button {
+    padding: 0 var(--space-2);
+    font-size: var(--step--1);
+  }
+}
+
 @media (min-width: 768px) {
   .header__lang,
   .header__cta {
