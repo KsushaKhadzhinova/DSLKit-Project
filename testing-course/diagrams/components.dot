@@ -1,0 +1,20 @@
+digraph G {
+  rankdir=LR; dpi=130; nodesep=0.4;
+  node [fontname="Times New Roman", fontsize=13, shape=box, style="rounded,filled", fillcolor="#eef3ff", color="#335"];
+  edge [fontname="Times New Roman", fontsize=12];
+  v [label="Посетитель", shape=oval, fillcolor="#dff5df"];
+  html [label="site/index.html\nформа #waitlist-form"];
+  form [label="waitlist-form.js\ninitWaitlistForm\n(readValues, showState, submit)"];
+  val [label="validation.js\nvalidateWaitlist\n(П1–П6)"];
+  stor [label="storage.js\ngetStorage / createStorage"];
+  ls [label="LocalStorage\nключ dslkit.waitlist", shape=cylinder, fillcolor="#fff6dd"];
+  th [label="thanks.html /\nen/thanks.html"];
+  v -> html [label="вводит данные,\n«Отправить»"];
+  html -> form [label="событие submit"];
+  form -> val [label="значения полей"];
+  val -> form [label="список неверных полей"];
+  form -> stor [label="get / set"];
+  stor -> ls;
+  form -> th [label="navigate"];
+  form -> html [label="ошибки, фокус", style=dashed];
+}

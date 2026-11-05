@@ -1,0 +1,83 @@
+import { importDiagram } from '../utils/import-diagram.js';
+import { showCode } from './code-lines.js';
+import { notify } from './toast.js';
+
+const KINDS = {
+  ru: { flowchart: 'блок-схема', sequence: 'диаграмма последовательности', state: 'диаграмма состояний', dsl: 'код DSLKit' },
+  en: { flowchart: 'flowchart', sequence: 'sequence diagram', state: 'state diagram', dsl: 'DSLKit code' },
+};
+const TEXT = {
+  ru: {
+    done: (kind) => `Импортировано: ${kind}.`,
+    skipped: (list) => ` Не перенесено: ${list.join(', ')}.`,
+    empty: 'В тексте нет диаграммы для импорта.',
+    unknown: 'Формат не распознан: нужен текст Mermaid или PlantUML.',
+    'too-long': 'Текст слишком большой для импорта: не больше 200 000 знаков и 2 000 знаков в строке.',
+    unsupported: (name) => `Диаграмма «${name}» пока не поддерживается: импортируются блок-схемы, диаграммы последовательности и состояний.`,
+    unreadable: 'Не удалось прочитать файл или буфер обмена.',
+  },
+  en: {
+    done: (kind) => `Imported: ${kind}.`,
+    skipped: (list) => ` Not carried over: ${list.join(', ')}.`,
+    empty: 'There is no diagram to import in the text.',
+    unknown: 'The format is not recognised: Mermaid or PlantUML text is needed.',
+    'too-long': 'The text is too large to import: at most 200,000 characters, and 2,000 characters in a line.',
+    unsupported: (name) => `The diagram "${name}" is not supported yet: flowcharts, sequence diagrams and state diagrams are imported.`,
+    unreadable: 'The file or the clipboard could not be read.',
+  },
+};
+
+// Import into the editor: a file or the clipboard with Mermaid or PlantUML text becomes DSLKit code that replaces the code on the screen.
+export const initImport = ({ root = document, readClipboard } = {}) => {
+  const page = root.querySelector('.app-page--editor');
+  const buttons = page ? [...page.querySelectorAll('[data-import]')] : [];
+  const codeLines = page?.querySelector('.code__lines');
+  if (buttons.length === 0 || !codeLines) return null;
+  const status = page.querySelector('.canvas__status');
+  const lang = root.documentElement.lang === 'en' ? 'en' : 'ru';
+  const words = TEXT[lang];
+  const input = page.querySelector('.editor-import__file');
+  const clipboard = readClipboard ?? (() => root.defaultView.navigator.clipboard.readText());
+  const say = (text) => {
+    if (status) status.textContent = text;
+    notify(root, text);
+  };
+
+  const load = (source) => {
+    const result = importDiagram(source);
+    if (!result.ok) {
+      say(result.reason === 'unsupported' ? words.unsupported(result.name) : words[result.reason]);
+      return false;
+    }
+    showCode(root, codeLines, result.dsl);
+    page.dispatchEvent(new root.defaultView.CustomEvent('dslkit:run', { bubbles: true }));
+    say(words.done(KINDS[lang][result.kind]) + (result.skipped.length > 0 ? words.skipped(result.skipped) : ''));
+    return true;
+  };
+
+  const importFrom = async (read) => {
+    try {
+      return load(await read());
+    } catch {
+      say(words.unreadable);
+      return false;
+    }
+  };
+
+  page.querySelector('[data-import="file"]')?.addEventListener('click', () => input?.click());
+  page.querySelector('[data-import="clipboard"]')?.addEventListener('click', () => importFrom(clipboard));
+  input?.addEventListener('change', async () => {
+    const [file] = input.files;
+    if (file) await importFrom(() => file.text());
+    input.value = '';
+  });
+  // A file dropped on the code is imported like a file chosen in the menu (.dsl, .mmd, .puml, .txt).
+  const area = codeLines.parentElement;
+  area.addEventListener('dragover', (event) => event.preventDefault());
+  area.addEventListener('drop', async (event) => {
+    event.preventDefault();
+    const [file] = event.dataTransfer?.files ?? [];
+    if (file) await importFrom(() => file.text());
+  });
+  return { load, importFrom };
+};

@@ -1,0 +1,18 @@
+import { start, sleep } from './dtf.mjs';
+const OUT = 'E:/DSLKit-Project/labs/01-network/figures';
+const { b, app, open } = await start();
+const dt = await open('network');
+const shot = (n) => dt.screenshot({ path: `${OUT}/devtools-${n}.png` });
+await dt.mouse.click(229, 40);
+await dt.mouse.click(375, 40); await sleep(700); await shot('08-throttling-menu');
+await dt.keyboard.press('ArrowDown'); await dt.keyboard.press('ArrowDown'); await dt.keyboard.press('Enter'); await sleep(700);
+await app.goto('https://app.diagrams.net/', { waitUntil: 'load', timeout: 240000 });
+await app.waitForNetworkIdle({ idleTime: 5000, timeout: 240000 }).catch(() => {});
+await dt.mouse.move(300, 400); await dt.mouse.wheel({ deltaY: -9000 }); await sleep(600);
+await shot('09-slow-4g-load');
+await dt.mouse.click(573, 15); await sleep(300);
+await dt.mouse.click(499, 15); await sleep(1200);
+await dt.mouse.click(16, 275); await sleep(800);
+await dt.mouse.click(125, 297); await sleep(1000);
+await shot('07-cookies');
+await b.close();

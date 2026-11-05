@@ -1,0 +1,15 @@
+digraph G {
+  rankdir=LR; dpi=130;
+  node [fontname="Times New Roman", fontsize=13, shape=box, style="rounded,filled", fillcolor="#eef3ff", color="#335"];
+  edge [fontname="Times New Roman", fontsize=12];
+  init [shape=point, width=0.15, fillcolor=black];
+  clean [label="Нейтральное\n(ошибка скрыта,\nнет aria-invalid)"];
+  invalid [label="Ошибка\n(сообщение role=alert,\naria-invalid=true)", fillcolor="#ffe3e3"];
+  valid [label="Корректное\n(ошибка скрыта)", fillcolor="#dff5df"];
+  init -> clean;
+  clean -> valid [label="выход из поля,\nзначение верное"];
+  clean -> invalid [label="выход из поля\nили «Отправить»,\nзначение неверное"];
+  valid -> invalid [label="значение стало\nневерным"];
+  invalid -> valid [label="ввод, значение\nстало верным"];
+  invalid -> invalid [label="ввод,\nвсё ещё неверно"];
+}

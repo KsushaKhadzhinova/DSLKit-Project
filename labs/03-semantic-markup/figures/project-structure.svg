@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 536" width="1000" height="536" font-family="Consolas, Menlo, monospace" font-size="13" role="img" aria-labelledby="t d">
+<title id="t">Project structure of the DSLKit site and semantic blocks of the home page</title>
+<desc id="d">Left: the folder site with index.html, privacy.html, thanks.html, robots.txt, sitemap.xml and the folders en, errors, app, css, js, images and design. Right: the semantic blocks of index.html: skip link, header with nav, main with the sections hero, notations, how, audience, pricing, faq and waitlist, and footer.</desc>
+<rect width="1000" height="536" fill="#ffffff"/>
+<line x1="470" y1="20" x2="470" y2="516" stroke="#d1d5db"/>
+<text x="20" y="42" font-weight="bold" font-size="15" fill="#111827">Project folder</text>
+<rect x="14" y="54" width="54" height="21" rx="4" fill="#e8eefc" stroke="#3b5bdb"/>
+<text x="20" y="70" fill="#111827">site/</text>
+<text x="42" y="94" fill="#111827">index.html</text>
+<text x="42" y="118" fill="#111827">privacy.html</text>
+<text x="42" y="142" fill="#111827">thanks.html</text>
+<text x="42" y="166" fill="#111827">robots.txt</text>
+<text x="42" y="190" fill="#111827">sitemap.xml</text>
+<rect x="36" y="198" width="38" height="21" rx="4" fill="#e8eefc" stroke="#3b5bdb"/>
+<text x="42" y="214" fill="#111827">en/</text>
+<text x="64" y="238" fill="#111827">index.html, privacy.html, thanks.html</text>
+<rect x="36" y="246" width="70" height="21" rx="4" fill="#e8eefc" stroke="#3b5bdb"/>
+<text x="42" y="262" fill="#111827">errors/</text>
+<text x="64" y="286" fill="#111827">400, 403, 404, 405, 500 .html</text>
+<rect x="36" y="294" width="46" height="21" rx="4" fill="#e8eefc" stroke="#3b5bdb"/>
+<text x="42" y="310" fill="#111827">app/</text>
+<text x="64" y="334" fill="#111827">welcome, dashboard, editor, settings .html</text>
+<rect x="36" y="342" width="46" height="21" rx="4" fill="#e8eefc" stroke="#3b5bdb"/>
+<text x="42" y="358" fill="#111827">css/</text>
+<text x="64" y="382" fill="#111827">variables, base, header, main, footer ... .css</text>
+<rect x="36" y="390" width="38" height="21" rx="4" fill="#e8eefc" stroke="#3b5bdb"/>
+<text x="42" y="406" fill="#111827">js/</text>
+<rect x="36" y="414" width="70" height="21" rx="4" fill="#e8eefc" stroke="#3b5bdb"/>
+<text x="42" y="430" fill="#111827">images/</text>
+<rect x="36" y="438" width="70" height="21" rx="4" fill="#e8eefc" stroke="#3b5bdb"/>
+<text x="42" y="454" fill="#111827">design/</text>
+<text x="64" y="478" fill="#111827">figma/, mockups/, design-tokens.txt</text>
+<text x="500" y="42" font-weight="bold" font-size="15" fill="#111827">Semantic blocks of the home page</text>
+<rect x="494" y="54" width="94" height="21" rx="4" fill="#e8eefc" stroke="#3b5bdb"/>
+<text x="500" y="70" fill="#111827">index.html</text>
+<text x="522" y="94" fill="#111827">a.skip-link  ->  #main</text>
+<rect x="516" y="102" width="62" height="21" rx="4" fill="#e3f6e8" stroke="#2f855a"/>
+<text x="522" y="118" fill="#111827">header</text>
+<text x="544" y="142" fill="#111827">nav (main menu)</text>
+<rect x="516" y="150" width="86" height="21" rx="4" fill="#e3f6e8" stroke="#2f855a"/>
+<text x="522" y="166" fill="#111827">main#main</text>
+<text x="544" y="190" fill="#111827">section.hero   [SoftwareApplication]</text>
+<text x="566" y="214" fill="#111827">h1, figure + figcaption</text>
+<text x="544" y="238" fill="#111827">section#notations</text>
+<text x="566" y="262" fill="#111827">h2, article.card x 6</text>
+<text x="544" y="286" fill="#111827">section#how</text>
+<text x="544" y="310" fill="#111827">section#audience</text>
+<text x="544" y="334" fill="#111827">section#pricing</text>
+<text x="566" y="358" fill="#111827">article.plan x 2, aside.note, time</text>
+<text x="544" y="382" fill="#111827">section#faq   [FAQPage]</text>
+<text x="566" y="406" fill="#111827">details + summary</text>
+<text x="544" y="430" fill="#111827">section#waitlist</text>
+<text x="566" y="454" fill="#111827">form, fieldset + legend, label</text>
+<rect x="516" y="462" width="62" height="21" rx="4" fill="#e3f6e8" stroke="#2f855a"/>
+<text x="522" y="478" fill="#111827">footer</text>
+<text x="544" y="502" fill="#111827">nav (footer menu), address, small</text>
+</svg>

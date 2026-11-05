@@ -22,7 +22,10 @@ import {
 } from './site-checks.js';
 
 const SITE = join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'site');
-const walk = (dir) => readdirSync(dir).flatMap((name) => (statSync(join(dir, name)).isDirectory() ? walk(join(dir, name)) : [join(dir, name)]));
+const walk = (dir) =>
+  readdirSync(dir)
+    .filter((name) => name !== 'design')
+    .flatMap((name) => (statSync(join(dir, name)).isDirectory() ? walk(join(dir, name)) : [join(dir, name)]));
 const files = walk(SITE);
 const pages = Object.fromEntries(
   files.filter((file) => file.endsWith('.html')).map((file) => [relative(SITE, file).replaceAll('\\', '/'), parse(readFileSync(file, 'utf8'))]),
@@ -36,9 +39,34 @@ const eachPage = (title, check, subset = names) =>
   });
 
 test('the site has the landing pages in both languages, error pages and application screens', () => {
-  for (const page of ['index.html', 'en/index.html', 'thanks.html', 'privacy.html', 'errors/404.html', 'app/editor.html'])
+  for (const page of [
+    'index.html',
+    'en/index.html',
+    'thanks.html',
+    'privacy.html',
+    'errors/404.html',
+    'app/editor.html',
+    'en/app/editor.html',
+    'app/dashboard.html',
+    'en/app/dashboard.html',
+    'app/settings.html',
+    'en/app/settings.html',
+    'app/welcome.html',
+    'en/app/welcome.html',
+    'app/login.html',
+    'en/app/login.html',
+    'app/register.html',
+    'en/app/register.html',
+    'app/docs.html',
+    'en/app/docs.html',
+    'app/expert.html',
+    'en/app/expert.html',
+    'app/decision.html',
+    'en/app/decision.html',
+  ])
     assert.ok(names.includes(page), page);
-  assert.equal(names.length, 15);
+  // 431.html joined the other error pages (400, 403, 404, 405, 500) when the header-overflow response got its own page.
+  assert.equal(names.length, 30);
 });
 
 eachPage('every page has lang, title, charset and viewport', documentProblems);
@@ -81,6 +109,14 @@ test('the Russian and English versions have the same element structure', () => {
     ['index.html', 'en/index.html'],
     ['thanks.html', 'en/thanks.html'],
     ['privacy.html', 'en/privacy.html'],
+    ['app/dashboard.html', 'en/app/dashboard.html'],
+    ['app/settings.html', 'en/app/settings.html'],
+    ['app/welcome.html', 'en/app/welcome.html'],
+    ['app/login.html', 'en/app/login.html'],
+    ['app/register.html', 'en/app/register.html'],
+    ['app/docs.html', 'en/app/docs.html'],
+    ['app/expert.html', 'en/app/expert.html'],
+    ['app/decision.html', 'en/app/decision.html'],
   ])
     assert.deepEqual(parityProblems(pages[ru], pages[en]), [], ru);
 });
@@ -104,7 +140,7 @@ test('every local href and src resolves to an existing file', () => {
   const missing = [];
   for (const file of files.filter((name) => name.endsWith('.html'))) {
     const html = readFileSync(file, 'utf8');
-    for (const [, url] of html.matchAll(/\b(?:href|src)="([^"#]*)(?:#[^"]*)?"/g)) {
+    for (const [, url] of html.matchAll(/\b(?:href|src)="([^"#?]*)(?:[?#][^"]*)?"/g)) {
       if (!url || /^(https?:|mailto:)/.test(url)) continue;
       const target = url.startsWith('/') ? join(SITE, url) : join(dirname(file), url);
       const resolved = statSync(target, { throwIfNoEntry: false })?.isDirectory() ? join(target, 'index.html') : target;

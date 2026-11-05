@@ -1,0 +1,1 @@
+== ru user app/welcome.html: 26 elements

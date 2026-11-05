@@ -135,3 +135,17 @@ test('a document without a window falls back to light', () => {
   const { document } = new JSDOM('<!doctype html><html><body></body></html>').window;
   assert.equal(initTheme({ root: document, storage: memory() }).current(), 'light');
 });
+
+test('the button of the page header switches the theme and remembers it', () => {
+  const window = new JSDOM('<!doctype html><html><body><button data-theme-switch><svg></svg></button></body></html>').window;
+  const storage = createStorage(createMemoryBackend());
+  initTheme({ root: window.document, storage, matchMedia: () => ({ matches: false }) });
+  assert.equal(window.document.documentElement.dataset.theme, 'light');
+  window.document.querySelector('[data-theme-switch]').dispatchEvent(new window.MouseEvent('click', { bubbles: true }));
+  assert.equal(window.document.documentElement.dataset.theme, 'dark');
+  assert.equal(storage.get('theme'), 'dark');
+  window.document.body.dispatchEvent(new window.MouseEvent('click', { bubbles: true }));
+  assert.equal(window.document.documentElement.dataset.theme, 'dark');
+  window.document.querySelector('[data-theme-switch]').dispatchEvent(new window.MouseEvent('click', { bubbles: true }));
+  assert.equal(window.document.documentElement.dataset.theme, 'light');
+});

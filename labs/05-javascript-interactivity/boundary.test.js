@@ -26,7 +26,21 @@ test('name: equivalence classes of characters', () => {
 test('email: classes of format and boundaries of length', () => {
   for (const good of ['a@b.co', 'first.last@mail.example.com', ' trimmed@example.com ', 'a+tag@example.org'])
     assert.deepEqual(invalidFields({ email: good }), [], good);
-  for (const bad of ['', 'plain', '@example.com', 'a@', 'a@b', 'a@b.c', 'a b@example.com', 'a@@example.com', 'a@.com', 'a@b..com'])
+  for (const bad of [
+    '',
+    'plain',
+    '@example.com',
+    'a@',
+    'a@b',
+    'a@b.c',
+    'a b@example.com',
+    'a@@example.com',
+    'a@.com',
+    'a@b..com',
+    '<script>@x.com',
+    '"quoted"@example.com',
+    'a;b@example.com',
+  ])
     assert.deepEqual(invalidFields({ email: bad }), ['email'], bad);
   const withLength = (length) => `${'a'.repeat(length - '@example.com'.length)}@example.com`;
   assert.deepEqual(invalidFields({ email: withLength(120) }), []);

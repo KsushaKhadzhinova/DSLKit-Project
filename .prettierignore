@@ -13,3 +13,11 @@ labs/08-frontend-testing/lighthouse-*/
 react-app/coverage/
 react-app/dist/
 docs/metrics/
+tools/evidence/
+DSLKit-Project/
+.playwright-mcp/
+.accelerator/
+paper-its/
+docs/**/*.json
+testing-course/**/*.json
+testing-course/db.json

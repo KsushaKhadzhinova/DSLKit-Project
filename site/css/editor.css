@@ -16,7 +16,7 @@
   height: auto;
   min-height: 100dvh;
   overflow: visible;
-  font-size: var(--step--1);
+  font-size: var(--text-small);
   display: block;
   padding-bottom: calc(var(--bottom-nav-height) + var(--target-size) + var(--space-3));
 }
@@ -27,20 +27,19 @@
   z-index: 10;
   border-bottom: 1px solid var(--color-border);
   background: var(--color-surface);
-  position: sticky;
-  top: 0;
 }
 
+/* On a phone the action bar stays: undo, redo, save and the menu with check, format, share, layout, import, export and theme */
 .editor-toolbar__row {
-  display: none;
-  flex-wrap: wrap;
+  display: flex;
+  flex-wrap: nowrap;
   align-items: center;
-  gap: var(--space-1) var(--space-2);
-  min-height: var(--toolbar-height);
-  padding: var(--space-1) var(--space-3);
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-2);
 }
 
 .editor-toolbar__logo {
+  display: none;
   margin-right: var(--space-1);
   color: var(--color-text);
   font-size: var(--step-0);
@@ -50,7 +49,7 @@
 }
 
 .editor-toolbar__run {
-  display: flex;
+  display: none;
   align-items: center;
   gap: var(--space-2);
 }
@@ -63,7 +62,7 @@
 .editor-toolbar__reason {
   max-width: 16rem;
   color: var(--color-muted);
-  font-size: var(--step--1);
+  font-size: var(--text-small);
   line-height: 1.3;
   position: absolute;
   width: 1px;
@@ -76,13 +75,13 @@
 
 .editor-toolbar__group {
   display: flex;
-  gap: 4px;
+  gap: 0.25rem;
 }
 
 .editor-toolbar__row .button {
   min-height: var(--target-size-small);
   padding-inline: var(--space-2);
-  font-size: var(--step--1);
+  font-size: var(--text-small);
 }
 
 .editor-toolbar__row .button--icon {
@@ -99,7 +98,7 @@
   border-radius: 50%;
   background: var(--color-secondary);
   color: var(--color-link);
-  font-size: var(--step--1);
+  font-size: var(--text-small);
   font-weight: 700;
 }
 
@@ -112,15 +111,15 @@
   border: 0;
   border-radius: var(--radius-small);
   background: transparent;
-  font-size: var(--step--1);
+  font-size: var(--text-small);
   font-weight: 600;
 }
 
 .editor-toolbar__switch-track {
   position: relative;
-  width: 32px;
-  height: 18px;
-  border-radius: 999px;
+  width: 2rem;
+  height: 1.125rem;
+  border-radius: 62.4375rem;
   background: var(--color-border-strong);
   transition: background-color 160ms ease;
 }
@@ -128,10 +127,10 @@
 .editor-toolbar__switch-track::after {
   content: '';
   position: absolute;
-  top: 2px;
-  left: 2px;
-  width: 14px;
-  height: 14px;
+  top: 0.125rem;
+  left: 0.125rem;
+  width: 0.875rem;
+  height: 0.875rem;
   border-radius: 50%;
   background: var(--color-surface);
   transition: transform 160ms ease;
@@ -166,8 +165,8 @@
 .editor-topbar__dot,
 .editor-tabs__dot {
   flex: none;
-  width: 8px;
-  height: 8px;
+  width: 0.5rem;
+  height: 0.5rem;
   border-radius: 50%;
   background: var(--color-warning);
 }
@@ -178,7 +177,7 @@
   display: none;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: 0.25rem;
   padding: var(--space-1);
   border-right: 1px solid var(--color-border);
   background: var(--color-surface);
@@ -187,8 +186,8 @@
 .editor-activity__button {
   display: grid;
   place-items: center;
-  width: 40px;
-  height: 40px;
+  width: 2.5rem;
+  height: 2.5rem;
   border: 0;
   border-radius: var(--radius-small);
   background: transparent;
@@ -229,7 +228,7 @@
 
 .editor-sidebar__heading {
   color: var(--color-muted);
-  font-size: var(--step--1);
+  font-size: var(--text-small);
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -238,7 +237,13 @@
 .file-tree,
 .templates {
   display: grid;
-  gap: 2px;
+  gap: 0.125rem;
+}
+
+/* Many saved projects scroll inside the list, so the palette below it stays on the screen. */
+.file-tree {
+  max-height: calc(var(--space-1) * 18);
+  overflow-y: auto;
 }
 
 .file-tree__item,
@@ -253,7 +258,7 @@
   border-radius: var(--radius-small);
   background: transparent;
   color: var(--color-text-light);
-  font-size: var(--step--1);
+  font-size: var(--text-small);
   text-align: left;
 }
 
@@ -280,30 +285,30 @@
   border-radius: var(--radius-medium);
   background: var(--color-secondary);
   color: var(--color-text-light);
-  font-size: var(--step--1);
+  font-size: var(--text-small);
 }
 
 .editor-sidebar__beta progress {
   width: 100%;
-  height: 8px;
+  height: 0.5rem;
 }
 
 /* Mobile view switch (decorative until JavaScript, hidden on larger screens) */
 .editor-segmented {
   display: flex;
-  gap: 4px;
+  gap: 0.25rem;
   margin: var(--space-2);
-  padding: 4px;
+  padding: 0.25rem;
   border: 1px solid var(--color-border);
-  border-radius: 999px;
+  border-radius: 62.4375rem;
   background: var(--color-surface);
 }
 
 .editor-segmented__button {
   flex: 1;
-  min-height: 36px;
+  min-height: 2.25rem;
   border: 0;
-  border-radius: 999px;
+  border-radius: 62.4375rem;
   background: transparent;
   color: var(--color-text-light);
   font-weight: 600;
@@ -338,21 +343,21 @@
 
 .editor-tabs__list {
   display: flex;
-  gap: 2px;
+  gap: 0.125rem;
 }
 
 .editor-tabs__tab {
   display: inline-flex;
   align-items: center;
   gap: var(--space-1);
-  min-height: 40px;
+  min-height: 2.5rem;
   padding: 0 var(--space-2);
   border: 0;
   border-bottom: 2px solid transparent;
   background: transparent;
   color: var(--color-text-light);
   font-family: var(--font-mono);
-  font-size: var(--step--1);
+  font-size: var(--text-small);
   white-space: nowrap;
 }
 
@@ -371,12 +376,12 @@
 .editor-tabs__close {
   display: grid;
   place-items: center;
-  width: 24px;
-  height: 24px;
-  margin: 0 0 8px var(--space-1);
+  width: 1.5rem;
+  height: 1.5rem;
+  margin: 0 0 0.5rem var(--space-1);
   padding: 0;
   border: 0;
-  border-radius: 4px;
+  border-radius: var(--radius-small);
   background: transparent;
   color: var(--color-text-light);
 }
@@ -387,8 +392,8 @@
 }
 
 .editor-tabs__close .icon {
-  width: 14px;
-  height: 14px;
+  width: 0.875rem;
+  height: 0.875rem;
 }
 
 .editor-panel {
@@ -414,7 +419,7 @@
 
 .code__lines {
   font-family: var(--font-mono);
-  font-size: calc(var(--step-0) * 0.875);
+  font-size: var(--text-small);
   line-height: 1.6;
   counter-reset: line;
 }
@@ -474,7 +479,7 @@
 .canvas > figcaption {
   padding: var(--space-1) var(--space-3) 0;
   color: var(--color-muted);
-  font-size: var(--step--1);
+  font-size: var(--text-small);
 }
 
 .canvas__toolbar {
@@ -491,36 +496,33 @@
   display: none;
 }
 
-.canvas__engine-label {
-  color: var(--color-text-light);
-  font-size: var(--step--1);
-}
-
-.canvas__engine {
-  width: auto;
-  min-height: var(--target-size-small);
-  font-size: var(--step--1);
-}
-
-.canvas__render,
-.canvas__refresh {
-  flex: 0 0 auto;
-}
-
 .canvas__history-item {
   min-height: var(--target-size-small);
-  font-size: var(--step--1);
+  font-size: var(--text-small);
 }
 
 .canvas__status,
 .canvas__service {
   padding: 0 var(--space-3);
   color: var(--color-text-light);
-  font-size: var(--step--1);
+  font-size: var(--text-small);
 }
 
+/* The loader is a blue ring; it turns while a drawing is rendered and stands still for people who asked for less motion */
 .canvas[aria-busy='true'] .canvas__status::before {
-  content: '⏳ ';
+  content: '';
+  display: inline-block;
+  width: 1.25em;
+  height: 1.25em;
+  margin-inline-end: 0.5em;
+  vertical-align: -0.3em;
+  background: url('../images/loader.svg') center / contain no-repeat;
+}
+
+@keyframes loader-turn {
+  to {
+    transform: rotate(1turn);
+  }
 }
 
 .canvas__history {
@@ -549,7 +551,7 @@
   margin-inline-end: auto;
   color: var(--color-text-light);
   font-family: var(--font-mono);
-  font-size: var(--step--1);
+  font-size: var(--text-small);
 }
 
 .canvas__diagram {
@@ -570,13 +572,13 @@
 
 .canvas__code {
   fill: var(--color-link);
-  font-size: 15px;
+  font-size: 0.9375rem;
   font-weight: 700;
 }
 
 .canvas__name {
   fill: var(--color-text);
-  font-size: 13px;
+  font-size: 0.8125rem;
 }
 
 .canvas__arrow {
@@ -591,7 +593,7 @@
 
 .canvas__label {
   fill: var(--color-text-light);
-  font-size: 12px;
+  font-size: 0.75rem;
 }
 
 .canvas__block {
@@ -603,8 +605,8 @@
   right: var(--space-3);
   bottom: var(--space-2);
   display: grid;
-  gap: 4px;
-  padding: 4px;
+  gap: 0.25rem;
+  padding: 0.25rem;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-medium);
   background: var(--color-surface);
@@ -627,17 +629,17 @@
 .problems__tabs {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px;
+  gap: 0.25rem;
 }
 
 .problems__tab {
   min-height: var(--target-size-small);
   padding: 0 var(--space-2);
   border: 1px solid transparent;
-  border-radius: 999px;
+  border-radius: 62.4375rem;
   background: transparent;
   color: var(--color-text-light);
-  font-size: var(--step--1);
+  font-size: var(--text-small);
   font-weight: 600;
 }
 
@@ -656,7 +658,7 @@
 
 .problems__status {
   color: var(--color-muted);
-  font-size: var(--step--1);
+  font-size: var(--text-small);
 }
 
 .problems__list {
@@ -665,7 +667,7 @@
 
 .problems__item {
   display: grid;
-  grid-template-columns: 20px minmax(0, 1fr);
+  grid-template-columns: 1.25rem minmax(0, 1fr);
   align-items: center;
   gap: var(--space-2);
   padding: var(--space-1) var(--space-2);
@@ -697,7 +699,7 @@
 .problems__location {
   color: var(--color-link);
   font-family: var(--font-mono);
-  font-size: var(--step--1);
+  font-size: var(--text-small);
   white-space: nowrap;
 }
 
@@ -740,13 +742,13 @@
   display: grid;
   place-items: center;
   align-content: center;
-  gap: 2px;
+  gap: 0.125rem;
   min-height: var(--target-size);
   padding: var(--space-1) 0;
   border: 0;
   background: transparent;
   color: var(--color-text-light);
-  font-size: var(--step--1);
+  font-size: var(--text-small);
   font-weight: 600;
   text-decoration: none;
 }
@@ -768,12 +770,25 @@
   border-top: 1px solid var(--color-border);
   background: var(--color-surface);
   color: var(--color-text-light);
-  font-size: var(--step--1);
+  font-size: var(--text-small);
   white-space: nowrap;
 }
 
 .editor-status__type {
   font-weight: 700;
+}
+
+.editor-status__saved {
+  margin-left: auto;
+  color: var(--color-text-light);
+}
+
+.editor-status__saved:empty {
+  display: none;
+}
+
+.editor-status__saved:not(:empty) + .editor-status__cursor {
+  margin-left: 0;
 }
 
 .editor-status__cursor {
@@ -845,6 +860,18 @@
 
   .editor-toolbar__row {
     display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1) var(--space-2);
+    min-height: var(--toolbar-height);
+    padding: var(--space-1) var(--space-3);
+  }
+
+  .editor-toolbar__logo {
+    display: revert;
+  }
+
+  .editor-toolbar__run {
+    display: flex;
   }
 
   .editor-activity {
@@ -887,7 +914,7 @@
   }
 
   .problems__item {
-    grid-template-columns: 20px auto minmax(0, 1fr) auto auto;
+    grid-template-columns: 1.25rem auto minmax(0, 1fr) auto auto;
   }
 
   .editor-banner {
@@ -951,15 +978,15 @@
 }
 
 .problems__icon {
-  width: 20px;
-  height: 20px;
+  width: 1.25rem;
+  height: 1.25rem;
 }
 
 .editor-status__problems,
 .editor-status__branch {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 0.25rem;
 }
 
 /* Drawings from the engines are SVG elements of their own: they share the interface font and crisp geometry. */
@@ -974,4 +1001,1151 @@
 .canvas__diagram marker,
 .canvas__diagram defs {
   overflow: visible;
+}
+
+/* Rarely used actions live in drop-down menus */
+.editor-toolbar__spacer {
+  flex: 1;
+}
+
+.editor-menu {
+  position: relative;
+}
+
+.editor-menu__summary {
+  list-style: none;
+  cursor: pointer;
+}
+
+.editor-menu__summary::-webkit-details-marker {
+  display: none;
+}
+
+.editor-menu__panel {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  z-index: 20;
+  display: grid;
+  gap: 0.25rem;
+  min-width: 15rem;
+  max-height: calc(100dvh - var(--toolbar-height) - var(--space-3));
+  overflow-y: auto;
+  padding: var(--space-1);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-medium);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-large);
+}
+
+.editor-menu__panel .button,
+.editor-menu__panel .editor-toolbar__switch {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  min-height: var(--target-size-small);
+  padding: 0 var(--space-2);
+}
+
+/* Interface rules: 44 px targets, text from 14 px, proportions from the golden ratio */
+.app-page--editor {
+  --sidebar-width: clamp(14rem, 19.1vw, 19rem);
+  --problems-height: clamp(13rem, 23.6dvh, 18rem);
+}
+
+.problems__tab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  min-width: var(--target-size-small);
+}
+
+.problems__count {
+  font-weight: 700;
+}
+
+/* Tooltips for icon controls: shown on hover and on keyboard focus */
+[data-tip] {
+  position: relative;
+}
+
+[data-tip]::after {
+  content: attr(data-tip);
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  left: 50%;
+  z-index: 30;
+  padding: 0.375rem 0.625rem;
+  border-radius: var(--radius-small);
+  background: var(--color-text);
+  color: var(--color-background);
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.3;
+  white-space: nowrap;
+  transform: translateX(-50%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 120ms ease;
+}
+
+[data-tip]:hover::after,
+[data-tip]:focus-visible::after {
+  opacity: 1;
+}
+
+.editor-activity__button[data-tip]::after {
+  top: 50%;
+  left: calc(100% + 0.5rem);
+  transform: translateY(-50%);
+}
+
+.canvas__zoom [data-tip]::after,
+.editor-toolbar__row .editor-menu__summary[data-tip]::after {
+  top: 50%;
+  right: calc(100% + 0.5rem);
+  left: auto;
+  transform: translateY(-50%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-tip]::after {
+    transition: none;
+  }
+}
+
+/* One typeface per role: Inter for the interface, JetBrains Mono for code only; two text sizes, 1rem and 0.875rem */
+.editor-tabs__tab,
+.canvas__breadcrumb,
+.problems__location {
+  font-family: var(--font-sans);
+}
+
+.canvas > figcaption {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+/* The status lines go under the diagram, the top of the canvas keeps only the toolbar */
+.canvas__remote,
+.canvas__diagram {
+  order: 1;
+}
+
+.canvas__status,
+.canvas__service,
+.canvas__history {
+  order: 2;
+  margin: 0;
+  padding: 0 var(--space-3);
+  color: var(--color-muted);
+  font-size: 0.875rem;
+}
+
+/* The picture from Kroki gets the colours and the font of the application instead of its own white frame and black lines */
+.canvas__remote svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.canvas__remote svg polygon[fill='white'] {
+  fill: transparent;
+}
+
+.canvas__remote svg [stroke='black'] {
+  stroke: var(--color-text-light);
+}
+
+.canvas__remote svg [fill='black'] {
+  fill: var(--color-text-light);
+}
+
+.canvas__remote svg .node :is(ellipse, polygon, path, rect)[stroke='black'] {
+  stroke: var(--color-primary);
+  stroke-width: 1.5;
+}
+
+/* An outline drawn over a table keeps its inside empty, otherwise it would cover the text under it */
+.canvas__remote svg .node :is(ellipse, polygon, path, rect)[stroke='black']:not([fill='none']) {
+  fill: var(--color-surface);
+}
+
+.canvas__remote svg text {
+  fill: var(--color-text);
+  font-family: var(--font-sans);
+}
+
+.canvas__remote svg {
+  background: transparent !important;
+}
+
+/* Mermaid styles its drawing with a style element, which is removed from foreign SVG, so the shapes get the colours of the application here */
+.canvas__remote[data-engine='mermaid'] svg :is(rect, polygon, circle, ellipse, path):not([fill='none']) {
+  fill: var(--color-surface);
+  stroke: var(--color-primary);
+  stroke-width: 1.5;
+}
+
+.canvas__remote[data-engine='mermaid'] svg :is(path, line, polyline)[class*='link'],
+.canvas__remote[data-engine='mermaid'] svg :is(path, line, polyline)[class*='edge'],
+.canvas__remote[data-engine='mermaid'] svg :is(path, line, polyline)[class*='line'],
+.canvas__remote[data-engine='mermaid'] svg :is(path, line, polyline)[class*='divider'],
+.canvas__remote[data-engine='mermaid'] svg :is(path, line, polyline)[class*='relation'] {
+  fill: none;
+  stroke: var(--color-text-light);
+}
+
+.canvas__remote[data-engine='mermaid'] svg line {
+  stroke: var(--color-text-light);
+  stroke-width: 1.5;
+}
+
+.canvas__remote[data-engine='mermaid'] svg marker :is(path, polygon, circle) {
+  fill: var(--color-text-light);
+  stroke: var(--color-text-light);
+}
+
+.canvas__remote[data-engine='mermaid'] svg .edgeLabel rect,
+.canvas__remote[data-engine='mermaid'] svg .labelBkg {
+  fill: var(--color-surface);
+  stroke: none;
+  opacity: 0.85;
+}
+
+.templates__select {
+  width: 100%;
+  margin-top: var(--space-1);
+}
+
+/* Logo as on the other application screens, and the engine named in the status bar */
+.editor-toolbar__logo {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.editor-status__engine {
+  color: var(--color-text-light);
+}
+
+.canvas__refresh {
+  flex: 0 0 auto;
+}
+
+/* Table headers that Graphviz draws light grey follow the theme, so the text on them stays readable on the dark canvas */
+.canvas__remote svg polygon[fill$='e2e8f0' i] {
+  fill: var(--color-secondary);
+}
+
+/* PlantUML paints its default light boxes: they follow the theme too, the text on them is already themed */
+.canvas__remote svg :is(rect, polygon, ellipse, path)[fill$='F1F1F1' i],
+.canvas__remote svg :is(rect, polygon, ellipse, path)[fill$='FEFECE' i],
+.canvas__remote svg :is(rect, polygon, ellipse, path)[fill$='E2E2F0' i] {
+  fill: var(--color-secondary);
+}
+
+/* The own engine draws a light sheet with dark ink: on the canvas it takes the colours of the theme like the Kroki output */
+.canvas__remote[data-engine='local'] svg [fill$='ffffff' i] {
+  fill: var(--color-surface);
+}
+
+.canvas__remote[data-engine='local'] svg > rect:first-of-type {
+  fill: transparent;
+}
+
+.canvas__remote[data-engine='local'] svg [fill$='0f172a' i] {
+  fill: var(--color-text);
+}
+
+.canvas__remote[data-engine='local'] svg :is([fill$='475569' i], [fill$='334155' i]) {
+  fill: var(--color-text-light);
+}
+
+.canvas__remote[data-engine='local'] svg [fill$='1e293b' i] {
+  fill: var(--color-text-light);
+}
+
+.canvas__remote[data-engine='local'] svg :is([stroke$='1e293b' i], [stroke$='334155' i]) {
+  stroke: var(--color-text-light);
+}
+
+.canvas__remote[data-engine='local'] svg text[stroke$='ffffff' i] {
+  stroke: var(--color-surface);
+}
+
+/* While a drawing is rendered or the server has not answered, the whole diagram field is blurred: the old picture is not mistaken for the result */
+.canvas[aria-busy='true'] :is(.canvas__remote, .canvas__diagram) {
+  filter: blur(6px);
+  pointer-events: none;
+  user-select: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .canvas :is(.canvas__remote, .canvas__diagram) {
+    transition: filter var(--dur-snap, 0.15s) ease;
+  }
+
+  .canvas[aria-busy='true'] .canvas__status::before {
+    animation: loader-turn 1.2s linear infinite;
+  }
+  .toast {
+    animation: dslkit-toast-in 0.18s ease-out;
+  }
+  @keyframes dslkit-toast-in {
+    from {
+      opacity: 0;
+      transform: translateY(0.5rem);
+    }
+  }
+}
+
+/* Tour of the editor: a card in the corner and an outline around the part it talks about */
+.tour {
+  position: fixed;
+  right: var(--space-2);
+  bottom: var(--space-2);
+  z-index: 50;
+  width: min(92vw, 22rem);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-large);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-large);
+}
+
+.tour__title {
+  margin: 0 0 var(--space-2);
+  font-size: 1.15rem;
+}
+
+.tour__text {
+  margin: 0 0 var(--space-3);
+}
+
+.tour__count {
+  margin: 0 0 var(--space-3);
+  color: var(--color-text-light);
+  font-size: var(--text-small);
+}
+
+.tour__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+
+.tour__target {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 3px;
+}
+
+.editor-import__file {
+  display: none;
+}
+
+/* Blocks of the own engine can be moved: a hand cursor, an outline for the keyboard and no scrolling while a finger drags */
+.canvas__remote .notation__node[data-cx] {
+  cursor: grab;
+  touch-action: none;
+}
+
+.canvas__remote .notation__node[data-cx]:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.canvas__remote .notation__node--dragging {
+  cursor: grabbing;
+  opacity: 0.8;
+}
+
+/* Buttons wired by editor-actions.js: the explorer opened with the menu button and the zoom of the drawing */
+.editor-sidebar.editor-sidebar--open {
+  display: grid;
+}
+
+.canvas__remote[data-zoom] svg {
+  max-width: none;
+  zoom: var(--canvas-zoom, 1);
+}
+
+.problems--open {
+  outline: 2px solid var(--color-error);
+}
+
+/* Drawer of the activity bar (search, Git, assistant) and the extra tabs under the code */
+.editor-tools {
+  position: fixed;
+  z-index: 30;
+  inset-block: var(--toolbar-height) calc(var(--status-height) + var(--problems-height));
+  inset-inline-start: var(--activity-width);
+  inline-size: min(22rem, calc(100vw - var(--activity-width)));
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-2);
+  overflow: auto;
+  background: var(--color-surface);
+  color: var(--color-text);
+  border-inline-end: 1px solid var(--color-border);
+  box-shadow: var(--shadow-large);
+}
+.editor-tools[hidden],
+.editor-tools [hidden],
+.problems__extra[hidden] {
+  display: none;
+}
+.editor-tools__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.editor-tools__heading {
+  margin: 0;
+  font-size: 1rem;
+}
+.editor-tools__view {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+.editor-tools__input {
+  padding: 0.5rem 0.75rem;
+  font: inherit;
+  color: inherit;
+  background: var(--color-background);
+  border: 1px solid var(--color-border-strong);
+  border-radius: 6px;
+}
+.editor-tools__list,
+.editor-tools__chat {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+.editor-tools__hit {
+  inline-size: 100%;
+  text-align: start;
+  justify-content: flex-start;
+}
+.editor-tools__commit {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 0.25rem 0.5rem;
+  align-items: center;
+  padding-block: 0.25rem;
+  border-block-end: 1px solid var(--color-border);
+}
+.editor-tools__commit-time {
+  grid-column: 1;
+  color: var(--color-muted);
+  font-size: 0.8125rem;
+}
+.editor-tools__diff {
+  max-block-size: 14rem;
+  margin: 0;
+  padding: 0.5rem;
+  overflow: auto;
+  font: 0.8125rem/1.4 var(--font-mono);
+  background: var(--color-code-background);
+  color: var(--color-code-text);
+  border-radius: 6px;
+}
+.editor-tools__message--user {
+  color: var(--color-primary-text);
+}
+.editor-tools__status,
+.editor-tools__summary,
+.editor-tools__empty {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 0.875rem;
+}
+.problems__extra {
+  padding: var(--space-1) var(--space-2);
+  overflow: auto;
+}
+.code__line--found {
+  outline: 2px solid var(--color-primary);
+  outline-offset: -2px;
+}
+
+/* Palette of the elements that can be put on the board by hand */
+.palette {
+  display: grid;
+  gap: 0.25rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.palette__item {
+  inline-size: 100%;
+  justify-content: flex-start;
+  text-align: start;
+  cursor: grab;
+  touch-action: none;
+}
+.palette__connect {
+  display: grid;
+  gap: 0.25rem;
+  margin-block-start: var(--space-1);
+}
+.palette__connect[hidden],
+.palette__empty[hidden] {
+  display: none;
+}
+.palette__hint,
+.palette__message,
+.palette__empty {
+  margin: 0.25rem 0;
+  color: var(--color-muted);
+  font-size: 0.8125rem;
+}
+.palette__ghost {
+  position: fixed;
+  z-index: 60;
+  padding: 0.25rem 0.625rem;
+  color: var(--color-on-primary);
+  background: var(--color-primary);
+  border-radius: 6px;
+  box-shadow: var(--shadow-large);
+  pointer-events: none;
+}
+.canvas__remote--connect .notation__node,
+.canvas__remote--connect .local-engine__box {
+  cursor: crosshair;
+}
+.notation__node--selected rect,
+.notation__node--selected ellipse,
+.notation__node--selected polygon,
+.notation__node--selected path {
+  stroke: var(--color-primary);
+  stroke-width: 3;
+}
+
+/* The text field of the code lies over the coloured lines and has the same font, so the caret stands where the text is drawn */
+.code {
+  position: relative;
+}
+.code__lines {
+  position: relative;
+  z-index: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.code__input {
+  position: absolute;
+  z-index: 1;
+  top: var(--space-2);
+  left: 0;
+  box-sizing: border-box;
+  min-width: 100%;
+  margin: 0;
+  padding: 0 var(--space-3) 0 calc(var(--space-1) + 3.5ch + var(--space-2));
+  border: 0;
+  outline: none;
+  resize: none;
+  overflow: hidden;
+  background: transparent;
+  color: transparent;
+  caret-color: var(--color-code-text);
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  line-height: 1.6;
+  white-space: pre;
+  tab-size: 2;
+}
+.code__input::selection {
+  background: rgb(37 99 235 / 0.5);
+  background: color-mix(in srgb, var(--color-primary) 55%, transparent);
+  color: transparent;
+}
+.code:focus-within {
+  outline: 2px solid var(--color-primary);
+  outline-offset: -2px;
+}
+
+.palette__remove {
+  inline-size: 100%;
+  margin-block-start: var(--space-1);
+  justify-content: flex-start;
+}
+.notation__node--picked rect,
+.notation__node--picked ellipse,
+.notation__node--picked polygon,
+.notation__node--picked path {
+  stroke: var(--color-primary);
+  stroke-width: 3;
+}
+
+/* Board tools in the toolbar: add (a menu of shapes), connect, rename, delete */
+.board-tools {
+  position: relative;
+  align-items: center;
+  padding-inline-start: var(--space-2);
+  border-inline-start: 1px solid var(--color-border);
+}
+.board-tools__button[aria-disabled='true'] {
+  opacity: 0.45;
+}
+.board-tools__add {
+  gap: 0.25rem;
+  padding-inline: var(--space-2);
+}
+.board-tools__text {
+  display: none;
+}
+.board-tools__pop {
+  position: absolute;
+  z-index: 40;
+  inset-block-start: calc(100% + 0.5rem);
+  inset-inline-start: var(--space-2);
+  inline-size: min(17rem, 90vw);
+  padding: var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-large);
+}
+.board-tools__pop[hidden] {
+  display: none;
+}
+.board-tools .palette {
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.375rem;
+}
+.board-tools .palette__item {
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  gap: 0.25rem;
+  min-block-size: 4.25rem;
+  padding: 0.5rem 0.25rem;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  text-align: center;
+  font-size: 0.75rem;
+  line-height: 1.2;
+}
+.board-tools .palette__item:hover {
+  border-color: var(--color-primary);
+}
+.board-tools .palette__item .icon {
+  inline-size: 1.75rem;
+  block-size: 1.75rem;
+}
+.board-tools .palette__connect {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin: 0;
+}
+.board-tools .palette__link {
+  max-inline-size: 7.5rem;
+  min-block-size: var(--target-size-small);
+}
+.board-tools .palette__mode[aria-pressed='true'] {
+  color: var(--color-on-primary);
+  background: var(--color-primary);
+}
+.board-tools .palette__remove {
+  inline-size: auto;
+  margin: 0;
+  justify-content: center;
+}
+.board-edit {
+  position: fixed;
+  z-index: 70;
+  box-sizing: border-box;
+  block-size: 2rem;
+  padding: 0 0.5rem;
+  border: 2px solid var(--color-primary);
+  border-radius: 6px;
+  color: var(--color-text);
+  background: var(--color-surface);
+  font: inherit;
+}
+.canvas {
+  position: relative;
+}
+.canvas__remote {
+  background-image: radial-gradient(circle, var(--color-border) 1px, transparent 1px);
+  background-size: 16px 16px;
+}
+.canvas > .palette__message {
+  position: absolute;
+  inset-block-end: 0.5rem;
+  inset-inline-start: 0.5rem;
+  max-inline-size: 70%;
+  margin: 0;
+  padding: 0.25rem 0.625rem;
+  border-radius: 6px;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-large);
+}
+.canvas > .palette__message:empty {
+  display: none;
+}
+
+@media (min-width: 64rem) {
+  .board-tools__text {
+    display: inline;
+  }
+}
+
+/* The panel under the code is small while the code has no problems, and tall again for the assistant, the output and the versions */
+.app-page--editor[data-clean='true']:not([data-tab='ai'], [data-tab='output'], [data-tab='versions'], [data-tab='expert']) {
+  --problems-height: 5.75rem;
+}
+.problems > .editor-tools__view {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) repeat(4, auto);
+  grid-template-rows: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-1);
+  min-width: 0;
+  min-height: 0;
+  max-block-size: calc(var(--problems-height) - 3.5rem);
+  overflow: hidden;
+}
+.problems > .editor-tools__view[hidden] {
+  display: none;
+}
+.problems .editor-tools__chat {
+  grid-column: 1 / -1;
+  align-self: stretch;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  overflow: hidden auto;
+  list-style: none;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.problems .editor-tools__view .editor-tools__input {
+  grid-column: 1;
+  min-width: 0;
+  block-size: 2.25rem;
+  padding-block: 0;
+}
+.problems .editor-tools__view .button {
+  white-space: nowrap;
+}
+.editor-sidebar[data-view='templates'] > :is(h2:first-child, .file-tree, .editor-sidebar__beta),
+.editor-sidebar:not([data-view='templates']) > :is(h2:nth-of-type(2), .templates, .templates__select) {
+  display: none;
+}
+
+.editor-toolbar__row .button--icon[aria-disabled='true'] {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.canvas__status[data-state='ready'] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Fluid toolbar: buttons take the size of their content, and the type, the targets and the gaps grow with the width of the screen */
+.editor-toolbar__row {
+  gap: clamp(0.25rem, 0.1rem + 0.6vw, 0.625rem);
+  padding: clamp(0.25rem, 0.1rem + 0.5vw, 0.5rem) clamp(0.375rem, 0.1rem + 1vw, 1rem);
+  flex-wrap: wrap;
+}
+.editor-toolbar__row .button {
+  flex: 0 0 auto;
+  inline-size: auto;
+  min-block-size: clamp(2.75rem, 2.5rem + 0.4vw, 3rem);
+  padding-inline: clamp(0.5rem, 0.25rem + 0.9vw, 1rem);
+  font-size: clamp(0.75rem, 0.68rem + 0.3vw, 0.9375rem);
+  white-space: nowrap;
+}
+.editor-toolbar__row .button--icon {
+  min-inline-size: clamp(2.75rem, 2.5rem + 0.4vw, 3rem);
+  padding-inline: 0;
+}
+.editor-toolbar__row .board-tools__add {
+  padding-inline: clamp(0.5rem, 0.25rem + 0.9vw, 1rem);
+}
+.board-tools {
+  gap: clamp(0.25rem, 0.1rem + 0.5vw, 0.5rem);
+  flex: 0 0 auto;
+}
+.board-tools .palette__link {
+  inline-size: auto;
+  max-inline-size: clamp(5rem, 3rem + 6vw, 9rem);
+  min-block-size: clamp(2.75rem, 2.5rem + 0.4vw, 3rem);
+  font-size: clamp(0.75rem, 0.68rem + 0.3vw, 0.9375rem);
+}
+.board-tools .icon,
+.editor-toolbar__row .icon {
+  inline-size: clamp(1rem, 0.85rem + 0.5vw, 1.25rem);
+  block-size: clamp(1rem, 0.85rem + 0.5vw, 1.25rem);
+}
+.app-topbar__theme {
+  display: inline-grid;
+  place-items: center;
+  inline-size: clamp(2.75rem, 2.5rem + 0.4vw, 3rem);
+  block-size: clamp(2.75rem, 2.5rem + 0.4vw, 3rem);
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+  color: var(--color-text);
+  background: transparent;
+  cursor: pointer;
+}
+@media (min-width: 48rem) {
+  .board-tools__text {
+    display: inline;
+  }
+  .docs {
+    grid-template-columns: 16rem minmax(0, 1fr);
+    align-items: start;
+  }
+  .docs__editor,
+  .docs__edit,
+  .docs__role,
+  .docs__status {
+    grid-column: 2;
+  }
+  .editor-toolbar__row {
+    flex-wrap: nowrap;
+  }
+}
+
+/* The menu is split into groups with a title and a divider; the export formats fold into a sub-menu */
+.editor-menu__group {
+  display: grid;
+  gap: 0.125rem;
+  padding-block: 0.375rem;
+}
+.editor-menu__group + .editor-menu__group,
+.editor-menu__group + .editor-menu__sub,
+.editor-menu__sub + .editor-menu__group {
+  border-top: 1px solid var(--color-border);
+}
+.editor-menu__title {
+  margin: 0;
+  padding: 0 var(--space-2);
+  color: var(--color-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.editor-menu__sub {
+  padding-block: 0.375rem;
+}
+.editor-menu__subsummary {
+  list-style: none;
+  cursor: pointer;
+}
+.editor-menu__subsummary::-webkit-details-marker {
+  display: none;
+}
+.editor-menu__subsummary::after {
+  content: '▸';
+  margin-inline-start: auto;
+}
+.editor-menu__sub[open] > .editor-menu__subsummary::after {
+  content: '▾';
+}
+.editor-menu__sub > .button:not(.editor-menu__subsummary) {
+  padding-inline-start: var(--space-4);
+}
+
+.templates__search {
+  inline-size: 100%;
+  margin-block-end: var(--space-1);
+}
+.editor-sidebar:not([data-view='templates']) > .templates__search {
+  display: none;
+}
+.templates {
+  max-block-size: calc(100dvh - 14rem);
+  overflow-y: auto;
+}
+
+/* Until the scripts have run, the sample content of the markup is hidden, so it never flashes before the real content; after 3 seconds it shows anyway */
+html.js:not(.is-ready)
+  :is(.canvas__diagram, .problems__list, .problems__status, .editor-banner, .canvas__status, .project-list, .app-nav__quota, .file-tree, .dashboard__count) {
+  visibility: hidden;
+  animation: dslkit-reveal 0s 3s forwards;
+}
+@keyframes dslkit-reveal {
+  to {
+    visibility: visible;
+  }
+}
+
+/* Documentation page */
+.docs {
+  display: grid;
+  gap: var(--space-3);
+  align-content: start;
+}
+.docs__kinds {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+.docs__kinds .button[aria-pressed='true'] {
+  color: var(--color-on-primary);
+  background: var(--color-primary);
+}
+.docs__list {
+  display: grid;
+  gap: 0.125rem;
+  margin: var(--space-2) 0 0;
+  padding: 0;
+  list-style: none;
+}
+.docs__link {
+  inline-size: 100%;
+  padding: 0.375rem var(--space-2);
+  border: 0;
+  border-radius: var(--radius-small);
+  color: var(--color-text);
+  background: transparent;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+.docs__link:hover,
+.docs__link[aria-current='true'] {
+  color: var(--color-link);
+  background: var(--color-secondary);
+}
+.docs__article {
+  min-width: 0;
+  max-inline-size: 48rem;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+.docs__article pre {
+  padding: var(--space-2);
+  overflow-x: auto;
+  border-radius: var(--radius-small);
+  color: var(--color-code-text);
+  background: var(--color-code-background);
+}
+.docs__article code {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+}
+.docs__edited,
+.docs__status,
+.docs__role-hint {
+  color: var(--color-muted);
+  font-size: 0.875rem;
+}
+.docs__text {
+  inline-size: 100%;
+  padding: var(--space-2);
+  color: var(--color-text);
+  background: var(--color-background);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-small);
+  font: 0.875rem/1.5 var(--font-mono);
+}
+.docs__actions,
+.docs__role {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1);
+}
+.docs__role-title {
+  inline-size: 100%;
+  margin: 0;
+  font-size: 1rem;
+}
+.docs__role-hint {
+  inline-size: 100%;
+  margin: 0;
+}
+.docs__role-input {
+  min-block-size: var(--target-size-small);
+  padding: 0 var(--space-2);
+  color: var(--color-text);
+  background: var(--color-background);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-small);
+}
+
+.app-page--docs .settings {
+  padding-block-end: var(--space-5);
+}
+.docs__nav {
+  min-width: 0;
+}
+.docs__hint {
+  margin: 0;
+  color: var(--color-muted);
+}
+.docs__role-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.app-topbar__theme {
+  flex: 0 0 auto;
+}
+
+/* On a narrow screen the group of board tools may wrap and never be wider than the screen */
+.board-tools {
+  flex: 0 1 auto;
+  flex-wrap: wrap;
+  max-inline-size: 100%;
+}
+.board-tools .palette__connect {
+  flex-wrap: nowrap;
+}
+
+/* The hidden tooltips of the toolbar buttons reach beyond the screen on a phone; they are clipped sideways, while the menus still open downwards */
+.editor-toolbar {
+  overflow-x: clip;
+}
+
+/* touch-action is not applied to the inner elements of an SVG, so a finger on a block was taken for a scroll and the drag was cancelled; it is set on the drawing itself */
+.canvas__remote svg {
+  touch-action: none;
+}
+
+/* The round buttons of the header (theme, settings) are 36 px; the touch area stays 44 px through the pseudo-element */
+.app-topbar .app-topbar__avatar,
+.app-topbar .app-topbar__theme,
+.editor-toolbar__row .editor-toolbar__avatar {
+  position: relative;
+  inline-size: 2.25rem;
+  block-size: 2.25rem;
+  width: 2.25rem;
+  height: 2.25rem;
+  min-width: 2.25rem;
+  min-height: 2.25rem;
+  padding: 0;
+}
+.app-topbar .app-topbar__avatar::after,
+.app-topbar .app-topbar__theme::after,
+.editor-toolbar__row .editor-toolbar__avatar::after {
+  content: '';
+  position: absolute;
+  inset: -0.25rem;
+}
+.app-topbar .app-topbar__avatar .icon,
+.app-topbar .app-topbar__theme .icon,
+.editor-toolbar__row .editor-toolbar__avatar .icon {
+  inline-size: 1.125rem;
+  block-size: 1.125rem;
+}
+
+/* Printing the editor prints the diagram and its code, without the panels and buttons */
+@media print {
+  .editor-toolbar,
+  .editor-activity,
+  .editor-sidebar,
+  .editor-bottom-nav,
+  .editor-status,
+  .editor-banner,
+  .problems,
+  .editor-tools,
+  .tour,
+  .canvas__toolbar,
+  .palette__message,
+  .skip-link {
+    display: none;
+  }
+  .app-page--editor {
+    display: block;
+    color: black;
+    background: white;
+  }
+  .canvas__remote,
+  .canvas__remote svg {
+    max-inline-size: 100%;
+    background: white;
+  }
+  .toasts {
+    display: none;
+  }
+}
+
+/* Toasts: short answers of the system in a corner */
+.toasts {
+  position: fixed;
+  z-index: 90;
+  inset-inline: var(--space-2);
+  inset-block-end: calc(var(--space-2) + env(safe-area-inset-bottom, 0px));
+  display: grid;
+  gap: 0.5rem;
+  justify-items: end;
+  pointer-events: none;
+}
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  box-sizing: border-box;
+  max-inline-size: min(26rem, 100%);
+  padding: 0.625rem 0.75rem;
+  border: 1px solid var(--color-border);
+  border-inline-start: 4px solid var(--color-primary);
+  border-radius: var(--radius-medium);
+  color: var(--color-text);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-large);
+  font-size: 0.875rem;
+  line-height: 1.35;
+  pointer-events: auto;
+}
+.toast--error {
+  border-inline-start-color: var(--color-error);
+}
+.toast--success {
+  border-inline-start-color: var(--color-success, var(--color-primary));
+}
+.toast__mark {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  inline-size: 1.25rem;
+  block-size: 1.25rem;
+  border-radius: 50%;
+  color: var(--color-on-primary);
+  background: var(--color-primary);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+.toast--error .toast__mark {
+  background: var(--color-error);
+}
+.toast__text {
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+.toast__close {
+  flex: none;
+  inline-size: 1.5rem;
+  block-size: 1.5rem;
+  padding: 0;
+  border: 0;
+  color: var(--color-muted);
+  background: transparent;
+  font-size: 1.125rem;
+  line-height: 1;
+  cursor: pointer;
 }

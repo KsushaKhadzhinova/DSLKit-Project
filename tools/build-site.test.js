@@ -1,0 +1,32 @@
+import assert from 'node:assert/strict';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { test } from 'node:test';
+import { buildSite } from './build-site.js';
+
+test('the build replaces the entry files by single bundles and keeps every other file', async () => {
+  const root = mkdtempSync(join(tmpdir(), 'build-'));
+  const from = join(root, 'site');
+  const to = join(root, 'dist');
+  mkdirSync(join(from, 'js'), { recursive: true });
+  mkdirSync(join(from, 'css'));
+  writeFileSync(join(from, 'index.html'), '<p>home</p>');
+  writeFileSync(join(from, 'js', 'one.js'), "export const one = () => 'first module';\n");
+  writeFileSync(join(from, 'js', 'script.js'), "import { one } from './one.js';\nconsole.log(one());\n");
+  writeFileSync(join(from, 'css', 'a.css'), 'a {\n  color: #111;\n  color: color-mix(in srgb, red 50%, blue);\n}\n');
+  writeFileSync(join(from, 'css', 'style.css'), "@import './a.css';\nb { background: url('../logo.svg'); }\n");
+  const sizes = await buildSite({ from, to });
+  assert.ok(sizes.script > 0 && sizes.style > 0);
+  const script = readFileSync(join(to, 'js', 'script.js'), 'utf8');
+  assert.ok(script.includes('first module'));
+  assert.equal(script.includes('import'), false);
+  const style = readFileSync(join(to, 'css', 'style.css'), 'utf8');
+  assert.match(style, /color:#111/);
+  assert.match(style, /color-mix/);
+  assert.match(style, /logo\.svg/);
+  assert.equal(readFileSync(join(to, 'index.html'), 'utf8'), '<p>home</p>');
+  assert.equal(existsSync(join(to, 'js', 'one.js')), true);
+  const again = await buildSite({ from, to });
+  assert.deepEqual(again, sizes);
+});

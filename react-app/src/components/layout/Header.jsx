@@ -1,7 +1,7 @@
 import Button from '../ui/Button';
 import styles from './Header.module.css';
 
-// Page header: the product title, links to the sections and a call-to-action stub.
+// Page header: the product title, links to the sections and a call-to-action button.
 function Header({ title, links = [], onSignup }) {
   return (
     <header className={styles.header}>

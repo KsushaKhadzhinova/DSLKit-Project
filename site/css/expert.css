@@ -1,0 +1,313 @@
+/* The wizard "Automatic build" in the editor, the tab "Expert", the page of the expert system and the page of decision support */
+
+/* The wizard: a panel on the right of the editor */
+.auto {
+  position: fixed;
+  z-index: 40;
+  inset-block: var(--toolbar-height) var(--status-height);
+  inset-inline: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-2);
+  overflow: auto;
+  color: var(--color-text);
+  background: var(--color-surface);
+  border-inline-start: 1px solid var(--color-border);
+  box-shadow: var(--shadow-large);
+}
+.auto[hidden],
+.auto [hidden],
+.expert-panel[hidden] {
+  display: none;
+}
+.auto__head,
+.auto__sources,
+.auto__actions,
+.auto__file,
+.expert__actions,
+.expert__kinds,
+.expert__choices,
+.decision__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1);
+}
+.auto__head {
+  justify-content: space-between;
+}
+.auto__title,
+.auto__subtitle,
+.expert__title,
+.expert__subtitle,
+.decision__title {
+  margin: 0;
+  font-size: 1rem;
+}
+.auto__subtitle,
+.expert__subtitle {
+  color: var(--color-muted);
+  font-size: 0.875rem;
+}
+.auto__note,
+.auto__hint,
+.auto__chosen,
+.auto__empty,
+.auto__file-name,
+.expert__honest,
+.decision__intro,
+.decision__hint,
+.decision__empty,
+.decision__note,
+.decision__status {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 0.875rem;
+}
+.auto__status {
+  min-block-size: 1.25rem;
+  margin: 0;
+  font-size: 0.875rem;
+}
+.auto__label,
+.expert__label,
+.decision__label,
+.auto__check,
+.decision__pair-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+.auto__select,
+.auto__text,
+.expert__text,
+.expert__rule-text,
+.decision__select,
+.decision__input {
+  inline-size: 100%;
+  min-block-size: var(--target-size-small);
+  padding: 0.5rem 0.75rem;
+  color: var(--color-text);
+  background: var(--color-background);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-small);
+  font: inherit;
+}
+.auto__text,
+.expert__text,
+.expert__rule-text {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  resize: vertical;
+}
+.auto__preview {
+  max-block-size: 16rem;
+  margin: 0;
+  padding: var(--space-2);
+  overflow: auto;
+  color: var(--color-code-text);
+  background: var(--color-code-background);
+  border-radius: var(--radius-small);
+  font: 0.875rem/1.5 var(--font-mono);
+}
+.auto__list,
+.expert__list,
+.expert-panel__list,
+.decision__saved,
+.decision__pair-list,
+.decision__ranking {
+  display: grid;
+  gap: 0.25rem;
+  margin: 0;
+  padding-inline-start: 1.25rem;
+}
+.auto__list {
+  font-size: 0.875rem;
+}
+.auto__output {
+  display: grid;
+  gap: var(--space-1);
+}
+.auto__progress {
+  inline-size: 100%;
+}
+.auto__why,
+.expert__why,
+.expert-panel__why {
+  font-size: 0.875rem;
+}
+.auto__file-input {
+  max-inline-size: 100%;
+}
+.auto__reuse {
+  max-inline-size: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* The tab "Expert" under the code */
+.expert-panel {
+  display: grid;
+  gap: var(--space-1);
+  font-size: 0.875rem;
+}
+.expert-panel__summary {
+  margin: 0;
+  font-weight: 600;
+}
+.expert-panel__item--high {
+  color: var(--color-error);
+}
+.expert-panel__item--medium {
+  color: var(--color-warning);
+}
+.expert-panel__item--low {
+  color: var(--color-text);
+}
+
+/* The page of the expert system */
+.expert,
+.decision {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-3);
+  align-content: start;
+}
+.expert__work,
+.expert__rules,
+.decision__setup,
+.decision__tablebox,
+.decision__pairs,
+.decision__resultbox,
+.decision__exportbox,
+.decision__savedbox {
+  display: grid;
+  gap: var(--space-1);
+  min-width: 0;
+  max-inline-size: 56rem;
+}
+.expert__ask {
+  margin: 0;
+  font-weight: 600;
+}
+.expert__question {
+  display: grid;
+  gap: var(--space-1);
+}
+.expert__editor {
+  display: grid;
+  gap: var(--space-1);
+}
+.expert__editor[hidden] {
+  display: none;
+}
+.expert__edited {
+  color: var(--color-muted);
+}
+.expert__rule,
+.expert__result {
+  overflow-wrap: anywhere;
+}
+.expert__rule-text-line,
+.expert__trace {
+  font-size: 0.875rem;
+}
+.expert__trace {
+  margin: 0.25rem 0 0;
+  color: var(--color-muted);
+}
+.expert__kinds .button[aria-pressed='true'] {
+  color: var(--color-on-primary);
+  background: var(--color-primary);
+}
+
+/* The page of decision support */
+.decision__scroll {
+  max-inline-size: 100%;
+  overflow-x: auto;
+}
+.decision__table {
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+.decision__table th,
+.decision__table td {
+  padding: 0.25rem;
+  text-align: start;
+  vertical-align: top;
+  border: 1px solid var(--color-border);
+}
+.decision__head,
+.decision__row-head {
+  min-inline-size: 9rem;
+}
+.decision__corner {
+  color: var(--color-muted);
+}
+.decision__pair {
+  display: grid;
+  gap: 0.25rem;
+}
+.decision__chart {
+  inline-size: 100%;
+  max-inline-size: 20rem;
+  block-size: auto;
+}
+.decision__bar {
+  fill: var(--color-border-strong);
+}
+.decision__bar--best {
+  fill: var(--color-primary);
+}
+.decision__warning {
+  margin: 0;
+  color: var(--color-error);
+  font-weight: 600;
+}
+.decision__ok {
+  margin: 0;
+  color: var(--color-accent-text);
+}
+.decision__cr,
+.decision__explain {
+  margin: 0;
+}
+.decision__saved-item {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+
+@media (min-width: 48rem) {
+  .auto {
+    inset-inline-start: auto;
+    inline-size: 26rem;
+  }
+  .decision__pair {
+    grid-template-columns: minmax(0, 1fr) 8rem;
+    align-items: center;
+  }
+}
+
+.app-page--expert .settings,
+.app-page--decision .settings {
+  padding-block-end: var(--space-5);
+}
+/* These pages have no settings menu, so their content takes the whole width instead of the narrow menu column */
+.settings.expert,
+.settings.decision {
+  grid-template-columns: minmax(0, 1fr);
+  align-content: start;
+}
+/* The role form and the status line of the documentation page sit in its second column; here they take the only column */
+.settings.expert > *,
+.settings.decision > * {
+  grid-column: 1;
+}
+.decision__result,
+.decision__sensitivity {
+  display: grid;
+  gap: var(--space-1);
+  min-width: 0;
+}

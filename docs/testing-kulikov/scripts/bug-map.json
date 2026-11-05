@@ -1,0 +1,9 @@
+{"K89b":"BUG-01","K89":"BUG-01","I63":"BUG-02","I63b":"BUG-02",
+"D11":"BUG-03","D12":"BUG-03","D12b":"BUG-03","D12c":"BUG-03","D01":"BUG-03","D02":"BUG-03","D06":"BUG-03","G04":"BUG-03","G05":"BUG-03","D28":"BUG-04",
+"J05":"BUG-05","J05-validate":"BUG-05","J05-parse":"BUG-05","J05-generate":"BUG-05","J06":"BUG-05","J06-validate":"BUG-05","J06-parse":"BUG-05","J06-generate":"BUG-05",
+"H05":"BUG-06","H06":"BUG-06","H07":"BUG-06","H08":"BUG-06","H09":"BUG-06","H10":"BUG-06","H11":"BUG-06","F03":"BUG-06","F04":"BUG-06","K06":"BUG-06","K93":"BUG-06",
+"K80":"BUG-07","K90":"BUG-08",
+"B35":"BUG-09","B36":"BUG-09","B31":"BUG-10","B32":"BUG-10","B33":"BUG-10",
+"A13":"BUG-11","B15":"BUG-11","B30":"BUG-11","C02":"BUG-11","C20":"BUG-11","B42":"BUG-12",
+"A07-HEAD/api/notations":"BUG-13","K04-HEAD":"BUG-13","G06":"BUG-14","G07":"BUG-14",
+"I35":"BUG-15","I38":"BUG-15","I48":"BUG-15","I49":"BUG-15","I53":"BUG-15","I57b":"BUG-16"}

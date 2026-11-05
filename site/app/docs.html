@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="../js/early.js"></script>
+    <meta name="robots" content="noindex" />
+    <meta name="description" content="Документация DSLKit: программа, обучающие гайды и код" />
+    <title>Документация — DSLKit</title>
+    <link rel="icon" href="../images/favicon.svg" type="image/svg+xml" />
+    <link rel="manifest" href="../manifest.webmanifest" />
+    <meta name="theme-color" content="#2563eb" />
+    <link rel="stylesheet" href="../css/style.css" />
+  </head>
+  <body class="app-page app-page--settings app-page--docs">
+    <a class="skip-link" href="#main">Перейти к основному содержимому</a>
+
+    <header class="app-topbar">
+      <a class="app-topbar__logo" href="../index.html">
+        <img class="app-topbar__logo-image" src="../images/logo.svg" alt="" width="24" height="24" />
+        <span class="app-topbar__logo-text">DSLKit</span>
+      </a>
+      <div class="app-topbar__search" role="search">
+        <label class="visually-hidden" for="app-search">Поиск диаграмм</label>
+        <input id="app-search" class="app-topbar__search-input" type="search" name="search" placeholder="Поиск диаграмм… Ctrl+K" autocomplete="off" />
+        <button type="button" class="app-topbar__search-button" aria-label="Найти">
+          <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="9" cy="9" r="5" />
+            <path d="M13 13l4 4" />
+          </svg>
+        </button>
+      </div>
+      <a class="app-topbar__new" href="welcome.html">
+        <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M10 4v12M4 10h12" />
+        </svg>
+        <span>Новая диаграмма</span>
+      </a>
+      <a class="header__lang" href="../en/app/docs.html" hreflang="en" lang="en">English</a>
+      <div class="auth auth--app" data-auth data-home="../index.html">
+        <a class="button auth__button" href="login.html" data-auth-guest>Войти</a>
+        <a class="button button--primary auth__button" href="register.html" data-auth-guest>Регистрация</a>
+        <span class="auth__name" data-auth-name data-auth-user hidden></span>
+        <button type="button" class="button auth__button" data-auth-logout data-auth-user hidden>Выйти</button>
+      </div>
+      <button type="button" class="app-topbar__theme" data-theme-switch aria-label="Сменить тему" title="Сменить тему">
+        <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+          <path d="M16 11.5A6.5 6.5 0 018.5 4 6.5 6.5 0 1016 11.5z" />
+        </svg>
+      </button>
+      <a class="app-topbar__avatar" href="settings.html" aria-label="Настройки"
+        ><svg
+          class="icon"
+          aria-hidden="true"
+          focusable="false"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.75"
+          stroke-linejoin="round"
+        >
+          <circle cx="12" cy="12" r="3" />
+          <path
+            d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"
+          /></svg
+      ></a>
+    </header>
+
+    <nav class="app-nav" aria-label="Разделы приложения">
+      <ul class="app-nav__list">
+        <li class="app-nav__item">
+          <a class="app-nav__link" href="dashboard.html">
+            <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M3 10l7-6 7 6M5 9v7h10V9" />
+            </svg>
+            <span>Мои проекты</span>
+          </a>
+        </li>
+        <li class="app-nav__item">
+          <a class="app-nav__link" href="welcome.html">
+            <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M3 4h14v12H3zM3 8h14M8 8v8" />
+            </svg>
+            <span>Шаблоны</span>
+          </a>
+        </li>
+        <li class="app-nav__item">
+          <a class="app-nav__link" href="dashboard.html#shared">
+            <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+              <circle cx="7" cy="7" r="3" />
+              <path d="M2 16c0-3 2-5 5-5s5 2 5 5M14 4a3 3 0 010 6M16 16c0-2-1-4-3-5" />
+            </svg>
+            <span>Общие</span>
+          </a>
+        </li>
+        <li class="app-nav__item">
+          <a class="app-nav__link" href="dashboard.html#trash">
+            <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M4 6h12M8 6V4h4v2M6 6l1 10h6l1-10" />
+            </svg>
+            <span>Корзина</span>
+          </a>
+        </li>
+        <li class="app-nav__item">
+          <a class="app-nav__link" href="docs.html" aria-current="page">
+            <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M5 3h8l3 3v11H5zM13 3v3h3M8 10h5M8 13h5" />
+            </svg>
+            <span>Документация</span>
+          </a>
+        </li>
+        <li class="app-nav__item">
+          <a class="app-nav__link" href="expert.html">
+            <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M10 3a4 4 0 00-2 7.5V13h4v-2.5A4 4 0 0010 3zM8 16h4" />
+            </svg>
+            <span>Эксперт</span>
+          </a>
+        </li>
+        <li class="app-nav__item">
+          <a class="app-nav__link" href="decision.html">
+            <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M10 3v13M5 16h10M10 6H4l-2 5h6zM10 6h6l-2 5h6z" />
+            </svg>
+            <span>Решения</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+    <div class="app-nav__quota">
+      <p class="app-nav__quota-text" id="quota-text">Бета: 3 из 5 диаграмм в день</p>
+      <progress class="app-nav__progress" aria-labelledby="quota-text" max="5" value="3">3 из 5</progress>
+      <p class="app-nav__quota-plan">Pro — без лимитов</p>
+    </div>
+
+    <main id="main" class="settings docs">
+      <h1 class="visually-hidden">Документация</h1>
+      <nav class="docs__nav" aria-label="Разделы документации">
+        <div class="docs__kinds" role="group" aria-label="Разделы документации">
+          <button type="button" class="button button--quiet" data-docs-kind="project" aria-pressed="true">Программа</button>
+          <button type="button" class="button button--quiet" data-docs-kind="guides" aria-pressed="false">Гайды</button>
+          <button type="button" class="button button--quiet" data-docs-kind="code" aria-pressed="false">Код</button>
+        </div>
+        <ul class="docs__list"></ul>
+      </nav>
+      <article class="docs__article" aria-live="polite">
+        <p class="docs__hint">Выберите раздел слева.</p>
+      </article>
+      <div class="docs__editor" hidden>
+        <textarea class="docs__text" rows="18" aria-label="Markdown"></textarea>
+        <div class="docs__actions">
+          <button type="button" class="button button--primary" data-docs-save>Сохранить</button>
+          <button type="button" class="button" data-docs-reset>Сбросить к исходному</button>
+          <button type="button" class="button" data-docs-cancel>Отмена</button>
+        </div>
+      </div>
+      <button type="button" class="button docs__edit" data-docs-edit hidden>Править</button>
+      <form class="docs__role" data-docs-role>
+        <h2 class="docs__role-title">Роль «разработчик»</h2>
+        <p class="docs__role-hint">Только разработчик может менять документацию. Читать её могут все.</p>
+        <label class="docs__role-label" for="docs-role-code">Код разработчика</label>
+        <input id="docs-role-code" class="docs__role-input" type="password" autocomplete="off" />
+        <button type="submit" class="button button--primary" data-docs-role-on>Включить роль</button>
+        <button type="button" class="button" data-docs-role-off hidden>Выйти из роли</button>
+      </form>
+      <p class="docs__status" role="status" aria-live="polite"></p>
+    </main>
+    <script type="module" src="../js/script.js"></script>
+  </body>
+</html>

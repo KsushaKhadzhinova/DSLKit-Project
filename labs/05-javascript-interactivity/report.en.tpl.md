@@ -94,40 +94,27 @@ Automated jsdom tests are written for every module and parse the real pages of t
 
 The commit with the implementation: https://github.com/KsushaKhadzhinova/DSLKit-Project/commit/39efd4f. The commit message: `feat: add JavaScript interactivity for a SaaS diagram editor`.
 
-## 4 Answers to Control Questions
+### 3.9 Checking in DevTools
 
-{{answers}}
-1. **Element lookup methods.** `getElementById` quickly finds an element with a known identifier, for example `#project-list`. `querySelector` accepts any selector and returns the first element, and `querySelectorAll` returns all matches, for example the filter buttons `.filter__chip[data-filter]`.
-2. **Event delegation.** One handler on a container receives events from descendants, and the needed element is found with `event.target.closest`. Elements added later work too: the notation filter buttons are created by the script and served by one group handler.
-3. **Creating elements.** `createElement`, `append` and `before` are used. `innerHTML` parses a string as markup and opens a path for code injection, while `createElement` with `textContent` is safe for user data and returns a reference to the created node.
-4. **Code structure.** The entry point `script.js` starts the components from the `components` folder, and shared parts live in `utils`: storage and field validation. The split allowed each module to be tested alone.
-5. **Bubbling and capturing.** The `toggle` event does not bubble, so the accordion listens in the capture phase on the container. The other events are handled in the bubbling phase through delegation.
-6. **What the DOM is.** It is the tree of objects that the browser builds from HTML. A script reads and changes it, and the page updates without a reload.
-7. **Selecting by identifier.** The expression `document.getElementById('name')` returns an element or `null`.
-8. **Changing text.** The assignment `element.textContent = 'Showing 3 of 6'` replaces the text inside an element without parsing markup.
-9. **Event handler.** It is a function the browser calls on an event. It is attached like this: `button.addEventListener('click', (event) => { ... });`.
-10. **Element attributes.** Read with `getAttribute('aria-label')`, write with `setAttribute('aria-invalid', 'true')`, remove with `removeAttribute`. The `data-` attributes are available through `element.dataset`.
-11. **Adding an element.** Create it with `const chip = document.createElement('button');`, set its properties and insert it with `group.append(chip);` or `list.before(group)`.
-12. **Removing an element.** The method `element.remove()`, as in the editor where saving a file removes the unsaved mark.
-13. **LocalStorage.** Key-value storage. Saving: `localStorage.setItem('theme', JSON.stringify('dark'));`, reading: `JSON.parse(localStorage.getItem('theme'))`.
-14. **LocalStorage in the project.** The keys `dslkit.notation-filter`, `dslkit.waitlist`, `dslkit.dashboard`, `dslkit.settings` and `dslkit.theme` keep the filter, requests, dashboard state, settings and theme. Requests are stored as an array of objects.
-15. **Updating without a reload.** A script changes the DOM: the filter hides cards with the `hidden` attribute, and search reorders and hides projects, with no page reload.
-16. **Styles from JavaScript.** Classes through `classList.add`, `remove` and `toggle` are preferred. One-off values are set with `element.style.width = '10px'`, and computed styles are read with `getComputedStyle`.
-17. **getElementById versus querySelector.** The first works with identifiers only and is faster, and the second accepts any CSS selector and returns the first match.
-18. **Adding to a list.** Create an `li` with `createElement`, set `textContent` and call `list.append(li)`. Saved requests are added to an array with `push`.
-19. **Sorting.** An array of elements is sorted with `sort` and a comparator, for example `localeCompare` by title, and then the elements are inserted into the list in the new order. Project sorting works this way.
-20. **Email check.** The regular expression `/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/` checks for an at sign and a domain. The function `isValidEmail` in `validation.js` uses it.
-21. **Changing a class.** The methods `classList.add('x')`, `remove('x')`, `toggle('x', true)` and `contains('x')`.
-22. **Click on a button.** `button.addEventListener('click', handler);` where the handler performs the action and calls `event.preventDefault()` when needed.
-23. **The submit event.** It fires when a form is sent. The handler calls `event.preventDefault()`, checks the fields and decides what happens next. In the project it saves the request and opens the confirmation page.
-24. **Field value.** The property `input.value`, and `checkbox.checked` for a checkbox. The form reads values by field identifiers.
-25. **Filtering.** A condition is computed for every element and `item.hidden = !matches` is set. The notation filter compares `item.dataset.status` with the chosen value.
-26. **Animation.** CSS provides the smoothness, and a script toggles a class or an attribute. In the project animations are turned off by the `prefers-reduced-motion` rule for users who are bothered by them.
-27. **A slider.** An array of slides, the index of the current one and handlers of the back and forward buttons that change the index and show the needed slide. The index is saved in LocalStorage.
-28. **A drop-down list.** A `select` element with `option` items is made by markup or code, and the change is handled by the `change` event. The project sorting of projects is built this way.
-29. **A timer.** The function `setInterval(() => {...}, 1000)` runs an action every second and `clearInterval` stops it. A one-time delay uses `setTimeout`.
-30. **Drag and drop.** An element gets `draggable="true"`, the events `dragstart`, `dragover` and `drop` are handled, and data travels through `event.dataTransfer`.
-{{/answers}}
+The page was checked in Chrome 155: the Elements panel shows the event handlers and the Application panel shows the saved data.
+
+The event handlers are shown in Figure 5: the click, change and keydown listeners of the notation filter button are attached to the common container, so delegation is used.
+
+![DevTools screenshot](figures/devtools-01-event-listeners.png)
+
+Figure 5 – The Elements panel, the Event Listeners tab for a filter button
+
+The console check is shown in Figure 6: getEventListeners returns the listeners of the container, and the notation list holds six cards.
+
+![DevTools screenshot](figures/devtools-02-console.png)
+
+Figure 6 – Console: the listeners of the filter container and the card count
+
+The saved state is shown in Figure 7: after the form is submitted, LocalStorage holds keys with the dslkit prefix, among them dslkit.notation-filter and dslkit.waitlist.
+
+![DevTools screenshot](figures/devtools-03-local-storage.png)
+
+Figure 7 – The Application panel: site LocalStorage
 
 ## Conclusion
 

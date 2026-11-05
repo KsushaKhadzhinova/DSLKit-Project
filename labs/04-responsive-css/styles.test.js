@@ -9,6 +9,7 @@ import {
   darkTokens,
   colorMixWithoutFallback,
   desktopFirstQueries,
+  duplicateMediaQueries,
   fibonacciProblems,
   goldenProblems,
   hardcodedColors,
@@ -24,7 +25,10 @@ import {
 
 const SITE = join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'site');
 const CSS_DIR = join(SITE, 'css');
-const walk = (dir) => readdirSync(dir).flatMap((name) => (statSync(join(dir, name)).isDirectory() ? walk(join(dir, name)) : [join(dir, name)]));
+const walk = (dir) =>
+  readdirSync(dir)
+    .filter((name) => name !== 'design')
+    .flatMap((name) => (statSync(join(dir, name)).isDirectory() ? walk(join(dir, name)) : [join(dir, name)]));
 const read = (file) => readFileSync(file, 'utf8');
 const sheets = Object.fromEntries(readdirSync(CSS_DIR).map((name) => [name, read(join(CSS_DIR, name))]));
 const allCss = Object.values(sheets).join('\n');
@@ -137,6 +141,12 @@ test('the header is sticky, focus is visible, reduced motion is respected and a 
 
 test('the styles are mobile first: only min-width media queries are used for layout', () => {
   assert.deepEqual(desktopFirstQueries(allCss), []);
+});
+
+test('no stylesheet repeats a media query, one query is one block', () => {
+  for (const [name, css] of Object.entries(sheets)) {
+    assert.deepEqual(duplicateMediaQueries(css), [], name);
+  }
 });
 
 test('the variables named in the assignment exist', () => {

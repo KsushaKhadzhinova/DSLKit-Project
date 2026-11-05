@@ -51,7 +51,7 @@
 
 ### 3.4 Иерархия заголовков
 
-Каждая страница содержит один заголовок первого уровня. На главной это «Пишите код — получайте диаграмму», секции получают заголовки второго уровня, карточки и шаги заголовки третьего. Пропусков уровней нет, это проверяет автоматический тест для всех 15 страниц сайта.
+Каждая страница содержит один заголовок первого уровня. На главной это «Пишите код — получайте диаграмму», секции получают заголовки второго уровня, карточки и шаги заголовки третьего. Пропусков уровней нет, это проверяет автоматический тест для всех 16 страниц сайта.
 
 ### 3.5 Доступность
 
@@ -79,21 +79,23 @@
 
 ### 3.8 Проверка валидности
 
-Страница проверена валидатором W3C Nu Html Checker. Результат показан на рисунке 1: ошибок и предупреждений нет. Код передан в валидатор без отступов, на содержимое это не влияет.
+Страница проверена валидатором W3C Nu Html Checker (версия vnu 26.10.12, указана на снимке) в режиме «Check by text input»: исходный код вставлен в поле ввода, потому что сайт не опубликован и проверка по адресу невозможна. Показаны только ошибки и предупреждения. Дата проверки на снимке не отображается, файл снимка добавлен в репозиторий 14 октября 2026 года. Результат показан на рисунке 1: ошибок и предупреждений нет. Код передан в валидатор без отступов, на содержимое это не влияет.
 
 ![Результат проверки главной страницы в валидаторе W3C](figures/w3c-validator.jpg)
 
 Рисунок 1 – Результат проверки W3C Nu Html Checker: ошибок и предупреждений нет
 
-Все 15 страниц сайта проверены тем же сервисом с нулевым числом ошибок и предупреждений. Остаются только информационные сообщения о слэше в пустых элементах, на работу страниц они не влияют.
+Все 15 страниц сайта проверены тем же сервисом и тем же способом, вставкой кода, с нулевым числом ошибок и предупреждений. Остаются только информационные сообщения о слэше в пустых элементах, на работу страниц они не влияют.
 
 ### 3.9 Проверка микроразметки
 
-Для проверки микроразметки использован валидатор Schema.org. Результат показан на рисунке 2: найдены объекты SoftwareApplication и FAQPage без ошибок и предупреждений. Инструмент Google Rich Results Test требует публичный адрес страницы, а домен `dslkit.io` пока не куплен, поэтому проверка в нём не выполнена и остаётся задачей после публикации.
+Для проверки микроразметки использован валидатор Schema.org (validator.schema.org), код страницы вставлен в поле ввода. Результат показан на рисунке 2: обнаружены 2 элемента, SoftwareApplication и FAQPage, ошибок 0 и предупреждений 0. Интерфейс на снимке польский, дата проверки на нём не отображается, файл снимка добавлен в репозиторий 14 октября 2026 года.
 
 ![Результат проверки микроразметки в валидаторе Schema.org](figures/schema-org-validator.jpg)
 
 Рисунок 2 – Результат проверки микроразметки: объекты SoftwareApplication и FAQPage без ошибок
+
+Google Rich Results Test не запускался: сайт не опубликован, домен `dslkit.io` пока не куплен. Проверка в этом инструменте остаётся задачей после публикации, результатов по нему в отчёте нет.
 
 ### 3.10 Автоматические тесты
 
@@ -101,21 +103,19 @@
 
 ### 3.11 Структура проекта
 
-Файлы проекта находятся в папках `site` (страницы, стили, скрипты, изображения, макеты), `labs` (лабораторные работы) и `tools` (инструменты). Страницы приложения для следующих работ лежат в `site/app`.
+Файлы проекта находятся в папках `site` (страницы, стили, скрипты, изображения, макеты), `labs` (лабораторные работы) и `tools` (инструменты). Страницы приложения для следующих работ лежат в `site/app`. Структура папки `site` и семантические блоки главной страницы показаны на рисунке 3, он построен по фактическим файлам и разметке `site/index.html`.
+
+![Структура проекта и семантические блоки главной страницы](figures/project-structure.svg)
+
+Рисунок 3 – Структура папки site и семантические блоки страницы index.html
 
 ### 3.12 Фиксация изменений
 
 Работа выполнена в ветке `feature/semantic-markup`. Коммит: https://github.com/KsushaKhadzhinova/DSLKit-Project/commit/a2b85e0. Сообщение коммита: `feat: add semantic HTML markup with Schema.org for a SaaS diagram editor`.
 
-## 4 Ответы на контрольные вопросы
-
-5. **Ошибки валидации.** Валидатор показал замечание о секции без заголовка на странице настроек, а локальные проверки нашли ссылки на несуществующие идентификаторы. Секция заменена на `div`, ссылки исправлены. Валидная разметка одинаково обрабатывается браузерами и проще поддерживается.
-6. **Section и article.** Элемент `section` объединяет тематический раздел и требует заголовка, например «Тарифы». Элемент `article` самостоятелен и может существовать вне страницы, например карточка нотации или тариф.
-7. **Figure.** Элемент `figure` связывает иллюстрацию с подписью `figcaption`, и программы чтения с экрана воспринимают их как единое целое. Обычный `div` с изображением такой связи не создаёт.
-
 ## Заключение
 
-Создана семантическая разметка главной страницы DSLKit и сопутствующих страниц: русская и английская версии, страницы ошибок, политика и подтверждение записи. Использовано 15 семантических тегов, соблюдены иерархия заголовков и требования доступности, добавлена микроразметка SoftwareApplication, Offer и FAQPage. Валидаторы W3C и Schema.org не нашли ошибок, автоматические тесты проверяют разметку на всех страницах. Проверка в Rich Results Test отложена до публикации сайта.
+Создана семантическая разметка главной страницы DSLKit и сопутствующих страниц: русская и английская версии, страницы ошибок, политика и подтверждение записи. Использовано 15 семантических тегов, соблюдены иерархия заголовков и требования доступности, добавлена микроразметка SoftwareApplication, Offer и FAQPage. Валидаторы W3C и Schema.org не нашли ошибок, автоматические тесты проверяют разметку на всех страницах. Google Rich Results Test не запускался, так как сайт не опубликован и домен не куплен.
 
 ## Приложение А – Листинг файла index.html
 
@@ -136,6 +136,8 @@
     <link rel="alternate" hreflang="en" href="https://dslkit.io/en/" />
     <link rel="alternate" hreflang="x-default" href="https://dslkit.io/" />
     <link rel="icon" href="images/favicon.svg" type="image/svg+xml" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <meta name="theme-color" content="#2563eb" />
     <link rel="stylesheet" href="css/style.css" />
   </head>
   <body class="page">
@@ -158,12 +160,40 @@
             <li class="nav__item"><a class="nav__link" href="#audience">Для кого</a></li>
             <li class="nav__item"><a class="nav__link" href="#pricing">Тарифы</a></li>
             <li class="nav__item"><a class="nav__link" href="#faq">FAQ</a></li>
+            <li class="nav__item nav__item--auth">
+              <div class="auth" data-auth data-home="./">
+                <a class="button auth__button" href="app/login.html" data-auth-guest>Войти</a>
+                <a class="button button--primary auth__button" href="app/register.html" data-auth-guest>Регистрация</a>
+                <a class="auth__link" href="app/dashboard.html" data-auth-user hidden><span data-auth-name>Аккаунт</span></a>
+                <button type="button" class="button auth__button" data-auth-logout data-auth-user hidden>Выйти</button>
+              </div>
+            </li>
           </ul>
         </nav>
         <div class="header__tools">
           <a class="header__lang" href="en/" hreflang="en" lang="en">English</a>
           <input class="theme__input" type="checkbox" id="theme-toggle" />
-          <label class="theme__button" for="theme-toggle">Тёмная тема</label>
+          <label class="theme__button" for="theme-toggle" title="Тёмная тема"
+            ><svg class="theme__icon theme__icon--moon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">
+              <path
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"
+              /></svg
+            ><svg class="theme__icon theme__icon--sun" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">
+              <circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2" />
+              <path
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"
+              /></svg
+            ><span class="theme__label">Тёмная тема</span></label
+          >
           <a class="button button--primary header__cta" href="#waitlist">В бету</a>
         </div>
       </div>
@@ -181,11 +211,11 @@
             Веб-редактор диаграмм как кода: опишите схему текстом на DSL, а DSLKit проверит её по правилам нотации и нарисует.
           </p>
           <div class="hero__cta">
-            <a class="button button--hero" href="app/editor.html">Создать диаграмму</a>
+            <a class="button button--primary button--hero" href="app/editor.html">Создать диаграмму</a>
             <p class="hero__cta-note">Откроется редактор: слева код, справа диаграмма</p>
           </div>
           <p class="hero__actions">
-            <a class="button button--primary" href="#waitlist">Записаться в бету</a>
+            <a class="button" href="#waitlist">Записаться в бету</a>
             <a class="button" href="#how">Как это работает</a>
           </p>
           <p class="hero__note" itemprop="offers" itemscope itemtype="https://schema.org/Offer">
@@ -681,7 +711,10 @@ import {
 } from './site-checks.js';
 
 const SITE = join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'site');
-const walk = (dir) => readdirSync(dir).flatMap((name) => (statSync(join(dir, name)).isDirectory() ? walk(join(dir, name)) : [join(dir, name)]));
+const walk = (dir) =>
+  readdirSync(dir)
+    .filter((name) => name !== 'design')
+    .flatMap((name) => (statSync(join(dir, name)).isDirectory() ? walk(join(dir, name)) : [join(dir, name)]));
 const files = walk(SITE);
 const pages = Object.fromEntries(
   files.filter((file) => file.endsWith('.html')).map((file) => [relative(SITE, file).replaceAll('\\', '/'), parse(readFileSync(file, 'utf8'))]),
@@ -695,9 +728,34 @@ const eachPage = (title, check, subset = names) =>
   });
 
 test('the site has the landing pages in both languages, error pages and application screens', () => {
-  for (const page of ['index.html', 'en/index.html', 'thanks.html', 'privacy.html', 'errors/404.html', 'app/editor.html'])
+  for (const page of [
+    'index.html',
+    'en/index.html',
+    'thanks.html',
+    'privacy.html',
+    'errors/404.html',
+    'app/editor.html',
+    'en/app/editor.html',
+    'app/dashboard.html',
+    'en/app/dashboard.html',
+    'app/settings.html',
+    'en/app/settings.html',
+    'app/welcome.html',
+    'en/app/welcome.html',
+    'app/login.html',
+    'en/app/login.html',
+    'app/register.html',
+    'en/app/register.html',
+    'app/docs.html',
+    'en/app/docs.html',
+    'app/expert.html',
+    'en/app/expert.html',
+    'app/decision.html',
+    'en/app/decision.html',
+  ])
     assert.ok(names.includes(page), page);
-  assert.equal(names.length, 15);
+  // 431.html joined the other error pages (400, 403, 404, 405, 500) when the header-overflow response got its own page.
+  assert.equal(names.length, 30);
 });
 
 eachPage('every page has lang, title, charset and viewport', documentProblems);
@@ -740,6 +798,14 @@ test('the Russian and English versions have the same element structure', () => {
     ['index.html', 'en/index.html'],
     ['thanks.html', 'en/thanks.html'],
     ['privacy.html', 'en/privacy.html'],
+    ['app/dashboard.html', 'en/app/dashboard.html'],
+    ['app/settings.html', 'en/app/settings.html'],
+    ['app/welcome.html', 'en/app/welcome.html'],
+    ['app/login.html', 'en/app/login.html'],
+    ['app/register.html', 'en/app/register.html'],
+    ['app/docs.html', 'en/app/docs.html'],
+    ['app/expert.html', 'en/app/expert.html'],
+    ['app/decision.html', 'en/app/decision.html'],
   ])
     assert.deepEqual(parityProblems(pages[ru], pages[en]), [], ru);
 });
@@ -763,7 +829,7 @@ test('every local href and src resolves to an existing file', () => {
   const missing = [];
   for (const file of files.filter((name) => name.endsWith('.html'))) {
     const html = readFileSync(file, 'utf8');
-    for (const [, url] of html.matchAll(/\b(?:href|src)="([^"#]*)(?:#[^"]*)?"/g)) {
+    for (const [, url] of html.matchAll(/\b(?:href|src)="([^"#?]*)(?:[?#][^"]*)?"/g)) {
       if (!url || /^(https?:|mailto:)/.test(url)) continue;
       const target = url.startsWith('/') ? join(SITE, url) : join(dirname(file), url);
       const resolved = statSync(target, { throwIfNoEntry: false })?.isDirectory() ? join(target, 'index.html') : target;

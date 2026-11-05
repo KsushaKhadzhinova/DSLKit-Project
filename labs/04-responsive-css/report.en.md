@@ -49,6 +49,23 @@ Table 1 – Style files of the DSLKit project
 
 The file `variables.css` defines colours of the light and dark themes, font families, the text size scale, spacing, radii, shadows and the container width. The names required by the assignment (`--font-family-main`, `--font-size-base`, `--spacing-small`, `--container-max-width`, `--breakpoint-mobile` and others) are aliases of the project scales. Spacing of 8, 16, 24, 40, 64 and 104 pixels corresponds to Fibonacci numbers multiplied by 8, so the 8 pixel grid agrees with the golden ratio.
 
+The reasons for the main values are given in table 2.
+
+Table 2 – Rationale of the CSS variable values
+
+| Variables | Value | Rationale |
+|---|---|---|
+| `--phi`, `--phi-root` | 1.618 and 1.272 | The golden ratio and its square root build the type scale: a step of √φ gives small increments for captions and a step of φ gives headings |
+| `--font-size-base` | 16 pixels | The browser default: text never drops below 12 pixels and the user's scaling in `rem` is kept |
+| `--font-size-h1`, `--font-size-h2` | about 53 and 42 pixels | Steps `--step-5` and `--step-4` of the scale: 16 × φ² × √φ and 16 × φ² |
+| `--spacing-small` … `--spacing-xlarge` | 8, 16, 24 and 40 pixels | Fibonacci numbers 1, 2, 3 and 5 multiplied by 8, so spacing stays on the 8 pixel grid. The assignment example uses 48 for the last value, the project uses 40 to keep the Fibonacci series |
+| `--space-5`, `--space-6` | 64 and 104 pixels | Fibonacci numbers 8 and 13 for the vertical spacing of sections |
+| `--container-max-width` | 1200 pixels | The value from the assignment: a line of text stays within `--measure` (62 characters) and the hero columns get about 458 and 742 pixels |
+| `--target-size` | 48 pixels | A tap target above the 24 pixel minimum of WCAG 2.2 (criterion 2.5.8), comfortable for a finger |
+| `--header-height` | 64 pixels | Equal to `--space-5`, so the header fits the 8 pixel grid |
+
+The breakpoints are set in pixels in `--breakpoint-small`, `--breakpoint-medium` and `--breakpoint-large` and repeated in the aliases required by the assignment. CSS variables cannot be used inside an `@media` condition, so the numbers 576, 768 and 1024 are written in `adaptive.css` directly, and a test checks them against the list of allowed breakpoints.
+
 ### 3.4 Base Styles
 
 The file `base.css` resets margins, sets `box-sizing: border-box`, the font, the text colour and the line height. The line height is 1.618 for body text and 1.15 for headings. Every interactive element has a visible focus ring, the `visually-hidden` class hides text visually only, and the `prefers-reduced-motion` rule turns animation off for users who are bothered by it.
@@ -59,13 +76,44 @@ The header is fixed with `position: sticky`. On screens narrower than 768 pixels
 
 ### 3.6 Flexbox and Grid Layouts
 
-Flexbox is used in the header, the footer, rows of buttons and captions. Grid builds the hero block (two columns, 1 to 1.618), the card grid, pricing, steps and the application shell with a 224 pixel sidebar. The editor screen uses the named areas `toolbar`, `activity`, `sidebar`, `main`, `problems` and `status`.
+Flexbox and Grid solve different problems, so the project uses them together: Flexbox arranges content along one axis, Grid defines a two-dimensional layout.
+
+#### 3.6.1 Flexbox
+
+Flexbox is used where items sit side by side or one under another and align along one axis:
+
+- the logo in the header (`.header__logo`), the navigation row (`.nav__list`) and the row of tools (`.header__tools`);
+- rows of buttons in the hero block (`.hero__actions`) and the buttons themselves (`.button`), where the icon and the label are centred;
+- the list of footer links (`.footer__list`);
+- the title and the meta line of a card (`.card__title`, `.card__meta`) and the accordion question (`.faq__question`).
+
+On a phone the navigation is a column, and from 768 pixels it is a wrapping row (`flex-flow: row wrap`).
+
+#### 3.6.2 CSS Grid
+
+Grid is used for two-dimensional layouts:
+
+- the page frame `.page` is described by the areas `header`, `main` and `footer` with `grid-template-areas`, one column and the rows `auto 1fr auto`. The `1fr` row pushes the footer to the bottom of the window on short pages, as the former Flexbox frame did. The public pages have no sidebar, so the `sidebar` area from the assignment example is not needed, and the application shell with its 224 pixel panel is described separately in `app.css`;
+- the hero block `.hero`: one column on a phone and `1fr 1.618fr` from 1024 pixels;
+- the card grid `.cards`: one, two and three columns through `repeat(n, minmax(0, 1fr))`, where `minmax(0, 1fr)` stops a long word from stretching a column;
+- pricing `.plans` and the hero facts `.hero__facts`;
+- the editor screen: the named areas `toolbar`, `activity`, `sidebar`, `main`, `problems` and `status`, with the `sidebar` column added on a wide screen.
+
+After `.page` moved from Flexbox to Grid, comparing the position and size of every element with the previous ones on six pages at the widths 375, 500, 800 and 1440 pixels showed no differences.
 
 ### 3.7 Responsiveness
 
-Three states are implemented with the mobile-first approach and listed in table 2.
+Three states are implemented with the mobile-first approach and listed in table 3.
 
-Table 2 – Breakpoints and page behaviour
+The breakpoints follow the page content and typical devices, not particular phone models:
+
+- 576 pixels: the border between a narrow and a wide phone, for example after a screen rotation. From here the cards have room for two columns, and the burger caption becomes visible;
+- 768 pixels: the width of a tablet in portrait orientation. Five menu items, the language switch and the button fit in one row, so the burger is replaced by a horizontal menu. The assignment names the same border as the limit for the burger;
+- 1024 pixels: a tablet in landscape orientation and a laptop. There is room for three columns of cards and for the hero block in the proportion 1 to 1.618.
+
+The mobile-first approach is used: base styles describe a phone and each `min-width` query only adds rules. A phone never receives desktop rules that would have to be cancelled, and the cascade has fewer overrides than with desktop-first `max-width` queries. The breakpoints are in pixels because dependence on the user's font size is not needed here. The assignment text names 992 pixels for the desktop, and the project uses 1024 as in the media query example of the same assignment. Every query is written in `adaptive.css` as one block, and a test forbids repeats.
+
+Table 3 – Breakpoints and page behaviour
 
 | Width | State | Behaviour |
 |---|---|---|
@@ -98,27 +146,63 @@ The dark theme switches without JavaScript: the rule `:root:has(.theme__input:ch
 
 ### 3.9 Cross-Browser Compatibility
 
-Flexbox and Grid are supported by all modern browsers. Every `color-mix()` declaration is preceded by a fallback value, so a browser without the function uses a plain colour. The `-webkit-` prefix is added for `backdrop-filter`. Autoprefixer is not connected because the project targets current browser versions.
+Flexbox and Grid are supported by all modern browsers, so no fallbacks are needed for them. Every `color-mix()` declaration is preceded by a fallback value, so a browser without the function uses a plain colour. The `-webkit-` prefix is added for `backdrop-filter`. Autoprefixer is not connected because the project targets current browser versions.
+
+The site was opened in real browsers driven through puppeteer-core. The results are in table 4, and the full protocol is in `docs/metrics/browsers/README.md`.
+
+Table 4 – Browser test results
+
+| Browser | Version | Check | Result |
+|---|---|---|---|
+| Google Chrome | current | inspection at 375, 768 and 1280 pixels | layout is correct |
+| Mozilla Firefox | 157.0.1 | 20 scenarios on the landing, the application and the editor | 20 of 20 |
+| Microsoft Edge | 155.0.4283.45 | the same 20 scenarios | 20 of 20 |
+| Safari | not tested | no Apple device | left for the acceptance stage |
+
+Each browser checked page loading, the theme switch, the burger menu, forms, no horizontal scrolling at 375 pixels and no console errors. The check found a defect: at 375 pixels the page scrolled sideways, and it was fixed with the rule `overflow-x: clip` for `html` in `base.css`. A snapshot of the landing page in Firefox at 375 pixels is shown in figure 4.
+
+![Landing page in Firefox at 375 pixels](figures/firefox-landing-375.png)
+
+Figure 4 – The DSLKit landing page in Firefox on a 375 pixel screen
+
+A snapshot of the landing page in Edge at 1280 pixels is shown in figure 5.
+
+![Landing page in Edge at 1280 pixels](figures/edge-landing-1280.png)
+
+Figure 5 – The DSLKit landing page in Edge on a 1280 pixel screen
 
 ### 3.10 Verification and Testing
 
-Automated checks are collected in the tests of `labs/04-responsive-css`. They confirm that every class used in the HTML has a rule in the styles, that the tokens follow the golden ratio, that spacing is a multiple of 8 pixels and forms a Fibonacci series, that colours pass AA contrast in the light and dark themes, that no colours live outside the variables file, that no font is smaller than 12 pixels, and that only `min-width` queries and the breakpoints 576, 768 and 1024 are used.
+Automated checks are collected in the tests of `labs/04-responsive-css`. They confirm that every class used in the HTML has a rule in the styles, that the tokens follow the golden ratio, that spacing is a multiple of 8 pixels and forms a Fibonacci series, that colours pass AA contrast in the light and dark themes, that no colours live outside the variables file, that no font is smaller than 12 pixels, that only `min-width` queries and the breakpoints 576, 768 and 1024 are used, and that no file contains two identical `@media` queries.
 
-All style files passed the W3C CSS validator without errors, and the HTML pages passed the W3C Nu validator. The geometry of all page elements was compared before and after the move to mobile first at the widths 500, 800 and 1440 pixels, and no differences appeared. Visual inspection in Chrome at 375, 768 and 1280 pixels showed a correct layout. Testing in Firefox, Edge and Safari on real devices has not been done and remains a task for the acceptance stage.
+Every style file was checked with the W3C CSS validator (profile CSS 3.0 with SVG, warnings on). The results are in table 5, and the full validator responses are saved in `docs/metrics/css-validator`.
+
+Table 5 – W3C CSS validator results
+
+| File | Errors | Warnings |
+|---|---|---|
+| `variables.css` | 0 | 0 |
+| `base.css` | 0 | 29 |
+| `components.css` | 0 | 98 |
+| `header.css` | 0 | 35 |
+| `main.css` | 0 | 34 |
+| `footer.css` | 0 | 9 |
+| `pages.css` | 0 | 26 |
+| `app.css` | 0 | 236 |
+| `editor.css` | 0 | 170 |
+| `adaptive.css` | 0 | 14 |
+
+Almost all warnings have one cause: the validator cannot evaluate values with `var()` because they depend on the runtime. The rest report vendor prefixes (`-webkit-appearance`, `progress` indicators), the deprecated `clip` property in the `visually-hidden` class, kept as a fallback beside `clip-path`, and the notation `rect(0 0 0 0)` without commas, which browsers understand.
+
+The HTML pages passed the W3C Nu validator. The geometry of all page elements was compared before and after the move to mobile first at the widths 500, 800 and 1440 pixels, and no differences appeared. The same method was applied after the `.page` frame moved to Grid.
 
 ### 3.11 Committing the Changes
 
 The work is done in the branch `feature/responsive-layout`. The commit with the implementation: https://github.com/KsushaKhadzhinova/DSLKit-Project/commit/eb70a59. The commit message: `feat: implement responsive layout according to Figma design`.
 
-## 4 Answers to Control Questions
-
-5. **Difficulties when moving the design.** Figma layouts are static and carry no states, so hover, focus and error states had to be designed independently. The Fibonacci spacing scale resolved the differences from the 8 pixel grid.
-6. **Media queries.** The rule `@media (min-width: 768px) { .nav { display: block; } }` shows the menu on wide screens. Queries switch styles on by a condition, so one markup works on different devices.
-7. **Fluid grids.** Percentages are computed from the parent width, while the `fr` unit divides the remaining free space between columns. The value `1fr 1.618fr` sets the hero columns without computing percentages.
-
 ## Conclusion
 
-The styles of the DSLKit project are split into files following the BEM methodology and built mobile first. Three page states, a burger menu without JavaScript, Flexbox and Grid layouts, CSS variables and a dark theme are implemented. The golden ratio is built into the size scale, the spacing and the columns, and automated tests prevent any drift from it. What remains is to check the page in Firefox, Edge and Safari on real devices.
+The styles of the DSLKit project are split into files following the BEM methodology and built mobile first. Three page states, a burger menu without JavaScript, Flexbox and Grid layouts, CSS variables and a dark theme are implemented. The golden ratio is built into the size scale, the spacing and the columns, and automated tests prevent any drift from it. The page is tested in Chrome, Firefox and Edge, and the check in Safari on an Apple device remains.
 
 ## Appendix A – Listing of variables.css
 
@@ -134,7 +218,6 @@ The styles of the DSLKit project are split into files following the BEM methodol
   --color-primary: #2563eb;
   --color-on-primary: #ffffff;
   --color-primary-text: #1d4ed8;
-  --color-cta-end: #7c3aed;
   --color-diagram-paper: #ffffff;
   --color-secondary: #e8efff;
   --color-accent: #16a34a;
@@ -170,25 +253,27 @@ The styles of the DSLKit project are split into files following the BEM methodol
   --columns-golden: 1fr 1.618fr;
   --columns-golden-reverse: 1.618fr 1fr;
 
+  /* Smallest readable text: the golden step, but never below 14 px (WCAG and the interface rules). */
+  --text-small: max(var(--step--1), 0.875rem, 14px);
   --line-body: var(--phi);
   --line-heading: 1.15;
 
-  --space-1: 8px;
-  --space-2: 16px;
-  --space-3: 24px;
-  --space-4: 40px;
-  --space-5: 64px;
-  --space-6: 104px;
+  --space-1: 0.5rem;
+  --space-2: 1rem;
+  --space-3: 1.5rem;
+  --space-4: 2.5rem;
+  --space-5: 4rem;
+  --space-6: 6.5rem;
 
-  --radius-small: 8px;
-  --radius-medium: 16px;
-  --radius-large: 24px;
+  --radius-small: 0.5rem;
+  --radius-medium: 1rem;
+  --radius-large: 1.5rem;
 
   --container: 1200px;
   --measure: 62ch;
-  --header-height: 64px;
-  --target-size: 48px;
-  --target-size-small: 32px;
+  --header-height: 4rem;
+  --target-size: max(3rem, 48px);
+  --target-size-small: max(2.75rem, 44px);
   --focus-ring: 0 0 0 3px var(--color-background), 0 0 0 5px var(--color-primary);
 
   --breakpoint-small: 576px;
@@ -197,7 +282,7 @@ The styles of the DSLKit project are split into files following the BEM methodol
 
   /* Names required by the lab assignment; they alias the golden-ratio scales above. */
   --font-family-main: var(--font-sans);
-  --font-size-base: 16px;
+  --font-size-base: 1rem;
   --font-size-h1: var(--step-5);
   --font-size-h2: var(--step-4);
   --spacing-small: var(--space-1);
@@ -270,6 +355,8 @@ The styles of the DSLKit project are split into files following the BEM methodol
 }
 
 html {
+  /* Fluid root size: 15 px on a phone, about 17 px at 1280 px, 18 px at the largest screens. Every rem value follows it, so type, spacing and controls grow together. */
+  font-size: clamp(0.9375rem, 0.875rem + 0.25vw, 1.125rem);
   overflow-x: clip;
   scroll-padding-top: calc(var(--header-height) + var(--space-2));
   -webkit-text-size-adjust: 100%;
@@ -356,24 +443,24 @@ address {
 }
 
 small {
-  font-size: var(--step--1);
+  font-size: var(--text-small);
 }
 
 code,
 kbd,
 pre {
   font-family: var(--font-mono);
-  font-size: 0.92em;
+  font-size: var(--text-small);
   font-feature-settings: 'zero';
 }
 
 kbd {
-  padding: 2px 6px;
+  padding: 0.125rem 0.375rem;
   border: 1px solid var(--color-border-strong);
-  border-radius: 4px;
+  border-radius: var(--radius-small);
   background: var(--color-surface);
   color: var(--color-text-light);
-  font-size: var(--step--1);
+  font-size: var(--text-small);
   line-height: 1.2;
 }
 
@@ -441,18 +528,18 @@ time {
 
 .icon {
   flex: none;
-  width: 20px;
-  height: 20px;
+  width: 1.25rem;
+  height: 1.25rem;
 }
 
 .badge {
   display: inline-flex;
   align-items: center;
-  padding: 2px var(--space-1);
-  border-radius: 999px;
+  padding: 0.125rem var(--space-1);
+  border-radius: 62.4375rem;
   background: var(--color-secondary);
   color: var(--color-link);
-  font-size: var(--step--1);
+  font-size: var(--text-small);
   font-weight: 600;
   line-height: 1.4;
   white-space: nowrap;
@@ -524,6 +611,7 @@ label > span {
 
 ```css
 .header {
+  grid-area: header;
   position: sticky;
   top: 0;
   z-index: 100;
@@ -558,8 +646,8 @@ label > span {
 }
 
 .header__logo-image {
-  width: 32px;
-  height: 32px;
+  width: 2rem;
+  height: 2rem;
 }
 
 .header__logo-text {
@@ -599,9 +687,9 @@ label > span {
 .burger__icon::before,
 .burger__icon::after {
   display: block;
-  width: 18px;
-  height: 2px;
-  border-radius: 2px;
+  width: 1.125rem;
+  height: 0.125rem;
+  border-radius: 0.125rem;
   background: currentColor;
   transition: transform 200ms ease;
 }
@@ -622,7 +710,7 @@ label > span {
 }
 
 .burger__icon::after {
-  top: 6px;
+  top: 0.375rem;
 }
 
 .burger__input:checked + .burger__button .burger__icon {
@@ -702,7 +790,7 @@ label > span {
   min-height: var(--target-size-small);
   padding: 0 var(--space-1);
   color: var(--color-text-light);
-  font-size: var(--step--1);
+  font-size: var(--text-small);
   font-weight: 600;
   text-decoration: none;
 }
@@ -723,10 +811,12 @@ label > span {
 .theme__button {
   display: inline-flex;
   align-items: center;
-  min-height: var(--target-size-small);
-  padding: 0 var(--space-1);
+  justify-content: center;
+  width: var(--target-size);
+  height: var(--target-size);
+  padding: 0;
   border: 1px solid var(--color-border-strong);
-  border-radius: 999px;
+  border-radius: 62.4375rem;
   color: var(--color-text-light);
   cursor: pointer;
   font-size: 0.75rem;
@@ -752,11 +842,33 @@ label > span {
   color: var(--color-text);
 }
 
+.theme__icon {
+  flex: none;
+}
+
+.theme__label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.theme__icon--sun,
+.theme__input:checked + .theme__button .theme__icon--moon {
+  display: none;
+}
+
+.theme__input:checked + .theme__button .theme__icon--sun {
+  display: block;
+}
+
 .header__cta {
   display: none;
   min-height: var(--target-size-small);
   padding: 0 var(--space-2);
-  font-size: var(--step--1);
+  font-size: var(--text-small);
 }
 ```
 
@@ -764,14 +876,19 @@ label > span {
 
 ```css
 .page {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto 1fr auto;
+  grid-template-areas:
+    'header'
+    'main'
+    'footer';
   min-height: 100vh;
   overflow-x: clip;
 }
 
 .main {
-  flex: 1;
+  grid-area: main;
   width: 100%;
   max-width: calc(var(--container) + var(--space-3) * 2);
   padding-inline: var(--space-3);
@@ -796,7 +913,11 @@ label > span {
   z-index: -1;
   background:
     radial-gradient(ellipse 55% 70% at 78% 18%, var(--color-glow), transparent 70%),
-    radial-gradient(ellipse 40% 50% at 8% 0%, var(--color-glow), transparent 70%);
+    radial-gradient(ellipse 40% 50% at 8% 0%, var(--color-glow), transparent 70%), radial-gradient(circle, var(--color-border) 1.4px, transparent 1.6px);
+  background-size:
+    auto,
+    auto,
+    24px 24px;
 }
 
 .hero__content {
@@ -809,19 +930,19 @@ label > span {
   display: inline-flex;
   align-items: center;
   gap: var(--space-1);
-  padding: 4px var(--space-2);
+  padding: 0.25rem var(--space-2);
   border: 1px solid var(--color-border);
-  border-radius: 999px;
+  border-radius: 62.4375rem;
   background: var(--color-surface);
   color: var(--color-text-light);
-  font-size: var(--step--1);
+  font-size: var(--text-small);
   font-weight: 600;
 }
 
 .hero__badge::before {
   content: '';
-  width: 8px;
-  height: 8px;
+  width: 0.5rem;
+  height: 0.5rem;
   border-radius: 50%;
   background: var(--color-accent);
   box-shadow: 0 0 0 4px var(--color-glow);
@@ -842,21 +963,13 @@ label > span {
 .hero__cta {
   display: grid;
   gap: var(--space-2);
-  justify-items: stretch;
-  width: 100%;
-  padding: var(--space-3);
-  border-radius: var(--radius-large);
-  background: var(--color-primary);
-  background: linear-gradient(135deg, var(--color-primary), var(--color-cta-end));
-  box-shadow: var(--shadow-large);
-  color: var(--color-on-primary);
+  justify-items: start;
 }
 
 .hero__cta-note {
   margin: 0;
-  color: var(--color-on-primary);
-  font-size: var(--step--1);
-  text-align: center;
+  color: var(--color-text-light);
+  font-size: var(--text-small);
 }
 
 .hero__actions {
@@ -871,7 +984,7 @@ label > span {
 
 .hero__note {
   color: var(--color-muted);
-  font-size: var(--step--1);
+  font-size: var(--text-small);
 }
 
 .hero__facts {
@@ -885,7 +998,7 @@ label > span {
 
 .hero__fact {
   display: grid;
-  gap: 4px;
+  gap: 0.25rem;
 }
 
 .hero__fact-value {
@@ -898,7 +1011,7 @@ label > span {
 
 .hero__fact-label {
   color: var(--color-text-light);
-  font-size: var(--step--1);
+  font-size: var(--text-small);
 }
 
 .hero__figure {
@@ -916,7 +1029,7 @@ label > span {
 
 .hero__caption {
   color: var(--color-muted);
-  font-size: var(--step--1);
+  font-size: var(--text-small);
   text-align: center;
 }
 
@@ -954,6 +1067,7 @@ label > span {
 
 ```css
 .footer {
+  grid-area: footer;
   margin-top: var(--space-6);
   border-top: 1px solid var(--color-border);
   background: var(--color-surface);
@@ -978,7 +1092,7 @@ label > span {
 .footer__link {
   display: inline-flex;
   align-items: center;
-  min-height: 24px;
+  min-height: 1.5rem;
   color: var(--color-text-light);
   text-decoration: none;
 }
@@ -991,7 +1105,7 @@ label > span {
 .footer__address,
 .footer__copy {
   color: var(--color-muted);
-  font-size: var(--step--1);
+  font-size: var(--text-small);
 }
 ```
 
@@ -1001,6 +1115,14 @@ label > span {
 /* Mobile first: the base styles describe a phone, wider screens add to them.
    Breakpoints: 576, 768 and 1024 px. */
 @media (min-width: 576px) {
+  .error {
+    margin-inline: auto;
+  }
+
+  .error .button {
+    justify-self: start;
+  }
+
   .hero__actions .button {
     flex: 0 0 auto;
   }
@@ -1008,20 +1130,13 @@ label > span {
   .cards {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-}
 
-@media (min-width: 576px) {
   .burger__label {
     position: static;
     width: auto;
     height: auto;
     overflow: visible;
     clip-path: none;
-  }
-
-  .theme__button {
-    padding: 0 var(--space-2);
-    font-size: var(--step--1);
   }
 }
 
@@ -1041,28 +1156,28 @@ label > span {
   }
 
   .header__tools {
-    grid-column: auto;
-    grid-row: auto;
+    grid-column: 3;
+    grid-row: 1;
   }
 
   .nav {
     display: block;
-    grid-column: auto;
-    grid-row: auto;
-    padding-bottom: 0;
+    grid-column: 1 / -1;
+    grid-row: 2;
+    padding-bottom: var(--space-1);
   }
 
   .nav__list {
     flex-flow: row wrap;
     gap: 0;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
   }
 
   .nav__link {
     min-height: var(--target-size-small);
     padding: 0 var(--space-1);
-    font-size: var(--step--1);
+    font-size: var(--text-small);
   }
 
   .hero__facts {
@@ -1087,8 +1202,15 @@ label > span {
     gap: var(--space-3);
   }
 
+  .nav {
+    grid-column: auto;
+    grid-row: auto;
+    padding-bottom: 0;
+  }
+
   .nav__list {
     gap: var(--space-1);
+    justify-content: center;
   }
 
   .nav__link {
@@ -1109,6 +1231,65 @@ label > span {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
+
+/* Touch targets: every control is at least 44 x 44 px (WCAG 2.5.8 asks 24 px, the interface rules of the project ask 44 px). */
+.header__logo,
+.nav__link,
+.footer__link,
+.card__link,
+.template-card__link,
+.project-card__link,
+.app-topbar__logo,
+.editor-toolbar__logo,
+.canvas__engine-link,
+.problems__location {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--target-size-small);
+}
+
+.filter__chip,
+.app-topbar__new,
+.app-topbar__search-input,
+.sort__select,
+.settings-row__select,
+.editor-tabs__tab,
+.problems__tab,
+.editor-segmented__button,
+.canvas__history-item,
+.button {
+  min-height: var(--target-size-small);
+}
+
+.app-topbar__avatar,
+.app-topbar__search-button,
+.project-card__menu,
+.editor-activity__button,
+.editor-tabs__close,
+.button--icon {
+  min-width: var(--target-size-small);
+  min-height: var(--target-size-small);
+}
+
+.form__checkbox {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.app-topbar__logo {
+  min-width: var(--target-size-small);
+  justify-content: center;
+}
+
+.problems__location {
+  align-self: center;
+  min-width: var(--target-size-small);
+  justify-content: center;
+}
+
+.template-card__link {
+  min-width: var(--target-size-small);
+}
 ```
 
 ## Appendix G – Listing of style.css
@@ -1122,6 +1303,8 @@ label > span {
 @import url('footer.css');
 @import url('pages.css');
 @import url('app.css');
+@import url('auth.css');
 @import url('editor.css');
+@import url('expert.css');
 @import url('adaptive.css');
 ```

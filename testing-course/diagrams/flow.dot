@@ -1,0 +1,15 @@
+digraph G {
+  rankdir=TB; dpi=150; nodesep=0.4; ranksep=0.45;
+  node [fontname="Times New Roman", fontsize=16, shape=box, style="rounded,filled", fillcolor="#eef3ff", color="#335", margin="0.15,0.08"];
+  edge [fontname="Times New Roman", fontsize=15];
+  a [label="Открыть форму\n(«В бету», #waitlist)", fillcolor="#dff5df"];
+  b [label="Заполнить поля\nи нажать «Отправить»"];
+  c [label="Все поля верны?", shape=diamond, fillcolor="#fff6dd"];
+  d [label="A1: показать ошибки,\nфокус на первое поле", fillcolor="#ffe3e3"];
+  e [label="Сохранить заявку\nв LocalStorage"];
+  f [label="Открыть thanks.html", fillcolor="#dff5df"];
+  a -> b -> c;
+  c -> d [label="нет"]; d -> b [label="исправить"];
+  c -> e [label="да"]; e -> f;
+  e -> f [label="E1: сбой записи —\nошибка не показана", style=dashed, constraint=false];
+}

@@ -51,7 +51,7 @@ Table 1 – Semantic tags of the home page
 
 ### 3.4 Heading Hierarchy
 
-Every page has one first-level heading. On the home page it reads "Write code, get a diagram", sections get second-level headings, and cards and steps get third-level headings. No level is skipped, and an automated test confirms it for all 15 pages of the site.
+Every page has one first-level heading. On the home page it reads "Write code, get a diagram", sections get second-level headings, and cards and steps get third-level headings. No level is skipped, and an automated test confirms it for all 16 pages of the site.
 
 ### 3.5 Accessibility
 
@@ -79,21 +79,23 @@ Reviews and ratings are not added because there are no real reviews yet and inve
 
 ### 3.8 Validity Check
 
-The page is checked with the W3C Nu Html Checker. The result is shown in figure 1: there are no errors or warnings. The code was submitted to the validator without indentation, which does not change the content.
+The page is checked with the W3C Nu Html Checker (version vnu 26.10.12, shown in the screenshot) in the "Check by text input" mode: the source code is pasted into the input area because the site is not published and a check by address is impossible. Only errors and warnings are shown. The screenshot does not display the date of the check, and the screenshot file was added to the repository on 14 October 2026. The result is shown in figure 1: there are no errors or warnings. The code was submitted to the validator without indentation, which does not change the content.
 
 ![Result of checking the home page in the W3C validator](figures/w3c-validator.jpg)
 
 Figure 1 – Result of the W3C Nu Html Checker: no errors or warnings
 
-All 15 pages of the site passed the same service with zero errors and warnings. Only informational messages about the slash in void elements remain, and they do not affect the pages.
+All 15 pages of the site passed the same service in the same way, by pasting the code, with zero errors and warnings. Only informational messages about the slash in void elements remain, and they do not affect the pages.
 
 ### 3.9 Microdata Check
 
-The Schema.org validator checks the microdata. The result is shown in figure 2: the objects SoftwareApplication and FAQPage are found without errors or warnings. The Google Rich Results Test needs a public page address, and the domain `dslkit.io` is not bought yet, so the check in that tool is not done and remains a task after publication.
+The Schema.org validator (validator.schema.org) checks the microdata, and the page code is pasted into its input area. The result is shown in figure 2: 2 items are detected, SoftwareApplication and FAQPage, with 0 errors and 0 warnings. The interface in the screenshot is Polish, it does not display the date of the check, and the screenshot file was added to the repository on 14 October 2026.
 
 ![Result of checking the microdata in the Schema.org validator](figures/schema-org-validator.jpg)
 
 Figure 2 – Result of the microdata check: SoftwareApplication and FAQPage without errors
+
+The Google Rich Results Test was not run: the site is not published and the domain `dslkit.io` is not bought yet. The check in that tool remains a task after publication, and the report has no results from it.
 
 ### 3.10 Automated Tests
 
@@ -101,30 +103,19 @@ Tests for the markup check on all pages: the language, title and meta tags, one 
 
 ### 3.11 Project Structure
 
-Project files live in `site` (pages, styles, scripts, images, layouts), `labs` (laboratory works) and `tools` (utilities). The application pages for the next works are in `site/app`.
+Project files live in `site` (pages, styles, scripts, images, layouts), `labs` (laboratory works) and `tools` (utilities). The application pages for the next works are in `site/app`. The structure of the `site` folder and the semantic blocks of the home page are shown in figure 3, which is built from the actual files and the markup of `site/index.html`.
+
+![Project structure and semantic blocks of the home page](figures/project-structure.svg)
+
+Figure 3 – Structure of the site folder and semantic blocks of index.html
 
 ### 3.12 Committing the Changes
 
 The work is done in the branch `feature/semantic-markup`. The commit: https://github.com/KsushaKhadzhinova/DSLKit-Project/commit/a2b85e0. The commit message: `feat: add semantic HTML markup with Schema.org for a SaaS diagram editor`.
 
-## 4 Answers to Control Questions
-
-{{answers}}
-1. **Tags used.** The home page has 15 semantic tags: `header` (logo and menu), `nav` (navigation), `main` (main content), `section` (sections), `article` (cards and plans), `aside` (pricing note), `footer`, `figure` and `figcaption` (editor image with a caption), `time`, `address`, `details` and `summary`, `fieldset` and `legend`.
-2. **Heading hierarchy.** Screen readers build a table of contents from headings, and search engines judge the topic structure. The home page has one `h1`, sections get `h2`, cards and steps get `h3`, and no level is skipped.
-3. **Microdata.** `SoftwareApplication` (name, category, system, address, description, image, offer), `Offer` (price, currency, availability) and `FAQPage` with questions and answers are applied. Search engines get a machine-readable description of the product and its terms.
-4. **The alt attribute.** The alternative text serves screen reader users and covers failed image loads. A meaningful image is described with a sentence ("The DSLKit editor: DSL code on the left, an IDEF0 diagram on the right"), and a decorative one gets an empty `alt`.
-5. **Validation errors.** The validator reported a section without a heading on the settings page, and local checks found links to non-existent identifiers. The section became a `div` and the links got correct targets. Valid markup is processed identically by browsers and is easier to maintain.
-6. **Section and article.** The `section` element groups a thematic part and needs a heading, for example Pricing. The `article` element is self-contained and can live outside the page, for example a notation card or a plan.
-7. **Figure.** The `figure` element ties an illustration to its `figcaption`, and screen readers treat them as one unit. A plain `div` with an image creates no such link.
-8. **Skip link.** It is the first link on the page and leads to the main content, so a keyboard user skips the header and menu. On the site it is `<a class="skip-link" href="#main">` and the `main` element with the identifier `main`.
-9. **Checking without publishing.** The code can be pasted as a snippet into the Schema.org validator or the Rich Results Test, and pages can be checked locally with the W3C validator through text input.
-10. **Suitable Schema.org types.** `SoftwareApplication` or `WebApplication` with `Offer` for plans and `FAQPage` for questions fit a service. `SoftwareApplication` is chosen because the page presents a software product and its terms of use.
-{{/answers}}
-
 ## Conclusion
 
-Semantic markup is created for the DSLKit home page and the related pages: Russian and English versions, error pages, the privacy policy and the signup confirmation. The pages use 15 semantic tags, keep the heading hierarchy and accessibility requirements, and carry SoftwareApplication, Offer and FAQPage microdata. The W3C and Schema.org validators found no errors, and automated tests check the markup on every page. The Rich Results Test is postponed until the site is published.
+Semantic markup is created for the DSLKit home page and the related pages: Russian and English versions, error pages, the privacy policy and the signup confirmation. The pages use 15 semantic tags, keep the heading hierarchy and accessibility requirements, and carry SoftwareApplication, Offer and FAQPage microdata. The W3C and Schema.org validators found no errors, and automated tests check the markup on every page. The Google Rich Results Test was not run because the site is not published and the domain is not bought.
 
 ## Appendix A – Listing of index.html
 

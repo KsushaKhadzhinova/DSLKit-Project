@@ -1,3 +1,5 @@
+import { notify } from './toast.js';
+
 const CONTROLS = 'input.switch__input[type="checkbox"], select.settings-row__select';
 
 const isPlainObject = (value) => typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -29,6 +31,7 @@ export const initSettings = ({ root = document, storage } = {}) => {
     Object.assign(state, readState());
     state[control.id] = control.type === 'checkbox' ? control.checked : control.value;
     storage.set('settings', state);
+    notify(root, root.documentElement.lang === 'en' ? 'The setting is saved.' : 'Настройка сохранена.', 'success');
   });
 
   return { values: () => ({ ...state }) };
