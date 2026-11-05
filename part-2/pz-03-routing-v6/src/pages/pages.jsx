@@ -1,5 +1,5 @@
 import { useEffect, useId, useState } from 'react';
-import { Link, Navigate, useLocation, useNavigate, useParams } from 'react-router-dom';
+import { Link, Navigate, useLocation, useNavigate, useNavigationType, useParams } from 'react-router-dom';
 import { safeReturnPath, useAuth, validateUserName } from '../auth';
 import { findTemplate } from '../data/templates';
 import limits from '../limits.json';
@@ -150,10 +150,40 @@ export function NotFound() {
 
 // /logout clears the fake session and leaves for the home page; the redirect is declarative,
 // so it cannot race with PrivateRoute.
+// The session is only cleared when the user arrives here by an in-app click (the nav link uses a normal
+// <NavLink>, which pushes a new history entry, so navigationType is "PUSH"). A bare GET to this address —
+// an <a>/<img> on another site, an auto-redirect, a bookmark, a page reload, or the browser's back/forward
+// buttons — reaches this component with navigationType "POP" or "REPLACE" and only sees a confirmation
+// page: logging a visitor out is a real action and must not fire on a mere navigation that is not a click
+// inside this app (logout-CSRF).
 export function Logout() {
-  const { logout } = useAuth();
+  const { isAuth, logout } = useAuth();
+  const navigate = useNavigate();
+  const navigationType = useNavigationType();
+  usePageTitle('Выход');
+
   useEffect(() => {
+    if (navigationType === 'PUSH') logout();
+  }, [navigationType, logout]);
+
+  if (navigationType === 'PUSH' || !isAuth) return <Navigate to="/" replace />;
+
+  const confirmLogout = () => {
     logout();
-  }, [logout]);
-  return <Navigate to="/" replace />;
+    navigate('/', { replace: true });
+  };
+
+  return (
+    <>
+      <PageHead title="Выход из системы" lead="Адрес /logout сам не завершает сессию: нажмите кнопку, чтобы подтвердить выход." />
+      <p className="actions">
+        <button type="button" className="button button--primary" onClick={confirmLogout}>
+          Подтвердить выход
+        </button>
+        <Link className="link" to="/dashboard">
+          Остаться в кабинете
+        </Link>
+      </p>
+    </>
+  );
 }

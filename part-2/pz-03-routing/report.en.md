@@ -24,7 +24,9 @@ Table 1 – Application routes
 | `/about`       | About                  | open                            |
 | `/login`       | Sign in (simulated)    | open                            |
 | `/logout`      | Sign out, redirect `/` | open                            |
-| `/dashboard`   | Dashboard              | after sign-in only              |
+| `/dashboard`   | Dashboard, overview    | after sign-in only              |
+| `/dashboard/projects` | Dashboard, projects | after sign-in only, nested route |
+| `/dashboard/profile`  | Dashboard, profile  | after sign-in only, nested route |
 | `/admin`       | Admin section          | admin role only, else 403       |
 | `*`            | 404                    | open                            |
 
@@ -134,15 +136,23 @@ Figure 14 – Template catalog in the dark theme
 
 ### 3.7 Testing
 
-One hundred and twenty-two automated tests on `MemoryRouter` check all the pages, the catalog filter in the address (a huge and a whitespace-only query, a forged sort, markup in the query), lazy loading with the fallback message, breadcrumbs, the admin-only route (guest, user, admin, a logout in another tab), a double click on the sign-in button, the `NavLink` highlight, the dynamic route, the 404 page, the guest redirect, the return with query parameters, the name check, a forged return address, a logout in another tab, the focus move, markup rendered as text and the 500 page. The manual check is described in `README.md`.
+One hundred and sixty automated tests on `MemoryRouter` check all the pages, the nested dashboard routes (a direct link to every tab, an unknown continuation of the address, fast switching between tabs), the catalog filter in the address (a huge and a whitespace-only query, a forged sort, a repeated key, markup in the query), the memoized list and cards, lazy loading with the fallback message and with a failed chunk download, breadcrumbs, the admin-only route (guest, user, admin, a logout in another tab), a double click on the sign-in button, the `NavLink` highlight, the dynamic route, the 404 page, the guest redirect, the return with query parameters, the name check, a forged return address, a logout in another tab, the focus move, markup rendered as text and the 500 page. The manual check is described in `README.md`.
 
 ### 3.8 Addresses and hosting
 
 The app can be hosted not at the server root. A build with the variable `VITE_BASE=/dslkit/` puts the files into a sub-folder, and the `AppRouter` component takes it as `basename`. A build with the variable `VITE_ROUTER=hash` switches the app to `HashRouter`: addresses look like `/#/catalog`, and a static host needs no redirect rules to `index.html`. By default the usual `BrowserRouter` works.
 
+### 3.9 Nested dashboard routes and catalog memoization
+
+The dashboard is split into three nested routes: `/dashboard` (overview), `/dashboard/projects` and `/dashboard/profile`. The `Dashboard` component is a layout route, it renders one level-one heading, a tab menu built on `NavLink` and an `Outlet` that the matching tab is placed into. A direct link to any tab opens it right away, with no detour through the overview, and an unknown continuation of the address (for example `/dashboard/settings`) matches none of the child routes and ends on the shared 404 page instead of an empty `Outlet`. All three tabs sit in one file and share one lazy chunk: `App.jsx` wraps every tab in its own `lazy`, but all four calls read the same module, so opening a second tab triggers no second network fetch. The catalog page now uses `useMemo`, `useCallback` and `memo`: filtering and sorting are recomputed only when the query text or the sort key changes, the address-update function is created once per render, and the `TemplateCard` component is wrapped in `memo`, so it does not re-render when the template handed to it stays the same. With five templates the saving cannot be measured, but the same technique keeps paying off at any catalog size, because filtering still takes one pass over every template regardless of how many there are.
+
+### 3.10 Comparison with Redux Toolkit and Zustand
+
+State in this project lives in React Context (`AuthProvider`, the session and the role) and in the page address itself (`useSearchParams`, the catalog filter), with no extra state library added. Redux Toolkit gives a single store, debugging tools and clear rules for changing state through slices, which pays off with large, tightly coupled state across many screens, but for one plain sign-in flag and a text filter it means an extra provider, extra actions and an extra dependency. Zustand is lighter than Redux Toolkit and needs no provider wrapper, yet its store still lives apart from the page address, and syncing the filter with `useSearchParams` would need separate code instead of coming for free, the way it does here. Context and the page address fit this project because the state is small and comes in two different kinds: the session is needed in many places across the app, while the catalog filter is a piece of the address that should survive a reload and travel as an ordinary link.
+
 ## Conclusion
 
-The Vite application contains eight routes, a menu with the active item highlighted, a dynamic route handling an unknown parameter, a 404 page a protected dashboard with simulated sign-in and programmatic navigation, a catalog filter through `useSearchParams`, lazy page loading, breadcrumbs and a section for the admin role only. `react-router-dom` 7 is chosen, its API for the tasks of this work matches v6.
+The Vite application contains eleven routes, three of them nested inside the dashboard, a menu with the active item highlighted, a dynamic route handling an unknown parameter, a 404 page, a protected dashboard with simulated sign-in and programmatic navigation, a catalog filter through `useSearchParams`, memoized list and cards, lazy page loading, breadcrumbs and a section for the admin role only. `react-router-dom` 7 is chosen, its API for the tasks of this work matches v6.
 
 ## Answers to Control Questions
 
@@ -171,8 +181,12 @@ The Vite application contains eight routes, a menu with the active item highligh
     <Route path="logout" element={<Logout />} />
     {/* Protected group: without a login a redirect to /login that remembers the address */}
     <Route element={<PrivateRoute />}>
-      {/* Dashboard (lazy loaded) */}
-      <Route path="dashboard" element={<Dashboard />} />
+      {/* Dashboard (lazy loaded): a layout route with its own Outlet and three nested tabs */}
+      <Route path="dashboard" element={<Dashboard />}>
+        <Route index element={<DashboardOverview />} />
+        <Route path="projects" element={<DashboardProjects />} />
+        <Route path="profile" element={<DashboardProfile />} />
+      </Route>
       {/* Nested role check: admin only, other roles get 403 */}
       <Route element={<RoleRoute role="admin" />}>
         <Route path="admin" element={<Admin />} />
@@ -197,6 +211,13 @@ const Catalog = lazy(() => import('./pages/Catalog'));
 const [searchParams, setSearchParams] = useSearchParams();
 const raw = (searchParams.get('q') ?? '').slice(0, limits.search.maxLength);
 setSearchParams({ q: value }, { replace: true });
+```
+
+```jsx
+// Catalog.jsx: memoizing the list and the cards
+const shown = useMemo(() => filterTemplates(query, sort), [query, sort]);
+const update = useCallback((next) => setSearchParams(toParams(next), { replace: true }), [setSearchParams]);
+const TemplateCard = memo(function TemplateCard({ template }) { /* … one card … */ });
 ```
 
 ```jsx

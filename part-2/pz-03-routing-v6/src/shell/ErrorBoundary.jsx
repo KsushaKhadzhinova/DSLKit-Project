@@ -20,11 +20,18 @@ export default class ErrorBoundary extends Component {
 
   render() {
     if (!this.state.failed) return this.props.children;
+    // This boundary sits outside the router (main.jsx), so it cannot use <Link>. A hard-coded "/" would
+    // send the user to the server root instead of the app when the app lives in a sub-folder (VITE_BASE)
+    // or uses the hash router (VITE_ROUTER=hash, where the real home address is "<base>#/").
+    // `env` can be passed in tests instead of relying on the real import.meta.env, the same way router.jsx does.
+    const env = this.props.env ?? import.meta.env;
+    const base = env.BASE_URL || '/';
+    const homeHref = env.VITE_ROUTER === 'hash' ? `${base}#/` : base;
     return (
       <>
         <header className="header">
           <div className="header__inner">
-            <a className="header__logo" href="/">
+            <a className="header__logo" href={homeHref}>
               <img className="header__logo-image" src={logoUrl} alt="" width="32" height="32" />
               <span className="header__logo-text">DSLKit</span>
             </a>

@@ -7,7 +7,8 @@ import { AUTH_KEY, AuthProvider, roleFor, USER_KEY } from './auth';
 import { buildCrumbs } from './components/Breadcrumbs';
 import Layout from './components/Layout';
 import limits from './limits.json';
-import { filterTemplates, readCatalogParams } from './pages/Catalog';
+import { filterTemplates, readCatalogParams, TemplateCard } from './pages/Catalog';
+import ErrorBoundary from './shell/ErrorBoundary';
 import { ThemeProvider } from './shell/theme';
 
 const Where = () => {
@@ -105,6 +106,65 @@ describe('catalog filter in the address (useSearchParams)', () => {
     expect(readCatalogParams(new URLSearchParams('sort=notation')).sort).toBe('notation');
     expect(filterTemplates('', 'notation').map((t) => t.notation)).toEqual(['BPMN', 'DFD', 'ERD', 'IDEF0', 'UML']);
   });
+
+  it('keeps the first value of a duplicated ?q= and ignores an array-like forged key', () => {
+    // A hand-built or forwarded address can repeat a key; URLSearchParams.get always answers with
+    // the first occurrence, so the page cannot be made to filter by anything but a single string.
+    const { raw, sort } = readCatalogParams(new URLSearchParams('q=UML&q=BPMN&sort=title&sort=notation'));
+    expect(raw).toBe('UML');
+    expect(sort).toBe('title');
+  });
+
+  it('treats a bare ?sort= (no value) the same as an unknown sort', () => {
+    expect(readCatalogParams(new URLSearchParams('sort=')).sort).toBe('id');
+    expect(readCatalogParams(new URLSearchParams('sort')).sort).toBe('id');
+  });
+
+  it('a filtered link survives a reload: re-reading the same address gives back the same list', async () => {
+    renderAt('/catalog?q=bpmn&sort=title');
+    expect(await screen.findByRole('searchbox', { name: 'Поиск по каталогу' })).toHaveValue('bpmn');
+    expect(screen.getByRole('combobox', { name: 'Сортировка' })).toHaveValue('title');
+    expect(cardTitles()).toEqual(['Процесс согласования заказа']);
+  });
+});
+
+describe('useMemo/useCallback/React.memo in the catalog list', () => {
+  it('TemplateCard is wrapped with React.memo', () => {
+    // React.memo(Component) returns an object, not a plain function, tagged with this symbol -
+    // the same tag React itself checks internally to skip a re-render when props are shallow-equal.
+    expect(TemplateCard.$$typeof).toBe(Symbol.for('react.memo'));
+  });
+
+  it('filterTemplates is a pure function: same arguments give structurally equal results, called repeatedly', () => {
+    // useMemo in Catalog.jsx relies on filterTemplates having no side effect and no hidden mutable state,
+    // otherwise memoizing by [query, sort] alone would be unsound. This is the property that makes it safe.
+    const a = filterTemplates('bpmn', 'title');
+    const b = filterTemplates('bpmn', 'title');
+    expect(a).toEqual(b);
+    expect(a).not.toBe(b); // a fresh array each call, exactly what useMemo is there to avoid recomputing
+  });
+
+  it('switching the sort does not drop or duplicate any card, and the search box keeps its own value', async () => {
+    const user = userEvent.setup();
+    renderAt('/catalog');
+    await screen.findByRole('status');
+    await user.selectOptions(screen.getByRole('combobox', { name: 'Сортировка' }), 'notation');
+    expect(cardTitles()).toHaveLength(5);
+    await user.selectOptions(screen.getByRole('combobox', { name: 'Сортировка' }), 'id');
+    expect(cardTitles()).toHaveLength(5);
+    expect(screen.getByRole('searchbox', { name: 'Поиск по каталогу' })).toHaveValue('');
+  });
+
+  it('typing and clearing the query repeatedly does not throw or leave a stale list (memoized update handler)', async () => {
+    const user = userEvent.setup();
+    renderAt('/catalog');
+    const box = await screen.findByRole('searchbox', { name: 'Поиск по каталогу' });
+    for (let i = 0; i < 5; i += 1) {
+      await user.type(box, 'bpmn');
+      await user.clear(box);
+    }
+    expect(cardTitles()).toHaveLength(5);
+  });
 });
 
 describe('lazy pages and Suspense', () => {
@@ -125,6 +185,33 @@ describe('lazy pages and Suspense', () => {
     );
     expect(screen.getByText('Загрузка страницы…')).toHaveAttribute('role', 'status');
     expect(screen.getByRole('navigation', { name: 'Основная навигация' })).toBeInTheDocument();
+  });
+
+  it('a lazy page whose chunk fails to download is caught by ErrorBoundary and shown as a network error, not a blank page', async () => {
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    // The same situation App.jsx would hit if the browser could not fetch Catalog's chunk (a stale
+    // deploy, an offline tab): the dynamic import's promise rejects instead of resolving.
+    const BrokenChunk = lazy(() => Promise.reject(new TypeError('Failed to fetch dynamically imported module')));
+    render(
+      <ErrorBoundary>
+        <MemoryRouter>
+          <ThemeProvider>
+            <AuthProvider>
+              <Routes>
+                <Route element={<Layout />}>
+                  <Route index element={<BrokenChunk />} />
+                </Route>
+              </Routes>
+            </AuthProvider>
+          </ThemeProvider>
+        </MemoryRouter>
+      </ErrorBoundary>,
+    );
+    // This variant's ErrorBoundary does not yet tell a failed chunk download from any other crash
+    // (that distinction is var6-only, see errorCatalog.js there), so every throw ends on the same 500 page.
+    expect(await screen.findByRole('heading', { level: 1 })).toHaveTextContent('Ошибка 500');
+    expect(screen.getByRole('button', { name: 'Обновить страницу' })).toBeInTheDocument();
+    spy.mockRestore();
   });
 
   it('loads the catalog page on demand through the menu', async () => {

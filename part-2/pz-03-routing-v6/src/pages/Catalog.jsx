@@ -1,4 +1,4 @@
-import { useId } from 'react';
+import { memo, useCallback, useId, useMemo } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { TEMPLATES } from '../data/templates';
 import limits from '../limits.json';
@@ -24,19 +24,50 @@ export function filterTemplates(query, sort) {
   return [...found].sort(SORTS[sort].compare);
 }
 
+// One card, memoized: TEMPLATES entries are stable module-level objects, so the same template passed
+// again as a prop (the common case: typing into an unrelated field, or a route change elsewhere re-rendering
+// Catalog without the filter actually changing) keeps the same reference and React.memo skips the re-render.
+// With five templates the win is not measurable, but filterTemplates below already does one full pass over
+// TEMPLATES on every change, so the same shallow-prop check keeps paying for itself as the catalog grows.
+export const TemplateCard = memo(function TemplateCard({ template }) {
+  return (
+    <li className="cards__item">
+      <article className="card">
+        <h2 className="card__title">{template.title}</h2>
+        <p className="card__meta">
+          <span className="badge">{template.notation}</span>
+        </p>
+        <p className="card__text">{template.description}</p>
+        <Link className="card__link" to={`/catalog/${template.id}`} aria-label={`Открыть шаблон: ${template.title}`}>
+          Открыть шаблон
+        </Link>
+      </article>
+    </li>
+  );
+});
+
 export default function Catalog() {
   usePageTitle('Каталог шаблонов');
   const id = useId();
   const [searchParams, setSearchParams] = useSearchParams();
   const { raw, query, sort } = readCatalogParams(searchParams);
-  const shown = filterTemplates(query, sort);
 
-  const update = (next) => {
-    const params = {};
-    if (next.q) params.q = next.q;
-    if (next.sort !== 'id') params.sort = next.sort;
-    setSearchParams(params, { replace: true });
-  };
+  // Recomputed only when the trimmed query or the sort key changes, not on every render of Catalog
+  // (for example the focus-move effect in Layout runs on every route change, including ones unrelated
+  // to this page's own state).
+  const shown = useMemo(() => filterTemplates(query, sort), [query, sort]);
+
+  // update is passed to both the search input and the sort select; useCallback keeps one stable function
+  // across renders instead of a new closure on every keystroke, matching the TemplateCard memoization above.
+  const update = useCallback(
+    (next) => {
+      const params = {};
+      if (next.q) params.q = next.q;
+      if (next.sort !== 'id') params.sort = next.sort;
+      setSearchParams(params, { replace: true });
+    },
+    [setSearchParams],
+  );
 
   return (
     <>
@@ -76,18 +107,7 @@ export default function Catalog() {
       ) : (
         <ul className="cards">
           {shown.map((t) => (
-            <li className="cards__item" key={t.id}>
-              <article className="card">
-                <h2 className="card__title">{t.title}</h2>
-                <p className="card__meta">
-                  <span className="badge">{t.notation}</span>
-                </p>
-                <p className="card__text">{t.description}</p>
-                <Link className="card__link" to={`/catalog/${t.id}`} aria-label={`Открыть шаблон: ${t.title}`}>
-                  Открыть шаблон
-                </Link>
-              </article>
-            </li>
+            <TemplateCard key={t.id} template={t} />
           ))}
         </ul>
       )}

@@ -333,6 +333,18 @@ select.form__input {
   }
 }
 
+/* Dashboard tab menu: reuses .nav__list/.nav__link/.nav__item (shared with the header menu), so the active
+   tab gets the same aria-current styling and the same column-to-row breakpoint, without a separate stylesheet. */
+.tabs {
+  margin-bottom: var(--space-3);
+}
+
+.page__subtitle {
+  margin-bottom: var(--space-2);
+  font-size: var(--step-2);
+  font-weight: 700;
+}
+
 /* Breadcrumbs: Главная / Каталог / Шаблон, the links are tall enough to hit */
 .breadcrumbs {
   margin-bottom: var(--space-3);

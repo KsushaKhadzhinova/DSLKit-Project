@@ -66,9 +66,18 @@ export default function Layout() {
     </>
   );
 
+  // A plain `<a href="#main">` only works with BrowserRouter: in hash mode (VITE_ROUTER=hash) the address bar
+  // already holds the route after the hash, so "#main" is read by HashRouter as the route "main" and a click
+  // on the skip-link lands on the 404 page instead of moving focus. Focusing the ref directly works the same
+  // way in every router mode.
+  const skipToMain = (event) => {
+    event.preventDefault();
+    main.current?.focus();
+  };
+
   return (
     <>
-      <a className="skip-link" href="#main">
+      <a className="skip-link" href="#main" onClick={skipToMain}>
         Перейти к основному содержимому
       </a>
       <SiteHeader

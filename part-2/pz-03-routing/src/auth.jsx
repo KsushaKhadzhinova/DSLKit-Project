@@ -7,11 +7,20 @@ export const ADMIN_NAME = 'admin';
 
 const AuthContext = createContext(null);
 
+// Characters that trim() cannot see because they sit inside the name, not at its edges, but that are either
+// invisible (zero-width space, the Hangul filler letters, which render as nothing but still count as \p{L})
+// or reorder the visible text (the bidi override/embedding controls, \p{Cf}): a name built only from these
+// would look empty or show something other than what is stored, and "‮admin" would visually read
+// backwards without being the real admin name. \p{Cc} rejects raw control characters such as NUL.
+const INVISIBLE_OR_BIDI_CHARACTER = /[\p{Cc}\p{Cf}ᅟᅠㅤﾠ]/u;
+
 // Returns an error text for a user name or null. A whitespace-only value counts as empty; limits live in limits.json.
 export function validateUserName(value) {
-  const length = typeof value === 'string' ? value.trim().length : 0;
+  if (typeof value !== 'string') return 'Введите имя пользователя';
+  const length = value.trim().length;
   if (length < limits.userName.minLength) return 'Введите имя пользователя';
   if (length > limits.userName.maxLength) return `Имя не длиннее ${limits.userName.maxLength} символов`;
+  if (INVISIBLE_OR_BIDI_CHARACTER.test(value)) return 'Имя содержит недопустимые невидимые символы';
   return null;
 }
 
