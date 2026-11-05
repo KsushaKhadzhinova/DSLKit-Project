@@ -1,0 +1,1310 @@
+
+<title>DSLKit IDE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap">
+
+<style>
+/* ── Design tokens ───────────────────────────────────────────────────────── */
+/* Layout: activity-bar(48px) + sidebar(220px) + [editor(38.2%) | canvas(61.8%)] + bottom(180px) + statusbar(22px) */
+:root {
+  --bg-app:       #1a1b1e;
+  --bg-editor:    #1e1f23;
+  --bg-sidebar:   #252628;
+  --bg-activity:  #2c2d30;
+  --bg-panel:     #1e1f23;
+  --bg-header:    #252628;
+  --bg-hover:     #2a2b2e;
+  --bg-selected:  #37373d;
+  --bg-input:     #3c3c3c;
+  --bg-tab-act:   #1e1f23;
+  --bg-tab-in:    #2d2e31;
+  --bg-toast:     #323234;
+  --bg-dropdown:  #252628;
+  --text-1:       #cccccc;
+  --text-2:       #a0a0a0;
+  --text-3:       #666666;
+  --text-inv:     #ffffff;
+  --accent:       #4fc3f7;
+  --accent-dim:   #1a3a4a;
+  --blue:         #569cd6;
+  --cyan:         #4ec9b0;
+  --green:        #4caf50;
+  --green-text:   #6a9955;
+  --yellow:       #dcdcaa;
+  --orange:       #ce9178;
+  --red:          #f48771;
+  --purple:       #c586c0;
+  --pink:         #f48771;
+  --status-bg:    #0078d4;
+  --border:       #3e3e42;
+  --border-light: #454545;
+  --radius:       4px;
+  --font-ui:      'Inter', system-ui, sans-serif;
+  --font-code:    'JetBrains Mono', 'Consolas', monospace;
+  --fs-xs:        11px;
+  --fs-sm:        12px;
+  --fs-md:        13px;
+  --fs-lg:        14px;
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --bg-app:      #f3f3f3;
+    --bg-editor:   #ffffff;
+    --bg-sidebar:  #f3f3f3;
+    --bg-activity: #e8e8e8;
+    --bg-panel:    #f3f3f3;
+    --bg-header:   #dddddd;
+    --bg-hover:    #e8e8e8;
+    --bg-selected: #cce4f7;
+    --bg-input:    #ffffff;
+    --bg-tab-act:  #ffffff;
+    --bg-tab-in:   #ececec;
+    --bg-toast:    #ffffff;
+    --bg-dropdown: #ffffff;
+    --text-1:      #333333;
+    --text-2:      #666666;
+    --text-3:      #999999;
+    --border:      #d4d4d4;
+    --border-light: #e0e0e0;
+    --blue:        #0070c1;
+    --cyan:        #267f99;
+    --green-text:  #008000;
+    --yellow:      #795e26;
+    --orange:      #a31515;
+    --purple:      #af00db;
+    --accent:      #0078d4;
+    --accent-dim:  #ddeeff;
+    --status-bg:   #0078d4;
+    color-scheme: light;
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg-app:       #1a1b1e;
+  --bg-editor:    #1e1f23;
+  --bg-sidebar:   #252628;
+  --bg-activity:  #2c2d30;
+  --bg-panel:     #1e1f23;
+  --bg-header:    #252628;
+  --bg-hover:     #2a2b2e;
+  --bg-selected:  #37373d;
+  --bg-input:     #3c3c3c;
+  --bg-tab-act:   #1e1f23;
+  --bg-tab-in:    #2d2e31;
+  --bg-toast:     #323234;
+  --bg-dropdown:  #252628;
+  --text-1:       #cccccc;
+  --text-2:       #a0a0a0;
+  --text-3:       #666666;
+  --accent:       #4fc3f7;
+  --accent-dim:   #1a3a4a;
+  --blue:         #569cd6;
+  --cyan:         #4ec9b0;
+  --green:        #4caf50;
+  --green-text:   #6a9955;
+  --yellow:       #dcdcaa;
+  --orange:       #ce9178;
+  --red:          #f48771;
+  --purple:       #c586c0;
+  --status-bg:    #0078d4;
+  --border:       #3e3e42;
+  --border-light: #454545;
+  color-scheme: dark;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  font-family: var(--font-ui);
+  font-size: var(--fs-md);
+  color: var(--text-1);
+  background: var(--bg-app);
+  overflow: hidden;
+  user-select: none;
+}
+
+/* ── App shell ───────────────────────────────────────────────────────────── */
+.app {
+  display: grid;
+  grid-template-rows: 36px 1fr 22px;
+  grid-template-columns: 48px auto 1fr;
+  height: 100%;
+  grid-template-areas:
+    "activity header  header"
+    "activity sidebar main"
+    "activity statusbar statusbar";
+}
+
+/* ── Header toolbar ──────────────────────────────────────────────────────── */
+.header {
+  grid-area: header;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 8px;
+  background: var(--bg-header);
+  border-bottom: 1px solid var(--border);
+  min-width: 0;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-right: 8px;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--text-1);
+  white-space: nowrap;
+}
+.logo-icon {
+  width: 20px; height: 20px;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--purple) 100%);
+  border-radius: 4px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; color: #fff; font-weight: 700;
+}
+
+.breadcrumb {
+  display: flex; align-items: center; gap: 2px;
+  font-size: var(--fs-xs); color: var(--text-2);
+  flex: 1; min-width: 0;
+}
+.breadcrumb span { white-space: nowrap; }
+.breadcrumb .sep { color: var(--text-3); margin: 0 1px; }
+.breadcrumb .current { color: var(--text-1); }
+
+.toolbar-right {
+  display: flex; align-items: center; gap: 4px; margin-left: auto; flex-shrink: 0;
+}
+
+.btn {
+  display: flex; align-items: center; gap: 5px;
+  padding: 3px 8px;
+  font-size: var(--fs-sm); font-family: var(--font-ui);
+  background: transparent; border: none; color: var(--text-2);
+  border-radius: var(--radius); cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.12s, color 0.12s;
+}
+.btn:hover { background: var(--bg-hover); color: var(--text-1); }
+
+.btn-run {
+  background: var(--green);
+  color: #fff;
+  font-weight: 600;
+  padding: 3px 10px;
+  gap: 4px;
+}
+.btn-run:hover { background: #43a047; color: #fff; }
+.btn-run.running { background: var(--accent); animation: pulse 1s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.7} }
+
+.btn-icon {
+  padding: 3px 6px; font-size: 15px;
+}
+
+.notation-select {
+  display: flex; align-items: center; gap: 4px;
+  padding: 2px 8px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: var(--fs-sm); font-family: var(--font-ui);
+  color: var(--text-1); cursor: pointer;
+  position: relative;
+}
+.notation-select:hover { border-color: var(--accent); }
+.notation-badge {
+  background: var(--accent-dim); color: var(--accent);
+  font-size: 10px; font-weight: 600;
+  padding: 1px 5px; border-radius: 10px;
+}
+
+/* ── Activity bar ────────────────────────────────────────────────────────── */
+.activity-bar {
+  grid-area: activity;
+  background: var(--bg-activity);
+  display: flex; flex-direction: column; align-items: center;
+  padding: 8px 0;
+  gap: 2px;
+  border-right: 1px solid var(--border);
+  z-index: 10;
+}
+.activity-bar .spacer { flex: 1; }
+
+.act-btn {
+  width: 36px; height: 36px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: var(--radius); cursor: pointer;
+  color: var(--text-3); font-size: 18px;
+  position: relative;
+  transition: color 0.1s, background 0.1s;
+}
+.act-btn:hover { color: var(--text-1); background: var(--bg-hover); }
+.act-btn.active { color: var(--text-1); }
+.act-btn.active::before {
+  content: '';
+  position: absolute; left: -6px;
+  width: 3px; height: 24px;
+  background: var(--accent);
+  border-radius: 0 2px 2px 0;
+}
+.act-btn .badge {
+  position: absolute; top: 4px; right: 4px;
+  background: var(--red); color: #fff;
+  font-size: 9px; font-weight: 700;
+  min-width: 14px; height: 14px;
+  border-radius: 7px; padding: 0 3px;
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* ── Sidebar ─────────────────────────────────────────────────────────────── */
+.sidebar {
+  grid-area: sidebar;
+  background: var(--bg-sidebar);
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  width: 220px;
+  overflow: hidden;
+  transition: width 0.15s;
+}
+.sidebar.collapsed { width: 0; }
+
+.sidebar-section-title {
+  padding: 8px 12px 4px;
+  font-size: 11px; font-weight: 700;
+  letter-spacing: .08em; text-transform: uppercase;
+  color: var(--text-2);
+}
+
+.file-tree { flex: 1; overflow-y: auto; padding-bottom: 8px; }
+.file-tree::-webkit-scrollbar { width: 6px; }
+.file-tree::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+.tree-item {
+  display: flex; align-items: center; gap: 5px;
+  padding: 2px 12px 2px 20px;
+  font-size: var(--fs-sm); cursor: pointer;
+  color: var(--text-2);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.tree-item:hover { background: var(--bg-hover); color: var(--text-1); }
+.tree-item.active { background: var(--bg-selected); color: var(--text-1); }
+.tree-item.folder { padding-left: 8px; color: var(--text-1); font-weight: 500; }
+.tree-item .icon { font-size: 13px; flex-shrink: 0; }
+.tree-item.depth1 { padding-left: 24px; }
+.tree-item.depth2 { padding-left: 36px; }
+
+.sidebar-divider { height: 1px; background: var(--border); margin: 8px 0; }
+
+/* ── Main area ───────────────────────────────────────────────────────────── */
+.main {
+  grid-area: main;
+  display: flex; flex-direction: column;
+  overflow: hidden; min-width: 0;
+}
+
+.editor-area {
+  display: flex; flex: 1; overflow: hidden;
+}
+
+/* editor gets 38.2% (golden ratio inverse), canvas gets 61.8% */
+.editor-pane {
+  width: 38.2%;
+  min-width: 200px;
+  display: flex; flex-direction: column;
+  border-right: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.canvas-pane {
+  flex: 1; min-width: 0;
+  display: flex; flex-direction: column;
+  overflow: hidden; background: var(--bg-editor);
+}
+
+/* ── Tab bar ─────────────────────────────────────────────────────────────── */
+.tab-bar {
+  display: flex; align-items: stretch;
+  background: var(--bg-tab-in);
+  border-bottom: 1px solid var(--border);
+  height: 35px; overflow-x: auto; overflow-y: hidden;
+  flex-shrink: 0;
+}
+.tab-bar::-webkit-scrollbar { height: 0; }
+
+.tab {
+  display: flex; align-items: center; gap: 6px;
+  padding: 0 12px;
+  font-size: var(--fs-sm); cursor: pointer;
+  border-right: 1px solid var(--border);
+  white-space: nowrap;
+  color: var(--text-2); background: var(--bg-tab-in);
+  position: relative;
+  transition: background 0.1s;
+}
+.tab:hover { background: var(--bg-hover); color: var(--text-1); }
+.tab.active {
+  background: var(--bg-tab-act); color: var(--text-1);
+  border-bottom: 2px solid var(--accent);
+}
+.tab .tab-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--text-3);
+}
+.tab.modified .tab-dot { background: var(--orange); }
+.tab .tab-close {
+  font-size: 14px; opacity: 0; margin-left: 2px;
+  width: 14px; height: 14px; display: flex; align-items: center; justify-content: center;
+  border-radius: 3px;
+}
+.tab:hover .tab-close { opacity: 1; }
+.tab .tab-close:hover { background: var(--bg-selected); }
+
+/* ── Code editor ─────────────────────────────────────────────────────────── */
+.code-editor {
+  flex: 1; overflow: auto;
+  background: var(--bg-editor);
+  font-family: var(--font-code); font-size: 13px; line-height: 1.6;
+  position: relative;
+}
+.code-editor::-webkit-scrollbar { width: 8px; height: 8px; }
+.code-editor::-webkit-scrollbar-thumb { background: #424242; border-radius: 4px; }
+
+.code-lines { padding: 8px 0; min-width: max-content; }
+
+.code-line {
+  display: flex; align-items: stretch;
+  min-height: 20px;
+  position: relative;
+}
+.code-line:hover { background: rgba(255,255,255,.03); }
+.code-line.highlighted { background: rgba(79,195,247,.08); border-left: 2px solid var(--accent); }
+.code-line.error-line { background: rgba(244,135,113,.06); }
+
+.line-num {
+  min-width: 40px; padding: 0 8px 0 12px;
+  color: var(--text-3); text-align: right;
+  flex-shrink: 0; font-size: 12px;
+  user-select: none;
+}
+.code-line.highlighted .line-num { color: var(--accent); }
+
+.gutter-icon {
+  width: 16px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px;
+}
+
+.line-content { padding: 0 12px 0 4px; white-space: pre; }
+
+/* Syntax tokens */
+.kw   { color: var(--blue); }
+.type { color: var(--cyan); }
+.str  { color: var(--orange); }
+.num  { color: var(--accent); }
+.cmt  { color: var(--green-text); font-style: italic; }
+.fn   { color: var(--yellow); }
+.op   { color: var(--text-1); }
+.id   { color: var(--text-1); }
+.err  { text-decoration: underline wavy var(--red); }
+
+/* ── Canvas ──────────────────────────────────────────────────────────────── */
+.canvas-toolbar {
+  display: flex; align-items: center; gap: 4px; padding: 4px 8px;
+  background: var(--bg-header); border-bottom: 1px solid var(--border);
+  font-size: var(--fs-sm); color: var(--text-2);
+  flex-shrink: 0;
+}
+.canvas-toolbar .sep { width: 1px; height: 16px; background: var(--border); margin: 0 2px; }
+
+.canvas-area {
+  flex: 1; overflow: hidden; position: relative;
+  background:
+    radial-gradient(circle, var(--border) 1px, transparent 1px),
+    var(--bg-editor);
+  background-size: 20px 20px;
+}
+
+.canvas-content {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.diagram-svg {
+  filter: drop-shadow(0 2px 12px rgba(0,0,0,.4));
+}
+
+/* highlight on element hover */
+.diagram-node { cursor: pointer; transition: filter 0.15s; }
+.diagram-node:hover rect, .diagram-node:hover .node-header { filter: brightness(1.2); }
+.diagram-node.hl rect.node-bg { stroke: var(--accent); stroke-width: 2; }
+
+.canvas-controls {
+  position: absolute; bottom: 12px; right: 12px;
+  display: flex; flex-direction: column; gap: 2px;
+}
+.canvas-btn {
+  width: 28px; height: 28px;
+  background: var(--bg-sidebar); border: 1px solid var(--border);
+  border-radius: var(--radius); cursor: pointer; color: var(--text-1);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-family: var(--font-ui);
+  transition: background 0.1s;
+}
+.canvas-btn:hover { background: var(--bg-hover); }
+
+.canvas-hint {
+  position: absolute; bottom: 12px; left: 12px;
+  font-size: 11px; color: var(--text-3);
+}
+
+/* ── Bottom panel ────────────────────────────────────────────────────────── */
+.bottom-panel {
+  height: 180px; flex-shrink: 0;
+  background: var(--bg-panel);
+  border-top: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  transition: height 0.15s;
+}
+.bottom-panel.collapsed { height: 35px; }
+
+.panel-tabs {
+  display: flex; align-items: center;
+  background: var(--bg-tab-in);
+  border-bottom: 1px solid var(--border);
+  height: 35px; flex-shrink: 0;
+}
+
+.panel-tab {
+  display: flex; align-items: center; gap: 5px;
+  padding: 0 12px; height: 100%;
+  font-size: var(--fs-sm); cursor: pointer;
+  color: var(--text-2); border-right: 1px solid var(--border);
+  transition: color 0.1s;
+}
+.panel-tab:hover { color: var(--text-1); }
+.panel-tab.active { color: var(--text-1); border-bottom: 2px solid var(--accent); }
+.panel-tab .count {
+  background: var(--red); color: #fff;
+  font-size: 10px; font-weight: 700;
+  padding: 1px 4px; border-radius: 8px;
+}
+
+.panel-tab .count.warn { background: #b8860b; }
+
+.panel-close { margin-left: auto; margin-right: 4px; }
+
+.panel-body { flex: 1; overflow-y: auto; padding: 4px 0; }
+.panel-body::-webkit-scrollbar { width: 6px; }
+.panel-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+/* Problems */
+.problem-item {
+  display: flex; align-items: flex-start; gap: 8px;
+  padding: 4px 12px; cursor: pointer; font-size: var(--fs-sm);
+}
+.problem-item:hover { background: var(--bg-hover); }
+.prob-icon { flex-shrink: 0; margin-top: 1px; font-size: 13px; }
+.prob-msg { color: var(--text-1); }
+.prob-loc { color: var(--text-3); font-size: 11px; margin-left: auto; white-space: nowrap; padding-left: 8px; }
+.prob-file { color: var(--text-2); font-size: 11px; }
+
+/* AI panel */
+.ai-chat { padding: 8px 12px; display: flex; flex-direction: column; gap: 8px; height: 100%; }
+.ai-msg {
+  font-size: var(--fs-sm); line-height: 1.5;
+  padding: 8px 10px; border-radius: var(--radius);
+  max-width: 90%;
+}
+.ai-msg.user { background: var(--accent-dim); color: var(--accent); align-self: flex-end; }
+.ai-msg.bot  { background: var(--bg-selected); color: var(--text-1); }
+
+.ai-input-row {
+  display: flex; gap: 6px; margin-top: auto;
+}
+.ai-input {
+  flex: 1; padding: 5px 8px;
+  background: var(--bg-input); border: 1px solid var(--border);
+  border-radius: var(--radius); color: var(--text-1);
+  font-size: var(--fs-sm); font-family: var(--font-ui);
+  outline: none;
+}
+.ai-input:focus { border-color: var(--accent); }
+.ai-send {
+  padding: 4px 10px; background: var(--accent); color: #000;
+  border: none; border-radius: var(--radius); cursor: pointer;
+  font-size: var(--fs-sm); font-weight: 600;
+}
+.ai-send:hover { filter: brightness(1.1); }
+
+/* Terminal */
+.terminal {
+  font-family: var(--font-code); font-size: 12px;
+  padding: 8px 12px; color: var(--text-2);
+  line-height: 1.6;
+}
+.term-line.cmd { color: var(--accent); }
+.term-line.ok  { color: var(--cyan); }
+.term-line.err { color: var(--red); }
+.term-prompt { color: var(--green-text); }
+
+/* ── Status bar ──────────────────────────────────────────────────────────── */
+.status-bar {
+  grid-area: statusbar;
+  background: var(--status-bg);
+  display: flex; align-items: center; gap: 0;
+  font-size: 11px; color: rgba(255,255,255,.9);
+  overflow: hidden;
+}
+.status-item {
+  display: flex; align-items: center; gap: 4px;
+  padding: 0 8px; height: 100%; cursor: pointer;
+  white-space: nowrap;
+}
+.status-item:hover { background: rgba(255,255,255,.15); }
+.status-item .dot { width: 6px; height: 6px; border-radius: 50%; background: #fff; }
+.status-right { margin-left: auto; display: flex; }
+
+/* ── Dropdown overlay ────────────────────────────────────────────────────── */
+.dropdown {
+  position: fixed; z-index: 100;
+  background: var(--bg-dropdown);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 4px 20px rgba(0,0,0,.4);
+  min-width: 200px;
+  display: none;
+}
+.dropdown.open { display: block; }
+.dropdown-item {
+  padding: 7px 12px;
+  font-size: var(--fs-sm); cursor: pointer; color: var(--text-1);
+  display: flex; align-items: center; gap: 8px;
+}
+.dropdown-item:hover { background: var(--bg-hover); }
+.dropdown-item.active { color: var(--accent); }
+.dropdown-item .check { font-size: 12px; width: 14px; }
+.dropdown-sep { height: 1px; background: var(--border); margin: 4px 0; }
+
+/* ── Toasts ──────────────────────────────────────────────────────────────── */
+.toast-container {
+  position: fixed; bottom: 30px; right: 16px;
+  display: flex; flex-direction: column; gap: 8px; z-index: 200;
+  pointer-events: none;
+}
+.toast {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 14px;
+  background: var(--bg-toast);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: var(--fs-sm); color: var(--text-1);
+  box-shadow: 0 4px 16px rgba(0,0,0,.4);
+  pointer-events: all;
+  animation: toastin .2s ease-out;
+  min-width: 220px;
+}
+.toast.out { animation: toastout .2s ease-in forwards; }
+@keyframes toastin  { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+@keyframes toastout { to{opacity:0;transform:translateY(8px)} }
+.toast.success { border-left: 3px solid var(--green); }
+.toast.error   { border-left: 3px solid var(--red); }
+.toast.info    { border-left: 3px solid var(--accent); }
+.toast .t-icon { font-size: 15px; }
+
+/* ── Tooltip ─────────────────────────────────────────────────────────────── */
+[data-tip] { position: relative; }
+[data-tip]:hover::after {
+  content: attr(data-tip);
+  position: absolute; left: 50%; bottom: calc(100% + 6px);
+  transform: translateX(-50%);
+  background: #000; color: #fff;
+  font-size: 11px; padding: 3px 7px; border-radius: 3px;
+  white-space: nowrap; pointer-events: none; z-index: 300;
+}
+
+/* ── Resize handle ───────────────────────────────────────────────────────── */
+.resize-handle {
+  width: 3px; cursor: col-resize;
+  background: transparent; flex-shrink: 0;
+  transition: background 0.15s;
+}
+.resize-handle:hover, .resize-handle.dragging { background: var(--accent); }
+
+/* ── Spinner ─────────────────────────────────────────────────────────────── */
+.spinner {
+  display: none; width: 14px; height: 14px;
+  border: 2px solid rgba(255,255,255,.3);
+  border-top-color: #fff; border-radius: 50%;
+  animation: spin .5s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.running .spinner { display: block; }
+.running .run-label { display: none; }
+
+/* scrollable area */
+.panel-body-wrap { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
+
+</style>
+
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+<div class="app" id="app">
+
+  <!-- Activity bar -->
+  <div class="activity-bar">
+    <div class="act-btn active" data-tip="Explorer" id="act-explorer" onclick="toggleSidebar('explorer')">📁</div>
+    <div class="act-btn" data-tip="Search" onclick="toggleSidebar('search')">🔍</div>
+    <div class="act-btn" data-tip="Versions" onclick="toggleSidebar('versions')">⏱</div>
+    <div class="act-btn" data-tip="AI Assistant" onclick="toggleSidebar('ai')">✨</div>
+    <div class="spacer"></div>
+    <div class="act-btn" data-tip="Problems" id="act-problems" onclick="openPanel('problems')">
+      ⚠️
+      <span class="badge">3</span>
+    </div>
+    <div class="act-btn" data-tip="Settings" onclick="showToast('info','Настройки откроются в следующей версии','⚙️')">⚙️</div>
+  </div>
+
+  <!-- Header -->
+  <div class="header">
+    <div class="logo">
+      <div class="logo-icon">D</div>
+      DSLKit
+    </div>
+
+    <div class="breadcrumb">
+      <span>my-project</span>
+      <span class="sep">›</span>
+      <span>diagrams</span>
+      <span class="sep">›</span>
+      <span class="current">order-system.dsl</span>
+    </div>
+
+    <div class="toolbar-right">
+      <div class="notation-select" onclick="toggleDropdown('notationDrop',this)" id="notationBtn">
+        <span class="notation-badge">UML</span>
+        <span id="notationLabel">class · uml</span>
+        <span style="color:var(--text-3);font-size:10px">▾</span>
+      </div>
+
+      <div class="btn btn-icon" data-tip="Сохранить (Ctrl+S)" onclick="saveFile()">💾</div>
+      <div class="btn btn-icon" data-tip="Экспорт" onclick="toggleDropdown('exportDrop',this)">📤</div>
+      <div class="btn btn-icon" data-tip="Поделиться" onclick="showToast('info','Ссылка скопирована','🔗')">🔗</div>
+      <div class="btn btn-icon" data-tip="Переключить тему" id="themeBtn" onclick="toggleTheme()">🌙</div>
+
+      <div class="btn btn-run" id="runBtn" onclick="runDiagram()">
+        <div class="spinner"></div>
+        <span class="run-label">▶ Run</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sidebar -->
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-section-title">Explorer</div>
+    <div class="file-tree" id="fileTree">
+      <div class="tree-item folder">📂 my-project</div>
+      <div class="tree-item depth1 folder">📂 diagrams</div>
+      <div class="tree-item depth2 active" onclick="switchFile('order-system.dsl')">📄 order-system.dsl</div>
+      <div class="tree-item depth2" onclick="switchFile('auth-flow.dsl')">📄 auth-flow.dsl</div>
+      <div class="tree-item depth2" onclick="switchFile('data-model.dsl')">📄 data-model.dsl</div>
+      <div class="tree-item depth1 folder">📂 exports</div>
+      <div class="tree-item depth2">🖼️ order-system.svg</div>
+      <div class="tree-item depth2">📋 order-system.plantuml</div>
+      <div class="sidebar-divider"></div>
+      <div class="tree-item folder">📂 templates</div>
+      <div class="tree-item depth1">📋 uml-class.dsl</div>
+      <div class="tree-item depth1">📋 idef0-context.dsl</div>
+      <div class="tree-item depth1">📋 erd-logical.dsl</div>
+    </div>
+  </div>
+
+  <!-- Main area -->
+  <div class="main">
+    <div class="editor-area">
+
+      <!-- Editor pane -->
+      <div class="editor-pane" id="editorPane">
+        <div class="tab-bar">
+          <div class="tab active modified" id="tab-order">
+            <span class="tab-dot"></span>
+            📄 order-system.dsl
+            <span class="tab-close">×</span>
+          </div>
+          <div class="tab" id="tab-auth" onclick="switchFile('auth-flow.dsl')">
+            <span class="tab-dot"></span>
+            📄 auth-flow.dsl
+            <span class="tab-close">×</span>
+          </div>
+        </div>
+
+        <div class="code-editor" id="codeEditor">
+          <div class="code-lines" id="codeLines">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Resize handle -->
+      <div class="resize-handle" id="resizeHandle"></div>
+
+      <!-- Canvas pane -->
+      <div class="canvas-pane" id="canvasPane">
+        <div class="canvas-toolbar">
+          <div class="btn btn-icon" data-tip="Вписать" onclick="fitCanvas()">⤢</div>
+          <div class="btn btn-icon" data-tip="Zoom 100%" id="zoomLabel" onclick="">100%</div>
+          <div class="canvas-toolbar sep"></div>
+          <div class="btn btn-icon" data-tip="Сетка" onclick="toggleGrid()">⊞</div>
+          <div class="btn btn-icon" data-tip="Скриншот" onclick="showToast('success','SVG экспортирован','🖼️')">📷</div>
+          <div class="canvas-toolbar sep"></div>
+          <span style="font-size:11px;color:var(--text-3)">UML Class · order-system</span>
+          <div class="btn btn-icon" style="margin-left:auto" data-tip="Image → DSL (AI)" onclick="showImageToDsl()">🔮</div>
+        </div>
+
+        <div class="canvas-area" id="canvasArea">
+          <div class="canvas-content" id="canvasContent">
+            <svg class="diagram-svg" id="diagramSvg" width="560" height="380" viewBox="0 0 560 380" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+                  <path d="M0,0 L0,6 L8,3 z" fill="#888"/>
+                </marker>
+                <marker id="arr-inh" markerWidth="10" markerHeight="10" refX="8" refY="4" orient="auto">
+                  <path d="M0,0 L0,8 L10,4 z" fill="none" stroke="#888" stroke-width="1"/>
+                </marker>
+              </defs>
+
+              <!-- Order class -->
+              <g class="diagram-node" id="node-Order" onclick="highlightNode('Order',4)" data-line="4">
+                <rect class="node-bg" x="30" y="80" width="150" height="140" rx="2" fill="#252628" stroke="#569cd6" stroke-width="1.5"/>
+                <rect class="node-header" x="30" y="80" width="150" height="28" rx="2" fill="#1a3a5a"/>
+                <text x="105" y="99" text-anchor="middle" font-family="JetBrains Mono" font-size="12" fill="#4fc3f7" font-weight="600">Order</text>
+                <line x1="30" y1="108" x2="180" y2="108" stroke="#3e3e42" stroke-width="1"/>
+                <text x="42" y="125" font-family="JetBrains Mono" font-size="11" fill="#ce9178">- id: UUID</text>
+                <text x="42" y="141" font-family="JetBrains Mono" font-size="11" fill="#ce9178">- status: OrderStatus</text>
+                <text x="42" y="157" font-family="JetBrains Mono" font-size="11" fill="#ce9178">- total: Decimal</text>
+                <line x1="30" y1="165" x2="180" y2="165" stroke="#3e3e42" stroke-width="1" stroke-dasharray="4,3"/>
+                <text x="42" y="182" font-family="JetBrains Mono" font-size="11" fill="#dcdcaa">+ confirm()</text>
+                <text x="42" y="198" font-family="JetBrains Mono" font-size="11" fill="#dcdcaa">+ cancel()</text>
+              </g>
+
+              <!-- Customer class -->
+              <g class="diagram-node" id="node-Customer" onclick="highlightNode('Customer',14)" data-line="14">
+                <rect class="node-bg" x="200" y="20" width="160" height="120" rx="2" fill="#252628" stroke="#569cd6" stroke-width="1.5"/>
+                <rect class="node-header" x="200" y="20" width="160" height="28" rx="2" fill="#1a3a5a"/>
+                <text x="280" y="39" text-anchor="middle" font-family="JetBrains Mono" font-size="12" fill="#4fc3f7" font-weight="600">Customer</text>
+                <line x1="200" y1="48" x2="360" y2="48" stroke="#3e3e42" stroke-width="1"/>
+                <text x="212" y="65" font-family="JetBrains Mono" font-size="11" fill="#ce9178">- id: UUID</text>
+                <text x="212" y="81" font-family="JetBrains Mono" font-size="11" fill="#ce9178">- name: String</text>
+                <text x="212" y="97" font-family="JetBrains Mono" font-size="11" fill="#ce9178">- email: String</text>
+                <line x1="200" y1="105" x2="360" y2="105" stroke="#3e3e42" stroke-width="1" stroke-dasharray="4,3"/>
+                <text x="212" y="122" font-family="JetBrains Mono" font-size="11" fill="#dcdcaa">+ getOrders()</text>
+              </g>
+
+              <!-- OrderItem class -->
+              <g class="diagram-node" id="node-OrderItem" onclick="highlightNode('OrderItem',23)" data-line="23">
+                <rect class="node-bg" x="200" y="200" width="160" height="110" rx="2" fill="#252628" stroke="#569cd6" stroke-width="1.5"/>
+                <rect class="node-header" x="200" y="200" width="160" height="28" rx="2" fill="#1a3a5a"/>
+                <text x="280" y="219" text-anchor="middle" font-family="JetBrains Mono" font-size="12" fill="#4fc3f7" font-weight="600">OrderItem</text>
+                <line x1="200" y1="228" x2="360" y2="228" stroke="#3e3e42" stroke-width="1"/>
+                <text x="212" y="245" font-family="JetBrains Mono" font-size="11" fill="#ce9178">- quantity: Int</text>
+                <text x="212" y="261" font-family="JetBrains Mono" font-size="11" fill="#ce9178">- price: Decimal</text>
+                <line x1="200" y1="269" x2="360" y2="269" stroke="#3e3e42" stroke-width="1" stroke-dasharray="4,3"/>
+                <text x="212" y="286" font-family="JetBrains Mono" font-size="11" fill="#dcdcaa">+ getTotal()</text>
+              </g>
+
+              <!-- Product class -->
+              <g class="diagram-node" id="node-Product" onclick="highlightNode('Product',31)" data-line="31">
+                <rect class="node-bg" x="390" y="140" width="145" height="110" rx="2" fill="#252628" stroke="#569cd6" stroke-width="1.5"/>
+                <rect class="node-header" x="390" y="140" width="145" height="28" rx="2" fill="#1a3a5a"/>
+                <text x="462" y="159" text-anchor="middle" font-family="JetBrains Mono" font-size="12" fill="#4fc3f7" font-weight="600">Product</text>
+                <line x1="390" y1="168" x2="535" y2="168" stroke="#3e3e42" stroke-width="1"/>
+                <text x="402" y="185" font-family="JetBrains Mono" font-size="11" fill="#ce9178">- id: UUID</text>
+                <text x="402" y="201" font-family="JetBrains Mono" font-size="11" fill="#ce9178">- name: String</text>
+                <text x="402" y="217" font-family="JetBrains Mono" font-size="11" fill="#ce9178">- price: Decimal</text>
+                <line x1="390" y1="225" x2="535" y2="225" stroke="#3e3e42" stroke-width="1" stroke-dasharray="4,3"/>
+                <text x="402" y="242" font-family="JetBrains Mono" font-size="11" fill="#dcdcaa">+ getStock()</text>
+              </g>
+
+              <!-- Arrows -->
+              <!-- Customer →has→ Order (1:N) -->
+              <line x1="200" y1="80" x2="180" y2="120" stroke="#888" stroke-width="1.2" marker-end="url(#arr)"/>
+              <text x="182" y="97" font-family="Inter" font-size="10" fill="#666">1</text>
+              <text x="155" y="115" font-family="Inter" font-size="10" fill="#666">N</text>
+
+              <!-- Order →has→ OrderItem (1:N) -->
+              <line x1="105" y1="220" x2="200" y2="240" stroke="#888" stroke-width="1.2" marker-end="url(#arr)"/>
+              <text x="120" y="243" font-family="Inter" font-size="10" fill="#666">1</text>
+              <text x="193" y="235" font-family="Inter" font-size="10" fill="#666">N</text>
+
+              <!-- OrderItem →ref→ Product -->
+              <line x1="360" y1="254" x2="390" y2="220" stroke="#888" stroke-width="1.2" stroke-dasharray="6,3" marker-end="url(#arr)"/>
+              <text x="360" y="248" font-family="Inter" font-size="10" fill="#666">N</text>
+              <text x="385" y="225" font-family="Inter" font-size="10" fill="#666">1</text>
+
+              <!-- Cardinality labels -->
+              <text x="198" y="75" font-family="Inter" font-size="10" fill="#6a9955" font-style="italic">places</text>
+              <text x="140" y="238" font-family="Inter" font-size="10" fill="#6a9955" font-style="italic">contains</text>
+              <text x="358" y="270" font-family="Inter" font-size="10" fill="#6a9955" font-style="italic">«use»</text>
+            </svg>
+          </div>
+
+          <div class="canvas-controls">
+            <div class="canvas-btn" data-tip="Zoom +" onclick="zoomIn()">+</div>
+            <div class="canvas-btn" data-tip="Zoom −" onclick="zoomOut()">−</div>
+            <div class="canvas-btn" data-tip="Вписать" onclick="fitCanvas()">⤢</div>
+          </div>
+
+          <div class="canvas-hint">Click element → highlight code</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom panel -->
+    <div class="bottom-panel" id="bottomPanel">
+      <div class="panel-tabs">
+        <div class="panel-tab active" id="ptab-problems" onclick="switchPanel('problems')">
+          ⚠ Problems <span class="count">3</span>
+        </div>
+        <div class="panel-tab" id="ptab-ai" onclick="switchPanel('ai')">
+          ✨ AI Assistant
+        </div>
+        <div class="panel-tab" id="ptab-terminal" onclick="switchPanel('terminal')">
+          &gt;_ Terminal
+        </div>
+        <div class="panel-tab" id="ptab-output" onclick="switchPanel('output')">
+          Output
+        </div>
+        <div class="btn btn-icon panel-close" onclick="togglePanel()">⌃</div>
+      </div>
+
+      <div class="panel-body-wrap">
+
+        <!-- Problems -->
+        <div class="panel-body" id="panel-problems">
+          <div class="problem-item" onclick="gotoLine(8)">
+            <span class="prob-icon">🔴</span>
+            <div>
+              <div class="prob-msg">ERR-031 · Отсутствует обязательная связь для сущности <code>OrderItem</code>: не указан атрибут <code>orderId</code></div>
+              <div class="prob-file">order-system.dsl</div>
+            </div>
+            <span class="prob-loc">строка 8, кол 12</span>
+          </div>
+          <div class="problem-item" onclick="gotoLine(17)">
+            <span class="prob-icon">🟡</span>
+            <div>
+              <div class="prob-msg">WARN-014 · Класс <code>Customer</code> не имеет ни одного метода; рекомендуется добавить хотя бы один</div>
+              <div class="prob-file">order-system.dsl</div>
+            </div>
+            <span class="prob-loc">строка 17, кол 1</span>
+          </div>
+          <div class="problem-item" onclick="gotoLine(25)">
+            <span class="prob-icon">🔵</span>
+            <div>
+              <div class="prob-msg">INFO-002 · Поле <code>total</code> у <code>Order</code> можно пометить как <code>computed</code> (вычислимое)</div>
+              <div class="prob-file">order-system.dsl</div>
+            </div>
+            <span class="prob-loc">строка 25, кол 3</span>
+          </div>
+        </div>
+
+        <!-- AI -->
+        <div class="panel-body" id="panel-ai" hidden>
+          <div class="ai-chat">
+            <div class="ai-msg bot">Привет! Я вижу твою UML-диаграмму. В классе <code>OrderItem</code> не хватает ссылки на <code>orderId</code>. Исправить?</div>
+            <div class="ai-msg user">Да, исправь</div>
+            <div class="ai-msg bot">Добавила <code>- orderId: UUID</code> в <code>OrderItem</code>. Ошибка ERR-031 устранена. Нужно что-то ещё?</div>
+            <div class="ai-input-row">
+              <input class="ai-input" placeholder="Спросить у AI или описать изменение..." id="aiInput">
+              <button class="ai-send" onclick="sendAI()">→</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Terminal -->
+        <div class="panel-body" id="panel-terminal" hidden>
+          <div class="terminal">
+            <div class="term-line"><span class="term-prompt">$</span> dslkit validate order-system.dsl</div>
+            <div class="term-line ok">✓ Parsing… OK</div>
+            <div class="term-line err">✗ ERR-031  OrderItem: missing orderId attribute (line 8:12)</div>
+            <div class="term-line" style="color:var(--yellow)">⚠ WARN-014  Customer: no methods defined (line 17:1)</div>
+            <div class="term-line ok">ℹ  INFO-002  Order.total can be marked computed (line 25:3)</div>
+            <div class="term-line" style="color:var(--text-3)">Validation complete: 1 error, 1 warning, 1 info</div>
+            <div class="term-line"><span class="term-prompt">$</span> <span style="animation:blink 1s step-end infinite">▋</span></div>
+          </div>
+          <style>@keyframes blink{50%{opacity:0}}</style>
+        </div>
+
+        <!-- Output -->
+        <div class="panel-body" id="panel-output" hidden>
+          <div class="terminal">
+            <div class="term-line ok">[10:41:02] Render started · notation=uml.class</div>
+            <div class="term-line ok">[10:41:02] Parser OK · 4 nodes, 3 edges</div>
+            <div class="term-line" style="color:var(--yellow)">[10:41:02] Validator · 1 error, 1 warning</div>
+            <div class="term-line ok">[10:41:02] Layout engine: elkjs · layered</div>
+            <div class="term-line ok">[10:41:03] SVG rendered · 560×380px · 12.4 KB</div>
+            <div class="term-line ok">[10:41:03] Render complete in 312ms</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Status bar -->
+  <div class="status-bar">
+    <div class="status-item" onclick="toggleSidebar('explorer')">
+      <span>◉ DSLKit</span>
+    </div>
+    <div class="status-item">
+      <span>🌿 main</span>
+    </div>
+    <div class="status-item">
+      <span id="statusNotation">UML · class</span>
+    </div>
+    <div class="status-item" style="color:rgba(255,255,255,.6)">
+      <span>⚠ 1  ⓘ 1</span>
+    </div>
+    <div class="status-right">
+      <div class="status-item" id="statusSave">● Несохранено</div>
+      <div class="status-item" id="statusCursor">Ln 1, Col 1</div>
+      <div class="status-item">UTF-8</div>
+      <div class="status-item">DSL</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Notation dropdown -->
+<div class="dropdown" id="notationDrop">
+  <div style="padding:6px 12px 4px;font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em">Нотация</div>
+  <div class="dropdown-item active" onclick="setNotation('uml','class','UML','Class')"><span class="check">✓</span>UML · Диаграмма классов</div>
+  <div class="dropdown-item" onclick="setNotation('uml','usecase','UML','Use Case')"><span class="check"> </span>UML · Use Case</div>
+  <div class="dropdown-item" onclick="setNotation('uml','sequence','UML','Sequence')"><span class="check"> </span>UML · Sequence</div>
+  <div class="dropdown-item" onclick="setNotation('uml','activity','UML','Activity')"><span class="check"> </span>UML · Activity</div>
+  <div class="dropdown-sep"></div>
+  <div class="dropdown-item" onclick="setNotation('erd','logical','ERD','Logical')"><span class="check"> </span>ERD · Logical</div>
+  <div class="dropdown-item" onclick="setNotation('erd','physical','ERD','Physical')"><span class="check"> </span>ERD · Physical</div>
+  <div class="dropdown-sep"></div>
+  <div class="dropdown-item" onclick="setNotation('idef0','context','IDEF0','A-0')"><span class="check"> </span>IDEF0 · Контекстная A-0</div>
+  <div class="dropdown-item" onclick="setNotation('idef0','decomp','IDEF0','A0')"><span class="check"> </span>IDEF0 · Декомпозиция A0</div>
+  <div class="dropdown-sep"></div>
+  <div class="dropdown-item" onclick="setNotation('dfd','0','DFD','Уровень 0')"><span class="check"> </span>DFD · Уровень 0</div>
+  <div class="dropdown-item" onclick="setNotation('bpmn','process','BPMN','Process')"><span class="check"> </span>BPMN · Process</div>
+</div>
+
+<!-- Export dropdown -->
+<div class="dropdown" id="exportDrop">
+  <div style="padding:6px 12px 4px;font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em">Экспорт</div>
+  <div class="dropdown-item" onclick="doExport('SVG')">🖼️ SVG</div>
+  <div class="dropdown-item" onclick="doExport('PNG')">🖼️ PNG ×2</div>
+  <div class="dropdown-sep"></div>
+  <div class="dropdown-item" onclick="doExport('PlantUML')">📋 PlantUML</div>
+  <div class="dropdown-item" onclick="doExport('Mermaid')">📋 Mermaid</div>
+  <div class="dropdown-item" onclick="doExport('D2')">📋 D2</div>
+  <div class="dropdown-sep"></div>
+  <div class="dropdown-item" onclick="doExport('XMI / UML')">📦 XMI / UML</div>
+  <div class="dropdown-item" onclick="doExport('SQL DDL')">🗃️ SQL DDL</div>
+</div>
+
+<!-- Toast container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- ── JavaScript ──────────────────────────────────────────────────────── -->
+<script>
+/* ── DSL source code ─────────────────────────────────────────────────────── */
+const DSL_SOURCE = [
+  { t: 'cmt',  s: '// Order Management System · UML Class Diagram' },
+  { t: 'kw',   s: 'notation', rest: ' uml.class' },
+  { t: '',     s: '' },
+  { t: 'kw',   s: 'class', rest: ' ', id: 'Order', rest2: ' {' },
+  { t: 'cmt',  s: '  // Core order entity', indent: 1 },
+  { t: 'prop', s: '  - id', op: ':', type: ' UUID' },
+  { t: 'prop', s: '  - status', op: ':', type: ' OrderStatus' },
+  { t: 'prop', s: '  - total', op: ':', type: ' Decimal', err: true },
+  { t: 'prop', s: '  - createdAt', op: ':', type: ' DateTime' },
+  { t: 'meth', s: '  + confirm', op: '()', ret: ': void' },
+  { t: 'meth', s: '  + cancel',  op: '()', ret: ': void' },
+  { t: '',     s: '}' },
+  { t: '',     s: '' },
+  { t: 'kw',   s: 'class', rest: ' ', id: 'Customer', rest2: ' {' },
+  { t: 'prop', s: '  - id', op: ':', type: ' UUID' },
+  { t: 'prop', s: '  - name', op: ':', type: ' String' },
+  { t: 'prop', s: '  - email', op: ':', type: ' String', warn: true },
+  { t: 'meth', s: '  + getOrders', op: '()', ret: ': Order[]' },
+  { t: '',     s: '}' },
+  { t: '',     s: '' },
+  { t: 'rel',  s: 'Customer', op: ' -->', id: ' Order', label: ' [label="places" card="1:N"]' },
+  { t: '',     s: '' },
+  { t: 'kw',   s: 'class', rest: ' ', id: 'OrderItem', rest2: ' {' },
+  { t: 'prop', s: '  - quantity', op: ':', type: ' Int' },
+  { t: 'prop', s: '  - price', op: ':', type: ' Decimal', info: true },
+  { t: 'meth', s: '  + getTotal', op: '()', ret: ': Decimal' },
+  { t: '',     s: '}' },
+  { t: '',     s: '' },
+  { t: 'kw',   s: 'class', rest: ' ', id: 'Product', rest2: ' {' },
+  { t: 'prop', s: '  - id', op: ':', type: ' UUID' },
+  { t: 'prop', s: '  - name', op: ':', type: ' String' },
+  { t: 'prop', s: '  - price', op: ':', type: ' Decimal' },
+  { t: 'meth', s: '  + getStock', op: '()', ret: ': Int' },
+  { t: '',     s: '}' },
+  { t: '',     s: '' },
+  { t: 'rel',  s: 'Order', op: ' -->', id: ' OrderItem', label: ' [label="contains" card="1:N"]' },
+  { t: 'rel',  s: 'OrderItem', op: ' ..>', id: ' Product', label: ' [label="«use»" card="N:1"]' },
+];
+
+/* ── Render code lines ───────────────────────────────────────────────────── */
+function renderCode() {
+  const container = document.getElementById('codeLines');
+  container.innerHTML = '';
+  DSL_SOURCE.forEach((line, idx) => {
+    const row = document.createElement('div');
+    row.className = 'code-line';
+    row.id = 'L' + (idx + 1);
+    if (line.err)  row.classList.add('error-line');
+
+    // gutter
+    const gutter = document.createElement('span');
+    gutter.className = 'gutter-icon';
+    if (line.err)  gutter.textContent = '🔴';
+    else if (line.warn) gutter.textContent = '🟡';
+    else if (line.info) gutter.textContent = '🔵';
+
+    const lineNum = document.createElement('span');
+    lineNum.className = 'line-num';
+    lineNum.textContent = idx + 1;
+
+    const content = document.createElement('span');
+    content.className = 'line-content';
+    content.innerHTML = buildLineHTML(line);
+
+    row.appendChild(gutter);
+    row.appendChild(lineNum);
+    row.appendChild(content);
+    row.onclick = () => {
+      document.getElementById('statusCursor').textContent = `Ln ${idx+1}, Col 1`;
+    };
+    container.appendChild(row);
+  });
+}
+
+function buildLineHTML(line) {
+  if (!line.t && !line.kw && !line.rest) return escH(line.s);
+  if (line.t === 'cmt')  return `<span class="cmt">${escH(line.s)}</span>`;
+  if (line.t === 'kw')   return `<span class="kw">${escH(line.s)}</span><span class="id">${escH(line.rest||'')}</span>${line.id?`<span class="type">${escH(line.id)}</span>`:''}${escH(line.rest2||'')}`;
+  if (line.t === 'prop') return `${escH(line.s)}<span class="op">${escH(line.op)}</span><span class="type">${line.err?`<span class="err">${escH(line.type)}</span>`:escH(line.type)}</span>`;
+  if (line.t === 'meth') return `${escH(line.s)}<span class="op">${escH(line.op)}</span><span class="cmt">${escH(line.ret||'')}</span>`;
+  if (line.t === 'rel')  return `<span class="type">${escH(line.s)}</span><span class="op">${escH(line.op)}</span><span class="type">${escH(line.id)}</span><span class="cmt">${escH(line.label||'')}</span>`;
+  return escH(line.s);
+}
+
+function escH(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+/* ── Highlight node ──────────────────────────────────────────────────────── */
+let lastHL = null;
+function highlightNode(name, lineNum) {
+  // Remove previous
+  if (lastHL) {
+    document.querySelectorAll('.code-line.highlighted').forEach(el => el.classList.remove('highlighted'));
+    const prevNode = document.getElementById('node-' + lastHL);
+    if (prevNode) prevNode.classList.remove('hl');
+  }
+  lastHL = name;
+  // Highlight canvas node
+  const node = document.getElementById('node-' + name);
+  if (node) node.classList.add('hl');
+  // Highlight code line
+  const codeLine = document.getElementById('L' + lineNum);
+  if (codeLine) {
+    codeLine.classList.add('highlighted');
+    codeLine.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    document.getElementById('statusCursor').textContent = `Ln ${lineNum}, Col 1`;
+  }
+  showToast('info', `Выбран: ${name} → строка ${lineNum}`, '⟵');
+}
+
+function gotoLine(n) {
+  const el = document.getElementById('L' + n);
+  if (el) { el.classList.add('highlighted'); el.scrollIntoView({block:'center',behavior:'smooth'}); setTimeout(()=>el.classList.remove('highlighted'),2000); }
+}
+
+/* ── Run ─────────────────────────────────────────────────────────────────── */
+function runDiagram() {
+  const btn = document.getElementById('runBtn');
+  btn.classList.add('running');
+  setTimeout(() => {
+    btn.classList.remove('running');
+    showToast('success', 'Диаграмма обновлена · 312ms', '✓');
+    switchPanel('output');
+  }, 1200);
+}
+
+/* ── Sidebar ─────────────────────────────────────────────────────────────── */
+function toggleSidebar(section) {
+  const sidebar = document.getElementById('sidebar');
+  const actBtns = document.querySelectorAll('.act-btn');
+  // Simple toggle
+  if (sidebar.classList.contains('collapsed')) {
+    sidebar.classList.remove('collapsed');
+  } else {
+    sidebar.classList.add('collapsed');
+  }
+}
+
+/* ── Panel ───────────────────────────────────────────────────────────────── */
+let panelOpen = true;
+function togglePanel() {
+  const p = document.getElementById('bottomPanel');
+  panelOpen = !panelOpen;
+  p.classList.toggle('collapsed', !panelOpen);
+}
+
+function openPanel(name) {
+  const p = document.getElementById('bottomPanel');
+  p.classList.remove('collapsed');
+  panelOpen = true;
+  switchPanel(name);
+}
+
+function switchPanel(name) {
+  ['problems','ai','terminal','output'].forEach(n => {
+    const body = document.getElementById('panel-' + n);
+    const tab  = document.getElementById('ptab-' + n);
+    if (body) body.hidden = (n !== name);
+    if (tab)  tab.classList.toggle('active', n === name);
+  });
+}
+
+/* ── Notation ────────────────────────────────────────────────────────────── */
+function setNotation(group, type, badge, label) {
+  document.getElementById('notationLabel').textContent = label.toLowerCase() + ' · ' + group;
+  document.querySelector('.notation-badge').textContent = badge;
+  document.getElementById('statusNotation').textContent = badge + ' · ' + type;
+  document.getElementById('notationDrop').classList.remove('open');
+  showToast('info', `Нотация: ${badge} · ${label}`, '📐');
+}
+
+/* ── Export ──────────────────────────────────────────────────────────────── */
+function doExport(fmt) {
+  closeDropdowns();
+  showToast('success', `Экспортировано как ${fmt}`, '📤');
+}
+
+/* ── Theme ───────────────────────────────────────────────────────────────── */
+let isDark = true;
+function toggleTheme() {
+  isDark = !isDark;
+  document.getElementById('app').setAttribute('data-theme', isDark ? 'dark' : 'light');
+  document.getElementById('themeBtn').textContent = isDark ? '🌙' : '☀️';
+  showToast('info', isDark ? 'Тёмная тема' : 'Светлая тема', isDark ? '🌙' : '☀️');
+}
+
+/* ── Save ────────────────────────────────────────────────────────────────── */
+function saveFile() {
+  document.getElementById('statusSave').textContent = '● Сохранено';
+  document.getElementById('tab-order').classList.remove('modified');
+  showToast('success', 'Файл сохранён', '💾');
+}
+
+/* ── Canvas zoom ─────────────────────────────────────────────────────────── */
+let zoom = 1;
+function zoomIn()  { zoom = Math.min(2, zoom + 0.1); applyZoom(); }
+function zoomOut() { zoom = Math.max(0.3, zoom - 0.1); applyZoom(); }
+function fitCanvas() { zoom = 1; applyZoom(); showToast('info','Диаграмма вписана','⤢'); }
+function applyZoom() {
+  const svg = document.getElementById('diagramSvg');
+  svg.style.transform = `scale(${zoom})`;
+  svg.style.transformOrigin = 'center center';
+  document.getElementById('zoomLabel').textContent = Math.round(zoom*100) + '%';
+}
+
+let gridOn = true;
+function toggleGrid() {
+  const ca = document.getElementById('canvasArea');
+  gridOn = !gridOn;
+  ca.style.backgroundImage = gridOn
+    ? 'radial-gradient(circle, var(--border) 1px, transparent 1px)'
+    : 'none';
+}
+
+/* ── Image → DSL ─────────────────────────────────────────────────────────── */
+function showImageToDsl() {
+  showToast('info', 'Image → DSL: загрузите скриншот диаграммы', '🔮');
+}
+
+/* ── AI ──────────────────────────────────────────────────────────────────── */
+function sendAI() {
+  const input = document.getElementById('aiInput');
+  if (!input.value.trim()) return;
+  showToast('info', 'AI обрабатывает запрос…', '✨');
+  input.value = '';
+}
+
+/* ── File switch ─────────────────────────────────────────────────────────── */
+function switchFile(name) {
+  showToast('info', `Открыт: ${name}`, '📄');
+}
+
+/* ── Dropdowns ───────────────────────────────────────────────────────────── */
+function toggleDropdown(id, el) {
+  const dd = document.getElementById(id);
+  const open = dd.classList.contains('open');
+  closeDropdowns();
+  if (!open) {
+    const rect = el.getBoundingClientRect();
+    dd.style.top  = rect.bottom + 4 + 'px';
+    dd.style.left = rect.left + 'px';
+    dd.classList.add('open');
+  }
+}
+function closeDropdowns() {
+  document.querySelectorAll('.dropdown.open').forEach(d => d.classList.remove('open'));
+}
+document.addEventListener('click', e => {
+  if (!e.target.closest('.dropdown') && !e.target.closest('[onclick*="Dropdown"]')) closeDropdowns();
+});
+
+/* ── Toasts ──────────────────────────────────────────────────────────────── */
+function showToast(type, msg, icon) {
+  const c = document.getElementById('toastContainer');
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.innerHTML = `<span class="t-icon">${icon||'ℹ'}</span><span>${msg}</span>`;
+  c.appendChild(t);
+  // max 3
+  while (c.children.length > 3) c.removeChild(c.firstChild);
+  setTimeout(() => { t.classList.add('out'); setTimeout(() => t.remove(), 200); }, 2500);
+}
+
+/* ── Init ────────────────────────────────────────────────────────────────── */
+renderCode();
+setTimeout(() => showToast('success', 'Диаграмма загружена · 4 класса, 3 связи', '✓'), 400);
+
+/* ── Resize handle ───────────────────────────────────────────────────────── */
+(function() {
+  const handle = document.getElementById('resizeHandle');
+  const edPane = document.getElementById('editorPane');
+  let dragging = false, startX = 0, startW = 0;
+  handle.addEventListener('mousedown', e => {
+    dragging = true; startX = e.clientX;
+    startW = edPane.offsetWidth;
+    handle.classList.add('dragging');
+    document.body.style.cursor = 'col-resize';
+    e.preventDefault();
+  });
+  document.addEventListener('mousemove', e => {
+    if (!dragging) return;
+    const delta = e.clientX - startX;
+    const newW = Math.max(180, Math.min(startW + delta, window.innerWidth * 0.7));
+    edPane.style.width = newW + 'px';
+  });
+  document.addEventListener('mouseup', () => {
+    if (!dragging) return;
+    dragging = false;
+    handle.classList.remove('dragging');
+    document.body.style.cursor = '';
+  });
+})();
+</script>

@@ -1,0 +1,176 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="900" viewBox="0 0 1440 900">
+<rect id="Background" width="1440" height="900" fill="#ffffff"/>
+<g id="Toolbar">
+<rect x="0" y="0" width="1440" height="40" rx="0" fill="#ffffff" stroke="none" stroke-width="1"/>
+<line x1="0" y1="40" x2="1440" y2="40" stroke="#a8a8a8" stroke-width="1"/>
+<text x="14" y="25" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="14" font-weight="700" fill="#666666" text-anchor="start">DSLKit</text>
+<line x1="88" y1="10" x2="88" y2="30" stroke="#a8a8a8" stroke-width="1"/>
+<rect x="100" y="7" width="66" height="26" rx="6" fill="#d9d9d9" stroke="none" stroke-width="1"/>
+<rect x="108" y="13" width="14" height="14" rx="2" fill="none" stroke="#a8a8a8" stroke-width="1"/>
+<path d="M108 13L122 27M122 13L108 27" stroke="#a8a8a8" stroke-width="1"/>
+<text x="130" y="24" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="12" font-weight="500" fill="#555555" text-anchor="start">Run</text>
+<rect x="174" y="7" width="82" height="26" rx="6" fill="none" stroke="#a8a8a8" stroke-width="1"/>
+<text x="184" y="24" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="12" font-weight="500" fill="#666666" text-anchor="start">Validate</text>
+<line x1="266" y1="10" x2="266" y2="30" stroke="#a8a8a8" stroke-width="1"/>
+<rect x="278" y="12" width="16" height="16" rx="2" fill="none" stroke="#a8a8a8" stroke-width="1"/>
+<path d="M278 12L294 28M294 12L278 28" stroke="#a8a8a8" stroke-width="1"/>
+<rect x="304" y="12" width="16" height="16" rx="2" fill="none" stroke="#a8a8a8" stroke-width="1"/>
+<path d="M304 12L320 28M320 12L304 28" stroke="#a8a8a8" stroke-width="1"/>
+<line x1="334" y1="10" x2="334" y2="30" stroke="#a8a8a8" stroke-width="1"/>
+<rect x="346" y="12" width="16" height="16" rx="2" fill="none" stroke="#a8a8a8" stroke-width="1"/>
+<path d="M346 12L362 28M362 12L346 28" stroke="#a8a8a8" stroke-width="1"/>
+<circle cx="1416" cy="20" r="12" fill="#f0f0f0" stroke="none" stroke-width="1"/>
+<text x="1416" y="24" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="9" font-weight="700" fill="#666666" text-anchor="middle">KX</text>
+<rect x="1374" y="12" width="16" height="16" rx="2" fill="none" stroke="#a8a8a8" stroke-width="1"/>
+<path d="M1374 12L1390 28M1390 12L1374 28" stroke="#a8a8a8" stroke-width="1"/>
+<rect x="1280" y="7" width="76" height="26" rx="6" fill="none" stroke="#a8a8a8" stroke-width="1"/>
+<rect x="1288" y="13" width="14" height="14" rx="2" fill="none" stroke="#a8a8a8" stroke-width="1"/>
+<path d="M1288 13L1302 27M1302 13L1288 27" stroke="#a8a8a8" stroke-width="1"/>
+<text x="1310" y="24" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="12" font-weight="500" fill="#666666" text-anchor="start">Share</text>
+<rect x="1204" y="7" width="66" height="26" rx="6" fill="none" stroke="#a8a8a8" stroke-width="1"/>
+<rect x="1212" y="13" width="14" height="14" rx="2" fill="none" stroke="#a8a8a8" stroke-width="1"/>
+<path d="M1212 13L1226 27M1226 13L1212 27" stroke="#a8a8a8" stroke-width="1"/>
+<text x="1234" y="24" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="12" font-weight="500" fill="#666666" text-anchor="start">Save</text>
+<rect x="1110" y="12" width="30" height="16" rx="8" fill="#d9d9d9" stroke="none" stroke-width="1"/>
+<circle cx="1132" cy="20" r="6" fill="#ffffff" stroke="none" stroke-width="1"/>
+<text x="1144" y="25" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="11" font-weight="400" fill="#777777" text-anchor="start">Autosave</text>
+<rect x="940" y="7" width="130" height="26" rx="6" fill="#f0f0f0" stroke="none" stroke-width="1"/>
+<text x="950" y="24" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="12" font-weight="500" fill="#666666" text-anchor="start">Diagram: IDEF0</text>
+</g>
+<g id="ActivityBar">
+<rect x="0" y="40" width="40" height="838" rx="0" fill="#ffffff" stroke="none" stroke-width="1"/>
+<line x1="40" y1="40" x2="40" y2="878" stroke="#a8a8a8" stroke-width="1"/>
+<rect x="11" y="54" width="18" height="18" rx="2" fill="none" stroke="#a8a8a8" stroke-width="1"/>
+<path d="M11 54L29 72M29 54L11 72" stroke="#a8a8a8" stroke-width="1"/>
+<rect x="11" y="98" width="18" height="18" rx="2" fill="none" stroke="#a8a8a8" stroke-width="1"/>
+<path d="M11 98L29 116M29 98L11 116" stroke="#a8a8a8" stroke-width="1"/>
+<rect x="11" y="142" width="18" height="18" rx="2" fill="none" stroke="#a8a8a8" stroke-width="1"/>
+<path d="M11 142L29 160M29 142L11 160" stroke="#a8a8a8" stroke-width="1"/>
+<rect x="11" y="186" width="18" height="18" rx="2" fill="none" stroke="#a8a8a8" stroke-width="1"/>
+<path d="M11 186L29 204M29 186L11 204" stroke="#a8a8a8" stroke-width="1"/>
+<rect x="0" y="48" width="2" height="36" rx="0" fill="#d4d4d4" stroke="none" stroke-width="1"/>
+<rect x="11" y="842" width="18" height="18" rx="2" fill="none" stroke="#a8a8a8" stroke-width="1"/>
+<path d="M11 842L29 860M29 842L11 860" stroke="#a8a8a8" stroke-width="1"/>
+</g>
+<g id="Sidebar">
+<rect x="40" y="40" width="180" height="838" rx="0" fill="#ffffff" stroke="none" stroke-width="1"/>
+<line x1="220" y1="40" x2="220" y2="878" stroke="#a8a8a8" stroke-width="1"/>
+<text x="54" y="64" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="10" font-weight="700" fill="#999999" text-anchor="start">EXPLORER</text>
+<rect x="46" y="76" width="168" height="26" rx="5" fill="#f0f0f0" stroke="none" stroke-width="1"/>
+<rect x="54" y="81" width="16" height="16" rx="2" fill="none" stroke="#a8a8a8" stroke-width="1"/>
+<path d="M54 81L70 97M70 81L54 97" stroke="#a8a8a8" stroke-width="1"/>
+<text x="78" y="93" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="12" font-weight="500" fill="#666666" text-anchor="start">order.dsl</text>
+<rect x="54" y="109" width="16" height="16" rx="2" fill="none" stroke="#a8a8a8" stroke-width="1"/>
+<path d="M54 109L70 125M70 109L54 125" stroke="#a8a8a8" stroke-width="1"/>
+<text x="78" y="121" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="12" font-weight="400" fill="#666666" text-anchor="start">rules.dsl</text>
+<rect x="54" y="137" width="16" height="16" rx="2" fill="none" stroke="#a8a8a8" stroke-width="1"/>
+<path d="M54 137L70 153M70 137L54 153" stroke="#a8a8a8" stroke-width="1"/>
+<text x="78" y="149" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="12" font-weight="400" fill="#666666" text-anchor="start">invoice.dsl</text>
+<text x="54" y="190" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="10" font-weight="700" fill="#999999" text-anchor="start">TEMPLATES</text>
+<rect x="54" y="204" width="16" height="16" rx="2" fill="none" stroke="#a8a8a8" stroke-width="1"/>
+<path d="M54 204L70 220M70 204L54 220" stroke="#a8a8a8" stroke-width="1"/>
+<text x="78" y="217" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="12" font-weight="400" fill="#666666" text-anchor="start">IDEF0</text>
+<rect x="54" y="232" width="16" height="16" rx="2" fill="none" stroke="#a8a8a8" stroke-width="1"/>
+<path d="M54 232L70 248M70 232L54 248" stroke="#a8a8a8" stroke-width="1"/>
+<text x="78" y="245" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="12" font-weight="400" fill="#666666" text-anchor="start">DFD</text>
+<rect x="54" y="260" width="16" height="16" rx="2" fill="none" stroke="#a8a8a8" stroke-width="1"/>
+<path d="M54 260L70 276M70 260L54 276" stroke="#a8a8a8" stroke-width="1"/>
+<text x="78" y="273" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="12" font-weight="400" fill="#666666" text-anchor="start">ERD</text>
+<rect x="52" y="816" width="156" height="48" rx="8" fill="#ffffff" stroke="#a8a8a8" stroke-width="1"/>
+<text x="62" y="836" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="10" font-weight="500" fill="#777777" text-anchor="start">Beta · 3 из 5 сегодня</text>
+<rect x="62" y="848" width="136" height="5" rx="3" fill="#a8a8a8" stroke="none" stroke-width="1"/>
+<rect x="62" y="848" width="82" height="5" rx="3" fill="#d4d4d4" stroke="none" stroke-width="1"/>
+</g>
+<g id="Tabs">
+<rect x="220" y="40" width="1220" height="32" rx="0" fill="#ffffff" stroke="none" stroke-width="1"/>
+<line x1="220" y1="72" x2="1440" y2="72" stroke="#a8a8a8" stroke-width="1"/>
+<rect x="220" y="40" width="140" height="32" rx="0" fill="#ffffff" stroke="none" stroke-width="1"/>
+<line x1="360" y1="40" x2="360" y2="72" stroke="#a8a8a8" stroke-width="1"/>
+<rect x="220" y="40" width="140" height="2" rx="0" fill="#d4d4d4" stroke="none" stroke-width="1"/>
+<text x="234" y="60" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="12" font-weight="500" fill="#666666" text-anchor="start">order.dsl</text>
+<circle cx="316" cy="56" r="3.5" fill="#cccccc" stroke="none" stroke-width="1"/>
+<rect x="332" y="46" width="20" height="20" rx="4" fill="none" stroke="none" stroke-width="1"/>
+<rect x="337" y="51" width="10" height="10" rx="2" fill="none" stroke="#a8a8a8" stroke-width="1"/>
+<path d="M337 51L347 61M347 51L337 61" stroke="#a8a8a8" stroke-width="1"/>
+<rect x="360" y="40" width="140" height="32" rx="0" fill="#ffffff" stroke="none" stroke-width="1"/>
+<line x1="500" y1="40" x2="500" y2="72" stroke="#a8a8a8" stroke-width="1"/>
+<text x="374" y="60" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="12" font-weight="400" fill="#999999" text-anchor="start">rules.dsl</text>
+<rect x="472" y="46" width="20" height="20" rx="4" fill="none" stroke="none" stroke-width="1"/>
+<rect x="477" y="51" width="10" height="10" rx="2" fill="none" stroke="#a8a8a8" stroke-width="1"/>
+<path d="M477 51L487 61M487 51L477 61" stroke="#a8a8a8" stroke-width="1"/>
+</g>
+<rect x="220" y="72" width="466.04" height="636" rx="0" fill="#ffffff" stroke="none" stroke-width="1"/>
+<g id="Code">
+<rect x="264" y="87" width="187.92" height="6" rx="3" fill="#a8a8a8" stroke="none" stroke-width="1" opacity="0.5"/>
+<rect x="264" y="107" width="155.52" height="6" rx="3" fill="#a8a8a8" stroke="none" stroke-width="1" opacity="0.5"/>
+<rect x="220" y="120" width="466.04" height="20" rx="0" fill="#f3f3f3" stroke="none" stroke-width="1"/>
+<rect x="264" y="127" width="90.72" height="6" rx="3" fill="#a8a8a8" stroke="none" stroke-width="1" opacity="0.5"/>
+<rect x="220" y="140" width="466.04" height="20" rx="0" fill="#bbbbbb" stroke="none" stroke-width="1" opacity="0.12"/>
+<rect x="264" y="147" width="97.2" height="6" rx="3" fill="#a8a8a8" stroke="none" stroke-width="1" opacity="0.5"/>
+<rect x="264" y="167" width="110.16" height="6" rx="3" fill="#a8a8a8" stroke="none" stroke-width="1" opacity="0.5"/>
+<rect x="264" y="187" width="6.48" height="6" rx="3" fill="#a8a8a8" stroke="none" stroke-width="1" opacity="0.5"/>
+<rect x="264" y="207" width="136.08" height="6" rx="3" fill="#a8a8a8" stroke="none" stroke-width="1" opacity="0.5"/>
+<rect x="264" y="227" width="103.68" height="6" rx="3" fill="#a8a8a8" stroke="none" stroke-width="1" opacity="0.5"/>
+<rect x="264" y="247" width="6.48" height="6" rx="3" fill="#a8a8a8" stroke="none" stroke-width="1" opacity="0.5"/>
+<rect x="264" y="267" width="174.96" height="6" rx="3" fill="#a8a8a8" stroke="none" stroke-width="1" opacity="0.5"/>
+</g>
+<line x1="686.04" y1="72" x2="686.04" y2="708" stroke="#a8a8a8" stroke-width="1"/>
+<g id="Canvas">
+<rect x="686.04" y="72" width="753.96" height="636" rx="0" fill="#ffffff" stroke="none" stroke-width="1"/>
+<rect x="873.02" y="280" width="150" height="60" rx="4" fill="#ffffff" stroke="#777777" stroke-width="1.5"/>
+<text x="948.02" y="308" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="13" font-weight="700" fill="#666666" text-anchor="middle">A0</text>
+<text x="948.02" y="325" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="10" font-weight="400" fill="#999999" text-anchor="middle">Process order</text>
+<rect x="1093.02" y="380" width="150" height="60" rx="4" fill="#ffffff" stroke="#777777" stroke-width="1.5"/>
+<text x="1168.02" y="408" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="13" font-weight="700" fill="#666666" text-anchor="middle">A1</text>
+<text x="1168.02" y="425" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="10" font-weight="400" fill="#999999" text-anchor="middle">Ship goods</text>
+<path d="M1023.02 310H1058.02V410H1087.02" fill="none" stroke="#777777" stroke-width="1.4"/><path d="M1093.02 410l-7 -4v8z" fill="#777777"/>
+<text x="1064.02" y="360" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="10" font-weight="400" fill="#999999" text-anchor="start">Invoice</text>
+<rect x="700.04" y="86" width="78" height="24" rx="12" fill="#ffffff" stroke="#a8a8a8" stroke-width="1"/>
+<text x="739.04" y="102" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="10" font-weight="500" fill="#777777" text-anchor="middle">A-0 › A0</text>
+<rect x="1322" y="84" width="104" height="26" rx="6" fill="none" stroke="#a8a8a8" stroke-width="1"/>
+<text x="1332" y="101" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="12" font-weight="500" fill="#666666" text-anchor="start">Auto-layout</text>
+<rect x="1398" y="608" width="30" height="88" rx="6" fill="#ffffff" stroke="#a8a8a8" stroke-width="1"/>
+<rect x="1405" y="616" width="16" height="16" rx="2" fill="none" stroke="#a8a8a8" stroke-width="1"/>
+<path d="M1405 616L1421 632M1421 616L1405 632" stroke="#a8a8a8" stroke-width="1"/>
+<line x1="1398" y1="638" x2="1428" y2="638" stroke="#a8a8a8" stroke-width="1"/>
+<text x="1413" y="664" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="16" font-weight="400" fill="#777777" text-anchor="middle">−</text>
+<line x1="1398" y1="668" x2="1428" y2="668" stroke="#a8a8a8" stroke-width="1"/>
+<rect x="1405" y="678" width="16" height="16" rx="2" fill="none" stroke="#a8a8a8" stroke-width="1"/>
+<path d="M1405 678L1421 694M1421 678L1405 694" stroke="#a8a8a8" stroke-width="1"/>
+</g>
+<g id="BottomPanel">
+<rect x="220" y="708" width="1220" height="170" rx="0" fill="#ffffff" stroke="none" stroke-width="1"/>
+<line x1="220" y1="708" x2="1440" y2="708" stroke="#a8a8a8" stroke-width="1"/>
+<text x="236" y="730" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="11" font-weight="600" fill="#666666" text-anchor="start">Problems 3</text>
+<text x="328" y="730" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="11" font-weight="400" fill="#999999" text-anchor="start">AI</text>
+<text x="420" y="730" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="11" font-weight="400" fill="#999999" text-anchor="start">Output</text>
+<text x="512" y="730" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="11" font-weight="400" fill="#999999" text-anchor="start">Versions</text>
+<rect x="236" y="738" width="70" height="2" rx="0" fill="#d4d4d4" stroke="none" stroke-width="1"/>
+<line x1="220" y1="740" x2="1440" y2="740" stroke="#a8a8a8" stroke-width="1"/>
+<rect x="220" y="744" width="1220" height="30" rx="0" fill="#f0f0f0" stroke="none" stroke-width="1"/>
+<rect x="236" y="751" width="16" height="16" rx="2" fill="none" stroke="#a8a8a8" stroke-width="1"/>
+<path d="M236 751L252 767M252 751L236 767" stroke="#a8a8a8" stroke-width="1"/>
+<text x="260" y="763" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="12" font-weight="400" fill="#666666" text-anchor="start">Unknown property &#x27;contro&#x27; — did you mean &#x27;control&#x27;?</text>
+<text x="600.4" y="763" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="11" font-weight="400" fill="#999999" text-anchor="start">order.dsl:4</text>
+<rect x="1320" y="747" width="104" height="24" rx="6" fill="none" stroke="#a8a8a8" stroke-width="1"/>
+<rect x="1328" y="752" width="14" height="14" rx="2" fill="none" stroke="#a8a8a8" stroke-width="1"/>
+<path d="M1328 752L1342 766M1342 752L1328 766" stroke="#a8a8a8" stroke-width="1"/>
+<text x="1350" y="763" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="12" font-weight="500" fill="#666666" text-anchor="start">Fix with AI</text>
+<rect x="236" y="781" width="16" height="16" rx="2" fill="none" stroke="#a8a8a8" stroke-width="1"/>
+<path d="M236 781L252 797M252 781L236 797" stroke="#a8a8a8" stroke-width="1"/>
+<text x="260" y="793" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="12" font-weight="400" fill="#666666" text-anchor="start">Unclosed block &quot;A1&quot;</text>
+<text x="395.6" y="793" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="11" font-weight="400" fill="#999999" text-anchor="start">order.dsl:7</text>
+<rect x="236" y="811" width="16" height="16" rx="2" fill="none" stroke="#a8a8a8" stroke-width="1"/>
+<path d="M236 811L252 827M252 811L236 827" stroke="#a8a8a8" stroke-width="1"/>
+<text x="260" y="823" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="12" font-weight="400" fill="#666666" text-anchor="start">Block A1 has no outputs</text>
+<text x="421.2" y="823" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="11" font-weight="400" fill="#999999" text-anchor="start">rules.dsl:2</text>
+</g>
+<g id="StatusBar">
+<rect x="0" y="878" width="1440" height="22" rx="0" fill="#ffffff" stroke="none" stroke-width="1"/>
+<line x1="0" y1="878" x2="1440" y2="878" stroke="#a8a8a8" stroke-width="1"/>
+<text x="12" y="893" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="10" font-weight="600" fill="#777777" text-anchor="start">IDEF0</text>
+<text x="62" y="893" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="10" font-weight="400" fill="#bbbbbb" text-anchor="start">⊗ 2   ⚠ 1</text>
+<text x="130" y="893" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="10" font-weight="400" fill="#777777" text-anchor="start">⎇ main</text>
+<text x="1428" y="893" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="10" font-weight="400" fill="#777777" text-anchor="end">Autosave ON · Ln 4, Col 12</text>
+</g>
+</svg>

@@ -1,0 +1,585 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DSLKit — 100 A/B тестов</title>
+<style>
+:root{--bg:#f8f9fc;--sf:#fff;--br:#dde1e9;--tx:#1c1f2e;--tx2:#4a5068;--tx3:#6b7285;--ac:#2563eb;--acs:#e8efff;--rt:#16a34a;--er:#dc2626;--wn:#d97706;--kw:#7c3aed;--st:#15803d;--hl:#fff7d6;--sh:0 4px 14px rgba(20,24,40,.14)}
+.t-dark{--bg:#1e1e2e;--sf:#181825;--br:#313244;--tx:#cdd6f4;--tx2:#a6adc8;--tx3:#7f849c;--ac:#6d9bff;--acs:#27304d;--rt:#4ade80;--er:#f87171;--wn:#fbbf24;--kw:#c4a5ff;--st:#86efac;--hl:#3a3520;--sh:0 4px 14px rgba(0,0,0,.5)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--tx);font:14px/1.5 Inter,system-ui,"Segoe UI",sans-serif}
+button{font:inherit;color:inherit;cursor:pointer}
+.hd{position:sticky;top:0;z-index:100;background:var(--sf);border-bottom:1px solid var(--br);padding:12px 24px}
+.hd-row{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.hd h1{font-size:17px;font-weight:700}
+.hd p{font-size:12px;color:var(--tx3)}
+.hd .sp1{flex:1}
+.hbtn{height:30px;padding:0 12px;border:1px solid var(--br);background:var(--sf);border-radius:6px;font-size:12px}
+.hbtn:hover{border-color:var(--ac)}
+.hbtn.on{background:var(--ac);color:#fff;border-color:var(--ac)}
+.pg{height:3px;background:var(--br);border-radius:2px;margin-top:10px}
+.pg i{display:block;height:100%;width:0;background:var(--ac);border-radius:2px;transition:width .25s}
+.lay{display:grid;grid-template-columns:220px minmax(0,1fr);align-items:start}.nav{position:sticky;top:84px;max-height:calc(100vh - 84px);overflow:auto;padding:16px 12px;border-right:1px solid var(--br);background:var(--sf);min-height:calc(100vh - 84px)}
+.nav a{display:flex;justify-content:space-between;gap:8px;padding:7px 10px;border-radius:6px;font-size:13px;color:var(--tx2);text-decoration:none}
+.nav a:hover{background:var(--bg)}
+.nav a.cur{background:var(--acs);color:var(--ac);font-weight:600}
+.nav a span{color:var(--tx3);font-size:11px}
+.ct{padding:24px;max-width:1100px}
+.sec h2{font-size:16px;margin:28px 0 12px;display:flex;gap:8px;align-items:baseline}
+.sec h2 small{font-weight:400;color:var(--tx3);font-size:12px}
+.card{background:var(--sf);border:1px solid var(--br);border-radius:10px;padding:16px;margin-bottom:14px}
+.card.done{border-color:color-mix(in srgb,var(--ac) 40%,var(--br))}
+.qh{display:flex;gap:10px;align-items:flex-start;margin-bottom:12px}
+.qn{flex:none;min-width:28px;height:24px;display:grid;place-items:center;background:var(--bg);border:1px solid var(--br);border-radius:6px;font-size:12px;font-weight:600;color:var(--tx2)}
+.qt{font-weight:600;font-size:14px}
+.tag{display:inline-block;margin-left:8px;font-size:10px;font-weight:600;padding:1px 7px;border-radius:9px;background:var(--bg);border:1px solid var(--br);color:var(--tx3);vertical-align:2px}
+.ab{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}
+.opt{display:block;min-width:0;border:2px solid var(--br);border-radius:10px;padding:10px;cursor:pointer;background:var(--sf);transition:border-color .12s,background .12s}
+.opt:hover{border-color:color-mix(in srgb,var(--ac) 50%,var(--br))}
+.opt:has(input:checked){border-color:var(--ac);background:var(--acs)}
+.opt input{position:absolute;opacity:0;pointer-events:none}
+.opt:has(input:focus-visible){outline:2px solid var(--ac);outline-offset:2px}
+.ol{display:flex;gap:8px;align-items:flex-start;margin-top:10px;font-size:12.5px;color:var(--tx2)}
+.ol b{flex:none;width:20px;height:20px;border-radius:50%;display:grid;place-items:center;background:var(--bg);border:1px solid var(--br);font-size:11px;color:var(--tx)}
+.opt:has(input:checked) .ol b{background:var(--ac);color:#fff;border-color:var(--ac)}
+.hy{margin-top:10px;font-size:12px;color:var(--tx3)}
+.foot{margin:32px 0 60px;padding:16px;border:1px dashed var(--br);border-radius:10px;font-size:13px}
+.foot pre{margin-top:10px;max-height:220px;overflow:auto;background:var(--bg);padding:10px;border-radius:6px;font-size:12px;white-space:pre-wrap}
+@media(max-width:820px){.lay{grid-template-columns:minmax(0,1fr)}.nav{display:none}.ab{grid-template-columns:minmax(0,1fr)}.ct{padding:12px}}
+
+/* ---------- mini UI ---------- */
+.pv{position:relative;height:150px;border:1px solid var(--br);border-radius:6px;background:var(--bg);overflow:hidden;font-size:11px;color:var(--tx);user-select:none;pointer-events:none;display:flex;flex-direction:column}
+.pv.tall{height:190px}.pv.ph{height:230px}
+.pv .ic{flex:none}
+.pv .bd{flex:1;position:relative;min-height:0;display:flex}
+.pv .col{display:flex;flex-direction:column}
+.pv .fl{flex:1;min-width:0}
+.mtb{display:flex;align-items:center;gap:4px;height:30px;padding:0 8px;background:var(--sf);border-bottom:1px solid var(--br);flex:none;position:relative}
+.mb{display:inline-flex;align-items:center;gap:4px;height:22px;padding:0 7px;border-radius:5px;font-size:11px;font-weight:500;border:1px solid transparent;color:var(--tx2);white-space:nowrap}
+.mb.g{border-color:var(--br);color:var(--tx)}
+.mb.run{background:var(--rt);color:#fff}
+.mb.blue{background:var(--ac);color:#fff}
+.mb.dis{background:var(--br);color:var(--tx3)}
+.mb.err{background:var(--er);color:#fff}
+.mb.ghost{color:var(--tx2)}
+.mb.sq{padding:0 5px}
+.mb small{font-size:9px;opacity:.75;margin-left:2px}
+.sep{width:1px;height:16px;background:var(--br);margin:0 4px}
+.gap{width:16px}
+.ttl{font-weight:600;color:var(--tx);padding:0 6px}
+.bdg{display:inline-block;padding:1px 6px;border-radius:9px;background:var(--acs);color:var(--ac);font-weight:600;font-size:10px}
+.bdg.r{background:var(--er);color:#fff}
+.bdg.y{background:var(--wn);color:#fff}
+.bdg.g{background:var(--rt);color:#fff}
+.tgl{display:inline-flex;align-items:center;gap:5px;color:var(--tx2)}
+.tgl i{width:24px;height:14px;border-radius:7px;background:var(--br);position:relative}
+.tgl i:after{content:"";position:absolute;top:2px;left:2px;width:10px;height:10px;border-radius:50%;background:#fff;transition:.15s}
+.tgl.on i{background:var(--rt)}.tgl.on i:after{left:12px}
+.tip{position:absolute;z-index:5;background:#1c1f2e;color:#fff;padding:3px 7px;border-radius:5px;font-size:10px;white-space:nowrap}
+.mnu{position:absolute;z-index:5;min-width:120px;background:var(--sf);border:1px solid var(--br);border-radius:7px;box-shadow:var(--sh);padding:3px}
+.mnu div{display:flex;justify-content:space-between;gap:10px;padding:3px 8px;border-radius:4px;color:var(--tx)}
+.mnu div.hi{background:var(--acs);color:var(--ac)}
+.mnu hr{border:0;border-top:1px solid var(--br);margin:3px 0}
+.mnu.dk{background:#1e1e2e;color:#cdd6f4;border-color:#313244}.mnu.dk div{color:#cdd6f4}.mnu.dk div.hi{background:#313244;color:#fff}.mnu.dk hr{border-color:#313244}
+.mnu.nat{background:#f1f1f1;border-color:#aaa;border-radius:2px;color:#111}.mnu.nat div{color:#111;border-radius:0}.mnu.nat div.hi{background:#0078d7;color:#fff}
+.mdl{position:absolute;z-index:6;left:50%;top:50%;transform:translate(-50%,-50%);width:70%;max-width:260px;background:var(--sf);border:1px solid var(--br);border-radius:9px;box-shadow:var(--sh);padding:10px}
+.mdl b{display:block;margin-bottom:4px;font-size:12px}
+.mdl p{color:var(--tx2);margin-bottom:8px}
+.mdl .bt{display:flex;gap:5px;justify-content:flex-end}
+.scrim:before{content:"";position:absolute;inset:0;background:rgba(20,24,40,.28);z-index:4}
+.toast{position:absolute;z-index:7;background:#1c1f2e;color:#fff;border-radius:6px;padding:5px 10px;box-shadow:var(--sh);display:flex;gap:6px;align-items:center}
+.spin{width:11px;height:11px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:rot .8s linear infinite}
+@keyframes rot{to{transform:rotate(360deg)}}
+.prog{height:2px;background:var(--br);position:relative;flex:none}.prog i{position:absolute;left:0;top:0;height:100%;width:55%;background:var(--ac)}
+/* tabs */
+.mtabs{display:flex;align-items:flex-end;height:28px;background:var(--bg);border-bottom:1px solid var(--br);flex:none;overflow:hidden;position:relative}
+.mt{position:relative;display:inline-flex;align-items:center;gap:5px;height:27px;padding:0 10px;border-right:1px solid var(--br);color:var(--tx3);white-space:nowrap;flex:none}
+.mt.act{background:var(--sf);color:var(--tx);box-shadow:inset 0 2px 0 var(--ac)}
+.mt .dot{width:7px;height:7px;border-radius:50%;background:var(--wn)}
+.mt .x{display:grid;place-items:center;width:15px;height:15px;border-radius:3px;font-style:normal}
+.mt .nb{position:absolute;left:0;right:0;bottom:0;height:3px}
+.mt.sm{padding:0 6px;max-width:64px;overflow:hidden}
+/* code */
+.med{flex:1;min-width:0;background:var(--sf);font:11px/16px "JetBrains Mono","Cascadia Mono",Consolas,monospace;padding:6px 0;position:relative;overflow:hidden;color:var(--tx)}
+.med.f13{font-size:13px;line-height:19px}.med.f14{font-size:14px;line-height:21px}
+.med .ln{display:flex;white-space:pre;position:relative}
+.med .ln>i{flex:none;width:28px;text-align:right;padding-right:8px;color:var(--tx3);font-style:normal}
+.med.nonum .ln>i{display:none}.med.nonum .ln>span{padding-left:10px}
+.med .ln.wv>span{background:linear-gradient(transparent 85%,transparent)}
+.med .k{color:var(--kw);font-weight:600}.med .s{color:var(--st);font-weight:400}.med .c{color:var(--tx3);font-style:italic;font-weight:400}
+.med .ln.er{background:color-mix(in srgb,var(--er) 12%,transparent)}
+.med .wave{text-decoration:underline wavy var(--er);text-underline-offset:2px}
+.med .ln.hl{background:var(--hl)}
+.med .ln.dirty:before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--wn)}
+.med .ln.gut:before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--ac)}
+.med .gh{color:var(--tx3);opacity:.7}
+.med .cur{display:inline-block;width:1px;height:1em;background:var(--tx);vertical-align:-2px}
+.med .mm{position:absolute;right:0;top:0;bottom:0;width:34px;background:var(--bg);border-left:1px solid var(--br)}
+.med .mm i{display:block;height:2px;margin:3px 4px;background:var(--br);border-radius:1px}
+.med .bm{background:#ffe27a;color:#000}.med .bb{outline:1px solid var(--ac);outline-offset:0}
+.med .pop{position:absolute;z-index:3;background:var(--sf);border:1px solid var(--br);border-radius:6px;box-shadow:var(--sh);font:11px/1.4 Inter,sans-serif;padding:3px}
+.med .pop div{padding:2px 8px;border-radius:4px}.med .pop div.hi{background:var(--acs);color:var(--ac)}
+/* canvas */
+.mcv{flex:1;position:relative;min-width:0;overflow:hidden;background:var(--bg)}
+.mcv.dots{background-image:radial-gradient(var(--br) 1px,transparent 1.2px);background-size:12px 12px}
+.mcv.lines{background-image:linear-gradient(var(--br) 1px,transparent 1px),linear-gradient(90deg,var(--br) 1px,transparent 1px);background-size:14px 14px}
+.nd{position:absolute;width:62px;height:30px;border:1.5px solid var(--tx2);border-radius:4px;background:var(--sf);display:grid;place-items:center;font-weight:600;font-size:10px}
+.nd.sel{border-color:var(--ac);box-shadow:0 0 0 3px color-mix(in srgb,var(--ac) 25%,transparent)}
+.nd.bad{border-color:var(--er);border-width:2px}
+.nd.blur{filter:blur(1.2px);opacity:.7}
+.nd.r8{border-radius:9px}
+.mcv svg.ed{position:absolute;inset:0;width:100%;height:100%}
+.el{position:absolute;font-size:9px;background:var(--bg);padding:0 3px;color:var(--tx2)}
+.zc{position:absolute;display:flex;flex-direction:column;border:1px solid var(--br);border-radius:6px;background:var(--sf);overflow:hidden}
+.zc span{padding:3px 6px;text-align:center;border-bottom:1px solid var(--br)}.zc span:last-child{border:0}
+.mmap{position:absolute;width:44px;height:30px;border:1px solid var(--br);background:var(--sf);border-radius:4px}
+.mmap i{position:absolute;border:1px solid var(--ac);background:var(--acs)}
+/* status / panels */
+.msb{display:flex;align-items:center;gap:12px;height:22px;padding:0 10px;background:var(--sf);border-top:1px solid var(--br);color:var(--tx2);font-size:10.5px;flex:none;white-space:nowrap}
+.msb.tall{height:28px}.msb.alt{background:var(--bg)}
+.mpn{background:var(--sf);border-top:1px solid var(--br);flex:none}
+.mpn .h{display:flex;gap:10px;padding:4px 8px;border-bottom:1px solid var(--br);font-weight:600;color:var(--tx2)}
+.mpn .r{display:flex;gap:6px;align-items:center;padding:3px 8px;border-bottom:1px solid color-mix(in srgb,var(--br) 60%,transparent)}
+.mpn .r.hi{background:var(--acs)}
+.er-c{color:var(--er)}.wn-c{color:var(--wn)}.ok-c{color:var(--rt)}.mut{color:var(--tx3)}
+.side{width:90px;flex:none;background:var(--sf);border-right:1px solid var(--br);padding:6px}
+.side.l{border-right:0;border-left:1px solid var(--br)}
+.card2{background:var(--sf);border:1px solid var(--br);border-radius:6px;padding:6px 8px}
+.ph-frame{width:104px;height:100%;margin:0 auto;border:2px solid var(--tx2);border-radius:14px;background:var(--bg);overflow:hidden;display:flex;flex-direction:column;position:relative}
+.ph-frame .mtb{height:24px}
+.ph-frame .msb{height:34px;justify-content:space-around;gap:0}
+.ph-frame .med{font-size:8px;line-height:11px}.ph-frame .med .ln>i{width:14px;padding-right:4px}
+.ph-frame .mb{height:18px;padding:0 5px;font-size:9px}
+.pv .set-r{display:flex;justify-content:space-between;align-items:center;padding:3px 0;border-bottom:1px solid var(--br)}
+.skel{height:6px;border-radius:3px;background:var(--br);margin:4px 0}
+.fade1,.fade2,.fade3{animation:fin 2.4s infinite both}.fade2{animation-delay:.4s}.fade3{animation-delay:.8s}
+@keyframes fin{0%,15%{opacity:0;transform:scale(.9)}35%,100%{opacity:1;transform:none}}
+
+</style>
+</head>
+<body>
+<header class="hd">
+  <div class="hd-row">
+    <div><h1>DSLKit — 100 A/B тестов интерфейса</h1><p>Кликните по макету, который нравится больше. Ответы сохраняются автоматически.</p></div>
+    <div class="sp1"></div>
+    <span class="hy" style="margin:0">Отвечено <b id="cnt">0 / 100</b> · A: <b id="a">0</b> · B: <b id="b">0</b></span>
+    <button class="hbtn" id="todo">Только без ответа</button>
+    <button class="hbtn" id="theme">☀ Светлая</button>
+    <button class="hbtn" id="copy">Скопировать итог</button>
+    <button class="hbtn" id="dl">Скачать .md</button>
+    <button class="hbtn" id="reset">Сбросить</button>
+  </div>
+  <div class="pg"><i id="pg"></i></div>
+</header>
+<div class="lay">
+  <nav class="nav" id="nav"></nav>
+  <main class="ct" id="ct"></main>
+</div>
+<script>
+const Q=[{"n": 1, "sec": "Тулбар", "q": "Кнопка «Run» — как лучше обозначить её состояние, когда в коде есть ошибки?", "tag": "UX", "a": "Кнопка серая и заблокирована, tooltip «Исправьте ошибки перед запуском»", "b": "Кнопка красная и активна — клик показывает модал со списком ошибок", "h": "Гипотеза A: не позволяет запустить сломанный код. Гипотеза B: даёт видимость ошибок через Run-действие."}, {"n": 2, "sec": "Тулбар", "q": "Как показать нотацию текущего файла в тулбаре?", "tag": "Навигация", "a": "Бейдж-тег рядом с именем файла: «IDEF0»", "b": "Иконка нотации в левой части тулбара с выпадающим меню смены", "h": ""}, {"n": 3, "sec": "Тулбар", "q": "Как разместить кнопки сохранения и экспорта?", "tag": "UX", "a": "Отдельные кнопки «Save» (⌘S) и «Export» рядом", "b": "Одна кнопка «Save ▾» с выпадающим: «Save», «Save As…», «Export»", "h": ""}, {"n": 4, "sec": "Тулбар", "q": "Тогл автосохранения — где его разместить?", "tag": "UX", "a": "В тулбаре, тогл с подписью «Autosave»", "b": "Только в настройках, в тулбаре убрать", "h": ""}, {"n": 5, "sec": "Тулбар", "q": "Как обозначить кнопки Undo / Redo в тулбаре?", "tag": "A11y", "a": "Только иконки ↩ ↪ с aria-label и tooltip", "b": "Иконки + текст «Undo» / «Redo» (компактный вид скрывает текст)", "h": ""}, {"n": 6, "sec": "Тулбар", "q": "Где показывать уведомление о последнем сохранении?", "tag": "Копи", "a": "В статус-баре внизу: «Saved 2s ago»", "b": "Тост вверху, исчезает через 2 сек", "h": ""}, {"n": 7, "sec": "Тулбар", "q": "Как показывать горячие клавиши на кнопках тулбара?", "tag": "UX", "a": "Только в tooltip при наведении", "b": "Мелким текстом рядом с кнопкой видно всегда", "h": ""}, {"n": 8, "sec": "Тулбар", "q": "Как разделять группы кнопок в тулбаре (Run / Edit / Format)?", "tag": "Визуал", "a": "Разделитель-линия между группами", "b": "Пустое пространство (gap) без линии", "h": ""}, {"n": 9, "sec": "Тулбар", "q": "Кнопка «Format code» — иконка или текст?", "tag": "Копи", "a": "Иконка метлы/кисти с tooltip «Format (⇧⌥F)»", "b": "Кнопка «Format» с иконкой", "h": ""}, {"n": 10, "sec": "Тулбар", "q": "Как выглядит кнопка открытия AI-ассистента в тулбаре?", "tag": "UX", "a": "Иконка «✨» или «AI» — открывает боковую панель", "b": "Кнопка «Ask AI…» с иконкой — открывает всплывающий чат", "h": ""}, {"n": 11, "sec": "Тулбар", "q": "Что происходит при нажатии Run, если файл не сохранён?", "tag": "UX", "a": "Автосохранение + запуск без диалога", "b": "Модальный диалог «Сохранить перед запуском?»", "h": ""}, {"n": 12, "sec": "Тулбар", "q": "Цвет кнопки Run в нормальном состоянии?", "tag": "Визуал", "a": "Зелёная (#9ece6a) — ассоциация «выполнить»", "b": "Синяя (#7aa2f7) — единый стиль primary-действий", "h": ""}, {"n": 13, "sec": "Тулбар", "q": "Где показывать имя текущего файла (breadcrumb)?", "tag": "Навигация", "a": "В центре тулбара крупно", "b": "Только в активном табе — тулбар не дублирует", "h": ""}, {"n": 14, "sec": "Тулбар", "q": "Кнопка «Share» / «Export PNG» в тулбаре — нужна?", "tag": "UX", "a": "Да, вынести в тулбар отдельной кнопкой", "b": "Нет, убрать в File-меню / контекстное меню", "h": ""}, {"n": 15, "sec": "Тулбар", "q": "Как показать статус «компилируется» во время выполнения Run?", "tag": "Перф", "a": "Spinner внутри кнопки Run, кнопка остаётся активной (отмена)", "b": "Прогресс-бар под тулбаром, кнопка Run меняется на «Stop»", "h": ""}, {"n": 16, "sec": "Редактор кода", "q": "Как подсвечивать строку с ошибкой в редакторе?", "tag": "Визуал", "a": "Красная волнистая линия под токеном + красный фон строки", "b": "Красная волнистая линия только под токеном, без фона строки", "h": ""}, {"n": 17, "sec": "Редактор кода", "q": "Автодополнение — когда показывать список вариантов?", "tag": "Перф", "a": "После первого введённого символа (delay 200ms)", "b": "По явному Ctrl+Space", "h": ""}, {"n": 18, "sec": "Редактор кода", "q": "Как показать синхронизацию кода и канваса (двунаправленная связь)?", "tag": "Визуал", "a": "Мигающий синий фон строки при наведении соответствующего элемента на канвасе", "b": "Синяя вертикальная полоска слева от строки (gutter highlight)", "h": ""}, {"n": 19, "sec": "Редактор кода", "q": "Размер шрифта кода по умолчанию?", "tag": "UX", "a": "13px — компактно, больше кода на экране", "b": "14px — легче читать при долгой работе", "h": ""}, {"n": 20, "sec": "Редактор кода", "q": "Как отображать номера строк (gutter)?", "tag": "UX", "a": "Всегда видны", "b": "Скрыты по умолчанию, включаются в настройках", "h": ""}, {"n": 21, "sec": "Редактор кода", "q": "Как вести себя скобкам / закрывающим тегам при наборе?", "tag": "UX", "a": "Автоматически вставлять парную скобку", "b": "Не вставлять автоматически — настройка в опциях", "h": ""}, {"n": 22, "sec": "Редактор кода", "q": "Как показывать inline-подсказку AI (ghost text) при наборе?", "tag": "UX", "a": "Серый ghost text справа от курсора, Tab принимает", "b": "Всплывающий блок ниже курсора, Enter принимает", "h": ""}, {"n": 23, "sec": "Редактор кода", "q": "Миниатюра кода (minimap) справа от редактора — нужна?", "tag": "Навигация", "a": "Да, включена по умолчанию", "b": "Нет — только отнимает место, можно включить в настройках", "h": ""}, {"n": 24, "sec": "Редактор кода", "q": "Перенос строк (word wrap) в редакторе по умолчанию?", "tag": "UX", "a": "Включён — нет горизонтального скролла", "b": "Выключен — видна исходная структура DSL", "h": ""}, {"n": 25, "sec": "Редактор кода", "q": "Как выглядит контекстное меню правой кнопкой мыши?", "tag": "UX", "a": "Нативное меню браузера (Copy, Paste, …) + custom пункты", "b": "Полностью кастомное тёмное меню в стиле IDE", "h": ""}, {"n": 26, "sec": "Редактор кода", "q": "Как показать «найти и заменить» (Find & Replace)?", "tag": "Навигация", "a": "Панель появляется в верхнем правом углу редактора", "b": "Модальный диалог по центру экрана", "h": ""}, {"n": 27, "sec": "Редактор кода", "q": "Как подсветить пару скобок при позиционировании курсора?", "tag": "Визуал", "a": "Жёлтый фон у обеих скобок", "b": "Синяя рамка без изменения фона", "h": ""}, {"n": 28, "sec": "Редактор кода", "q": "Как показывать информацию о токене при наведении (hover card)?", "tag": "UX", "a": "Тёмная всплывашка с типом, описанием и ссылкой на документацию", "b": "Только мини-tooltip с типом (без hover card)", "h": ""}, {"n": 29, "sec": "Редактор кода", "q": "Вставка фрагментов кода (snippets) — как инициировать?", "tag": "Перф", "a": "Ввести prefix + Tab (как Emmet)", "b": "Выбрать из меню снипетов через иконку в тулбаре", "h": ""}, {"n": 30, "sec": "Редактор кода", "q": "Как обозначить несохранённые изменения в редакторе (кроме точки в табе)?", "tag": "Визуал", "a": "Жёлтая полоска слева (dirty gutter line)", "b": "Только точка в табе — больше ничего не нужно", "h": ""}, {"n": 31, "sec": "Канвас диаграмм", "q": "Как реагировать при клике на элемент диаграммы?", "tag": "Навигация", "a": "Перейти к соответствующей строке в редакторе кода", "b": "Показать инспектор свойств элемента в боковой панели", "h": ""}, {"n": 32, "sec": "Канвас диаграмм", "q": "Как расположить разделитель между кодом и канвасом?", "tag": "UX", "a": "Вертикальный разделитель (код слева, канвас справа)", "b": "Горизонтальный (код сверху, канвас снизу)", "h": ""}, {"n": 33, "sec": "Канвас диаграмм", "q": "Кнопки масштаба канваса (Zoom In/Out/Fit) — где размещать?", "tag": "Навигация", "a": "Плавающие кнопки в правом нижнем углу канваса", "b": "В статус-баре внизу экрана", "h": ""}, {"n": 34, "sec": "Канвас диаграмм", "q": "Что делать при перетаскивании элемента на канвасе?", "tag": "UX", "a": "Обновить позицию в DSL-коде автоматически", "b": "Сохранить позицию только в метаданных (layout file), не менять DSL", "h": ""}, {"n": 35, "sec": "Канвас диаграмм", "q": "Как показывать ошибку прямо на канвасе?", "tag": "Визуал", "a": "Красная рамка у проблемного элемента + иконка ⚠ в углу", "b": "Заблюренный элемент + tooltip при наведении", "h": ""}, {"n": 36, "sec": "Канвас диаграмм", "q": "Как отображать анимацию рендера при компиляции?", "tag": "Перф", "a": "Плавное появление элементов один за другим (staggered fade in)", "b": "Без анимации — мгновенная замена (быстрее на слабых машинах)", "h": ""}, {"n": 37, "sec": "Канвас диаграмм", "q": "Как отображать метки связей на диаграмме?", "tag": "Визуал", "a": "Всегда видны над стрелкой", "b": "Появляются только при наведении на связь", "h": ""}, {"n": 38, "sec": "Канвас диаграмм", "q": "Сетка (grid) на канвасе по умолчанию?", "tag": "Визуал", "a": "Точечная сетка (dots) всегда видна", "b": "Сетка скрыта, включается по кнопке", "h": ""}, {"n": 39, "sec": "Канвас диаграмм", "q": "Экспорт диаграммы — какие форматы в первую очередь?", "tag": "UX", "a": "SVG + PNG (векторный и растровый)", "b": "PDF + PNG (для документов и презентаций)", "h": ""}, {"n": 40, "sec": "Канвас диаграмм", "q": "Навигация по большой диаграмме — как?", "tag": "Навигация", "a": "Мини-карта в углу + колёсо мыши для прокрутки", "b": "Только колёсо мыши + drag (без мини-карты)", "h": ""}, {"n": 41, "sec": "Канвас диаграмм", "q": "Как авто-расставлять элементы (auto-layout)?", "tag": "UX", "a": "Авто-layout при каждой компиляции", "b": "Только по кнопке «Auto-layout» — не трогать ручное расположение", "h": ""}, {"n": 42, "sec": "Канвас диаграмм", "q": "Как выделить несколько элементов на канвасе?", "tag": "UX", "a": "Выделение прямоугольником (lasso drag)", "b": "Shift+клик по каждому элементу", "h": ""}, {"n": 43, "sec": "Табы файлов", "q": "Как обозначить несохранённые изменения в табе?", "tag": "Визуал", "a": "Жёлтая точка перед именем файла", "b": "Звёздочка (*) после имени файла", "h": ""}, {"n": 44, "sec": "Табы файлов", "q": "Что произойдёт при закрытии таба с несохранёнными изменениями?", "tag": "UX", "a": "Модальный диалог: «Сохранить / Не сохранять / Отмена»", "b": "Таб не закрывается — сначала нужно сохранить или явно отменить", "h": ""}, {"n": 45, "sec": "Табы файлов", "q": "Кнопка закрытия таба (×) — когда видна?", "tag": "UX", "a": "Только при наведении и на активном табе", "b": "Всегда видна на всех табах", "h": ""}, {"n": 46, "sec": "Табы файлов", "q": "Сколько табов умещается до появления прокрутки/меню?", "tag": "Навигация", "a": "Горизонтальная прокрутка — табы не сжимаются", "b": "Табы сужаются, лишние уходят в «…» меню", "h": ""}, {"n": 47, "sec": "Табы файлов", "q": "Перетаскивание табов для перестановки — нужно?", "tag": "UX", "a": "Да, drag & drop табов", "b": "Нет — порядок не важен, убрать сложность", "h": ""}, {"n": 48, "sec": "Табы файлов", "q": "Как показать тип нотации прямо в табе?", "tag": "Визуал", "a": "Цветная полоска снизу таба (цвет по нотации)", "b": "Иконка нотации перед именем файла", "h": ""}, {"n": 49, "sec": "Табы файлов", "q": "Восстанавливать ли табы при следующей сессии?", "tag": "UX", "a": "Да, автоматически открывать все вкладки последней сессии", "b": "Нет, начинать с пустого — пусть пользователь откроет нужное", "h": ""}, {"n": 50, "sec": "Табы файлов", "q": "Правая кнопка на табе — что в меню?", "tag": "UX", "a": "Close, Close Others, Close All, Copy Path", "b": "Только Close и Copy Path — минимум", "h": ""}, {"n": 51, "sec": "Табы файлов", "q": "Как показать, что таб «закреплён» (pinned)?", "tag": "Визуал", "a": "Иконка 📌 вместо имени (очень узкий таб)", "b": "Полоска отличного цвета снизу таба", "h": ""}, {"n": 52, "sec": "Табы файлов", "q": "Middle-click на табе?", "tag": "UX", "a": "Закрыть таб (как в браузерах)", "b": "Не обрабатывать — нет у всех пользователей колёса", "h": ""}, {"n": 53, "sec": "Панель ошибок", "q": "Где размещать панель ошибок/диагностики?", "tag": "Навигация", "a": "Внизу (как Terminal panel в VS Code)", "b": "Справа под канвасом", "h": ""}, {"n": 54, "sec": "Панель ошибок", "q": "Как группировать ошибки в панели?", "tag": "UX", "a": "По файлу", "b": "По типу (Error / Warning / Info)", "h": ""}, {"n": 55, "sec": "Панель ошибок", "q": "Как показать количество ошибок в шапке приложения?", "tag": "Визуал", "a": "Красный badge-счётчик рядом с иконкой панели ошибок", "b": "В статус-баре: «⊗ 3 Errors»", "h": ""}, {"n": 56, "sec": "Панель ошибок", "q": "Клик на ошибку в панели — куда перейти?", "tag": "Навигация", "a": "Перейти к строке в редакторе + подсветить её", "b": "Открыть детальное объяснение ошибки в правой панели", "h": ""}, {"n": 57, "sec": "Панель ошибок", "q": "AI «Quick Fix» для ошибок — где показывать?", "tag": "UX", "a": "Иконка лампочки 💡 рядом с ошибкой в редакторе", "b": "Кнопка «Fix with AI» в каждой строке панели ошибок", "h": ""}, {"n": 58, "sec": "Панель ошибок", "q": "Панель ошибок — открывать автоматически при компиляции с ошибками?", "tag": "UX", "a": "Да, раскрывать автоматически", "b": "Нет — только badge-счётчик, пользователь открывает сам", "h": ""}, {"n": 59, "sec": "Панель ошибок", "q": "Как отличать Warning от Error визуально?", "tag": "Визуал", "a": "Красный ⊗ для Error, жёлтый ⚠ для Warning", "b": "Красный и оранжевый цвет строки без иконки", "h": ""}, {"n": 60, "sec": "Панель ошибок", "q": "Сколько ошибок показывать в панели без прокрутки?", "tag": "UX", "a": "5 строк — панель маленькая, остальные при скролле", "b": "Панель растягивается под количество ошибок (max ~40% экрана)", "h": ""}, {"n": 61, "sec": "Панель ошибок", "q": "Фильтрация ошибок в панели — нужна?", "tag": "UX", "a": "Да, поле поиска + кнопки «Errors» / «Warnings»", "b": "Нет — список небольшой, фильтрация лишняя", "h": ""}, {"n": 62, "sec": "Панель ошибок", "q": "Что делать с ошибками при успешной повторной компиляции?", "tag": "UX", "a": "Панель ошибок очищается и схлопывается автоматически", "b": "Панель остаётся, показывает «0 errors» зелёным", "h": ""}, {"n": 63, "sec": "Онбординг", "q": "Как встречать нового пользователя?", "tag": "UX", "a": "Пустой редактор с подсказками-заглушками в панелях", "b": "Приветственный экран с выбором шаблона нотации", "h": ""}, {"n": 64, "sec": "Онбординг", "q": "Обучающий тур (tour) — когда показывать?", "tag": "UX", "a": "Автоматически при первом входе", "b": "Только по кнопке «Start tour» — не навязывать", "h": ""}, {"n": 65, "sec": "Онбординг", "q": "Первый шаблон при создании нового файла — откуда брать?", "tag": "UX", "a": "Диалог выбора нотации → вставить готовый boilerplate", "b": "Всегда пустой файл — не предполагать нотацию", "h": ""}, {"n": 66, "sec": "Онбординг", "q": "Как показывать подсказки при наборе первой диаграммы?", "tag": "UX", "a": "Inline hints в виде ghost text: «Try: → A0 \"name\"»", "b": "Боковая панель «Quick Reference» с синтаксисом", "h": ""}, {"n": 67, "sec": "Онбординг", "q": "Встроенные примеры диаграмм — как оформить?", "tag": "UX", "a": "Галерея с превью на экране выбора шаблона", "b": "Примеры в боковом проводнике как read-only файлы", "h": ""}, {"n": 68, "sec": "Онбординг", "q": "Как знакомить с концепцией «diagram as code» новичка?", "tag": "Копи", "a": "Short animated demo (gif/video) на экране приветствия", "b": "Пошаговый интерактивный tutorial прямо в редакторе", "h": ""}, {"n": 69, "sec": "Онбординг", "q": "Прогресс онбординга — показывать?", "tag": "UX", "a": "Да, чеклист «Начало работы» в боковой панели", "b": "Нет — не надо создавать ощущение «задания»", "h": ""}, {"n": 70, "sec": "Онбординг", "q": "Как справочник (Docs) доступен внутри IDE?", "tag": "Навигация", "a": "F1 или кнопка «?» открывает встроенный поиск по документации", "b": "Ссылка открывает docs в новой вкладке браузера", "h": ""}, {"n": 71, "sec": "Онбординг", "q": "Можно ли пропустить онбординг?", "tag": "UX", "a": "Да, кнопка «Skip» всегда видна", "b": "Нет, нужно хотя бы пройти первый шаг", "h": ""}, {"n": 72, "sec": "Онбординг", "q": "Как напоминать о возможностях, которые пользователь ещё не пробовал?", "tag": "UX", "a": "Ненавязчивый tip в статус-баре раз в несколько дней", "b": "Не напоминать — пользователь найдёт сам", "h": ""}, {"n": 73, "sec": "Настройки", "q": "Как открывать настройки?", "tag": "Навигация", "a": "Отдельный экран настроек (вся страница)", "b": "Боковая панель поверх редактора (drawer)", "h": ""}, {"n": 74, "sec": "Настройки", "q": "Применение изменений настроек — когда?", "tag": "UX", "a": "В реальном времени, без кнопки Save", "b": "После нажатия «Save changes»", "h": ""}, {"n": 75, "sec": "Настройки", "q": "Тема оформления — как выбирать?", "tag": "Визуал", "a": "Миниатюры с live preview при наведении", "b": "Выпадающий список с именами тем", "h": ""}, {"n": 76, "sec": "Настройки", "q": "Настройки AI (модель, BYOK) — где?", "tag": "UX", "a": "Отдельная секция «AI & Integrations» в настройках", "b": "В боковой AI-панели кнопка «AI Settings»", "h": ""}, {"n": 77, "sec": "Настройки", "q": "Поиск по настройкам — нужен?", "tag": "Навигация", "a": "Да, поисковая строка как в VS Code Settings", "b": "Нет — настроек немного, иерархия секций достаточна", "h": ""}, {"n": 78, "sec": "Настройки", "q": "Экспорт/импорт настроек — нужна ли эта функция?", "tag": "UX", "a": "Да, кнопка «Export settings (JSON)»", "b": "Нет — слишком редкий сценарий для MVP", "h": ""}, {"n": 79, "sec": "Настройки", "q": "Как выглядят категории в панели настроек?", "tag": "Визуал", "a": "Вертикальная панель вкладок слева (Editor / Canvas / AI / Keymap)", "b": "Аккордеон-секции на одной странице с прокруткой", "h": ""}, {"n": 80, "sec": "Настройки", "q": "Сброс настроек до заводских — как оформить?", "tag": "UX", "a": "Кнопка «Reset to defaults» с диалогом подтверждения", "b": "Не показывать в UI — только через команд-палет", "h": ""}, {"n": 81, "sec": "Настройки", "q": "Привязки клавиш (keymap) — можно ли кастомизировать?", "tag": "UX", "a": "Да, полная кастомизация в настройках", "b": "Нет, только выбор из пресетов (VS Code / JetBrains / Default)", "h": ""}, {"n": 82, "sec": "Настройки", "q": "Где хранить настройки пользователя?", "tag": "UX", "a": "В облаке (синхронизация между устройствами)", "b": "В localStorage браузера (локально, приватно)", "h": ""}, {"n": 83, "sec": "Статус-бар", "q": "Что показывать в статус-баре слева?", "tag": "Навигация", "a": "Счётчики ошибок/предупреждений", "b": "Имя текущей нотации + версия DSL", "h": ""}, {"n": 84, "sec": "Статус-бар", "q": "Что показывать в статус-баре справа?", "tag": "Навигация", "a": "Строка:колонка курсора + время последнего сохранения", "b": "Только время последнего сохранения", "h": ""}, {"n": 85, "sec": "Статус-бар", "q": "Высота статус-бара?", "tag": "Визуал", "a": "22px (компактный как VS Code)", "b": "28px (более кликабельный)", "h": ""}, {"n": 86, "sec": "Статус-бар", "q": "Показывать ли статус «Autosave ON» в статус-баре?", "tag": "UX", "a": "Да — иконка облака с состоянием", "b": "Нет — загромождает, убрать", "h": ""}, {"n": 87, "sec": "Статус-бар", "q": "Тип кодировки файла (UTF-8) в статус-баре?", "tag": "UX", "a": "Показывать, клик открывает меню смены", "b": "Не показывать — DSL всегда UTF-8", "h": ""}, {"n": 88, "sec": "Статус-бар", "q": "Счётчик элементов диаграммы (nodes / edges) в статус-баре?", "tag": "Визуал", "a": "Да — «12 nodes · 8 edges»", "b": "Нет — это не нужно в статус-баре", "h": ""}, {"n": 89, "sec": "Статус-бар", "q": "Цвет фона статус-бара?", "tag": "Визуал", "a": "Совпадает с фоном тулбара (--surface)", "b": "Чуть темнее фона (--bg) — даёт ощущение «подвала»", "h": ""}, {"n": 90, "sec": "Статус-бар", "q": "Можно ли скрыть статус-бар (для максимума пространства)?", "tag": "UX", "a": "Да, через меню View → Hide Status Bar", "b": "Нет — статус-бар всегда виден", "h": ""}, {"n": 91, "sec": "Мобайл", "q": "Что показывать на мобильном по умолчанию?", "tag": "UX", "a": "Канвас диаграммы на весь экран (режим просмотра)", "b": "Список файлов / дашборд — редактировать на мобиле не нужно", "h": ""}, {"n": 92, "sec": "Мобайл", "q": "Редактирование DSL-кода на мобиле — поддерживать?", "tag": "UX", "a": "Да, простой textarea с подсветкой", "b": "Нет — мобиле только просмотр, редактирование только на десктопе", "h": ""}, {"n": 93, "sec": "Мобайл", "q": "Navigation bar на мобиле — где?", "tag": "Навигация", "a": "Bottom navigation bar (как в мобильных приложениях)", "b": "Hamburger menu сверху", "h": ""}, {"n": 94, "sec": "Мобайл", "q": "Как переключаться между кодом и канвасом на мобиле?", "tag": "Навигация", "a": "Свайп влево/вправо", "b": "Кнопки «Code» | «Preview» вверху", "h": ""}, {"n": 95, "sec": "Мобайл", "q": "Экспорт диаграммы с мобиле — как делиться?", "tag": "UX", "a": "Кнопка «Share» → Native share sheet (png/svg)", "b": "Кнопка «Copy link» → ссылка в буфер", "h": ""}, {"n": 96, "sec": "Мобайл", "q": "Жест Pinch-to-zoom на канвасе мобиле — поддерживать?", "tag": "UX", "a": "Да, pinch = zoom канваса", "b": "Нет, только кнопки +/−", "h": ""}, {"n": 97, "sec": "Мобайл", "q": "Как читать сообщение об ошибке на маленьком экране?", "tag": "UX", "a": "Bottom sheet снизу с прокручиваемым списком ошибок", "b": "Badge-иконка — клик открывает модал с ошибками", "h": ""}, {"n": 98, "sec": "Мобайл", "q": "PWA-установка на устройство — как предложить?", "tag": "UX", "a": "Баннер «Добавить на экран» через 3 визита", "b": "Кнопка в меню «Install app» без навязывания", "h": ""}, {"n": 99, "sec": "Мобайл", "q": "Оффлайн-режим на мобиле — поддерживать?", "tag": "Перф", "a": "Да, полный оффлайн (Service Worker, локальные файлы)", "b": "Только просмотр кэшированных диаграмм — редактирование онлайн", "h": ""}, {"n": 100, "sec": "Мобайл", "q": "Какую цветовую тему предлагать по умолчанию на мобиле?", "tag": "Визуал", "a": "Следовать системной теме (светлая / тёмная)", "b": "Всегда тёмная тема — IDE-ощущение", "h": ""}];
+const IC={
+play:'<path d="M6 4l10 6-10 6z"/>',
+save:'<path d="M4 4h10l2 2v10H4z"/><path d="M7 4v4h5V4M7 16v-5h6v5"/>',
+undo:'<path d="M8 5L4 9l4 4"/><path d="M4 9h7a4 4 0 010 8H9"/>',
+redo:'<path d="M12 5l4 4-4 4"/><path d="M16 9H9a4 4 0 000 8h2"/>',
+exp:'<path d="M10 3v9M6 8l4 4 4-4M4 16h12"/>',
+share:'<circle cx="5" cy="10" r="2"/><circle cx="15" cy="5" r="2"/><circle cx="15" cy="15" r="2"/><path d="M7 9l6-3M7 11l6 3"/>',
+ai:'<path d="M10 3l1.6 4.4L16 9l-4.4 1.6L10 15l-1.6-4.4L4 9l4.4-1.6z"/>',
+fmt:'<path d="M4 6h12M4 10h8M4 14h10"/>',
+chk:'<path d="M4 10l4 4 8-8"/>',
+x:'<path d="M5 5l10 10M15 5L5 15"/>',
+warn:'<path d="M10 3l8 14H2z"/><path d="M10 8v4M10 14v.5"/>',
+err:'<circle cx="10" cy="10" r="7"/><path d="M7 7l6 6M13 7l-6 6"/>',
+search:'<circle cx="9" cy="9" r="5"/><path d="M13 13l4 4"/>',
+gear:'<circle cx="10" cy="10" r="3"/><path d="M10 2v3M10 15v3M2 10h3M15 10h3M4.5 4.5l2 2M13.5 13.5l2 2M15.5 4.5l-2 2M6.5 13.5l-2 2"/>',
+file:'<path d="M5 3h7l3 3v11H5z"/><path d="M12 3v3h3"/>',
+pin:'<path d="M12 3l5 5-3 1-3 4-1-1-4 4M9 11L4 16"/>',
+cloud:'<path d="M6 15a4 4 0 010-8 5 5 0 019.5 1.5A3.2 3.2 0 0115 15z"/>',
+bulb:'<path d="M7 14h6M8 17h4M10 3a5 5 0 00-3 9v2h6v-2a5 5 0 00-3-9z"/>',
+plus:'<path d="M10 4v12M4 10h12"/>',
+chev:'<path d="M6 8l4 4 4-4"/>',
+menu:'<path d="M3 6h14M3 10h14M3 14h14"/>',
+code:'<path d="M7 6l-4 4 4 4M13 6l4 4-4 4"/>',
+eye:'<path d="M2 10s3-6 8-6 8 6 8 6-3 6-8 6-8-6-8-6z"/><circle cx="10" cy="10" r="2"/>',
+dots:'<circle cx="5" cy="10" r="1"/><circle cx="10" cy="10" r="1"/><circle cx="15" cy="10" r="1"/>',
+home:'<path d="M3 10l7-6 7 6M5 9v7h10V9"/>',
+q:'<circle cx="10" cy="10" r="7"/><path d="M8 8a2 2 0 114 0c0 1.5-2 1.5-2 3M10 14v.5"/>',
+git:'<circle cx="6" cy="5" r="2"/><circle cx="6" cy="15" r="2"/><circle cx="14" cy="8" r="2"/><path d="M6 7v6M14 10c0 3-4 2-8 4"/>',
+fit:'<path d="M4 8V4h4M12 4h4v4M16 12v4h-4M8 16H4v-4"/>',
+trash:'<path d="M4 6h12M8 6V4h4v2M6 6l1 10h6l1-10"/>',
+lock:'<rect x="5" y="9" width="10" height="7" rx="1"/><path d="M7 9V6a3 3 0 016 0v3"/>',
+folder:'<path d="M3 6h5l2 2h7v8H3z"/>',
+grid:'<path d="M4 4h12v12H4zM4 10h12M10 4v12"/>',
+down:'<path d="M5 8l5 5 5-5"/>',
+bell:'<path d="M5 14V9a5 5 0 0110 0v5l1 1H4zM8 17h4"/>',
+};
+const ic=(n,s=13)=>`<svg class="ic" width="${s}" height="${s}" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">${IC[n]||''}</svg>`;
+const bt=(l,k='g',i,sm)=>`<span class="mb ${k}${l?'':' sq'}">${i?ic(i,12):''}${l?`<span>${l}</span>`:''}${sm?`<small>${sm}</small>`:''}</span>`;
+const SP='<i class="sep"></i>',GAP='<i class="gap"></i>',FL='<i style="flex:1"></i>';
+const tb=(...p)=>`<div class="mtb">${p.join('')}</div>`;
+const pv=(inner,c='')=>`<div class="pv ${c}">${inner}</div>`;
+const bd=(inner,st='')=>`<div class="bd" style="${st}">${inner}</div>`;
+const tip=(t,st)=>`<div class="tip" style="${st}">${t}</div>`;
+const mnu=(items,st,c='')=>`<div class="mnu ${c}" style="${st}">${items.map(i=>i==='-'?'<hr>':i[0]==='*'?`<div class="hi">${i.slice(1)}</div>`:`<div>${i}</div>`).join('')}</div>`;
+const mdl=(t,p,btns)=>`<div class="mdl"><b>${t}</b><p>${p}</p><div class="bt">${btns.join('')}</div></div>`;
+const toast=(t,st)=>`<div class="toast" style="${st}">${t}</div>`;
+const tgl=(on,l)=>`<span class="tgl${on?' on':''}"><i></i>${l||''}</span>`;
+const tab=(n,o={})=>`<span class="mt${o.act?' act':''}${o.sm?' sm':''}">${o.ico?ic('file',11):''}${o.pin?ic('pin',11):`<span>${n}${o.dirty==='star'?'*':''}</span>`}${o.dirty==='dot'?'<b class="dot"></b>':''}${o.x?`<em class="x">${ic('x',9)}</em>`:''}${o.bar?`<i class="nb" style="background:${o.bar}"></i>`:''}</span>`;
+const tabs=(...t)=>`<div class="mtabs">${t.join('')}</div>`;
+const K=s=>`<b class="k">${s}</b>`,S=s=>`<b class="s">${s}</b>`,C=s=>`<span class="c">${s}</span>`;
+const L0=[`${K('diagram')} idef0 ${S('"Order"')}`,`${K('box')} A0 ${S('"Process order"')} {`,`  ${K('input')}: Order`,`  ${K('control')}: Rules`,`}`,`${K('box')} A1 ${S('"Ship"')}`];
+const code=(ls=L0,o={})=>`<div class="med${o.fs?' f'+o.fs:''}${o.num===false?' nonum':''}">${ls.map((l,i)=>{const [c,t]=Array.isArray(l)?l:['',l];return `<div class="ln ${c}"><i>${i+1}</i><span>${t}</span></div>`}).join('')}${o.mm?'<div class="mm">'+'<i></i>'.repeat(10)+'</div>':''}${o.x||''}</div>`;
+const ND=[[4,8,'A0'],[108,44,'A1'],[208,8,'A2']];
+const zoom=st=>`<div class="zc" style="${st}"><span>+</span><span>−</span><span>${ic('fit',11)}</span></div>`;
+const cv=(o={})=>{
+ const n=o.nodes||ND;
+ const ed=n.slice(1).map((p,i)=>{const a=n[i],dx=p[0]-a[0],dy=p[1]-a[1];const t=Math.min(dx?31/Math.abs(dx):9,dy?15/Math.abs(dy):9);
+  const x1=a[0]+31+dx*t,y1=a[1]+15+dy*t,x2=p[0]+31-dx*t-(dx?Math.sign(dx)*2:0),y2=p[1]+15-dy*t-(dy?Math.sign(dy)*2:0);
+  return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="var(--tx2)" stroke-width="1.3" marker-end="url(#ar)"/>`}).join('');
+ const nd=n.map((p,i)=>`<div class="nd${o.sel===i||(Array.isArray(o.sel)&&o.sel.includes(i))?' sel':''}${o.bad===i?' bad':''}${o.blur===i?' blur':''}${o.r8?' r8':''}${o.anim?' fade'+(i+1):''}" style="left:${p[0]}px;top:${p[1]}px">${p[2]}${o.bad===i?`<span style="position:absolute;right:-7px;top:-8px;color:var(--er);background:var(--sf);border-radius:50%;display:flex">${ic('warn',13)}</span>`:''}</div>`).join('');
+ const lb=o.labels==='off'?'':`<div class="el" style="left:${o.labels==='one'?70:76}px;top:26px">Order</div>${o.labels==='one'?'':'<div class="el" style="left:176px;top:26px">Invoice</div>'}`;
+ return `<div class="mcv ${o.grid==null?'dots':o.grid==='none'?'':o.grid}"><div style="position:absolute;left:50%;top:50%;width:280px;height:118px;margin:-59px 0 0 -140px;transform:scale(${o.sc||1})"><svg class="ed" viewBox="0 0 280 118"><defs><marker id="ar" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M0 0L7 3.5L0 7z" fill="var(--tx2)"/></marker></defs>${ed}</svg>${lb}${nd}${o.in||''}</div>${o.x||''}</div>`};
+const sbar=(l,r,c='')=>`<div class="msb ${c}">${l.join('')}${FL}${r.join('')}</div>`;
+const pnl=(head,rows)=>`<div class="mpn"><div class="h">${head.join('')}</div>${rows.map(r=>`<div class="r${Array.isArray(r)?' '+r[0]:''}">${Array.isArray(r)?r[1]:r}</div>`).join('')}</div>`;
+const ERR=ic('err',12).replace('currentColor','var(--er)'),WRN=ic('warn',12);
+const E1=`<span class="er-c">${ic('err',12)}</span>`,W1=`<span class="wn-c">${ic('warn',12)}</span>`;
+const ide=(o={})=>`${o.tb||tb(bt('Run','run','play'),bt('Validate'),FL,bt('Save','g','save'))}${o.tabs===0?'':o.tabs||tabs(tab('order.dsl',{act:1,x:1}),tab('rules.dsl'))}${bd((o.side||'')+(o.a||code())+(o.b||cv()),o.dir?'flex-direction:'+o.dir:'')}${o.pn||''}${o.sb===0?'':o.sb||sbar(['IDEF0'],['Ln 3, Col 8'])}`;
+const ph=(inner,c='')=>`<div style="flex:1;padding:6px 0;display:flex;gap:10px;justify-content:center"><div class="ph-frame ${c}">${inner}</div></div>`;
+const phone=(top,bodyHtml,bottom,c='')=>ph(`<div class="mtb" style="justify-content:space-between">${top}</div><div class="bd" style="position:relative">${bodyHtml}</div>${bottom||''}`,c);
+const phs=(...a)=>`<div style="flex:1;padding:6px 0;display:flex;gap:10px;justify-content:center">${a.join('')}</div>`;
+const phf=(top,bodyHtml,bottom,c='')=>`<div class="ph-frame ${c}"><div class="mtb" style="justify-content:space-between">${top}</div><div class="bd" style="position:relative">${bodyHtml}</div>${bottom||''}</div>`;
+const P={};
+
+const LE=[L0[0],L0[1],['er',`  ${K('imput')}: <span class="wave">Order</span>`],L0[3],L0[4],L0[5]];
+const bodyC=(l=L0)=>bd(code(l)+cv({}));
+P[1]=()=>[
+ pv(tb(bt('Run','dis','play'),bt('Validate'),FL,'<span class="bdg r">3 ошибки</span>')+bodyC(LE)+tip('Исправьте ошибки перед запуском','left:8px;top:34px')),
+ pv(tb(bt('Run','err','play'),bt('Validate'),FL,'<span class="bdg r">3 ошибки</span>')+bodyC(LE)+'<div class="scrim"></div>'+mdl('Не удалось запустить','3 ошибки в order.dsl',[bt('Закрыть'),bt('К ошибкам','blue')]))];
+P[2]=()=>[
+ pv(tb(`<span class="ttl">order.dsl</span>`,'<span class="bdg">IDEF0</span>',FL,bt('Run','run','play'))+bodyC()),
+ pv(tb(bt('IDEF0','g','code'),ic('down',10),SP,`<span class="ttl">order.dsl</span>`,FL,bt('Run','run','play'))+bodyC()+mnu(['*IDEF0','ERD','BPMN','DFD'],'left:8px;top:34px'))];
+P[3]=()=>[
+ pv(tb(bt('Save','g','save','Ctrl+S'),bt('Export','g','exp'),FL,bt('Run','run','play'))+bodyC()),
+ pv(tb(bt('Save','g','save'),ic('down',10),FL,bt('Run','run','play'))+bodyC()+mnu(['*Save','Save as…','-','Export SVG','Export PNG'],'left:8px;top:34px'))];
+P[4]=()=>[
+ pv(tb(bt('Save','g','save'),tgl(1,'Autosave'),FL,bt('Run','run','play'))+bodyC()),
+ pv(tb(bt('Save','g','save'),FL,bt('Run','run','play'),bt('','ghost','gear'))+bodyC()+mnu(['Редактор','*Сохранение: Autosave ✓','Холст'],'right:8px;top:34px'))];
+P[5]=()=>[
+ pv(tb(bt('','g','undo'),bt('','g','redo'),SP,bt('Validate'),FL,bt('Run','run','play'))+bodyC()+tip('Undo (Ctrl+Z)','left:6px;top:34px')),
+ pv(tb(bt('Undo','g','undo'),bt('Redo','g','redo'),SP,bt('Validate'),FL,bt('Run','run','play'))+bodyC())];
+P[6]=()=>[
+ pv(ide({sb:sbar(['IDEF0'],['<span class="ok-c">'+ic('chk',11)+' Saved 2s ago</span>','Ln 3'])})),
+ pv(ide({sb:sbar(['IDEF0'],['Ln 3'])})+toast(ic('chk',12)+' Сохранено','left:50%;top:8px;transform:translateX(-50%)'))];
+P[7]=()=>[
+ pv(tb(bt('Run','run','play'),bt('Validate'),bt('Save','g','save'))+bodyC()+tip('Run · Ctrl+Enter','left:8px;top:34px')),
+ pv(tb(bt('Run','run','play','Ctrl+↵'),bt('Validate','g','','Ctrl+K'),bt('Save','g','save','Ctrl+S'))+bodyC())];
+P[8]=()=>[
+ pv(tb(bt('Run','run','play'),bt('Validate'),SP,bt('','g','undo'),bt('','g','redo'),SP,bt('Format','g','fmt'))+bodyC()),
+ pv(tb(bt('Run','run','play'),bt('Validate'),GAP,bt('','g','undo'),bt('','g','redo'),GAP,bt('Format','g','fmt'))+bodyC())];
+P[9]=()=>[
+ pv(tb(bt('Run','run','play'),SP,bt('','g','fmt'))+bodyC()+tip('Format (Shift+Alt+F)','left:70px;top:34px')),
+ pv(tb(bt('Run','run','play'),SP,bt('Format','g','fmt'))+bodyC())];
+P[10]=()=>[
+ pv(tb(bt('Run','run','play'),FL,bt('','g','ai'))+bd(code()+cv()+`<div class="side l" style="width:96px"><b>${ic('ai',11)} AI</b><div class="skel"></div><div class="skel" style="width:70%"></div><div class="skel"></div></div>`)),
+ pv(tb(bt('Run','run','play'),FL,bt('Ask AI…','g','ai'))+bodyC()+`<div class="mnu" style="right:8px;top:34px;width:150px"><div style="color:var(--tx3)">Опишите диаграмму…</div></div>`)];
+P[11]=()=>[
+ pv(tb(bt('Run','run','play'),bt('Save','g','save'))+tabs(tab('order.dsl',{act:1,dirty:'dot'}))+bodyC()+toast(ic('chk',12)+' Сохранено, запуск…','right:8px;bottom:8px')),
+ pv(tb(bt('Run','run','play'),bt('Save','g','save'))+tabs(tab('order.dsl',{act:1,dirty:'dot'}))+bodyC()+'<div class="scrim"></div>'+mdl('Сохранить перед запуском?','Есть несохранённые изменения',[bt('Отмена'),bt('Не сохранять'),bt('Сохранить','blue')]))];
+P[12]=()=>[
+ pv(tb(bt('Run','run','play'),bt('Validate'),bt('Export','g','exp'))+bodyC()),
+ pv(tb(bt('Run','blue','play'),bt('Validate'),bt('Export','g','exp'))+bodyC())];
+P[13]=()=>[
+ pv(tb(bt('Run','run','play'),FL,`<span class="ttl" style="font-size:13px">Order / order.dsl</span>`,FL,bt('Save','g','save'))+tabs(tab('order.dsl',{act:1}))+bodyC()),
+ pv(tb(bt('Run','run','play'),FL,bt('Save','g','save'))+tabs(tab('order.dsl',{act:1,x:1}),tab('rules.dsl'))+bodyC())];
+P[14]=()=>[
+ pv(tb(bt('Run','run','play'),FL,bt('Share','g','share'),bt('PNG','g','exp'))+bodyC()),
+ pv(tb(bt('File','ghost'),bt('Edit','ghost'),bt('Run','run','play'))+bodyC()+mnu(['Новый','Открыть','-','*Поделиться…','Экспорт PNG','Экспорт SVG'],'left:8px;top:34px'))];
+P[15]=()=>[
+ pv(tb(`<span class="mb run"><span class="spin"></span><span>Run</span></span>`,bt('Validate'))+bodyC()),
+ pv(tb(bt('Stop','err'),bt('Validate'))+'<div class="prog"><i></i></div>'+bodyC())];
+
+const ed1=(ls,o={})=>pv(bd(code(ls,o)),o.c||'');
+const T3=[L0[0],L0[1],`  ${K('input')}: Order`,`  ${K('con')}`];
+P[16]=()=>[ed1([L0[0],L0[1],['er',`  ${K('imput')}: <span class="wave">Order</span>`],L0[3],L0[4]]),ed1([L0[0],L0[1],`  ${K('imput')}: <span class="wave">Order</span>`,L0[3],L0[4]])];
+P[17]=()=>[
+ ed1([L0[0],L0[1],`  ${K('i')}<span class="cur"></span>`],{x:`<div class="pop" style="left:60px;top:56px"><div class="hi">input</div><div>inherit</div><div>include</div></div>`}),
+ ed1([L0[0],L0[1],`  ${K('i')}<span class="cur"></span>`],{x:`<div class="tip" style="right:8px;bottom:8px">Ctrl+Space — подсказки</div>`})];
+P[18]=()=>[
+ pv(bd(code([L0[0],L0[1],['hl',L0[2]],L0[3],L0[4]])+cv({sel:0}))),
+ pv(bd(code([L0[0],L0[1],['gut',L0[2]],L0[3],L0[4]])+cv({sel:0})))];
+P[19]=()=>[ed1(L0,{fs:13}),ed1(L0,{fs:14})];
+P[20]=()=>[ed1(L0,{}),ed1(L0,{num:false})];
+P[21]=()=>[
+ ed1([L0[0],`${K('box')} A0 ${S('"Process"')} {<span class="cur"></span>}`,''],{}),
+ ed1([L0[0],`${K('box')} A0 ${S('"Process"')} {<span class="cur"></span>`,''],{})];
+P[22]=()=>[
+ ed1([L0[0],L0[1],`  ${K('input')}: Order<span class="cur"></span><span class="gh"> → Invoice</span>`],{x:`<div class="tip" style="right:8px;bottom:8px">Tab — принять</div>`}),
+ ed1([L0[0],L0[1],`  ${K('input')}: Order<span class="cur"></span>`],{x:`<div class="pop" style="left:90px;top:56px"><div class="hi">→ Invoice</div><div style="color:var(--tx3)">Enter — принять</div></div>`})];
+P[23]=()=>[ed1([...L0,`${K('box')} A2`,`${K('box')} A3`],{mm:true}),ed1([...L0,`${K('box')} A2`,`${K('box')} A3`],{})];
+P[24]=()=>[
+ ed1([L0[0],`${K('box')} A0 ${S('"Очень длинное имя функции процесса,')}`,`${S('которое переносится"')} {`,L0[2]],{}),
+ ed1([L0[0],`${K('box')} A0 ${S('"Очень длинное имя функции процесса, которое уходит за край экрана и ещё дальше…"')} {`,L0[2]],{x:'<div style="position:absolute;left:0;right:0;bottom:0;height:6px;background:var(--br)"><i style="display:block;width:40%;height:100%;background:var(--tx3)"></i></div>'})];
+P[25]=()=>[
+ pv(bd(code(L0,{x:mnu(['Копировать','Вставить','Выделить всё','-','Проверить'],'left:70px;top:40px','nat')}))),
+ pv(bd(code(L0,{x:mnu(['*Перейти к определению','Переименовать','Fix with AI','-','Копировать как DSL'],'left:70px;top:40px','dk')})))];
+P[26]=()=>[
+ ed1(L0,{x:`<div class="mnu" style="right:6px;top:4px;width:140px;display:flex;gap:4px;align-items:center;padding:4px 6px">${ic('search',11)}<span style="color:var(--tx3)">Найти…</span>${FL}1/3</div>`}),
+ pv(bd(code(L0))+'<div class="scrim"></div>'+mdl('Найти и заменить','Найти: box  →  Заменить: node',[bt('Закрыть'),bt('Заменить','blue')]))];
+P[27]=()=>[
+ ed1([L0[0],`${K('box')} A0 ${S('"P"')} <span class="bm">{</span>`,L0[2],`<span class="bm">}</span>`],{}),
+ ed1([L0[0],`${K('box')} A0 ${S('"P"')} <span class="bb">{</span>`,L0[2],`<span class="bb">}</span>`],{})];
+P[28]=()=>[
+ ed1(L0,{x:`<div class="mnu" style="left:70px;top:48px;width:150px;display:block"><b>input</b><div style="padding:0;color:var(--tx2)">Вход функции: данные или материал, который преобразуется.</div><div style="padding:0;color:var(--ac)">Документация →</div></div>`}),
+ ed1(L0,{x:`<div class="tip" style="left:70px;top:48px">input: Port</div>`})];
+P[29]=()=>[
+ ed1([L0[0],`bo<span class="cur"></span>`,'',C('# Tab → вставит шаблон box')],{x:`<div class="pop" style="left:34px;top:34px"><div class="hi">box ⇥ box A "name" { }</div></div>`}),
+ pv(tb(bt('Snippets','g','code'),ic('down',10))+bd(code(L0))+mnu(['*box','arrow','group','note'],'left:8px;top:34px'))];
+P[30]=()=>[
+ pv(tabs(tab('order.dsl',{act:1,dirty:'dot'}))+bd(code([L0[0],['dirty',L0[1]],['dirty',L0[2]],L0[3],L0[4]]))),
+ pv(tabs(tab('order.dsl',{act:1,dirty:'dot'}))+bd(code(L0)))];
+
+const c3=(o)=>bd(cv(o));
+const TAB3=(...a)=>pv(tabs(...a)+bd(code(L0)));
+P[31]=()=>[
+ pv(bd(code([L0[0],['hl',L0[1]],L0[2],L0[3],L0[4]])+cv({sel:0}))),
+ pv(bd(cv({sel:0})+`<div class="side l" style="width:104px"><b>A0</b><div class="skel"></div><div class="mut">name</div><div class="card2" style="margin:2px 0">Process order</div><div class="mut">inputs: 1</div></div>`))];
+P[32]=()=>[
+ pv(bd(code(L0)+cv())),
+ pv(bd(code(L0.slice(0,3))+cv(),'flex-direction:column'))];
+P[33]=()=>[
+ pv(bd(cv({x:zoom('right:8px;bottom:8px')}))),
+ pv(bd(cv())+sbar(['IDEF0'],[ic('plus',10),'100%',ic('fit',11)]))];
+P[34]=()=>[
+ pv(bd(code([L0[0],L0[1],['hl',`  ${K('pos')}: (120, 40)`],L0[3],L0[4]])+cv({sel:0}))),
+ pv(bd(code(L0)+cv({sel:0})+`<div class="side l" style="width:96px;font:10px/1.5 monospace"><b>layout.json</b><br>{ "A0":<br>&nbsp;[120,40] }</div>`))];
+P[35]=()=>[pv(c3({bad:1})),pv(c3({blur:1,x:tip('Неизвестный порт «mechanism»','left:50%;top:70%;transform:translateX(-30%)')}))];
+P[36]=()=>[pv(c3({anim:1})),pv(c3({}))];
+P[37]=()=>[pv(c3({})),pv(c3({labels:'one'}))];
+P[38]=()=>[pv(tb(tgl(1,'Сетка'))+c3({})),pv(tb(tgl(0,'Сетка'))+c3({grid:'none'}))];
+P[39]=()=>[
+ pv(tb(bt('Export','g','exp'))+c3({})+mnu(['*SVG','PNG','-','.dsl'],'left:8px;top:34px')),
+ pv(tb(bt('Export','g','exp'))+c3({})+mnu(['*PDF','PNG','-','.dsl'],'left:8px;top:34px'))];
+P[40]=()=>[
+ pv(c3({x:'<div class="mmap" style="right:8px;bottom:8px"><i style="left:4px;top:5px;width:20px;height:14px"></i></div>'})),
+ pv(c3({x:tip('колесо — zoom · drag — сдвиг','left:8px;bottom:8px')}))];
+P[41]=()=>[
+ pv(tb(tgl(1,'Auto-layout'))+c3({})),
+ pv(tb(bt('Auto-layout','g','grid'))+c3({nodes:[[10,52,'A0'],[130,6,'A1'],[196,84,'A2']]}))];
+P[42]=()=>[
+ pv(c3({sel:[0,1],in:'<div style="position:absolute;left:-2px;top:2px;width:178px;height:84px;border:1px dashed var(--ac);background:var(--acs);opacity:.45"></div>',x:'<span class="bdg" style="position:absolute;left:8px;top:8px">рамка · drag</span>'})),
+ pv(c3({sel:[0,1],x:'<span class="bdg" style="position:absolute;left:8px;top:8px">Shift + клик</span>'}))];
+P[43]=()=>[TAB3(tab('order.dsl',{act:1,dirty:'dot'}),tab('rules.dsl')),TAB3(tab('order.dsl',{act:1,dirty:'star'}),tab('rules.dsl'))];
+P[44]=()=>[
+ pv(tabs(tab('order.dsl',{act:1,dirty:'dot',x:1}))+bd(code(L0))+'<div class="scrim"></div>'+mdl('Закрыть order.dsl?','Есть несохранённые изменения',[bt('Отмена'),bt('Не сохранять'),bt('Сохранить','blue')])),
+ pv(tabs(tab('order.dsl',{act:1,dirty:'dot',x:1}))+bd(code(L0))+tip('Сначала сохраните или отмените правки','left:6px;top:32px'))];
+P[45]=()=>[
+ TAB3(tab('order.dsl',{act:1,x:1}),tab('rules.dsl'),tab('invoice.dsl')),
+ TAB3(tab('order.dsl',{act:1,x:1}),tab('rules.dsl',{x:1}),tab('invoice.dsl',{x:1}))];
+const MT=['order.dsl','rules.dsl','invoice.dsl','customer.dsl','report.dsl','archive.dsl'];
+P[46]=()=>[
+ pv(tabs(tab(MT[0],{act:1}),...MT.slice(1).map(n=>tab(n)),'<span style="position:absolute;right:0;top:0;bottom:0;width:20px;background:var(--sf);display:grid;place-items:center;border-left:1px solid var(--br)">›</span>')+bd(code(L0))),
+ pv(tabs(tab('order…',{act:1,sm:1}),...MT.slice(1,5).map(n=>tab(n,{sm:1})),'<span class="mt" style="margin-left:auto;background:var(--sf)">'+ic('dots',12)+'</span>')+bd(code(L0)))];
+P[47]=()=>[
+ pv(tabs(tab('order.dsl',{act:1}),tab('invoice.dsl'),'<span class="mt" style="position:absolute;left:62px;top:6px;background:var(--sf);box-shadow:var(--sh);border:1px solid var(--ac);transform:rotate(-3deg)">rules.dsl</span>')+bd(code(L0))),
+ pv(tabs(tab('order.dsl',{act:1}),tab('rules.dsl'),tab('invoice.dsl'))+bd(code(L0))+tip('Порядок вкладок фиксирован','left:8px;bottom:8px'))];
+P[48]=()=>[
+ TAB3(tab('order.dsl',{act:1,bar:'#2563eb'}),tab('db.dsl',{bar:'#16a34a'}),tab('flow.dsl',{bar:'#d97706'})),
+ TAB3(tab('order.dsl',{act:1,ico:1}),tab('db.dsl',{ico:1}),tab('flow.dsl',{ico:1}))];
+P[49]=()=>[
+ pv(tabs(tab('order.dsl',{act:1}),tab('rules.dsl'),tab('db.dsl'),tab('flow.dsl'))+bd(code(L0))+toast(ic('chk',12)+' Восстановлено 4 вкладки','right:8px;bottom:8px')),
+ pv(tabs()+bd('<div style="margin:auto;text-align:center;color:var(--tx3)">'+ic('file',22)+'<br>Откройте файл или создайте новый<br>'+bt('Открыть','g','folder')+'</div>'))];
+P[50]=()=>[
+ pv(tabs(tab('order.dsl',{act:1}),tab('rules.dsl'))+bd(code(L0))+mnu(['*Закрыть','Закрыть другие','Закрыть все','Скопировать путь'],'left:10px;top:34px')),
+ pv(tabs(tab('order.dsl',{act:1}),tab('rules.dsl'))+bd(code(L0))+mnu(['*Закрыть','Скопировать путь'],'left:10px;top:34px'))];
+P[51]=()=>[
+ TAB3(tab('',{pin:1,sm:1}),tab('order.dsl',{act:1}),tab('rules.dsl')),
+ TAB3(tab('rules.dsl',{bar:'var(--wn)'}),tab('order.dsl',{act:1}),tab('db.dsl'))];
+P[52]=()=>[
+ pv(tabs(tab('order.dsl',{act:1}))+bd(code(L0))+toast('rules.dsl закрыта · Ctrl+Z вернуть','right:8px;bottom:8px')),
+ pv(tabs(tab('order.dsl',{act:1}),tab('rules.dsl'))+bd(code(L0))+tip('Клик колёсиком — без действия','right:8px;bottom:8px'))];
+
+const R1=`${E1} Неизвестное свойство «mechanism» <span class="mut">order.dsl:3</span>`;
+const R2=`${E1} Не закрыта скобка <span class="mut">order.dsl:5</span>`;
+const R3=`${W1} Блок A1 без выходов <span class="mut">rules.dsl:2</span>`;
+const withPn=(pn,t='')=>pv(bd(code(LE)+cv())+pn,t);
+P[53]=()=>[
+ withPn(pnl(['Problems <span class="bdg r">3</span>'],[R1,R2])),
+ pv(bd(code(LE)+`<div class="col fl">${cv()}${pnl(['Problems <span class="bdg r">3</span>'],[R1])}</div>`))];
+P[54]=()=>[
+ withPn(pnl(['Problems'],[['',`<b>order.dsl</b> <span class="bdg r">2</span>`],R1,R2]),'tall'),
+ withPn(pnl(['Problems'],[['',`<b class="er-c">Errors</b> <span class="bdg r">2</span>`],R1,R2]),'tall')];
+P[55]=()=>[
+ pv(tb(bt('Run','run','play'),FL,`<span style="position:relative;display:inline-flex">${bt('','g','warn')}<span class="bdg r" style="position:absolute;right:-6px;top:-6px;font-size:9px">3</span></span>`)+bd(code(LE)+cv())),
+ pv(ide({a:code(LE),sb:sbar([`<span class="er-c">${ic('err',11)} 3 Errors</span>`,`<span class="wn-c">${ic('warn',11)} 1</span>`],['IDEF0'])}))];
+P[56]=()=>[
+ pv(bd(code([L0[0],L0[1],['hl',L0[2]],L0[3],L0[4]]))+pnl(['Problems'],[['hi',R1],R2])),
+ pv(bd(code(LE)+`<div class="side l" style="width:130px"><b>Свойство «mechanism»</b><div class="mut" style="margin:3px 0">Допустимо: input, control, output, mechanism в блоке box.</div>${bt('Показать в коде','g')}</div>`)+pnl(['Problems'],[['hi',R1]]))];
+P[57]=()=>[
+ pv(bd(code([L0[0],L0[1],['er',`<span style="position:absolute;left:-1px;color:var(--wn)">${ic('bulb',12)}</span>  ${K('imput')}: <span class="wave">Order</span>`],L0[3],L0[4]]))),
+ pv(bd(code(LE))+pnl(['Problems'],[`${R1} ${FL} ${bt('Fix with AI','g','ai')}`,R2]))];
+P[58]=()=>[
+ withPn(pnl(['Problems <span class="bdg r">3</span>'],[R1,R2])),
+ pv(ide({a:code(LE),sb:sbar([`<span class="er-c">${ic('err',11)} 3</span>`],['IDEF0'])})+tip('Панель скрыта · клик по счётчику открывает','right:8px;bottom:30px'))];
+P[59]=()=>[
+ withPn(pnl(['Problems'],[R1,R3]),'tall'),
+ withPn(pnl(['Problems'],[['',`<span class="er-c">Неизвестное свойство «mechanism»</span>`],['',`<span class="wn-c">Блок A1 без выходов</span>`]]),'tall')];
+P[60]=()=>[
+ pv(bd(code(LE))+pnl(['Problems'],[R1,R2,R3])+'<div style="position:absolute;right:2px;bottom:4px;width:4px;height:36px;background:var(--tx3);border-radius:2px"></div>','tall'),
+ pv(bd(code(L0.slice(0,3)))+pnl(['Problems'],[R1,R2,R3,R1,R2]),'tall')];
+P[61]=()=>[
+ withPn(pnl([`${ic('search',11)} <span class="mut">Фильтр…</span>`,'<span class="bdg r">Errors 2</span>','<span class="bdg y">Warnings 1</span>'],[R1,R2,R3]),'tall'),
+ withPn(pnl(['Problems'],[R1,R2,R3]),'tall')];
+P[62]=()=>[
+ pv(ide({a:code(L0),pn:'',sb:sbar([`<span class="ok-c">${ic('chk',11)} 0</span>`],['IDEF0'])})+toast(ic('chk',12)+' Ошибок нет · панель закрыта','right:8px;bottom:30px')),
+ pv(bd(code(L0))+pnl(['Problems'],[`<span class="ok-c">${ic('chk',12)} 0 errors</span>`]))];
+const welc=`<div class="bd" style="flex-direction:column;align-items:center;justify-content:center;gap:6px;background:var(--bg)"><b style="font-size:12px">Добро пожаловать в DSLKit</b><div style="display:flex;gap:6px"><div class="card2">IDEF0</div><div class="card2">ERD</div><div class="card2">BPMN</div></div>${bt('Пустой файл')}</div>`;
+P[63]=()=>[
+ pv(ide({a:code([C('# Начните печатать…'),C('# diagram idef0 "Название"'),''])})),
+ pv(welc)];
+P[64]=()=>[
+ pv(ide({})+'<div class="scrim"></div>'+`<div class="mnu" style="left:8px;top:40px;width:150px;z-index:7"><b>1/5 · Run</b><div style="padding:0;color:var(--tx2)">Запускает проверку и рисует диаграмму.</div><div style="padding:3px 0;justify-content:flex-end">${bt('Далее','blue')}</div></div>`),
+ pv(tb(bt('Run','run','play'),FL,bt('Start tour','g','q'))+bodyC())];
+P[65]=()=>[
+ pv(ide({})+'<div class="scrim"></div>'+mdl('Новая диаграмма','Нотация: IDEF0 / ERD / BPMN / DFD',[bt('Создать с шаблоном','blue')])),
+ pv(bd(code(['','',''],{})+cv({grid:'none'})))];
+P[66]=()=>[
+ pv(bd(code([L0[0],`<span class="gh">  Try: box A0 "name" { … }</span>`,''])+cv({grid:'none'}))),
+ pv(bd(code([L0[0],'',''])+`<div class="side l" style="width:110px"><b>Справка</b><div class="mut" style="margin-top:3px">box — блок<br>input — вход<br>control — управление</div></div>`))];
+const tpl=(n)=>`<div class="card2" style="width:62px;height:46px;display:grid;place-items:center">${n}</div>`;
+P[67]=()=>[
+ pv(`<div class="bd" style="flex-direction:column;padding:8px;gap:6px"><b>Шаблоны</b><div style="display:flex;gap:6px;flex-wrap:wrap">${tpl('IDEF0')}${tpl('ERD')}${tpl('BPMN')}${tpl('DFD')}</div></div>`),
+ pv(bd(`<div class="side" style="width:110px"><b>${ic('folder',11)} Примеры</b><div class="mut" style="margin-top:3px">${ic('lock',10)} idef0-order.dsl<br>${ic('lock',10)} erd-shop.dsl<br>${ic('lock',10)} bpmn-hr.dsl</div></div>`+code(L0)))];
+P[68]=()=>[
+ pv(`<div class="bd" style="flex-direction:column;align-items:center;justify-content:center;gap:6px"><div style="width:90px;height:50px;border-radius:8px;background:var(--acs);display:grid;place-items:center;color:var(--ac)">${ic('play',22)}</div><b>Код → диаграмма за 30 секунд</b></div>`),
+ pv(bd(code([C('# Шаг 1 из 5: напишите первый блок'),`${K('box')} A0 ${S('"…"')}`,''])+`<div class="side l" style="width:100px"><b>Урок 1</b><div class="skel"></div><div class="skel" style="width:60%"></div>${bt('Дальше','blue')}</div>`))];
+P[69]=()=>[
+ pv(bd(`<div class="side" style="width:120px"><b>Начало работы 2/5</b><div style="margin-top:3px">${ic('chk',10)} Создать файл<br>${ic('chk',10)} Запустить<br><span class="mut">○ Экспорт<br>○ Поделиться<br>○ AI</span></div></div>`+code(L0))),
+ pv(ide({}))];
+P[70]=()=>[
+ pv(bd(code(L0))+'<div class="scrim"></div>'+`<div class="mnu" style="left:50%;top:14px;transform:translateX(-50%);width:200px;z-index:7"><div style="color:var(--tx3)">${ic('search',11)} Поиск по документации…</div><div class="hi">Синтаксис box</div><div>Порты и стрелки</div></div>`),
+ pv(`<div class="mtabs"><span class="mt act">DSLKit</span><span class="mt">docs.dslkit.dev ${ic('share',10)}</span></div>`+bd(code(L0)))];
+P[71]=()=>[
+ pv(ide({})+'<div class="scrim"></div>'+`<div class="mnu" style="left:50%;top:42px;transform:translateX(-50%);width:170px;z-index:7"><b>Шаг 1</b><div style="padding:0">Создайте блок</div><div style="justify-content:space-between;padding:4px 0 0"><span class="mut">Пропустить</span>${bt('Далее','blue')}</div></div>`),
+ pv(ide({})+'<div class="scrim"></div>'+`<div class="mnu" style="left:50%;top:42px;transform:translateX(-50%);width:170px;z-index:7"><b>Шаг 1</b><div style="padding:0">Создайте блок</div><div style="justify-content:flex-end;padding:4px 0 0">${bt('Далее','blue')}</div></div>`)];
+P[72]=()=>[
+ pv(ide({sb:sbar(['IDEF0',`<span style="color:var(--ac)">${ic('bulb',11)} Совет: Ctrl+K — быстрый поиск</span>`],['Ln 3']),})),
+ pv(ide({}))];
+
+const sr=(l,c)=>`<div class="set-r"><span>${l}</span>${c}</div>`;
+const snav=(a)=>`<div class="side" style="width:84px"><div class="${a==0?'card2':''}">Editor</div><div class="${a==1?'card2':''}">Canvas</div><div class="${a==2?'card2':''}">Theme</div><div>AI</div></div>`;
+const sbody=(rows)=>`<div class="fl" style="padding:8px 10px;background:var(--sf)">${rows}</div>`;
+const SR=sr('Размер шрифта','13')+sr('Minimap',tgl(0))+sr('Автосохранение',tgl(1));
+P[73]=()=>[
+ pv(tb(bt('← Назад'),`<span class="ttl">Настройки</span>`)+bd(snav(0)+sbody(SR))),
+ pv(ide({})+'<div class="scrim"></div>'+`<div style="position:absolute;right:0;top:0;bottom:0;width:58%;background:var(--sf);border-left:1px solid var(--br);box-shadow:var(--sh);padding:8px 10px;z-index:6"><b>Настройки</b>${SR}</div>`)];
+P[74]=()=>[
+ pv(tb(`<span class="ttl">Настройки</span>`,FL,`<span class="ok-c">${ic('chk',11)} Применено</span>`)+bd(sbody(SR))),
+ pv(tb(`<span class="ttl">Настройки</span>`)+bd(sbody(SR))+`<div class="msb" style="justify-content:flex-end;gap:6px">${bt('Отмена')}${bt('Save changes','blue')}</div>`)];
+P[75]=()=>[
+ pv(tb(`<span class="ttl">Тема</span>`)+bd(`<div style="display:flex;gap:8px;padding:10px;align-items:flex-start">${['#f8f9fc','#1e1e2e','#fff'].map((c,i)=>`<div style="width:62px"><div style="height:42px;border-radius:6px;border:2px solid ${i==0?'var(--ac)':'var(--br)'};background:${c}"></div><div style="text-align:center;margin-top:2px">${['Light','Dark','Contrast'][i]}</div></div>`).join('')}</div>`)),
+ pv(tb(`<span class="ttl">Тема</span>`)+bd(`<div style="padding:10px"><div class="card2" style="width:140px;display:flex;justify-content:space-between">Light ${ic('down',10)}</div></div>`)+mnu(['*Light','Dark','High contrast'],'left:10px;top:70px;width:140px'))];
+P[76]=()=>[
+ pv(tb(`<span class="ttl">Настройки</span>`)+bd(snav(3)+sbody(`<b>AI &amp; Integrations</b>`+sr('Модель','Авто ▾')+sr('Свой ключ (BYOK)','••••••')+sr('GitHub',bt('Подключить'))))),
+ pv(ide({a:code(L0),b:`<div class="side l" style="width:120px"><b>${ic('ai',11)} AI</b><div class="skel"></div><div class="skel" style="width:60%"></div><div style="margin-top:6px">${bt('AI Settings','g','gear')}</div></div>`}))];
+P[77]=()=>[
+ pv(tb(`<span class="ttl">Настройки</span>`)+bd(snav(0)+sbody(`<div class="card2" style="margin-bottom:4px;color:var(--tx3)">${ic('search',11)} Поиск настроек…</div>`+SR))),
+ pv(tb(`<span class="ttl">Настройки</span>`)+bd(snav(0)+sbody(SR)))];
+P[78]=()=>[
+ pv(tb(`<span class="ttl">Настройки</span>`)+bd(snav(0)+sbody(SR+sr('Резервная копия',bt('Export (JSON)','g','exp'))+sr('',bt('Import','g','down'))))),
+ pv(tb(`<span class="ttl">Настройки</span>`)+bd(snav(0)+sbody(SR)))];
+P[79]=()=>[
+ pv(tb(`<span class="ttl">Настройки</span>`)+bd(snav(1)+sbody(SR))),
+ pv(tb(`<span class="ttl">Настройки</span>`)+bd(`<div class="fl" style="background:var(--sf);padding:6px 10px"><div class="set-r"><b>${ic('down',10)} Editor</b></div>${sr('Шрифт','13')}<div class="set-r"><b>${ic('chev',10)} Canvas</b></div><div class="set-r"><b>${ic('chev',10)} Theme</b></div><div class="set-r"><b>${ic('chev',10)} AI</b></div></div>`))];
+P[80]=()=>[
+ pv(tb(`<span class="ttl">Настройки</span>`)+bd(sbody(SR+sr('',bt('Reset to defaults','err'))))+'<div class="scrim"></div>'+mdl('Сбросить настройки?','Все параметры вернутся к стандартным',[bt('Отмена'),bt('Сбросить','err')])),
+ pv(bd(code(L0))+'<div class="scrim"></div>'+`<div class="mnu" style="left:50%;top:14px;transform:translateX(-50%);width:200px;z-index:7"><div style="color:var(--tx3)">&gt; reset sett</div><div class="hi">Reset settings</div></div>`)];
+P[81]=()=>[
+ pv(tb(`<span class="ttl">Горячие клавиши</span>`)+bd(sbody(sr('Run','<span class="card2">Ctrl+Enter ✎</span>')+sr('Save','<span class="card2">Ctrl+S ✎</span>')+sr('Format','<span class="card2">Shift+Alt+F ✎</span>')))),
+ pv(tb(`<span class="ttl">Горячие клавиши</span>`)+bd(sbody(sr('Пресет','<span class="card2">VS Code ▾</span>')+`<div class="mut" style="margin-top:6px">Доступно: VS Code · JetBrains · Vim</div>`)))];
+P[82]=()=>[
+ pv(tb(`<span class="ttl">Синхронизация</span>`)+bd(sbody(sr(ic('cloud',13)+' Настройки в облаке',tgl(1))+'<div class="mut">Доступны на всех устройствах</div>'))),
+ pv(tb(`<span class="ttl">Хранение</span>`)+bd(sbody(sr(ic('lock',13)+' Только на этом устройстве','')+'<div class="mut">Данные в localStorage, ничего не уходит в сеть</div>')))];
+const SBX=(l,r,c)=>pv(ide({sb:sbar(l,r,c)}));
+P[83]=()=>[SBX([`<span class="er-c">${ic('err',11)} 2</span>`,`<span class="wn-c">${ic('warn',11)} 1</span>`],[]),SBX(['IDEF0','DSL 1.2'],[])];
+P[84]=()=>[SBX(['IDEF0'],['Ln 3, Col 8','Saved 12:41']),SBX(['IDEF0'],['Saved 12:41'])];
+P[85]=()=>[SBX(['IDEF0'],['Ln 3, Col 8']),SBX(['IDEF0'],['Ln 3, Col 8'],'tall')];
+P[86]=()=>[SBX(['IDEF0',`<span class="ok-c">${ic('cloud',11)} Autosave</span>`],['Ln 3']),SBX(['IDEF0'],['Ln 3'])];
+P[87]=()=>[SBX(['IDEF0'],['Ln 3','UTF-8']),SBX(['IDEF0'],['Ln 3'])];
+P[88]=()=>[SBX(['IDEF0','12 nodes · 8 edges'],['Ln 3']),SBX(['IDEF0'],['Ln 3'])];
+P[89]=()=>[SBX(['IDEF0'],['Ln 3']),SBX(['IDEF0'],['Ln 3'],'alt')];
+P[90]=()=>[
+ pv(tb(bt('File','ghost'),bt('View','ghost'),FL)+bd(code(L0)+cv())+mnu(['Sidebar','*Hide Status Bar','Fullscreen'],'left:44px;top:34px')),
+ pv(ide({}))];
+const MC=(o)=>cv({sc:.34,grid:o&&o.g});
+const fileRows=`<div style="padding:6px;width:100%"><b>Мои диаграммы</b>${['Order process','Shop ERD','HR BPMN'].map(n=>`<div class="card2" style="margin-top:3px">${n}</div>`).join('')}</div>`;
+P[91]=()=>[pv(phone(`${ic('menu',11)}<b>Order</b>${ic('share',11)}`,MC()),'ph'),pv(phone(`<b>DSLKit</b>${ic('plus',11)}`,fileRows),'ph')];
+P[92]=()=>[pv(phone(`<b>order.dsl</b>${bt('Run','run')}`,code(L0)),'ph'),pv(phone(`<b>order.dsl</b>${ic('lock',11)}`,MC({}),''),'ph')];
+const botNav=`<div class="msb">${['code','eye','folder','gear'].map(i=>ic(i,14)).join('')}</div>`;
+P[93]=()=>[pv(phone(`<b>Order</b>`,MC(),botNav),'ph'),pv(phone(`${ic('menu',12)}<b>Order</b>`,MC()+mnu(['*Code','Canvas','Files','Settings'],'left:2px;top:0;min-width:70px'),''),'ph')];
+P[94]=()=>[
+ pv(phone(`<b>Order</b>`,code(L0)+'<span style="position:absolute;right:2px;top:40%;color:var(--tx3)">›</span>','<div class="msb" style="justify-content:center;gap:4px">● ○</div>'),'ph'),
+ pv(phone(`<span class="mb g" style="background:var(--acs);color:var(--ac)">Code</span><span class="mb g">Preview</span>`,code(L0)),'ph')];
+P[95]=()=>[
+ pv(phs(phf(`<b>Order</b>${ic('share',11)}`,MC(),'')+'',`<div class="ph-frame" style="justify-content:flex-end"><div style="background:var(--sf);border-top:1px solid var(--br);padding:6px;border-radius:12px 12px 0 0;box-shadow:var(--sh)"><b>Поделиться</b><div class="skel"></div><div class="mut">PNG · SVG · Mail</div></div></div>`),'ph'),
+ pv(phone(`<b>Order</b>${ic('share',11)}`,MC()+toast('Ссылка скопирована','left:4px;bottom:6px;font-size:9px;padding:3px 6px'),''),'ph')];
+P[96]=()=>[
+ pv(phone(`<b>Order</b>`,MC()+'<svg width="60" height="40" style="position:absolute;left:20px;top:30px" viewBox="0 0 60 40" fill="none" stroke="var(--ac)" stroke-width="2"><path d="M10 30l12-12M50 10L38 22"/><circle cx="8" cy="32" r="4"/><circle cx="52" cy="8" r="4"/></svg>'),'ph'),
+ pv(phone(`<b>Order</b>`,MC({})+zoom('right:3px;bottom:4px;font-size:9px'),''),'ph')];
+P[97]=()=>[
+ pv(phs(`<div class="ph-frame" style="justify-content:flex-end"><div style="flex:1;background:var(--bg)"></div><div style="background:var(--sf);border-top:1px solid var(--br);padding:5px;border-radius:12px 12px 0 0;box-shadow:var(--sh);font-size:9px"><b>Ошибки · 3</b>${['Неизвестное свойство','Не закрыта скобка','Блок A1 без выходов'].map((r,i)=>`<div style="padding:2px 0;white-space:nowrap;overflow:hidden"><span class="${i<2?'er-c':'wn-c'}">●</span> ${r}</div>`).join('')}</div></div>`),'ph'),
+ pv(phone(`<b>Order</b><span class="bdg r">3</span>`,MC()+'<div class="scrim"></div>'+'<div class="mdl" style="width:84%;font-size:9px"><b>Ошибки</b><p>3 ошибки в order.dsl</p><div class="bt">'+bt('OK','blue')+'</div></div>',''),'ph')];
+P[98]=()=>[
+ pv(phone(`<b>Order</b>`,MC()+'<div class="mdl" style="top:auto;bottom:4px;transform:translateX(-50%);width:92%;font-size:9px"><b>Добавить на экран</b>'+bt('Установить','blue')+'</div>',''),'ph'),
+ pv(phone(`<b>Order</b>${ic('dots',12)}`,MC()+mnu(['Share','*Install app','Settings'],'right:2px;top:0;min-width:66px;font-size:9px'),''),'ph')];
+P[99]=()=>[
+ pv(phone(`<b>Order</b><span class="bdg g">offline</span>`,code(L0)),'ph'),
+ pv(phone(`<b>Order</b><span class="bdg y">${ic('lock',9)} кэш</span>`,MC()),'ph')];
+P[100]=()=>[
+ pv(phs(phf(`<b>Order</b>`,MC(),''),phf(`<b>Order</b>`,MC(),'','t-dark')),'ph'),
+ pv(phs(phf(`<b>Order</b>`,MC(),'','t-dark')),'ph')];
+
+</script>
+<script>
+const KEY='dslkit-ab-v2';
+let ans={};try{ans=JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){}
+const persist=()=>{try{localStorage.setItem(KEY,JSON.stringify(ans))}catch(e){}};
+try{if(localStorage.getItem(KEY+'-theme')==='dark')document.documentElement.classList.add('t-dark')}catch(e){}
+const secs=[...new Set(Q.map(q=>q.sec))];
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+function card(q){
+ let pr;try{pr=P[q.n]()}catch(e){console.error('preview',q.n,e);pr=['<div class="pv"></div>','<div class="pv"></div>']}
+ const opt=(k,i,t)=>`<label class="opt">${pr[i]}<span class="ol"><b>${k.toUpperCase()}</b><span>${esc(t)}</span></span><input type="radio" name="q${q.n}" value="${k}"${ans[q.n]===k?' checked':''}></label>`;
+ return `<article class="card${ans[q.n]?' done':''}" id="q${q.n}"><div class="qh"><span class="qn">${q.n}</span><div class="qt">${esc(q.q)}<span class="tag">${esc(q.tag)}</span></div></div><div class="ab">${opt('a',0,q.a)}${opt('b',1,q.b)}</div>${q.h?`<div class="hy">${esc(q.h)}</div>`:''}</article>`}
+function render(){
+ $('#nav').innerHTML=secs.map((s,i)=>{const qs=Q.filter(q=>q.sec===s);return `<a href="#s${i}" data-s="s${i}">${esc(s)}<span id="nc${i}">0/${qs.length}</span></a>`}).join('');
+ $('#ct').innerHTML=secs.map((s,i)=>{const qs=Q.filter(q=>q.sec===s);return `<section class="sec" id="s${i}"><h2>${esc(s)} <small>${qs[0].n}–${qs[qs.length-1].n}</small></h2>${qs.map(card).join('')}</section>`}).join('')+'<div class="foot" id="foot"></div>';
+ stats();
+}
+function stats(){
+ const n=Object.keys(ans).length,a=Object.values(ans).filter(v=>v==='a').length;
+ $('#cnt').textContent=n+' / '+Q.length;$('#a').textContent=a;$('#b').textContent=n-a;
+ $('#pg').style.width=(n/Q.length*100)+'%';
+ secs.forEach((s,i)=>{const qs=Q.filter(q=>q.sec===s);const e=document.getElementById('nc'+i);if(e)e.textContent=qs.filter(q=>ans[q.n]).length+'/'+qs.length});
+ const f=$('#foot');if(f)f.innerHTML=n===Q.length?'Готово! Все '+Q.length+' ответов собраны. Нажмите «Скопировать итог» или «Скачать .md».':'Осталось ответить: '+(Q.length-n)+'. Ответы сохраняются в браузере автоматически.';
+}
+function summary(){
+ const rows=Q.map(q=>{const v=ans[q.n];return `| ${q.n} | ${q.sec} | ${q.q.replace(/\|/g,'/')} | ${v?v.toUpperCase()+': '+(v==='a'?q.a:q.b).replace(/\|/g,'/'):'—'} |`});
+ return '# DSLKit — результаты A/B тестов\n\nОтвечено: '+Object.keys(ans).length+' из '+Q.length+'\n\n| № | Раздел | Вопрос | Выбор |\n|---|---|---|---|\n'+rows.join('\n')+'\n'}
+document.addEventListener('change',e=>{
+ const t=e.target;if(t.type!=='radio')return;
+ const n=+t.name.slice(1);ans[n]=t.value;persist();t.closest('.card').classList.add('done');stats()});
+$('#theme').onclick=()=>{const d=document.documentElement.classList.toggle('t-dark');try{localStorage.setItem(KEY+'-theme',d?'dark':'light')}catch(e){}$('#theme').textContent=d?'☾ Тёмная':'☀ Светлая'};
+$('#todo').onclick=()=>{const on=$('#todo').classList.toggle('on');document.querySelectorAll('.card.done').forEach(c=>c.style.display=on?'none':'')};
+$('#copy').onclick=async()=>{const s=summary();try{await navigator.clipboard.writeText(s);$('#copy').textContent='Скопировано ✓'}catch(e){prompt('Скопируйте текст:',s)}setTimeout(()=>$('#copy').textContent='Скопировать итог',1800)};
+$('#dl').onclick=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([summary()],{type:'text/markdown'}));a.download='dslkit-ab-results.md';a.click()};
+$('#reset').onclick=()=>{if(confirm('Сбросить все ответы?')){ans={};persist();render();observe()}};
+function observe(){
+ const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){document.querySelectorAll('#nav a').forEach(a=>a.classList.toggle('cur',a.dataset.s===e.target.id))}}),{rootMargin:'-90px 0px -70% 0px'});
+ document.querySelectorAll('.sec').forEach(s=>io.observe(s))}
+render();observe();
+
+</script>
+</body>
+</html>

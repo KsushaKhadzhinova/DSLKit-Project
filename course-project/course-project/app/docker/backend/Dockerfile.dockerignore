@@ -1,0 +1,9 @@
+node_modules
+tests
+coverage
+.env
+*.sqlite
+*.md
+report*
+requests.http
+.gitignore

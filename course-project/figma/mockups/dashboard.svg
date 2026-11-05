@@ -1,0 +1,136 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="900" viewBox="0 0 1440 900">
+<rect id="Background" width="1440" height="900" fill="#efefef"/>
+<g id="Topbar">
+<rect x="0" y="0" width="1440" height="56" rx="0" fill="#ffffff" stroke="none" stroke-width="1"/>
+<line x1="0" y1="56" x2="1440" y2="56" stroke="#cccccc" stroke-width="1"/>
+<text x="24" y="35" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="16" font-weight="700" fill="#333333" text-anchor="start">DSLKit</text>
+<rect x="500" y="12" width="440" height="32" rx="8" fill="#efefef" stroke="#cccccc" stroke-width="1"/>
+<g transform="translate(514 20) scale(0.8)" fill="none" stroke="#555555" stroke-width="1.5625" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="9" r="5"/><path d="M13 13l4 4"/></g>
+<text x="540" y="33" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="12" font-weight="400" fill="#888888" text-anchor="start">Поиск диаграмм…  Ctrl+K</text>
+<rect x="1210" y="14" width="150" height="30" rx="6" fill="#666666" stroke="none" stroke-width="1"/>
+<g transform="translate(1218 22) scale(0.7)" fill="none" stroke="#ffffff" stroke-width="1.78571" stroke-linecap="round" stroke-linejoin="round"><path d="M10 4v12M4 10h12"/></g>
+<text x="1240" y="33" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="12" font-weight="500" fill="#ffffff" text-anchor="start">Новая диаграмма</text>
+<circle cx="1400" cy="28" r="14" fill="#e4e4e4" stroke="none" stroke-width="1"/>
+<text x="1400" y="32" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="10" font-weight="700" fill="#444444" text-anchor="middle">KX</text>
+</g>
+<g id="Nav">
+<rect x="0" y="56" width="220" height="844" rx="0" fill="#ffffff" stroke="none" stroke-width="1"/>
+<line x1="220" y1="56" x2="220" y2="900" stroke="#cccccc" stroke-width="1"/>
+<rect x="10" y="72" width="200" height="32" rx="6" fill="#e4e4e4" stroke="none" stroke-width="1"/>
+<g transform="translate(22 80) scale(0.8)" fill="none" stroke="#444444" stroke-width="1.5625" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l7-6 7 6M5 9v7h10V9"/></g>
+<text x="48" y="93" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="13" font-weight="500" fill="#444444" text-anchor="start">Мои проекты</text>
+<g transform="translate(22 118) scale(0.8)" fill="none" stroke="#555555" stroke-width="1.5625" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h14v12H3zM3 8h14M8 8v8"/></g>
+<text x="48" y="131" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="13" font-weight="400" fill="#333333" text-anchor="start">Шаблоны</text>
+<g transform="translate(22 156) scale(0.8)" fill="none" stroke="#555555" stroke-width="1.5625" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="7" r="3"/><path d="M2 16c0-3 2-5 5-5s5 2 5 5M14 4a3 3 0 010 6M16 16c0-2-1-4-3-5"/></g>
+<text x="48" y="169" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="13" font-weight="400" fill="#333333" text-anchor="start">Общие</text>
+<g transform="translate(22 194) scale(0.8)" fill="none" stroke="#555555" stroke-width="1.5625" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h12M8 6V4h4v2M6 6l1 10h6l1-10"/></g>
+<text x="48" y="207" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="13" font-weight="400" fill="#333333" text-anchor="start">Корзина</text>
+</g>
+<rect x="16" y="810" width="188" height="62" rx="8" fill="#efefef" stroke="#cccccc" stroke-width="1"/>
+<text x="28" y="834" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="11" font-weight="600" fill="#555555" text-anchor="start">Beta: 3 из 5 диаграмм</text>
+<rect x="28" y="848" width="164" height="6" rx="3" fill="#cccccc" stroke="none" stroke-width="1"/>
+<rect x="28" y="848" width="98" height="6" rx="3" fill="#666666" stroke="none" stroke-width="1"/>
+<text x="28" y="866" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="10" font-weight="600" fill="#444444" text-anchor="start">Pro — без лимитов</text>
+<text x="252" y="100" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="22" font-weight="700" fill="#333333" text-anchor="start">Мои проекты</text>
+<rect x="252" y="116" width="43" height="26" rx="13" fill="#e4e4e4" stroke="none" stroke-width="1"/>
+<text x="273.5" y="133" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="11" font-weight="600" fill="#444444" text-anchor="middle">Все</text>
+<rect x="303" y="116" width="57" height="26" rx="13" fill="#ffffff" stroke="#cccccc" stroke-width="1"/>
+<text x="331.5" y="133" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="11" font-weight="600" fill="#555555" text-anchor="middle">IDEF0</text>
+<rect x="368" y="116" width="43" height="26" rx="13" fill="#ffffff" stroke="#cccccc" stroke-width="1"/>
+<text x="389.5" y="133" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="11" font-weight="600" fill="#555555" text-anchor="middle">ERD</text>
+<rect x="419" y="116" width="50" height="26" rx="13" fill="#ffffff" stroke="#cccccc" stroke-width="1"/>
+<text x="444" y="133" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="11" font-weight="600" fill="#555555" text-anchor="middle">BPMN</text>
+<rect x="477" y="116" width="43" height="26" rx="13" fill="#ffffff" stroke="#cccccc" stroke-width="1"/>
+<text x="498.5" y="133" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="11" font-weight="600" fill="#555555" text-anchor="middle">DFD</text>
+<text x="1400" y="133" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="12" font-weight="400" fill="#555555" text-anchor="end">Сначала новые ▾</text>
+<g id="Cards">
+<rect x="252" y="164" width="272" height="228" rx="12" fill="#ffffff" stroke="#cccccc" stroke-width="1"/>
+<rect x="262" y="174" width="252" height="130" rx="8" fill="#efefef" stroke="#cccccc" stroke-width="1"/>
+<rect x="282" y="198" width="70" height="34" rx="3" fill="#ffffff" stroke="#555555" stroke-width="1.2"/>
+<rect x="424" y="246" width="70" height="34" rx="3" fill="#ffffff" stroke="#555555" stroke-width="1.2"/>
+<line x1="352" y1="215" x2="459" y2="215" stroke="#555555" stroke-width="1.2"/>
+<line x1="459" y1="215" x2="459" y2="246" stroke="#555555" stroke-width="1.2"/>
+<text x="266" y="332" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="14" font-weight="600" fill="#333333" text-anchor="start">Order process</text>
+<rect x="266" y="344" width="46" height="18" rx="9" fill="#e4e4e4" stroke="none" stroke-width="1"/>
+<text x="289" y="357" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="10" font-weight="600" fill="#444444" text-anchor="middle">IDEF0</text>
+<text x="266" y="378" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="11" font-weight="400" fill="#888888" text-anchor="start">Изменён 2 ч назад</text>
+<g transform="translate(494 318) scale(0.8)" fill="none" stroke="#888888" stroke-width="1.5625" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="10" r="1"/><circle cx="10" cy="10" r="1"/><circle cx="15" cy="10" r="1"/></g>
+<rect x="544" y="164" width="272" height="228" rx="12" fill="#ffffff" stroke="#cccccc" stroke-width="1"/>
+<rect x="554" y="174" width="252" height="130" rx="8" fill="#efefef" stroke="#cccccc" stroke-width="1"/>
+<rect x="574" y="198" width="70" height="34" rx="3" fill="#ffffff" stroke="#555555" stroke-width="1.2"/>
+<rect x="716" y="246" width="70" height="34" rx="3" fill="#ffffff" stroke="#555555" stroke-width="1.2"/>
+<line x1="644" y1="215" x2="751" y2="215" stroke="#555555" stroke-width="1.2"/>
+<line x1="751" y1="215" x2="751" y2="246" stroke="#555555" stroke-width="1.2"/>
+<text x="558" y="332" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="14" font-weight="600" fill="#333333" text-anchor="start">Shop schema</text>
+<rect x="558" y="344" width="33.2" height="18" rx="9" fill="#e4e4e4" stroke="none" stroke-width="1"/>
+<text x="574.6" y="357" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="10" font-weight="600" fill="#444444" text-anchor="middle">ERD</text>
+<text x="558" y="378" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="11" font-weight="400" fill="#888888" text-anchor="start">Изменён 2 ч назад</text>
+<g transform="translate(786 318) scale(0.8)" fill="none" stroke="#888888" stroke-width="1.5625" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="10" r="1"/><circle cx="10" cy="10" r="1"/><circle cx="15" cy="10" r="1"/></g>
+<rect x="836" y="164" width="272" height="228" rx="12" fill="#ffffff" stroke="#cccccc" stroke-width="1"/>
+<rect x="846" y="174" width="252" height="130" rx="8" fill="#efefef" stroke="#cccccc" stroke-width="1"/>
+<rect x="866" y="198" width="70" height="34" rx="3" fill="#ffffff" stroke="#555555" stroke-width="1.2"/>
+<rect x="1008" y="246" width="70" height="34" rx="3" fill="#ffffff" stroke="#555555" stroke-width="1.2"/>
+<line x1="936" y1="215" x2="1043" y2="215" stroke="#555555" stroke-width="1.2"/>
+<line x1="1043" y1="215" x2="1043" y2="246" stroke="#555555" stroke-width="1.2"/>
+<text x="850" y="332" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="14" font-weight="600" fill="#333333" text-anchor="start">Hiring flow</text>
+<rect x="850" y="344" width="39.6" height="18" rx="9" fill="#e4e4e4" stroke="none" stroke-width="1"/>
+<text x="869.8" y="357" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="10" font-weight="600" fill="#444444" text-anchor="middle">BPMN</text>
+<text x="850" y="378" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="11" font-weight="400" fill="#888888" text-anchor="start">Изменён 2 ч назад</text>
+<g transform="translate(1078 318) scale(0.8)" fill="none" stroke="#888888" stroke-width="1.5625" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="10" r="1"/><circle cx="10" cy="10" r="1"/><circle cx="15" cy="10" r="1"/></g>
+<rect x="1128" y="164" width="272" height="228" rx="12" fill="#ffffff" stroke="#cccccc" stroke-width="1"/>
+<rect x="1138" y="174" width="252" height="130" rx="8" fill="#efefef" stroke="#cccccc" stroke-width="1"/>
+<rect x="1158" y="198" width="70" height="34" rx="3" fill="#ffffff" stroke="#555555" stroke-width="1.2"/>
+<rect x="1300" y="246" width="70" height="34" rx="3" fill="#ffffff" stroke="#555555" stroke-width="1.2"/>
+<line x1="1228" y1="215" x2="1335" y2="215" stroke="#555555" stroke-width="1.2"/>
+<line x1="1335" y1="215" x2="1335" y2="246" stroke="#555555" stroke-width="1.2"/>
+<text x="1142" y="332" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="14" font-weight="600" fill="#333333" text-anchor="start">Data pipeline</text>
+<rect x="1142" y="344" width="33.2" height="18" rx="9" fill="#e4e4e4" stroke="none" stroke-width="1"/>
+<text x="1158.6" y="357" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="10" font-weight="600" fill="#444444" text-anchor="middle">DFD</text>
+<text x="1142" y="378" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="11" font-weight="400" fill="#888888" text-anchor="start">Изменён 2 ч назад</text>
+<g transform="translate(1370 318) scale(0.8)" fill="none" stroke="#888888" stroke-width="1.5625" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="10" r="1"/><circle cx="10" cy="10" r="1"/><circle cx="15" cy="10" r="1"/></g>
+<rect x="252" y="414" width="272" height="228" rx="12" fill="#ffffff" stroke="#cccccc" stroke-width="1"/>
+<rect x="262" y="424" width="252" height="130" rx="8" fill="#efefef" stroke="#cccccc" stroke-width="1"/>
+<rect x="282" y="448" width="70" height="34" rx="3" fill="#ffffff" stroke="#555555" stroke-width="1.2"/>
+<rect x="424" y="496" width="70" height="34" rx="3" fill="#ffffff" stroke="#555555" stroke-width="1.2"/>
+<line x1="352" y1="465" x2="459" y2="465" stroke="#555555" stroke-width="1.2"/>
+<line x1="459" y1="465" x2="459" y2="496" stroke="#555555" stroke-width="1.2"/>
+<text x="266" y="582" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="14" font-weight="600" fill="#333333" text-anchor="start">Warehouse</text>
+<rect x="266" y="594" width="46" height="18" rx="9" fill="#e4e4e4" stroke="none" stroke-width="1"/>
+<text x="289" y="607" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="10" font-weight="600" fill="#444444" text-anchor="middle">IDEF0</text>
+<text x="266" y="628" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="11" font-weight="400" fill="#888888" text-anchor="start">Изменён 2 ч назад</text>
+<g transform="translate(494 568) scale(0.8)" fill="none" stroke="#888888" stroke-width="1.5625" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="10" r="1"/><circle cx="10" cy="10" r="1"/><circle cx="15" cy="10" r="1"/></g>
+<rect x="544" y="414" width="272" height="228" rx="12" fill="#ffffff" stroke="#cccccc" stroke-width="1"/>
+<rect x="554" y="424" width="252" height="130" rx="8" fill="#efefef" stroke="#cccccc" stroke-width="1"/>
+<rect x="574" y="448" width="70" height="34" rx="3" fill="#ffffff" stroke="#555555" stroke-width="1.2"/>
+<rect x="716" y="496" width="70" height="34" rx="3" fill="#ffffff" stroke="#555555" stroke-width="1.2"/>
+<line x1="644" y1="465" x2="751" y2="465" stroke="#555555" stroke-width="1.2"/>
+<line x1="751" y1="465" x2="751" y2="496" stroke="#555555" stroke-width="1.2"/>
+<text x="558" y="582" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="14" font-weight="600" fill="#333333" text-anchor="start">Users &amp; roles</text>
+<rect x="558" y="594" width="33.2" height="18" rx="9" fill="#e4e4e4" stroke="none" stroke-width="1"/>
+<text x="574.6" y="607" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="10" font-weight="600" fill="#444444" text-anchor="middle">ERD</text>
+<text x="558" y="628" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="11" font-weight="400" fill="#888888" text-anchor="start">Изменён 2 ч назад</text>
+<g transform="translate(786 568) scale(0.8)" fill="none" stroke="#888888" stroke-width="1.5625" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="10" r="1"/><circle cx="10" cy="10" r="1"/><circle cx="15" cy="10" r="1"/></g>
+<rect x="836" y="414" width="272" height="228" rx="12" fill="#ffffff" stroke="#cccccc" stroke-width="1"/>
+<rect x="846" y="424" width="252" height="130" rx="8" fill="#efefef" stroke="#cccccc" stroke-width="1"/>
+<rect x="866" y="448" width="70" height="34" rx="3" fill="#ffffff" stroke="#555555" stroke-width="1.2"/>
+<rect x="1008" y="496" width="70" height="34" rx="3" fill="#ffffff" stroke="#555555" stroke-width="1.2"/>
+<line x1="936" y1="465" x2="1043" y2="465" stroke="#555555" stroke-width="1.2"/>
+<line x1="1043" y1="465" x2="1043" y2="496" stroke="#555555" stroke-width="1.2"/>
+<text x="850" y="582" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="14" font-weight="600" fill="#333333" text-anchor="start">Release process</text>
+<rect x="850" y="594" width="39.6" height="18" rx="9" fill="#e4e4e4" stroke="none" stroke-width="1"/>
+<text x="869.8" y="607" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="10" font-weight="600" fill="#444444" text-anchor="middle">BPMN</text>
+<text x="850" y="628" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="11" font-weight="400" fill="#888888" text-anchor="start">Изменён 2 ч назад</text>
+<g transform="translate(1078 568) scale(0.8)" fill="none" stroke="#888888" stroke-width="1.5625" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="10" r="1"/><circle cx="10" cy="10" r="1"/><circle cx="15" cy="10" r="1"/></g>
+<rect x="1128" y="414" width="272" height="228" rx="12" fill="#ffffff" stroke="#cccccc" stroke-width="1"/>
+<rect x="1138" y="424" width="252" height="130" rx="8" fill="#efefef" stroke="#cccccc" stroke-width="1"/>
+<rect x="1158" y="448" width="70" height="34" rx="3" fill="#ffffff" stroke="#555555" stroke-width="1.2"/>
+<rect x="1300" y="496" width="70" height="34" rx="3" fill="#ffffff" stroke="#555555" stroke-width="1.2"/>
+<line x1="1228" y1="465" x2="1335" y2="465" stroke="#555555" stroke-width="1.2"/>
+<line x1="1335" y1="465" x2="1335" y2="496" stroke="#555555" stroke-width="1.2"/>
+<text x="1142" y="582" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="14" font-weight="600" fill="#333333" text-anchor="start">Billing</text>
+<rect x="1142" y="594" width="33.2" height="18" rx="9" fill="#e4e4e4" stroke="none" stroke-width="1"/>
+<text x="1158.6" y="607" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="10" font-weight="600" fill="#444444" text-anchor="middle">DFD</text>
+<text x="1142" y="628" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="11" font-weight="400" fill="#888888" text-anchor="start">Изменён 2 ч назад</text>
+<g transform="translate(1370 568) scale(0.8)" fill="none" stroke="#888888" stroke-width="1.5625" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="10" r="1"/><circle cx="10" cy="10" r="1"/><circle cx="15" cy="10" r="1"/></g>
+</g>
+</svg>
