@@ -9,3 +9,9 @@ dist/
 testing-course/reports/*/output/tex/*.aux
 testing-course/reports/*/output/tex/*.log
 testing-course/reports/*/output/tex/*.out
+
+# Local and personal files that must never be committed (CLAUDE.md)
+.playwright-mcp/
+.claude/admin-test-account.txt
+.accelerator/profile.user.json
+.accelerator/registry.user.json
