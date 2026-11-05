@@ -97,7 +97,7 @@ What changed and why:
 
 What is left:
 
-- End-to-end tests `npm run tc:full` were not run (they need Python and a browser).
+- End-to-end tests `npm run tc:full` were not run (they need Python and a browser). Run later, see section 8.
 - `.claude/cleanup-e-drive.ps1` is not part of the project: it deletes folders on drive E: (up to 100 GB). Do not commit it; run it only by hand after reading it.
 - The nested folder `DSLKit-Project/` holds an untracked copy of the project (141 files). Decide whether it is needed.
 - Prettier reformatted some JSON data files of the checks in `docs/` (the diff grew by tens of thousands of lines). They can be restored with `git checkout -- <file>`; the formatting does not affect anything.
@@ -111,3 +111,9 @@ Check on a copy of HEAD exported with `git archive`: `prettier --check` passes, 
 Found during this check: the committed `package.json` listed `esbuild` but `package-lock.json` did not, so `npm ci` would have failed in CI. Fixed in a separate commit.
 
 Not committed: other work in `docs/testing-kulikov/`, the reformatted JSON data of the checks, the untracked `DSLKit-Project/`, `paper-its/`, `part-2/`, `workspace/` and `.claude/cleanup-e-drive.ps1`. The end-to-end tests on Python and Edge were not run.
+
+## 8 End-to-end tests `tc:full`
+
+Run later, on the local server (`npm start`, port 5173) in Edge. First run: static 41 of 41, editor 17 of 21, the chain stopped and the sign-in tests did not start. The failures were outdated checks and the site code did not need to change: the templates now have their own panel, Share copies a link with the code after `#s=`, the AI assistant opens in the bottom panel, the toast close button has a handler, My projects needs a sign-in, a new user gets 33 starter diagrams, and the daily limit of five diagrams needs the developer role in the repeat-create check.
+
+After fixing the scripts: static 41 of 41, editor 21 of 21, sign-in 42 of 42 (three variants of 14), and the documentation `testing-course/documents/04-full-test-documentation.md` is rebuilt. Committed in a separate commit (`test: bring the end-to-end checks up to date...`).
