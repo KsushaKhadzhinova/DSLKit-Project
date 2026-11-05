@@ -7,7 +7,7 @@ Date: 5 November 2026. Branch: `testing-course-full`. Russian version: [`acceler
 - Accelerator is fully installed: catalog `v1.4.1`, 18 project skills and 4 personal ones. Nothing in the catalog that fits a web project is left out.
 - The skills are adapted to DSLKit: a "Project context" section (commands, paths, the owner's rules) was added to 18 project `SKILL.md` files.
 - Checking through the skills found three groups of problems: a red format check, lab reports that lag behind the code, and failing site tests caused by work that is under way in `site/`.
-- Nothing is committed.
+- The changes are committed on `testing-course-full` (not pushed): skill adaptation, ignore rules, formatting, the `package-lock.json` fix.
 
 ## 2 What was done
 
@@ -101,3 +101,13 @@ What is left:
 - `.claude/cleanup-e-drive.ps1` is not part of the project: it deletes folders on drive E: (up to 100 GB). Do not commit it; run it only by hand after reading it.
 - The nested folder `DSLKit-Project/` holds an untracked copy of the project (141 files). Decide whether it is needed.
 - Prettier reformatted some JSON data files of the checks in `docs/` (the diff grew by tens of thousands of lines). They can be restored with `git checkout -- <file>`; the formatting does not affect anything.
+
+## 7 Commits and a check of the committed state
+
+Commits (branch `testing-course-full`, not pushed): skill adaptation and the report, the `.gitignore` and `.prettierignore` rules, formatting of `docs/` and `testing-course/` (226 files), the `package-lock.json` fix.
+
+Check on a copy of HEAD exported with `git archive`: `prettier --check` passes, `npm test` 1026 of 1026 with 100% coverage, `node testing-course/full/static-sec-perf.js` 41 of 41, `npm ci --dry-run` passes.
+
+Found during this check: the committed `package.json` listed `esbuild` but `package-lock.json` did not, so `npm ci` would have failed in CI. Fixed in a separate commit.
+
+Not committed: other work in `docs/testing-kulikov/`, the reformatted JSON data of the checks, the untracked `DSLKit-Project/`, `paper-its/`, `part-2/`, `workspace/` and `.claude/cleanup-e-drive.ps1`. The end-to-end tests on Python and Edge were not run.
