@@ -1,3 +1,4 @@
+import { useRef } from 'react';
 import { TEMPLATES } from '../data/templates';
 import { MAX_QTY, useFavorites, useFavoritesDispatch, useFavoritesHistory } from '../context/FavoritesContext';
 import { useLanguage } from '../context/LanguageContext';
@@ -53,6 +54,12 @@ export function FavoritesPanel() {
   const dispatch = useFavoritesDispatch();
   const { language, t } = useLanguage();
   const { canUndo, canRedo } = useFavoritesHistory();
+  const heading = useRef(null);
+  // After a removal the clicked button is gone: the focus moves to the heading of the panel instead of falling to the page start.
+  const send = (action) => {
+    dispatch(action);
+    heading.current?.focus();
+  };
   const chosen = TEMPLATES.flatMap((template) => {
     const item = favorites.find((entry) => entry.id === template.id);
     return item ? [{ template, qty: item.qty }] : [];
@@ -60,12 +67,15 @@ export function FavoritesPanel() {
 
   return (
     <section className="section" id="favorites" aria-labelledby="favorites-title">
-      <h2 className="section__title" id="favorites-title">
+      <h2 className="section__title" id="favorites-title" tabIndex={-1} ref={heading}>
         {t('favorites')}{' '}
         <span className="badge">
           {t('count')}: {chosen.length}
         </span>
       </h2>
+      <p className="visually-hidden" role="status" aria-live="polite">
+        {t('updated')}: {chosen.length}
+      </p>
       <p className="actions">
         <button type="button" className="button button--small" disabled={!canUndo} onClick={() => dispatch({ type: 'UNDO' })}>
           {t('undo')}
@@ -109,7 +119,7 @@ export function FavoritesPanel() {
                       type="button"
                       className="button button--small"
                       aria-label={`${t('remove')}: ${template.title[language]}`}
-                      onClick={() => dispatch({ type: 'REMOVE', id: template.id })}
+                      onClick={() => send({ type: 'REMOVE', id: template.id })}
                     >
                       {t('remove')}
                     </button>
@@ -119,7 +129,7 @@ export function FavoritesPanel() {
             ))}
           </ul>
           <p className="actions">
-            <button type="button" className="button button--quiet button--danger" onClick={() => dispatch({ type: 'CLEAR' })}>
+            <button type="button" className="button button--quiet button--danger" onClick={() => send({ type: 'CLEAR' })}>
               {t('clear')}
             </button>
           </p>

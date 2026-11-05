@@ -47,6 +47,12 @@ describe('reducer fed with wrong actions and states', () => {
     expect(favoritesReducer([item(1, 2)], { type: 'SET_QTY', id: 1, qty: NaN })).toEqual([item(1, 1)]);
   });
 
+  it('does not crash on a quantity that throws while being read as a number', () => {
+    const set = (qty) => favoritesReducer([item(1, 2)], { type: 'SET_QTY', id: 1, qty })[0].qty;
+    expect(set(Symbol('x'))).toBe(1);
+    expect(set({ valueOf: () => { throw new Error('boom'); } })).toBe(1);
+  });
+
   it('clamps 2147483648 and Number.MAX_SAFE_INTEGER + 1 to the limit', () => {
     const set = (qty) => favoritesReducer([item(1, 2)], { type: 'SET_QTY', id: 1, qty });
     expect(set(2147483648)).toEqual([item(1, MAX_QTY)]);

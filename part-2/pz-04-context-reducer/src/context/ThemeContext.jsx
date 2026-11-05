@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 
 export const THEME_KEY = 'dslkit.theme';
 
@@ -18,9 +18,19 @@ export function readTheme() {
   return systemTheme();
 }
 
+const hasSavedTheme = () => {
+  try {
+    const saved = localStorage.getItem(THEME_KEY);
+    return saved === 'light' || saved === 'dark';
+  } catch {
+    return false;
+  }
+};
+
 export function ThemeProvider({ children }) {
   const [theme, setThemeState] = useState(readTheme);
-  const chosen = useRef(false);
+  // True once the user picked a theme (or one was saved earlier): from then on the system preference is not followed.
+  const [chosen, setChosen] = useState(hasSavedTheme);
 
   // The root attribute lets the colour tokens of dslkit.css switch the whole page.
   useEffect(() => {
@@ -31,26 +41,36 @@ export function ThemeProvider({ children }) {
     // Only the two known themes are accepted, anything else is ignored.
     const setTheme = (next) => {
       if (next !== 'light' && next !== 'dark') return;
-      chosen.current = true;
+      setChosen(true);
       setThemeState(next);
     };
     // The functional update makes two toggles in a row flip twice, not once.
     const toggleTheme = () => {
-      chosen.current = true;
+      setChosen(true);
       setThemeState((prev) => (prev === 'light' ? 'dark' : 'light'));
     };
     return { theme, setTheme, toggleTheme };
   }, [theme]);
 
-  // Only a choice made by the user is stored, so the system preference is still followed until then.
+  // Only a choice made by the user is stored. The effect also depends on `chosen`, so picking the theme that is already on is stored too.
   useEffect(() => {
-    if (!chosen.current) return;
+    if (!chosen) return;
     try {
       localStorage.setItem(THEME_KEY, theme);
     } catch {
       // The choice lives in memory only.
     }
-  }, [theme]);
+  }, [theme, chosen]);
+
+  // Until the user chooses, the theme follows the system setting while the page is open.
+  useEffect(() => {
+    if (chosen || typeof window.matchMedia !== 'function') return undefined;
+    const query = window.matchMedia('(prefers-color-scheme: dark)');
+    const onChange = (event) => setThemeState(event.matches ? 'dark' : 'light');
+    query.addEventListener?.('change', onChange);
+    return () => query.removeEventListener?.('change', onChange);
+  }, [chosen]);
+
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 }
 

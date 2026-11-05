@@ -4,8 +4,11 @@
 import { createContext, useContext } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 
-// An empty or missing name must not break the page.
-const initial = (userName) => (userName || '?').trim().charAt(0).toUpperCase() || '?';
+// An empty, missing or non-text name must not break the page. The first code point is taken, so an emoji is not cut in half.
+const initial = (userName) => {
+  const name = typeof userName === 'string' ? userName.trim() : '';
+  return name ? Array.from(name)[0].toUpperCase() : '?';
+};
 
 // Problem: props at every level.
 function UserAvatar({ userName }) {

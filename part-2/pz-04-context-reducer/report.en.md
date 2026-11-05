@@ -125,7 +125,7 @@ Prop drilling is shown on a chain of five components and removed with the theme,
 ```
 
 ```jsx
-import { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 
 export const THEME_KEY = 'dslkit.theme';
 
@@ -145,9 +145,19 @@ export function readTheme() {
   return systemTheme();
 }
 
+const hasSavedTheme = () => {
+  try {
+    const saved = localStorage.getItem(THEME_KEY);
+    return saved === 'light' || saved === 'dark';
+  } catch {
+    return false;
+  }
+};
+
 export function ThemeProvider({ children }) {
   const [theme, setThemeState] = useState(readTheme);
-  const chosen = useRef(false);
+  // True once the user picked a theme (or one was saved earlier): from then on the system preference is not followed.
+  const [chosen, setChosen] = useState(hasSavedTheme);
 
   // The root attribute lets the colour tokens of dslkit.css switch the whole page.
   useEffect(() => {
@@ -158,26 +168,36 @@ export function ThemeProvider({ children }) {
     // Only the two known themes are accepted, anything else is ignored.
     const setTheme = (next) => {
       if (next !== 'light' && next !== 'dark') return;
-      chosen.current = true;
+      setChosen(true);
       setThemeState(next);
     };
     // The functional update makes two toggles in a row flip twice, not once.
     const toggleTheme = () => {
-      chosen.current = true;
+      setChosen(true);
       setThemeState((prev) => (prev === 'light' ? 'dark' : 'light'));
     };
     return { theme, setTheme, toggleTheme };
   }, [theme]);
 
-  // Only a choice made by the user is stored, so the system preference is still followed until then.
+  // Only a choice made by the user is stored. The effect also depends on `chosen`, so picking the theme that is already on is stored too.
   useEffect(() => {
-    if (!chosen.current) return;
+    if (!chosen) return;
     try {
       localStorage.setItem(THEME_KEY, theme);
     } catch {
       // The choice lives in memory only.
     }
-  }, [theme]);
+  }, [theme, chosen]);
+
+  // Until the user chooses, the theme follows the system setting while the page is open.
+  useEffect(() => {
+    if (chosen || typeof window.matchMedia !== 'function') return undefined;
+    const query = window.matchMedia('(prefers-color-scheme: dark)');
+    const onChange = (event) => setThemeState(event.matches ? 'dark' : 'light');
+    query.addEventListener?.('change', onChange);
+    return () => query.removeEventListener?.('change', onChange);
+  }, [chosen]);
+
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 }
 
@@ -190,7 +210,7 @@ export const useTheme = () => {
 ```
 
 ```jsx
-import { createContext, useContext, useEffect, useMemo, useReducer } from 'react';
+import { createContext, useContext, useEffect, useMemo, useReducer, useRef } from 'react';
 import { TEMPLATES } from '../data/templates';
 import limits from '../limits.json';
 
@@ -199,13 +219,31 @@ export const MAX_QTY = limits.maxQty;
 export const MAX_HISTORY = limits.maxHistory;
 
 // Quantity is always a whole number from 1 to MAX_QTY, anything else is replaced by the nearest valid value.
+// Number()/Math.trunc() can throw on a Symbol or an object with a poisoned valueOf; such a value is treated
+// the same as any other junk input, not allowed to crash the reducer.
 export function clampQty(value) {
-  const number = Math.trunc(Number(value));
+  let number;
+  try {
+    number = Math.trunc(Number(value));
+  } catch {
+    return 1;
+  }
   if (!Number.isFinite(number)) return 1;
   return Math.min(MAX_QTY, Math.max(1, number));
 }
 
-const changeQty = (state, id, next) => state.map((item) => (item.id === id ? { ...item, qty: clampQty(next(item.qty)) } : item));
+// A change that leaves every quantity as it was returns the same array, so the history records no step for it.
+const changeQty = (state, id, next) => {
+  let changed = false;
+  const result = state.map((item) => {
+    if (item.id !== id) return item;
+    const qty = clampQty(next(item.qty));
+    if (qty === item.qty) return item;
+    changed = true;
+    return { ...item, qty };
+  });
+  return changed ? result : state;
+};
 
 const isTemplateId = (id) => TEMPLATES.some((template) => template.id === id);
 
@@ -218,7 +256,7 @@ export function favoritesReducer(current, action) {
       if (!isTemplateId(action.id) || state.some((item) => item.id === action.id)) return state;
       return [...state, { id: action.id, qty: 1 }];
     case 'REMOVE':
-      return state.filter((item) => item.id !== action.id);
+      return state.some((item) => item.id === action.id) ? state.filter((item) => item.id !== action.id) : state;
     case 'TOGGLE':
       if (!isTemplateId(action.id)) return state;
       return state.some((item) => item.id === action.id) ? state.filter((item) => item.id !== action.id) : [...state, { id: action.id, qty: 1 }];
@@ -229,7 +267,7 @@ export function favoritesReducer(current, action) {
     case 'SET_QTY':
       return changeQty(state, action.id, () => action.qty);
     case 'CLEAR':
-      return [];
+      return state.length ? [] : state;
     default:
       return state;
   }
@@ -237,7 +275,9 @@ export function favoritesReducer(current, action) {
 
 // localStorage can hold anything: keep only known template ids, once each, with a valid quantity.
 // A plain id (the format of the first version) is accepted as quantity 1.
+// The versioned form { v: 1, items: [...] } is read too; any other version is not understood and gives an empty list.
 export function sanitizeFavorites(value) {
+  if (value !== null && typeof value === 'object' && !Array.isArray(value) && value.v === 1) value = value.items;
   if (!Array.isArray(value)) return [];
   const known = new Set(TEMPLATES.map((template) => template.id));
   const seen = new Set();
@@ -252,28 +292,61 @@ export function sanitizeFavorites(value) {
   return result;
 }
 
+export const BACKUP_KEY = `${FAVORITES_KEY}.bak`;
+
+// Data that the sanitizer changes or drops (a newer schema, damaged JSON, an unknown id) is copied to a backup key first,
+// so a rollback of the application or a manual fix does not lose it.
 function loadFavorites() {
   try {
-    return sanitizeFavorites(JSON.parse(localStorage.getItem(FAVORITES_KEY)));
+    const raw = localStorage.getItem(FAVORITES_KEY);
+    if (raw === null) return [];
+    let parsed = null;
+    try {
+      parsed = JSON.parse(raw);
+    } catch {
+      // Damaged JSON is kept in the backup below.
+    }
+    const items = sanitizeFavorites(parsed);
+    if (JSON.stringify(items) !== raw) {
+      try {
+        localStorage.setItem(BACKUP_KEY, raw);
+      } catch {
+        // No room for a backup: nothing else can be done.
+      }
+    }
+    return items;
   } catch {
     return [];
   }
 }
 
+const sameItems = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+
 // Undo and redo around any reducer: the state is { past, present, future }, the wrapped reducer only sees `present`.
 // An action that changes nothing (the reducer returns the same array) leaves no step in the history, a new change clears the redo steps.
-export const withHistory = (reducer, limit = MAX_HISTORY) => (state, action) => {
-  if (action?.type === 'UNDO') {
-    if (state.past.length === 0) return state;
-    return { past: state.past.slice(0, -1), present: state.past.at(-1), future: [state.present, ...state.future] };
-  }
-  if (action?.type === 'REDO') {
-    if (state.future.length === 0) return state;
-    return { past: [...state.past, state.present].slice(-limit), present: state.future[0], future: state.future.slice(1) };
-  }
-  const present = reducer(state.present, action);
-  if (present === state.present) return state;
-  return { past: [...state.past, state.present].slice(-limit), present, future: [] };
+export const withHistory = (reducer, limit = MAX_HISTORY) => {
+  // A limit that is not a positive number keeps no steps at all.
+  const cap = Number.isFinite(limit) && limit >= 1 ? Math.floor(limit) : 0;
+  const keep = (steps) => (cap ? steps.slice(-cap) : []);
+  const isHistory = (value) => value !== null && typeof value === 'object' && Array.isArray(value.past) && Array.isArray(value.future) && 'present' in value;
+  return (current, action) => {
+    const state = isHistory(current) ? current : { past: [], present: current?.present ?? current, future: [] };
+    if (action?.type === 'UNDO') {
+      if (state.past.length === 0) return state;
+      return { past: state.past.slice(0, -1), present: state.past.at(-1), future: [state.present, ...state.future] };
+    }
+    if (action?.type === 'REDO') {
+      if (state.future.length === 0) return state;
+      return { past: keep([...state.past, state.present]), present: state.future[0], future: state.future.slice(1) };
+    }
+    // Data that arrived from another tab replaces the present value without a step in the history.
+    if (action?.type === 'HYDRATE') {
+      return sameItems(state.present, action.items) ? state : { ...state, present: action.items };
+    }
+    const present = reducer(state.present, action);
+    if (present === state.present) return state;
+    return { past: keep([...state.past, state.present]), present, future: [] };
+  };
 };
 
 const favoritesWithHistory = withHistory(favoritesReducer);
@@ -291,13 +364,39 @@ export function FavoritesProvider({ children }) {
   const favorites = state.present;
   const history = useMemo(() => ({ canUndo: state.past.length > 0, canRedo: state.future.length > 0 }), [state.past.length, state.future.length]);
 
+  // The first value (loaded or empty) is never written back, so data of a newer schema survives until the user changes something.
+  const lastSeen = useRef(favorites);
   useEffect(() => {
+    if (lastSeen.current === favorites) return;
+    lastSeen.current = favorites;
     try {
-      localStorage.setItem(FAVORITES_KEY, JSON.stringify(favorites));
+      const json = JSON.stringify(favorites);
+      // Writing the same text would be no change; this also keeps data from another tab from being written back in a loop.
+      if (localStorage.getItem(FAVORITES_KEY) !== json) localStorage.setItem(FAVORITES_KEY, json);
     } catch {
       // Storage is blocked or full: the state still works in memory.
     }
   }, [favorites]);
+
+  // Another tab saved new favorites: take them over (the storage event never fires in the tab that wrote).
+  useEffect(() => {
+    const onStorage = (event) => {
+      if (event.key !== null && event.key !== FAVORITES_KEY) return;
+      try {
+        let parsed = null;
+        try {
+          parsed = JSON.parse(event.newValue ?? localStorage.getItem(FAVORITES_KEY));
+        } catch {
+          return;
+        }
+        dispatch({ type: 'HYDRATE', items: sanitizeFavorites(parsed) });
+      } catch {
+        // Storage is blocked: keep the current state.
+      }
+    };
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  }, []);
 
   return (
     <FavoritesStateContext.Provider value={favorites}>

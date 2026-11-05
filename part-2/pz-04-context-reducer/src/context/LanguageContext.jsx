@@ -5,6 +5,8 @@ export const LANGUAGE_KEY = 'dslkit.language';
 const DICTIONARY = {
   ru: {
     title: 'Шаблоны диаграмм',
+    docTitle: 'DSLKit: состояние приложения',
+    updated: 'Список обновлён. В избранном',
     lead: 'Выберите шаблоны в избранное. Тема, язык и избранное лежат в контекстах и доступны любому компоненту без передачи через props.',
     theme: 'Тема',
     themeDark: 'Тёмная тема',
@@ -16,6 +18,7 @@ const DICTIONARY = {
     nav: 'Основная навигация',
     footerNav: 'Нижняя навигация',
     copy: '© 2026 DSLKit. Учебный проект БГУИР.',
+    userName: 'Ксения',
     add: 'В избранное',
     remove: 'Убрать',
     favorites: 'Избранное',
@@ -35,6 +38,8 @@ const DICTIONARY = {
   },
   en: {
     title: 'Diagram templates',
+    docTitle: 'DSLKit: application state',
+    updated: 'List updated. In favorites',
     lead: 'Pick templates into favorites. The theme, the language and the favorites live in contexts and any component reads them without props.',
     theme: 'Theme',
     themeDark: 'Dark theme',
@@ -46,6 +51,7 @@ const DICTIONARY = {
     nav: 'Main navigation',
     footerNav: 'Footer navigation',
     copy: '© 2026 DSLKit. BSUIR study project.',
+    userName: 'Kate',
     add: 'Add to favorites',
     remove: 'Remove',
     favorites: 'Favorites',
@@ -85,6 +91,7 @@ export function LanguageProvider({ children }) {
 
   useEffect(() => {
     document.documentElement.lang = language;
+    document.title = DICTIONARY[language].docTitle;
     try {
       localStorage.setItem(LANGUAGE_KEY, language);
     } catch {
@@ -97,7 +104,7 @@ export function LanguageProvider({ children }) {
       language,
       toggleLanguage: () => setLanguage((prev) => (prev === 'ru' ? 'en' : 'ru')),
       // A missing key falls back to Russian and then to the key itself, so the page never shows "undefined".
-      t: (key) => DICTIONARY[language][key] ?? DICTIONARY.ru[key] ?? key,
+      t: (key) => (Object.hasOwn(DICTIONARY[language], key) ? DICTIONARY[language][key] : Object.hasOwn(DICTIONARY.ru, key) ? DICTIONARY.ru[key] : key),
     }),
     [language],
   );

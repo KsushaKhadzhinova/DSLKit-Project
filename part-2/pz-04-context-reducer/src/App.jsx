@@ -54,7 +54,7 @@ function Page() {
         </div>
         <TemplateList />
         <FavoritesPanel />
-        <PropDrilling userName="Ксения" />
+        <PropDrilling userName={t('userName')} />
       </main>
       <SiteFooter links={links} labels={{ nav: t('footerNav'), copy: t('copy') }} />
     </>
