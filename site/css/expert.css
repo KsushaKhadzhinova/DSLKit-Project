@@ -294,6 +294,17 @@
 .app-page--decision .settings {
   padding-block-end: var(--space-5);
 }
+/* These pages have no settings menu, so their content takes the whole width instead of the narrow menu column */
+.settings.expert,
+.settings.decision {
+  grid-template-columns: minmax(0, 1fr);
+  align-content: start;
+}
+/* The role form and the status line of the documentation page sit in its second column; here they take the only column */
+.settings.expert > *,
+.settings.decision > * {
+  grid-column: 1;
+}
 .decision__result,
 .decision__sensitivity {
   display: grid;
