@@ -1,6 +1,9 @@
 ### VS Code REST Client (extension humao.rest-client). Start the server first: npm run dev
 @base = http://localhost:3000
 
+### Health check -> 200
+GET {{base}}/health
+
 ### List all diagrams -> 200
 GET {{base}}/diagrams
 
@@ -53,4 +56,55 @@ Content-Type: application/json
 DELETE {{base}}/diagrams/2
 
 ### Unknown route -> 404
-GET {{base}}/projects
+GET {{base}}/tickets
+
+### Page 2 of size 5, sorted by title descending -> 200 (X-Total-Count has the full size)
+GET {{base}}/diagrams?limit=5&offset=5&sort=title&order=desc
+
+### Page size over 100 -> 400
+GET {{base}}/diagrams?limit=1000
+
+### Unknown sort field -> 400
+GET {{base}}/diagrams?sort=password
+
+### Partial update -> 200 (only the sent fields change)
+PATCH {{base}}/diagrams/1
+Content-Type: application/json
+
+{ "revision": 5 }
+
+### Empty PATCH body -> 400
+PATCH {{base}}/diagrams/1
+Content-Type: application/json
+
+{}
+
+### Negative revision -> 400
+PATCH {{base}}/diagrams/1
+Content-Type: application/json
+
+{ "revision": -1 }
+
+### Create a project -> 201
+POST {{base}}/projects
+Content-Type: application/json
+
+{ "name": "Billing" }
+
+### The same name again -> 409
+POST {{base}}/projects
+Content-Type: application/json
+
+{ "name": "Billing" }
+
+### Put a diagram into the project -> 200
+PATCH {{base}}/diagrams/1
+Content-Type: application/json
+
+{ "projectId": 1 }
+
+### Diagrams of the project -> 200
+GET {{base}}/projects/1/diagrams
+
+### Delete the project, its diagrams stay -> 204
+DELETE {{base}}/projects/1
