@@ -21,3 +21,4 @@ paper-its/
 docs/**/*.json
 testing-course/**/*.json
 testing-course/db.json
+testing-course/documents/04-full-test-documentation.md
