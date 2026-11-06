@@ -243,12 +243,17 @@ The styles of the DSLKit project are split into files following the BEM methodol
 
   --step--1: calc(1rem / var(--phi-root));
   --step-0: 1rem;
-  --step-1: calc(1rem * var(--phi-root));
-  --step-2: calc(1rem * var(--phi));
-  --step-3: calc(1rem * var(--phi) * var(--phi-root));
-  --step-4: calc(1rem * var(--phi) * var(--phi));
-  --step-5: calc(1rem * var(--phi) * var(--phi) * var(--phi-root));
-  --step-6: calc(1rem * var(--phi) * var(--phi) * var(--phi));
+  /* step-1 and up grow fast (√φ, φ, φ√φ...), so on a narrow phone their fixed size reads as
+     oversized relative to the viewport. Each is now fluid: unchanged from 1280px up (the desktop
+     value equals the old fixed calc()), scaled down to about 70% of that at 320px and below, and
+     interpolated by viewport width in between. The formula (min, preferred, max) follows the
+     standard fluid-type construction: preferred = yIntersection + slope * 1vw. */
+  --step-1: clamp(0.89rem, 0.763rem + 0.636vw, calc(1rem * var(--phi-root)));
+  --step-2: clamp(1.133rem, 0.971rem + 0.809vw, calc(1rem * var(--phi)));
+  --step-3: clamp(1.441rem, 1.235rem + 1.029vw, calc(1rem * var(--phi) * var(--phi-root)));
+  --step-4: clamp(1.833rem, 1.571rem + 1.309vw, calc(1rem * var(--phi) * var(--phi)));
+  --step-5: clamp(2.331rem, 1.998rem + 1.665vw, calc(1rem * var(--phi) * var(--phi) * var(--phi-root)));
+  --step-6: clamp(2.965rem, 2.542rem + 2.118vw, calc(1rem * var(--phi) * var(--phi) * var(--phi)));
 
   --columns-golden: 1fr 1.618fr;
   --columns-golden-reverse: 1.618fr 1fr;
