@@ -4,6 +4,7 @@ Russian version: [`README.md`](README.md). The directory was assembled on 6 Nove
 
 | File                                                                                                 | What is inside                                                                                              |
 | ---------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| [`60-update-2026-11-06.en.md`](60-update-2026-11-06.en.md)                                           | Update: owner answers, what was pushed to GitHub, corrections to stale facts (read first)                   |
 | [`00-project-checklist.en.md`](00-project-checklist.en.md)                                           | Project checklist: done, in progress, waiting for the owner, planned, not planned                           |
 | [`01-test-strategy.en.md`](01-test-strategy.en.md)                                                   | Strategy: objects, kinds of testing, entry and exit criteria, order, metrics, risks                         |
 | [`02-analytics.en.md`](02-analytics.en.md)                                                           | Analytics: numbers, gaps by area, risk register, source contradictions, unstable tests, critical path       |

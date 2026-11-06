@@ -1,5 +1,7 @@
 # DSLKit project checklist: done, in progress, still open
 
+Update of 6.11 with corrections to stale facts: [`60-update-2026-11-06.en.md`](60-update-2026-11-06.en.md).
+
 Russian version: [`00-project-checklist.md`](00-project-checklist.md). Snapshot of 6 November 2026, branch `testing-course-full`, commit `ccb4b0b`.
 
 How to read it. Every item has a source: a repository file or the last message of the chat it came from. Items marked "verify" come from older documents and were not re-confirmed in this snapshot. Test counts for Part 2 from 23–29 October were not re-run.
