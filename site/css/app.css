@@ -313,7 +313,7 @@
 }
 
 .welcome__title {
-  font-size: var(--step-4);
+  font-size: clamp(var(--step-2), 1rem + 2.4vw, var(--step-4));
 }
 
 .welcome__lead {
@@ -428,7 +428,7 @@
 
 .dashboard__title {
   margin-bottom: var(--space-3);
-  font-size: var(--step-3);
+  font-size: clamp(var(--step-1), 1rem + 1.4vw, var(--step-3));
 }
 
 .dashboard__toolbar {
@@ -706,7 +706,7 @@
 
 .settings__title {
   margin-bottom: var(--space-3);
-  font-size: var(--step-3);
+  font-size: clamp(var(--step-1), 1rem + 1.4vw, var(--step-3));
 }
 
 .settings-group {

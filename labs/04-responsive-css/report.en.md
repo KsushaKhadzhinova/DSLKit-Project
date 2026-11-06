@@ -951,7 +951,7 @@ label > span {
 }
 
 .hero__title {
-  font-size: clamp(var(--step-3), 1rem + 3.2vw, var(--step-5));
+  font-size: clamp(var(--step-2), 0.9rem + 3.2vw, var(--step-5));
   font-weight: 800;
   letter-spacing: -0.035em;
 }
@@ -1005,7 +1005,7 @@ label > span {
 
 .hero__fact-value {
   color: var(--color-link);
-  font-size: var(--step-4);
+  font-size: clamp(var(--step-2), 1rem + 2.4vw, var(--step-4));
   font-weight: 800;
   letter-spacing: -0.03em;
   line-height: 1;
@@ -1042,7 +1042,7 @@ label > span {
 
 .section__title {
   margin-bottom: var(--space-2);
-  font-size: var(--step-4);
+  font-size: clamp(var(--step-2), 1rem + 2.4vw, var(--step-4));
   font-weight: 800;
   letter-spacing: -0.03em;
 }

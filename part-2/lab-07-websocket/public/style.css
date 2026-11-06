@@ -52,7 +52,7 @@
 }
 
 .live__title {
-  font-size: var(--step-4);
+  font-size: clamp(var(--step-2), 1rem + 2.4vw, var(--step-4));
 }
 
 .live__lead {

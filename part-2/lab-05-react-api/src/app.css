@@ -25,7 +25,7 @@
 }
 
 .page-title {
-  font-size: var(--step-3);
+  font-size: clamp(var(--step-1), 1rem + 1.4vw, var(--step-3));
 }
 
 .page-lead {
