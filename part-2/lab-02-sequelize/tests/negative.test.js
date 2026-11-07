@@ -204,7 +204,7 @@ test('a database failure on POST answers 500 without the internal message', asyn
   assert.deepEqual(body, { error: 'Internal server error' });
 });
 
-test('a closed database answers 500 on the API and 503 on the health check, without file paths', async (t) => {
+test('a closed database answers 503 with a plain human message on the API and on the health check, without file paths', async (t) => {
   t.mock.method(console, 'error', () => {});
   const closed = createModels({ dialect: 'sqlite', storage: db.storage, logging: false });
   await closed.sequelize.close();
@@ -213,13 +213,37 @@ test('a closed database answers 500 on the API and 503 on the health check, with
   const url = `http://localhost:${app.address().port}`;
   try {
     const list = await fetch(`${url}/diagrams`);
-    assert.equal(list.status, 500);
-    assert.deepEqual(await list.json(), { error: 'Internal server error' });
+    assert.equal(list.status, 503);
+    const body = await list.json();
+    assert.match(body.error, /unavailable/i);
+    assert.match(body.error, /недоступен/i);
+    assert.doesNotMatch(JSON.stringify(body), /\.js:|\\|sqlite/i);
     const health = await fetch(`${url}/health`);
     assert.equal(health.status, 503);
     assert.deepEqual(await health.json(), { status: 'unavailable' });
   } finally {
     app.close();
+  }
+});
+
+test('a connection refused by the real database (DATABASE_URL pointing at a closed port) answers 503, not a stack trace', async (t) => {
+  t.mock.method(console, 'error', () => {});
+  // No PostgreSQL is actually started: the port is simply not listening, the same as a stopped database or a cut network.
+  const unreachable = createModels({ dialect: 'postgres', host: '127.0.0.1', port: 1, username: 'u', password: 'p', database: 'd', logging: false, dialectOptions: { connectTimeout: 2000 } });
+  const app = createApp(unreachable).listen(0);
+  await new Promise((resolve) => app.once('listening', resolve));
+  const url = `http://localhost:${app.address().port}`;
+  try {
+    const list = await fetch(`${url}/diagrams`);
+    assert.equal(list.status, 503);
+    const body = await list.json();
+    assert.match(body.error, /unavailable/i);
+    assert.doesNotMatch(JSON.stringify(body), /ECONNREFUSED|\.js:|password/i);
+    const health = await fetch(`${url}/health`);
+    assert.equal(health.status, 503);
+  } finally {
+    app.close();
+    await unreachable.sequelize.close().catch(() => {});
   }
 });
 
