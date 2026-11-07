@@ -172,6 +172,15 @@ test('GET by an upper-case id of a missing record answers 404', async () => {
   assert.equal((await call('GET', `/diagrams/${MISSING_ID.toUpperCase()}`)).res.status, 404);
 });
 
+test('GET /diagrams/:id with a 50000-character id answers 400 or 431 quickly, never reaching the database', async () => {
+  const started = performance.now();
+  const { res } = await call('GET', `/diagrams/${'a'.repeat(50000)}`);
+  // 431 (request line too long) is the HTTP server rejecting it before Express even routes the request;
+  // 400 is the parseId check rejecting it. Either way it must not hang or reach the database.
+  assert.ok([400, 431].includes(res.status), String(res.status));
+  assert.ok(performance.now() - started < 500, 'a huge id was not rejected quickly');
+});
+
 test('an unknown route with an 8000-character path answers 404 with a JSON error', async () => {
   const { res, body } = await call('GET', `/nothing/${'a'.repeat(8000)}`);
   assert.equal(res.status, 404);
