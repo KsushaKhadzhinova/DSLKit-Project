@@ -11,7 +11,7 @@ ICOM = {
     "I2": "Замысел диаграммы\n(описание на DSL)",
     "I3": "Обращения и запросы\nадминистрирования",
     "C1": "Условия тарифов,\nзаконодательство",
-    "C2": "Правила нотаций\n(UML, IDEF0, BPMN)",
+    "C2": "Правила\nнотаций (UML,\nIDEF0, BPMN)",
     "C3": "Политика\nбезопасности и\nхранения данных",
     "C4": "Параметры\nрендеринга\nи экспорта",
     "O1": "Построенная диаграмма\n(SVG, PNG)",
@@ -122,10 +122,11 @@ class Idef0:
         # согласованность граничных стрелок с родителем
         if parent_icom is not None:
             child = {a["code"]: a["label"] for a in self.arrows if a["code"]}
+            norm = lambda s: " ".join(s.split())
             for code, lab in parent_icom.items():
                 if code not in child:
                     out.append(f"граничная стрелка {code} «{lab.replace(chr(10), ' ')}» есть у родителя, но отсутствует на диаграмме")
-                elif child[code] != lab:
+                elif norm(child[code]) != norm(lab):
                     out.append(f"граничная стрелка {code}: название не совпадает с родительским")
             for code in child:
                 if code not in parent_icom:

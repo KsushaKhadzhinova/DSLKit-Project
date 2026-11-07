@@ -20,7 +20,7 @@ from xml.sax.saxutils import escape
 
 FONT = "Times New Roman"
 PX = 0.72  # 1 px модели -> pt шрифта (фигура W/100 дюймов)
-FS = float(os.environ.get("DGL_FS", "1.25"))  # общий множитель размера шрифта на диаграммах
+FS = float(os.environ.get("DGL_FS", "1.45"))  # общий множитель размера шрифта на диаграммах
 plt.rcParams["font.family"] = FONT
 
 SIDE = {"l": (0.0, 0.5), "r": (1.0, 0.5), "t": (0.5, 0.0), "b": (0.5, 1.0)}
@@ -63,9 +63,9 @@ class Scene:
         return (s["x"] + s["w"] * f, s["y"] + (0 if side == "t" else s["h"]))
 
     def edge(self, pts, src=None, tgt=None, style="seq", arrow="block", start="none",
-             label=None, lx=None, ly=None, align="center", lfs=11, lw=None, default=False):
+             label=None, lx=None, ly=None, align="center", lfs=11, lw=None, default=False, color="k", free=False):
         e = dict(pts=[(round(a, 1), round(b, 1)) for a, b in pts], src=src, tgt=tgt, style=style,
-                 arrow=arrow, start=start, lw=lw, default=default)
+                 arrow=arrow, start=start, lw=lw, default=default, color=color, free=free)
         self.edges.append(e)
         if label:
             self.text(lx, ly, label, align=align, fs=lfs, tag="edge")
@@ -271,7 +271,7 @@ class Scene:
         if s["text"]:
             self._label_out(ax, s, s.get("lpos", "below"), cx, cy, r, r)
 
-    def _head(self, ax, a, b, kind, z=5):
+    def _head(self, ax, a, b, kind, z=5, color="k"):
         dx, dy = b[0] - a[0], b[1] - a[1]
         L = math.hypot(dx, dy) or 1
         ux, uy = dx / L, dy / L
@@ -280,9 +280,9 @@ class Scene:
         left = (base[0] - uy * hw, base[1] + ux * hw)
         right = (base[0] + uy * hw, base[1] - ux * hw)
         if kind == "open":
-            ax.plot([left[0], b[0], right[0]], [left[1], b[1], right[1]], color="k", lw=1.3, zorder=z)
+            ax.plot([left[0], b[0], right[0]], [left[1], b[1], right[1]], color=color, lw=1.3, zorder=z)
         else:
-            ax.add_patch(Polygon([b, left, right], closed=True, fc="white" if kind == "hollow" else "k", ec="k", lw=1.2, zorder=z))
+            ax.add_patch(Polygon([b, left, right], closed=True, fc="white" if kind == "hollow" else color, ec=color, lw=1.2, zorder=z))
 
     def _draw_edge(self, ax, e):
         p = e["pts"]
@@ -290,10 +290,10 @@ class Scene:
         ls = {"seq": "-", "plain": "-", "idef": "-", "msg": (0, (5, 3)), "assoc": (0, (1, 2.2))}[st]
         lw = e["lw"] or (1.3 if st == "assoc" else 1.6)
         for i in range(len(p) - 1):
-            ax.plot([p[i][0], p[i + 1][0]], [p[i][1], p[i + 1][1]], color="k", lw=lw, linestyle=ls, zorder=3,
+            ax.plot([p[i][0], p[i + 1][0]], [p[i][1], p[i + 1][1]], color=e.get("color", "k"), lw=lw, linestyle=ls, zorder=3,
                     solid_capstyle="butt")
         if e["arrow"] != "none":
-            self._head(ax, p[-2], p[-1], "open" if st == "assoc" else ("hollow" if st == "msg" else "block"))
+            self._head(ax, p[-2], p[-1], "open" if st == "assoc" else ("hollow" if st == "msg" else "block"), color=e.get("color", "k"))
         if e["start"] == "oval":
             ax.add_patch(Circle(p[0], 4, fc="white", ec="k", lw=1.2, zorder=5))
         if e["default"]:
@@ -350,6 +350,8 @@ class Scene:
         # 4. наклонные отрезки
         for e in self.edges:
             p = e["pts"]
+            if e.get("free"):
+                continue
             for i in range(len(p) - 1):
                 if abs(p[i][0] - p[i + 1][0]) > 0.6 and abs(p[i][1] - p[i + 1][1]) > 0.6:
                     W.append(f"[{self.name}] наклонный отрезок стрелки {p[i]} -> {p[i + 1]}")
@@ -477,7 +479,7 @@ class Scene:
                 st += f"entryX={fx:.4f};entryY={fy:.4f};entryDx=0;entryDy=0;"
                 ex += f' target="{mapid[e["tgt"]]}"'
             mid = "".join(f'<mxPoint x="{a}" y="{b}"/>' for a, b in p[1:-1])
-            out.append(f'<mxCell id="{cid()}" style="html=1;rounded=0;edgeStyle=none;strokeColor=#000000;{st}" edge="1" parent="1"{ex}>'
+            out.append(f'<mxCell id="{cid()}" style="html=1;rounded=0;edgeStyle=none;strokeColor={COL(e)};{st}" edge="1" parent="1"{ex}>'
                        f'<mxGeometry relative="1" as="geometry"><mxPoint x="{p[0][0]}" y="{p[0][1]}" as="sourcePoint"/>'
                        f'<mxPoint x="{p[-1][0]}" y="{p[-1][1]}" as="targetPoint"/><Array as="points">{mid}</Array></mxGeometry></mxCell>')
 
@@ -506,6 +508,11 @@ class Scene:
         self.png(base + ".png", check)
         self.drawio(base + ".drawio")
         return self.warnings
+
+
+def COL(e):
+    c = e.get('color', 'k')
+    return '#000000' if c == 'k' else c
 
 
 def _short(o):
