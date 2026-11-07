@@ -154,6 +154,16 @@ describe('prop drilling demo', () => {
     expect(screen.getByRole('region', { name: 'Демонстрация prop drilling' })).toHaveTextContent('К');
   });
 
+  it('switches the demo user name with the page language instead of keeping a hardcoded Cyrillic name', async () => {
+    const user = userEvent.setup();
+    render(<App />);
+    expect(screen.getByRole('region', { name: 'Демонстрация prop drilling' })).toHaveTextContent('К');
+    await user.click(screen.getByRole('button', { name: /Язык: RU/ }));
+    const region = screen.getByRole('region', { name: 'Prop drilling demo' });
+    expect(region).toHaveTextContent('K');
+    expect(region).not.toHaveTextContent('К');
+  });
+
   it('shows a placeholder for an empty name instead of failing', () => {
     render(
       <LanguageProvider>

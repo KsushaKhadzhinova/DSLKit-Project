@@ -24,6 +24,7 @@ const DICTIONARY = {
     count: 'Выбрано',
     drillingTitle: 'Демонстрация prop drilling',
     drillingHint: 'Имя пользователя проходит через Header, Navigation и UserMenu, которым оно не нужно.',
+    userName: 'Ксения',
   },
   en: {
     title: 'Diagram templates',
@@ -46,6 +47,7 @@ const DICTIONARY = {
     count: 'Selected',
     drillingTitle: 'Prop drilling demo',
     drillingHint: 'The user name passes through Header, Navigation and UserMenu, which do not need it.',
+    userName: 'Kate',
   },
 };
 
