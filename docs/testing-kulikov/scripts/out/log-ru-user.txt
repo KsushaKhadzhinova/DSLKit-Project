@@ -1,1 +1,6 @@
 == ru user app/welcome.html: 26 elements
+== ru user app/settings.html: 33 elements
+== ru user app/docs.html: 43 elements
+== ru user app/dashboard.html: 356 elements
+== ru user app/editor.html: 154 elements
+done 612

@@ -1,0 +1,132 @@
+menu ⋯ 23
+menu ⋯ / check Check -> DOM/storage/code changed
+menu ⋯ / format Format -> DOM/storage/code changed
+menu ⋯ / layout Auto layout -> DOM/storage/code changed
+menu ⋯ /  Diagram: IDEF0 -> DOM/storage/code changed
+menu ⋯ / share Share -> DOM/storage/code changed
+menu ⋯ / save-template Save as a template -> DOM/storage/code changed
+menu ⋯ / file Import from a file -> NO VISIBLE EFFECT
+menu ⋯ / clipboard Import from the clipboard -> DOM/storage/code changed
+menu ⋯ /  Export -> DOM/storage/code changed
+menu ⋯ / svg Export SVG -> download order-process.svg | DOM/storage/code changed
+menu ⋯ / png Export PNG -> download order-process.png | DOM/storage/code changed
+menu ⋯ / jpeg Export JPEG -> download order-process.jpg | DOM/storage/code changed
+menu ⋯ / drawio Export draw.io -> download order-process.drawio | DOM/storage/code changed
+menu ⋯ / html Export HTML -> download order-process.html | DOM/storage/code changed
+menu ⋯ /  Code documentation -> ERROR Page.evaluate: TypeError: Cannot read properties of null (reading 'value')
+menu ⋯ /  Show tour -> DOM/storage/code changed
+menu ⋯ /  Refresh from the server -> NO VISIBLE EFFECT
+menu ⋯ /  Autosave -> DOM/storage/code changed
+menu ⋯ / theme Theme -> DOM/storage/code changed
+menu ⋯ /  Sign in -> ERROR Locator.click: Timeout 4000ms exceeded.
+menu ⋯ /  Sign up -> ERROR Locator.click: Timeout 4000ms exceeded.
+menu ⋯ /  Sign out -> ERROR Page.evaluate: TypeError: Cannot read properties of null (reading 'value')
+menu ⋯ /  Русская версия -> URL -> /app/editor.html
+panel Файлы 34
+panel Файлы /  New diagram (not saved) -> NO VISIBLE EFFECT
+panel Файлы /  order-process.dsl -> URL -> /en/app/editor.html?p=smvukhnmg0
+panel Файлы /  order-handling.dsl -> URL -> /en/app/editor.html?p=smvukhnmg1
+panel Файлы /  shop.dsl -> URL -> /en/app/editor.html?p=smvukhnmg2
+panel Файлы /  shop.dsl -> URL -> /en/app/editor.html?p=smvukhnmg3
+panel Файлы /  online-order.dsl -> URL -> /en/app/editor.html?p=smvukhnmg4
+panel Файлы /  producer-and-consumer.dsl -> URL -> /en/app/editor.html?p=smvukhnmg5
+panel Файлы /  order-information.dsl -> URL -> /en/app/editor.html?p=smvukhnmg6
+panel Файлы /  orders.dsl -> URL -> /en/app/editor.html?p=smvukhnmg7
+panel Файлы /  order-fulfilment.dsl -> URL -> /en/app/editor.html?p=smvukhnmg8
+panel Файлы /  vehicles.dsl -> URL -> /en/app/editor.html?p=smvukhnmg9
+panel Файлы /  organisation.dsl -> URL -> /en/app/editor.html?p=smvukhnmga
+panel Файлы /  сумма-чисел.dsl -> ERROR Locator.click: Timeout 4000ms exceeded.
+panel Файлы /  roads.dsl -> URL -> /en/app/editor.html?p=smvukhnmgc
+panel Файлы /  build-pipeline.dsl -> URL -> /en/app/editor.html?p=smvukhnmgd
+panel Файлы /  order-snapshot.dsl -> URL -> /en/app/editor.html?p=smvukhnmge
+panel Файлы /  shop-services.dsl -> URL -> /en/app/editor.html?p=smvukhnmgf
+panel Файлы /  car.dsl -> URL -> /en/app/editor.html?p=smvukhnmgg
+panel Файлы /  shop-deployment.dsl -> URL -> /en/app/editor.html?p=smvukhnmgh
+panel Файлы /  shop-modules.dsl -> URL -> /en/app/editor.html?p=smvukhnmgi
+panel Файлы /  shop-profile.dsl -> URL -> /en/app/editor.html?p=smvukhnmgj
+panel Файлы /  online-shop.dsl -> URL -> /en/app/editor.html?p=smvukhnmgk
+panel Файлы /  order-flow.dsl -> URL -> /en/app/editor.html?p=smvukhnmgl
+panel Файлы /  player.dsl -> URL -> /en/app/editor.html?p=smvukhnmgm
+panel Файлы /  checkout.dsl -> URL -> /en/app/editor.html?p=smvukhnmgn
+panel Файлы /  checkout.dsl -> URL -> /en/app/editor.html?p=smvukhnmgo
+panel Файлы /  crossing.dsl -> URL -> /en/app/editor.html?p=smvukhnmgp
+panel Файлы /  checkout-overview.dsl -> URL -> /en/app/editor.html?p=smvukhnmgq
+panel Файлы /  learning-plan.dsl -> URL -> /en/app/editor.html?p=smvukhnmgr
+panel Файлы /  project-team.dsl -> URL -> /en/app/editor.html?p=smvukhnmgs
+panel Файлы /  dslkit-context.dsl -> URL -> /en/app/editor.html?p=smvukhnmgt
+panel Файлы /  office-network.dsl -> URL -> /en/app/editor.html?p=smvukhnmgu
+panel Файлы /  choose-a-database.dsl -> URL -> /en/app/editor.html?p=smvukhnmgv
+panel Файлы /  order-handling.dsl -> URL -> /en/app/editor.html?p=smvukhnmgw
+panel Шаблоны 34
+panel Шаблоны / idef0 IDEF0 — function modellingIDEF0 -> NO VISIBLE EFFECT
+panel Шаблоны / dfd DFD — data flow diagramDFD -> DOM/storage/code changed
+panel Шаблоны / erd ERD — entity-relationship diagramERD -> DOM/storage/code changed
+panel Шаблоны / idef1 IDEF1 — information modellingIDEF1 -> DOM/storage/code changed
+panel Шаблоны / idef1x IDEF1X — data modellingIDEF1X -> DOM/storage/code changed
+panel Шаблоны / idef3 IDEF3 — process flowsIDEF3 -> DOM/storage/code changed
+panel Шаблоны / idef4 IDEF4 — object-oriented designIDEF4 -> DOM/storage/code changed
+panel Шаблоны / idef5 IDEF5 — ontology descriptionIDEF5 -> DOM/storage/code changed
+panel Шаблоны / bpmn BPMN — business processesBPMN -> DOM/storage/code changed
+panel Шаблоны / petri Petri netsPetri -> DOM/storage/code changed
+panel Шаблоны / gost GOST 19.701-90 flowchartsГОСТ -> DOM/storage/code changed
+panel Шаблоны / graph GraphsGraph -> DOM/storage/code changed
+panel Шаблоны / dag DAG — directed acyclic graphDAG -> DOM/storage/code changed
+panel Шаблоны / uml-class UML — class diagramUML · Class -> DOM/storage/code changed
+panel Шаблоны / uml-object UML — object diagramUML · Object -> DOM/storage/code changed
+panel Шаблоны / uml-component UML — component diagramUML · Component -> DOM/storage/code changed
+panel Шаблоны / uml-composite UML — composite structure diagramUML · C -> DOM/storage/code changed
+panel Шаблоны / uml-deployment UML — deployment diagramUML · Deployment -> DOM/storage/code changed
+panel Шаблоны / uml-package UML — package diagramUML · Package -> DOM/storage/code changed
+panel Шаблоны / uml-profile UML — profile diagramUML · Profile -> DOM/storage/code changed
+panel Шаблоны / uml-usecase UML — use case diagramUML · Use case -> DOM/storage/code changed
+panel Шаблоны / uml-activity UML — activity diagramUML · Activity -> DOM/storage/code changed
+panel Шаблоны / uml-state UML — state machine diagramUML · State -> DOM/storage/code changed
+panel Шаблоны / uml-sequence UML — sequence diagramUML · Sequence -> DOM/storage/code changed
+panel Шаблоны / uml-communication UML — communication diagramUML · Communi -> DOM/storage/code changed
+panel Шаблоны / uml-timing UML — timing diagramUML · Timing -> DOM/storage/code changed
+panel Шаблоны / uml-overview UML — interaction overview diagramUML ·  -> DOM/storage/code changed
+panel Шаблоны / mindmap Mind mapMind map -> DOM/storage/code changed
+panel Шаблоны / orgchart Organisation chartOrg chart -> DOM/storage/code changed
+panel Шаблоны / c4 C4 — context and containersC4 -> DOM/storage/code changed
+panel Шаблоны / network Network diagramNetwork -> DOM/storage/code changed
+panel Шаблоны / decision Decision treeDecision -> DOM/storage/code changed
+panel Шаблоны / epc eEPC — event-driven process chaineEPC -> DOM/storage/code changed
+panel Шаблоны /  Diagram template -> DOM/storage/code changed
+panel Поиск 5
+panel Поиск /  Close the panel -> DOM/storage/code changed
+panel Поиск /  Find -> NO VISIBLE EFFECT
+panel Поиск /   -> NO VISIBLE EFFECT
+panel Поиск /  Replace with -> NO VISIBLE EFFECT
+panel Поиск /  Replace all -> DOM/storage/code changed
+panel Git 4
+panel Git /  Close the panel -> DOM/storage/code changed
+panel Git /  Commit message -> NO VISIBLE EFFECT
+Traceback (most recent call last):
+  File "E:\DSLKit-Project\docs\testing-kulikov\scripts\nav-01b-editor-menus.py", line 38, in <module>
+    info = el.evaluate("e=>({tag:e.tagName.toLowerCase(),href:e.getAttribute('href'),type:e.getAttribute('type'),text:(e.getAttribute('aria-label')||e.textContent||'').replace(/\\s+/g,' ').trim().slice(0,40),act:e.dataset.action||e.dataset.import||e.dataset.export||e.dataset.template||''})")
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\VisualDSL_Tools\Python311\Lib\site-packages\playwright\sync_api\_generated.py", line 18248, in evaluate
+    self._sync(
+  File "E:\VisualDSL_Tools\Python311\Lib\site-packages\playwright\_impl\_sync_base.py", line 115, in _sync
+    return task.result()
+           ^^^^^^^^^^^^^
+  File "E:\VisualDSL_Tools\Python311\Lib\site-packages\playwright\_impl\_locator.py", line 195, in evaluate
+    return await self._with_element(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\VisualDSL_Tools\Python311\Lib\site-packages\playwright\_impl\_locator.py", line 114, in _with_element
+    handle = await self.element_handle(timeout=timeout)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\VisualDSL_Tools\Python311\Lib\site-packages\playwright\_impl\_locator.py", line 325, in element_handle
+    handle = await self._frame.wait_for_selector(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\VisualDSL_Tools\Python311\Lib\site-packages\playwright\_impl\_frame.py", line 395, in wait_for_selector
+    await self._channel.send(
+  File "E:\VisualDSL_Tools\Python311\Lib\site-packages\playwright\_impl\_connection.py", line 76, in send
+    return await self._connection.wrap_api_call(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\VisualDSL_Tools\Python311\Lib\site-packages\playwright\_impl\_connection.py", line 632, in wrap_api_call
+    raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+playwright._impl._errors.Error: Locator.evaluate: SyntaxError: missing ) after argument list
+Call log:
+  - waiting for locator(".editor-tools button:visible, .editor-tools input:visible").nth(2)
+

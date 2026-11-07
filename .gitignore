@@ -15,3 +15,6 @@ testing-course/reports/*/output/tex/*.out
 .claude/admin-test-account.txt
 .accelerator/profile.user.json
 .accelerator/registry.user.json
+
+# Screenshots written by failed end-to-end runs
+testing-course/screens/fail-*.png

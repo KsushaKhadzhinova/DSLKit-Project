@@ -190,12 +190,12 @@ with sync_playwright() as pw:
     # notation change in the middle of an edit
     e = open_editor(ctx)
     type_code(e, 'idef0 "Моя правка"\nA1 "Вручную"\n'); typed = code(e)
-    e.select_option('[data-notation-select]', 'bpmn'); e.wait_for_timeout(900)
+    e.click('button[data-panel=templates]'); e.wait_for_timeout(300); e.select_option('[data-notation-select]', 'bpmn'); e.wait_for_timeout(900)
     R.add('E25', 'Смена нотации (список «Шаблон») после ручной правки кода', 'пользователя предупреждают о потере правки или правка сохранена/отменяема', f'код заменён без вопроса={code(e) != typed}; отмена возвращает: ', code(e) == typed)
     e.click('[data-action=undo]', force=True); e.wait_for_timeout(300)
     R.add('E26', 'Отменить смену нотации', 'правка пользователя вернулась', f'вернулась={code(e) == typed}', code(e) == typed)
     # notation change updates palette
-    e.select_option('[data-notation-select]', 'erd'); e.wait_for_timeout(900)
+    e.click('button[data-panel=templates]'); e.wait_for_timeout(300); e.select_option('[data-notation-select]', 'erd'); e.wait_for_timeout(900)
     items = e.locator('.palette__item').count(); e.click('.board-tools__add'); e.wait_for_timeout(150)
     names = e.evaluate("()=>[...document.querySelectorAll('.palette__name')].map(x=>x.textContent)")
     R.add('E27', 'Смена нотации на ERD обновляет палитру', 'палитра ERD (сущность, атрибут...)', str(names[:4]), len(names) > 0)

@@ -82,7 +82,7 @@ with sync_playwright() as pw:
     R.add('N13', 'Меню ⋯ карточки: открыть второе при открытом первом', 'открыто только одно', f'открытых меню={open3}', open3 == 1)
     # editor Templates tab
     p.goto(url('app/editor.html')); p.wait_for_timeout(1200)
-    tabs = p.evaluate("()=>[...document.querySelectorAll('[role=tab], .editor-sidebar__tab, .sidebar-tab')].map(t=>t.textContent.trim().replace(/\\s+/g,' ').slice(0,25))")
+    tabs = p.evaluate("()=>[...document.querySelectorAll('.editor-activity__button')].map(t=>t.getAttribute('aria-label'))")
     R.add('N14', 'Редактор: вкладки боковой панели', 'есть вкладка «Шаблоны»', str(tabs), any('Шаблон' in t for t in tabs))
     tab = p.locator('button[data-panel=templates]')
     try:

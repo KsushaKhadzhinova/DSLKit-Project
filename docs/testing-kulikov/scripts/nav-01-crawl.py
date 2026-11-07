@@ -38,7 +38,11 @@ with sync_playwright() as pw:
         n = p.evaluate(TAG)
         descs = [p.evaluate(DESCR, i) for i in range(n)]
         print(f'== {lang} {auth} {path}: {n} elements', flush=True)
-        json.dump(out, open(f'out/crawl-{lang}-{auth}.partial.json', 'w'))
+        try:
+            with open(f'out/crawl-{lang}-{auth}.partial.json', 'w') as fh:
+                json.dump(out, fh)
+        except OSError as ex:
+            print('partial dump failed', ex, flush=True)
         seen = {}
         for i, d in enumerate(descs):
             rec = dict(page=path, lang=lang, auth=auth, i=i, **d)

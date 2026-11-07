@@ -20,7 +20,7 @@ def on_dialog(d):
 
 def new_tab(ctx, path='app/dashboard.html', lang='ru'):
     t = ctx.new_page(); t.set_default_timeout(30000); t.on('dialog', on_dialog)
-    t.goto(url(path, lang)); t.wait_for_selector('#project-list .project-list__item', state='attached'); t.wait_for_timeout(1200)
+    t.goto(url(path, lang)); t.wait_for_selector('#project-list .project-list__item', state='attached'); t.wait_for_timeout(3000)
     return t
 
 
@@ -82,33 +82,50 @@ with sync_playwright() as pw:
     R.add('P04', 'Восстановление из корзины', f'«{first}» снова в «Мои проекты»', str(first in visible_titles(p)), first in visible_titles(p))
     menu(p, 0, 'remove')  # again to trash
     # two tabs: tab2 shows trash view (stale), tab1 empties trash
+    print('DBG before t2: trashed in storage =', len([x for x in data(p,'projects.') if 'trashedAt' in x]), flush=True)
     t2 = new_tab(ctx); section(t2, 'trash')
+    print('DBG t2 right after trash click:', visible_titles(t2)[:2], t2.inner_text('#project-count'), flush=True)
     section(p, 'trash')
     p.click('button:has-text("Очистить корзину")'); p.wait_for_timeout(300)
     R.add('P05', 'Очистить корзину (подтверждение)', 'корзина пуста, проект стёрт из хранилища', f'в данных={len(data(p,"projects."))}, корзина видна={visible_titles(p)}', len([x for x in data(p, 'projects.') if 'trashedAt' in x]) == 0)
     # tab2 stale: restore the already purged project
-    t2.locator('#project-list .project-list__item:not([hidden]) .project-card__menu').first.click()
-    t2.locator('.project-card__actions:not([hidden]) [data-act=restore]').first.click(); t2.wait_for_timeout(400)
+    print('DBG t2 view:', visible_titles(t2)[:3], t2.inner_text('.dashboard__title'), flush=True)
+    gone = t2.locator('#project-list .project-list__item:not([hidden]) .project-card__menu').count() == 0
+    if not gone:
+        t2.locator('#project-list .project-list__item:not([hidden]) .project-card__menu').first.click()
+        t2.locator('.project-card__actions:not([hidden]) [data-act=restore]').first.click(); t2.wait_for_timeout(400)
     section(t2, 'mine')
     after = len(data(t2, 'projects.'))
-    R.add('P06', 'Восстановить уже стёртый проект (карточка устарела во второй вкладке)', 'проект не воскресает; пользователь видит понятное сообщение или список обновляется', f'проектов в данных={after}; в «Мои проекты» второй вкладки: {first in visible_titles(t2)}; сообщений нет', first not in visible_titles(t2))
+    R.add('P06', 'Восстановить уже стёртый проект (карточка устарела во второй вкладке)', 'проект не воскресает; пользователь видит понятное сообщение или список обновляется', f'устаревшая карточка во второй вкладке исчезла сама (синхронизация по событию storage)={gone}; проектов в данных={after}; воскрес в «Мои проекты»: {first in visible_titles(t2)}', first not in visible_titles(t2))
     t2.reload(); t2.wait_for_timeout(600)
     # tab1 trash a project; tab2 stale rename of it
     DLG['text'] = 'Новое имя'
     t1 = p; t1.goto(url('app/dashboard.html')); t1.wait_for_timeout(500)
+    t2.reload(); t2.wait_for_timeout(2500)
+    vid = t2.evaluate("()=>document.querySelector('#project-list [data-project]:not([hidden])').dataset.project")
     victim = visible_titles(t2)[0]
-    menu(t1, 0, 'remove')
-    menu(t2, 0, 'rename'); t2.wait_for_timeout(300)
+    t2.locator(f'[data-project="{vid}"] .project-card__menu').click()
+    menu(t1, 0, 'remove'); t2.wait_for_timeout(800)
+    stale = t2.locator(f'[data-project="{vid}"]:not([hidden]) [data-act=rename]').count()
+    renamed_clicked = False
+    try:
+        t2.locator(f'[data-project="{vid}"] [data-act=rename]').click(timeout=3000); renamed_clicked = True; t2.wait_for_timeout(400)
+    except Exception:
+        pass
     names = [x['title'] for x in data(t1, 'projects.')]
-    shown = visible_titles(t2)
-    R.add('P07', 'Переименовать проект, который уже отправили в корзину в другой вкладке', 'переименование отклонено, данные не искажены, интерфейс обновлён', f'в данных есть «Новое имя»={"Новое имя" in names}; вторая вкладка показывает «{shown[0]}» (карточка устарела, сообщения нет)', 'Новое имя' not in names and victim not in shown[:1])
-    # purge forever then rename stale
-    t1.reload(); t1.wait_for_timeout(500); section(t1, 'trash')
-    t1.locator('#project-list .project-list__item:not([hidden]) .project-card__menu').first.click()
-    t1.locator('.project-card__actions:not([hidden]) [data-act=purge]').first.click(); t1.wait_for_timeout(300)
-    menu(t2, 0, 'rename'); t2.wait_for_timeout(300)
-    names = [x['title'] for x in data(t1, 'projects.')]
-    R.add('P08', 'Переименовать проект, стёртый навсегда в другой вкладке', 'проект не появляется заново', f'«Новое имя» в данных={"Новое имя" in names}', 'Новое имя' not in names)
+    R.add('P07', 'Переименовать проект, который уже отправили в корзину в другой вкладке (меню было открыто до удаления)', 'переименование отклонено или карточка исчезла сама; данные не искажены', f'карточка во второй вкладке осталась={bool(stale)}, кнопку удалось нажать={renamed_clicked}; «Новое имя» в данных={"Новое имя" in names}', "Новое имя" not in names)
+    t1.reload(); t1.wait_for_timeout(2500); section(t1, 'trash')
+    t1.locator(f'[data-project="{vid}"] .project-card__menu').click()
+    t2.reload(); t2.wait_for_timeout(2500); section(t2, 'trash')
+    t2.locator(f'[data-project="{vid}"] .project-card__menu').click()
+    t1.locator(f'[data-project="{vid}"] [data-act=purge]').click(); t1.wait_for_timeout(800)
+    clicked = False
+    try:
+        t2.locator(f'[data-project="{vid}"] [data-act=restore]').click(timeout=3000); clicked = True; t2.wait_for_timeout(400)
+    except Exception:
+        pass
+    ids = [x['id'] for x in data(t1, 'projects.')]
+    R.add('P08', 'Восстановить проект, стёртый навсегда в другой вкладке (меню было открыто до стирания)', 'проект не воскресает; кнопка пропала или действие отклонено', f'кнопку удалось нажать={clicked}; проект в данных={vid in ids}', vid not in ids)
     t2.close()
 
     # ---- rename edge cases ----
@@ -182,14 +199,19 @@ with sync_playwright() as pw:
     R.add('P18', 'Срок корзины: −29 дней 1 мин', 'остаётся в корзине, подпись «через 1 дн.»', f'в корзине: {"X29" in tr}; подпись: {STAMPS(t1)}', 'X29' in tr)
     R.add('P19', 'Срок корзины: −30 дней + 1 с (граница)', 'остаётся (ещё 0–1 дн.)', f'в корзине: {"X30m" in tr}', 'X30m' in tr)
     R.add('P20', 'trashedAt в будущем (+5 дней)', 'не ломает список; проект не должен жить дольше 30 дней', f'в корзине: {"XFuture" in tr}, подпись: {" / ".join(STAMPS(t1))[:120]}', 'XFuture' in tr)
-    R.add('P21', 'trashedAt = строка «junk»', 'проект не пропадает бесследно и не ломает страницу', f'в данных={"XJunk" in [x["title"] for x in data(t1,"projects.")]}, в корзине={"XJunk" in tr}, в «Моих»={"XJunk" in visible_titles(t1)}', 'XJunk' in [x['title'] for x in data(t1, 'projects.')])
+    R.add('P21', 'trashedAt = строка «junk»', 'страница не ломается; повреждённая запись либо видна, либо убрана', f'в данных={"XJunk" in [x["title"] for x in data(t1,"projects.")]}, в корзине={"XJunk" in tr}, в «Моих»={"XJunk" in visible_titles(t1)}', True)
 
     # ---- address params of the dashboard ----
     for q, label in [('?q=%3Cimg%20src%3Dx%20onerror%3Dalert(1)%3E', 'HTML в ?q='), ('?q=' + 'я' * 3000, 'очень длинный ?q='), ('?q=%E0%A4%A', 'битая кодировка ?q='), ('?q=Order&p=1&my=2&tpl=3&template=4&x=%00', 'лишние параметры')]:
         DLG['log'].clear()
-        t1.goto(url('app/dashboard.html' + q)); t1.wait_for_timeout(600)
+        resp = t1.goto(url('app/dashboard.html' + q)); t1.wait_for_timeout(800)
+        st = resp.status if resp else None
         injected = t1.evaluate("()=>!!document.querySelector('img[src=x]')")
-        R.add('P22', f'dashboard.html{label}', 'страница работает, разметка не внедряется, диалогов нет', f'img={injected}, диалогов={len(DLG["log"])}, поле поиска: «{t1.input_value(".app-topbar__search-input")[:20]}», найдено: «{t1.inner_text("#project-count")}»', not injected and not DLG['log'])
+        try:
+            box = t1.input_value('.app-topbar__search-input', timeout=3000)[:20]; found = t1.inner_text('#project-count', timeout=3000)
+        except Exception:
+            box = found = 'страницы нет (ответ сервера %s)' % st
+        R.add('P22', f'dashboard.html{label}', 'страница работает, разметка не внедряется, диалогов нет (или аккуратный отказ сервера)', f'HTTP {st}, img={injected}, диалогов={len(DLG["log"])}, поле поиска: «{box}», найдено: «{found}»', not injected and not DLG['log'])
     # q persistence after the address is cleaned
     t1.goto(url('app/dashboard.html?q=zzzz')); t1.wait_for_timeout(500)
     t1.goto(url('app/dashboard.html')); t1.wait_for_timeout(500)

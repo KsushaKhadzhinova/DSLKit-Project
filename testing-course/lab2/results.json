@@ -29,12 +29,8 @@
       "comment": "",
       "consent": true
     },
-    "expected": [
-      "name"
-    ],
-    "actual": [
-      "name"
-    ],
+    "expected": ["name"],
+    "actual": ["name"],
     "status": "Passed"
   },
   {
@@ -84,12 +80,8 @@
       "comment": "",
       "consent": true
     },
-    "expected": [
-      "name"
-    ],
-    "actual": [
-      "name"
-    ],
+    "expected": ["name"],
+    "actual": ["name"],
     "status": "Passed"
   },
   {
@@ -105,12 +97,8 @@
       "comment": "",
       "consent": true
     },
-    "expected": [
-      "name"
-    ],
-    "actual": [
-      "name"
-    ],
+    "expected": ["name"],
+    "actual": ["name"],
     "status": "Passed"
   },
   {
@@ -143,12 +131,8 @@
       "comment": "",
       "consent": true
     },
-    "expected": [
-      "email"
-    ],
-    "actual": [
-      "email"
-    ],
+    "expected": ["email"],
+    "actual": ["email"],
     "status": "Passed"
   },
   {
@@ -164,12 +148,8 @@
       "comment": "",
       "consent": true
     },
-    "expected": [
-      "email"
-    ],
-    "actual": [
-      "email"
-    ],
+    "expected": ["email"],
+    "actual": ["email"],
     "status": "Passed"
   },
   {
@@ -202,12 +182,8 @@
       "comment": "",
       "consent": true
     },
-    "expected": [
-      "email"
-    ],
-    "actual": [
-      "email"
-    ],
+    "expected": ["email"],
+    "actual": ["email"],
     "status": "Passed"
   },
   {
@@ -257,12 +233,8 @@
       "comment": "",
       "consent": true
     },
-    "expected": [
-      "team"
-    ],
-    "actual": [
-      "team"
-    ],
+    "expected": ["team"],
+    "actual": ["team"],
     "status": "Passed"
   },
   {
@@ -278,12 +250,8 @@
       "comment": "",
       "consent": true
     },
-    "expected": [
-      "team"
-    ],
-    "actual": [
-      "team"
-    ],
+    "expected": ["team"],
+    "actual": ["team"],
     "status": "Passed"
   },
   {
@@ -299,12 +267,8 @@
       "comment": "",
       "consent": true
     },
-    "expected": [
-      "team"
-    ],
-    "actual": [
-      "team"
-    ],
+    "expected": ["team"],
+    "actual": ["team"],
     "status": "Passed"
   },
   {
@@ -337,12 +301,8 @@
       "comment": "",
       "consent": true
     },
-    "expected": [
-      "notation"
-    ],
-    "actual": [
-      "notation"
-    ],
+    "expected": ["notation"],
+    "actual": ["notation"],
     "status": "Passed"
   },
   {
@@ -375,12 +335,8 @@
       "comment": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
       "consent": true
     },
-    "expected": [
-      "comment"
-    ],
-    "actual": [
-      "comment"
-    ],
+    "expected": ["comment"],
+    "actual": ["comment"],
     "status": "Passed"
   },
   {
@@ -396,12 +352,8 @@
       "comment": "",
       "consent": false
     },
-    "expected": [
-      "consent"
-    ],
-    "actual": [
-      "consent"
-    ],
+    "expected": ["consent"],
+    "actual": ["consent"],
     "status": "Passed"
   },
   {
@@ -410,20 +362,8 @@
     "priority": "High",
     "title": "Пустая форма",
     "data": {},
-    "expected": [
-      "name",
-      "email",
-      "notation",
-      "team",
-      "consent"
-    ],
-    "actual": [
-      "name",
-      "email",
-      "notation",
-      "team",
-      "consent"
-    ],
+    "expected": ["name", "email", "notation", "team", "consent"],
+    "actual": ["name", "email", "notation", "team", "consent"],
     "status": "Passed"
   }
 ]

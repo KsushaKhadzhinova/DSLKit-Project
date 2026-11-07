@@ -1,13 +1,13 @@
 {
- "origin": "http://localhost:5190",
- "user": "empty.user.r2@example.com",
- "localStorage": {
-  "dslkit.projects.u343d901d3b19cd30": "[]",
-  "dslkit.session": "{\"userId\":\"u343d901d3b19cd30\"}",
-  "dslkit.seeded.u343d901d3b19cd30": "true",
-  "dslkit.tour-done": "1",
-  "dslkit.accounts": "[{\"id\":\"u343d901d3b19cd30\",\"name\":\"Пустой\",\"email\":\"empty.user.r2@example.com\",\"salt\":\"18d2f486a82875adcb6d206db6aa519b\",\"hash\":\"fbd1e5fdba8351fd86241bbc75624cde417af77d9168514961ed419f0ebd23b5\",\"iterations\":100000,\"created\":1793300817451}]",
-  "dslkit.dashboard": "{\"filter\":\"all\",\"query\":\"\",\"sort\":\"newest\"}"
- },
- "savedAt": 1793300844500
+  "origin": "http://localhost:5190",
+  "user": "empty.user.r2@example.com",
+  "localStorage": {
+    "dslkit.projects.u343d901d3b19cd30": "[]",
+    "dslkit.session": "{\"userId\":\"u343d901d3b19cd30\"}",
+    "dslkit.seeded.u343d901d3b19cd30": "true",
+    "dslkit.tour-done": "1",
+    "dslkit.accounts": "[{\"id\":\"u343d901d3b19cd30\",\"name\":\"Пустой\",\"email\":\"empty.user.r2@example.com\",\"salt\":\"18d2f486a82875adcb6d206db6aa519b\",\"hash\":\"fbd1e5fdba8351fd86241bbc75624cde417af77d9168514961ed419f0ebd23b5\",\"iterations\":100000,\"created\":1793300817451}]",
+    "dslkit.dashboard": "{\"filter\":\"all\",\"query\":\"\",\"sort\":\"newest\"}"
+  },
+  "savedAt": 1793300844500
 }

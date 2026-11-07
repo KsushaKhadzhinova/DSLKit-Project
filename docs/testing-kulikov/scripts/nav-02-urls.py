@@ -44,7 +44,8 @@ with sync_playwright() as pw:
     s = Session(pw)
     p = s.page()
     register(p, 'Адрес Проверкин', 'url%d@example.com' % int(time.time()))
-    for path in ['app/editor.html', 'app/dashboard.html', 'app/welcome.html', 'app/settings.html']:
+    json.dump(rows, open('out/urls.json', 'w'))
+    for path in ['app/editor.html', 'app/dashboard.html', 'app/welcome.html', 'app/settings.html', 'app/docs.html']:
         for q in PARAMS:
             for lang in ('ru',):
                 err0 = len(s.errors); dialogs = []
@@ -66,6 +67,8 @@ with sync_playwright() as pw:
                 p.remove_listener('dialog', h)
                 rows.append(('PAGE', (path + q)[:90], res, '; '.join(errs)[:200], ''))
                 print(rows[-1], flush=True)
+                if 'crashed' in res or 'Target' in res:
+                    p = s.page()
     # missing pages in a browser: look of the 404 page
     for u in ['/nope.html', '/app/nope.html', '/en/nope.html', '/en/app/nope.html']:
         r = p.goto(BASE + u); p.wait_for_timeout(300)
@@ -75,6 +78,6 @@ with sync_playwright() as pw:
             p.click('a >> nth=0'); p.wait_for_timeout(500); rows.append(('404LINK', u, p.url.replace(BASE, ''), '', ''))
         except Exception as ex:
             rows.append(('404LINK', u, 'no link', str(ex)[:50], ''))
-    json.dump(rows, open('out/urls.json', 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
+    json.dump(rows, open('out/urls.json', 'w'), indent=1)
     s.close()
 print('done', len(rows))

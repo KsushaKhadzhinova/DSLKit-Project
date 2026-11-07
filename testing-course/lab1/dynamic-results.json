@@ -3,14 +3,7 @@
     "url": "/thanks.html",
     "count": 1,
     "name": "Анна Иванова",
-    "fields": [
-      "comment",
-      "createdAt",
-      "email",
-      "name",
-      "notation",
-      "team"
-    ]
+    "fields": ["comment", "createdAt", "email", "name", "notation", "team"]
   },
   "empty": {
     "url": "/",

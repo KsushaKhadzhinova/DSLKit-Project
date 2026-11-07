@@ -24,7 +24,7 @@ for f in sorted(glob.glob('out/crawl-*.json')):
         base = f.replace('.partial.json', '.json')
         if os.path.exists(base):
             continue
-    crawl += [dict(r, src=os.path.basename(f)) for r in load(f)]
+    crawl += [dict(r, src=os.path.basename(f), **({'page': 'app/editor.html (меню ⋯ и панели)'} if 'editormenus' in f else {})) for r in load(f)]
 seen = set(); rows = []
 for r in crawl:
     k = (r['lang'], r['auth'], r['page'], r['i'])
@@ -38,7 +38,8 @@ out = ['# Матрица переходов: страница × элемент 
 by = collections.defaultdict(list)
 for r in rows:
     by[(r['lang'], r['auth'], r['page'])].append(r)
-out.append(f'Всего проверено элементов: **{len(rows)}** в {len(by)} сочетаниях «язык × гость/вошедший × страница».')
+clicked = sum(1 for r in rows if not r.get('result', '').startswith(('NOT-CLICKABLE', 'file input')))
+out.append(f'Строк в матрице: **{len(rows)}** в {len(by)} сочетаниях «язык × гость/вошедший × страница»; из них нажато **{clicked}**, остальные скрыты в данном состоянии (кнопка «Выйти» у гостя, пункты меню ⋯ и панелей редактора, которые проверены отдельно скриптом `nav-01b-editor-menus.py`, только для русской версии: 100 элементов) или относятся к полям файла (проверены в E23). Повторяющиеся карточки проектов на дашборде проверены на первых двух, остальные помечены «same as the previous cards».')
 out.append('')
 for key in sorted(by):
     lang, auth, page = key
@@ -56,6 +57,7 @@ for key in sorted(by):
             cnt['console'] += 1
         out.append(f"| {r['i']} | {esc(r['text'][:40])} | {r['tag']}{('/' + r['type']) if r.get('type') else ''} | {esc((r.get('href') or r.get('act') or r.get('id') or '')[:50])} | {esc(res)[:150]}{flag} | {esc('; '.join(r.get('errors', []))[:120])} |")
     out.append('')
+out.insert(5, open('40-extra.md', encoding='utf-8').read())
 out.insert(4, f'Элементов без видимого эффекта: {cnt["noeffect"]}; ссылок на 404/5xx: {cnt["dead"]}; ошибок выполнения проверки: {cnt["error"]}; элементов с ошибкой консоли: {cnt["console"]}.')
 open(f'{D}/40-navigation-matrix.md', 'w', encoding='utf-8').write('\n'.join(out) + '\n')
 

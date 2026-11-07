@@ -1,0 +1,106 @@
+menu ⋯ 23
+menu ⋯ / check Проверить -> DOM/storage/code changed
+menu ⋯ / format Форматировать -> DOM/storage/code changed
+menu ⋯ / layout Автораскладка -> DOM/storage/code changed
+menu ⋯ /  Диаграмма: IDEF0 -> DOM/storage/code changed
+menu ⋯ / share Поделиться -> DOM/storage/code changed
+menu ⋯ / save-template Сохранить как шаблон -> DOM/storage/code changed
+menu ⋯ / file Импорт из файла -> NO VISIBLE EFFECT
+menu ⋯ / clipboard Импорт из буфера -> DOM/storage/code changed
+menu ⋯ /  Экспорт -> DOM/storage/code changed
+menu ⋯ / svg Экспорт SVG -> download order-process.svg | DOM/storage/code changed
+menu ⋯ / png Экспорт PNG -> download order-process.png | DOM/storage/code changed
+menu ⋯ / jpeg Экспорт JPEG -> download order-process.jpg | DOM/storage/code changed
+menu ⋯ / drawio Экспорт draw.io -> download order-process.drawio | DOM/storage/code changed
+menu ⋯ / html Экспорт HTML -> download order-process.html | DOM/storage/code changed
+menu ⋯ /  Документация по коду -> ERROR Page.evaluate: TypeError: Cannot read properties of null (reading 'value')
+menu ⋯ /  Показать тур -> DOM/storage/code changed
+menu ⋯ /  Обновить с сервера -> NO VISIBLE EFFECT
+menu ⋯ /  Автосохранение -> DOM/storage/code changed
+menu ⋯ / theme Тема -> DOM/storage/code changed
+menu ⋯ /  Войти -> ERROR Locator.click: Timeout 4000ms exceeded.
+menu ⋯ /  Регистрация -> ERROR Locator.click: Timeout 4000ms exceeded.
+menu ⋯ /  Выйти -> ERROR Page.evaluate: TypeError: Cannot read properties of null (reading 'value')
+menu ⋯ /  English -> URL -> /en/app/editor.html
+panel Файлы 34
+panel Файлы /  Новая диаграмма (не сохранена) -> NO VISIBLE EFFECT
+panel Файлы /  order-process.dsl -> URL -> /app/editor.html?p=smvukam4d0
+panel Файлы /  order-handling.dsl -> URL -> /app/editor.html?p=smvukam4d1
+panel Файлы /  shop.dsl -> URL -> /app/editor.html?p=smvukam4d2
+panel Файлы /  shop.dsl -> URL -> /app/editor.html?p=smvukam4d3
+panel Файлы /  online-order.dsl -> URL -> /app/editor.html?p=smvukam4d4
+panel Файлы /  producer-and-consumer.dsl -> URL -> /app/editor.html?p=smvukam4d5
+panel Файлы /  order-information.dsl -> URL -> /app/editor.html?p=smvukam4d6
+panel Файлы /  orders.dsl -> URL -> /app/editor.html?p=smvukam4d7
+panel Файлы /  order-fulfilment.dsl -> URL -> /app/editor.html?p=smvukam4d8
+panel Файлы /  vehicles.dsl -> URL -> /app/editor.html?p=smvukam4d9
+panel Файлы /  organisation.dsl -> URL -> /app/editor.html?p=smvukam4da
+panel Файлы /  сумма-чисел.dsl -> URL -> /app/editor.html?p=smvukam4db
+panel Файлы /  roads.dsl -> URL -> /app/editor.html?p=smvukam4dc
+panel Файлы /  build-pipeline.dsl -> URL -> /app/editor.html?p=smvukam4dd
+panel Файлы /  order-snapshot.dsl -> URL -> /app/editor.html?p=smvukam4de
+panel Файлы /  shop-services.dsl -> URL -> /app/editor.html?p=smvukam4df
+panel Файлы /  car.dsl -> URL -> /app/editor.html?p=smvukam4dg
+panel Файлы /  shop-deployment.dsl -> URL -> /app/editor.html?p=smvukam4dh
+panel Файлы /  shop-modules.dsl -> URL -> /app/editor.html?p=smvukam4di
+panel Файлы /  shop-profile.dsl -> URL -> /app/editor.html?p=smvukam4dj
+panel Файлы /  online-shop.dsl -> URL -> /app/editor.html?p=smvukam4dk
+panel Файлы /  order-flow.dsl -> URL -> /app/editor.html?p=smvukam4dl
+panel Файлы /  player.dsl -> URL -> /app/editor.html?p=smvukam4dm
+panel Файлы /  checkout.dsl -> URL -> /app/editor.html?p=smvukam4dn
+panel Файлы /  checkout.dsl -> URL -> /app/editor.html?p=smvukam4do
+panel Файлы /  crossing.dsl -> URL -> /app/editor.html?p=smvukam4dp
+panel Файлы /  checkout-overview.dsl -> URL -> /app/editor.html?p=smvukam4dq
+panel Файлы /  learning-plan.dsl -> URL -> /app/editor.html?p=smvukam4dr
+panel Файлы /  project-team.dsl -> URL -> /app/editor.html?p=smvukam4ds
+panel Файлы /  dslkit-context.dsl -> URL -> /app/editor.html?p=smvukam4dt
+panel Файлы /  office-network.dsl -> URL -> /app/editor.html?p=smvukam4du
+panel Файлы /  choose-a-database.dsl -> URL -> /app/editor.html?p=smvukam4dv
+panel Файлы /  order-handling.dsl -> URL -> /app/editor.html?p=smvukam4dw
+panel Шаблоны 34
+panel Шаблоны / idef0 IDEF0 — функциональное моделированиеIDEF -> NO VISIBLE EFFECT
+panel Шаблоны / dfd DFD — диаграмма потоков данныхDFD -> DOM/storage/code changed
+panel Шаблоны / erd ERD — диаграмма «сущность — связь»ERD -> DOM/storage/code changed
+panel Шаблоны / idef1 IDEF1 — информационное моделированиеIDEF -> DOM/storage/code changed
+panel Шаблоны / idef1x IDEF1X — моделирование данныхIDEF1X -> DOM/storage/code changed
+panel Шаблоны / idef3 IDEF3 — потоки работIDEF3 -> DOM/storage/code changed
+panel Шаблоны / idef4 IDEF4 — объектно-ориентированное проекти -> DOM/storage/code changed
+panel Шаблоны / idef5 IDEF5 — онтологическое описаниеIDEF5 -> DOM/storage/code changed
+panel Шаблоны / bpmn BPMN — бизнес-процессыBPMN -> DOM/storage/code changed
+panel Шаблоны / petri Сети ПетриPetri -> DOM/storage/code changed
+panel Шаблоны / gost Блок-схемы по ГОСТ 19.701-90ГОСТ -> DOM/storage/code changed
+panel Шаблоны / graph ГрафыGraph -> DOM/storage/code changed
+panel Шаблоны / dag DAG — ориентированный ациклический графD -> DOM/storage/code changed
+panel Шаблоны / uml-class UML — диаграмма классовUML · Class -> DOM/storage/code changed
+panel Шаблоны / uml-object UML — диаграмма объектовUML · Object -> DOM/storage/code changed
+panel Шаблоны / uml-component UML — диаграмма компонентовUML · Compone -> DOM/storage/code changed
+panel Шаблоны / uml-composite UML — составная структураUML · Composite -> DOM/storage/code changed
+panel Шаблоны / uml-deployment UML — диаграмма развёртыванияUML · Deplo -> DOM/storage/code changed
+panel Шаблоны / uml-package UML — диаграмма пакетовUML · Package -> DOM/storage/code changed
+panel Шаблоны / uml-profile UML — диаграмма профилейUML · Profile -> DOM/storage/code changed
+panel Шаблоны / uml-usecase UML — диаграмма вариантов использованияU -> DOM/storage/code changed
+panel Шаблоны / uml-activity UML — диаграмма деятельностиUML · Activi -> DOM/storage/code changed
+panel Шаблоны / uml-state UML — диаграмма состоянийUML · State -> DOM/storage/code changed
+panel Шаблоны / uml-sequence UML — диаграмма последовательностиUML ·  -> DOM/storage/code changed
+panel Шаблоны / uml-communication UML — диаграмма коммуникацииUML · Commun -> DOM/storage/code changed
+panel Шаблоны / uml-timing UML — диаграмма синхронизацииUML · Timin -> DOM/storage/code changed
+panel Шаблоны / uml-overview UML — обзор взаимодействийUML · Overview -> DOM/storage/code changed
+panel Шаблоны / mindmap Ментальная картаMind map -> DOM/storage/code changed
+panel Шаблоны / orgchart Организационная структураOrg chart -> DOM/storage/code changed
+panel Шаблоны / c4 C4 — контекст и контейнерыC4 -> DOM/storage/code changed
+panel Шаблоны / network Схема компьютерной сетиNetwork -> DOM/storage/code changed
+panel Шаблоны / decision Дерево решенийDecision -> DOM/storage/code changed
+panel Шаблоны / epc eEPC — цепочка процессов по событиямeEPC -> DOM/storage/code changed
+panel Шаблоны /  Шаблон диаграммы -> DOM/storage/code changed
+panel Поиск 5
+panel Поиск /  Закрыть панель -> DOM/storage/code changed
+panel Поиск /  Найти -> NO VISIBLE EFFECT
+panel Поиск /   -> NO VISIBLE EFFECT
+panel Поиск /  Заменить на -> NO VISIBLE EFFECT
+panel Поиск /  Заменить всё -> DOM/storage/code changed
+panel Git 4
+panel Git /  Закрыть панель -> DOM/storage/code changed
+panel Git /  Сообщение коммита -> NO VISIBLE EFFECT
+panel Git /  Закоммитить -> DOM/storage/code changed
+panel Git /  Скопировать diff -> DOM/storage/code changed
+panel AI 0

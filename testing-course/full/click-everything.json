@@ -423,10 +423,7 @@
   "pages": {
     "desktop /": {
       "n": 28,
-      "dead": [
-        "desktop /: <a> Тарифы (ошибка страницы: Invalid regular expression: missing /)",
-        "desktop /: <a> Вопросы и ответы (нет реакции)"
-      ]
+      "dead": ["desktop /: <a> Тарифы (ошибка страницы: Invalid regular expression: missing /)", "desktop /: <a> Вопросы и ответы (нет реакции)"]
     },
     "desktop /privacy.html": {
       "n": 13,

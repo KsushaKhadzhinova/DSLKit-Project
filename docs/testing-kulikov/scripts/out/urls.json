@@ -1,0 +1,1213 @@
+[
+  ["HTTP GET", "/", 200, "text/html; charset=utf-8", "<!doctype html> <html lang=\"ru\">   <head"],
+  ["HTTP GET", "/index.html", 200, "text/html; charset=utf-8", "<!doctype html> <html lang=\"ru\">   <head"],
+  ["HTTP GET", "/en/", 200, "text/html; charset=utf-8", "<!doctype html> <html lang=\"en\">   <head"],
+  ["HTTP GET", "/en/index.html", 200, "text/html; charset=utf-8", "<!doctype html> <html lang=\"en\">   <head"],
+  ["HTTP GET", "/app/", 404, "text/html; charset=utf-8", "<!doctype html> <html lang=\"ru\">   <head"],
+  ["HTTP GET", "/app", 404, "text/html; charset=utf-8", "<!doctype html> <html lang=\"ru\">   <head"],
+  ["HTTP GET", "/en/app/", 404, "text/html; charset=utf-8", "<!doctype html> <html lang=\"ru\">   <head"],
+  ["HTTP GET", "/index", 404, "text/html; charset=utf-8", "<!doctype html> <html lang=\"ru\">   <head"],
+  ["HTTP GET", "/app/dashboard", 404, "text/html; charset=utf-8", "<!doctype html> <html lang=\"ru\">   <head"],
+  ["HTTP GET", "/app/nope.html", 404, "text/html; charset=utf-8", "<!doctype html> <html lang=\"ru\">   <head"],
+  ["HTTP GET", "/en/app/nope.html", 404, "text/html; charset=utf-8", "<!doctype html> <html lang=\"ru\">   <head"],
+  ["HTTP GET", "/nope", 404, "text/html; charset=utf-8", "<!doctype html> <html lang=\"ru\">   <head"],
+  ["HTTP GET", "/nope/", 404, "text/html; charset=utf-8", "<!doctype html> <html lang=\"ru\">   <head"],
+  ["HTTP GET", "/%D1%82%D0%B5%D1%81%D1%82.html", 404, "text/html; charset=utf-8", "<!doctype html> <html lang=\"ru\">   <head"],
+  ["HTTP GET", "/app/%00.html", 404, "text/html; charset=utf-8", "<!doctype html> <html lang=\"ru\">   <head"],
+  ["HTTP GET", "/..%2f..%2ftools/server.js", 403, "text/html; charset=utf-8", "<!doctype html> <html lang=\"ru\">   <head"],
+  ["HTTP GET", "/%2e%2e/%2e%2e/package.json", 404, "text/html; charset=utf-8", "<!doctype html> <html lang=\"ru\">   <head"],
+  ["HTTP GET", "/app/..%5c..%5cpackage.json", 403, "text/html; charset=utf-8", "<!doctype html> <html lang=\"ru\">   <head"],
+  ["HTTP GET", "/tools/server.js", 404, "text/html; charset=utf-8", "<!doctype html> <html lang=\"ru\">   <head"],
+  ["HTTP GET", "/package.json", 404, "text/html; charset=utf-8", "<!doctype html> <html lang=\"ru\">   <head"],
+  ["HTTP GET", "/.git/config", 404, "text/html; charset=utf-8", "<!doctype html> <html lang=\"ru\">   <head"],
+  ["HTTP GET", "/js/script.js", 200, "text/javascript; charset=utf-8", "import { initAccordion } from './compone"],
+  ["HTTP GET", "/js/", 404, "text/html; charset=utf-8", "<!doctype html> <html lang=\"ru\">   <head"],
+  ["HTTP GET", "/css/", 404, "text/html; charset=utf-8", "<!doctype html> <html lang=\"ru\">   <head"],
+  ["HTTP GET", "/sw.js", 200, "text/javascript; charset=utf-8", "// DSLKit service worker: the pages and "],
+  ["HTTP GET", "/manifest.webmanifest", 200, "application/octet-stream", "{   \"name\": \"DSLKit\",   \"short_name\": \"D"],
+  ["HTTP GET", "/robots.txt", 200, "text/plain; charset=utf-8", "User-agent: * Allow: / Disallow: /errors"],
+  ["HTTP GET", "/sitemap.xml", 200, "application/xml; charset=utf-8", "<?xml version=\"1.0\" encoding=\"UTF-8\"?> <"],
+  ["HTTP GET", "/privacy.html", 200, "text/html; charset=utf-8", "<!doctype html> <html lang=\"ru\">   <head"],
+  ["HTTP GET", "/en/privacy.html", 200, "text/html; charset=utf-8", "<!doctype html> <html lang=\"en\">   <head"],
+  ["HTTP GET", "/thanks.html", 200, "text/html; charset=utf-8", "<!doctype html> <html lang=\"ru\">   <head"],
+  ["HTTP GET", "/en/thanks.html", 200, "text/html; charset=utf-8", "<!doctype html> <html lang=\"en\">   <head"],
+  ["HTTP GET", "/errors/404.html", 200, "text/html; charset=utf-8", "<!doctype html> <html lang=\"ru\">   <head"],
+  ["HTTP GET", "/errors/500.html", 200, "text/html; charset=utf-8", "<!doctype html> <html lang=\"ru\">   <head"],
+  ["HTTP GET", "/api", 404, "application/json; charset=utf-", "{\"error\":{\"code\":\"not-found\",\"message\":\""],
+  ["HTTP GET", "/api/render", 405, "application/json; charset=utf-", "{\"error\":{\"code\":\"method\",\"message\":\"Use"],
+  ["HTTP GET", "/INDEX.HTML", 200, "application/octet-stream", "<!doctype html> <html lang=\"ru\">   <head"],
+  ["HTTP GET", "/app/Dashboard.html", 200, "text/html; charset=utf-8", "<!doctype html> <html lang=\"ru\">   <head"],
+  ["HTTP GET", "//app/login.html", 404, "text/html; charset=utf-8", "<!doctype html> <html lang=\"ru\">   <head"],
+  ["HTTP GET", "/app//login.html", 200, "text/html; charset=utf-8", "<!doctype html> <html lang=\"ru\">   <head"],
+  ["HTTP GET", "/app/login.html/extra", 404, "text/html; charset=utf-8", "<!doctype html> <html lang=\"ru\">   <head"],
+  [
+    "HTTP GET",
+    "/app/login.html?x=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    200,
+    "text/html; charset=utf-8",
+    "<!doctype html> <html lang=\"ru\">   <head"
+  ],
+  ["HTTP GET", "/favicon.ico", 404, "text/html; charset=utf-8", "<!doctype html> <html lang=\"ru\">   <head"],
+  ["HTTP GET", "/images/favicon.svg", 200, "image/svg+xml", "<svg xmlns=\"http://www.w3.org/2000/svg\" "],
+  ["HTTP GET", "/%", 400, "text/html; charset=utf-8", "<!doctype html> <html lang=\"ru\">   <head"],
+  ["HTTP GET", "/%zz", 400, "text/html; charset=utf-8", "<!doctype html> <html lang=\"ru\">   <head"],
+  ["HTTP GET", "/app/login.html%20", 404, "text/html; charset=utf-8", "<!doctype html> <html lang=\"ru\">   <head"],
+  ["HTTP POST", "/index.html", 405, "text/html; charset=utf-8", ""],
+  ["HTTP PUT", "/index.html", 405, "text/html; charset=utf-8", ""],
+  ["HTTP DELETE", "/index.html", 405, "text/html; charset=utf-8", ""],
+  ["HTTP OPTIONS", "/index.html", 405, "text/html; charset=utf-8", ""],
+  ["HTTP HEAD", "/index.html", 200, "text/html; charset=utf-8", ""],
+  ["HTTP TRACE", "/index.html", 405, "text/html; charset=utf-8", ""],
+  [
+    "PAGE",
+    "app/editor.html",
+    "200 -> /app/editor.html | title=\"\u0420\u0435\u0434\u0430\u043a\u0442\u043e\u0440 order.dsl \u2014 DSLK\" | text=1648 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/editor.html?p=",
+    "200 -> /app/editor.html?p= | title=\"\u0420\u0435\u0434\u0430\u043a\u0442\u043e\u0440 order.dsl \u2014 DSLK\" | text=1691 | note=\"\u041f\u0440\u043e\u0435\u043a\u0442 \u043d\u0435 \u043d\u0430\u0439\u0434\u0435\u043d, \u043e\u0442\u043a\u0440\u044b\u0442\u0430 \u043d\u043e\u0432\u0430\u044f \u0434\u0438\u0430\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/editor.html?p=nope",
+    "200 -> /app/editor.html?p=nope | title=\"\u0420\u0435\u0434\u0430\u043a\u0442\u043e\u0440 order.dsl \u2014 DSLK\" | text=1691 | note=\"\u041f\u0440\u043e\u0435\u043a\u0442 \u043d\u0435 \u043d\u0430\u0439\u0434\u0435\u043d, \u043e\u0442\u043a\u0440\u044b\u0442\u0430 \u043d\u043e\u0432\u0430\u044f \u0434\u0438\u0430\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/editor.html?p=%00",
+    "200 -> /app/editor.html?p=%00 | title=\"\u0420\u0435\u0434\u0430\u043a\u0442\u043e\u0440 order.dsl \u2014 DSLK\" | text=1691 | note=\"\u041f\u0440\u043e\u0435\u043a\u0442 \u043d\u0435 \u043d\u0430\u0439\u0434\u0435\u043d, \u043e\u0442\u043a\u0440\u044b\u0442\u0430 \u043d\u043e\u0432\u0430\u044f \u0434\u0438\u0430\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/editor.html?p=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+    "200 -> /app/editor.html?p=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | title=\"\u0420\u0435\u0434\u0430\u043a\u0442\u043e\u0440 order.dsl \u2014 DSLK\" | text=1691 | note=\"\u041f\u0440\u043e\u0435\u043a\u0442 \u043d\u0435 \u043d\u0430\u0439\u0434\u0435\u043d, \u043e\u0442\u043a\u0440\u044b\u0442\u0430 \u043d\u043e\u0432\u0430\u044f \u0434\u0438\u0430\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/editor.html?my=",
+    "200 -> /app/editor.html?my= | title=\"\u0420\u0435\u0434\u0430\u043a\u0442\u043e\u0440 order.dsl \u2014 DSLK\" | text=1691 | note=\"\u041f\u0440\u043e\u0435\u043a\u0442 \u043d\u0435 \u043d\u0430\u0439\u0434\u0435\u043d, \u043e\u0442\u043a\u0440\u044b\u0442\u0430 \u043d\u043e\u0432\u0430\u044f \u0434\u0438\u0430\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/editor.html?my=nope",
+    "200 -> /app/editor.html?my=nope | title=\"\u0420\u0435\u0434\u0430\u043a\u0442\u043e\u0440 order.dsl \u2014 DSLK\" | text=1691 | note=\"\u041f\u0440\u043e\u0435\u043a\u0442 \u043d\u0435 \u043d\u0430\u0439\u0434\u0435\u043d, \u043e\u0442\u043a\u0440\u044b\u0442\u0430 \u043d\u043e\u0432\u0430\u044f \u0434\u0438\u0430\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/editor.html?tpl=",
+    "200 -> /app/editor.html?tpl= | title=\"\u0420\u0435\u0434\u0430\u043a\u0442\u043e\u0440 order.dsl \u2014 DSLK\" | text=1691 | note=\"\u041f\u0440\u043e\u0435\u043a\u0442 \u043d\u0435 \u043d\u0430\u0439\u0434\u0435\u043d, \u043e\u0442\u043a\u0440\u044b\u0442\u0430 \u043d\u043e\u0432\u0430\u044f \u0434\u0438\u0430\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/editor.html?tpl=nope",
+    "200 -> /app/editor.html?tpl=nope | title=\"\u0420\u0435\u0434\u0430\u043a\u0442\u043e\u0440 order.dsl \u2014 DSLK\" | text=1691 | note=\"\u041f\u0440\u043e\u0435\u043a\u0442 \u043d\u0435 \u043d\u0430\u0439\u0434\u0435\u043d, \u043e\u0442\u043a\u0440\u044b\u0442\u0430 \u043d\u043e\u0432\u0430\u044f \u0434\u0438\u0430\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/editor.html?template=",
+    "200 -> /app/editor.html?template= | title=\"\u0420\u0435\u0434\u0430\u043a\u0442\u043e\u0440 order.dsl \u2014 DSLK\" | text=1648 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/editor.html?template=nope",
+    "200 -> /app/editor.html?template=nope | title=\"\u0420\u0435\u0434\u0430\u043a\u0442\u043e\u0440 order.dsl \u2014 DSLK\" | text=1648 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/editor.html?template=idef0",
+    "200 -> /app/editor.html?template=idef0 | title=\"\u0420\u0435\u0434\u0430\u043a\u0442\u043e\u0440 order.dsl \u2014 DSLK\" | text=1648 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/editor.html?template=__proto__",
+    "200 -> /app/editor.html?template=__proto__ | title=\"\u0420\u0435\u0434\u0430\u043a\u0442\u043e\u0440 order.dsl \u2014 DSLK\" | text=1195 | note=\"\" | dialogs=0 | inj=False",
+    "console:DSLKit: component initEditorProjects failed TypeError: text.",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/editor.html?template=constructor",
+    "200 -> /app/editor.html?template=constructor | title=\"\u0420\u0435\u0434\u0430\u043a\u0442\u043e\u0440 order.dsl \u2014 DSLK\" | text=1195 | note=\"\" | dialogs=0 | inj=False",
+    "console:DSLKit: component initEditorProjects failed TypeError: text.",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/editor.html?template=toString",
+    "200 -> /app/editor.html?template=toString | title=\"\u0420\u0435\u0434\u0430\u043a\u0442\u043e\u0440 order.dsl \u2014 DSLK\" | text=1195 | note=\"\" | dialogs=0 | inj=False",
+    "console:DSLKit: component initEditorProjects failed TypeError: text.",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/editor.html?q=",
+    "200 -> /app/editor.html?q= | title=\"\u0420\u0435\u0434\u0430\u043a\u0442\u043e\u0440 order.dsl \u2014 DSLK\" | text=1648 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/editor.html?q=<b>x</b>",
+    "200 -> /app/editor.html?q=%3Cb%3Ex%3C/b%3E | title=\"\u0420\u0435\u0434\u0430\u043a\u0442\u043e\u0440 order.dsl \u2014 DSLK\" | text=1648 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/editor.html?q=%E0%A4%A",
+    "200 -> /app/editor.html?q=%E0%A4%A | title=\"\u0420\u0435\u0434\u0430\u043a\u0442\u043e\u0440 order.dsl \u2014 DSLK\" | text=1648 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/editor.html?q=\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f",
+    "200 -> /app/editor.html?q=%D1%8F%D1%8F%D1%8F%D1%8F%D1%8F%D1%8F%D1%8 | title=\"\u0420\u0435\u0434\u0430\u043a\u0442\u043e\u0440 order.dsl \u2014 DSLK\" | text=1648 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/editor.html?p=a&p=b",
+    "200 -> /app/editor.html?p=a&p=b | title=\"\u0420\u0435\u0434\u0430\u043a\u0442\u043e\u0440 order.dsl \u2014 DSLK\" | text=1691 | note=\"\u041f\u0440\u043e\u0435\u043a\u0442 \u043d\u0435 \u043d\u0430\u0439\u0434\u0435\u043d, \u043e\u0442\u043a\u0440\u044b\u0442\u0430 \u043d\u043e\u0432\u0430\u044f \u0434\u0438\u0430\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/editor.html?p[]=1",
+    "200 -> /app/editor.html?p[]=1 | title=\"\u0420\u0435\u0434\u0430\u043a\u0442\u043e\u0440 order.dsl \u2014 DSLK\" | text=1648 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/editor.html?%D0%BF=1",
+    "200 -> /app/editor.html?%D0%BF=1 | title=\"\u0420\u0435\u0434\u0430\u043a\u0442\u043e\u0440 order.dsl \u2014 DSLK\" | text=1648 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/editor.html?p=%F0%9F%98%80",
+    "200 -> /app/editor.html?p=%F0%9F%98%80 | title=\"\u0420\u0435\u0434\u0430\u043a\u0442\u043e\u0440 order.dsl \u2014 DSLK\" | text=1691 | note=\"\u041f\u0440\u043e\u0435\u043a\u0442 \u043d\u0435 \u043d\u0430\u0439\u0434\u0435\u043d, \u043e\u0442\u043a\u0440\u044b\u0442\u0430 \u043d\u043e\u0432\u0430\u044f \u0434\u0438\u0430\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/editor.html?p=../../etc/passwd",
+    "200 -> /app/editor.html?p=../../etc/passwd | title=\"\u0420\u0435\u0434\u0430\u043a\u0442\u043e\u0440 order.dsl \u2014 DSLK\" | text=1691 | note=\"\u041f\u0440\u043e\u0435\u043a\u0442 \u043d\u0435 \u043d\u0430\u0439\u0434\u0435\u043d, \u043e\u0442\u043a\u0440\u044b\u0442\u0430 \u043d\u043e\u0432\u0430\u044f \u0434\u0438\u0430\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/editor.html?template=idef0&p=nope&tpl=nope&my=nope",
+    "200 -> /app/editor.html?template=idef0&p=nope&tpl=nope&my=nope | title=\"\u0420\u0435\u0434\u0430\u043a\u0442\u043e\u0440 order.dsl \u2014 DSLK\" | text=1691 | note=\"\u041f\u0440\u043e\u0435\u043a\u0442 \u043d\u0435 \u043d\u0430\u0439\u0434\u0435\u043d, \u043e\u0442\u043a\u0440\u044b\u0442\u0430 \u043d\u043e\u0432\u0430\u044f \u0434\u0438\u0430\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/editor.html?lang=en",
+    "200 -> /app/editor.html?lang=en | title=\"\u0420\u0435\u0434\u0430\u043a\u0442\u043e\u0440 order.dsl \u2014 DSLK\" | text=1648 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/editor.html?theme=dark",
+    "200 -> /app/editor.html?theme=dark | title=\"\u0420\u0435\u0434\u0430\u043a\u0442\u043e\u0440 order.dsl \u2014 DSLK\" | text=1648 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/editor.html#",
+    "200 -> /app/editor.html# | title=\"\u0420\u0435\u0434\u0430\u043a\u0442\u043e\u0440 order.dsl \u2014 DSLK\" | text=1648 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/editor.html#x",
+    "None -> /app/editor.html#x | title=\"\u0420\u0435\u0434\u0430\u043a\u0442\u043e\u0440 order.dsl \u2014 DSLK\" | text=1651 | note=\"\u0421\u043e\u0445\u0440\u0430\u043d\u0435\u043d\u043e 06:47\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/editor.html#main",
+    "None -> /app/editor.html#main | title=\"\u0420\u0435\u0434\u0430\u043a\u0442\u043e\u0440 order.dsl \u2014 DSLK\" | text=1651 | note=\"\u0421\u043e\u0445\u0440\u0430\u043d\u0435\u043d\u043e 06:47\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/editor.html?#",
+    "200 -> /app/editor.html?# | title=\"\u0420\u0435\u0434\u0430\u043a\u0442\u043e\u0440 order.dsl \u2014 DSLK\" | text=1635 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/editor.html?a=1#b",
+    "200 -> /app/editor.html?a=1#b | title=\"\u0420\u0435\u0434\u0430\u043a\u0442\u043e\u0440 order.dsl \u2014 DSLK\" | text=1635 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/dashboard.html",
+    "200 -> /app/dashboard.html | title=\"\u041c\u043e\u0438 \u043f\u0440\u043e\u0435\u043a\u0442\u044b \u2014 DSLKit\" | text=3020 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/dashboard.html?p=",
+    "200 -> /app/dashboard.html?p= | title=\"\u041c\u043e\u0438 \u043f\u0440\u043e\u0435\u043a\u0442\u044b \u2014 DSLKit\" | text=3020 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/dashboard.html?p=nope",
+    "200 -> /app/dashboard.html?p=nope | title=\"\u041c\u043e\u0438 \u043f\u0440\u043e\u0435\u043a\u0442\u044b \u2014 DSLKit\" | text=3020 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/dashboard.html?p=%00",
+    "200 -> /app/dashboard.html?p=%00 | title=\"\u041c\u043e\u0438 \u043f\u0440\u043e\u0435\u043a\u0442\u044b \u2014 DSLKit\" | text=3020 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/dashboard.html?p=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+    "200 -> /app/dashboard.html?p=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | title=\"\u041c\u043e\u0438 \u043f\u0440\u043e\u0435\u043a\u0442\u044b \u2014 DSLKit\" | text=3020 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/dashboard.html?my=",
+    "200 -> /app/dashboard.html?my= | title=\"\u041c\u043e\u0438 \u043f\u0440\u043e\u0435\u043a\u0442\u044b \u2014 DSLKit\" | text=3020 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/dashboard.html?my=nope",
+    "200 -> /app/dashboard.html?my=nope | title=\"\u041c\u043e\u0438 \u043f\u0440\u043e\u0435\u043a\u0442\u044b \u2014 DSLKit\" | text=3020 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/dashboard.html?tpl=",
+    "200 -> /app/dashboard.html?tpl= | title=\"\u041c\u043e\u0438 \u043f\u0440\u043e\u0435\u043a\u0442\u044b \u2014 DSLKit\" | text=3020 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/dashboard.html?tpl=nope",
+    "200 -> /app/dashboard.html?tpl=nope | title=\"\u041c\u043e\u0438 \u043f\u0440\u043e\u0435\u043a\u0442\u044b \u2014 DSLKit\" | text=3020 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/dashboard.html?template=",
+    "200 -> /app/dashboard.html?template= | title=\"\u041c\u043e\u0438 \u043f\u0440\u043e\u0435\u043a\u0442\u044b \u2014 DSLKit\" | text=3020 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/dashboard.html?template=nope",
+    "200 -> /app/dashboard.html?template=nope | title=\"\u041c\u043e\u0438 \u043f\u0440\u043e\u0435\u043a\u0442\u044b \u2014 DSLKit\" | text=3020 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/dashboard.html?template=idef0",
+    "200 -> /app/dashboard.html?template=idef0 | title=\"\u041c\u043e\u0438 \u043f\u0440\u043e\u0435\u043a\u0442\u044b \u2014 DSLKit\" | text=3020 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/dashboard.html?template=__proto__",
+    "200 -> /app/dashboard.html?template=__proto__ | title=\"\u041c\u043e\u0438 \u043f\u0440\u043e\u0435\u043a\u0442\u044b \u2014 DSLKit\" | text=3020 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/dashboard.html?template=constructor",
+    "200 -> /app/dashboard.html?template=constructor | title=\"\u041c\u043e\u0438 \u043f\u0440\u043e\u0435\u043a\u0442\u044b \u2014 DSLKit\" | text=3020 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/dashboard.html?template=toString",
+    "200 -> /app/dashboard.html?template=toString | title=\"\u041c\u043e\u0438 \u043f\u0440\u043e\u0435\u043a\u0442\u044b \u2014 DSLKit\" | text=3020 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/dashboard.html?q=",
+    "200 -> /app/dashboard.html?q= | title=\"\u041c\u043e\u0438 \u043f\u0440\u043e\u0435\u043a\u0442\u044b \u2014 DSLKit\" | text=3020 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/dashboard.html?q=<b>x</b>",
+    "200 -> /app/dashboard.html?q=%3Cb%3Ex%3C/b%3E | title=\"\u041c\u043e\u0438 \u043f\u0440\u043e\u0435\u043a\u0442\u044b \u2014 DSLKit\" | text=1151 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/dashboard.html?q=%E0%A4%A",
+    "200 -> /app/dashboard.html?q=%E0%A4%A | title=\"\u041c\u043e\u0438 \u043f\u0440\u043e\u0435\u043a\u0442\u044b \u2014 DSLKit\" | text=1151 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/dashboard.html?q=\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f",
+    "200 -> /app/dashboard.html?q=%D1%8F%D1%8F%D1%8F%D1%8F%D1%8F%D1%8F%D | title=\"\u041c\u043e\u0438 \u043f\u0440\u043e\u0435\u043a\u0442\u044b \u2014 DSLKit\" | text=1151 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/dashboard.html?p=a&p=b",
+    "200 -> /app/dashboard.html?p=a&p=b | title=\"\u041c\u043e\u0438 \u043f\u0440\u043e\u0435\u043a\u0442\u044b \u2014 DSLKit\" | text=1151 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/dashboard.html?p[]=1",
+    "200 -> /app/dashboard.html?p[]=1 | title=\"\u041c\u043e\u0438 \u043f\u0440\u043e\u0435\u043a\u0442\u044b \u2014 DSLKit\" | text=1151 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/dashboard.html?%D0%BF=1",
+    "200 -> /app/dashboard.html?%D0%BF=1 | title=\"\u041c\u043e\u0438 \u043f\u0440\u043e\u0435\u043a\u0442\u044b \u2014 DSLKit\" | text=1151 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/dashboard.html?p=%F0%9F%98%80",
+    "200 -> /app/dashboard.html?p=%F0%9F%98%80 | title=\"\u041c\u043e\u0438 \u043f\u0440\u043e\u0435\u043a\u0442\u044b \u2014 DSLKit\" | text=1151 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/dashboard.html?p=../../etc/passwd",
+    "200 -> /app/dashboard.html?p=../../etc/passwd | title=\"\u041c\u043e\u0438 \u043f\u0440\u043e\u0435\u043a\u0442\u044b \u2014 DSLKit\" | text=1151 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/dashboard.html?template=idef0&p=nope&tpl=nope&my=nope",
+    "200 -> /app/dashboard.html?template=idef0&p=nope&tpl=nope&my=nope | title=\"\u041c\u043e\u0438 \u043f\u0440\u043e\u0435\u043a\u0442\u044b \u2014 DSLKit\" | text=1151 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/dashboard.html?lang=en",
+    "200 -> /app/dashboard.html?lang=en | title=\"\u041c\u043e\u0438 \u043f\u0440\u043e\u0435\u043a\u0442\u044b \u2014 DSLKit\" | text=1151 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/dashboard.html?theme=dark",
+    "200 -> /app/dashboard.html?theme=dark | title=\"\u041c\u043e\u0438 \u043f\u0440\u043e\u0435\u043a\u0442\u044b \u2014 DSLKit\" | text=1151 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/dashboard.html#",
+    "200 -> /app/dashboard.html# | title=\"\u041c\u043e\u0438 \u043f\u0440\u043e\u0435\u043a\u0442\u044b \u2014 DSLKit\" | text=1151 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/dashboard.html#x",
+    "None -> /app/dashboard.html#x | title=\"\u041c\u043e\u0438 \u043f\u0440\u043e\u0435\u043a\u0442\u044b \u2014 DSLKit\" | text=1151 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/dashboard.html#main",
+    "None -> /app/dashboard.html#main | title=\"\u041c\u043e\u0438 \u043f\u0440\u043e\u0435\u043a\u0442\u044b \u2014 DSLKit\" | text=1151 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/dashboard.html?#",
+    "200 -> /app/dashboard.html?# | title=\"\u041c\u043e\u0438 \u043f\u0440\u043e\u0435\u043a\u0442\u044b \u2014 DSLKit\" | text=1151 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/dashboard.html?a=1#b",
+    "200 -> /app/dashboard.html?a=1#b | title=\"\u041c\u043e\u0438 \u043f\u0440\u043e\u0435\u043a\u0442\u044b \u2014 DSLKit\" | text=1151 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/welcome.html",
+    "200 -> /app/welcome.html | title=\"\u0414\u043e\u0431\u0440\u043e \u043f\u043e\u0436\u0430\u043b\u043e\u0432\u0430\u0442\u044c \u2014 DSLKit\" | text=542 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/welcome.html?p=",
+    "200 -> /app/welcome.html?p= | title=\"\u0414\u043e\u0431\u0440\u043e \u043f\u043e\u0436\u0430\u043b\u043e\u0432\u0430\u0442\u044c \u2014 DSLKit\" | text=542 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/welcome.html?p=nope",
+    "200 -> /app/welcome.html?p=nope | title=\"\u0414\u043e\u0431\u0440\u043e \u043f\u043e\u0436\u0430\u043b\u043e\u0432\u0430\u0442\u044c \u2014 DSLKit\" | text=542 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/welcome.html?p=%00",
+    "200 -> /app/welcome.html?p=%00 | title=\"\u0414\u043e\u0431\u0440\u043e \u043f\u043e\u0436\u0430\u043b\u043e\u0432\u0430\u0442\u044c \u2014 DSLKit\" | text=542 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/welcome.html?p=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+    "200 -> /app/welcome.html?p=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | title=\"\u0414\u043e\u0431\u0440\u043e \u043f\u043e\u0436\u0430\u043b\u043e\u0432\u0430\u0442\u044c \u2014 DSLKit\" | text=542 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/welcome.html?my=",
+    "200 -> /app/welcome.html?my= | title=\"\u0414\u043e\u0431\u0440\u043e \u043f\u043e\u0436\u0430\u043b\u043e\u0432\u0430\u0442\u044c \u2014 DSLKit\" | text=542 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/welcome.html?my=nope",
+    "200 -> /app/welcome.html?my=nope | title=\"\u0414\u043e\u0431\u0440\u043e \u043f\u043e\u0436\u0430\u043b\u043e\u0432\u0430\u0442\u044c \u2014 DSLKit\" | text=542 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/welcome.html?tpl=",
+    "200 -> /app/welcome.html?tpl= | title=\"\u0414\u043e\u0431\u0440\u043e \u043f\u043e\u0436\u0430\u043b\u043e\u0432\u0430\u0442\u044c \u2014 DSLKit\" | text=542 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/welcome.html?tpl=nope",
+    "200 -> /app/welcome.html?tpl=nope | title=\"\u0414\u043e\u0431\u0440\u043e \u043f\u043e\u0436\u0430\u043b\u043e\u0432\u0430\u0442\u044c \u2014 DSLKit\" | text=542 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/welcome.html?template=",
+    "200 -> /app/welcome.html?template= | title=\"\u0414\u043e\u0431\u0440\u043e \u043f\u043e\u0436\u0430\u043b\u043e\u0432\u0430\u0442\u044c \u2014 DSLKit\" | text=542 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/welcome.html?template=nope",
+    "200 -> /app/welcome.html?template=nope | title=\"\u0414\u043e\u0431\u0440\u043e \u043f\u043e\u0436\u0430\u043b\u043e\u0432\u0430\u0442\u044c \u2014 DSLKit\" | text=542 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/welcome.html?template=idef0",
+    "200 -> /app/welcome.html?template=idef0 | title=\"\u0414\u043e\u0431\u0440\u043e \u043f\u043e\u0436\u0430\u043b\u043e\u0432\u0430\u0442\u044c \u2014 DSLKit\" | text=542 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/welcome.html?template=__proto__",
+    "200 -> /app/welcome.html?template=__proto__ | title=\"\u0414\u043e\u0431\u0440\u043e \u043f\u043e\u0436\u0430\u043b\u043e\u0432\u0430\u0442\u044c \u2014 DSLKit\" | text=542 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/welcome.html?template=constructor",
+    "200 -> /app/welcome.html?template=constructor | title=\"\u0414\u043e\u0431\u0440\u043e \u043f\u043e\u0436\u0430\u043b\u043e\u0432\u0430\u0442\u044c \u2014 DSLKit\" | text=542 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/welcome.html?template=toString",
+    "200 -> /app/welcome.html?template=toString | title=\"\u0414\u043e\u0431\u0440\u043e \u043f\u043e\u0436\u0430\u043b\u043e\u0432\u0430\u0442\u044c \u2014 DSLKit\" | text=542 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/welcome.html?q=",
+    "200 -> /app/welcome.html?q= | title=\"\u0414\u043e\u0431\u0440\u043e \u043f\u043e\u0436\u0430\u043b\u043e\u0432\u0430\u0442\u044c \u2014 DSLKit\" | text=542 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/welcome.html?q=<b>x</b>",
+    "200 -> /app/welcome.html?q=%3Cb%3Ex%3C/b%3E | title=\"\u0414\u043e\u0431\u0440\u043e \u043f\u043e\u0436\u0430\u043b\u043e\u0432\u0430\u0442\u044c \u2014 DSLKit\" | text=542 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/welcome.html?q=%E0%A4%A",
+    "200 -> /app/welcome.html?q=%E0%A4%A | title=\"\u0414\u043e\u0431\u0440\u043e \u043f\u043e\u0436\u0430\u043b\u043e\u0432\u0430\u0442\u044c \u2014 DSLKit\" | text=542 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/welcome.html?q=\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f",
+    "200 -> /app/welcome.html?q=%D1%8F%D1%8F%D1%8F%D1%8F%D1%8F%D1%8F%D1% | title=\"\u0414\u043e\u0431\u0440\u043e \u043f\u043e\u0436\u0430\u043b\u043e\u0432\u0430\u0442\u044c \u2014 DSLKit\" | text=542 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/welcome.html?p=a&p=b",
+    "200 -> /app/welcome.html?p=a&p=b | title=\"\u0414\u043e\u0431\u0440\u043e \u043f\u043e\u0436\u0430\u043b\u043e\u0432\u0430\u0442\u044c \u2014 DSLKit\" | text=542 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/welcome.html?p[]=1",
+    "200 -> /app/welcome.html?p[]=1 | title=\"\u0414\u043e\u0431\u0440\u043e \u043f\u043e\u0436\u0430\u043b\u043e\u0432\u0430\u0442\u044c \u2014 DSLKit\" | text=542 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/welcome.html?%D0%BF=1",
+    "200 -> /app/welcome.html?%D0%BF=1 | title=\"\u0414\u043e\u0431\u0440\u043e \u043f\u043e\u0436\u0430\u043b\u043e\u0432\u0430\u0442\u044c \u2014 DSLKit\" | text=542 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/welcome.html?p=%F0%9F%98%80",
+    "200 -> /app/welcome.html?p=%F0%9F%98%80 | title=\"\u0414\u043e\u0431\u0440\u043e \u043f\u043e\u0436\u0430\u043b\u043e\u0432\u0430\u0442\u044c \u2014 DSLKit\" | text=542 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/welcome.html?p=../../etc/passwd",
+    "200 -> /app/welcome.html?p=../../etc/passwd | title=\"\u0414\u043e\u0431\u0440\u043e \u043f\u043e\u0436\u0430\u043b\u043e\u0432\u0430\u0442\u044c \u2014 DSLKit\" | text=542 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/welcome.html?template=idef0&p=nope&tpl=nope&my=nope",
+    "200 -> /app/welcome.html?template=idef0&p=nope&tpl=nope&my=nope | title=\"\u0414\u043e\u0431\u0440\u043e \u043f\u043e\u0436\u0430\u043b\u043e\u0432\u0430\u0442\u044c \u2014 DSLKit\" | text=542 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/welcome.html?lang=en",
+    "200 -> /app/welcome.html?lang=en | title=\"\u0414\u043e\u0431\u0440\u043e \u043f\u043e\u0436\u0430\u043b\u043e\u0432\u0430\u0442\u044c \u2014 DSLKit\" | text=542 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/welcome.html?theme=dark",
+    "200 -> /app/welcome.html?theme=dark | title=\"\u0414\u043e\u0431\u0440\u043e \u043f\u043e\u0436\u0430\u043b\u043e\u0432\u0430\u0442\u044c \u2014 DSLKit\" | text=542 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/welcome.html#",
+    "200 -> /app/welcome.html# | title=\"\u0414\u043e\u0431\u0440\u043e \u043f\u043e\u0436\u0430\u043b\u043e\u0432\u0430\u0442\u044c \u2014 DSLKit\" | text=542 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/welcome.html#x",
+    "None -> /app/welcome.html#x | title=\"\u0414\u043e\u0431\u0440\u043e \u043f\u043e\u0436\u0430\u043b\u043e\u0432\u0430\u0442\u044c \u2014 DSLKit\" | text=542 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/welcome.html#main",
+    "None -> /app/welcome.html#main | title=\"\u0414\u043e\u0431\u0440\u043e \u043f\u043e\u0436\u0430\u043b\u043e\u0432\u0430\u0442\u044c \u2014 DSLKit\" | text=542 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/welcome.html?#",
+    "200 -> /app/welcome.html?# | title=\"\u0414\u043e\u0431\u0440\u043e \u043f\u043e\u0436\u0430\u043b\u043e\u0432\u0430\u0442\u044c \u2014 DSLKit\" | text=542 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/welcome.html?a=1#b",
+    "200 -> /app/welcome.html?a=1#b | title=\"\u0414\u043e\u0431\u0440\u043e \u043f\u043e\u0436\u0430\u043b\u043e\u0432\u0430\u0442\u044c \u2014 DSLKit\" | text=542 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/settings.html",
+    "200 -> /app/settings.html | title=\"\u041d\u0430\u0441\u0442\u0440\u043e\u0439\u043a\u0438 \u0440\u0435\u0434\u0430\u043a\u0442\u043e\u0440\u0430 \u2014 DSL\" | text=586 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/settings.html?p=",
+    "200 -> /app/settings.html?p= | title=\"\u041d\u0430\u0441\u0442\u0440\u043e\u0439\u043a\u0438 \u0440\u0435\u0434\u0430\u043a\u0442\u043e\u0440\u0430 \u2014 DSL\" | text=586 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/settings.html?p=nope",
+    "200 -> /app/settings.html?p=nope | title=\"\u041d\u0430\u0441\u0442\u0440\u043e\u0439\u043a\u0438 \u0440\u0435\u0434\u0430\u043a\u0442\u043e\u0440\u0430 \u2014 DSL\" | text=586 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/settings.html?p=%00",
+    "200 -> /app/settings.html?p=%00 | title=\"\u041d\u0430\u0441\u0442\u0440\u043e\u0439\u043a\u0438 \u0440\u0435\u0434\u0430\u043a\u0442\u043e\u0440\u0430 \u2014 DSL\" | text=586 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/settings.html?p=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+    "200 -> /app/settings.html?p=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | title=\"\u041d\u0430\u0441\u0442\u0440\u043e\u0439\u043a\u0438 \u0440\u0435\u0434\u0430\u043a\u0442\u043e\u0440\u0430 \u2014 DSL\" | text=586 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/settings.html?my=",
+    "200 -> /app/settings.html?my= | title=\"\u041d\u0430\u0441\u0442\u0440\u043e\u0439\u043a\u0438 \u0440\u0435\u0434\u0430\u043a\u0442\u043e\u0440\u0430 \u2014 DSL\" | text=586 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/settings.html?my=nope",
+    "200 -> /app/settings.html?my=nope | title=\"\u041d\u0430\u0441\u0442\u0440\u043e\u0439\u043a\u0438 \u0440\u0435\u0434\u0430\u043a\u0442\u043e\u0440\u0430 \u2014 DSL\" | text=586 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/settings.html?tpl=",
+    "200 -> /app/settings.html?tpl= | title=\"\u041d\u0430\u0441\u0442\u0440\u043e\u0439\u043a\u0438 \u0440\u0435\u0434\u0430\u043a\u0442\u043e\u0440\u0430 \u2014 DSL\" | text=586 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/settings.html?tpl=nope",
+    "200 -> /app/settings.html?tpl=nope | title=\"\u041d\u0430\u0441\u0442\u0440\u043e\u0439\u043a\u0438 \u0440\u0435\u0434\u0430\u043a\u0442\u043e\u0440\u0430 \u2014 DSL\" | text=586 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/settings.html?template=",
+    "200 -> /app/settings.html?template= | title=\"\u041d\u0430\u0441\u0442\u0440\u043e\u0439\u043a\u0438 \u0440\u0435\u0434\u0430\u043a\u0442\u043e\u0440\u0430 \u2014 DSL\" | text=586 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/settings.html?template=nope",
+    "200 -> /app/settings.html?template=nope | title=\"\u041d\u0430\u0441\u0442\u0440\u043e\u0439\u043a\u0438 \u0440\u0435\u0434\u0430\u043a\u0442\u043e\u0440\u0430 \u2014 DSL\" | text=586 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/settings.html?template=idef0",
+    "200 -> /app/settings.html?template=idef0 | title=\"\u041d\u0430\u0441\u0442\u0440\u043e\u0439\u043a\u0438 \u0440\u0435\u0434\u0430\u043a\u0442\u043e\u0440\u0430 \u2014 DSL\" | text=586 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/settings.html?template=__proto__",
+    "200 -> /app/settings.html?template=__proto__ | title=\"\u041d\u0430\u0441\u0442\u0440\u043e\u0439\u043a\u0438 \u0440\u0435\u0434\u0430\u043a\u0442\u043e\u0440\u0430 \u2014 DSL\" | text=586 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/settings.html?template=constructor",
+    "200 -> /app/settings.html?template=constructor | title=\"\u041d\u0430\u0441\u0442\u0440\u043e\u0439\u043a\u0438 \u0440\u0435\u0434\u0430\u043a\u0442\u043e\u0440\u0430 \u2014 DSL\" | text=586 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/settings.html?template=toString",
+    "200 -> /app/settings.html?template=toString | title=\"\u041d\u0430\u0441\u0442\u0440\u043e\u0439\u043a\u0438 \u0440\u0435\u0434\u0430\u043a\u0442\u043e\u0440\u0430 \u2014 DSL\" | text=586 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/settings.html?q=",
+    "200 -> /app/settings.html?q= | title=\"\u041d\u0430\u0441\u0442\u0440\u043e\u0439\u043a\u0438 \u0440\u0435\u0434\u0430\u043a\u0442\u043e\u0440\u0430 \u2014 DSL\" | text=586 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/settings.html?q=<b>x</b>",
+    "200 -> /app/settings.html?q=%3Cb%3Ex%3C/b%3E | title=\"\u041d\u0430\u0441\u0442\u0440\u043e\u0439\u043a\u0438 \u0440\u0435\u0434\u0430\u043a\u0442\u043e\u0440\u0430 \u2014 DSL\" | text=586 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/settings.html?q=%E0%A4%A",
+    "200 -> /app/settings.html?q=%E0%A4%A | title=\"\u041d\u0430\u0441\u0442\u0440\u043e\u0439\u043a\u0438 \u0440\u0435\u0434\u0430\u043a\u0442\u043e\u0440\u0430 \u2014 DSL\" | text=586 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/settings.html?q=\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f",
+    "200 -> /app/settings.html?q=%D1%8F%D1%8F%D1%8F%D1%8F%D1%8F%D1%8F%D1 | title=\"\u041d\u0430\u0441\u0442\u0440\u043e\u0439\u043a\u0438 \u0440\u0435\u0434\u0430\u043a\u0442\u043e\u0440\u0430 \u2014 DSL\" | text=586 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/settings.html?p=a&p=b",
+    "200 -> /app/settings.html?p=a&p=b | title=\"\u041d\u0430\u0441\u0442\u0440\u043e\u0439\u043a\u0438 \u0440\u0435\u0434\u0430\u043a\u0442\u043e\u0440\u0430 \u2014 DSL\" | text=586 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/settings.html?p[]=1",
+    "200 -> /app/settings.html?p[]=1 | title=\"\u041d\u0430\u0441\u0442\u0440\u043e\u0439\u043a\u0438 \u0440\u0435\u0434\u0430\u043a\u0442\u043e\u0440\u0430 \u2014 DSL\" | text=586 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/settings.html?%D0%BF=1",
+    "200 -> /app/settings.html?%D0%BF=1 | title=\"\u041d\u0430\u0441\u0442\u0440\u043e\u0439\u043a\u0438 \u0440\u0435\u0434\u0430\u043a\u0442\u043e\u0440\u0430 \u2014 DSL\" | text=586 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/settings.html?p=%F0%9F%98%80",
+    "200 -> /app/settings.html?p=%F0%9F%98%80 | title=\"\u041d\u0430\u0441\u0442\u0440\u043e\u0439\u043a\u0438 \u0440\u0435\u0434\u0430\u043a\u0442\u043e\u0440\u0430 \u2014 DSL\" | text=586 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/settings.html?p=../../etc/passwd",
+    "200 -> /app/settings.html?p=../../etc/passwd | title=\"\u041d\u0430\u0441\u0442\u0440\u043e\u0439\u043a\u0438 \u0440\u0435\u0434\u0430\u043a\u0442\u043e\u0440\u0430 \u2014 DSL\" | text=586 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/settings.html?template=idef0&p=nope&tpl=nope&my=nope",
+    "200 -> /app/settings.html?template=idef0&p=nope&tpl=nope&my=nope | title=\"\u041d\u0430\u0441\u0442\u0440\u043e\u0439\u043a\u0438 \u0440\u0435\u0434\u0430\u043a\u0442\u043e\u0440\u0430 \u2014 DSL\" | text=586 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/settings.html?lang=en",
+    "200 -> /app/settings.html?lang=en | title=\"\u041d\u0430\u0441\u0442\u0440\u043e\u0439\u043a\u0438 \u0440\u0435\u0434\u0430\u043a\u0442\u043e\u0440\u0430 \u2014 DSL\" | text=586 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/settings.html?theme=dark",
+    "200 -> /app/settings.html?theme=dark | title=\"\u041d\u0430\u0441\u0442\u0440\u043e\u0439\u043a\u0438 \u0440\u0435\u0434\u0430\u043a\u0442\u043e\u0440\u0430 \u2014 DSL\" | text=586 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/settings.html#",
+    "200 -> /app/settings.html# | title=\"\u041d\u0430\u0441\u0442\u0440\u043e\u0439\u043a\u0438 \u0440\u0435\u0434\u0430\u043a\u0442\u043e\u0440\u0430 \u2014 DSL\" | text=586 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/settings.html#x",
+    "None -> /app/settings.html#x | title=\"\u041d\u0430\u0441\u0442\u0440\u043e\u0439\u043a\u0438 \u0440\u0435\u0434\u0430\u043a\u0442\u043e\u0440\u0430 \u2014 DSL\" | text=586 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/settings.html#main",
+    "None -> /app/settings.html#main | title=\"\u041d\u0430\u0441\u0442\u0440\u043e\u0439\u043a\u0438 \u0440\u0435\u0434\u0430\u043a\u0442\u043e\u0440\u0430 \u2014 DSL\" | text=586 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/settings.html?#",
+    "200 -> /app/settings.html?# | title=\"\u041d\u0430\u0441\u0442\u0440\u043e\u0439\u043a\u0438 \u0440\u0435\u0434\u0430\u043a\u0442\u043e\u0440\u0430 \u2014 DSL\" | text=586 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/settings.html?a=1#b",
+    "200 -> /app/settings.html?a=1#b | title=\"\u041d\u0430\u0441\u0442\u0440\u043e\u0439\u043a\u0438 \u0440\u0435\u0434\u0430\u043a\u0442\u043e\u0440\u0430 \u2014 DSL\" | text=586 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/docs.html",
+    "200 -> /app/docs.html | title=\"\u0414\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u0430\u0446\u0438\u044f \u2014 DSLKit\" | text=2136 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/docs.html?p=",
+    "200 -> /app/docs.html?p= | title=\"\u0414\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u0430\u0446\u0438\u044f \u2014 DSLKit\" | text=2136 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/docs.html?p=nope",
+    "200 -> /app/docs.html?p=nope | title=\"\u0414\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u0430\u0446\u0438\u044f \u2014 DSLKit\" | text=2136 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/docs.html?p=%00",
+    "200 -> /app/docs.html?p=%00 | title=\"\u0414\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u0430\u0446\u0438\u044f \u2014 DSLKit\" | text=2136 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/docs.html?p=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+    "200 -> /app/docs.html?p=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | title=\"\u0414\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u0430\u0446\u0438\u044f \u2014 DSLKit\" | text=2136 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/docs.html?my=",
+    "200 -> /app/docs.html?my= | title=\"\u0414\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u0430\u0446\u0438\u044f \u2014 DSLKit\" | text=2136 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/docs.html?my=nope",
+    "200 -> /app/docs.html?my=nope | title=\"\u0414\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u0430\u0446\u0438\u044f \u2014 DSLKit\" | text=2136 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/docs.html?tpl=",
+    "200 -> /app/docs.html?tpl= | title=\"\u0414\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u0430\u0446\u0438\u044f \u2014 DSLKit\" | text=2136 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/docs.html?tpl=nope",
+    "200 -> /app/docs.html?tpl=nope | title=\"\u0414\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u0430\u0446\u0438\u044f \u2014 DSLKit\" | text=2136 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/docs.html?template=",
+    "200 -> /app/docs.html?template= | title=\"\u0414\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u0430\u0446\u0438\u044f \u2014 DSLKit\" | text=2136 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/docs.html?template=nope",
+    "200 -> /app/docs.html?template=nope | title=\"\u0414\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u0430\u0446\u0438\u044f \u2014 DSLKit\" | text=2136 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/docs.html?template=idef0",
+    "200 -> /app/docs.html?template=idef0 | title=\"\u0414\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u0430\u0446\u0438\u044f \u2014 DSLKit\" | text=2136 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/docs.html?template=__proto__",
+    "200 -> /app/docs.html?template=__proto__ | title=\"\u0414\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u0430\u0446\u0438\u044f \u2014 DSLKit\" | text=2136 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/docs.html?template=constructor",
+    "200 -> /app/docs.html?template=constructor | title=\"\u0414\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u0430\u0446\u0438\u044f \u2014 DSLKit\" | text=2136 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/docs.html?template=toString",
+    "200 -> /app/docs.html?template=toString | title=\"\u0414\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u0430\u0446\u0438\u044f \u2014 DSLKit\" | text=2136 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/docs.html?q=",
+    "200 -> /app/docs.html?q= | title=\"\u0414\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u0430\u0446\u0438\u044f \u2014 DSLKit\" | text=2136 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/docs.html?q=<b>x</b>",
+    "200 -> /app/docs.html?q=%3Cb%3Ex%3C/b%3E | title=\"\u0414\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u0430\u0446\u0438\u044f \u2014 DSLKit\" | text=2136 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/docs.html?q=%E0%A4%A",
+    "200 -> /app/docs.html?q=%E0%A4%A | title=\"\u0414\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u0430\u0446\u0438\u044f \u2014 DSLKit\" | text=2136 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/docs.html?q=\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f\u044f",
+    "200 -> /app/docs.html?q=%D1%8F%D1%8F%D1%8F%D1%8F%D1%8F%D1%8F%D1%8F% | title=\"\u0414\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u0430\u0446\u0438\u044f \u2014 DSLKit\" | text=2136 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/docs.html?p=a&p=b",
+    "200 -> /app/docs.html?p=a&p=b | title=\"\u0414\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u0430\u0446\u0438\u044f \u2014 DSLKit\" | text=2136 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/docs.html?p[]=1",
+    "200 -> /app/docs.html?p[]=1 | title=\"\u0414\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u0430\u0446\u0438\u044f \u2014 DSLKit\" | text=2136 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/docs.html?%D0%BF=1",
+    "200 -> /app/docs.html?%D0%BF=1 | title=\"\u0414\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u0430\u0446\u0438\u044f \u2014 DSLKit\" | text=2136 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/docs.html?p=%F0%9F%98%80",
+    "200 -> /app/docs.html?p=%F0%9F%98%80 | title=\"\u0414\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u0430\u0446\u0438\u044f \u2014 DSLKit\" | text=2136 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/docs.html?p=../../etc/passwd",
+    "200 -> /app/docs.html?p=../../etc/passwd | title=\"\u0414\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u0430\u0446\u0438\u044f \u2014 DSLKit\" | text=2136 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/docs.html?template=idef0&p=nope&tpl=nope&my=nope",
+    "200 -> /app/docs.html?template=idef0&p=nope&tpl=nope&my=nope | title=\"\u0414\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u0430\u0446\u0438\u044f \u2014 DSLKit\" | text=2136 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/docs.html?lang=en",
+    "200 -> /app/docs.html?lang=en | title=\"\u0414\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u0430\u0446\u0438\u044f \u2014 DSLKit\" | text=2136 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/docs.html?theme=dark",
+    "200 -> /app/docs.html?theme=dark | title=\"\u0414\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u0430\u0446\u0438\u044f \u2014 DSLKit\" | text=2136 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/docs.html#",
+    "200 -> /app/docs.html# | title=\"\u0414\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u0430\u0446\u0438\u044f \u2014 DSLKit\" | text=2136 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/docs.html#x",
+    "None -> /app/docs.html#x | title=\"\u0414\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u0430\u0446\u0438\u044f \u2014 DSLKit\" | text=2136 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/docs.html#main",
+    "None -> /app/docs.html#main | title=\"\u0414\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u0430\u0446\u0438\u044f \u2014 DSLKit\" | text=2136 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/docs.html?#",
+    "200 -> /app/docs.html?# | title=\"\u0414\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u0430\u0446\u0438\u044f \u2014 DSLKit\" | text=2136 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "PAGE",
+    "app/docs.html?a=1#b",
+    "200 -> /app/docs.html?a=1#b | title=\"\u0414\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u0430\u0446\u0438\u044f \u2014 DSLKit\" | text=2136 | note=\"\" | dialogs=0 | inj=False",
+    "",
+    ""
+  ],
+  [
+    "404PAGE",
+    "/nope.html",
+    404,
+    "\u041e\u0448\u0438\u0431\u043a\u0430 404: \u0441\u0442\u0440\u0430\u043d\u0438\u0446\u0430 \u043d\u0435 \u043d\u0430\u0439\u0434\u0435\u043d\u0430 \u2014 DSLKit",
+    "['#main', '/', '/', '/en/', '/#notations', '/#pricing', '/#faq', '/en/', 'mailto:hello@dslkit.io']"
+  ],
+  ["404LINK", "/nope.html", "no link", "Page.click: Timeout 30000ms exceeded.\nCall log:\n  ", ""],
+  [
+    "404PAGE",
+    "/app/nope.html",
+    404,
+    "\u041e\u0448\u0438\u0431\u043a\u0430 404: \u0441\u0442\u0440\u0430\u043d\u0438\u0446\u0430 \u043d\u0435 \u043d\u0430\u0439\u0434\u0435\u043d\u0430 \u2014 DSLKit",
+    "['#main', '/', '/', '/en/', '/#notations', '/#pricing', '/#faq', '/en/', 'mailto:hello@dslkit.io']"
+  ],
+  ["404LINK", "/app/nope.html", "no link", "Page.click: Timeout 30000ms exceeded.\nCall log:\n  ", ""],
+  [
+    "404PAGE",
+    "/en/nope.html",
+    404,
+    "\u041e\u0448\u0438\u0431\u043a\u0430 404: \u0441\u0442\u0440\u0430\u043d\u0438\u0446\u0430 \u043d\u0435 \u043d\u0430\u0439\u0434\u0435\u043d\u0430 \u2014 DSLKit",
+    "['#main', '/', '/', '/en/', '/#notations', '/#pricing', '/#faq', '/en/', 'mailto:hello@dslkit.io']"
+  ],
+  ["404LINK", "/en/nope.html", "no link", "Page.click: Timeout 30000ms exceeded.\nCall log:\n  ", ""],
+  [
+    "404PAGE",
+    "/en/app/nope.html",
+    404,
+    "\u041e\u0448\u0438\u0431\u043a\u0430 404: \u0441\u0442\u0440\u0430\u043d\u0438\u0446\u0430 \u043d\u0435 \u043d\u0430\u0439\u0434\u0435\u043d\u0430 \u2014 DSLKit",
+    "['#main', '/', '/', '/en/', '/#notations', '/#pricing', '/#faq', '/en/', 'mailto:hello@dslkit.io']"
+  ],
+  ["404LINK", "/en/app/nope.html", "no link", "Page.click: Timeout 30000ms exceeded.\nCall log:\n  ", ""]
+]

@@ -1,1172 +1,1172 @@
 [
- {
-  "id": "K01",
-  "group": "K. Engines, external languages, body limit",
-  "title": "GET /api/engines",
-  "request": "GET /api/engines",
-  "expect": "200 JSON, own.notations = 33, external list",
-  "actual": "200 own={\"id\":\"dslkit\",\"endpoint\":\"/api/render\",\"notations\":33} external=24",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K02",
-  "group": "K. Engines, external languages, body limit",
-  "title": "every external endpoint is exactly /api/external/<id>",
-  "request": "GET /api/engines",
-  "expect": "endpoint === \"/api/external/\" + id for all",
-  "actual": "0 mismatches",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K03",
-  "group": "K. Engines, external languages, body limit",
-  "title": "engines ids are unique",
-  "request": "GET /api/engines",
-  "expect": "no duplicates",
-  "actual": "24 of 24",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K04-POST",
-  "group": "K. Engines, external languages, body limit",
-  "title": "POST /api/engines",
-  "request": "POST /api/engines",
-  "expect": "405 with Allow",
-  "actual": "405 allow=GET",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K04-PUT",
-  "group": "K. Engines, external languages, body limit",
-  "title": "PUT /api/engines",
-  "request": "PUT /api/engines",
-  "expect": "405 with Allow",
-  "actual": "405 allow=GET",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K04-DELETE",
-  "group": "K. Engines, external languages, body limit",
-  "title": "DELETE /api/engines",
-  "request": "DELETE /api/engines",
-  "expect": "405 with Allow",
-  "actual": "405 allow=GET",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K04-PATCH",
-  "group": "K. Engines, external languages, body limit",
-  "title": "PATCH /api/engines",
-  "request": "PATCH /api/engines",
-  "expect": "405 with Allow",
-  "actual": "405 allow=GET",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K04-OPTIONS",
-  "group": "K. Engines, external languages, body limit",
-  "title": "OPTIONS /api/engines",
-  "request": "OPTIONS /api/engines",
-  "expect": "405 with Allow",
-  "actual": "405 allow=GET",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K04-HEAD",
-  "group": "K. Engines, external languages, body limit",
-  "title": "HEAD /api/engines",
-  "request": "HEAD /api/engines",
-  "expect": "200 empty body",
-  "actual": "405 allow=GET",
-  "pass": false,
-  "note": ""
- },
- {
-  "id": "K04-TRACE",
-  "group": "K. Engines, external languages, body limit",
-  "title": "TRACE /api/engines",
-  "request": "TRACE /api/engines",
-  "expect": "405 with Allow",
-  "actual": "405 allow=GET",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K05-/api/engines/",
-  "group": "K. Engines, external languages, body limit",
-  "title": "variant path /api/engines/",
-  "request": "GET /api/engines/",
-  "expect": "404 JSON",
-  "actual": "404 application/json; charset=utf-8",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K05-/api/engines/x",
-  "group": "K. Engines, external languages, body limit",
-  "title": "variant path /api/engines/x",
-  "request": "GET /api/engines/x",
-  "expect": "404 JSON",
-  "actual": "404 application/json; charset=utf-8",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K05-/api/ENGINES",
-  "group": "K. Engines, external languages, body limit",
-  "title": "variant path /api/ENGINES",
-  "request": "GET /api/ENGINES",
-  "expect": "404 JSON",
-  "actual": "404 application/json; charset=utf-8",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K05-/api/engines?x=1",
-  "group": "K. Engines, external languages, body limit",
-  "title": "variant path /api/engines?x=1",
-  "request": "GET /api/engines?x=1",
-  "expect": "200",
-  "actual": "200 application/json; charset=utf-8",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K05-/api/engines%00",
-  "group": "K. Engines, external languages, body limit",
-  "title": "variant path /api/engines%00",
-  "request": "GET /api/engines%00",
-  "expect": "404 JSON",
-  "actual": "404 application/json; charset=utf-8",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K06",
-  "group": "K. Engines, external languages, body limit",
-  "title": "security headers on /api/engines",
-  "request": "GET /api/engines",
-  "expect": "CSP and nosniff present",
-  "actual": "csp=no nosniff=no",
-  "pass": false,
-  "note": "Same defect as H05: API answers carry no security headers"
- },
- {
-  "id": "K10",
-  "group": "K. Engines, external languages, body limit",
-  "title": "GET on external endpoint",
-  "request": "GET /api/external/graphviz",
-  "expect": "405 Allow: POST",
-  "actual": "405 allow=POST",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K11-nope",
-  "group": "K. Engines, external languages, body limit",
-  "title": "unknown language \"nope\"",
-  "request": "POST /api/external/nope",
-  "expect": "404 JSON, nothing sent to upstream",
-  "actual": "404 {\"error\":{\"code\":\"not-found\",\"message\":\"Unknown language nope\"}}",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K11-empty",
-  "group": "K. Engines, external languages, body limit",
-  "title": "unknown language \"\"",
-  "request": "POST /api/external/",
-  "expect": "404 JSON, nothing sent to upstream",
-  "actual": "404 {\"error\":{\"code\":\"not-found\",\"message\":\"Unknown language \"}}",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K11-GRAPHVIZ",
-  "group": "K. Engines, external languages, body limit",
-  "title": "unknown language \"GRAPHVIZ\"",
-  "request": "POST /api/external/GRAPHVIZ",
-  "expect": "404 JSON, nothing sent to upstream",
-  "actual": "404 {\"error\":{\"code\":\"not-found\",\"message\":\"Unknown language GRAPHVIZ\"}}",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K11-graphviz/",
-  "group": "K. Engines, external languages, body limit",
-  "title": "unknown language \"graphviz/\"",
-  "request": "POST /api/external/graphviz/",
-  "expect": "404 JSON, nothing sent to upstream",
-  "actual": "404 {\"error\":{\"code\":\"not-found\",\"message\":\"Unknown language graphviz/\"}}",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K11-graphviz/svg",
-  "group": "K. Engines, external languages, body limit",
-  "title": "unknown language \"graphviz/svg\"",
-  "request": "POST /api/external/graphviz/svg",
-  "expect": "404 JSON, nothing sent to upstream",
-  "actual": "404 {\"error\":{\"code\":\"not-found\",\"message\":\"Unknown language graphviz/svg\"…",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K11-__proto__",
-  "group": "K. Engines, external languages, body limit",
-  "title": "unknown language \"__proto__\"",
-  "request": "POST /api/external/__proto__",
-  "expect": "404 JSON, nothing sent to upstream",
-  "actual": "404 {\"error\":{\"code\":\"not-found\",\"message\":\"Unknown language __proto__\"}}",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K11-constructor",
-  "group": "K. Engines, external languages, body limit",
-  "title": "unknown language \"constructor\"",
-  "request": "POST /api/external/constructor",
-  "expect": "404 JSON, nothing sent to upstream",
-  "actual": "404 {\"error\":{\"code\":\"not-found\",\"message\":\"Unknown language constructor\"}…",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K11-toString",
-  "group": "K. Engines, external languages, body limit",
-  "title": "unknown language \"toString\"",
-  "request": "POST /api/external/toString",
-  "expect": "404 JSON, nothing sent to upstream",
-  "actual": "404 {\"error\":{\"code\":\"not-found\",\"message\":\"Unknown language toString\"}}",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K11-graphviz%00",
-  "group": "K. Engines, external languages, body limit",
-  "title": "unknown language \"graphviz%00\"",
-  "request": "POST /api/external/graphviz%00",
-  "expect": "404 JSON, nothing sent to upstream",
-  "actual": "404 {\"error\":{\"code\":\"not-found\",\"message\":\"Unknown language graphviz%00\"}…",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K11-..%2fengines",
-  "group": "K. Engines, external languages, body limit",
-  "title": "unknown language \"..%2fengines\"",
-  "request": "POST /api/external/..%2fengines",
-  "expect": "404 JSON, nothing sent to upstream",
-  "actual": "404 {\"error\":{\"code\":\"not-found\",\"message\":\"Unknown language ..%2fengines\"…",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K11-../engines",
-  "group": "K. Engines, external languages, body limit",
-  "title": "unknown language \"../engines\"",
-  "request": "POST /api/external/../engines",
-  "expect": "404 JSON, nothing sent to upstream",
-  "actual": "405 {\"error\":{\"code\":\"method\",\"message\":\"Use GET\"}}",
-  "pass": true,
-  "note": "the URL parser folds ../ into /api/engines; GET-only answer 405 is correct"
- },
- {
-  "id": "K11-http:%2f%2fevil.exam",
-  "group": "K. Engines, external languages, body limit",
-  "title": "unknown language \"http:%2f%2fevil.example\"",
-  "request": "POST /api/external/http:%2f%2fevil.example",
-  "expect": "404 JSON, nothing sent to upstream",
-  "actual": "404 {\"error\":{\"code\":\"not-found\",\"message\":\"Unknown language http:%2f%2fev…",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K11-%67raphviz",
-  "group": "K. Engines, external languages, body limit",
-  "title": "unknown language \"%67raphviz\"",
-  "request": "POST /api/external/%67raphviz",
-  "expect": "404 JSON, nothing sent to upstream",
-  "actual": "404 {\"error\":{\"code\":\"not-found\",\"message\":\"Unknown language %67raphviz\"}}",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K11-graphviz%20",
-  "group": "K. Engines, external languages, body limit",
-  "title": "unknown language \"graphviz%20\"",
-  "request": "POST /api/external/graphviz%20",
-  "expect": "404 JSON, nothing sent to upstream",
-  "actual": "404 {\"error\":{\"code\":\"not-found\",\"message\":\"Unknown language graphviz%20\"}…",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K11-aaaaaaaaaaaaaaaaaaaa",
-  "group": "K. Engines, external languages, body limit",
-  "title": "unknown language \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\"",
-  "request": "POST /api/external/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-  "expect": "404 JSON, nothing sent to upstream",
-  "actual": "404 {\"error\":{\"code\":\"not-found\",\"message\":\"Unknown language aaaaaaaaaaaaa…",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K12",
-  "group": "K. Engines, external languages, body limit",
-  "title": "unknown language never reached the upstream",
-  "request": "mock log",
-  "expect": "no request to a path other than /<known>/svg",
-  "actual": "0 strange requests: -",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K13-PUT",
-  "group": "K. Engines, external languages, body limit",
-  "title": "PUT on external endpoint",
-  "request": "PUT /api/external/graphviz",
-  "expect": "405 Allow: POST",
-  "actual": "405 allow=POST",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K13-DELETE",
-  "group": "K. Engines, external languages, body limit",
-  "title": "DELETE on external endpoint",
-  "request": "DELETE /api/external/graphviz",
-  "expect": "405 Allow: POST",
-  "actual": "405 allow=POST",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K13-PATCH",
-  "group": "K. Engines, external languages, body limit",
-  "title": "PATCH on external endpoint",
-  "request": "PATCH /api/external/graphviz",
-  "expect": "405 Allow: POST",
-  "actual": "405 allow=POST",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K13-OPTIONS",
-  "group": "K. Engines, external languages, body limit",
-  "title": "OPTIONS on external endpoint",
-  "request": "OPTIONS /api/external/graphviz",
-  "expect": "405 Allow: POST",
-  "actual": "405 allow=POST",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K13-HEAD",
-  "group": "K. Engines, external languages, body limit",
-  "title": "HEAD on external endpoint",
-  "request": "HEAD /api/external/graphviz",
-  "expect": "405 Allow: POST",
-  "actual": "405 allow=POST",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K13-TRACE",
-  "group": "K. Engines, external languages, body limit",
-  "title": "TRACE on external endpoint",
-  "request": "TRACE /api/external/graphviz",
-  "expect": "405 Allow: POST",
-  "actual": "405 allow=POST",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K14",
-  "group": "K. Engines, external languages, body limit",
-  "title": "unknown language is checked before the body is read",
-  "request": "POST /api/external/doesnotexist body \"{\"",
-  "expect": "404 (not 400)",
-  "actual": "404",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K20",
-  "group": "K. Engines, external languages, body limit",
-  "title": "valid request is proxied",
-  "request": "POST /api/external/graphviz {source:\"ok\"}",
-  "expect": "200 image/svg+xml, valid SVG",
-  "actual": "200 image/svg+xml; charset=utf-8 <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"10\" height=\"10\"><text>g… issues=none",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K21",
-  "group": "K. Engines, external languages, body limit",
-  "title": "upstream receives POST /graphviz/svg as text/plain with the source",
-  "request": "mock log",
-  "expect": "POST /graphviz/svg text/plain, len 2",
-  "actual": "{\"url\":\"/graphviz/svg\",\"method\":\"POST\",\"type\":\"text/plain\",\"len\":2}",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K22-graphviz",
-  "group": "K. Engines, external languages, body limit",
-  "title": "every language is routed: graphviz",
-  "request": "POST /api/external/graphviz",
-  "expect": "200, upstream path /graphviz/svg",
-  "actual": "200 <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"10\" height=\"1…",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K22-mermaid",
-  "group": "K. Engines, external languages, body limit",
-  "title": "every language is routed: mermaid",
-  "request": "POST /api/external/mermaid",
-  "expect": "200, upstream path /mermaid/svg",
-  "actual": "200 <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"10\" height=\"1…",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K22-plantuml",
-  "group": "K. Engines, external languages, body limit",
-  "title": "every language is routed: plantuml",
-  "request": "POST /api/external/plantuml",
-  "expect": "200, upstream path /plantuml/svg",
-  "actual": "200 <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"10\" height=\"1…",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K22-c4plantuml",
-  "group": "K. Engines, external languages, body limit",
-  "title": "every language is routed: c4plantuml",
-  "request": "POST /api/external/c4plantuml",
-  "expect": "200, upstream path /c4plantuml/svg",
-  "actual": "200 <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"10\" height=\"1…",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K22-d2",
-  "group": "K. Engines, external languages, body limit",
-  "title": "every language is routed: d2",
-  "request": "POST /api/external/d2",
-  "expect": "200, upstream path /d2/svg",
-  "actual": "200 <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"10\" height=\"1…",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K22-nomnoml",
-  "group": "K. Engines, external languages, body limit",
-  "title": "every language is routed: nomnoml",
-  "request": "POST /api/external/nomnoml",
-  "expect": "200, upstream path /nomnoml/svg",
-  "actual": "200 <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"10\" height=\"1…",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K22-ditaa",
-  "group": "K. Engines, external languages, body limit",
-  "title": "every language is routed: ditaa",
-  "request": "POST /api/external/ditaa",
-  "expect": "200, upstream path /ditaa/svg",
-  "actual": "200 <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"10\" height=\"1…",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K22-svgbob",
-  "group": "K. Engines, external languages, body limit",
-  "title": "every language is routed: svgbob",
-  "request": "POST /api/external/svgbob",
-  "expect": "200, upstream path /svgbob/svg",
-  "actual": "200 <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"10\" height=\"1…",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K22-blockdiag",
-  "group": "K. Engines, external languages, body limit",
-  "title": "every language is routed: blockdiag",
-  "request": "POST /api/external/blockdiag",
-  "expect": "200, upstream path /blockdiag/svg",
-  "actual": "200 <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"10\" height=\"1…",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K22-seqdiag",
-  "group": "K. Engines, external languages, body limit",
-  "title": "every language is routed: seqdiag",
-  "request": "POST /api/external/seqdiag",
-  "expect": "200, upstream path /seqdiag/svg",
-  "actual": "200 <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"10\" height=\"1…",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K22-actdiag",
-  "group": "K. Engines, external languages, body limit",
-  "title": "every language is routed: actdiag",
-  "request": "POST /api/external/actdiag",
-  "expect": "200, upstream path /actdiag/svg",
-  "actual": "200 <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"10\" height=\"1…",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K22-nwdiag",
-  "group": "K. Engines, external languages, body limit",
-  "title": "every language is routed: nwdiag",
-  "request": "POST /api/external/nwdiag",
-  "expect": "200, upstream path /nwdiag/svg",
-  "actual": "200 <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"10\" height=\"1…",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K22-packetdiag",
-  "group": "K. Engines, external languages, body limit",
-  "title": "every language is routed: packetdiag",
-  "request": "POST /api/external/packetdiag",
-  "expect": "200, upstream path /packetdiag/svg",
-  "actual": "200 <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"10\" height=\"1…",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K22-rackdiag",
-  "group": "K. Engines, external languages, body limit",
-  "title": "every language is routed: rackdiag",
-  "request": "POST /api/external/rackdiag",
-  "expect": "200, upstream path /rackdiag/svg",
-  "actual": "200 <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"10\" height=\"1…",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K22-bytefield",
-  "group": "K. Engines, external languages, body limit",
-  "title": "every language is routed: bytefield",
-  "request": "POST /api/external/bytefield",
-  "expect": "200, upstream path /bytefield/svg",
-  "actual": "200 <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"10\" height=\"1…",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K22-erd",
-  "group": "K. Engines, external languages, body limit",
-  "title": "every language is routed: erd",
-  "request": "POST /api/external/erd",
-  "expect": "200, upstream path /erd/svg",
-  "actual": "200 <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"10\" height=\"1…",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K22-pikchr",
-  "group": "K. Engines, external languages, body limit",
-  "title": "every language is routed: pikchr",
-  "request": "POST /api/external/pikchr",
-  "expect": "200, upstream path /pikchr/svg",
-  "actual": "200 <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"10\" height=\"1…",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K22-structurizr",
-  "group": "K. Engines, external languages, body limit",
-  "title": "every language is routed: structurizr",
-  "request": "POST /api/external/structurizr",
-  "expect": "200, upstream path /structurizr/svg",
-  "actual": "200 <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"10\" height=\"1…",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K22-vega",
-  "group": "K. Engines, external languages, body limit",
-  "title": "every language is routed: vega",
-  "request": "POST /api/external/vega",
-  "expect": "200, upstream path /vega/svg",
-  "actual": "200 <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"10\" height=\"1…",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K22-vegalite",
-  "group": "K. Engines, external languages, body limit",
-  "title": "every language is routed: vegalite",
-  "request": "POST /api/external/vegalite",
-  "expect": "200, upstream path /vegalite/svg",
-  "actual": "200 <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"10\" height=\"1…",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K22-wavedrom",
-  "group": "K. Engines, external languages, body limit",
-  "title": "every language is routed: wavedrom",
-  "request": "POST /api/external/wavedrom",
-  "expect": "200, upstream path /wavedrom/svg",
-  "actual": "200 <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"10\" height=\"1…",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K22-dbml",
-  "group": "K. Engines, external languages, body limit",
-  "title": "every language is routed: dbml",
-  "request": "POST /api/external/dbml",
-  "expect": "200, upstream path /dbml/svg",
-  "actual": "200 <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"10\" height=\"1…",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K22-excalidraw",
-  "group": "K. Engines, external languages, body limit",
-  "title": "every language is routed: excalidraw",
-  "request": "POST /api/external/excalidraw",
-  "expect": "200, upstream path /excalidraw/svg",
-  "actual": "200 <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"10\" height=\"1…",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K22-bpmn",
-  "group": "K. Engines, external languages, body limit",
-  "title": "every language is routed: bpmn",
-  "request": "POST /api/external/bpmn",
-  "expect": "200, upstream path /bpmn/svg",
-  "actual": "200 <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"10\" height=\"1…",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K23",
-  "group": "K. Engines, external languages, body limit",
-  "title": "text/plain body accepted",
-  "request": "POST text/plain \"ok\"",
-  "expect": "200",
-  "actual": "200",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K30",
-  "group": "K. Engines, external languages, body limit",
-  "title": "external: empty body",
-  "request": "POST /api/external/graphviz ",
-  "expect": "400",
-  "actual": "400 {\"error\":{\"code\":\"json\",\"message\":\"The body is not valid JSON\"}}",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K31",
-  "group": "K. Engines, external languages, body limit",
-  "title": "external: broken JSON",
-  "request": "POST /api/external/graphviz {",
-  "expect": "400",
-  "actual": "400 {\"error\":{\"code\":\"json\",\"message\":\"The body is not valid JSON\"}}",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K32",
-  "group": "K. Engines, external languages, body limit",
-  "title": "external: JSON null",
-  "request": "POST /api/external/graphviz null",
-  "expect": "400",
-  "actual": "400 {\"error\":{\"code\":\"source\",\"message\":\"The \\\"source\\\" text is required\"}…",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K33",
-  "group": "K. Engines, external languages, body limit",
-  "title": "external: JSON array",
-  "request": "POST /api/external/graphviz [\"x\"]",
-  "expect": "400",
-  "actual": "400 {\"error\":{\"code\":\"source\",\"message\":\"The \\\"source\\\" text is required\"}…",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K34",
-  "group": "K. Engines, external languages, body limit",
-  "title": "external: source number",
-  "request": "POST /api/external/graphviz {\"source\":5}",
-  "expect": "400",
-  "actual": "400 {\"error\":{\"code\":\"source\",\"message\":\"The \\\"source\\\" text is required\"}…",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K35",
-  "group": "K. Engines, external languages, body limit",
-  "title": "external: source null",
-  "request": "POST /api/external/graphviz {\"source\":null}",
-  "expect": "400",
-  "actual": "400 {\"error\":{\"code\":\"source\",\"message\":\"The \\\"source\\\" text is required\"}…",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K36",
-  "group": "K. Engines, external languages, body limit",
-  "title": "external: source object",
-  "request": "POST /api/external/graphviz {\"source\":{\"a\":1}}",
-  "expect": "400",
-  "actual": "400 {\"error\":{\"code\":\"source\",\"message\":\"The \\\"source\\\" text is required\"}…",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K37",
-  "group": "K. Engines, external languages, body limit",
-  "title": "external: source spaces only",
-  "request": "POST /api/external/graphviz {\"source\":\"   \"}",
-  "expect": "400",
-  "actual": "400 {\"error\":{\"code\":\"source\",\"message\":\"The \\\"source\\\" text is required\"}…",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K38",
-  "group": "K. Engines, external languages, body limit",
-  "title": "external: source empty",
-  "request": "POST /api/external/graphviz {\"source\":\"\"}",
-  "expect": "400",
-  "actual": "400 {\"error\":{\"code\":\"source\",\"message\":\"The \\\"source\\\" text is required\"}…",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K39",
-  "group": "K. Engines, external languages, body limit",
-  "title": "external: no source",
-  "request": "POST /api/external/graphviz {}",
-  "expect": "400",
-  "actual": "400 {\"error\":{\"code\":\"source\",\"message\":\"The \\\"source\\\" text is required\"}…",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K40",
-  "group": "K. Engines, external languages, body limit",
-  "title": "external: __proto__ source is not inherited",
-  "request": "POST {\"__proto__\":{\"source\":\"x\"}}",
-  "expect": "400",
-  "actual": "400",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K41",
-  "group": "K. Engines, external languages, body limit",
-  "title": "external: NUL character in source",
-  "request": "POST source \"a\\u0000b\"",
-  "expect": "200 or 4xx, not 500",
-  "actual": "200",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K42",
-  "group": "K. Engines, external languages, body limit",
-  "title": "external: unicode, emoji, CRLF",
-  "request": "POST unicode source",
-  "expect": "200",
-  "actual": "200",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K50",
-  "group": "K. Engines, external languages, body limit",
-  "title": "external: source of 1 characters",
-  "request": "POST /api/external/graphviz (1 chars)",
-  "expect": "200",
-  "actual": "200 <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"10\" height=\"1…",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K51",
-  "group": "K. Engines, external languages, body limit",
-  "title": "external: source of 99999 characters",
-  "request": "POST /api/external/graphviz (99999 chars)",
-  "expect": "200",
-  "actual": "200 <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"10\" height=\"1…",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K52",
-  "group": "K. Engines, external languages, body limit",
-  "title": "external: source of 100000 characters",
-  "request": "POST /api/external/graphviz (100000 chars)",
-  "expect": "200",
-  "actual": "200 <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"10\" height=\"1…",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K53",
-  "group": "K. Engines, external languages, body limit",
-  "title": "external: source of 100001 characters",
-  "request": "POST /api/external/graphviz (100001 chars)",
-  "expect": "413",
-  "actual": "413 {\"error\":{\"code\":\"too-large\",\"message\":\"The source is longer…",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K54",
-  "group": "K. Engines, external languages, body limit",
-  "title": "external: 100000 Cyrillic characters (200000 bytes)",
-  "request": "POST source 100000 x \"я\"",
-  "expect": "200 (length is at the limit)",
-  "actual": "200",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K55",
-  "group": "K. Engines, external languages, body limit",
-  "title": "external: 100000 newlines (escaped as 200000 bytes in JSON)",
-  "request": "POST source 100000 x \\n",
-  "expect": "at the limit but blank: 400 (only whitespace)",
-  "actual": "400",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K56",
-  "group": "K. Engines, external languages, body limit",
-  "title": "external: 100000 chars with 50000 newlines",
-  "request": "POST",
-  "expect": "200",
-  "actual": "200",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K57",
-  "group": "K. Engines, external languages, body limit",
-  "title": "external: 100000 control chars (JSON escape = 6 bytes each, 600 KB body)",
-  "request": "POST source 100000 x \\u0001",
-  "expect": "200 (exactly at the limit)",
-  "actual": "200",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K60",
-  "group": "K. Engines, external languages, body limit",
-  "title": "text/plain 100000 bytes",
-  "request": "POST /api/validate 100000 x \"x\"",
-  "expect": "200",
-  "actual": "200",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K61",
-  "group": "K. Engines, external languages, body limit",
-  "title": "text/plain 100001 characters",
-  "request": "POST /api/validate 100001 x \"x\"",
-  "expect": "413 (source longer than 100000)",
-  "actual": "413",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K62",
-  "group": "K. Engines, external languages, body limit",
-  "title": "text/plain 601024 bytes (body limit)",
-  "request": "POST 601024 bytes",
-  "expect": "413 (source too long)",
-  "actual": "413",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K63",
-  "group": "K. Engines, external languages, body limit",
-  "title": "text/plain 601025 bytes (limit + 1)",
-  "request": "POST 601025 bytes",
-  "expect": "413",
-  "actual": "413",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K64",
-  "group": "K. Engines, external languages, body limit",
-  "title": "text/plain 5 MB",
-  "request": "POST 5 MB",
-  "expect": "413",
-  "actual": "413",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K65",
-  "group": "K. Engines, external languages, body limit",
-  "title": "JSON: 100000 chars each escaped to 6 bytes (body 600013 bytes)",
-  "request": "POST /api/validate",
-  "expect": "200 (source is at the limit)",
-  "actual": "200 {\"notation\":\"idef0\",\"valid\":false,\"problems\":[{\"line\":1,\"sev…",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K66",
-  "group": "K. Engines, external languages, body limit",
-  "title": "JSON: 100001 escaped chars (body 600019 bytes)",
-  "request": "POST /api/validate",
-  "expect": "413",
-  "actual": "413",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K67",
-  "group": "K. Engines, external languages, body limit",
-  "title": "JSON with a valid short source but 700 KB of extra field",
-  "request": "POST /api/validate",
-  "expect": "413 (body over limit) is acceptable; 200 would also be fine",
-  "actual": "413",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K68",
-  "group": "K. Engines, external languages, body limit",
-  "title": "JSON with a short source and 400 KB of extra field (below body limit)",
-  "request": "POST /api/validate",
-  "expect": "200",
-  "actual": "200",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K69",
-  "group": "K. Engines, external languages, body limit",
-  "title": "JSON nested 300000 deep (600 KB)",
-  "request": "POST /api/validate",
-  "expect": "200, 400 or 413; server stays alive",
-  "actual": "200",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K70",
-  "group": "K. Engines, external languages, body limit",
-  "title": "external: body over limit",
-  "request": "POST /api/external/graphviz 601025 bytes",
-  "expect": "413",
-  "actual": "413",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K71",
-  "group": "K. Engines, external languages, body limit",
-  "title": "50 parallel requests with 600 KB bodies (30 MB in flight)",
-  "request": "50 x POST /api/validate 600 KB",
-  "expect": "all 200 within 20 s",
-  "actual": "50/50 x 200 in 1559 ms",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K80",
-  "group": "K. Engines, external languages, body limit",
-  "title": "upstream SVG with <script>/on*/javascript: is forwarded as is",
-  "request": "mock returns hostile SVG",
-  "expect": "response must be sanitised or served so it cannot run (no <script>, no on*)",
-  "actual": "200 image/svg+xml; charset=utf-8 issues=<script>;on*-attribute;javascript: in attribute nosniff=- csp=-",
-  "pass": false,
-  "note": "The server relays the SVG unchanged and sends no CSP/sandbox; opened directly in a tab it runs the script on the DSLKit origin. The editor cleans the SVG on the page, a direct caller does not get that"
- },
- {
-  "id": "K81",
-  "group": "K. Engines, external languages, body limit",
-  "title": "upstream returns HTML",
-  "request": "mock returns text/html",
-  "expect": "502 upstream-invalid",
-  "actual": "502 {\"error\":{\"code\":\"upstream-invalid\",\"message\":\"The drawing service did not retur…",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K82",
-  "group": "K. Engines, external languages, body limit",
-  "title": "upstream returns an empty body",
-  "request": "mock returns \"\"",
-  "expect": "502",
-  "actual": "502",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K83",
-  "group": "K. Engines, external languages, body limit",
-  "title": "upstream 400 (syntax error) maps to 422",
-  "request": "mock 400",
-  "expect": "422 with code upstream-error",
-  "actual": "422 {\"error\":{\"code\":\"upstream-error\",\"message\":\"The drawing service answered 400\"}}",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K84",
-  "group": "K. Engines, external languages, body limit",
-  "title": "upstream 404",
-  "request": "mock 404",
-  "expect": "502",
-  "actual": "502",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K85",
-  "group": "K. Engines, external languages, body limit",
-  "title": "upstream 500",
-  "request": "mock 500",
-  "expect": "502",
-  "actual": "502",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K86",
-  "group": "K. Engines, external languages, body limit",
-  "title": "upstream error text is not echoed",
-  "request": "mock 400 \"syntax error\"",
-  "expect": "the response carries a message but the compiler error is lost",
-  "actual": "{\"error\":{\"code\":\"upstream-error\",\"message\":\"The drawing service answered 500\"}}",
-  "pass": true,
-  "note": "Informational: with 422 the user gets no line/column of the upstream syntax error"
- },
- {
-  "id": "K87",
-  "group": "K. Engines, external languages, body limit",
-  "title": "upstream SVG with <?xml> and DOCTYPE prolog is accepted",
-  "request": "mock prolog",
-  "expect": "200",
-  "actual": "200",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K88",
-  "group": "K. Engines, external languages, body limit",
-  "title": "upstream never answers: timeout",
-  "request": "mock hangs",
-  "expect": "504 upstream-timeout after about 10 s",
-  "actual": "504 after 10054 ms {\"error\":{\"code\":\"upstream-timeout\",\"message\":\"The drawing s…",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K89b",
-  "group": "K. Engines, external languages, body limit",
-  "title": "server process survives an upstream that stalls mid-body",
-  "request": "same request as K89",
-  "expect": "server keeps running",
-  "actual": "server process exited (code null): unhandled TimeoutError from answer.text()",
-  "pass": false,
-  "note": "In render-api.js the call is `return external(...)` inside try without await, so the rejection is not caught by the catch, and server.js does not catch the promise of handleApi: Node terminates on the unhandled rejection"
- },
- {
-  "id": "K89",
-  "group": "K. Engines, external languages, body limit",
-  "title": "upstream sends headers but never finishes the body",
-  "request": "mock sends part of the body and stalls",
-  "expect": "504/502 within about 10 s (timeout covers the body)",
-  "actual": "no response (ECONNRESET) after 10464 ms",
-  "pass": false,
-  "note": "AbortSignal.timeout also aborts answer.text() in modern Node, so the request is cut"
- },
- {
-  "id": "K90",
-  "group": "K. Engines, external languages, body limit",
-  "title": "upstream returns 100 MB of SVG",
-  "request": "mock 100 MB",
-  "expect": "refused (502/413) - memory of the server must be bounded",
-  "actual": "200 100 MB in 6900 ms",
-  "pass": false,
-  "note": "answer.text() buffers the whole upstream body; there is no size limit on what is relayed to the client"
- },
- {
-  "id": "K91",
-  "group": "K. Engines, external languages, body limit",
-  "title": "20 parallel requests to a hanging upstream do not block the server",
-  "request": "20 x hang",
-  "expect": "all 504 in about 10 s, other requests still answered",
-  "actual": "20/20 x 504 in 10547 ms, probe 200",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K92",
-  "group": "K. Engines, external languages, body limit",
-  "title": "Accept: application/json on a SVG-only endpoint",
-  "request": "Accept: application/json",
-  "expect": "200 SVG or 406",
-  "actual": "200 image/svg+xml; charset=utf-8",
-  "pass": true,
-  "note": ""
- },
- {
-  "id": "K93",
-  "group": "K. Engines, external languages, body limit",
-  "title": "external answer headers",
-  "request": "POST /api/external/graphviz",
-  "expect": "Cache-Control: no-store, nosniff, CSP",
-  "actual": "cache=no-store nosniff=- csp=-",
-  "pass": false,
-  "note": "No-store is set, security headers are not"
- },
- {
-  "id": "K94",
-  "group": "K. Engines, external languages, body limit",
-  "title": "external: cross-origin simple request (text/plain) is processed",
-  "request": "POST text/plain with Origin: evil.example",
-  "expect": "no ACAO header; the call costs only a proxy hop",
-  "actual": "200 ACAO=-",
-  "pass": true,
-  "note": "Any web page can make a visitor browser send diagrams to the server (open proxy for Kroki), no cookies involved"
- },
- {
-  "id": "K95",
-  "group": "K. Engines, external languages, body limit",
-  "title": "default upstream is the public https://kroki.io (privacy)",
-  "request": "source of render-api.js",
-  "expect": "user diagrams leave the server only on explicit /api/external/* calls",
-  "actual": "krokiUrl default = process.env.KROKI_URL ?? \"https://kroki.io\"",
-  "pass": true,
-  "note": "Informational: diagram text is sent to a third party unless KROKI_URL is set; CSP connect-src also allows https://kroki.io"
- }
+  {
+    "id": "K01",
+    "group": "K. Engines, external languages, body limit",
+    "title": "GET /api/engines",
+    "request": "GET /api/engines",
+    "expect": "200 JSON, own.notations = 33, external list",
+    "actual": "200 own={\"id\":\"dslkit\",\"endpoint\":\"/api/render\",\"notations\":33} external=24",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K02",
+    "group": "K. Engines, external languages, body limit",
+    "title": "every external endpoint is exactly /api/external/<id>",
+    "request": "GET /api/engines",
+    "expect": "endpoint === \"/api/external/\" + id for all",
+    "actual": "0 mismatches",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K03",
+    "group": "K. Engines, external languages, body limit",
+    "title": "engines ids are unique",
+    "request": "GET /api/engines",
+    "expect": "no duplicates",
+    "actual": "24 of 24",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K04-POST",
+    "group": "K. Engines, external languages, body limit",
+    "title": "POST /api/engines",
+    "request": "POST /api/engines",
+    "expect": "405 with Allow",
+    "actual": "405 allow=GET",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K04-PUT",
+    "group": "K. Engines, external languages, body limit",
+    "title": "PUT /api/engines",
+    "request": "PUT /api/engines",
+    "expect": "405 with Allow",
+    "actual": "405 allow=GET",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K04-DELETE",
+    "group": "K. Engines, external languages, body limit",
+    "title": "DELETE /api/engines",
+    "request": "DELETE /api/engines",
+    "expect": "405 with Allow",
+    "actual": "405 allow=GET",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K04-PATCH",
+    "group": "K. Engines, external languages, body limit",
+    "title": "PATCH /api/engines",
+    "request": "PATCH /api/engines",
+    "expect": "405 with Allow",
+    "actual": "405 allow=GET",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K04-OPTIONS",
+    "group": "K. Engines, external languages, body limit",
+    "title": "OPTIONS /api/engines",
+    "request": "OPTIONS /api/engines",
+    "expect": "405 with Allow",
+    "actual": "405 allow=GET",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K04-HEAD",
+    "group": "K. Engines, external languages, body limit",
+    "title": "HEAD /api/engines",
+    "request": "HEAD /api/engines",
+    "expect": "200 empty body",
+    "actual": "405 allow=GET",
+    "pass": false,
+    "note": ""
+  },
+  {
+    "id": "K04-TRACE",
+    "group": "K. Engines, external languages, body limit",
+    "title": "TRACE /api/engines",
+    "request": "TRACE /api/engines",
+    "expect": "405 with Allow",
+    "actual": "405 allow=GET",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K05-/api/engines/",
+    "group": "K. Engines, external languages, body limit",
+    "title": "variant path /api/engines/",
+    "request": "GET /api/engines/",
+    "expect": "404 JSON",
+    "actual": "404 application/json; charset=utf-8",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K05-/api/engines/x",
+    "group": "K. Engines, external languages, body limit",
+    "title": "variant path /api/engines/x",
+    "request": "GET /api/engines/x",
+    "expect": "404 JSON",
+    "actual": "404 application/json; charset=utf-8",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K05-/api/ENGINES",
+    "group": "K. Engines, external languages, body limit",
+    "title": "variant path /api/ENGINES",
+    "request": "GET /api/ENGINES",
+    "expect": "404 JSON",
+    "actual": "404 application/json; charset=utf-8",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K05-/api/engines?x=1",
+    "group": "K. Engines, external languages, body limit",
+    "title": "variant path /api/engines?x=1",
+    "request": "GET /api/engines?x=1",
+    "expect": "200",
+    "actual": "200 application/json; charset=utf-8",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K05-/api/engines%00",
+    "group": "K. Engines, external languages, body limit",
+    "title": "variant path /api/engines%00",
+    "request": "GET /api/engines%00",
+    "expect": "404 JSON",
+    "actual": "404 application/json; charset=utf-8",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K06",
+    "group": "K. Engines, external languages, body limit",
+    "title": "security headers on /api/engines",
+    "request": "GET /api/engines",
+    "expect": "CSP and nosniff present",
+    "actual": "csp=no nosniff=no",
+    "pass": false,
+    "note": "Same defect as H05: API answers carry no security headers"
+  },
+  {
+    "id": "K10",
+    "group": "K. Engines, external languages, body limit",
+    "title": "GET on external endpoint",
+    "request": "GET /api/external/graphviz",
+    "expect": "405 Allow: POST",
+    "actual": "405 allow=POST",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K11-nope",
+    "group": "K. Engines, external languages, body limit",
+    "title": "unknown language \"nope\"",
+    "request": "POST /api/external/nope",
+    "expect": "404 JSON, nothing sent to upstream",
+    "actual": "404 {\"error\":{\"code\":\"not-found\",\"message\":\"Unknown language nope\"}}",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K11-empty",
+    "group": "K. Engines, external languages, body limit",
+    "title": "unknown language \"\"",
+    "request": "POST /api/external/",
+    "expect": "404 JSON, nothing sent to upstream",
+    "actual": "404 {\"error\":{\"code\":\"not-found\",\"message\":\"Unknown language \"}}",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K11-GRAPHVIZ",
+    "group": "K. Engines, external languages, body limit",
+    "title": "unknown language \"GRAPHVIZ\"",
+    "request": "POST /api/external/GRAPHVIZ",
+    "expect": "404 JSON, nothing sent to upstream",
+    "actual": "404 {\"error\":{\"code\":\"not-found\",\"message\":\"Unknown language GRAPHVIZ\"}}",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K11-graphviz/",
+    "group": "K. Engines, external languages, body limit",
+    "title": "unknown language \"graphviz/\"",
+    "request": "POST /api/external/graphviz/",
+    "expect": "404 JSON, nothing sent to upstream",
+    "actual": "404 {\"error\":{\"code\":\"not-found\",\"message\":\"Unknown language graphviz/\"}}",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K11-graphviz/svg",
+    "group": "K. Engines, external languages, body limit",
+    "title": "unknown language \"graphviz/svg\"",
+    "request": "POST /api/external/graphviz/svg",
+    "expect": "404 JSON, nothing sent to upstream",
+    "actual": "404 {\"error\":{\"code\":\"not-found\",\"message\":\"Unknown language graphviz/svg\"…",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K11-__proto__",
+    "group": "K. Engines, external languages, body limit",
+    "title": "unknown language \"__proto__\"",
+    "request": "POST /api/external/__proto__",
+    "expect": "404 JSON, nothing sent to upstream",
+    "actual": "404 {\"error\":{\"code\":\"not-found\",\"message\":\"Unknown language __proto__\"}}",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K11-constructor",
+    "group": "K. Engines, external languages, body limit",
+    "title": "unknown language \"constructor\"",
+    "request": "POST /api/external/constructor",
+    "expect": "404 JSON, nothing sent to upstream",
+    "actual": "404 {\"error\":{\"code\":\"not-found\",\"message\":\"Unknown language constructor\"}…",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K11-toString",
+    "group": "K. Engines, external languages, body limit",
+    "title": "unknown language \"toString\"",
+    "request": "POST /api/external/toString",
+    "expect": "404 JSON, nothing sent to upstream",
+    "actual": "404 {\"error\":{\"code\":\"not-found\",\"message\":\"Unknown language toString\"}}",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K11-graphviz%00",
+    "group": "K. Engines, external languages, body limit",
+    "title": "unknown language \"graphviz%00\"",
+    "request": "POST /api/external/graphviz%00",
+    "expect": "404 JSON, nothing sent to upstream",
+    "actual": "404 {\"error\":{\"code\":\"not-found\",\"message\":\"Unknown language graphviz%00\"}…",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K11-..%2fengines",
+    "group": "K. Engines, external languages, body limit",
+    "title": "unknown language \"..%2fengines\"",
+    "request": "POST /api/external/..%2fengines",
+    "expect": "404 JSON, nothing sent to upstream",
+    "actual": "404 {\"error\":{\"code\":\"not-found\",\"message\":\"Unknown language ..%2fengines\"…",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K11-../engines",
+    "group": "K. Engines, external languages, body limit",
+    "title": "unknown language \"../engines\"",
+    "request": "POST /api/external/../engines",
+    "expect": "404 JSON, nothing sent to upstream",
+    "actual": "405 {\"error\":{\"code\":\"method\",\"message\":\"Use GET\"}}",
+    "pass": true,
+    "note": "the URL parser folds ../ into /api/engines; GET-only answer 405 is correct"
+  },
+  {
+    "id": "K11-http:%2f%2fevil.exam",
+    "group": "K. Engines, external languages, body limit",
+    "title": "unknown language \"http:%2f%2fevil.example\"",
+    "request": "POST /api/external/http:%2f%2fevil.example",
+    "expect": "404 JSON, nothing sent to upstream",
+    "actual": "404 {\"error\":{\"code\":\"not-found\",\"message\":\"Unknown language http:%2f%2fev…",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K11-%67raphviz",
+    "group": "K. Engines, external languages, body limit",
+    "title": "unknown language \"%67raphviz\"",
+    "request": "POST /api/external/%67raphviz",
+    "expect": "404 JSON, nothing sent to upstream",
+    "actual": "404 {\"error\":{\"code\":\"not-found\",\"message\":\"Unknown language %67raphviz\"}}",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K11-graphviz%20",
+    "group": "K. Engines, external languages, body limit",
+    "title": "unknown language \"graphviz%20\"",
+    "request": "POST /api/external/graphviz%20",
+    "expect": "404 JSON, nothing sent to upstream",
+    "actual": "404 {\"error\":{\"code\":\"not-found\",\"message\":\"Unknown language graphviz%20\"}…",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K11-aaaaaaaaaaaaaaaaaaaa",
+    "group": "K. Engines, external languages, body limit",
+    "title": "unknown language \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\"",
+    "request": "POST /api/external/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "expect": "404 JSON, nothing sent to upstream",
+    "actual": "404 {\"error\":{\"code\":\"not-found\",\"message\":\"Unknown language aaaaaaaaaaaaa…",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K12",
+    "group": "K. Engines, external languages, body limit",
+    "title": "unknown language never reached the upstream",
+    "request": "mock log",
+    "expect": "no request to a path other than /<known>/svg",
+    "actual": "0 strange requests: -",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K13-PUT",
+    "group": "K. Engines, external languages, body limit",
+    "title": "PUT on external endpoint",
+    "request": "PUT /api/external/graphviz",
+    "expect": "405 Allow: POST",
+    "actual": "405 allow=POST",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K13-DELETE",
+    "group": "K. Engines, external languages, body limit",
+    "title": "DELETE on external endpoint",
+    "request": "DELETE /api/external/graphviz",
+    "expect": "405 Allow: POST",
+    "actual": "405 allow=POST",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K13-PATCH",
+    "group": "K. Engines, external languages, body limit",
+    "title": "PATCH on external endpoint",
+    "request": "PATCH /api/external/graphviz",
+    "expect": "405 Allow: POST",
+    "actual": "405 allow=POST",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K13-OPTIONS",
+    "group": "K. Engines, external languages, body limit",
+    "title": "OPTIONS on external endpoint",
+    "request": "OPTIONS /api/external/graphviz",
+    "expect": "405 Allow: POST",
+    "actual": "405 allow=POST",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K13-HEAD",
+    "group": "K. Engines, external languages, body limit",
+    "title": "HEAD on external endpoint",
+    "request": "HEAD /api/external/graphviz",
+    "expect": "405 Allow: POST",
+    "actual": "405 allow=POST",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K13-TRACE",
+    "group": "K. Engines, external languages, body limit",
+    "title": "TRACE on external endpoint",
+    "request": "TRACE /api/external/graphviz",
+    "expect": "405 Allow: POST",
+    "actual": "405 allow=POST",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K14",
+    "group": "K. Engines, external languages, body limit",
+    "title": "unknown language is checked before the body is read",
+    "request": "POST /api/external/doesnotexist body \"{\"",
+    "expect": "404 (not 400)",
+    "actual": "404",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K20",
+    "group": "K. Engines, external languages, body limit",
+    "title": "valid request is proxied",
+    "request": "POST /api/external/graphviz {source:\"ok\"}",
+    "expect": "200 image/svg+xml, valid SVG",
+    "actual": "200 image/svg+xml; charset=utf-8 <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"10\" height=\"10\"><text>g… issues=none",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K21",
+    "group": "K. Engines, external languages, body limit",
+    "title": "upstream receives POST /graphviz/svg as text/plain with the source",
+    "request": "mock log",
+    "expect": "POST /graphviz/svg text/plain, len 2",
+    "actual": "{\"url\":\"/graphviz/svg\",\"method\":\"POST\",\"type\":\"text/plain\",\"len\":2}",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K22-graphviz",
+    "group": "K. Engines, external languages, body limit",
+    "title": "every language is routed: graphviz",
+    "request": "POST /api/external/graphviz",
+    "expect": "200, upstream path /graphviz/svg",
+    "actual": "200 <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"10\" height=\"1…",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K22-mermaid",
+    "group": "K. Engines, external languages, body limit",
+    "title": "every language is routed: mermaid",
+    "request": "POST /api/external/mermaid",
+    "expect": "200, upstream path /mermaid/svg",
+    "actual": "200 <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"10\" height=\"1…",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K22-plantuml",
+    "group": "K. Engines, external languages, body limit",
+    "title": "every language is routed: plantuml",
+    "request": "POST /api/external/plantuml",
+    "expect": "200, upstream path /plantuml/svg",
+    "actual": "200 <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"10\" height=\"1…",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K22-c4plantuml",
+    "group": "K. Engines, external languages, body limit",
+    "title": "every language is routed: c4plantuml",
+    "request": "POST /api/external/c4plantuml",
+    "expect": "200, upstream path /c4plantuml/svg",
+    "actual": "200 <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"10\" height=\"1…",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K22-d2",
+    "group": "K. Engines, external languages, body limit",
+    "title": "every language is routed: d2",
+    "request": "POST /api/external/d2",
+    "expect": "200, upstream path /d2/svg",
+    "actual": "200 <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"10\" height=\"1…",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K22-nomnoml",
+    "group": "K. Engines, external languages, body limit",
+    "title": "every language is routed: nomnoml",
+    "request": "POST /api/external/nomnoml",
+    "expect": "200, upstream path /nomnoml/svg",
+    "actual": "200 <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"10\" height=\"1…",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K22-ditaa",
+    "group": "K. Engines, external languages, body limit",
+    "title": "every language is routed: ditaa",
+    "request": "POST /api/external/ditaa",
+    "expect": "200, upstream path /ditaa/svg",
+    "actual": "200 <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"10\" height=\"1…",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K22-svgbob",
+    "group": "K. Engines, external languages, body limit",
+    "title": "every language is routed: svgbob",
+    "request": "POST /api/external/svgbob",
+    "expect": "200, upstream path /svgbob/svg",
+    "actual": "200 <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"10\" height=\"1…",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K22-blockdiag",
+    "group": "K. Engines, external languages, body limit",
+    "title": "every language is routed: blockdiag",
+    "request": "POST /api/external/blockdiag",
+    "expect": "200, upstream path /blockdiag/svg",
+    "actual": "200 <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"10\" height=\"1…",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K22-seqdiag",
+    "group": "K. Engines, external languages, body limit",
+    "title": "every language is routed: seqdiag",
+    "request": "POST /api/external/seqdiag",
+    "expect": "200, upstream path /seqdiag/svg",
+    "actual": "200 <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"10\" height=\"1…",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K22-actdiag",
+    "group": "K. Engines, external languages, body limit",
+    "title": "every language is routed: actdiag",
+    "request": "POST /api/external/actdiag",
+    "expect": "200, upstream path /actdiag/svg",
+    "actual": "200 <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"10\" height=\"1…",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K22-nwdiag",
+    "group": "K. Engines, external languages, body limit",
+    "title": "every language is routed: nwdiag",
+    "request": "POST /api/external/nwdiag",
+    "expect": "200, upstream path /nwdiag/svg",
+    "actual": "200 <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"10\" height=\"1…",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K22-packetdiag",
+    "group": "K. Engines, external languages, body limit",
+    "title": "every language is routed: packetdiag",
+    "request": "POST /api/external/packetdiag",
+    "expect": "200, upstream path /packetdiag/svg",
+    "actual": "200 <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"10\" height=\"1…",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K22-rackdiag",
+    "group": "K. Engines, external languages, body limit",
+    "title": "every language is routed: rackdiag",
+    "request": "POST /api/external/rackdiag",
+    "expect": "200, upstream path /rackdiag/svg",
+    "actual": "200 <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"10\" height=\"1…",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K22-bytefield",
+    "group": "K. Engines, external languages, body limit",
+    "title": "every language is routed: bytefield",
+    "request": "POST /api/external/bytefield",
+    "expect": "200, upstream path /bytefield/svg",
+    "actual": "200 <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"10\" height=\"1…",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K22-erd",
+    "group": "K. Engines, external languages, body limit",
+    "title": "every language is routed: erd",
+    "request": "POST /api/external/erd",
+    "expect": "200, upstream path /erd/svg",
+    "actual": "200 <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"10\" height=\"1…",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K22-pikchr",
+    "group": "K. Engines, external languages, body limit",
+    "title": "every language is routed: pikchr",
+    "request": "POST /api/external/pikchr",
+    "expect": "200, upstream path /pikchr/svg",
+    "actual": "200 <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"10\" height=\"1…",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K22-structurizr",
+    "group": "K. Engines, external languages, body limit",
+    "title": "every language is routed: structurizr",
+    "request": "POST /api/external/structurizr",
+    "expect": "200, upstream path /structurizr/svg",
+    "actual": "200 <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"10\" height=\"1…",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K22-vega",
+    "group": "K. Engines, external languages, body limit",
+    "title": "every language is routed: vega",
+    "request": "POST /api/external/vega",
+    "expect": "200, upstream path /vega/svg",
+    "actual": "200 <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"10\" height=\"1…",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K22-vegalite",
+    "group": "K. Engines, external languages, body limit",
+    "title": "every language is routed: vegalite",
+    "request": "POST /api/external/vegalite",
+    "expect": "200, upstream path /vegalite/svg",
+    "actual": "200 <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"10\" height=\"1…",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K22-wavedrom",
+    "group": "K. Engines, external languages, body limit",
+    "title": "every language is routed: wavedrom",
+    "request": "POST /api/external/wavedrom",
+    "expect": "200, upstream path /wavedrom/svg",
+    "actual": "200 <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"10\" height=\"1…",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K22-dbml",
+    "group": "K. Engines, external languages, body limit",
+    "title": "every language is routed: dbml",
+    "request": "POST /api/external/dbml",
+    "expect": "200, upstream path /dbml/svg",
+    "actual": "200 <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"10\" height=\"1…",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K22-excalidraw",
+    "group": "K. Engines, external languages, body limit",
+    "title": "every language is routed: excalidraw",
+    "request": "POST /api/external/excalidraw",
+    "expect": "200, upstream path /excalidraw/svg",
+    "actual": "200 <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"10\" height=\"1…",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K22-bpmn",
+    "group": "K. Engines, external languages, body limit",
+    "title": "every language is routed: bpmn",
+    "request": "POST /api/external/bpmn",
+    "expect": "200, upstream path /bpmn/svg",
+    "actual": "200 <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"10\" height=\"1…",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K23",
+    "group": "K. Engines, external languages, body limit",
+    "title": "text/plain body accepted",
+    "request": "POST text/plain \"ok\"",
+    "expect": "200",
+    "actual": "200",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K30",
+    "group": "K. Engines, external languages, body limit",
+    "title": "external: empty body",
+    "request": "POST /api/external/graphviz ",
+    "expect": "400",
+    "actual": "400 {\"error\":{\"code\":\"json\",\"message\":\"The body is not valid JSON\"}}",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K31",
+    "group": "K. Engines, external languages, body limit",
+    "title": "external: broken JSON",
+    "request": "POST /api/external/graphviz {",
+    "expect": "400",
+    "actual": "400 {\"error\":{\"code\":\"json\",\"message\":\"The body is not valid JSON\"}}",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K32",
+    "group": "K. Engines, external languages, body limit",
+    "title": "external: JSON null",
+    "request": "POST /api/external/graphviz null",
+    "expect": "400",
+    "actual": "400 {\"error\":{\"code\":\"source\",\"message\":\"The \\\"source\\\" text is required\"}…",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K33",
+    "group": "K. Engines, external languages, body limit",
+    "title": "external: JSON array",
+    "request": "POST /api/external/graphviz [\"x\"]",
+    "expect": "400",
+    "actual": "400 {\"error\":{\"code\":\"source\",\"message\":\"The \\\"source\\\" text is required\"}…",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K34",
+    "group": "K. Engines, external languages, body limit",
+    "title": "external: source number",
+    "request": "POST /api/external/graphviz {\"source\":5}",
+    "expect": "400",
+    "actual": "400 {\"error\":{\"code\":\"source\",\"message\":\"The \\\"source\\\" text is required\"}…",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K35",
+    "group": "K. Engines, external languages, body limit",
+    "title": "external: source null",
+    "request": "POST /api/external/graphviz {\"source\":null}",
+    "expect": "400",
+    "actual": "400 {\"error\":{\"code\":\"source\",\"message\":\"The \\\"source\\\" text is required\"}…",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K36",
+    "group": "K. Engines, external languages, body limit",
+    "title": "external: source object",
+    "request": "POST /api/external/graphviz {\"source\":{\"a\":1}}",
+    "expect": "400",
+    "actual": "400 {\"error\":{\"code\":\"source\",\"message\":\"The \\\"source\\\" text is required\"}…",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K37",
+    "group": "K. Engines, external languages, body limit",
+    "title": "external: source spaces only",
+    "request": "POST /api/external/graphviz {\"source\":\"   \"}",
+    "expect": "400",
+    "actual": "400 {\"error\":{\"code\":\"source\",\"message\":\"The \\\"source\\\" text is required\"}…",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K38",
+    "group": "K. Engines, external languages, body limit",
+    "title": "external: source empty",
+    "request": "POST /api/external/graphviz {\"source\":\"\"}",
+    "expect": "400",
+    "actual": "400 {\"error\":{\"code\":\"source\",\"message\":\"The \\\"source\\\" text is required\"}…",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K39",
+    "group": "K. Engines, external languages, body limit",
+    "title": "external: no source",
+    "request": "POST /api/external/graphviz {}",
+    "expect": "400",
+    "actual": "400 {\"error\":{\"code\":\"source\",\"message\":\"The \\\"source\\\" text is required\"}…",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K40",
+    "group": "K. Engines, external languages, body limit",
+    "title": "external: __proto__ source is not inherited",
+    "request": "POST {\"__proto__\":{\"source\":\"x\"}}",
+    "expect": "400",
+    "actual": "400",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K41",
+    "group": "K. Engines, external languages, body limit",
+    "title": "external: NUL character in source",
+    "request": "POST source \"a\\u0000b\"",
+    "expect": "200 or 4xx, not 500",
+    "actual": "200",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K42",
+    "group": "K. Engines, external languages, body limit",
+    "title": "external: unicode, emoji, CRLF",
+    "request": "POST unicode source",
+    "expect": "200",
+    "actual": "200",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K50",
+    "group": "K. Engines, external languages, body limit",
+    "title": "external: source of 1 characters",
+    "request": "POST /api/external/graphviz (1 chars)",
+    "expect": "200",
+    "actual": "200 <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"10\" height=\"1…",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K51",
+    "group": "K. Engines, external languages, body limit",
+    "title": "external: source of 99999 characters",
+    "request": "POST /api/external/graphviz (99999 chars)",
+    "expect": "200",
+    "actual": "200 <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"10\" height=\"1…",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K52",
+    "group": "K. Engines, external languages, body limit",
+    "title": "external: source of 100000 characters",
+    "request": "POST /api/external/graphviz (100000 chars)",
+    "expect": "200",
+    "actual": "200 <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"10\" height=\"1…",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K53",
+    "group": "K. Engines, external languages, body limit",
+    "title": "external: source of 100001 characters",
+    "request": "POST /api/external/graphviz (100001 chars)",
+    "expect": "413",
+    "actual": "413 {\"error\":{\"code\":\"too-large\",\"message\":\"The source is longer…",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K54",
+    "group": "K. Engines, external languages, body limit",
+    "title": "external: 100000 Cyrillic characters (200000 bytes)",
+    "request": "POST source 100000 x \"я\"",
+    "expect": "200 (length is at the limit)",
+    "actual": "200",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K55",
+    "group": "K. Engines, external languages, body limit",
+    "title": "external: 100000 newlines (escaped as 200000 bytes in JSON)",
+    "request": "POST source 100000 x \\n",
+    "expect": "at the limit but blank: 400 (only whitespace)",
+    "actual": "400",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K56",
+    "group": "K. Engines, external languages, body limit",
+    "title": "external: 100000 chars with 50000 newlines",
+    "request": "POST",
+    "expect": "200",
+    "actual": "200",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K57",
+    "group": "K. Engines, external languages, body limit",
+    "title": "external: 100000 control chars (JSON escape = 6 bytes each, 600 KB body)",
+    "request": "POST source 100000 x \\u0001",
+    "expect": "200 (exactly at the limit)",
+    "actual": "200",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K60",
+    "group": "K. Engines, external languages, body limit",
+    "title": "text/plain 100000 bytes",
+    "request": "POST /api/validate 100000 x \"x\"",
+    "expect": "200",
+    "actual": "200",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K61",
+    "group": "K. Engines, external languages, body limit",
+    "title": "text/plain 100001 characters",
+    "request": "POST /api/validate 100001 x \"x\"",
+    "expect": "413 (source longer than 100000)",
+    "actual": "413",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K62",
+    "group": "K. Engines, external languages, body limit",
+    "title": "text/plain 601024 bytes (body limit)",
+    "request": "POST 601024 bytes",
+    "expect": "413 (source too long)",
+    "actual": "413",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K63",
+    "group": "K. Engines, external languages, body limit",
+    "title": "text/plain 601025 bytes (limit + 1)",
+    "request": "POST 601025 bytes",
+    "expect": "413",
+    "actual": "413",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K64",
+    "group": "K. Engines, external languages, body limit",
+    "title": "text/plain 5 MB",
+    "request": "POST 5 MB",
+    "expect": "413",
+    "actual": "413",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K65",
+    "group": "K. Engines, external languages, body limit",
+    "title": "JSON: 100000 chars each escaped to 6 bytes (body 600013 bytes)",
+    "request": "POST /api/validate",
+    "expect": "200 (source is at the limit)",
+    "actual": "200 {\"notation\":\"idef0\",\"valid\":false,\"problems\":[{\"line\":1,\"sev…",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K66",
+    "group": "K. Engines, external languages, body limit",
+    "title": "JSON: 100001 escaped chars (body 600019 bytes)",
+    "request": "POST /api/validate",
+    "expect": "413",
+    "actual": "413",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K67",
+    "group": "K. Engines, external languages, body limit",
+    "title": "JSON with a valid short source but 700 KB of extra field",
+    "request": "POST /api/validate",
+    "expect": "413 (body over limit) is acceptable; 200 would also be fine",
+    "actual": "413",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K68",
+    "group": "K. Engines, external languages, body limit",
+    "title": "JSON with a short source and 400 KB of extra field (below body limit)",
+    "request": "POST /api/validate",
+    "expect": "200",
+    "actual": "200",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K69",
+    "group": "K. Engines, external languages, body limit",
+    "title": "JSON nested 300000 deep (600 KB)",
+    "request": "POST /api/validate",
+    "expect": "200, 400 or 413; server stays alive",
+    "actual": "200",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K70",
+    "group": "K. Engines, external languages, body limit",
+    "title": "external: body over limit",
+    "request": "POST /api/external/graphviz 601025 bytes",
+    "expect": "413",
+    "actual": "413",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K71",
+    "group": "K. Engines, external languages, body limit",
+    "title": "50 parallel requests with 600 KB bodies (30 MB in flight)",
+    "request": "50 x POST /api/validate 600 KB",
+    "expect": "all 200 within 20 s",
+    "actual": "50/50 x 200 in 1559 ms",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K80",
+    "group": "K. Engines, external languages, body limit",
+    "title": "upstream SVG with <script>/on*/javascript: is forwarded as is",
+    "request": "mock returns hostile SVG",
+    "expect": "response must be sanitised or served so it cannot run (no <script>, no on*)",
+    "actual": "200 image/svg+xml; charset=utf-8 issues=<script>;on*-attribute;javascript: in attribute nosniff=- csp=-",
+    "pass": false,
+    "note": "The server relays the SVG unchanged and sends no CSP/sandbox; opened directly in a tab it runs the script on the DSLKit origin. The editor cleans the SVG on the page, a direct caller does not get that"
+  },
+  {
+    "id": "K81",
+    "group": "K. Engines, external languages, body limit",
+    "title": "upstream returns HTML",
+    "request": "mock returns text/html",
+    "expect": "502 upstream-invalid",
+    "actual": "502 {\"error\":{\"code\":\"upstream-invalid\",\"message\":\"The drawing service did not retur…",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K82",
+    "group": "K. Engines, external languages, body limit",
+    "title": "upstream returns an empty body",
+    "request": "mock returns \"\"",
+    "expect": "502",
+    "actual": "502",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K83",
+    "group": "K. Engines, external languages, body limit",
+    "title": "upstream 400 (syntax error) maps to 422",
+    "request": "mock 400",
+    "expect": "422 with code upstream-error",
+    "actual": "422 {\"error\":{\"code\":\"upstream-error\",\"message\":\"The drawing service answered 400\"}}",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K84",
+    "group": "K. Engines, external languages, body limit",
+    "title": "upstream 404",
+    "request": "mock 404",
+    "expect": "502",
+    "actual": "502",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K85",
+    "group": "K. Engines, external languages, body limit",
+    "title": "upstream 500",
+    "request": "mock 500",
+    "expect": "502",
+    "actual": "502",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K86",
+    "group": "K. Engines, external languages, body limit",
+    "title": "upstream error text is not echoed",
+    "request": "mock 400 \"syntax error\"",
+    "expect": "the response carries a message but the compiler error is lost",
+    "actual": "{\"error\":{\"code\":\"upstream-error\",\"message\":\"The drawing service answered 500\"}}",
+    "pass": true,
+    "note": "Informational: with 422 the user gets no line/column of the upstream syntax error"
+  },
+  {
+    "id": "K87",
+    "group": "K. Engines, external languages, body limit",
+    "title": "upstream SVG with <?xml> and DOCTYPE prolog is accepted",
+    "request": "mock prolog",
+    "expect": "200",
+    "actual": "200",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K88",
+    "group": "K. Engines, external languages, body limit",
+    "title": "upstream never answers: timeout",
+    "request": "mock hangs",
+    "expect": "504 upstream-timeout after about 10 s",
+    "actual": "504 after 10054 ms {\"error\":{\"code\":\"upstream-timeout\",\"message\":\"The drawing s…",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K89b",
+    "group": "K. Engines, external languages, body limit",
+    "title": "server process survives an upstream that stalls mid-body",
+    "request": "same request as K89",
+    "expect": "server keeps running",
+    "actual": "server process exited (code null): unhandled TimeoutError from answer.text()",
+    "pass": false,
+    "note": "In render-api.js the call is `return external(...)` inside try without await, so the rejection is not caught by the catch, and server.js does not catch the promise of handleApi: Node terminates on the unhandled rejection"
+  },
+  {
+    "id": "K89",
+    "group": "K. Engines, external languages, body limit",
+    "title": "upstream sends headers but never finishes the body",
+    "request": "mock sends part of the body and stalls",
+    "expect": "504/502 within about 10 s (timeout covers the body)",
+    "actual": "no response (ECONNRESET) after 10464 ms",
+    "pass": false,
+    "note": "AbortSignal.timeout also aborts answer.text() in modern Node, so the request is cut"
+  },
+  {
+    "id": "K90",
+    "group": "K. Engines, external languages, body limit",
+    "title": "upstream returns 100 MB of SVG",
+    "request": "mock 100 MB",
+    "expect": "refused (502/413) - memory of the server must be bounded",
+    "actual": "200 100 MB in 6900 ms",
+    "pass": false,
+    "note": "answer.text() buffers the whole upstream body; there is no size limit on what is relayed to the client"
+  },
+  {
+    "id": "K91",
+    "group": "K. Engines, external languages, body limit",
+    "title": "20 parallel requests to a hanging upstream do not block the server",
+    "request": "20 x hang",
+    "expect": "all 504 in about 10 s, other requests still answered",
+    "actual": "20/20 x 504 in 10547 ms, probe 200",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K92",
+    "group": "K. Engines, external languages, body limit",
+    "title": "Accept: application/json on a SVG-only endpoint",
+    "request": "Accept: application/json",
+    "expect": "200 SVG or 406",
+    "actual": "200 image/svg+xml; charset=utf-8",
+    "pass": true,
+    "note": ""
+  },
+  {
+    "id": "K93",
+    "group": "K. Engines, external languages, body limit",
+    "title": "external answer headers",
+    "request": "POST /api/external/graphviz",
+    "expect": "Cache-Control: no-store, nosniff, CSP",
+    "actual": "cache=no-store nosniff=- csp=-",
+    "pass": false,
+    "note": "No-store is set, security headers are not"
+  },
+  {
+    "id": "K94",
+    "group": "K. Engines, external languages, body limit",
+    "title": "external: cross-origin simple request (text/plain) is processed",
+    "request": "POST text/plain with Origin: evil.example",
+    "expect": "no ACAO header; the call costs only a proxy hop",
+    "actual": "200 ACAO=-",
+    "pass": true,
+    "note": "Any web page can make a visitor browser send diagrams to the server (open proxy for Kroki), no cookies involved"
+  },
+  {
+    "id": "K95",
+    "group": "K. Engines, external languages, body limit",
+    "title": "default upstream is the public https://kroki.io (privacy)",
+    "request": "source of render-api.js",
+    "expect": "user diagrams leave the server only on explicit /api/external/* calls",
+    "actual": "krokiUrl default = process.env.KROKI_URL ?? \"https://kroki.io\"",
+    "pass": true,
+    "note": "Informational: diagram text is sent to a third party unless KROKI_URL is set; CSP connect-src also allows https://kroki.io"
+  }
 ]

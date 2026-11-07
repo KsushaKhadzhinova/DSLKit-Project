@@ -1,0 +1,10 @@
+{
+  "dslkit.projects.uffab13998fe07afe": "[{\"id\":\"pmvujlbjq0\",\"title\":\"Мой единственный проект\",\"notation\":\"uml-class\",\"source\":\"diagram uml-class \\\"Мой единственный проект\\\"\\ninterface Payable {\\n  + pay(amount: Money): Receipt\\n}\\nabstract class Person {\\n  - name: String\\n  + getName(): String\\n}\\nclass Customer {\\n  - email: String\\n  + placeOrder(item: Item): Order\\n}\\nclass Order {\\n  + total(): Money\\n}\\nclass Item {\\n  + price: Money\\n}\\nCustomer --|> Person\\nOrder ..|> Payable\\nCustomer \\\"1\\\" --> \\\"0..*\\\" Order : places\\nOrder \\\"1\\\" *-- \\\"1..*\\\" Item : contains\",\"created\":1793338755254,\"updated\":1793338755254}]",
+  "dslkit.editor-source": "\"diagram uml-class \\\"Мой единственный проект\\\"\\ninterface Payable {\\n  + pay(amount: Money): Receipt\\n}\\nabstract class Person {\\n  - name: String\\n  + getName(): String\\n}\\nclass Customer {\\n  - email: String\\n  + placeOrder(item: Item): Order\\n}\\nclass Order {\\n  + total(): Money\\n}\\nclass Item {\\n  + price: Money\\n}\\nCustomer --|> Person\\nOrder ..|> Payable\\nCustomer \\\"1\\\" --> \\\"0..*\\\" Order : places\\nOrder \\\"1\\\" *-- \\\"1..*\\\" Item : contains\"",
+  "dslkit.editor-tab": "0",
+  "dslkit.seeded.uffab13998fe07afe": "true",
+  "dslkit.editor-view": "\"canvas\"",
+  "dslkit.session": "{\"userId\":\"uffab13998fe07afe\"}",
+  "dslkit.dashboard": "{\"filter\":\"all\",\"query\":\"\",\"sort\":\"newest\"}",
+  "dslkit.accounts": "[{\"id\":\"uffab13998fe07afe\",\"name\":\"Ци Лэй\",\"email\":\"qi.lei@test.example\",\"salt\":\"2af076151c14eeea617b223de99e756a\",\"hash\":\"c80b3a97a60915e2e4974990e7a51794c13ab5b9e4e750d7825d0e09bb77da90\",\"iterations\":100000,\"created\":1793338729141}]"
+}
