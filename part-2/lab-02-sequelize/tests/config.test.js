@@ -1,6 +1,8 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const { resolve } = require('node:path');
+const { mkdtempSync } = require('node:fs');
+const { tmpdir } = require('node:os');
 
 const configPath = resolve(__dirname, '../config/config.js');
 
@@ -11,9 +13,13 @@ const load = (env) => {
   keys.forEach((key) => delete process.env[key]);
   Object.assign(process.env, env);
   delete require.cache[configPath];
+  // config.js reads .env from the working directory, so load it from an empty folder: a real .env must not change the result.
+  const cwd = process.cwd();
+  process.chdir(mkdtempSync(resolve(tmpdir(), 'cfg-')));
   try {
     return require(configPath).development;
   } finally {
+    process.chdir(cwd);
     keys.forEach((key) => (saved[key] === undefined ? delete process.env[key] : (process.env[key] = saved[key])));
     delete require.cache[configPath];
   }
