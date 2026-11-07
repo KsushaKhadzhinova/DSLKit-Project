@@ -1,0 +1,113 @@
+\PassOptionsToPackage{english}{babel}
+\documentclass[a4paper,10pt,twoside]{article}
+\usepackage{its_conf}
+\begin{document}
+\setcounter{section}{0}
+\setcounter{figure}{0}
+\setcounter{table}{0}
+\setcounter{equation}{0}
+\setcounter{secnumdepth}{1}
+\setcounter{secnumdepth}{1}
+% ======= Начало Ваших тезисов. Все, что выше - не изменять ! ===========
+\selectlanguage{english}
+\renewcommand{\figurename}{Fig.}
+\renewcommand{\tablename}{Table}
+
+\topic{Graph representations of diagrams: memory and speed}
+
+\information{Khadzhynava~K.~A.}
+{Belarusian State University of Informatics and Radioelectronics}
+{Minsk, Republic of Belarus}
+{kseniyakhadzhynava@gmail.com}
+
+% ========= Аннотация ==========
+\annotation{An object model, adjacency lists and typed arrays are compared for storing a diagram graph of up to 50,000 nodes. Arrays use ten times less memory and traverse the graph ten times faster; column-wise JSON is 41\,\% smaller than row-wise JSON.}
+
+\begin{multicols}{2} %НЕ УДАЛЯТЬ!!!
+
+\section*{Introduction}
+In diagram editors, a process, data or architecture model is stored as a graph: nodes correspond to elements and edges to relations. With a small number of nodes the storage method does not matter, but with about $10^4$ nodes or more it determines memory use, document opening time and graph traversal speed during validation and rendering.
+
+For large graphs, compactness of storage and speed of data processing matter [1, 2]; a survey of graph handling in information visualization is given in [3]. Graphs are stored as linked objects, adjacency lists and compact arrays [4]. The object model is convenient for editing, but every node and edge carries object overhead.
+
+The aim of this work is to measure how the choice of representation affects memory, construction and traversal time, and serialization size. The authors previously proposed a pipeline model for diagrams with a unified graph representation [5]; here its storage is studied.
+
+\section{Graph representations}
+Three representations of the same graph are considered. In the object model, a node and an edge are objects that refer to each other. In adjacency lists, nodes are stored in an array, and for each node an array of neighbour indices is kept. In the typed-array representation, node coordinates and edge endpoints lie in contiguous arrays, and adjacency is given by offsets.
+
+The memory gain is estimated by the ratio given by formula~(1):
+$$
+K_M = M_{obj}/M_{arr},\eqno(1)
+$$
+where $M_{obj}$ and $M_{arr}$ are the memory of the object model and of the arrays. For JSON, a row-wise format (an array of objects) and a column-wise format (one array per field) are compared.
+
+\section{Experimental method}
+The measurements were made on a separate test bench (Node.js~24, V8 engine; Intel Core i5-1035G1, 24~GB RAM, Windows~11). A generator produces diagram-language text for graphs of 500, 2,000, 10,000 and 50,000 nodes (with 1.5 times as many edges) of three types: random, hierarchical and hub-based; the seed is fixed. The following is measured: model memory (heap after garbage collection), construction and full traversal time, JSON size, and its write and read time. Each measurement is made in a separate process, 11 runs, the first one discarded; medians are reported, and for the three graph types the median over types.
+
+\section{Results}
+Text parsing takes about 0.55~s for 50,000 nodes and does not depend on the representation, so it is not included in Table~\ref{tab:repr}. Memory grows in proportion to the number of nodes (Fig.~\ref{fig:mem}); by formula (1), $K_M$ is 10.3 at 10,000 nodes and 10.6 at 50,000. Per node with its edges this is about 510 bytes for the object model and 48 bytes for arrays.
+
+\myTable{Graph representations\label{tab:repr}}{{\columnwidth}{|>{\raggedright\arraybackslash}p{2.5cm}|X|X|X|} \hline
+Metric & Objects & Lists & Arrays \\ \hline
+Memory, MB (10,000) & 4.87 & 4.64 & 0.47 \\ \hline
+Memory, MB (50,000) & 24.3 & 23.2 & 2.30 \\ \hline
+Build, ms (10,000) & 21.4 & 13.4 & 6.6 \\ \hline
+Build, ms (50,000) & 200 & 98 & 31 \\ \hline
+Traversal, ms (10,000) & 18.3 & 7.5 & 3.2 \\ \hline
+Traversal, ms (50,000) & 138 & 27 & 14 \\ \hline
+}
+
+Adjacency lists save only 5\,\% of memory but traverse the graph 5 times faster than objects, and arrays 10 times faster.
+
+\image{
+[width=0.8\columnwidth]{fig-memory-en.png}
+\caption{Memory of the internal graph model\label{fig:mem}}
+}
+
+Column-wise JSON is 41\,\% smaller, is written 2.1 times and read 5.2 times faster than row-wise JSON (Table~\ref{tab:json}); reading includes building the corresponding representation.
+
+\myTable{Serialization, 50,000 nodes\label{tab:json}}{{\columnwidth}{|>{\raggedright\arraybackslash}p{2.1cm}|X|X|X|} \hline
+Format & Size, KB & Write, ms & Read, ms \\ \hline
+Row-wise & 4482 & 29.0 & 43.3 \\ \hline
+Column-wise & 2626 & 13.6 & 8.3 \\ \hline
+}
+
+The file size in both formats grows linearly with the number of nodes (Fig.~\ref{fig:json}), and the column-wise format stays more compact at all sizes.
+
+\image{
+[width=0.8\columnwidth]{fig-json-en.png}
+\caption{Size of the JSON graph file\label{fig:json}}
+}
+
+A 100-fold increase in the number of nodes raises the traversal time 136 times for the object model, 39 times for adjacency lists and 26 times for arrays (Fig.~\ref{fig:trav}). The reason is probably the layout of data in memory [6] and requires separate verification.
+
+\image{
+[width=0.8\columnwidth]{fig-trav-en.png}
+\caption{Full graph traversal time\label{fig:trav}}
+}
+
+Text parsing accounts for 75\,\% of the load time of the object model, 85\,\% for lists and 95\,\% for arrays at 50,000 nodes (Fig.~\ref{fig:load}). The choice of representation therefore speeds up loading only partly, and the main reserve lies in faster parsing.
+
+\image{
+[width=0.8\columnwidth]{fig-load-en.png}
+\caption{Load time breakdown, 50,000 nodes\label{fig:load}}
+}
+
+The cost of adding and removing edges was not measured; it is higher for arrays, so they suit storage and analysis, while objects suit interactive editing.
+
+\section*{Conclusion}
+Typed arrays reduce memory tenfold and speed up construction and traversal, and column-wise JSON reduces file size and speeds up loading. At 500 nodes the model memory does not exceed 0.3~MB for any representation, so the choice of representation does not affect the result on small graphs. A limitation is that the measurements were made in Node.js and editing operations were not considered.
+
+\ListReferences{
+\item Kozar,~R.~V. Methods of data clustering in recognition of endoscopic images in computer-aided medical diagnosis~/ R.~V.~Kozar, N.~S.~Konoiko, A.~A.~Navrotsky~// Doklady BGUIR.~-- 2023.~-- Vol.~21, No.~1.~-- P.~94--97.~-- DOI: 10.35596/1729-7648-2023-21-1-94-97.
+\item Abello,~J. ASK-GraphView: a large scale graph visualization system~/ J.~Abello, F.~van Ham, N.~Krishnan~// IEEE Trans. Vis. Comput. Graph.~-- 2006.~-- Vol.~12, No.~5.~-- P.~669--676.
+\item Herman,~I. Graph visualization and navigation in information visualization: a survey~/ I.~Herman, G.~Melancon, M.~S.~Marshall~// IEEE Trans. Vis. Comput. Graph.~-- 2000.~-- Vol.~6, No.~1.~-- P.~24--43.
+\item Introduction to Algorithms~/ T.~H.~Cormen [et al.].~-- 4th ed.~-- Cambridge: MIT Press, 2022.~-- 1312~p.
+\item Lomako,~A.~V. Automation of diagram image conversion to program code~/ A.~V.~Lomako, K.~A.~Khadzhynava~// Information Transmission and Processing Technologies.~-- 2026.
+\item Drepper,~U. What every programmer should know about memory.~-- Red Hat, 2007.~-- 114~p.
+}
+
+\end{multicols} % НЕ УДАЛЯТЬ!
+
+% ===== Конец материалов. Все, что ниже, не изменять !===========
+\end{document}

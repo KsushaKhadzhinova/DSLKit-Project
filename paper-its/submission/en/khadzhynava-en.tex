@@ -1,0 +1,104 @@
+\PassOptionsToPackage{english}{babel}
+\documentclass[a4paper,10pt,twoside]{article}
+\usepackage{its_conf}
+\begin{document}
+\setcounter{section}{0}
+\setcounter{figure}{0}
+\setcounter{table}{0}
+\setcounter{equation}{0}
+\setcounter{secnumdepth}{1}
+\setcounter{secnumdepth}{1}
+% ======= Начало Ваших тезисов. Все, что выше - не изменять ! ===========
+% English hyphenation and caption names (the template loads only Russian and Latin)
+\selectlanguage{english}
+\renewcommand{\figurename}{Fig.}
+\renewcommand{\tablename}{Table}
+
+\topic{An adaptive rendering pipeline for large graphs in a text-based diagram editor}
+
+\information{Khadzhynava~K.~A.}
+{Belarusian State University of Informatics and Radioelectronics}
+{Minsk, Republic of Belarus}
+{kseniyakhadzhynava@gmail.com}
+
+% ========= Аннотация ==========
+\annotation{The paper addresses the problem of keeping a text-based diagram editor interactive when a diagram contains thousands or tens of thousands of elements. An adaptive visualization pipeline is proposed that combines the choice of an internal graph representation, spatial culling of visible elements, clustering of low-importance subgraphs and progressive rendering. On graphs of up to 50,000 nodes, three graph representations and three spatial search methods are compared experimentally. Typed arrays reduce memory about tenfold, and a uniform grid speeds up hit-testing by hundreds of times compared with brute force.}
+
+\begin{multicols}{2} %НЕ УДАЛЯТЬ!!!
+
+\section*{Introduction}
+In diagram editors, a process, data or architecture model is in fact an attributed graph: nodes correspond to elements and edges to relations. With thousands or tens of thousands of elements, the document opens slowly, panning and zooming lag, and finding the element under the cursor becomes a noticeable operation.
+
+SVG is the standard output format in web applications: every element becomes a DOM node, which is convenient for events and styling but makes mass rendering expensive. Canvas~2D draws many primitives in one element but requires custom selection and update logic. For large graphs, data clustering [1], level-of-detail methods that aggregate dense regions [2] and rendering of the current viewport only are used: GraphMaps draws only the elements inside the visible area at every scale [3], and ASK-GraphView relies on hierarchical clustering [4].
+
+The aim of this work is to describe an adaptive visualization pipeline for large graphs and to evaluate the contribution of graph storage and spatial search. The authors previously proposed a pipeline model for diagrams with a unified graph representation [5]; here its storage and display are studied.
+
+\section{Adaptive pipeline}
+A diagram is defined as text in a domain-specific language, where each line describes a node or an edge. The pipeline has seven stages shown in Fig.~\ref{fig:arch}: text parsing, building the internal graph representation, spatial index, visibility scheduler, progressive renderer and interaction layer.
+
+\image{
+[width=\columnwidth]{fig-architecture.png}
+\caption{Architecture of the adaptive pipeline\label{fig:arch}}
+}
+
+As Fig.~\ref{fig:arch} shows, user actions are fed back to the visibility scheduler. Three graph representations are compared: an object model (nodes and edges as linked objects), adjacency lists, and a compact representation on typed arrays.
+
+For hit-testing and for selecting visible elements, brute force, a uniform grid and a quadtree are compared. Brute force checks all $n$ nodes; an index restricts the check to nodes in the relevant area. The efficiency of culling invisible elements is measured by the coefficient given by formula~(1):
+$$
+C_{cull} = 1 - N_{drawn}/N_{total},\eqno(1)
+$$
+where $N_{drawn}$ and $N_{total}$ are the numbers of drawn and all elements.
+
+For progressive output, a node receives the priority given by formula~(2):
+$$
+p(v) = 0.5\,deg(v) + 0.3\,level(v) + 0.2\,sel(v),\eqno(2)
+$$
+where $deg(v)$ and $level(v)$ are the normalized degree and hierarchy level, and $sel(v)$ is the selection flag. Groups of nodes with low priority (2) are replaced by a cluster showing the number of hidden elements.
+
+\section{Experimental method}
+The measurements were made on a separate test bench independent of the main editor (Node.js~24, V8 engine; Intel Core i5-1035G1, 24~GB RAM, Windows~11). A generator produces diagram-language text for graphs of 500, 2,000, 10,000 and 50,000 nodes of three types: random, hierarchical and hub-based; the generator seed is fixed. The following is measured: model memory (heap after garbage collection), model, traversal and index construction time, hit-test time (1,000 points) and time to select nodes in a $1600\times900$ window (200 windows). Each measurement is made in a separate process, 11 runs, the first one discarded; medians are reported, and for the three graph types the median over types. The raw measurements are stored as CSV files, which makes the results reproducible.
+
+\section{Results}
+Text parsing takes about 0.55~s for 50,000 nodes and does not depend on the representation, so the other values in Table~\ref{tab:repr} are given without it. Typed arrays use ten times less memory than objects, build the model 3--6 times faster and traverse the graph 10 times faster.
+
+\myTable{Graph representations\label{tab:repr}}{{\columnwidth}{|>{\raggedright\arraybackslash}p{2.5cm}|X|X|X|} \hline
+Metric & Objects & Lists & Arrays \\ \hline
+Memory, MB (50,000) & 24.3 & 23.2 & 2.30 \\ \hline
+Build, ms (50,000) & 200 & 98 & 31 \\ \hline
+Traversal, ms (50,000) & 138 & 27 & 14 \\ \hline
+}
+
+Adjacency lists save only 5\,\% of memory. Spatial search results for 50,000 nodes are given in Table~\ref{tab:idx}; an index is built once at load time, so its construction time is also shown.
+
+\myTable{Spatial search, 50,000 nodes\label{tab:idx}}{{\columnwidth}{|>{\raggedright\arraybackslash}p{2.9cm}|X|X|X|X|} \hline
+Method & Index, ms & Hit, \textmu s & 95\,\%, \textmu s & Select, \textmu s \\ \hline
+Brute, objects & 0 & 1446 & 4952 & 1789 \\ \hline
+Brute, arrays & 0 & 573 & 2086 & 775 \\ \hline
+Grid & 69 & 1.3 & 4.4 & 50 \\ \hline
+Quadtree & 644 & 5.0 & 18.8 & 55 \\ \hline
+}
+
+A uniform grid speeds up hit-testing 440 times compared with brute force on arrays, and a quadtree 115 times (Fig.~\ref{fig:hit}). The grid is faster than the quadtree on hub-based graphs as well (1.3 and 4.1~\textmu s against 621~\textmu s for brute force) and is built 9 times faster.
+
+\image{
+[width=0.85\columnwidth]{fig-hit.png}
+\caption{Hit-test time\label{fig:hit}}
+}
+
+In Fig.~\ref{fig:hit}, brute-force time grows roughly in proportion to the number of nodes, while for the indexes it grows slowly. Even at 50,000 nodes, brute force on arrays takes 0.6~ms, which fits the 16.7~ms frame budget, so rendering is expected to be the bottleneck at such sizes; testing this for SVG and Canvas is the next step. Text parsing (0.55~s) takes an order of magnitude more time than building the arrays (31~ms), so incremental parsing is a promising direction.
+
+\section*{Conclusion}
+A visualization pipeline for large graphs is proposed, and the effect of the graph representation and the spatial index is measured. Typed arrays are worthwhile from a few thousand nodes, and for a nearly uniform density of elements a grid is preferable: it is faster and cheaper to build than a quadtree. A limitation of the work is that the measurements were made in Node.js without browser rendering. Future work includes measuring SVG and Canvas rendering, progressive output and incremental text parsing.
+
+\ListReferences{
+\item Kozar,~R.~V. Methods of data clustering in recognition of endoscopic images in computer-aided medical diagnosis~/ R.~V.~Kozar, N.~S.~Konoiko, A.~A.~Navrotsky~// Doklady BGUIR.~-- 2023.~-- Vol.~21, No.~1.~-- P.~94--97.~-- DOI: 10.35596/1729-7648-2023-21-1-94-97.
+\item Zinsmaier,~M. Interactive level-of-detail rendering of large graphs~/ M.~Zinsmaier, U.~Brandes, O.~Deussen, H.~Strobelt~// IEEE Trans. Vis. Comput. Graph.~-- 2012.~-- Vol.~18, No.~12.~-- P.~2486--2495.
+\item GraphMaps: browsing large graphs as interactive maps~/ L.~Nachmanson [et al.]~// arXiv.~-- 2015.~-- arXiv:1506.06745.
+\item Abello,~J. ASK-GraphView: a large scale graph visualization system~/ J.~Abello, F.~van Ham, N.~Krishnan~// IEEE Trans. Vis. Comput. Graph.~-- 2006.~-- Vol.~12, No.~5.~-- P.~669--676.
+\item Lomako,~A.~V. Automation of diagram image conversion to program code~/ A.~V.~Lomako, K.~A.~Khadzhynava~// Information Transmission and Processing Technologies.~-- 2026.
+}
+
+\end{multicols} % НЕ УДАЛЯТЬ!
+
+% ===== Конец материалов. Все, что ниже, не изменять !===========
+\end{document}

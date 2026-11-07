@@ -1,0 +1,114 @@
+\PassOptionsToPackage{english}{babel}
+\documentclass[a4paper,10pt,twoside]{article}
+\usepackage{its_conf}
+\begin{document}
+\setcounter{section}{0}
+\setcounter{figure}{0}
+\setcounter{table}{0}
+\setcounter{equation}{0}
+\setcounter{secnumdepth}{1}
+\setcounter{secnumdepth}{1}
+% ======= Начало Ваших тезисов. Все, что выше - не изменять ! ===========
+\selectlanguage{english}
+\renewcommand{\figurename}{Fig.}
+\renewcommand{\tablename}{Table}
+
+\topic{Spatial culling of large graphs in a diagram editor}
+
+\information{Khadzhynava~K.~A.}
+{Belarusian State University of Informatics and Radioelectronics}
+{Minsk, Republic of Belarus}
+{kseniyakhadzhynava@gmail.com}
+
+% ========= Аннотация ==========
+\annotation{The paper considers spatial culling of elements when displaying large graphs in a diagram editor. On graphs of up to 50,000 nodes, brute force, a uniform grid and a quadtree are compared: the grid speeds up hit-testing 440 times, while the quadtree is slower than the grid and more expensive to build.}
+
+\begin{multicols}{2} %НЕ УДАЛЯТЬ!!!
+
+\section*{Introduction}
+In diagram editors, a process, data or architecture model is represented by an attributed graph whose nodes correspond to diagram elements. As the number of nodes grows, so does the time of hit-testing and of selecting visible elements, which is part of the frame budget of the interface.
+
+For large graphs, data clustering [1], level-of-detail methods that aggregate dense regions [2] and rendering of the current viewport only are used: GraphMaps draws only the elements inside the visible area at every scale [3], and ASK-GraphView relies on hierarchical clustering [4]; a survey of graph visualization methods is given in [5]. SVG is the standard output format in web applications, for example in the D3 library [6]: every element becomes a DOM node, which makes mass rendering expensive.
+
+Hit-testing and selecting visible elements are performed on every mouse move and every animation frame, so their time is part of the frame budget, which is 16.7~ms at 60 frames per second.
+
+The aim of this work is to describe a visualization pipeline for large graphs and to evaluate the contribution of spatial culling. The authors previously proposed a pipeline model for diagrams with a unified graph representation [7]; here its display is studied.
+
+\section{Visualization pipeline}
+A diagram is defined as text in a domain-specific language, where each line describes a node or an edge. The pipeline has seven stages shown in Fig.~\ref{fig:arch}: text parsing, building the internal graph representation, spatial index, visibility scheduler, progressive renderer and interaction layer.
+
+\image{
+[width=\columnwidth]{fig-architecture-en.png}
+\caption{Architecture of the visualization pipeline\label{fig:arch}}
+}
+
+As Fig.~\ref{fig:arch} shows, user actions are fed back to the visibility scheduler. For hit-testing and for selecting visible elements, brute force, a uniform grid and a quadtree are compared. Brute force checks all $n$ nodes; an index restricts the check to nodes in the relevant area. A uniform grid divides the plane into cells of equal size and stores in each cell the indices of the nodes that intersect it, so a lookup checks one cell. A quadtree [8] recursively divides the area into four parts until a leaf holds no more than a given number of nodes. The efficiency of culling invisible elements is measured by the coefficient given by formula~(1):
+$$
+C_{cull} = 1 - N_{drawn}/N_{total},\eqno(1)
+$$
+where $N_{drawn}$ and $N_{total}$ are the numbers of drawn and all elements.
+
+For progressive output, a node receives the priority given by formula~(2):
+$$
+p(v) = 0.5\,deg(v) + 0.3\,level(v) + 0.2\,sel(v),\eqno(2)
+$$
+where $deg(v)$ and $level(v)$ are the normalized degree and hierarchy level, and $sel(v)$ is the selection flag. Groups of nodes with low priority (2) are replaced by a cluster showing the number of hidden elements.
+
+\section{Experimental method}
+The measurements were made on a separate test bench (Node.js~24, V8 engine; Intel Core i5-1035G1, 24~GB RAM, Windows~11). A generator produces graphs of 500, 2,000, 10,000 and 50,000 nodes of three types: random, hierarchical and hub-based; the seed is fixed. The following is measured: index construction time, hit-test time (1,000 points) and time to select nodes in a $1600\times900$ window (200 windows). Each measurement is made in a separate process, 11 runs, the first one discarded; medians are reported, and for the three graph types the median over types. The index results were verified against brute force on 3,000 nodes. A warm-up (200 hit-test and 20 selection queries) is performed before the measurement, and the query time is measured with the performance.now function. Index parameters: the grid cell is 120 units, a quadtree leaf holds up to 8 nodes, and the tree depth does not exceed 12.
+
+\section{Results}
+Hit-test results for 50,000 nodes are given in Table~\ref{tab:idx}; an index is built once at load time, so its construction time is also shown.
+
+\myTable{Hit-test, 50,000 nodes\label{tab:idx}}{{\columnwidth}{|>{\raggedright\arraybackslash}p{2.9cm}|X|X|X|} \hline
+Method & Index, ms & Hit, \textmu s & 95\,\%, \textmu s \\ \hline
+Brute, objects & 0 & 1446 & 4952 \\ \hline
+Brute, arrays & 0 & 573 & 2086 \\ \hline
+Grid & 69 & 1.3 & 4.4 \\ \hline
+Quadtree & 644 & 5.0 & 18.8 \\ \hline
+}
+
+A uniform grid speeds up hit-testing 440 times compared with brute force on arrays, and a quadtree 115 times (Fig.~\ref{fig:hit}). The grid is faster than the quadtree on hub-based graphs as well (1.3 and 4.1~\textmu s against 621~\textmu s for brute force) and is built 9 times faster.
+
+\image{
+[width=\columnwidth]{fig-hit-en.png}
+\caption{Hit-test time\label{fig:hit}}
+}
+
+In Fig.~\ref{fig:hit}, a 100-fold increase in the number of nodes raises the brute-force time on arrays 155 times, the grid time 2.4 times and the quadtree time 3.3 times. About 190 nodes remain in a $1600\times900$ window regardless of graph size, so by formula (1) the coefficient $C_{cull}$ grows from 0.61 to 0.996 (Table~\ref{tab:cull}).
+
+\myTable{Selecting visible nodes, \textmu s\label{tab:cull}}{{\columnwidth}{|X|X|X|X|X|} \hline
+Nodes & $C_{cull}$ & Brute & Grid & Quadtree \\ \hline
+500 & 0.61 & 7.0 & 7.1 & 18.8 \\ \hline
+2,000 & 0.90 & 38.8 & 9.3 & 24.3 \\ \hline
+10,000 & 0.98 & 156 & 20.4 & 36.2 \\ \hline
+50,000 & 0.996 & 775 & 49.9 & 55.4 \\ \hline
+}
+
+In Fig.~\ref{fig:cull}, a 100-fold increase in the number of nodes raises the selection time 110 times for brute force (from 7.0 to 775~\textmu s), 7 times for the grid and 3 times for the quadtree.
+
+\image{
+[width=\columnwidth]{fig-cull-en.png}
+\caption{Time to select visible nodes\label{fig:cull}}
+}
+
+At 500 nodes an index gives no gain, and from 2,000 nodes the grid selects faster than brute force. Even at 50,000 nodes, brute force takes less than 1~ms, which fits the 16.7~ms frame budget, so rendering is expected to be the bottleneck; testing this for SVG and Canvas is the next step. A practical rule follows from the data: up to about 500 nodes brute force is sufficient; from 2,000 nodes a grid should be used; a quadtree would be justified only for strongly non-uniform density, which was not observed even on hub-based graphs.
+
+\section*{Conclusion}
+A visualization pipeline for large graphs is proposed, and the effect of the spatial index is measured. For a nearly uniform density of elements a grid is preferable: it is 3.8 times faster in hit-testing and 9 times faster to build than a quadtree. A limitation of the work is that the measurements were made in Node.js without browser rendering. Future work includes measuring SVG and Canvas rendering and progressive output.
+
+\ListReferences{
+\item Kozar,~R.~V. Methods of data clustering in recognition of endoscopic images in computer-aided medical diagnosis~/ R.~V.~Kozar, N.~S.~Konoiko, A.~A.~Navrotsky~// Doklady BGUIR.~-- 2023.~-- Vol.~21, No.~1.~-- P.~94--97.~-- DOI: 10.35596/1729-7648-2023-21-1-94-97.
+\item Zinsmaier,~M. Interactive level-of-detail rendering of large graphs~/ M.~Zinsmaier, U.~Brandes, O.~Deussen, H.~Strobelt~// IEEE Trans. Vis. Comput. Graph.~-- 2012.~-- Vol.~18, No.~12.~-- P.~2486--2495.
+\item GraphMaps: browsing large graphs as interactive maps~/ L.~Nachmanson [et al.]~// arXiv.~-- 2015.~-- arXiv:1506.06745.
+\item Abello,~J. ASK-GraphView: a large scale graph visualization system~/ J.~Abello, F.~van Ham, N.~Krishnan~// IEEE Trans. Vis. Comput. Graph.~-- 2006.~-- Vol.~12, No.~5.~-- P.~669--676.
+\item Herman,~I. Graph visualization and navigation in information visualization: a survey~/ I.~Herman, G.~Melancon, M.~S.~Marshall~// IEEE Trans. Vis. Comput. Graph.~-- 2000.~-- Vol.~6, No.~1.~-- P.~24--43.
+\item Bostock,~M. D3: data-driven documents~/ M.~Bostock, V.~Ogievetsky, J.~Heer~// IEEE Trans. Vis. Comput. Graph.~-- 2011.~-- Vol.~17, No.~12.~-- P.~2301--2309.
+\item Lomako,~A.~V. Automation of diagram image conversion to program code~/ A.~V.~Lomako, K.~A.~Khadzhynava~// Information Transmission and Processing Technologies.~-- 2026.
+\item Finkel,~R.~A. Quad trees: a data structure for retrieval on composite keys~/ R.~A.~Finkel, J.~L.~Bentley~// Acta Inform.~-- 1974.~-- Vol.~4, No.~1.~-- P.~1--9.
+}
+
+\end{multicols} % НЕ УДАЛЯТЬ!
+
+% ===== Конец материалов. Все, что ниже, не изменять !===========
+\end{document}
