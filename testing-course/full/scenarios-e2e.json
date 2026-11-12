@@ -32,28 +32,28 @@
         },
         {
           "title": "Соединяет блок A3 с блоком A4 стрелкой в режиме «Соединить»",
-          "status": "Failed",
-          "note": "Locator.click: Timeout 8000ms exceeded. Call log:   - waiting for locator(\".notation__node[data-id=\\\"A4\\\"]\")     - locator resolved to <g data-id=\"A4\" tabindex=\"0\" role=\"button\" data-cx=\"465.5\" data-cy=\"312.7\" aria-label=\"A4\" class=\"local-engine__box notation__node\">…</g>"
+          "status": "Passed",
+          "note": ""
         },
         {
           "title": "Перетаскивает блок A1 мышью, положение пишется в код",
-          "status": "Blocked",
-          "note": "предыдущий шаг не прошёл"
+          "status": "Passed",
+          "note": ""
         },
         {
           "title": "Нажимает «Сохранить»: проект получает имя и адрес",
-          "status": "Blocked",
-          "note": "предыдущий шаг не прошёл"
+          "status": "Passed",
+          "note": ""
         },
         {
           "title": "Запоминает адрес проекта и уходит на панель проектов",
-          "status": "Blocked",
-          "note": "предыдущий шаг не прошёл"
+          "status": "Passed",
+          "note": ""
         },
         {
           "title": "Находит проект первым в «Мои проекты» и открывает его",
-          "status": "Blocked",
-          "note": "предыдущий шаг не прошёл"
+          "status": "Failed",
+          "note": "диаграмма не нарисована"
         }
       ],
       "status": "Failed"
@@ -255,46 +255,46 @@
         },
         {
           "title": "На панели три сохранённых проекта, новейший первым",
-          "status": "Passed",
-          "note": ""
+          "status": "Failed",
+          "note": " ожидалось 3, получено 36"
         },
         {
           "title": "Фильтр ERD оставляет только проект «Магазин»",
-          "status": "Passed",
-          "note": ""
+          "status": "Blocked",
+          "note": "предыдущий шаг не прошёл"
         },
         {
           "title": "Поиск «плат» находит только «Платежи»",
-          "status": "Passed",
-          "note": ""
+          "status": "Blocked",
+          "note": "предыдущий шаг не прошёл"
         },
         {
           "title": "Сортировка по названию ставит «Заказ» раньше «Магазин»",
-          "status": "Passed",
-          "note": ""
+          "status": "Blocked",
+          "note": "предыдущий шаг не прошёл"
         },
         {
           "title": "Переименовывает «Платежи» в «Оплата»",
-          "status": "Passed",
-          "note": ""
+          "status": "Blocked",
+          "note": "предыдущий шаг не прошёл"
         },
         {
           "title": "Удаляет «Заказ» с подтверждением",
-          "status": "Passed",
-          "note": ""
+          "status": "Blocked",
+          "note": "предыдущий шаг не прошёл"
         },
         {
           "title": "Отказ в диалоге удаления ничего не удаляет",
-          "status": "Passed",
-          "note": ""
+          "status": "Blocked",
+          "note": "предыдущий шаг не прошёл"
         },
         {
           "title": "После перезагрузки остались «Магазин» и «Оплата»",
-          "status": "Passed",
-          "note": ""
+          "status": "Blocked",
+          "note": "предыдущий шаг не прошёл"
         }
       ],
-      "status": "Passed"
+      "status": "Failed"
     },
     {
       "id": "S8",
@@ -364,21 +364,21 @@
         },
         {
           "title": "Через две секунды автосохранение записало правку",
-          "status": "Passed",
-          "note": ""
+          "status": "Failed",
+          "note": "Page.evaluate: TypeError: Cannot read properties of null (reading '0')     at eval (eval at evaluate (:311:30), <anonymous>:1:52)     at eval (<anonymous>)     at UtilityScript.evaluate (<anonymous>:311:30)"
         },
         {
           "title": "Закрывает вкладку и открывает проект по адресу: правка на месте",
-          "status": "Passed",
-          "note": ""
+          "status": "Blocked",
+          "note": "предыдущий шаг не прошёл"
         },
         {
           "title": "Выключает автосохранение: новая правка уже не записывается",
-          "status": "Passed",
-          "note": ""
+          "status": "Blocked",
+          "note": "предыдущий шаг не прошёл"
         }
       ],
-      "status": "Passed"
+      "status": "Failed"
     },
     {
       "id": "S11",
@@ -443,13 +443,13 @@
         },
         {
           "title": "Ошибка в коде показана с номером строки, щелчок по ней ставит курсор на эту строку",
-          "status": "Failed",
-          "note": "ошибка не ушла после правки"
+          "status": "Passed",
+          "note": ""
         },
         {
           "title": "Нажимает на блок «Archive» на доске и удаляет его клавишей Delete: блок и его связь исчезли из кода и с доски",
-          "status": "Blocked",
-          "note": "предыдущий шаг не прошёл"
+          "status": "Failed",
+          "note": "блок остался в коде"
         },
         {
           "title": "Выбирает процесс и удаляет кнопкой «Удалить выбранный»; «Отменить» возвращает всё как было",
@@ -486,26 +486,26 @@
         },
         {
           "title": "Сохраняет копию и находит её в «Мои проекты» с тегом нотации",
-          "status": "Passed",
-          "note": ""
+          "status": "Failed",
+          "note": " ожидалось 1, получено 2"
         },
         {
           "title": "Счётчик беты показывает одну созданную сегодня диаграмму",
-          "status": "Passed",
-          "note": ""
+          "status": "Blocked",
+          "note": "предыдущий шаг не прошёл"
         },
         {
           "title": "Поиск в верхней строке с другой страницы открывает список с запросом",
-          "status": "Passed",
-          "note": ""
+          "status": "Blocked",
+          "note": "предыдущий шаг не прошёл"
         },
         {
           "title": "Ctrl+K ставит курсор в строку поиска, значок профиля ведёт в настройки",
-          "status": "Passed",
-          "note": ""
+          "status": "Blocked",
+          "note": "предыдущий шаг не прошёл"
         }
       ],
-      "status": "Passed"
+      "status": "Failed"
     }
   ],
   "console_errors": [

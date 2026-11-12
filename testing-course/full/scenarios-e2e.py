@@ -32,6 +32,13 @@ class Scenario:
         scenarios.append({"id": self.sid, "persona": self.persona, "goal": self.goal, "steps": self.steps, "status": "Failed" if self.failed else "Passed"})
 
 
+def pal(pg, **kw):
+    """The shapes of the palette sit in the menu of the "Element" button of the toolbar: open it, then return the items."""
+    if pg.locator(".board-tools__pop").is_hidden():
+        pg.click(".board-tools__add")
+    return pg.locator(".palette__item", **kw)
+
+
 def yes(v, msg):
     if not v:
         raise AssertionError(msg)
@@ -45,8 +52,16 @@ def eq(a, b, msg=""):
 with sync_playwright() as p:
     b = p.chromium.launch(channel="msedge")
 
-    def new_user(width=1366, height=900, lang="ru-RU"):
+    # Pages of the application are for signed-in users, so a test account and its session are put in place before the page loads.
+    # signed_in=False gives a guest for the scenarios about the public site.
+    SIGN_IN = """() => { try { if (localStorage.getItem('dslkit.accounts') === null) {
+        localStorage.setItem('dslkit.accounts', JSON.stringify([{ id: 'e2e0000000000001', name: 'Test User', email: 'e2e@example.com', salt: '00', hash: '00', iterations: 1, role: 'user' }]));
+        localStorage.setItem('dslkit.session', JSON.stringify({ userId: 'e2e0000000000001' })); } } catch (e) { /* storage unavailable */ } }"""
+
+    def new_user(width=1366, height=900, lang="ru-RU", signed_in=True):
         ctx = b.new_context(viewport={"width": width, "height": height}, accept_downloads=True, locale=lang)
+        if signed_in:
+            ctx.add_init_script("(" + SIGN_IN + ")()")
         ctx.grant_permissions(["clipboard-read", "clipboard-write"], origin=base)
         pg = ctx.new_page()
         pg.set_default_timeout(8000)
@@ -87,7 +102,7 @@ with sync_playwright() as p:
 
     s.step("Печатает с клавиатуры новое название диаграммы «Заказ в магазине»: диаграмма перерисовывается сама", lambda: (retitle(pg, "Заказ в магазине"), yes("Заказ в магазине" in pg.inner_text(".canvas__remote"), "название не на диаграмме"), yes("Заказ в магазине" in code(pg), code(pg)[:60])))
     s.step("Печатает руками новый блок: автоотступ после «{», «}» возвращается на край, блок появляется на диаграмме", lambda: (pg.click(".code__input", position={"x": 300, "y": 12}), pg.keyboard.press("Control+End"), pg.keyboard.press("Enter"), pg.keyboard.type('box A9 "Ручной блок" {'), pg.keyboard.press("Enter"), pg.keyboard.type("input: In"), pg.keyboard.press("Enter"), pg.keyboard.type("control: Rule"), pg.keyboard.press("Enter"), pg.keyboard.type("output: Out"), pg.keyboard.press("Enter"), pg.keyboard.type("}"), pg.wait_for_timeout(1000), yes(code(pg).endswith('box A9 "Ручной блок" {' + chr(10) + "  input: In" + chr(10) + "  control: Rule" + chr(10) + "  output: Out" + chr(10) + "}"), code(pg)[-90:]), yes(pg.locator(".canvas__remote .notation__node").count() == 4, "блок не появился на диаграмме")))
-    s.step("Добавляет блок из палитры перетаскиванием на доску", lambda: (lambda item, svg: (pg.mouse.move(item["x"] + 10, item["y"] + 10), pg.mouse.down(), pg.mouse.move(svg["x"] + svg["width"] * 0.55, svg["y"] + svg["height"] * 0.75, steps=10), pg.mouse.up(), pg.wait_for_timeout(600), yes(pg.locator(".canvas__remote .notation__node").count() == 5, "нового блока нет"), yes("box A4" in code(pg), "блок не в коде")))(pg.locator(".palette__item").first.bounding_box(), pg.locator(".canvas__remote svg").bounding_box()))
+    s.step("Добавляет блок из палитры перетаскиванием на доску", lambda: (lambda item, svg: (pg.mouse.move(item["x"] + 10, item["y"] + 10), pg.mouse.down(), pg.mouse.move(svg["x"] + svg["width"] * 0.55, svg["y"] + svg["height"] * 0.75, steps=10), pg.mouse.up(), pg.wait_for_timeout(600), yes(pg.locator(".canvas__remote .notation__node").count() == 5, "нового блока нет"), yes("box A4" in code(pg), "блок не в коде")))(pal(pg).first.bounding_box(), pg.locator(".canvas__remote svg").bounding_box()))
     s.step("Соединяет блок A3 с блоком A4 стрелкой в режиме «Соединить»", lambda: (pg.click(".palette__mode"), pg.locator('.notation__node[data-id="A3"]').click(), pg.locator('.notation__node[data-id="A4"]').click(), pg.wait_for_timeout(500), yes("arrow A3.output -> A4.input" in code(pg), "стрелки нет в коде")))
     s.step("Перетаскивает блок A1 мышью, положение пишется в код", lambda: (pg.keyboard.press("Escape"), (lambda box: (pg.mouse.move(box["x"] + box["width"] / 2, box["y"] + box["height"] / 2), pg.mouse.down(), pg.mouse.move(box["x"] + box["width"] / 2 + 50, box["y"] + box["height"] / 2 + 40, steps=8), pg.mouse.up()))(pg.locator('.notation__node[data-id="A1"]').bounding_box()), pg.wait_for_timeout(500), yes(re.search(r"box A1 [^\n]*pos=", code(pg)), "pos= не записан")))
     s.step("Нажимает «Сохранить»: проект получает имя и адрес", lambda: (pg.click('[data-action="save"]'), pg.wait_for_timeout(400), yes("?p=" in pg.url, pg.url), eq(pg.inner_text(".editor-topbar__title"), "заказ-в-магазине.dsl")))
@@ -127,7 +142,7 @@ with sync_playwright() as p:
     tour(pg)
     pg.wait_for_timeout(600)
     s.step("Шаблон DFD открыт без ошибок", lambda: yes(code(pg).startswith("diagram dfd") and pg.locator(".canvas__remote svg").count() == 1, code(pg)[:30]))
-    s.step("Добавляет хранилище кликом по палитре", lambda: (pg.locator(".palette__item", has_text="Хранилище").click(), pg.wait_for_timeout(400), yes("store S1" in code(pg), "хранилища нет")))
+    s.step("Добавляет хранилище кликом по палитре", lambda: (pal(pg, has_text="Хранилище").click(), pg.wait_for_timeout(400), yes("store S1" in code(pg), "хранилища нет")))
     s.step("Соединяет процесс 2 с новым хранилищем: связь допустима", lambda: (pg.click(".palette__mode"), pg.locator('.notation__node[data-id="2"]').click(), pg.locator('.notation__node[data-id="S1"]').click(), pg.wait_for_timeout(400), yes("flow 2 -> S1" in code(pg), "связи нет")))
     s.step("Пытается соединить клиента с хранилищем напрямую: система отказывает и объясняет почему", lambda: (pg.locator('.notation__node[data-id="Customer"]').click(), pg.locator('.notation__node[data-id="S1"]').click(), pg.wait_for_timeout(400), yes("не касается процесса" in pg.inner_text(".palette__message"), pg.inner_text(".palette__message")), yes("flow Customer -> S1" not in code(pg), "запрещённая связь попала в код")))
     s.step("Пишет связь клиента с хранилищем руками: редактор показывает ошибку и блокирует запуск", lambda: (set_code(pg, code(pg) + "\nflow Customer -> S1 \"прямо\""), yes("не касается процесса" in pg.inner_text(".problems__list"), "ошибка не показана"), eq(pg.locator(".button--run").first.get_attribute("aria-disabled"), "true")))
@@ -223,8 +238,8 @@ with sync_playwright() as p:
     ctx, pg = new_user(390, 800)
     s.step("Открывает главную и редактор, горизонтальной прокрутки нет", lambda: (pg.goto(base + "/app/editor.html?template=idef0"), tour(pg), pg.wait_for_timeout(500), yes(pg.evaluate("document.documentElement.scrollWidth - innerWidth") <= 1, "есть прокрутка вбок")))
     s.step("Нижняя навигация переключает «Код» и «Холст»", lambda: (pg.click('.editor-bottom-nav [data-view="code"]'), pg.wait_for_timeout(300), yes(pg.locator("#editor-panel").is_visible(), "код не виден"), pg.click('.editor-bottom-nav [data-view="canvas"]'), pg.wait_for_timeout(300), yes(pg.locator(".canvas__remote svg").is_visible(), "холст не виден")))
-    s.step("Кнопка «Меню» открывает проводник с шаблонами и палитрой", lambda: (pg.click('.editor-bottom-nav [data-action="sidebar"]'), pg.wait_for_timeout(300), yes(pg.locator(".palette__item").first.is_visible(), "палитра не видна")))
-    s.step("Нажимает элемент палитры: блок добавлен, затем сохраняет", lambda: (pg.locator(".palette__item").first.click(), pg.wait_for_timeout(500), yes("box A4" in code(pg), "блок не добавлен"), pg.click('[data-action="save"]'), pg.wait_for_timeout(400), yes("?p=" in pg.url, pg.url)))
+    s.step("Кнопка «Меню» открывает проводник с шаблонами и палитрой", lambda: (pg.click('.editor-bottom-nav [data-action="sidebar"]'), pg.wait_for_timeout(300), yes(pal(pg).first.is_visible(), "палитра не видна")))
+    s.step("Нажимает элемент палитры: блок добавлен, затем сохраняет", lambda: (pal(pg).first.click(), pg.wait_for_timeout(500), yes("box A4" in code(pg), "блок не добавлен"), pg.click('[data-action="save"]'), pg.wait_for_timeout(400), yes("?p=" in pg.url, pg.url)))
     ctx.close()
     s.done()
 
