@@ -4,7 +4,7 @@ Branch `lab12`, folder `part-2/lab-02-sequelize`. Russian version: `11-LR2-SEQUE
 
 ## 1 What the lab does in one minute
 
-The REST API of the `diagrams` resource from lab 1, but the records live in a database table. By default this is a SQLite file (`dev.sqlite`); with `DATABASE_URL` it is PostgreSQL. Tables are created by migrations, never by `sequelize.sync()`. New compared with lab 1:
+The REST API of the `diagrams` resource from lab 1, but the records live in a database table. The database of the work is PostgreSQL (address in `DATABASE_URL`, a local one from `docker-compose.yml`); a SQLite file is chosen only by `SQLITE_STORAGE` and is used by the tests. Tables are created by migrations, never by `sequelize.sync()`. New compared with lab 1:
 
 - the `projects` resource and a one-to-many link (a project has many diagrams, a diagram belongs to one project);
 - the numeric field `revision` from 0 to a limit;
@@ -24,7 +24,7 @@ The REST API of the `diagrams` resource from lab 1, but the records live in a da
 
 ```
 server.js                      checks the database connection, then listens
-config/config.js               which database: SQLite by default, PostgreSQL by DATABASE_URL
+config/config.js               which database: PostgreSQL by DATABASE_URL, SQLite only by SQLITE_STORAGE
 migrations/                    schema history: tables, fields, link, log
 seeders/                       starting data
 src/models/index.js            connection, models and associations (hasMany, belongsTo)
@@ -57,7 +57,7 @@ The log sits after `/health` so Docker probes do not fill the table, and before 
 
 ### Configuration and connection
 
-`config/config.js` picks the database from the environment: no `DATABASE_URL` means a local SQLite file, with it PostgreSQL. In production SSL with certificate checks is required; checks cannot be turned off, `DATABASE_SSL_CA` is used instead. `server.js` calls `authenticate()` first and only then listens; without a database the process exits with code 1 and a clear message.
+`config/config.js` picks the database from the environment: `DATABASE_URL` points to PostgreSQL; without it only `SQLITE_STORAGE` works (the tests), and with neither the server reports a configuration error. In production SSL with certificate checks is required; checks cannot be turned off, `DATABASE_SSL_CA` is used instead. `server.js` calls `authenticate()` first and only then listens; without a database the process exits with code 1 and a clear message.
 
 ### Models and associations (`src/models`)
 
@@ -99,7 +99,7 @@ For variant 26 these are questions 5–7 of 10 (n−1, n, n+1 with n=6). Full an
 - **Why migrations rather than `sync()`.** `sync` keeps no history and cannot safely alter an existing table; migrations are reproducible and reversible.
 - **What is CHECK and why, if the code validates.** The last line of defence: data stays correct even if someone writes to the database around the API.
 - **How to trigger a 500 with a real failure.** Start the server, in a second window run `npx sequelize-cli db:migrate:undo:all`: the tables vanish, the first request cannot write the log and gets 500. Restore with `npm run db:migrate`, `npm run db:seed`. With PostgreSQL, stop the database.
-- **SQLite or PostgreSQL.** An open question for the teacher; SQLite by default, PostgreSQL through `DATABASE_URL` (not yet tried on a real PostgreSQL).
+- **SQLite or PostgreSQL.** An open question for the teacher; PostgreSQL through `DATABASE_URL`, SQLite only for tests; the work was checked on PostgreSQL 16 in Docker on 28 October 2026 (five migrations and the seeder passed, screenshots in `figures-pg/`).
 
 ## 6 Write it live: rehearsal
 
