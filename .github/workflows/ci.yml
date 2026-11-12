@@ -2,12 +2,19 @@ name: CI
 on:
   push:
   pull_request:
+  workflow_dispatch:
 # The token of the workflow may only read the code: a compromised step cannot push or change settings.
 permissions:
   contents: read
+# A newer push to the same branch cancels the older run of it.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   test:
+    name: Site tests, format, audit
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -19,3 +26,39 @@ jobs:
       - run: npm test
       # Known vulnerabilities in the libraries that reach the user fail the build; development tools are reported by Dependabot.
       - run: npm audit --omit=dev --audit-level=high
+
+  build:
+    name: Production build of the site
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: site-dist
+          path: dist
+          retention-days: 7
+
+  react:
+    name: React app (lab 7 and 8 of part 1)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: react-app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: react-app/package-lock.json
+      - run: npm ci
+      - run: npm test
+      - run: npm run build

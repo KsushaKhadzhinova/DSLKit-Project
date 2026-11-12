@@ -1,0 +1,41 @@
+name: Deploy site
+# Publishes the built site to GitHub Pages. It runs on the main branch only, or by hand from the Actions tab.
+# One-time setup by the owner: Settings, Pages, Source = "GitHub Actions". No secret is needed.
+on:
+  push:
+    branches: [main, docs/overview-and-ab-tests]
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: false
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      # The deploy follows the same gates as CI: a red test never reaches the public site.
+      - run: npm test
+      - run: npm run build
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
