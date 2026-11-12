@@ -231,10 +231,13 @@ test('a pressed block is selected, Delete and the button remove it with its link
   const button = t.$('.palette__remove');
   t.fire(button, 'click');
   assert.equal(t.$('.palette__message').textContent, 'Сначала нажмите на блок на доске.');
+  // The blocks of the drawing are focusable (tabindex 0), the test markup is not.
+  t.remote.querySelectorAll('.notation__node').forEach((node) => node.setAttribute('tabindex', '0'));
   press(t.remote.querySelector('[data-id="Bank"]'));
   assert.equal(t.api.picked(), 'Bank');
   assert.ok(t.remote.querySelector('[data-id="Bank"]').classList.contains('notation__node--picked'));
   assert.match(t.$('.palette__message').textContent, /Выбран блок Bank/);
+  assert.equal(t.window.document.activeElement, t.remote.querySelector('[data-id="Bank"]'), 'the keyboard goes to the pressed block');
   press(t.remote.querySelector('svg'));
   assert.equal(t.api.picked(), null);
   assert.equal(t.remote.querySelectorAll('.notation__node--picked').length, 0);

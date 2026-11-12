@@ -14,7 +14,7 @@ Russian version: [`HANDOVER-SESSION-2026-11-12.md`](HANDOVER-SESSION-2026-11-12.
 ## Open for the agent
 
 1. Confirm `npm test` and `npm run format:check` are green on this branch (a run was started on 12 November; the result is in the session message).
-2. `testing-course/full/scenarios-e2e.py`: the script is not part of `tc:full` and has fallen behind the app: the 7 November record shows 2 failures of 14 (S1, S13), a 12 November run on a fresh site shows 7 of 14 (S1, S3, S7, S8, S11, S13, S14) with different causes (palette, the projects panel `[data-section=shared]`, a sign-in page before the editor in S11). These look like stale selectors and scenarios rather than certain app bugs; go through one scenario at a time. The S13 error step is already made robust (it clicks the link of the right error), but the scenario still fails later. `npm test` on this branch on 12 November: 1026 of 1026.
+2. `testing-course/full/scenarios-e2e.py`: fixed on 12 November, 14 of 14 scenarios pass. The script had fallen behind the app (sign-in is required, the palette is in the "Element" menu, starter projects), it now signs in with a test account. A real defect was found and fixed: after pressing a block on the board Delete did nothing because the focus stayed in the code field (`editor-palette.js`, test added, coverage still 100%). The script is still not part of `tc:full`.
 3. Seeds for labs 2, 3 and 6 (chosen by the owner, not done).
 4. `render.yaml` and the `course-app` deploy (waits for the owner to say so).
 5. Red GitHub checks on branches 25, 28, pz21 and `testing-course-full`: needs the error text from the Actions tab or `gh auth login`.

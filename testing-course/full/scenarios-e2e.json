@@ -52,11 +52,11 @@
         },
         {
           "title": "Находит проект первым в «Мои проекты» и открывает его",
-          "status": "Failed",
-          "note": "диаграмма не нарисована"
+          "status": "Passed",
+          "note": ""
         }
       ],
-      "status": "Failed"
+      "status": "Passed"
     },
     {
       "id": "S2",
@@ -364,21 +364,21 @@
         },
         {
           "title": "Через две секунды автосохранение записало правку",
-          "status": "Failed",
-          "note": "Page.evaluate: TypeError: Cannot read properties of null (reading '0')     at eval (eval at evaluate (:311:30), <anonymous>:1:52)     at eval (<anonymous>)     at UtilityScript.evaluate (<anonymous>:311:30)"
+          "status": "Passed",
+          "note": ""
         },
         {
           "title": "Закрывает вкладку и открывает проект по адресу: правка на месте",
-          "status": "Blocked",
-          "note": "предыдущий шаг не прошёл"
+          "status": "Passed",
+          "note": ""
         },
         {
           "title": "Выключает автосохранение: новая правка уже не записывается",
-          "status": "Blocked",
-          "note": "предыдущий шаг не прошёл"
+          "status": "Passed",
+          "note": ""
         }
       ],
-      "status": "Failed"
+      "status": "Passed"
     },
     {
       "id": "S11",
@@ -448,21 +448,21 @@
         },
         {
           "title": "Нажимает на блок «Archive» на доске и удаляет его клавишей Delete: блок и его связь исчезли из кода и с доски",
-          "status": "Failed",
-          "note": "блок остался в коде"
+          "status": "Passed",
+          "note": ""
         },
         {
           "title": "Выбирает процесс и удаляет кнопкой «Удалить выбранный»; «Отменить» возвращает всё как было",
-          "status": "Blocked",
-          "note": "предыдущий шаг не прошёл"
+          "status": "Passed",
+          "note": ""
         },
         {
           "title": "Без выбранного блока кнопка «Удалить выбранный» объясняет, что делать",
-          "status": "Blocked",
-          "note": "предыдущий шаг не прошёл"
+          "status": "Passed",
+          "note": ""
         }
       ],
-      "status": "Failed"
+      "status": "Passed"
     },
     {
       "id": "S14",

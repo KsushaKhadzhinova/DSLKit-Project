@@ -345,7 +345,11 @@ export const initEditorPalette = ({ root = document } = {}) => {
     const node = event.target.closest(NODE);
     picked = node ? node.dataset.id : null;
     markPicked();
-    if (node) say(t('picked', { id: picked }));
+    if (node) {
+      // The keyboard goes to the pressed block, otherwise Delete would still act on the code field the user was typing in.
+      node.focus({ preventScroll: true });
+      say(t('picked', { id: picked }));
+    }
   });
   remote.addEventListener('keydown', (event) => {
     const node = event.target.closest?.(NODE);
