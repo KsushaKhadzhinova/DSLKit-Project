@@ -15,10 +15,11 @@ Russian version: [`HANDOVER-SESSION-2026-11-12.md`](HANDOVER-SESSION-2026-11-12.
 
 1. Confirm `npm test` and `npm run format:check` are green on this branch (a run was started on 12 November; the result is in the session message).
 2. `testing-course/full/scenarios-e2e.py`: fixed on 12 November, 14 of 14 scenarios pass. The script had fallen behind the app (sign-in is required, the palette is in the "Element" menu, starter projects), it now signs in with a test account. A real defect was found and fixed: after pressing a block on the board Delete did nothing because the focus stayed in the code field (`editor-palette.js`, test added, coverage still 100%). The script is still not part of `tc:full`.
-3. Seeds for labs 2, 3 and 6 (chosen by the owner, not done).
-4. `render.yaml` and the `course-app` deploy (waits for the owner to say so).
-5. Red GitHub checks on branches 25, 28, pz21 and `testing-course-full`: needs the error text from the Actions tab or `gh auth login`.
-6. The `part-2/` directory in the working tree is untracked (only `lab-02-sequelize/package-lock.json` and the ignored `pz-02-rest-api`): do not commit it to this branch; Part 2 works live in their own branches.
+3. `click-everything.py` (12 November): 17 of 496 elements show no reaction; the real placeholders without a handler are on `settings.html` the buttons "Canvas", "Keyboard shortcuts", "AI and integrations", "Account and plan" (no sections with such ids, only `#editor-settings` and `#theme` exist) and on `welcome.html` the buttons "Import PlantUML / Mermaid" and "Tour · 5 steps" (the tour only runs on the editor page). "Import from a file" in the editor opens a file chooser and the radio "light" is already checked: the detector counts them as dead, they are not defects. Decision: remove the placeholders or make them work.
+4. Seeds for labs 2, 3 and 6 (chosen by the owner, not done).
+5. `render.yaml` and the `course-app` deploy (waits for the owner to say so).
+6. Red GitHub checks on branches 25, 28, pz21 and `testing-course-full`: needs the error text from the Actions tab or `gh auth login`.
+7. The `part-2/` directory in the working tree is untracked (only `lab-02-sequelize/package-lock.json` and the ignored `pz-02-rest-api`): do not commit it to this branch; Part 2 works live in their own branches.
 
 ## Open for the owner
 
