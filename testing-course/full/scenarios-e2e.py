@@ -53,10 +53,12 @@ with sync_playwright() as p:
     b = p.chromium.launch(channel="msedge")
 
     # Pages of the application are for signed-in users, so a test account and its session are put in place before the page loads.
+    # The starter projects are marked as already added, so the scenarios start from an empty list as they were written.
     # signed_in=False gives a guest for the scenarios about the public site.
     SIGN_IN = """() => { try { if (localStorage.getItem('dslkit.accounts') === null) {
         localStorage.setItem('dslkit.accounts', JSON.stringify([{ id: 'e2e0000000000001', name: 'Test User', email: 'e2e@example.com', salt: '00', hash: '00', iterations: 1, role: 'user' }]));
-        localStorage.setItem('dslkit.session', JSON.stringify({ userId: 'e2e0000000000001' })); } } catch (e) { /* storage unavailable */ } }"""
+        localStorage.setItem('dslkit.session', JSON.stringify({ userId: 'e2e0000000000001' }));
+        localStorage.setItem('dslkit.seeded.e2e0000000000001', 'true'); } } catch (e) { /* storage unavailable */ } }"""
 
     def new_user(width=1366, height=900, lang="ru-RU", signed_in=True):
         ctx = b.new_context(viewport={"width": width, "height": height}, accept_downloads=True, locale=lang)
