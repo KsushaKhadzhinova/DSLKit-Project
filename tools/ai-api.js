@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { NOTATION_KEYS, formatProblem, parseDiagram } from '../site/js/notations/index.js';
+import { handleClarify } from './ai-questions.js';
 import { listNotations } from './render-api.js';
 
 // The AI endpoints of DSLKit: a description, a piece of code in another language or a picture becomes DSLKit code through the Claude API.
@@ -204,6 +205,10 @@ export const createAiHandler = ({ env = process.env, fetchImpl = globalThis.fetc
       if (pathname === '/api/ai/status') {
         if (req.method !== 'GET') return fail(res, 405, 'method', 'Use GET', {}, { Allow: 'GET' });
         return json(res, 200, { available: config.key !== '', model: config.model, maxImageMb: config.imageBytes / 1024 / 1024 });
+      }
+      if (pathname === '/api/ai/clarify') {
+        const system = (lang) => buildSystemPrompt(safeReference(), lang);
+        return handleClarify({ req, res, config, ask, system, readBody, json, fail, rateLimited, dayExhausted });
       }
       if (pathname !== '/api/ai/generate') return fail(res, 404, 'not-found', `Unknown endpoint ${pathname}`);
       if (req.method !== 'POST') return fail(res, 405, 'method', 'Use POST', {}, { Allow: 'POST' });
