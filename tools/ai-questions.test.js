@@ -94,7 +94,7 @@ test('answers to the questions of the model refine the code, which must not get 
   assert.equal(body.ok, true);
   assert.deepEqual(body.applied, ['flow-start', 'ai-1']);
   assert.match(calls[0].messages[0].content, /start start "Start"/);
-  assert.match(calls[0].messages[0].content, /Q: ai-1\nA: add C/);
+  assert.match(calls[0].messages[0].content, /Q: More\?\nA: add C/);
 });
 
 test('a worse code is sent back once and then the result of the rules is used', async () => {
