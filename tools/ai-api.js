@@ -3,12 +3,13 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { NOTATION_KEYS, formatProblem, parseDiagram } from '../site/js/notations/index.js';
 import { listNotations } from './render-api.js';
+import { VISION_SIGNATURES, VISION_TASK, VISION_TYPES, retryMessage, visionBlock, visionIssues } from './ai-vision.js';
 
 // The AI endpoints of DSLKit: a description, a piece of code in another language or a picture becomes DSLKit code through the Claude API.
 // The key is read only from the environment of the server (ANTHROPIC_API_KEY). It is never written to a file, a log or an answer.
 // Every result is checked by parseDiagram; a result with errors goes back to the model with the list of problems, at most twice.
 export const MODES = ['idea', 'code', 'image'];
-export const IMAGE_TYPES = { 'image/png': 'png', 'image/jpeg': 'jpeg', 'image/webp': 'webp', 'image/gif': 'gif' };
+export const IMAGE_TYPES = { 'image/png': 'png', 'image/jpeg': 'jpeg', 'image/webp': 'webp', 'image/gif': 'gif', ...VISION_TYPES };
 export const MAX_TEXT = 20_000;
 export const MAX_RETRIES = 2;
 export const DEFAULT_MODEL = 'claude-sonnet-5-5';
@@ -30,6 +31,7 @@ const SIGNATURES = {
   'image/jpeg': (bytes) => bytes.length > 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff,
   'image/webp': (bytes) => bytes.length > 12 && bytes.subarray(0, 4).toString('latin1') === 'RIFF' && bytes.subarray(8, 12).toString('latin1') === 'WEBP',
   'image/gif': (bytes) => bytes.length > 6 && /^GIF8[79]a$/.test(bytes.subarray(0, 6).toString('latin1')),
+  ...VISION_SIGNATURES,
 };
 
 const positive = (value, fallback) => {
@@ -40,7 +42,7 @@ const positive = (value, fallback) => {
 const TASKS = {
   idea: 'Turn the description of the user into a diagram. Choose the most fitting notation unless one is named.',
   code: 'Convert the given code (Mermaid, PlantUML, Graphviz DOT, or plain text) into DSLKit code. Keep every element and link that DSLKit can express.',
-  image: 'Read the picture of a diagram (or a sketch) and rebuild it as DSLKit code. Keep the labels as they are written in the picture.',
+  image: VISION_TASK,
 };
 
 export const buildSystemPrompt = (reference, lang) => {
@@ -139,7 +141,7 @@ export const createAiHandler = ({ env = process.env, fetchImpl = globalThis.fetc
 
   const firstMessage = ({ mode, text, notation, image, mediaType }) => {
     const parts = [];
-    if (mode === 'image') parts.push({ type: 'image', source: { type: 'base64', media_type: mediaType, data: image } });
+    if (mode === 'image') parts.push(visionBlock(mediaType, image));
     const wanted = notation ? `Notation: ${notation}.\n` : '';
     parts.push({ type: 'text', text: `${TASKS[mode]}\n${wanted}${text ? `\nInput:\n${text}` : ''}` });
     return { role: 'user', content: parts };
@@ -153,12 +155,16 @@ export const createAiHandler = ({ env = process.env, fetchImpl = globalThis.fetc
       const text = await ask(settingsNow, system, messages);
       const code = extractCode(text);
       result = { code, attempts: attempt, ...problemsOf(code, lang) };
+      visionIssues(result, input.mode).forEach((item) => {
+        result.problems.push(item);
+        result.errors.push(item);
+      });
       if (result.errors.length === 0) return result;
       messages.push(
         { role: 'assistant', content: text },
         {
           role: 'user',
-          content: `The code has errors. Fix them and answer with the whole corrected DSLKit code only.\n${result.errors.map((item) => `line ${item.line}: ${item.message}`).join('\n')}`,
+          content: retryMessage(result.errors, input.mode),
         },
       );
     }

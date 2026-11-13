@@ -39,6 +39,21 @@ string     = '"' , { char | "\\" , any } , '"' ;
 | POST   | `/api/render`              | { source, lang } -> { notation, valid, problems, svg } (Accept: image/svg+xml gives the bare SVG) |
 | POST   | `/api/external/<language>` | { source } -> SVG of the external service (Kroki-compatible, KROKI_URL)                           |
 
+## Импорт файлов и картинок
+
+Мастер «Автоматическое построение» принимает файлы до 10 МБ. Формат определяется по содержимому, затем по расширению. Структурные форматы читает детерминированный импортёр без ключа ИИ (site/js/utils/diagram-file-import.js), картинки и PDF читает только ИИ сервера.
+
+| Формат                                                                               | Результат                                                      |
+| ------------------------------------------------------------------------------------ | -------------------------------------------------------------- |
+| draw.io (.drawio, .dio, сжатое и несжатое), SVG (экспорт draw.io, Graphviz, Mermaid) | блок-схема ГОСТ, BPMN или граф, положения pos=XxY сохраняются  |
+| JSON (nodes и edges, Cytoscape, Excalidraw, Lucid)                                   | граф или блок-схема ГОСТ                                       |
+| BPMN 2.0 XML (.bpmn)                                                                 | BPMN с положениями из BPMNShape                                |
+| XMI (.xmi, .uml)                                                                     | UML, диаграмма классов                                         |
+| GraphML, GEXF, DOT (.dot, .gv), CSV и TSV со связями                                 | граф                                                           |
+| Visio (.vdx, .vsdx)                                                                  | блок-схема ГОСТ или граф                                       |
+| Mermaid (.mmd, .md), PlantUML (.puml, .plantuml, .pu, .wsd), DSLKit (.dsl), текст    | существующий импорт блок-схем, последовательностей и состояний |
+| png, jpeg, webp, gif, pdf                                                            | только ИИ с ключом на сервере; BMP не принимается              |
+
 ## Нотации
 
 ### IDEF0 — функциональное моделирование
@@ -319,20 +334,20 @@ arc take -> free
 Пример:
 
 ```
-diagram gost "Сумма чисел"
-start s "Начало"
-io in "Ввод n"
+diagram gost "Sum of numbers"
+start s "Start"
+io in "Input n"
 preparation p "i = 1, sum = 0"
 decision d "i <= n?"
 process a "sum = sum + i, i = i + 1"
-io out "Вывод sum"
-end e "Конец"
+io out "Output sum"
+end e "End"
 flow s -> in
 flow in -> p
 flow p -> d
-flow d -> a "Да"
+flow d -> a "Yes"
 flow a -> d
-flow d -> out "Нет"
+flow d -> out "No"
 flow out -> e
 ```
 
