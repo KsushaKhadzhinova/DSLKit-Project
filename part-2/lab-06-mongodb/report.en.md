@@ -75,9 +75,9 @@ Changing one array element shows the difference from the relational model: the p
 
 ### 3.5 Running and verification
 
-To run the project, copy `.env.example` to `.env` and set `MONGODB_URI`, run `npm run seed`, then `npm run dev`. The seed removes the demo documents by title and inserts three diagrams, so it can be repeated. A check against a local `mongod` showed that the list returns diagrams with nested comments and tags, and a request with `tag=shop` returns two of the three diagrams.
+To run the project, copy `.env.example` to `.env` and set `MONGODB_URI`, run `npm run seed`, then `npm run dev`. The seed inserts 32 demo diagrams with tags and nested comments, adding only those that do not exist by title yet (`upsert` with `$setOnInsert`), so a repeated run duplicates nothing and keeps user edits, and `npm run seed:undo` removes only the demo documents. A check against a local `mongod` showed that the list returns diagrams with nested comments and tags, and a request with `tag=shop` returns two of the three diagrams.
 
-The routes gained partial update `PATCH /diagrams/:id`, sorting with `?sort=title` or `?sort=-priority`, a record counter (the `/diagrams/count` route and the `X-Total-Count` header of the list) and `?q=` search over a text index of the title and the source code. There are 144 automated tests. Nineteen cover the main routes: valid and invalid identifiers, creation, replacement that keeps comments, deletion, the 400, 404, 405 and 413 errors, and a 500 answer that leaks no error text. Eleven cover nested structures: the tag and owner filter, adding, editing and removing a comment, the unreachable foreign comment, schema checks at the model level, indexes and the translation of a Mongoose error into 400. Ten cover `PATCH`, sorting, the counter and the text search. Twenty-eight cover wrong user behavior: empty, truncated and non-JSON bodies, wrong types, whitespace-only values, out-of-range values, forged fields, operator injection, malformed identifiers, repeated and parallel requests and a stopped database. Another eleven cover data protection: operators such as `$ne` in the body and in query parameters, whitespace-only values, the limits from `limits.json` at the border and beyond it, the integer priority, the body size cap and the creation time of every record. Thirty-nine more cover further misuse scenarios, twelve cover the security headers, the request log, aggregation and search in the nested field, nine cover resilience (load, parallel requests, cut connections, recovery after a database stop, Cyrillic and emoji), three cover the seed data and two cover the `/health` route. The tests run on a temporary MongoDB instance through `mongodb-memory-server`, so no working database is touched. The same `npm test` command checks the build and formatting of this report. Screenshots of the Atlas cluster, Postman requests and MongoDB Compass data are not included in this version of the report.
+The routes gained partial update `PATCH /diagrams/:id`, sorting with `?sort=title` or `?sort=-priority`, a record counter (the `/diagrams/count` route and the `X-Total-Count` header of the list) and `?q=` search over a text index of the title and the source code. There are 150 automated tests. Nineteen cover the main routes: valid and invalid identifiers, creation, replacement that keeps comments, deletion, the 400, 404, 405 and 413 errors, and a 500 answer that leaks no error text. Eleven cover nested structures: the tag and owner filter, adding, editing and removing a comment, the unreachable foreign comment, schema checks at the model level, indexes and the translation of a Mongoose error into 400. Ten cover `PATCH`, sorting, the counter and the text search. Twenty-eight cover wrong user behavior: empty, truncated and non-JSON bodies, wrong types, whitespace-only values, out-of-range values, forged fields, operator injection, malformed identifiers, repeated and parallel requests and a stopped database. Another eleven cover data protection: operators such as `$ne` in the body and in query parameters, whitespace-only values, the limits from `limits.json` at the border and beyond it, the integer priority, the body size cap and the creation time of every record. Thirty-nine more cover further misuse scenarios, twelve cover the security headers, the request log, aggregation and search in the nested field, nine cover resilience (load, parallel requests, cut connections, recovery after a database stop, Cyrillic and emoji), six cover the seed (the data, a repeated run without duplicates, keeping user edits, an undo that removes only its own documents) and two cover the `/health` route. The tests run on a temporary MongoDB instance through `mongodb-memory-server`, so no working database is touched. The same `npm test` command checks the build and formatting of this report. Screenshots of the Atlas cluster, Postman requests and MongoDB Compass data are not included in this version of the report.
 
 ### 3.6 Demonstration
 
@@ -244,7 +244,7 @@ Listing of db.js is given in appendix A. Listing of server.js is given in append
 
 ## Conclusion
 
-In this lab the DSLKit server from lab 2 moved from Sequelize to Mongoose. The `diagrams` collection lives in MongoDB, the CRUD routes kept their addresses and response format, and identifiers became `ObjectId` strings. Tags and comments sit inside the diagram document, which replaces several tables and joins with a single query. For the comments array the work adds appending, changing an element with the positional operator and removal. The connection string is an environment variable, the schema validates data, and 144 tests confirm the API behavior on a temporary database. The connection to MongoDB Atlas is not done and no screenshots are attached.
+In this lab the DSLKit server from lab 2 moved from Sequelize to Mongoose. The `diagrams` collection lives in MongoDB, the CRUD routes kept their addresses and response format, and identifiers became `ObjectId` strings. Tags and comments sit inside the diagram document, which replaces several tables and joins with a single query. For the comments array the work adds appending, changing an element with the positional operator and removal. The connection string is an environment variable, the schema validates data, and 150 tests confirm the API behavior on a temporary database. The connection to MongoDB Atlas is not done and no screenshots are attached.
 
 ## Appendix A (mandatory) Listing of db.js
 
@@ -497,24 +497,45 @@ module.exports = { createDiagramsRouter };
 
 ```js
 require('dotenv').config({ quiet: true });
+const mongoose = require('mongoose');
 const { Diagram } = require('../src/models');
 const { connect, disconnect } = require('../src/db');
 
 const { ROWS: demo } = require('./seed-diagrams');
 
-// Replaces the demo documents by title, so the script can be run many times.
-const seed = async () => {
+// Idempotent per document: a demo diagram that exists is left alone (comments added by users stay),
+// a deleted one comes back, nothing is duplicated. The title identifies a demo document.
+const seed = async (model = Diagram, rows = demo) => {
+  const result = await model.bulkWrite(
+    rows.map((row) => ({ updateOne: { filter: { title: row.title }, update: { $setOnInsert: row }, upsert: true } })),
+    { timestamps: true },
+  );
+  return { created: result.upsertedCount, kept: rows.length - result.upsertedCount };
+};
+
+// The model sanitizes filters, so the list of titles is marked as trusted (it comes from the seed file, not from a request).
+// Removes only the demo documents, anything else in the collection stays.
+const unseed = async (model = Diagram, rows = demo) => (await model.deleteMany({ title: mongoose.trusted({ $in: rows.map((row) => row.title) }) })).deletedCount;
+
+const run = async () => {
   await connect();
-  await Diagram.deleteMany({ title: { $in: demo.map((d) => d.title) } });
-  const created = await Diagram.create(demo);
-  console.log(`Seeded ${created.length} diagrams`);
+  const undo = process.argv.includes('--undo');
+  if (undo) console.log(`Removed ${await unseed()} demo diagrams`);
+  else {
+    const { created, kept } = await seed();
+    console.log(`Seeded ${created} diagrams, ${kept} already there`);
+  }
   await disconnect();
 };
 
-seed().catch((error) => {
-  console.error('Seed failed:', error.message);
-  process.exit(1);
-});
+if (require.main === module) {
+  run().catch((error) => {
+    console.error('Seed failed:', error.message);
+    process.exit(1);
+  });
+}
+
+module.exports = { seed, unseed };
 ```
 
 ## Appendix G (mandatory) Listing of limits.json
