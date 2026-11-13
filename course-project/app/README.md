@@ -20,6 +20,28 @@ docker compose up --build
 
 В `.env` нужно вписать `POSTGRES_PASSWORD` (буквы и цифры) и `JWT_SECRET` (не короче 32 случайных символов). Приложение откроется на `http://localhost:8080`, проверка сервера на `http://localhost:8080/api/health`. Первого администратора создаёт сид из `ADMIN_EMAIL` и `ADMIN_PASSWORD`, демонстрационных пользователей и комментарии из `DEMO_USER_PASSWORD` (см. `server/.env.example`).
 
+## Облачное развёртывание на Render / Deployment on Render
+
+Файл `render.yaml` лежит в корне репозитория (ветка `course-app`) и описывает три ресурса: базу PostgreSQL `dslkit-db`, сервер `dslkit-api` (Node.js) и клиент `dslkit-web` (статический сайт). Секретов в файле нет, они вводятся в панели Render.
+
+1. В панели Render выберите New, Blueprint, подключите репозиторий и ветку с `render.yaml`.
+2. Render создаст три ресурса и попросит значения переменных с `sync: false`: `JWT_SECRET` (не короче 32 случайных символов), `ADMIN_EMAIL`, `ADMIN_PASSWORD` (10 символов и больше), `DEMO_USER_PASSWORD` (необязательно), `CORS_ORIGIN` и `VITE_API_URL`.
+3. Адреса сервисов известны только после создания. Впишите в `CORS_ORIGIN` сервера адрес клиента (`https://dslkit-web.onrender.com` или фактический), в `VITE_API_URL` клиента адрес сервера (`https://dslkit-api.onrender.com`), затем перезапустите сервер и пересоберите клиент (Manual Deploy), потому что `VITE_API_URL` попадает в сборку.
+4. Сервер запускается командой `npx sequelize-cli db:migrate && npx sequelize-cli db:seed:all && node server.js` (как в Dockerfile), состояние проверяется по `/health`, сборка: `npm ci --omit=dev`.
+5. Бесплатные план базы и сервера Render ограничены по сроку и засыпают без запросов: первый ответ после простоя медленный. Проверьте актуальные условия плана перед защитой.
+
+Не проверено: развёртывание на самом Render не выполнялось. В `render.yaml` не задан `NODE_ENV=production`, потому что в этом режиме сервер требует `DATABASE_SSL=true` и проверяемый сертификат (`DATABASE_SSL_CA`); подходит ли внутреннее соединение Render с этой проверкой, нужно выяснить при первом запуске.
+
+The `render.yaml` file in the repository root (branch `course-app`) describes three resources: the PostgreSQL database `dslkit-db`, the Node.js server `dslkit-api` and the static client `dslkit-web`. It holds no secrets: they are typed in the Render dashboard.
+
+1. In the Render dashboard choose New, Blueprint, connect the repository and the branch that has `render.yaml`.
+2. Render creates the three resources and asks for the variables marked `sync: false`: `JWT_SECRET` (at least 32 random characters), `ADMIN_EMAIL`, `ADMIN_PASSWORD` (10 characters or more), `DEMO_USER_PASSWORD` (optional), `CORS_ORIGIN` and `VITE_API_URL`.
+3. The service addresses are known only after creation. Put the client address into the server variable `CORS_ORIGIN` (`https://dslkit-web.onrender.com` or the real one) and the server address into the client variable `VITE_API_URL` (`https://dslkit-api.onrender.com`), then restart the server and rebuild the client (Manual Deploy), because `VITE_API_URL` is baked into the build.
+4. The server starts with `npx sequelize-cli db:migrate && npx sequelize-cli db:seed:all && node server.js` (as in the Dockerfile), health is checked at `/health`, the build is `npm ci --omit=dev`.
+5. The free Render plans of the database and the server are time-limited and sleep without traffic: the first answer after idle is slow. Check the current plan terms before the defense.
+
+Not verified: no deployment to Render was performed. `render.yaml` does not set `NODE_ENV=production` because in that mode the server requires `DATABASE_SSL=true` with a verifiable certificate (`DATABASE_SSL_CA`); whether the internal Render connection fits that check has to be found out at the first start.
+
 ## Запуск без Docker
 
 ```bash
