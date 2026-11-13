@@ -54,6 +54,8 @@ test('diffLines tells the common, the removed and the added lines', () => {
 test('nearest finds the same word in another case or a word a letter away, never a short stranger', () => {
   assert.equal(nearest('Start', ['stop', 'start']), 'start');
   assert.equal(nearest('taks', ['flow', 'task']), 'task');
+  assert.equal(nearest('abcd', ['abce', 'abcf']), 'abce');
+  assert.equal(nearest('abcd', ['abce', 'abcd']), 'abcd');
   assert.equal(nearest('b', ['a']), undefined);
   assert.equal(nearest('B', ['a', 'b']), 'b');
   assert.equal(nearest('proces', ['process']), 'process');

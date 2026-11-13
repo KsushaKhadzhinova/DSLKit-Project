@@ -39,6 +39,7 @@ test('parseVariants finds the JSON however it is wrapped and ignores the rest', 
   assert.deepEqual(parseVariants('{}'), []);
   assert.deepEqual(parseVariants('no json at all'), []);
   assert.deepEqual(parseVariants('{ broken'), []);
+  assert.deepEqual(parseVariants('{ "a": }'), []);
   assert.deepEqual(parseVariants('} before {'), []);
 });
 

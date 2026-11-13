@@ -184,6 +184,19 @@ test('an answer without usable AI variants, a refusal and a lost connection are 
   }
 });
 
+test('blank lines show in the difference and an answer that is not JSON is a refusal', async () => {
+  const { $, click, api } = await setup({
+    code: BROKEN.replace('flow s -> a', NL + 'flow s -> a'),
+    fetchImpl: async (url) =>
+      url === '/api/ai/status' ? answer({ available: true }) : { ok: true, status: 200, json: async () => Promise.reject(new Error('html')) },
+  });
+  click('[data-review-open]');
+  await tick();
+  assert.ok($('.review__code').textContent.length > 0);
+  await api.askAi();
+  assert.match($('.review__status').textContent, /недоступен/);
+});
+
 test('the status of the AI that cannot be read hides the button', async () => {
   const lost = await setup({
     fetchImpl: async () => {

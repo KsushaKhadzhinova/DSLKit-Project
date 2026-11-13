@@ -108,7 +108,7 @@ export const nearest = (word, options) => {
   return options
     .map((option) => ({ option, gap: distance(low, option.toLowerCase()) }))
     .filter((item) => item.gap <= reach)
-    .sort((a, b) => a.gap - b.gap)[0]?.option;
+    .reduce((best, item) => (best && best.gap <= item.gap ? best : item), undefined)?.option;
 };
 
 // ----- the context of one review
