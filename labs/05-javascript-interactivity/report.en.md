@@ -125,6 +125,7 @@ Modular JavaScript is written for the DSLKit project: an entry point, storage an
 ```js
 import { initAccordion } from './components/accordion.js';
 import { initAutomation } from './components/automation.js';
+import { initReviewPanel } from './components/review-panel.js';
 import { initAppSearch } from './components/app-search.js';
 import { initAuthForm, initAuthMenu } from './components/auth.js';
 import { initAuthGate } from './components/auth-gate.js';
@@ -179,6 +180,7 @@ export const COMPONENTS = [
   initEditorActions,
   initEditorTools,
   initAutomation,
+  initReviewPanel,
   initEditorPalette,
   initExport,
   initImport,

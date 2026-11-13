@@ -2,12 +2,13 @@ import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { NOTATION_KEYS, formatProblem, parseDiagram } from '../site/js/notations/index.js';
+import { reviewWithAi } from './ai-review.js';
 import { listNotations } from './render-api.js';
 
 // The AI endpoints of DSLKit: a description, a piece of code in another language or a picture becomes DSLKit code through the Claude API.
 // The key is read only from the environment of the server (ANTHROPIC_API_KEY). It is never written to a file, a log or an answer.
 // Every result is checked by parseDiagram; a result with errors goes back to the model with the list of problems, at most twice.
-export const MODES = ['idea', 'code', 'image'];
+export const MODES = ['idea', 'code', 'image', 'review'];
 export const IMAGE_TYPES = { 'image/png': 'png', 'image/jpeg': 'jpeg', 'image/webp': 'webp', 'image/gif': 'gif' };
 export const MAX_TEXT = 20_000;
 export const MAX_RETRIES = 2;
@@ -222,6 +223,14 @@ export const createAiHandler = ({ env = process.env, fetchImpl = globalThis.fetc
       if (dayExhausted(config.daily)) return fail(res, 429, 'daily-limit', 'The daily limit of AI requests is used up');
       let result;
       try {
+        if (checked.input.mode === 'review') {
+          const ask1 = (system, messages) => ask(config, system, messages);
+          return json(
+            res,
+            200,
+            await reviewWithAi({ code: checked.input.text, lang: body.lang ?? 'ru', ask: ask1, reference: safeReference(), model: config.model }),
+          );
+        }
         result = await generate(config, checked.input, body.lang ?? 'ru');
       } catch {
         return fail(res, 502, 'upstream', 'The AI service failed, try again later');

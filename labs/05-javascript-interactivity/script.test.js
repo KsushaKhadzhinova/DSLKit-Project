@@ -44,6 +44,7 @@ test('the dashboard, the settings and the editor start their own components', ()
     'initEditorActions',
     'initEditorTools',
     'initAutomation',
+    'initReviewPanel',
     'initEditorPalette',
     'initExport',
     'initImport',
