@@ -1,0 +1,39 @@
+/* The dialog "Clarify and complete" of the editor: one question at a time. The shell is the panel of the automatic build (.auto). */
+.clarify__question {
+  display: grid;
+  gap: var(--space-1);
+  min-inline-size: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.clarify__text {
+  padding: 0;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.clarify__controls {
+  display: grid;
+  gap: var(--space-1);
+}
+.clarify__option {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-block-size: 2.75rem;
+  overflow-wrap: anywhere;
+}
+.clarify__count,
+.clarify__status {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 0.875rem;
+}
+.clarify__bar {
+  inline-size: 100%;
+  block-size: 0.5rem;
+}
+.clarify__nav .button {
+  flex: 1 1 auto;
+  min-block-size: 2.75rem;
+}
