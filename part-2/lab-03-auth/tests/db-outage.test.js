@@ -2,7 +2,6 @@ const { test, before, after } = require('node:test');
 const assert = require('node:assert/strict');
 const { spawn } = require('node:child_process');
 const { resolve } = require('node:path');
-const jwt = require('jsonwebtoken');
 const { Sequelize } = require('sequelize');
 const { createApp } = require('../src/app');
 const { createModels } = require('../src/models');

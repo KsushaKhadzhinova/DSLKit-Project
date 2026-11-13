@@ -85,4 +85,4 @@ The 500 answer is caused by a database failure, not by a button.
 
 - SQLite: run `npm start`, and in a second window run `npx sequelize-cli db:migrate:undo:all`. The tables vanish under the running server, the very first request cannot write a row to the `RequestLogs` log and gets 500 with the body `{ "error": "Internal server error" }`, and the details stay only in the server console. To restore work: `npm run db:migrate` and `npm run db:seed`.
 - PostgreSQL (Neon, Supabase or local): stop the database service or container, requests give 500, and `GET /health` answers 503.
-- A start with an unreachable database ends with exit code 1 and a message, and the server does not come up.
+- A start with an unreachable database does not exit: the server keeps running, a message goes to the console, and `GET /health` and the routes that need the database answer 503 until the database is reachable.
