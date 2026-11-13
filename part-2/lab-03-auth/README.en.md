@@ -40,10 +40,12 @@ cd part-2/lab-03-auth
 npm install
 cp .env.example .env     # then set JWT_SECRET, and ADMIN_EMAIL and ADMIN_PASSWORD if you like
 npm run db:migrate
-npm run db:seed          # demo diagrams and the administrator (if ADMIN_* are set)
+npm run db:seed          # the administrator (ADMIN_*), four demo users (DEMO_USER_PASSWORD), 32 demo diagrams
 npm run dev
 npm test
 ```
+
+**Demo data.** The seed has three files. `…-admin-user.js` creates the administrator from `ADMIN_EMAIL` and `ADMIN_PASSWORD` (10 characters or more). `…-demo-users.js` creates four ordinary users alice, bob, carol and dave (`@example.test`, role `user`) that share the password from `DEMO_USER_PASSWORD`. `…-demo-diagrams.js` adds 32 diagrams over six notations and five awkward rows (Unicode, markup, SQL-like text, maximum length); the administrator and the four users own them in turn, so the role and owner checks have data to try. Passwords come only from environment variables (names in `.env.example`), none is in the repository, and the database stores a bcrypt hash. Without a variable the matching step is skipped. Running it again duplicates nothing: an existing account is not changed, a deleted diagram comes back. `db:seed:undo` removes only the demo rows.
 
 A secret can be generated with `node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"`. Request examples for the REST Client extension are in [`requests.http`](requests.http). A curl example:
 
@@ -71,7 +73,7 @@ The `ownerId` field of a diagram is now set by the server from the token, not by
 
 ## 5 Checking
 
-`npm test` runs 120 tests on a temporary SQLite database with the real migrations (bcrypt with 4 rounds for speed) and the check of the reports (`report.test.mjs`). The connection to a real PostgreSQL was not checked. `npm audit` shows remarks in development tools (`nodemon`, `sequelize-cli`).
+`npm test` runs 142 tests on a temporary SQLite database with the real migrations (bcrypt with 4 rounds for speed) and the check of the reports (`report.test.mjs`). The connection to a real PostgreSQL was not checked. `npm audit` shows remarks in development tools (`nodemon`, `sequelize-cli`).
 
 ## 6 PUT and PATCH
 

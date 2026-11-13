@@ -165,3 +165,26 @@ test('the admin seed refuses a weak password and skips quietly without ADMIN_* v
     process.env.ADMIN_PASSWORD = saved.password ?? '';
   }
 });
+
+test('the demo user seed refuses a weak password, skips quietly without DEMO_USER_PASSWORD and never touches an existing account', async () => {
+  const seeder = require('../seeders/20261016000001-demo-users');
+  const inserted = [];
+  const fake = {
+    rawSelect: async (_table, { where }) => (where.email === seeder.DEMO_EMAILS[0] ? 1 : null),
+    bulkInsert: async (_table, rows) => inserted.push(rows[0]),
+  };
+  const saved = process.env.DEMO_USER_PASSWORD;
+  try {
+    process.env.DEMO_USER_PASSWORD = 'short';
+    await assert.rejects(seeder.up(fake), /DEMO_USER_PASSWORD must be 10 characters or more/);
+    process.env.DEMO_USER_PASSWORD = '';
+    await seeder.up(fake);
+    assert.equal(inserted.length, 0);
+    process.env.DEMO_USER_PASSWORD = 'a long demo password';
+    await seeder.up(fake);
+    assert.deepEqual(inserted.map((u) => u.email), seeder.DEMO_EMAILS.slice(1));
+    assert.ok(inserted.every((u) => u.role === 'user' && u.passwordHash !== 'a long demo password'));
+  } finally {
+    process.env.DEMO_USER_PASSWORD = saved ?? '';
+  }
+});
