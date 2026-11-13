@@ -1,3 +1,4 @@
+import { pageLanguage } from '../utils/lang.js';
 // Toasts: a short note in the corner after an action of the user, so the system always answers.
 // Any module reports through notify(root, text, kind); the component listens, shows the toast, and clears it after a few seconds.
 const EVENT = 'dslkit:toast';
@@ -23,7 +24,7 @@ export const flash = (storage, text, kind) => storage.set(FLASH, { text, kind })
 
 export const initToasts = ({ root = document, storage, setTimer = setTimeout, clearTimer = clearTimeout } = {}) => {
   if (!root.body) return null;
-  const lang = root.documentElement.lang === 'en' ? 'en' : 'ru';
+  const lang = pageLanguage(root);
   const region = root.createElement('div');
   region.className = 'toasts';
   region.setAttribute('role', 'region');

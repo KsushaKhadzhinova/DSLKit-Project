@@ -4,6 +4,7 @@ import { TEMPLATES, parseDiagram } from '../notations/index.js';
 import { currentUser, isUnlimited } from '../storage/accounts.js';
 import { starterProjects } from '../storage/seeds.js';
 import { createProjectStore, createTemplateStore, showQuota } from '../storage/projects.js';
+import { pageLanguage } from '../utils/lang.js';
 
 const TEXTS = {
   saved: { ru: 'Сохранено в «Мои проекты»: {title}', en: 'Saved to "My projects": {title}' },
@@ -48,7 +49,7 @@ export const initEditorProjects = ({
   const codeLines = page?.querySelector('.code__lines');
   if (!codeLines) return null;
   const view = root.defaultView;
-  const lang = root.documentElement.lang === 'en' ? 'en' : 'ru';
+  const lang = pageLanguage(root);
   const user = currentUser(storage);
   const owner = user?.id ?? null;
   const store = createProjectStore({ storage, now, owner, unlimited: isUnlimited(user) });

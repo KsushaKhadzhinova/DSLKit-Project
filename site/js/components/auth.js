@@ -19,6 +19,7 @@ const MESSAGES = {
 const FIELDS = { login: ['email', 'password'], register: ['name', 'email', 'password', 'confirm'] };
 
 import { flash } from './toast.js';
+import { pageLanguage } from '../utils/lang.js';
 
 const goTo = (root) => (url) => root.defaultView.location.assign(url);
 
@@ -67,7 +68,7 @@ export const initAuthForm = ({ root = document, storage, crypto, navigate = goTo
 
   const mode = form.dataset.mode === 'register' ? 'register' : 'login';
   const ids = FIELDS[mode];
-  const messages = MESSAGES[root.documentElement.lang === 'en' ? 'en' : 'ru'];
+  const messages = MESSAGES[pageLanguage(root)];
   const store = createAccountStore({ storage, crypto });
   const summary = form.querySelector('#auth-error');
   const button = form.querySelector('[type="submit"]');

@@ -2,6 +2,7 @@ import { applyTheme } from './theme.js';
 import { readCode, showCode } from './code-lines.js';
 import { notify } from './toast.js';
 import { clearPositions, formatCode } from '../utils/format-code.js';
+import { pageLanguage } from '../utils/lang.js';
 
 export const ZOOM_MIN = 0.5;
 export const ZOOM_MAX = 3;
@@ -47,7 +48,7 @@ export const initEditorActions = ({ root = document, storage, clipboard = root.d
   const page = root.querySelector('.app-page--editor');
   const codeLines = page?.querySelector('.code__lines');
   if (!codeLines) return null;
-  const lang = root.documentElement.lang === 'en' ? 'en' : 'ru';
+  const lang = pageLanguage(root);
   const note = page.querySelector('.editor-status__saved');
   const remote = page.querySelector('.canvas__remote');
   const sidebar = page.querySelector('.editor-sidebar');

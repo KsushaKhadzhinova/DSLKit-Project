@@ -143,6 +143,7 @@ import { initEditorProjects } from './components/editor-projects.js';
 import { initEditorTools } from './components/editor-tools.js';
 import { initExport } from './components/export-menu.js';
 import { initImport } from './components/import-menu.js';
+import { initLangSwitch } from './components/lang-switch.js';
 import { registerServiceWorker } from './components/pwa.js';
 import { initNotationFilter } from './components/notation-filter.js';
 import { initPopups } from './components/popups.js';
@@ -157,6 +158,7 @@ import { getStorage } from './utils/storage.js';
 
 export const COMPONENTS = [
   initTheme,
+  initLangSwitch,
   initToasts,
   initBurger,
   initAuthGate,
@@ -385,6 +387,7 @@ export function validateRegistration({ name, email, password, confirm } = {}) {
 ## Appendix D – Listing of notation-filter.js
 
 ```js
+import { pageLanguage } from '../utils/lang.js';
 const FILTERS = ['all', 'beta', 'planned'];
 
 const LABELS = {
@@ -414,7 +417,7 @@ export const initNotationFilter = ({ root = document, storage } = {}) => {
   const items = list ? [...list.querySelectorAll('li[data-status]')] : [];
   if (items.length === 0) return null;
 
-  const labels = LABELS[root.documentElement.lang === 'ru' ? 'ru' : 'en'];
+  const labels = LABELS[pageLanguage(root)];
   const doc = list.ownerDocument;
 
   const group = doc.createElement('div');
@@ -561,6 +564,7 @@ import { currentUser, isUnlimited } from '../storage/accounts.js';
 import { notify } from './toast.js';
 import { starterProjects } from '../storage/seeds.js';
 import { TRASH_DAYS, createProjectStore, createTemplateStore, showQuota } from '../storage/projects.js';
+import { pageLanguage } from '../utils/lang.js';
 
 const FILTERS = ['all', ...NOTATION_KEYS];
 const SORTS = ['newest', 'oldest', 'name'];
@@ -670,7 +674,7 @@ export const initDashboard = ({ root = document, storage, now = () => Date.now()
   if (!list) return null;
 
   const view = root.defaultView;
-  const lang = root.documentElement.lang === 'ru' ? 'ru' : 'en';
+  const lang = pageLanguage(root);
   const labels = LABELS[lang];
   const user = currentUser(storage);
   const owner = user?.id ?? null;
@@ -1007,6 +1011,7 @@ import { NOTATIONS, TEMPLATES } from '../notations/index.js';
 import { ui } from '../notations/messages.js';
 import { showCode } from './code-lines.js';
 import { initSourceAutosave } from './source-autosave.js';
+import { pageLanguage } from '../utils/lang.js';
 
 const VIEWS = ['code', 'canvas'];
 const KEY_STEPS = { ArrowRight: 1, ArrowLeft: -1 };
@@ -1040,7 +1045,7 @@ const initTabs = ({ page, root, storage, tabs }) => {
       panels[position].hidden = !active;
     });
     if (focus) tabs[index].focus();
-    closeButton?.setAttribute('aria-label', `Закрыть файл ${tabName(index)}`);
+    closeButton?.setAttribute('aria-label', `${root.documentElement.lang === 'en' ? 'Close the file' : 'Закрыть файл'} ${tabName(index)}`);
     storage.set('editor-tab', index);
   };
 
@@ -1076,7 +1081,7 @@ const initCloseDialog = ({ page, root, tabs, tabsApi }) => {
   const markSaved = () => {
     page.querySelectorAll('.editor-tabs__dot, .editor-topbar__dot').forEach((dot) => dot.remove());
     page.querySelectorAll('.visually-hidden').forEach((note) => {
-      if (note.textContent.trim() === 'не сохранено') note.remove();
+      if (['не сохранено', 'unsaved'].includes(note.textContent.trim())) note.remove();
     });
   };
 
@@ -1121,7 +1126,10 @@ const initAutosave = ({ page, settings }) => {
   const status = page.querySelector('.editor-status__cursor');
   const apply = (on) => {
     autosave.setAttribute('aria-checked', String(on));
-    if (status) status.textContent = status.textContent.replace(/Автосохранение: (?:вкл|выкл)/, `Автосохранение: ${on ? 'вкл' : 'выкл'}`);
+    if (status)
+      status.textContent = status.textContent.replace(/(Автосохранение|Autosave): (?:вкл|выкл|on|off)/, (_, label) =>
+        label === 'Autosave' ? `Autosave: ${on ? 'on' : 'off'}` : `Автосохранение: ${on ? 'вкл' : 'выкл'}`,
+      );
   };
   const saved = settings.read().autosave;
   apply(typeof saved === 'boolean' ? saved : autosave.getAttribute('aria-checked') === 'true');
@@ -1169,7 +1177,7 @@ const initRun = ({ page, root }) => {
 
 // Templates: the buttons and the notation list replace the code with a starter example and ask the runner to draw it.
 const initTemplates = ({ page, root }) => {
-  const lang = root.documentElement.lang === 'en' ? 'en' : 'ru';
+  const lang = pageLanguage(root);
   const codeLines = page.querySelector('.code__lines');
   const loadTemplate = (key) => {
     if (!codeLines || !Object.hasOwn(TEMPLATES, key)) return false;

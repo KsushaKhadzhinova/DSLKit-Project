@@ -1,6 +1,7 @@
 import { importDiagram } from '../utils/import-diagram.js';
 import { showCode } from './code-lines.js';
 import { notify } from './toast.js';
+import { pageLanguage } from '../utils/lang.js';
 
 const KINDS = {
   ru: { flowchart: 'блок-схема', sequence: 'диаграмма последовательности', state: 'диаграмма состояний', dsl: 'код DSLKit' },
@@ -34,7 +35,7 @@ export const initImport = ({ root = document, readClipboard } = {}) => {
   const codeLines = page?.querySelector('.code__lines');
   if (buttons.length === 0 || !codeLines) return null;
   const status = page.querySelector('.canvas__status');
-  const lang = root.documentElement.lang === 'en' ? 'en' : 'ru';
+  const lang = pageLanguage(root);
   const words = TEXT[lang];
   const input = page.querySelector('.editor-import__file');
   const clipboard = readClipboard ?? (() => root.defaultView.navigator.clipboard.readText());

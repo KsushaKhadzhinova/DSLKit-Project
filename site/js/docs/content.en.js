@@ -244,7 +244,7 @@ Light, dark or auto (follows the system). The theme can also be switched quickly
 
 ## Language
 
-The Russian and English versions are different pages: the "English" link (and "Русский" back) in the top bar. In the editor the link keeps the open project.
+The Russian and English versions are different pages: the "English" link (and "Русский" back) in the top bar. The link keeps the open page, section and project.
 
 ## Rendering engine
 
@@ -436,7 +436,7 @@ On the Russian page the "Element" button adds blocks with Russian names: "Про
 
 ## Typical mistakes
 
-- A space in an identifier: \`entity Заказ клиента\` gives the error "Unrecognized line". Write \`Заказ_клиента\` and put the nice name in quotes.
+- A space in an identifier: \`entity Заказ клиента\` gives the error "Unrecognized line". Write \`Заказ_клиента\` or \`ЗаказКлиента\` and put the nice name in quotes.
 - Write an identifier the same way everywhere: \`Клиент\` and \`клиент\` are different elements for the editor.
 - Escape quotes inside a quoted label with a backslash.`,
     },
@@ -799,24 +799,24 @@ Draw the algorithm of the sum of numbers 1…n by GOST 19.701-90.
 ## Steps
 
 1. Symbols: \`start\`/\`end\` (terminator), \`io\` (input-output), \`preparation\`, \`process\`, \`decision\`. There are also \`predefined\`, \`manual\`, \`document\`, \`connector\`, \`offpage\`, \`storage\`.
-2. Two labelled branches leave a decision: "Yes" and "No" (the template has them in Russian).
+2. Two labelled branches leave a decision: "Yes" and "No".
 3. A loop is a flow back to the decision.
 
 \`\`\`
-diagram gost "Сумма чисел"
-start s "Начало"
-io in "Ввод n"
+diagram gost "Sum of numbers"
+start s "Start"
+io in "Input n"
 preparation p "i = 1, sum = 0"
 decision d "i <= n?"
 process a "sum = sum + i, i = i + 1"
-io out "Вывод sum"
-end e "Конец"
+io out "Output sum"
+end e "End"
 flow s -> in
 flow in -> p
 flow p -> d
-flow d -> a "Да"
+flow d -> a "Yes"
 flow a -> d
-flow d -> out "Нет"
+flow d -> out "No"
 flow out -> e
 \`\`\`
 
@@ -1431,12 +1431,12 @@ The command writes docs/DSL-REFERENCE.md and DSL-REFERENCE.en.md: the parsing pi
 There are two languages now: Russian (the source) and English. For a third one:
 
 1. Create the page tree site/<code>/ on the model of site/en/ and set \`lang="<code>"\` on \`<html>\`. Add \`hreflang\` links to the switches.
-2. Components choose the language with \`root.documentElement.lang === 'en' ? 'en' : 'ru'\` and \`{ ru, en }\` dictionaries. Extend them with a third key and the language function, for example move it to a shared \`langOf(root)\`.
+2. Add the code to \`LANGUAGES\` in utils/lang.js: components choose the language with \`pageLanguage(root)\` and every dictionary \`{ ru, en }\` needs the new key. The test labs/06-async-api-storage/i18n-parity.test.js lists what is missing.
 3. Add the translation to \`MESSAGES\` (notations/messages.js), the palette (\`NAMES\` in utils/palette.js), the notation names (\`entry\` in index.js) and the rules of utils/i18n.js.
 4. The texts of this documentation are site/js/docs/content.<code>.js with the same section \`id\`s.
 5. Add the language to the API (\`LANGS\` in tools/render-api.js).
 
-The dictionary completeness test must check that every key has all the languages.`,
+The dictionary completeness test checks that every key has all the languages of \`LANGUAGES\`.`,
     },
     {
       id: 'security',

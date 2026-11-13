@@ -1,3 +1,4 @@
+import { pageLanguage } from '../utils/lang.js';
 const STEPS = [
   {
     selector: '.code',
@@ -37,7 +38,7 @@ export const TOUR_STEPS = STEPS.length;
 // A five step tour of the editor. It opens once for a new visitor, the menu can open it again, Escape or Skip closes it.
 export const initTour = ({ root = document, storage } = {}) => {
   const page = root.querySelector('.app-page--editor');
-  const lang = root.documentElement.lang === 'en' ? 'en' : 'ru';
+  const lang = pageLanguage(root);
   const words = LABELS[lang];
   const steps = page ? STEPS.filter((step) => page.querySelector(step.selector)) : [];
   if (steps.length === 0) return null;

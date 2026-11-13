@@ -1,5 +1,6 @@
 import { currentUser, isUnlimited } from '../storage/accounts.js';
 import { createProjectStore, showQuota } from '../storage/projects.js';
+import { pageLanguage } from '../utils/lang.js';
 
 // The quota block of the side bar shows the real number of diagrams created today on every page of the application.
 export const initQuota = ({ root = document, storage, now = () => Date.now() } = {}) => {
@@ -7,8 +8,7 @@ export const initQuota = ({ root = document, storage, now = () => Date.now() } =
   if (!text) return null;
   const user = currentUser(storage);
   const store = createProjectStore({ storage, now, owner: user?.id ?? null });
-  const refresh = () =>
-    showQuota(text, root.querySelector('.app-nav__progress'), store.createdOn(), root.documentElement.lang === 'en' ? 'en' : 'ru', isUnlimited(user));
+  const refresh = () => showQuota(text, root.querySelector('.app-nav__progress'), store.createdOn(), pageLanguage(root), isUnlimited(user));
   refresh();
   return { refresh };
 };

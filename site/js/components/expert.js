@@ -4,6 +4,7 @@ import { factsFromDescription, reviewDiagram, traceLines } from '../expert/revie
 import { NOTATIONS } from '../notations/index.js';
 import { createAccountStore } from '../storage/accounts.js';
 import { notify } from './toast.js';
+import { pageLanguage } from '../utils/lang.js';
 
 const TEXTS = {
   ru: {
@@ -101,7 +102,7 @@ export const initExpert = ({ root = document, storage, developerHash, adminHash 
   const work = root.querySelector('.expert__work');
   if (!work) return null;
   const view = root.defaultView;
-  const lang = root.documentElement.lang === 'en' ? 'en' : 'ru';
+  const lang = pageLanguage(root);
   const t = (key, params = {}) => TEXTS[lang][key].replace(/\{(\w+)\}/g, (_, name) => params[name]);
   const store = expertStore(storage);
   const accounts = createAccountStore({ storage, ...(developerHash ? { developerHash } : {}), ...(adminHash ? { adminHash } : {}) });
