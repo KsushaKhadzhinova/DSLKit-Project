@@ -1,5 +1,6 @@
 import { readCode, showCode } from './code-lines.js';
 import { notify } from './toast.js';
+import { pageLanguage } from '../utils/lang.js';
 
 export const AUTOSAVE_DELAY_MS = 1000;
 const SOURCE_KEY = 'editor-source';
@@ -22,7 +23,7 @@ export const initSourceAutosave = ({
   if (!codeLines) return null;
   const switchButton = page.querySelector('.editor-toolbar__switch');
   const note = page.querySelector('.editor-status__saved');
-  const lang = root.documentElement.lang === 'en' ? 'en' : 'ru';
+  const lang = pageLanguage(root);
 
   const saved = storage.get(SOURCE_KEY, null);
   if (typeof saved === 'string' && saved.trim() !== '' && saved !== readCode(codeLines)) {

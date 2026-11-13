@@ -1,3 +1,4 @@
+import { pageLanguage } from '../utils/lang.js';
 const FILTERS = ['all', 'beta', 'planned'];
 
 const LABELS = {
@@ -27,7 +28,7 @@ export const initNotationFilter = ({ root = document, storage } = {}) => {
   const items = list ? [...list.querySelectorAll('li[data-status]')] : [];
   if (items.length === 0) return null;
 
-  const labels = LABELS[root.documentElement.lang === 'ru' ? 'ru' : 'en'];
+  const labels = LABELS[pageLanguage(root)];
   const doc = list.ownerDocument;
 
   const group = doc.createElement('div');

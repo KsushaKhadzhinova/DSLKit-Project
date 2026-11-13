@@ -4,6 +4,7 @@ import { createDecisionStore } from '../decision/store.js';
 import { TASK_KEYS, TASKS, taskProblem } from '../decision/tasks.js';
 import { currentUser } from '../storage/accounts.js';
 import { notify } from './toast.js';
+import { pageLanguage } from '../utils/lang.js';
 
 const TEXTS = {
   ru: {
@@ -121,7 +122,7 @@ export const initDecision = ({ root = document, storage, clipboard } = {}) => {
   const table = root.querySelector('[data-decision-table]');
   if (!table) return null;
   const view = root.defaultView;
-  const lang = root.documentElement.lang === 'en' ? 'en' : 'ru';
+  const lang = pageLanguage(root);
   const t = (key, params = {}) => TEXTS[lang][key].replace(/\{(\w+)\}/g, (_, name) => params[name]);
   const store = createDecisionStore({ storage });
   const q = (selector) => root.querySelector(selector);

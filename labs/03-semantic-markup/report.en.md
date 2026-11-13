@@ -132,6 +132,16 @@ Semantic markup is created for the DSLKit home page and the related pages: Russi
     />
     <meta name="theme-color" content="#2563eb" />
     <link rel="canonical" href="https://dslkit.io/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="DSLKit" />
+    <meta property="og:title" content="DSLKit: диаграммы как код. UML, BPMN, ERD, DFD, IDEF0" />
+    <meta
+      property="og:description"
+      content="DSLKit — веб-редактор диаграмм как кода. Опишите схему текстом на DSL и получите UML, BPMN, ERD, DFD, IDEF0 и сети Петри. Запишитесь в закрытую бета-версию."
+    />
+    <meta property="og:url" content="https://dslkit.io/" />
+    <meta property="og:locale" content="ru_RU" />
+    <meta property="og:locale:alternate" content="en_US" />
     <link rel="alternate" hreflang="ru" href="https://dslkit.io/" />
     <link rel="alternate" hreflang="en" href="https://dslkit.io/en/" />
     <link rel="alternate" hreflang="x-default" href="https://dslkit.io/" />

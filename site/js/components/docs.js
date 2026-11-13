@@ -4,6 +4,7 @@ import { createAccountStore } from '../storage/accounts.js';
 import { createDocsStore } from '../storage/docs.js';
 import { DOCS as RU } from '../docs/content.ru.js';
 import { DOCS as EN } from '../docs/content.en.js';
+import { pageLanguage } from '../utils/lang.js';
 
 const KINDS = ['project', 'guides', 'code'];
 const TEXTS = {
@@ -41,7 +42,7 @@ const TEXTS = {
 export const initDocs = ({ root = document, storage, developerHash, adminHash } = {}) => {
   const article = root.querySelector('.docs__article');
   if (!article) return null;
-  const lang = root.documentElement.lang === 'en' ? 'en' : 'ru';
+  const lang = pageLanguage(root);
   const t = TEXTS[lang];
   const docs = createDocsStore({ storage, defaults: { ru: RU, en: EN } });
   const accounts = createAccountStore({ storage, ...(developerHash ? { developerHash } : {}), ...(adminHash ? { adminHash } : {}) });

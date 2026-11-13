@@ -2,6 +2,7 @@ import { NOTATIONS, TEMPLATES } from '../notations/index.js';
 import { ui } from '../notations/messages.js';
 import { showCode } from './code-lines.js';
 import { initSourceAutosave } from './source-autosave.js';
+import { pageLanguage } from '../utils/lang.js';
 
 const VIEWS = ['code', 'canvas'];
 const KEY_STEPS = { ArrowRight: 1, ArrowLeft: -1 };
@@ -35,7 +36,7 @@ const initTabs = ({ page, root, storage, tabs }) => {
       panels[position].hidden = !active;
     });
     if (focus) tabs[index].focus();
-    closeButton?.setAttribute('aria-label', `Закрыть файл ${tabName(index)}`);
+    closeButton?.setAttribute('aria-label', `${root.documentElement.lang === 'en' ? 'Close the file' : 'Закрыть файл'} ${tabName(index)}`);
     storage.set('editor-tab', index);
   };
 
@@ -71,7 +72,7 @@ const initCloseDialog = ({ page, root, tabs, tabsApi }) => {
   const markSaved = () => {
     page.querySelectorAll('.editor-tabs__dot, .editor-topbar__dot').forEach((dot) => dot.remove());
     page.querySelectorAll('.visually-hidden').forEach((note) => {
-      if (note.textContent.trim() === 'не сохранено') note.remove();
+      if (['не сохранено', 'unsaved'].includes(note.textContent.trim())) note.remove();
     });
   };
 
@@ -116,7 +117,10 @@ const initAutosave = ({ page, settings }) => {
   const status = page.querySelector('.editor-status__cursor');
   const apply = (on) => {
     autosave.setAttribute('aria-checked', String(on));
-    if (status) status.textContent = status.textContent.replace(/Автосохранение: (?:вкл|выкл)/, `Автосохранение: ${on ? 'вкл' : 'выкл'}`);
+    if (status)
+      status.textContent = status.textContent.replace(/(Автосохранение|Autosave): (?:вкл|выкл|on|off)/, (_, label) =>
+        label === 'Autosave' ? `Autosave: ${on ? 'on' : 'off'}` : `Автосохранение: ${on ? 'вкл' : 'выкл'}`,
+      );
   };
   const saved = settings.read().autosave;
   apply(typeof saved === 'boolean' ? saved : autosave.getAttribute('aria-checked') === 'true');
@@ -164,7 +168,7 @@ const initRun = ({ page, root }) => {
 
 // Templates: the buttons and the notation list replace the code with a starter example and ask the runner to draw it.
 const initTemplates = ({ page, root }) => {
-  const lang = root.documentElement.lang === 'en' ? 'en' : 'ru';
+  const lang = pageLanguage(root);
   const codeLines = page.querySelector('.code__lines');
   const loadTemplate = (key) => {
     if (!codeLines || !Object.hasOwn(TEMPLATES, key)) return false;

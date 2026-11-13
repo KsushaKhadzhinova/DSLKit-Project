@@ -19,6 +19,7 @@ import { initEditorProjects } from './components/editor-projects.js';
 import { initEditorTools } from './components/editor-tools.js';
 import { initExport } from './components/export-menu.js';
 import { initImport } from './components/import-menu.js';
+import { initLangSwitch } from './components/lang-switch.js';
 import { registerServiceWorker } from './components/pwa.js';
 import { initNotationFilter } from './components/notation-filter.js';
 import { initPopups } from './components/popups.js';
@@ -33,6 +34,7 @@ import { getStorage } from './utils/storage.js';
 
 export const COMPONENTS = [
   initTheme,
+  initLangSwitch,
   initToasts,
   initBurger,
   initAuthGate,

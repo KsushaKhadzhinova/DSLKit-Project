@@ -3,6 +3,7 @@ import { currentUser, isUnlimited } from '../storage/accounts.js';
 import { notify } from './toast.js';
 import { starterProjects } from '../storage/seeds.js';
 import { TRASH_DAYS, createProjectStore, createTemplateStore, showQuota } from '../storage/projects.js';
+import { pageLanguage } from '../utils/lang.js';
 
 const FILTERS = ['all', ...NOTATION_KEYS];
 const SORTS = ['newest', 'oldest', 'name'];
@@ -112,7 +113,7 @@ export const initDashboard = ({ root = document, storage, now = () => Date.now()
   if (!list) return null;
 
   const view = root.defaultView;
-  const lang = root.documentElement.lang === 'ru' ? 'ru' : 'en';
+  const lang = pageLanguage(root);
   const labels = LABELS[lang];
   const user = currentUser(storage);
   const owner = user?.id ?? null;

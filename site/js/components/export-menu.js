@@ -2,6 +2,7 @@ import { parseDiagram } from '../notations/index.js';
 import { drawioFile, fileName, htmlFile, rasterize, serializeSvg, sizeOf } from '../utils/exporters.js';
 import { readCode } from './code-lines.js';
 import { notify } from './toast.js';
+import { pageLanguage } from '../utils/lang.js';
 
 const TEXT = {
   ru: {
@@ -46,7 +47,7 @@ export const initExport = ({ root = document, save = download(root) } = {}) => {
   const buttons = page ? [...page.querySelectorAll('[data-export]')] : [];
   if (buttons.length === 0) return null;
   const status = page.querySelector('.canvas__status');
-  const lang = root.documentElement.lang === 'en' ? 'en' : 'ru';
+  const lang = pageLanguage(root);
   const say = (text) => {
     if (status) status.textContent = text;
     notify(root, text);

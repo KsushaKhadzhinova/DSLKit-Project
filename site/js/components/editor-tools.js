@@ -2,6 +2,7 @@ import { readCode, showCode } from './code-lines.js';
 import { createExpertPanel } from './expert-panel.js';
 import { notify } from './toast.js';
 import { addCommit, assistant, diffLines, diffText, replaceAll, searchLines } from '../utils/editor-tools.js';
+import { pageLanguage } from '../utils/lang.js';
 
 const TEXTS = {
   search: { ru: 'Поиск', en: 'Search' },
@@ -55,7 +56,7 @@ export const initEditorTools = ({ root = document, storage, now = () => Date.now
   const page = root.querySelector('.app-page--editor');
   const codeLines = page?.querySelector('.code__lines');
   if (!codeLines) return null;
-  const lang = root.documentElement.lang === 'en' ? 'en' : 'ru';
+  const lang = pageLanguage(root);
   const t = (key, params = {}) => TEXTS[key][lang].replace(/\{(\w+)\}/g, (_, name) => params[name]);
   const el = (tag, className, text) => {
     const node = root.createElement(tag);

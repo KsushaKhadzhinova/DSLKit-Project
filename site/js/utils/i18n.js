@@ -1,5 +1,8 @@
-// English texts for the editor messages. The Russian text stays the source: a page with lang="en" gets the translation.
-const RULES = [
+import { pageLanguage } from './lang.js';
+
+// Translations of the editor messages by language. The Russian text stays the source: a page in another language gets the translation.
+// A new language adds its own list here, the first matching pattern wins.
+const EN_RULES = [
   [/^В редакторе нет кода диаграммы\.$/, 'There is no diagram code in the editor.'],
   [/^Нет соединения с интернетом\./, 'No internet connection.'],
   [/^Сервер не ответил вовремя\. Попробуйте ещё раз\./, 'The server did not answer in time. Try again.'],
@@ -22,14 +25,17 @@ const RULES = [
   [/^Сервер DSLKit \(свой API\)$/, 'DSLKit server (own API)'],
   [/^Нарисовать через сервер DSLKit$/, 'Draw with the DSLKit server'],
   [/^Диаграмма: (.+)$/, 'Diagram: $1'],
+  [/^Нарисовать через Kroki$/, 'Draw with Kroki'],
+  [/^Нарисовать в браузере$/, 'Draw in the browser'],
   [/^Без названия$/, 'Untitled'],
 ];
 
+const RULES = { en: EN_RULES };
+
 export const createTranslator = (root = document) => {
-  const english = root.documentElement?.lang === 'en';
+  const rules = RULES[pageLanguage(root)];
   return (text) => {
-    if (!english) return text;
-    for (const [pattern, replacement] of RULES) {
+    for (const [pattern, replacement] of rules ?? []) {
       if (pattern.test(text)) return text.replace(pattern, replacement);
     }
     return text;

@@ -31,6 +31,7 @@ const SHELL = [
   'images/loader.svg',
   'images/mascot.svg',
   'manifest.webmanifest',
+  'en/manifest.webmanifest',
 ];
 
 const precache = async () => {
@@ -55,7 +56,9 @@ const page = async (request) => {
     return await keep(request, await fetch(request));
   } catch {
     const saved = await caches.match(request, { ignoreSearch: true });
-    return saved ?? new Response('Нет соединения с сетью. No network connection.', { status: 503, headers: { 'Content-Type': 'text/plain; charset=utf-8' } });
+    // The message is in the language of the page that was asked for: the English pages live under /en/.
+    const message = new URL(request.url).pathname.includes('/en/') ? 'No network connection.' : 'Нет соединения с сетью.';
+    return saved ?? new Response(message, { status: 503, headers: { 'Content-Type': 'text/plain; charset=utf-8' } });
   }
 };
 

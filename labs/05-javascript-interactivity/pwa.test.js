@@ -126,6 +126,8 @@ test('without a network a page comes from the kept copy, else a short message wi
   assert.equal(none.status, 503);
   assert.match(await textOf(none), /Нет соединения/);
   assert.equal(none.headers.get('content-type'), 'text/plain; charset=utf-8');
+  const english = await worker.dispatch('fetch', { request: request('en/app/unknown.html', { mode: 'navigate' }) }).answer;
+  assert.equal(await textOf(english), 'No network connection.');
 });
 
 test('a file comes from the kept copy at once and is renewed in the background', async () => {
@@ -173,6 +175,10 @@ test('the manifest names the app, starts at the dashboard and points to icons th
   assert.equal(manifest.display, 'standalone');
   assert.ok(existsSync(resolve('site', manifest.start_url)));
   assert.equal(manifest.theme_color, '#2563eb');
+  const english = JSON.parse(readFileSync('site/en/manifest.webmanifest', 'utf8'));
+  assert.equal(english.lang, 'en');
+  assert.ok(existsSync(resolve('site/en', english.start_url)));
+  english.icons.forEach((icon) => assert.ok(existsSync(resolve('site/en', icon.src)), icon.src));
   const sizes = manifest.icons.filter((icon) => icon.type === 'image/png').map((icon) => icon.sizes);
   assert.ok(sizes.includes('192x192') && sizes.includes('512x512'));
   assert.ok(manifest.icons.some((icon) => icon.purpose === 'maskable'));

@@ -4,6 +4,7 @@ import { pointInDrawing } from './canvas-drag.js';
 import { parseDiagram } from '../notations/index.js';
 import { addElement, connectElements, gate, glyphFor, labelOf, linksFor, paletteFor, removeElement, renameElement } from '../utils/palette.js';
 import { setNodePosition } from '../utils/node-position.js';
+import { pageLanguage } from '../utils/lang.js';
 
 const TEXTS = {
   heading: { ru: 'Элементы', en: 'Elements' },
@@ -55,7 +56,7 @@ export const initEditorPalette = ({ root = document } = {}) => {
   const remote = page?.querySelector('.canvas__remote');
   if (!toolbar || !codeLines || !remote) return null;
   const view = root.defaultView;
-  const lang = root.documentElement.lang === 'en' ? 'en' : 'ru';
+  const lang = pageLanguage(root);
   const t = (key, params = {}) => TEXTS[key][lang].replace(/\{(\w+)\}/g, (_, name) => params[name]);
   const el = (tag, className, text) => {
     const node = root.createElement(tag);

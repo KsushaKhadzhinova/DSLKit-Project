@@ -7,6 +7,7 @@ import { ui } from '../notations/messages.js';
 import { sanitizeSvg, sourceKey } from '../utils/dataParser.js';
 import { createTranslator } from '../utils/i18n.js';
 import { showProblems } from './problems-panel.js';
+import { pageLanguage } from '../utils/lang.js';
 
 const MESSAGES = {
   empty: 'В редакторе нет кода диаграммы.',
@@ -56,7 +57,7 @@ export const initDiagramRunner = ({
   let controller = null;
 
   const tr = createTranslator(root);
-  const lang = root.documentElement.lang === 'en' ? 'en' : 'ru';
+  const lang = pageLanguage(root);
   // The plain "ready" note is only for screen readers: a sighted user sees the drawing. Every other note (saved copy, loading, errors) stays visible.
   const setStatus = (text) => {
     status.textContent = tr(text);

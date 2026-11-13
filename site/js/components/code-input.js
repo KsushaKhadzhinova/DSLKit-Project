@@ -1,4 +1,5 @@
 import { readCode, showCode } from './code-lines.js';
+import { pageLanguage } from '../utils/lang.js';
 
 export const RUN_DELAY_MS = 350;
 const INDENT = '  ';
@@ -17,7 +18,7 @@ export const initCodeInput = ({ root = document, setTimer = setTimeout, clearTim
   const codeLines = page?.querySelector('.code__lines');
   if (!input || !codeLines) return null;
   const view = root.defaultView;
-  const lang = root.documentElement.lang === 'en' ? 'en' : 'ru';
+  const lang = pageLanguage(root);
   const cursor = page.querySelector('.editor-status__cursor');
   let timer = null;
 
