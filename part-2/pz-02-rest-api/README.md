@@ -38,6 +38,8 @@ npm start
 | `src/security.js`   | Заголовки безопасности, ограничение частоты, безопасная запись в журнал |
 | `test/api.test.js`  | Тесты на `node:test`, покрытие строк и функций 100 процентов    |
 
+Справочник по операциям собирается из `GET /api/openapi.json` командой `node tools/gen-api-md.mjs` в `API.generated.ru.md` и `API.generated.en.md` (проверка: `--check`). Снимки Swagger UI (рисунки 15 и 16): `node shots/swagger-shot.mjs` (нужны сеть для CDN, puppeteer-core и Chrome).
+
 Проверка вручную в Postman или Insomnia: запросы из `API.md` переносятся в коллекцию с переменной `baseUrl`.
 
 ---

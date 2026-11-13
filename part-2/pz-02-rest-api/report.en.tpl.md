@@ -175,6 +175,20 @@ A fragment of the API documentation is shown in figure 14.
 
 Figure 14 – A fragment of the file `API.md` and of the answer of `GET /api/openapi.json` (text captured by the script `shots/docs-shot.mjs`, not a Swagger UI window)
 
+The same document is opened in Swagger UI. The page is drawn by Swagger UI 5.17.14 loaded from a CDN by the script `shots/swagger-shot.mjs`: the document is taken from the running server and passed to the page as an object. The list of all operations is shown in figure 15.
+
+![Swagger UI: list of operations](figures/15-swagger-ui.png)
+
+Figure 15 – Swagger UI: all API operations from `GET /api/openapi.json`
+
+The `POST /users` operation with the request body and the response codes is shown in figure 16.
+
+![Swagger UI: the POST /users operation](figures/16-swagger-ui-post.png)
+
+Figure 16 – Swagger UI: the `POST /users` operation, the request body and the response codes
+
+The operation reference is built from the same document by the script `tools/gen-api-md.mjs` into the files `API.generated.ru.md` and `API.generated.en.md`. A test compares them with the answer of the server, so they cannot drift from the code.
+
 No Postman window was captured in this work: real screenshots of the program window cannot be produced here, so a script sent the requests in figures 2 and 9–12, and the captions say so. The ready collection `postman_collection.json` and the file `requests.http` allow repeating the check and taking such screenshots by hand.
 
 ## Conclusion
