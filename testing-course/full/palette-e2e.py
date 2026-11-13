@@ -41,7 +41,11 @@ NOTATIONS = ["idef0", "idef1", "idef1x", "idef3", "idef4", "idef5", "dfd", "erd"
 with sync_playwright() as p:
     b = p.chromium.launch(channel="msedge")
     ctx = b.new_context(viewport={"width": 1366, "height": 900})
-    ctx.add_init_script("try { localStorage.setItem('dslkit.tour-done', 'true'); } catch (e) {}")
+    # Pages of the application are for signed-in users; the starter projects are marked as already added.
+    ctx.add_init_script("(" + """() => { try { localStorage.setItem('dslkit.tour-done', 'true'); if (localStorage.getItem('dslkit.accounts') === null) {
+        localStorage.setItem('dslkit.accounts', JSON.stringify([{ id: 'e2e0000000000001', name: 'Test User', email: 'e2e@example.com', salt: '00', hash: '00', iterations: 1, role: 'user' }]));
+        localStorage.setItem('dslkit.session', JSON.stringify({ userId: 'e2e0000000000001' }));
+        localStorage.setItem('dslkit.seeded.e2e0000000000001', 'true'); } } catch (e) { /* storage unavailable */ } }""" + ")()")
     page = ctx.new_page()
     PAGE[0] = page
     page.set_default_timeout(8000)
@@ -49,12 +53,18 @@ with sync_playwright() as p:
     page.on("console", lambda m: errors.append(m.text) if m.type == "error" and "kroki" not in m.text.lower() else None)
     code = lambda: page.evaluate("[...document.querySelectorAll('.code__line code')].map(e=>e.textContent).join('\\n')")  # noqa: E731
 
+    def pal(**kw):
+        """The shapes of the palette sit in the menu of the "Element" button of the toolbar: open it, then return the items."""
+        if page.locator(".board-tools__pop").is_hidden():
+            page.click(".board-tools__add")
+        return page.locator(".palette__item", **kw)
+
     def load(template):
         page.goto(f"{base}/app/editor.html?template={template}")
         page.wait_for_timeout(600)
 
     def drop(index, dx=0.5, dy=0.5):
-        item = page.locator(".palette__item").nth(index).bounding_box()
+        item = pal().nth(index).bounding_box()
         svg = page.locator(".canvas__remote svg").bounding_box()
         page.mouse.move(item["x"] + 10, item["y"] + 10)
         page.mouse.down()
@@ -65,7 +75,7 @@ with sync_playwright() as p:
     def palettes():
         for key in ["idef0", "dfd", "erd", "bpmn", "uml-class", "petri", "network"]:
             load(key)
-            n = page.locator(".palette__item").count()
+            n = pal().count()
             yes(n >= 1, f"{key}: палитра пуста")
 
     check("PL-01", "Палитра элементов есть у основных нотаций и меняется вместе с нотацией", palettes)
@@ -73,7 +83,7 @@ with sync_playwright() as p:
     def click_add():
         load("dfd")
         before = code()
-        page.locator(".palette__item", has_text="Процесс").click()
+        pal(has_text="Процесс").click()
         page.wait_for_timeout(500)
         yes(code().count("process") == before.count("process") + 1, "процесс не добавлен")
         yes("Добавлено" in page.inner_text(".palette__message"), page.inner_text(".palette__message"))
@@ -165,7 +175,7 @@ with sync_playwright() as p:
     def second_start():
         load("bpmn")
         before = code()
-        page.locator(".palette__item", has_text="Начало").click()
+        pal(has_text="Начало").click()
         page.wait_for_timeout(400)
         eq(code(), before)
         yes("Не добавлено" in page.inner_text(".palette__message"), page.inner_text(".palette__message"))
@@ -176,12 +186,12 @@ with sync_playwright() as p:
         bad = []
         for key in NOTATIONS:
             load(key)
-            n = page.locator(".palette__item").count()
+            n = pal().count()
             if n == 0:
                 bad.append(f"{key}: пусто")
                 continue
             for i in range(n):
-                page.locator(".palette__item").nth(i).click()
+                pal().nth(i).click()
                 page.wait_for_timeout(120)
             text = page.inner_text(".problems__list") if page.locator(".problems__list").count() else ""
             if "не распознана" in text or "Строка не распознана" in text:

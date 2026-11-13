@@ -610,6 +610,22 @@ label > span {
   stroke-linecap: round;
   stroke-linejoin: round;
 }
+
+/* Printing a page of the site: no navigation and no switches, dark text on white */
+@media print {
+  .header,
+  .footer,
+  .skip-link,
+  .theme,
+  .burger__button {
+    display: none;
+  }
+
+  body {
+    color: black;
+    background: white;
+  }
+}
 ```
 
 ## Appendix C – Listing of header.css
@@ -634,7 +650,7 @@ label > span {
   gap: var(--space-2);
   width: 100%;
   max-width: calc(var(--container) + var(--space-3) * 2);
-  padding-inline: var(--space-3);
+  padding-inline: max(var(--space-3), env(safe-area-inset-left, 0px)) max(var(--space-3), env(safe-area-inset-right, 0px));
   min-height: var(--header-height);
   margin-inline: auto;
 }
@@ -1083,9 +1099,9 @@ label > span {
   gap: var(--space-3);
   width: 100%;
   max-width: calc(var(--container) + var(--space-3) * 2);
-  padding-inline: var(--space-3);
+  padding-inline: max(var(--space-3), env(safe-area-inset-left, 0px)) max(var(--space-3), env(safe-area-inset-right, 0px));
   margin-inline: auto;
-  padding-block: var(--space-5);
+  padding-block: var(--space-5) max(var(--space-5), env(safe-area-inset-bottom, 0px));
 }
 
 .footer__list {

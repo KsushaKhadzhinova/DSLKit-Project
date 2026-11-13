@@ -18,7 +18,7 @@
   overflow: visible;
   font-size: var(--text-small);
   display: block;
-  padding-bottom: calc(var(--bottom-nav-height) + var(--target-size) + var(--space-3));
+  padding-bottom: calc(var(--bottom-nav-height) + var(--target-size) + var(--space-3) + env(safe-area-inset-bottom, 0px));
 }
 
 /* Toolbar */
@@ -716,7 +716,7 @@
   font-weight: 600;
   position: fixed;
   right: var(--space-2);
-  bottom: calc(var(--bottom-nav-height) + var(--space-1));
+  bottom: calc(var(--bottom-nav-height) + var(--space-1) + env(safe-area-inset-bottom, 0px));
   left: var(--space-2);
   z-index: 30;
 }
@@ -735,7 +735,9 @@
   bottom: 0;
   left: 0;
   z-index: 40;
-  height: var(--bottom-nav-height);
+  height: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom, 0px));
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  padding-inline: env(safe-area-inset-left, 0px) env(safe-area-inset-right, 0px);
 }
 
 .editor-bottom-nav__item {
@@ -935,6 +937,23 @@
     z-index: auto;
     height: auto;
   }
+
+  .board-tools__text {
+    display: inline;
+  }
+  .docs {
+    grid-template-columns: 16rem minmax(0, 1fr);
+    align-items: start;
+  }
+  .docs__editor,
+  .docs__edit,
+  .docs__role,
+  .docs__status {
+    grid-column: 2;
+  }
+  .editor-toolbar__row {
+    flex-wrap: nowrap;
+  }
 }
 
 @media (min-width: 1024px) {
@@ -968,7 +987,8 @@
   .editor-toolbar__row .button,
   .problems__tab,
   .file-tree__item,
-  .templates__item {
+  .templates__item,
+  .docs__link {
     min-height: var(--target-size);
   }
 
@@ -1697,12 +1717,6 @@
   display: none;
 }
 
-@media (min-width: 64rem) {
-  .board-tools__text {
-    display: inline;
-  }
-}
-
 /* The panel under the code is small while the code has no problems, and tall again for the assistant, the output and the versions */
 .app-page--editor[data-clean='true']:not([data-tab='ai'], [data-tab='output'], [data-tab='versions'], [data-tab='expert']) {
   --problems-height: 5.75rem;
@@ -1807,24 +1821,6 @@
   color: var(--color-text);
   background: transparent;
   cursor: pointer;
-}
-@media (min-width: 48rem) {
-  .board-tools__text {
-    display: inline;
-  }
-  .docs {
-    grid-template-columns: 16rem minmax(0, 1fr);
-    align-items: start;
-  }
-  .docs__editor,
-  .docs__edit,
-  .docs__role,
-  .docs__status {
-    grid-column: 2;
-  }
-  .editor-toolbar__row {
-    flex-wrap: nowrap;
-  }
 }
 
 /* The menu is split into groups with a title and a divider; the export formats fold into a sub-menu */
@@ -1979,6 +1975,8 @@ html.js:not(.is-ready)
   margin: 0;
 }
 .docs__role-input {
+  min-inline-size: 0;
+  max-inline-size: 100%;
   min-block-size: var(--target-size-small);
   padding: 0 var(--space-2);
   color: var(--color-text);

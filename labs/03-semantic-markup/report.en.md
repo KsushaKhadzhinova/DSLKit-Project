@@ -124,7 +124,7 @@ Semantic markup is created for the DSLKit home page and the related pages: Russi
 <html lang="ru">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>DSLKit: диаграммы как код. UML, BPMN, ERD, DFD, IDEF0</title>
     <meta
       name="description"

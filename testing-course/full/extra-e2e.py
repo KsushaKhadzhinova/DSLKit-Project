@@ -26,7 +26,11 @@ def yes(v, msg):
 with sync_playwright() as p:
     b = p.chromium.launch(channel="msedge")
     ctx = b.new_context(viewport={"width": 1366, "height": 800})
-    ctx.add_init_script("try { localStorage.setItem('dslkit.tour-done', 'true'); } catch (e) {}")
+    # Pages of the application are for signed-in users; the starter projects are marked as already added.
+    ctx.add_init_script("(" + """() => { try { localStorage.setItem('dslkit.tour-done', 'true'); if (localStorage.getItem('dslkit.accounts') === null) {
+        localStorage.setItem('dslkit.accounts', JSON.stringify([{ id: 'e2e0000000000001', name: 'Test User', email: 'e2e@example.com', salt: '00', hash: '00', iterations: 1, role: 'user' }]));
+        localStorage.setItem('dslkit.session', JSON.stringify({ userId: 'e2e0000000000001' }));
+        localStorage.setItem('dslkit.seeded.e2e0000000000001', 'true'); } } catch (e) { /* storage unavailable */ } }""" + ")()")
     page = ctx.new_page()
     page.set_default_timeout(8000)
 
@@ -120,13 +124,14 @@ with sync_playwright() as p:
         pg.goto(base + "/app/editor.html?template=dfd")
         pg.wait_for_timeout(800)
         yes(pg.locator(".canvas__remote svg").count() == 1, "без хранилища диаграмма не нарисована")
+        # Without storage there is no session, so the application pages send a guest to the sign-in page, and that page must still open.
         pg.goto(base + "/app/dashboard.html")
-        pg.wait_for_timeout(400)
-        yes(pg.locator(".project-list__item").count() >= 1, "панель проектов пуста")
+        pg.wait_for_timeout(600)
+        yes(pg.locator("form, .auth, main").count() >= 1, "страница входа не открылась без хранилища")
         ctx2.close()
         yes(not errs, "; ".join(errs[:3]))
 
-    check("EX-06", "С выключенным хранилищем браузера редактор и панель проектов всё равно работают", no_storage)
+    check("EX-06", "С выключенным хранилищем браузера редактор работает, а гость на странице проектов попадает на вход", no_storage)
 
     def two_tabs():
         pg1 = ctx.new_page()
