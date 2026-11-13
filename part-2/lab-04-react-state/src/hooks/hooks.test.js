@@ -1,6 +1,6 @@
 import { act, renderHook } from '@testing-library/react';
 import { AUTOSAVE_DELAY, useAutosaveStatus } from './useAutosaveStatus';
-import { useLocalStorage } from './useLocalStorage';
+import { INVALID_SUFFIX, useLocalStorage } from './useLocalStorage';
 
 describe('useLocalStorage', () => {
   it('returns the initial value when storage is empty and saves it', () => {
@@ -25,6 +25,23 @@ describe('useLocalStorage', () => {
     localStorage.setItem('k', '{broken');
     const { result } = renderHook(() => useLocalStorage('k', 'fallback'));
     expect(result.current[0]).toBe('fallback');
+  });
+
+  it('keeps a copy of broken data under <key>.invalid before the fallback overwrites it', () => {
+    localStorage.setItem('k', '{broken');
+    renderHook(() => useLocalStorage('k', 'fallback'));
+    expect(localStorage.getItem('k')).toBe('"fallback"');
+    expect(localStorage.getItem('k' + INVALID_SUFFIX)).toBe('{broken');
+  });
+
+  it('keeps a copy of data that fails validation and cannot be repaired, but not of repaired data', () => {
+    localStorage.setItem('k', JSON.stringify({ a: 1 }));
+    renderHook(() => useLocalStorage('k', [], Array.isArray));
+    expect(localStorage.getItem('k' + INVALID_SUFFIX)).toBe('{"a":1}');
+    localStorage.clear();
+    localStorage.setItem('k', JSON.stringify([1, 'x']));
+    renderHook(() => useLocalStorage('k', [], (v) => v.every(Number.isInteger), (v) => v.filter(Number.isInteger)));
+    expect(localStorage.getItem('k' + INVALID_SUFFIX)).toBeNull();
   });
 });
 

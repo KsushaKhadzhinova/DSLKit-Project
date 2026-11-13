@@ -11,9 +11,9 @@
 | `useEffect` и `localStorage`                        | `hooks/useLocalStorage.js`: загрузка при инициализации, запись при каждом изменении |
 | Добавление, удаление, редактирование                | форма, кнопки «Удалить» и «Изменить», переключатель статуса                         |
 | Фильтрация и сортировка                             | поиск по названию, статус, сортировка по дате и названию (`utils/diagrams.js`)      |
-| Дополнительные эффекты                              | `document.title`, автосохранение с debounce 500 мс (`hooks/useAutosaveStatus.js`), имитация загрузки с сервера 1 с с индикатором (`hooks/useServerLoad.js`) |
+| Дополнительные эффекты                              | `document.title`, индикатор «Сохранение…/Сохранено» с debounce 500 мс (`hooks/useAutosaveStatus.js`, только подпись: данные пишутся в `localStorage` сразу при каждом изменении, настоящего отложенного автосохранения нет), имитация загрузки с сервера 1 с с индикатором (`hooks/useServerLoad.js`) |
 | Статистика                                          | всего, опубликовано, черновики (`StatsBar.jsx`)                                     |
-| Пустой localStorage                                 | начальные данные `data/initialDiagrams.js`, повреждённый JSON тоже даёт начальные   |
+| Пустой localStorage                                 | начальные данные `data/initialDiagrams.js`, повреждённый JSON тоже даёт начальные; нечитаемый оригинал, который нельзя исправить, перед перезаписью копируется в ключ `<ключ>.invalid` (хранится последняя копия) |
 | Хук `useLocalStorage` вынесен, как советует условие | `hooks/useLocalStorage.js`                                                          |
 | Проверка ввода (требование преподавателя)          | `utils/validation.js`: пробельное название, длина, предел числа записей (`src/limits.json`); проверка формата данных из `localStorage`; уникальное время создания; страница 500 (`ErrorBoundary`) |
 
@@ -23,7 +23,7 @@
 cd part-2/lab-04-react-state
 npm install
 npm run dev      # http://localhost:5175
-npm test         # Vitest и React Testing Library, 102 теста
+npm test         # Vitest и React Testing Library, 104 теста
 npm run build    # сборка в dist/
 ```
 
