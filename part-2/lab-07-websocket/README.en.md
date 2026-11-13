@@ -21,9 +21,15 @@ Server to client events: `welcome`, `user:online`, `user:offline`, `room:joined`
 
 `POST /login` with `{ "username": "alice" }` returns `{ username, token }`. The token is signed with HMAC-SHA256 and valid for one hour. The socket connects with `auth: { token }` and the user name is taken from the token, not from the client. A forged, foreign-secret or expired token is refused with `Invalid or expired token`. Plain `auth: { username }` still works for tests and simple clients; set `REQUIRE_TOKEN=1` to forbid it. The secret comes from `TOKEN_SECRET`; a development default is used when it is empty, so set your own value outside local runs.
 
+This is a name claim, not authentication. `POST /login` has no password: anyone who asks for a valid free name gets a token for it, and the token only proves that this server issued the name. The default secret is public (it is in the repository), so with `NODE_ENV=production` the server refuses to start with it, and with a secret shorter than 32 characters (test `production refuses...`). Real sign-in with passwords and accounts is outside the scope of this lab.
+
 ## 3 Chat history in MongoDB
 
 The handlers use only `history.add(room, message)` and `history.list(room)` and wait for them with `await`, so the store is injectable (`createServer({ history })`). By default the history is kept in memory. With `MONGODB_URI` in `.env`, `server.js` connects the `mongodb` driver and uses `createMongoHistory` over the `messages` collection, so the last 50 messages of a room survive a restart. When the database fails, `room:join` and `chat:message` answer an error through the acknowledgement and the server keeps running. The tests use a small fake collection and need no database; a run against a real MongoDB was not done.
+
+The message `id` in the MongoDB history is the document `_id` (an `ObjectId`), so it does not repeat after a restart; in memory it is a per-process counter. The index `{ room: 1, _id: -1 }` serves the query for the newest messages of a room, and `HISTORY_TTL_SECONDS` (off by default) adds a TTL index on `createdAt` so MongoDB deletes old messages itself.
+
+The `editing` flag is kept per room. The `maxPerAddress` limit counts the socket address; behind a reverse proxy every client would share one address, so `TRUST_PROXY=1` uses the last `X-Forwarded-For` entry instead (meant for one trusted proxy). Do not enable it without such a proxy: a client could then claim any address. It is off by default.
 
 ## 4 Run
 
@@ -40,4 +46,4 @@ Open `http://localhost:3000` in two windows, log in with different names, join `
 
 ## 5 Tests
 
-`npm test` starts a real server on a free port and connects `socket.io-client` clients. 102 automated tests cover connection and refusals, presence, rooms, history (memory and the Mongo-shaped store), typing, editing, private messages, limits, token login, and wrong behavior of a user (`tests/negative.test.js`, see [`NEGATIVE-TESTS.md`](NEGATIVE-TESTS.md)). The same run checks the build and formatting of the reports.
+`npm test` starts a real server on a free port and connects `socket.io-client` clients. 107 automated tests cover connection and refusals, presence, rooms, history (memory and the Mongo-shaped store), typing, editing, private messages, limits, token login, and wrong behavior of a user (`tests/negative.test.js`, see [`NEGATIVE-TESTS.md`](NEGATIVE-TESTS.md)). The same run checks the build and formatting of the reports.

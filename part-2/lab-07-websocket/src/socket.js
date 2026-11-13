@@ -20,6 +20,8 @@ const createHub = (io, opts) => {
   const online = new Map(); // socket id -> { id, username }
   const perAddress = new Map(); // client address -> number of open sockets
   let messageSeq = 0;
+  // A store that makes its own ids (the MongoDB one) keeps them unique across restarts; otherwise count in memory.
+  const nextId = () => history.newId?.() ?? ++messageSeq;
   const usersOf = (room) => [...(rooms.get(room)?.values() ?? [])];
   const onlineList = () => [...online.values()];
   return {
@@ -31,10 +33,21 @@ const createHub = (io, opts) => {
     usersOf,
     onlineList,
     publishPresence: (room) => io.to(room).emit('presence:update', { room, users: usersOf(room) }),
-    makeMessage: (user, text, extra) => ({ id: ++messageSeq, from: user.username, fromId: user.id, text, at: Date.now(), ...extra }),
+    makeMessage: (user, text, extra) => ({ id: nextId(), from: user.username, fromId: user.id, text, at: Date.now(), ...extra }),
     perAddress,
     isTaken: (username) => onlineList().some((u) => u.username.toLowerCase() === username.toLowerCase()),
   };
+};
+
+// The address a connection counts against. Behind a trusted reverse proxy (TRUST_PROXY=1) it is the last
+// X-Forwarded-For entry, otherwise the socket address, which a proxy would make the same for every client.
+const addressOf = (socket, trustProxy) => {
+  if (trustProxy) {
+    const forwarded = socket.handshake.headers?.['x-forwarded-for'];
+    const last = typeof forwarded === 'string' ? forwarded.split(',').at(-1).trim() : '';
+    if (last) return last;
+  }
+  return socket.handshake.address;
 };
 
 // Handshake: the name comes from a signed login token (`auth.token`, issued by POST /login) or, when
@@ -54,7 +67,7 @@ const createHandshake = (hub) => (socket, next) => {
   if (hub.isTaken(username)) return next(new Error('This username is already taken'));
   if (hub.online.size >= opts.maxUsers) return next(new Error('The server is full, try again later'));
   // One client cannot take all the places of the server.
-  if ((hub.perAddress.get(socket.handshake.address) ?? 0) >= opts.maxPerAddress) return next(new Error('Too many connections from your address'));
+  if ((hub.perAddress.get(addressOf(socket, opts.trustProxy)) ?? 0) >= opts.maxPerAddress) return next(new Error('Too many connections from your address'));
   socket.data.username = username;
   next();
 };
@@ -91,7 +104,8 @@ const createRoomActions = (hub, conn) => {
     joined.add(room);
     socket.join(room);
     if (!rooms.has(room)) rooms.set(room, new Map());
-    rooms.get(room).set(socket.id, user);
+    // The presence entry belongs to this room only, so "editing" in one room does not show in the others.
+    rooms.get(room).set(socket.id, { id: user.id, username: user.username, editing: false });
     socket.to(room).emit('room:joined', { room, username: user.username, at: Date.now() });
     hub.publishPresence(room);
     succeed(ack, { room, history: past, users: hub.usersOf(room) });
@@ -108,9 +122,10 @@ const createRoomActions = (hub, conn) => {
   const editing = (payload, ack) => {
     const room = cleanRoom(payload?.room);
     if (!room || !joined.has(room)) return fail(ack, 'Join the room first');
-    user.editing = Boolean(payload.editing);
+    const entry = rooms.get(room).get(socket.id);
+    entry.editing = Boolean(payload.editing);
     hub.publishPresence(room);
-    succeed(ack, { editing: user.editing });
+    succeed(ack, { editing: entry.editing });
   };
 
   const typing = (payload) => {
@@ -162,11 +177,11 @@ const createMessageActions = (hub, conn) => {
 
 const handleConnection = (hub, socket) => {
   const { opts } = hub;
-  const user = { id: socket.id, username: socket.data.username, editing: false };
+  const user = { id: socket.id, username: socket.data.username };
   const conn = { socket, user, joined: new Set(), allowed: createLimiter(opts.rateMax, opts.rateWindowMs) };
   const eventAllowed = createLimiter(opts.eventRateMax, opts.eventRateWindowMs);
   hub.online.set(socket.id, { id: user.id, username: user.username });
-  const address = socket.handshake.address;
+  const address = addressOf(socket, opts.trustProxy);
   hub.perAddress.set(address, (hub.perAddress.get(address) ?? 0) + 1);
 
   // Flood guard for every event (join, typing, editing...); chat messages have their own, stricter limit.

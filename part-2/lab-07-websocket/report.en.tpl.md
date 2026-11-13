@@ -81,7 +81,7 @@ The work includes extras from the assignment and a few of its own.
 
 **History.** The last 50 messages of a room reach a newcomer in the answer to `room:join`. The handlers use only the `add` and `list` methods of the store and wait for them with `await`, so the store is swappable. By default the history lives in memory. When `MONGODB_URI` is set, `server.js` connects the `mongodb` driver, and `createMongoHistory` writes messages to the `messages` collection and reads the last 50 per room, so the history survives a restart. If the database is unavailable the server answers with an acknowledgement error and keeps running. The tests use a small fake collection, and a real database was not started in the tests or while preparing this report.
 
-**Token login.** `POST /login` with the body `{ "username": "..." }` returns a signed token (HMAC-SHA256, valid for one hour). The socket connects with `auth: { token }` and the name is taken from the token. The secret is read from the `TOKEN_SECRET` variable, with a default for local runs and tests. With `REQUIRE_TOKEN=1` sockets without a token are refused. Forged, foreign-secret and expired tokens are refused.
+**Token login.** `POST /login` with the body `{ "username": "..." }` returns a signed token (HMAC-SHA256, valid for one hour). The socket connects with `auth: { token }` and the name is taken from the token. The secret is read from the `TOKEN_SECRET` variable, with a default for local runs and tests. With `REQUIRE_TOKEN=1` sockets without a token are refused. This is a name claim, not authentication: there is no password, and anyone who asks for a valid free name gets a token for it. The default secret is public, so with `NODE_ENV=production` the server does not start with it. Forged, foreign-secret and expired tokens are refused.
 
 **Private messages.** The `private:message` event takes the recipient `socket.id`, delivers the text to that user only and returns an acknowledgement with a copy to the sender.
 
@@ -91,7 +91,7 @@ The work includes extras from the assignment and a few of its own.
 
 ### 3.5 Verification
 
-The work is checked by automated tests: 102 tests start a real server on a free port and connect several `socket.io-client` clients over WebSocket. The scenarios are summarized in table 3. Manual checking uses two browser windows and the steps from the README file.
+The work is checked by automated tests: 107 tests start a real server on a free port and connect several `socket.io-client` clients over WebSocket. The scenarios are summarized in table 3. Manual checking uses two browser windows and the steps from the README file.
 
 Table 3 – Automated test scenarios
 
@@ -259,7 +259,7 @@ Listing of server.js is given in appendix A. Listing of app.js is given in appen
 
 ## Conclusion
 
-For DSLKit, a server on Express and Socket.IO with an HTML and JavaScript client was built. Users exchange messages in real time, get notifications about connecting, disconnecting, joining a room and leaving it, and for each diagram see the list of people and those who are editing it. On top of that the work adds a history with a MongoDB or in-memory store, login by a signed token, private messages, a typing indicator, acknowledgements and a rate limit. 102 automated tests confirm the behavior of every event. Limits are kept in `limits.json`, and every message carries a timestamp. A run against a real MongoDB and screenshots of two windows are not included.
+For DSLKit, a server on Express and Socket.IO with an HTML and JavaScript client was built. Users exchange messages in real time, get notifications about connecting, disconnecting, joining a room and leaving it, and for each diagram see the list of people and those who are editing it. On top of that the work adds a history with a MongoDB or in-memory store, login by a signed token, private messages, a typing indicator, acknowledgements and a rate limit. 107 automated tests confirm the behavior of every event. Limits are kept in `limits.json`, and every message carries a timestamp. A run against a real MongoDB and screenshots of two windows are not included.
 
 ## Appendix A (mandatory) Listing of server.js
 

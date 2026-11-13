@@ -15,7 +15,10 @@ const start = async () => {
     const { MongoClient } = require('mongodb');
     const { createMongoHistory } = require('./src/history');
     client = await MongoClient.connect(process.env.MONGODB_URI, { serverSelectionTimeoutMS: 5000 });
-    history = createMongoHistory(client.db().collection('messages'));
+    const { ObjectId } = require('mongodb');
+    history = createMongoHistory(client.db().collection('messages'), undefined, { ObjectId, ttlSeconds: Number(process.env.HISTORY_TTL_SECONDS) || 0 });
+    // A failed index build is not fatal: the history still works, only slower on a large collection.
+    await history.init().catch((error) => console.warn('Cannot create the history indexes:', error.message));
   }
   if (!process.env.TOKEN_SECRET) console.warn('TOKEN_SECRET is not set, the local development secret is used');
   const { httpServer, io } = createServer({ history });

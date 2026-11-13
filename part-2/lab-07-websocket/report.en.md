@@ -81,7 +81,7 @@ The work includes extras from the assignment and a few of its own.
 
 **History.** The last 50 messages of a room reach a newcomer in the answer to `room:join`. The handlers use only the `add` and `list` methods of the store and wait for them with `await`, so the store is swappable. By default the history lives in memory. When `MONGODB_URI` is set, `server.js` connects the `mongodb` driver, and `createMongoHistory` writes messages to the `messages` collection and reads the last 50 per room, so the history survives a restart. If the database is unavailable the server answers with an acknowledgement error and keeps running. The tests use a small fake collection, and a real database was not started in the tests or while preparing this report.
 
-**Token login.** `POST /login` with the body `{ "username": "..." }` returns a signed token (HMAC-SHA256, valid for one hour). The socket connects with `auth: { token }` and the name is taken from the token. The secret is read from the `TOKEN_SECRET` variable, with a default for local runs and tests. With `REQUIRE_TOKEN=1` sockets without a token are refused. Forged, foreign-secret and expired tokens are refused.
+**Token login.** `POST /login` with the body `{ "username": "..." }` returns a signed token (HMAC-SHA256, valid for one hour). The socket connects with `auth: { token }` and the name is taken from the token. The secret is read from the `TOKEN_SECRET` variable, with a default for local runs and tests. With `REQUIRE_TOKEN=1` sockets without a token are refused. This is a name claim, not authentication: there is no password, and anyone who asks for a valid free name gets a token for it. The default secret is public, so with `NODE_ENV=production` the server does not start with it. Forged, foreign-secret and expired tokens are refused.
 
 **Private messages.** The `private:message` event takes the recipient `socket.id`, delivers the text to that user only and returns an acknowledgement with a copy to the sender.
 
@@ -91,7 +91,7 @@ The work includes extras from the assignment and a few of its own.
 
 ### 3.5 Verification
 
-The work is checked by automated tests: 102 tests start a real server on a free port and connect several `socket.io-client` clients over WebSocket. The scenarios are summarized in table 3. Manual checking uses two browser windows and the steps from the README file.
+The work is checked by automated tests: 107 tests start a real server on a free port and connect several `socket.io-client` clients over WebSocket. The scenarios are summarized in table 3. Manual checking uses two browser windows and the steps from the README file.
 
 Table 3 – Automated test scenarios
 
@@ -206,7 +206,7 @@ Listing of server.js is given in appendix A. Listing of app.js is given in appen
 
 ## Conclusion
 
-For DSLKit, a server on Express and Socket.IO with an HTML and JavaScript client was built. Users exchange messages in real time, get notifications about connecting, disconnecting, joining a room and leaving it, and for each diagram see the list of people and those who are editing it. On top of that the work adds a history with a MongoDB or in-memory store, login by a signed token, private messages, a typing indicator, acknowledgements and a rate limit. 102 automated tests confirm the behavior of every event. Limits are kept in `limits.json`, and every message carries a timestamp. A run against a real MongoDB and screenshots of two windows are not included.
+For DSLKit, a server on Express and Socket.IO with an HTML and JavaScript client was built. Users exchange messages in real time, get notifications about connecting, disconnecting, joining a room and leaving it, and for each diagram see the list of people and those who are editing it. On top of that the work adds a history with a MongoDB or in-memory store, login by a signed token, private messages, a typing indicator, acknowledgements and a rate limit. 107 automated tests confirm the behavior of every event. Limits are kept in `limits.json`, and every message carries a timestamp. A run against a real MongoDB and screenshots of two windows are not included.
 
 ## Appendix A (mandatory) Listing of server.js
 
@@ -228,7 +228,10 @@ const start = async () => {
     const { MongoClient } = require('mongodb');
     const { createMongoHistory } = require('./src/history');
     client = await MongoClient.connect(process.env.MONGODB_URI, { serverSelectionTimeoutMS: 5000 });
-    history = createMongoHistory(client.db().collection('messages'));
+    const { ObjectId } = require('mongodb');
+    history = createMongoHistory(client.db().collection('messages'), undefined, { ObjectId, ttlSeconds: Number(process.env.HISTORY_TTL_SECONDS) || 0 });
+    // A failed index build is not fatal: the history still works, only slower on a large collection.
+    await history.init().catch((error) => console.warn('Cannot create the history indexes:', error.message));
   }
   if (!process.env.TOKEN_SECRET) console.warn('TOKEN_SECRET is not set, the local development secret is used');
   const { httpServer, io } = createServer({ history });
@@ -281,12 +284,17 @@ const securityHeaders = (req, res, next) => {
 // `allowedOrigins` lists extra sites (besides the server's own address) that may open a socket.
 // The token secret comes from TOKEN_SECRET; the default below is for local runs and tests only.
 // `requireToken` (REQUIRE_TOKEN=1) refuses sockets that come without a login token.
+// `trustProxy` (TRUST_PROXY=1) takes the client address for maxPerAddress from the last X-Forwarded-For entry
+// (the one added by a single reverse proxy in front of the server). Leave it off when no such proxy exists, or
+// any client could invent its own address.
+// Login is a name claim, not authentication: there is no password, so whoever asks for a free name gets a token for it.
 const DEFAULT_SECRET = 'local-development-secret-do-not-use-in-production';
 
 const createServer = ({
   allowedOrigins = parseAllowed(process.env.ALLOWED_ORIGINS),
   tokenSecret = process.env.TOKEN_SECRET || DEFAULT_SECRET,
   requireToken = process.env.REQUIRE_TOKEN === '1',
+  trustProxy = process.env.TRUST_PROXY === '1',
   setup,
   ...options
 } = {}) => {
@@ -327,7 +335,7 @@ const createServer = ({
     allowRequest: (req, callback) => callback(null, isOriginAllowed(req.headers.origin, req.headers.host, allowedOrigins)),
     maxHttpBufferSize: limits.maxPacketBytes,
   });
-  attachSocket(io, { ...options, tokenSecret, requireToken });
+  attachSocket(io, { ...options, tokenSecret, requireToken, trustProxy });
   return { app, httpServer, io };
 };
 
@@ -359,6 +367,8 @@ const createHub = (io, opts) => {
   const online = new Map(); // socket id -> { id, username }
   const perAddress = new Map(); // client address -> number of open sockets
   let messageSeq = 0;
+  // A store that makes its own ids (the MongoDB one) keeps them unique across restarts; otherwise count in memory.
+  const nextId = () => history.newId?.() ?? ++messageSeq;
   const usersOf = (room) => [...(rooms.get(room)?.values() ?? [])];
   const onlineList = () => [...online.values()];
   return {
@@ -370,10 +380,21 @@ const createHub = (io, opts) => {
     usersOf,
     onlineList,
     publishPresence: (room) => io.to(room).emit('presence:update', { room, users: usersOf(room) }),
-    makeMessage: (user, text, extra) => ({ id: ++messageSeq, from: user.username, fromId: user.id, text, at: Date.now(), ...extra }),
+    makeMessage: (user, text, extra) => ({ id: nextId(), from: user.username, fromId: user.id, text, at: Date.now(), ...extra }),
     perAddress,
     isTaken: (username) => onlineList().some((u) => u.username.toLowerCase() === username.toLowerCase()),
   };
+};
+
+// The address a connection counts against. Behind a trusted reverse proxy (TRUST_PROXY=1) it is the last
+// X-Forwarded-For entry, otherwise the socket address, which a proxy would make the same for every client.
+const addressOf = (socket, trustProxy) => {
+  if (trustProxy) {
+    const forwarded = socket.handshake.headers?.['x-forwarded-for'];
+    const last = typeof forwarded === 'string' ? forwarded.split(',').at(-1).trim() : '';
+    if (last) return last;
+  }
+  return socket.handshake.address;
 };
 
 // Handshake: the name comes from a signed login token (`auth.token`, issued by POST /login) or, when
@@ -393,7 +414,7 @@ const createHandshake = (hub) => (socket, next) => {
   if (hub.isTaken(username)) return next(new Error('This username is already taken'));
   if (hub.online.size >= opts.maxUsers) return next(new Error('The server is full, try again later'));
   // One client cannot take all the places of the server.
-  if ((hub.perAddress.get(socket.handshake.address) ?? 0) >= opts.maxPerAddress) return next(new Error('Too many connections from your address'));
+  if ((hub.perAddress.get(addressOf(socket, opts.trustProxy)) ?? 0) >= opts.maxPerAddress) return next(new Error('Too many connections from your address'));
   socket.data.username = username;
   next();
 };
@@ -430,7 +451,8 @@ const createRoomActions = (hub, conn) => {
     joined.add(room);
     socket.join(room);
     if (!rooms.has(room)) rooms.set(room, new Map());
-    rooms.get(room).set(socket.id, user);
+    // The presence entry belongs to this room only, so "editing" in one room does not show in the others.
+    rooms.get(room).set(socket.id, { id: user.id, username: user.username, editing: false });
     socket.to(room).emit('room:joined', { room, username: user.username, at: Date.now() });
     hub.publishPresence(room);
     succeed(ack, { room, history: past, users: hub.usersOf(room) });
@@ -447,9 +469,10 @@ const createRoomActions = (hub, conn) => {
   const editing = (payload, ack) => {
     const room = cleanRoom(payload?.room);
     if (!room || !joined.has(room)) return fail(ack, 'Join the room first');
-    user.editing = Boolean(payload.editing);
+    const entry = rooms.get(room).get(socket.id);
+    entry.editing = Boolean(payload.editing);
     hub.publishPresence(room);
-    succeed(ack, { editing: user.editing });
+    succeed(ack, { editing: entry.editing });
   };
 
   const typing = (payload) => {
@@ -501,11 +524,11 @@ const createMessageActions = (hub, conn) => {
 
 const handleConnection = (hub, socket) => {
   const { opts } = hub;
-  const user = { id: socket.id, username: socket.data.username, editing: false };
+  const user = { id: socket.id, username: socket.data.username };
   const conn = { socket, user, joined: new Set(), allowed: createLimiter(opts.rateMax, opts.rateWindowMs) };
   const eventAllowed = createLimiter(opts.eventRateMax, opts.eventRateWindowMs);
   hub.online.set(socket.id, { id: user.id, username: user.username });
-  const address = socket.handshake.address;
+  const address = addressOf(socket, opts.trustProxy);
   hub.perAddress.set(address, (hub.perAddress.get(address) ?? 0) + 1);
 
   // Flood guard for every event (join, typing, editing...); chat messages have their own, stricter limit.
@@ -604,16 +627,27 @@ const createHistory = (limit = 50, maxRooms = 200) => {
 };
 
 // History in a MongoDB collection (the object returned by `db.collection('messages')` of the
-// official driver). Only insertOne and find(...).sort(...).limit(...).toArray() are used, so tests
-// can pass a small fake collection and need no database.
-const createMongoHistory = (collection, limit = 50) => ({
+// official driver). Only insertOne, createIndex and find(...).sort(...).limit(...).toArray() are used,
+// so tests can pass a small fake collection and need no database.
+// `ObjectId` (from the driver) makes the message id the document `_id`: ids are unique and grow with time,
+// so they do not repeat after a restart the way a per-process counter does. Without it the hub counts itself.
+// `ttlSeconds` (HISTORY_TTL_SECONDS) lets MongoDB delete messages older than that; 0 or empty keeps them forever.
+const createMongoHistory = (collection, limit = 50, { ObjectId, ttlSeconds = 0 } = {}) => ({
+  newId: ObjectId ? () => new ObjectId().toHexString() : undefined,
+  // Indexes for the one query the history makes: the newest messages of a room.
+  async init() {
+    await collection.createIndex?.({ room: 1, _id: -1 });
+    if (ttlSeconds > 0) await collection.createIndex?.({ createdAt: 1 }, { expireAfterSeconds: ttlSeconds });
+  },
   async add(room, message) {
-    await collection.insertOne({ ...message, room });
+    const doc = { ...message, room, createdAt: new Date() };
+    if (ObjectId && typeof message.id === 'string') doc._id = new ObjectId(message.id);
+    await collection.insertOne(doc);
   },
   async list(room) {
     const newest = await collection.find({ room }).sort({ _id: -1 }).limit(limit).toArray();
-    // Newest first in the query, oldest first for the client; the database id stays inside.
-    return newest.reverse().map(({ _id, ...message }) => message);
+    // Newest first in the query, oldest first for the client; the database fields stay inside.
+    return newest.reverse().map(({ _id, createdAt, ...message }) => message);
   },
 });
 

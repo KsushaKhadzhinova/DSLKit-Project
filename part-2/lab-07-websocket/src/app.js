@@ -27,12 +27,17 @@ const securityHeaders = (req, res, next) => {
 // `allowedOrigins` lists extra sites (besides the server's own address) that may open a socket.
 // The token secret comes from TOKEN_SECRET; the default below is for local runs and tests only.
 // `requireToken` (REQUIRE_TOKEN=1) refuses sockets that come without a login token.
+// `trustProxy` (TRUST_PROXY=1) takes the client address for maxPerAddress from the last X-Forwarded-For entry
+// (the one added by a single reverse proxy in front of the server). Leave it off when no such proxy exists, or
+// any client could invent its own address.
+// Login is a name claim, not authentication: there is no password, so whoever asks for a free name gets a token for it.
 const DEFAULT_SECRET = 'local-development-secret-do-not-use-in-production';
 
 const createServer = ({
   allowedOrigins = parseAllowed(process.env.ALLOWED_ORIGINS),
   tokenSecret = process.env.TOKEN_SECRET || DEFAULT_SECRET,
   requireToken = process.env.REQUIRE_TOKEN === '1',
+  trustProxy = process.env.TRUST_PROXY === '1',
   setup,
   ...options
 } = {}) => {
@@ -73,7 +78,7 @@ const createServer = ({
     allowRequest: (req, callback) => callback(null, isOriginAllowed(req.headers.origin, req.headers.host, allowedOrigins)),
     maxHttpBufferSize: limits.maxPacketBytes,
   });
-  attachSocket(io, { ...options, tokenSecret, requireToken });
+  attachSocket(io, { ...options, tokenSecret, requireToken, trustProxy });
   return { app, httpServer, io };
 };
 
