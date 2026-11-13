@@ -23,12 +23,14 @@ cd part-2/lab-02-sequelize
 npm install
 cp .env.example .env     # optional
 npm run db:migrate       # create the tables, add priority, revision, projectId
-npm run db:seed          # three demo diagrams
+npm run db:seed          # 32 demo diagrams and 4 projects
 npm run dev              # nodemon; npm start for a plain start
 npm test                 # tests
 ```
 
 Database commands: `db:migrate:undo` rolls back the last migration, `db:seed:undo` removes the demo data, `db:reset` recreates everything from scratch.
+
+**Demo data.** The seed has two files. `…-demo-diagrams.js` adds 32 diagrams owned by `demo` over six notations (BPMN, ERD, UML, DFD, IDEF0, Petri) and five awkward rows (Unicode, markup, SQL-like text, maximum length). `…-demo-projects.js` creates four `Demo: …` projects and links the diagrams to them by notation (one-to-many); the awkward diagrams stay without a project. Running it again duplicates nothing: an existing row is left alone, a deleted one comes back, a diagram the user moved to another project stays there. The undo (`db:seed:undo`) removes only the demo rows. This lab has no passwords, so the seed needs no environment variables.
 
 ## 3 What changed compared with lab 1
 
@@ -40,7 +42,7 @@ Database commands: `db:migrate:undo` rolls back the last migration, `db:seed:und
 | `migrations/…-add-revision-to-diagrams.js`      | A numeric `revision` column with a `CHECK` from 0 to 100000                                                  |
 | `migrations/…-create-projects.js`               | The `Projects` table with a unique name and the foreign key `Diagrams.projectId`                             |
 | `src/models/project.js`                         | The project model, the one-to-many link is set in `src/models/index.js`                                      |
-| `seeders/…-demo-diagrams.js`                    | Initial data                                                                                                 |
+| `seeders/…-demo-diagrams.js`, `…-demo-projects.js` | Initial data: diagrams and projects (the data is in `seed-data/`)                                         |
 | `src/models/diagram.js`, `diagram.constants.js` | The Sequelize model and the allowed field values                                                             |
 | `src/models/index.js`                           | `createModels(config)`: creates the connection and the models                                                |
 | `src/controllers/diagrams.controller.js`        | Calls of `findAll`, `findByPk`, `create`, `update`, `destroy` instead of the array                           |
@@ -50,7 +52,7 @@ Routes, data validation, the error format and the response codes stay as in lab 
 
 ## 4 Checking
 
-`npm test` runs 98 tests: each check works with a temporary SQLite file on which the real migrations and seeds run. The same run includes the check of the report build and formatting (`report.test.mjs`).
+`npm test` runs 120 tests: each check works with a temporary SQLite file on which the real migrations and seeds run. The same run includes the check of the report build and formatting (`report.test.mjs`).
 
 A known remark: `npm audit` shows vulnerabilities in the `nodemon` and `sequelize-cli` chains (development tools). The production run does not use them.
 

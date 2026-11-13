@@ -3,6 +3,7 @@ const assert = require('node:assert/strict');
 const { createTempDatabase } = require('./helpers');
 const { createModels } = require('../src/models');
 const { ROWS } = require('../seed-data/diagrams');
+const { PROJECTS, projectFor } = require('../seed-data/projects');
 
 const db = createTempDatabase();
 const open = () => createModels({ dialect: 'sqlite', storage: db.storage, logging: false });
@@ -124,6 +125,37 @@ test('the seed inserts the marked demo diagrams, is idempotent, and undo keeps r
     ['Mine'],
   );
   await again.Diagram.destroy({ where: {} });
+  await again.sequelize.close();
+});
+
+test('the project seed links the demo diagrams, is idempotent, keeps a moved diagram, and undo keeps the diagrams', async () => {
+  db.cli('db:seed:all');
+  let { sequelize, Diagram, Project } = open();
+  const mine = await Project.create({ name: 'Mine' });
+  const moved = await Diagram.findOne({ where: { title: 'Order processing' } });
+  await moved.update({ projectId: mine.id });
+  await sequelize.close();
+
+  db.cli('db:seed:all');
+  ({ sequelize, Diagram, Project } = open());
+  const projects = await Project.findAll({ order: [['id', 'ASC']] });
+  assert.deepEqual(projects.map((p) => p.name).sort(), [...PROJECTS.map((p) => p.name), 'Mine'].sort());
+  const diagrams = await Diagram.findAll();
+  assert.equal(diagrams.length, ROWS.length);
+  for (const row of ROWS) {
+    const diagram = diagrams.find((d) => d.title === row.title);
+    const expected = row.title === 'Order processing' ? 'Mine' : projectFor(row);
+    const actual = projects.find((p) => p.id === diagram.projectId)?.name ?? null;
+    assert.equal(actual, expected, row.title);
+  }
+  assert.ok(diagrams.some((d) => d.projectId === null), 'awkward rows stay without a project');
+
+  await sequelize.close();
+  db.cli('db:seed:undo:all');
+  const again = open();
+  assert.equal(await again.Diagram.count(), 0);
+  assert.equal(await again.Project.count(), 1);
+  await again.Project.destroy({ where: {} });
   await again.sequelize.close();
 });
 
