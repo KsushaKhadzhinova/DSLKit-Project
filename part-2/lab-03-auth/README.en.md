@@ -33,7 +33,7 @@ The DSLKit project (diagrams as code, SaaS). Assignment: `materials/text/part-2/
 
 ## 3 Running
 
-Node.js 22 or newer is required. SQLite is used by default, and PostgreSQL and Neon are connected as in lab 2 (`DATABASE_URL`).
+Node.js 22 or newer is required. The database is PostgreSQL: a local one is started with `docker compose up -d db`, and Neon and Supabase are connected through `DATABASE_URL` as in lab 2. SQLite is used only by the tests (`SQLITE_STORAGE`).
 
 ```bash
 cd part-2/lab-03-auth
