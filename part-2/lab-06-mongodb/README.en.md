@@ -36,3 +36,7 @@ npm test                 # tests
 ## 4 Checking
 
 `npm test` runs 152 tests and the report build and formatting check (`report.test.mjs`). The tests start a temporary `mongod` through `mongodb-memory-server` on a random port, so no working database is touched. To avoid the one-time download of the `mongod` binary, set `MONGOMS_SYSTEM_BINARY` to an installed `mongod`.
+
+## 5 Known limitations
+
+These match the scope of the lab. The API has no authentication or authorization: any client that can reach the port can read and change every diagram. There is no rate limit. Every request, including `GET`, writes a row to the `requestlogs` collection (variant 26 requires this), so an unlimited stream of requests grows the collection and the database load quickly, and old rows are never purged. Real use would need sign-in, a rate limit and a retention period for the log.
