@@ -1,6 +1,8 @@
 import { NOTATIONS } from '../notations/index.js';
 import { BUILDABLE } from '../automation/builders.js';
-import { buildFromCode, buildFromDescription } from '../automation/build.js';
+import { buildFromDescription } from '../automation/build.js';
+import { ACCEPT, MAX_FILE_BYTES, importUpload, pictureType, uploadKind } from '../automation/upload.js';
+import { vsdxToXml } from '../utils/diagram-file-import.js';
 import { createRequestHistory } from '../automation/history.js';
 import { expertStore } from '../expert/bases.js';
 import { reviewDiagram, traceLines } from '../expert/review.js';
@@ -24,8 +26,10 @@ const TEXTS = {
     working: 'Строим диаграмму…',
     ideaLabel: 'Опишите идею словами',
     ideaHint: 'Например: «Сначала клиент оформляет заказ, затем менеджер проверяет наличие. Если товар есть, то отправить заказ, иначе сообщить клиенту.»',
-    codeLabel: 'Код Mermaid, PlantUML или DSLKit (или перетащите файл .dsl, .mmd, .puml, .txt)',
-    imageLabel: 'Картинка схемы (png, jpeg, webp, gif) и пояснение',
+    codeLabel: 'Код Mermaid, PlantUML, DOT или DSLKit или файл схемы (перетащите его сюда)',
+    imageLabel: 'Картинка схемы или PDF (png, jpeg, webp, gif, pdf) и пояснение',
+    formats:
+      'Без ключа ИИ читаются файлы: draw.io (.drawio), SVG, JSON (граф, Excalidraw, Cytoscape), BPMN (.bpmn), XMI (.xmi), GraphML, GEXF, Visio (.vdx, .vsdx), DOT (.dot, .gv), CSV и TSV, Mermaid (.mmd, .md), PlantUML (.puml, .wsd), DSLKit (.dsl), текст. Картинки (png, jpeg, webp, gif) и PDF читает только ИИ. До 10 МБ.',
     file: 'Выбрать файл',
     preview: 'Код',
     problems: 'Проверка',
@@ -44,8 +48,13 @@ const TEXTS = {
     noAi: 'ИИ не подключён: добавьте ключ в .env сервера. Доступен упрощённый режим по правилам, а не нейросеть, и импорт Mermaid и PlantUML.',
     rules: 'Режим по правилам: это упрощённый разбор по шаблонам фраз, а не нейросеть. Проверьте результат.',
     empty: 'Введите текст.',
-    imageNoAi: 'Картинки без ключа не поддерживаются: опишите схему текстом или загрузите код, Mermaid или PlantUML.',
-    imageType: 'Нужна картинка png, jpeg, webp или gif.',
+    imageNoAi:
+      'Картинки и PDF читает только ИИ, а ключа на сервере нет. Файлы draw.io, SVG, JSON, BPMN, GraphML, DOT, CSV, Mermaid и PlantUML работают без ключа: выберите вкладку «Код или файл».',
+    imageType: 'Нужна картинка png, jpeg, webp, gif или PDF.',
+    bmp: 'ИИ не читает BMP: сохраните картинку как PNG или JPEG.',
+    'too-big': 'Файл больше 10 МБ.',
+    'no-structure': 'В файле не нашлось элементов и связей диаграммы. Если это картинка в файле, загрузите её на вкладке «Картинка».',
+    'bad-file': 'Файл повреждён или не соответствует своему формату.',
     imageBig: 'Картинка больше {mb} МБ.',
     imageEmpty: 'Выберите картинку.',
     unreadable: 'Не удалось прочитать файл.',
@@ -87,8 +96,10 @@ const TEXTS = {
     ideaLabel: 'Describe the idea in words',
     ideaHint:
       'For example: "First the customer places an order, then the manager checks the stock. If the goods are in stock then ship the order, otherwise tell the customer."',
-    codeLabel: 'Mermaid, PlantUML or DSLKit code (or drop a .dsl, .mmd, .puml, .txt file)',
-    imageLabel: 'A picture of a diagram (png, jpeg, webp, gif) and a note',
+    codeLabel: 'Mermaid, PlantUML, DOT or DSLKit code, or a diagram file (drop it here)',
+    imageLabel: 'A picture of a diagram or a PDF (png, jpeg, webp, gif, pdf) and a note',
+    formats:
+      'Without an AI key these files are read: draw.io (.drawio), SVG, JSON (graph, Excalidraw, Cytoscape), BPMN (.bpmn), XMI (.xmi), GraphML, GEXF, Visio (.vdx, .vsdx), DOT (.dot, .gv), CSV and TSV, Mermaid (.mmd, .md), PlantUML (.puml, .wsd), DSLKit (.dsl), text. Pictures (png, jpeg, webp, gif) and PDF are read by the AI only. Up to 10 MB.',
     file: 'Choose a file',
     preview: 'Code',
     problems: 'Check',
@@ -107,8 +118,13 @@ const TEXTS = {
     noAi: 'AI is not connected: add the key to the .env of the server. The simplified mode by rules (not a neural network) and the import of Mermaid and PlantUML are available.',
     rules: 'Mode by rules: this is a simplified reading by phrase patterns, not a neural network. Check the result.',
     empty: 'Enter a text.',
-    imageNoAi: 'Pictures are not supported without a key: describe the diagram in text or load code, Mermaid or PlantUML.',
-    imageType: 'A png, jpeg, webp or gif picture is needed.',
+    imageNoAi:
+      'Pictures and PDF are read by the AI only, and the server has no key. Files of draw.io, SVG, JSON, BPMN, GraphML, DOT, CSV, Mermaid and PlantUML work without a key: use the tab "Code or file".',
+    imageType: 'A png, jpeg, webp, gif or PDF file is needed.',
+    bmp: 'The AI does not read BMP: save the picture as PNG or JPEG.',
+    'too-big': 'The file is larger than 10 MB.',
+    'no-structure': 'No elements and links of a diagram were found in the file. For a picture inside a file, load it on the tab "Picture".',
+    'bad-file': 'The file is damaged or does not match its format.',
     imageBig: 'The picture is larger than {mb} MB.',
     imageEmpty: 'Choose a picture.',
     unreadable: 'The file could not be read.',
@@ -136,8 +152,7 @@ const TEXTS = {
   },
 };
 const MODES = ['idea', 'code', 'image'];
-const IMAGE_TYPES = ['image/png', 'image/jpeg', 'image/webp', 'image/gif'];
-const CODE_ACCEPT = '.dsl,.mmd,.mermaid,.puml,.plantuml,.pu,.md,.txt';
+const IMAGE_TYPES = ['image/png', 'image/jpeg', 'image/webp', 'image/gif', 'application/pdf'];
 const STATUS_ERRORS = { 503: 'noKey', 429: 'limit', 422: 'invalid', 413: 'tooLarge', 415: 'media' };
 
 // The wizard "Automatic build": the source (description, code, picture), the notation, the build through the AI of the server or by rules,
@@ -274,9 +289,9 @@ export const initAutomation = ({ root = document, storage, fetchImpl } = {}) => 
     mode = name;
     sourceButtons.forEach((node) => node.setAttribute('aria-pressed', String(node.dataset.autoSource === name)));
     textLabel.textContent = t(`${name}Label`);
-    hint.textContent = name === 'idea' ? t('ideaHint') : '';
+    hint.textContent = name === 'idea' ? t('ideaHint') : t('formats');
     fileRow.hidden = name === 'idea';
-    fileInput.accept = name === 'image' ? IMAGE_TYPES.join(',') : CODE_ACCEPT;
+    fileInput.accept = ACCEPT;
     offlineLabel.hidden = name !== 'idea' || !ai.available;
     return name;
   };
@@ -401,7 +416,7 @@ export const initAutomation = ({ root = document, storage, fetchImpl } = {}) => 
     try {
       let built = null;
       if (mode === 'code') {
-        const imported = buildFromCode(text, { fileName: fileName.textContent, lang });
+        const imported = await importUpload(text, { fileName: fileName.textContent, lang });
         if (imported.ok) built = imported;
         else if (!ai.available) return say(offlineMessage(imported), 'error');
       } else if (mode === 'idea' && (!ai.available || offlineBox.checked)) {
@@ -441,13 +456,20 @@ export const initAutomation = ({ root = document, storage, fetchImpl } = {}) => 
   const takeFile = async (file) => {
     fileName.textContent = file.name;
     try {
-      if (mode === 'image') {
-        if (!IMAGE_TYPES.includes(file.type)) return fail('imageType');
+      if (file.size > MAX_FILE_BYTES) return fail('too-big');
+      const kind = uploadKind(file);
+      if (kind === 'bmp') return fail('bmp');
+      if (kind === 'picture' || (kind === 'unknown' && mode === 'image')) {
+        if (mode !== 'image') setMode('image');
+        const type = pictureType(file);
+        if (!IMAGE_TYPES.includes(type)) return fail('imageType');
         if (file.size > ai.maxImageMb * 1024 * 1024) return fail('imageBig', { mb: ai.maxImageMb });
-        imageData = { type: file.type, data: await toBase64(file) };
+        imageData = { type, data: await toBase64(file) };
+        if (!ai.available) fail('imageNoAi');
         return true;
       }
-      textBox.value = await file.text();
+      if (mode !== 'code') setMode('code');
+      textBox.value = kind === 'zip' ? await vsdxToXml(new Uint8Array(await file.arrayBuffer())) : await file.text();
       return true;
     } catch {
       return fail('unreadable');

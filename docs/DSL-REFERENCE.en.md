@@ -38,6 +38,21 @@ string     = '"' , { char | "\\" , any } , '"' ;
 | POST   | `/api/render`              | { source, lang } -> { notation, valid, problems, svg } (Accept: image/svg+xml gives the bare SVG) |
 | POST   | `/api/external/<language>` | { source } -> SVG of the external service (Kroki-compatible, KROKI_URL)                           |
 
+## Importing files and pictures
+
+The wizard "Automatic build" takes files up to 10 MB. The format is found by the content first, then by the extension. Structured formats are read by the deterministic importer without an AI key (site/js/utils/diagram-file-import.js); pictures and PDF are read only by the AI of the server.
+
+| Format                                                                                 | Result                                                         |
+| -------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
+| draw.io (.drawio, .dio, compressed or not), SVG (export of draw.io, Graphviz, Mermaid) | GOST flowchart, BPMN or graph, positions pos=XxY are kept      |
+| JSON (nodes and edges, Cytoscape, Excalidraw, Lucid)                                   | graph or GOST flowchart                                        |
+| BPMN 2.0 XML (.bpmn)                                                                   | BPMN with the positions of BPMNShape                           |
+| XMI (.xmi, .uml)                                                                       | UML class diagram                                              |
+| GraphML, GEXF, DOT (.dot, .gv), CSV and TSV with links                                 | graph                                                          |
+| Visio (.vdx, .vsdx)                                                                    | GOST flowchart or graph                                        |
+| Mermaid (.mmd, .md), PlantUML (.puml, .plantuml, .pu, .wsd), DSLKit (.dsl), text       | the existing import of flowcharts, sequence and state diagrams |
+| png, jpeg, webp, gif, pdf                                                              | only the AI with a key on the server; BMP is not accepted      |
+
 ## Notations
 
 ### IDEF0 — function modelling
@@ -318,20 +333,20 @@ arc take -> free
 Example:
 
 ```
-diagram gost "Сумма чисел"
-start s "Начало"
-io in "Ввод n"
+diagram gost "Sum of numbers"
+start s "Start"
+io in "Input n"
 preparation p "i = 1, sum = 0"
 decision d "i <= n?"
 process a "sum = sum + i, i = i + 1"
-io out "Вывод sum"
-end e "Конец"
+io out "Output sum"
+end e "End"
 flow s -> in
 flow in -> p
 flow p -> d
-flow d -> a "Да"
+flow d -> a "Yes"
 flow a -> d
-flow d -> out "Нет"
+flow d -> out "No"
 flow out -> e
 ```
 

@@ -128,7 +128,7 @@ test('rules mode refuses an empty text, a notation it cannot build, a text witho
 test('code mode imports Mermaid and PlantUML offline and explains what it cannot read', async () => {
   const { $, text, api, status } = setup();
   api.setMode('code');
-  assert.equal($('.auto__hint').textContent, '');
+  assert.match($('.auto__hint').textContent, /draw.io/);
   text('graph LR' + NL + 'A --> B');
   await api.build();
   assert.match(status(), /Диаграмма построена \(импорт\)/);
@@ -150,7 +150,7 @@ test('a picture without a key is refused with an honest word', async () => {
   assert.equal($('[data-auto-source="image"]').getAttribute('aria-pressed'), 'true');
   assert.equal($('.auto__file').hidden, false);
   await api.build();
-  assert.match(status(), /Картинки без ключа не поддерживаются/);
+  assert.match(status(), /Картинки и PDF читает только ИИ/);
 });
 
 test('with a key the description goes to the server, the answer is shown with its warnings and attempts', async () => {
@@ -271,7 +271,7 @@ test('a picture is read, checked and sent as base64', async () => {
   assert.match($('label[for="auto-text"]').textContent, /Картинка схемы/);
   await api.build();
   assert.match(status(), /Выберите картинку/);
-  await api.takeFile(new window.File([PNG_BYTES], 'a.txt', { type: 'text/plain' }));
+  await api.takeFile(new window.File([PNG_BYTES], 'a.bin', { type: 'application/octet-stream' }));
   assert.match(status(), /Нужна картинка/);
   await api.takeFile(new window.File([new Uint8Array(1.5 * 1024 * 1024)], 'big.png', { type: 'image/png' }));
   assert.match(status(), /больше 1 МБ/);
