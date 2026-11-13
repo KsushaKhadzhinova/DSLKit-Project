@@ -38,6 +38,11 @@ def yes(v, msg):
 with sync_playwright() as p:
     b = p.chromium.launch(channel="msedge")
     ctx = b.new_context(viewport={"width": 1366, "height": 800}, accept_downloads=True)
+    # Pages of the application are for signed-in users; the starter projects are marked as already added.
+    ctx.add_init_script("(" + """() => { try { if (localStorage.getItem('dslkit.accounts') === null) {
+        localStorage.setItem('dslkit.accounts', JSON.stringify([{ id: 'e2e0000000000001', name: 'Test User', email: 'e2e@example.com', salt: '00', hash: '00', iterations: 1, role: 'user' }]));
+        localStorage.setItem('dslkit.session', JSON.stringify({ userId: 'e2e0000000000001' }));
+        localStorage.setItem('dslkit.seeded.e2e0000000000001', 'true'); } } catch (e) { /* storage unavailable */ } }""" + ")()")
     page = ctx.new_page()
     PAGE[0] = page
     page.set_default_timeout(8000)
@@ -75,6 +80,8 @@ with sync_playwright() as p:
     check("CP-03", "Шаблоны IDEF0, DFD, ERD подставляют код и рисуют диаграмму", templates)
 
     def notation_select():
+        # The list of templates sits in the "Templates" panel of the activity bar, so the panel is opened first.
+        page.click('[data-panel="templates"]')
         sel = page.locator("[data-notation-select]")
         n = sel.locator("option").count()
         yes(n >= 20, f"в списке шаблонов {n}")

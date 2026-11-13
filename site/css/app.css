@@ -23,9 +23,10 @@
   grid-row: 1;
   min-width: 0;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: var(--space-1);
-  height: var(--header-height);
+  min-height: var(--header-height);
   padding: 0 var(--space-2);
   border-bottom: 1px solid var(--color-border);
   background: var(--color-surface);
@@ -360,6 +361,7 @@
   aspect-ratio: var(--phi);
   border-radius: var(--radius-small);
   background-color: var(--color-background);
+  background-image: linear-gradient(var(--color-border) 1px, transparent 1px), linear-gradient(90deg, var(--color-border) 1px, transparent 1px);
   background-image:
     linear-gradient(color-mix(in srgb, var(--color-border) 70%, transparent) 1px, transparent 1px),
     linear-gradient(90deg, color-mix(in srgb, var(--color-border) 70%, transparent) 1px, transparent 1px);
@@ -486,9 +488,12 @@
   align-items: center;
   gap: var(--space-1);
   width: 100%;
+  min-width: 0;
 }
 
 .sort__select {
+  flex: 1 1 0;
+  min-width: 0;
   min-height: var(--space-4);
   padding: 0 var(--space-2);
   border: 1px solid var(--color-border-strong);
@@ -544,6 +549,7 @@
   aspect-ratio: var(--phi);
   border-radius: var(--radius-small);
   background-color: var(--color-secondary);
+  background-image: linear-gradient(var(--color-primary) 1px, transparent 1px), linear-gradient(90deg, var(--color-primary) 1px, transparent 1px);
   background-image:
     linear-gradient(color-mix(in srgb, var(--color-primary) 14%, transparent) 1px, transparent 1px),
     linear-gradient(90deg, color-mix(in srgb, var(--color-primary) 14%, transparent) 1px, transparent 1px);
@@ -927,6 +933,8 @@
 
 .welcome__actions .button {
   flex: 1 1 100%;
+  max-inline-size: 100%;
+  white-space: normal;
 }
 
 @media (min-width: 576px) {

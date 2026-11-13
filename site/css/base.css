@@ -255,3 +255,19 @@ label > span {
   stroke-linecap: round;
   stroke-linejoin: round;
 }
+
+/* Printing a page of the site: no navigation and no switches, dark text on white */
+@media print {
+  .header,
+  .footer,
+  .skip-link,
+  .theme,
+  .burger__button {
+    display: none;
+  }
+
+  body {
+    color: black;
+    background: white;
+  }
+}
