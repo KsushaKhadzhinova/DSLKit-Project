@@ -73,7 +73,7 @@ Figure 4 – Desktop: three columns of cards
 
 ### 3.6 Testing
 
-An automated test reads the source files and checks the folder structure, the number of components, the function form of components, the size of mock data, the presence of `key` in lists, handler stubs, CSS modules and the absence of `useState` and `useEffect`. The application is additionally checked in Chrome: the console has no errors, and four stubs write messages to the console. A screenshot of the Components tab of React DevTools and testing in Firefox and Edge remain a task for the acceptance stage.
+An automated test reads the source files and checks the folder structure, the number of components, the function form of components, the size of mock data, the presence of `key` in lists, handler stubs, CSS modules and the absence of `useState` and `useEffect`. The application is additionally checked in Chrome: the console has no errors, and four stubs write messages to the console. React DevTools screenshots are given in section 3.8. The React application is not covered by a browser protocol for Firefox and Edge in the repository: `docs/metrics/browsers` (14 October 2026) describes the site started with `npm start`, not the `react-app` folder.
 
 ### 3.7 Committing the Changes
 
@@ -103,7 +103,7 @@ Figure 7 – Console: the output of the handler stubs
 
 ## Conclusion
 
-An application on Vite and React with ten components is created for the DSLKit project: base, layout and subject ones. Data is passed through `props`, lists are rendered with `key`, conditional rendering and composition are used in several places, and handlers are stubs. The rule about the absence of `useState` and `useEffect` is checked by an automated test, and the layout is confirmed on three screen widths. What remains is to attach a React DevTools screenshot and to check the application in Firefox and Edge.
+An application on Vite and React with ten components is created for the DSLKit project: base, layout and subject ones. Data is passed through `props`, lists are rendered with `key`, conditional rendering and composition are used in several places, and handlers are stubs. The rule about the absence of `useState` and `useEffect` is checked by an automated test, and the layout is confirmed on three screen widths. The application in Firefox and Edge is not confirmed by a protocol.
 
 ## Appendix A – Listing of Button.jsx
 

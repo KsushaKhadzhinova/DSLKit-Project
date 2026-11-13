@@ -133,7 +133,7 @@ Figure 8 – The application console
 
 ## Conclusion
 
-Jest and React Testing Library are set up for the React application of the DSLKit project, unit tests of five pure functions and tests of all components are written. Coverage is 100 percent with thresholds of 70 and 60. The Lighthouse audit found three remarks, and after fixing them accessibility rose to 100 and SEO to 100. What remains is to attach screenshots of the Sources panel and React DevTools and to check the application in Firefox and Edge.
+Jest and React Testing Library are set up for the React application of the DSLKit project, unit tests of five pure functions and tests of all components are written. Coverage is 100 percent with thresholds of 70 and 60. The Lighthouse audit found three remarks, and after fixing them accessibility rose to 100 and SEO to 100. Screenshots of the Sources panel are given in section 3.8, and there is no React DevTools screenshot. The React application is not covered by a browser protocol for Firefox and Edge in the repository: `docs/metrics/browsers` (14 October 2026) describes the site started with `npm start`, not the `react-app` folder.
 
 ## Appendix A – Listing of helpers.js
 

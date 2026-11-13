@@ -88,7 +88,7 @@ Reading and writing data is protected by `try/catch` blocks, and the entry point
 
 ### 3.7 Testing
 
-Automated jsdom tests are written for every module and parse the real pages of the site. The tests check filters, the form with valid and invalid data, state restoration after a reload, storage errors and missing markup. Coverage of all JavaScript files is 100 percent for lines, branches and functions. The components are additionally checked in Chrome: the console has no errors, a request lands in LocalStorage, and the theme persists between pages. Testing in Firefox and Edge and a screenshot of the Event Listeners tab of the developer tools remain a task for the acceptance stage.
+Automated jsdom tests are written for every module and parse the real pages of the site. The tests check filters, the form with valid and invalid data, state restoration after a reload, storage errors and missing markup. Coverage of all JavaScript files is 100 percent for lines, branches and functions. The components are additionally checked in Chrome: the console has no errors, a request lands in LocalStorage, and the theme persists between pages. Screenshots of the developer tools are given in section 3.9. The general run of the site in Firefox 157.0.1 and Microsoft Edge 155.0.4283.45 (14 October 2026, 20 scenarios, 20 of 20, protocol in `docs/metrics/browsers`) covers the notation filter, the accordion, the form and the theme switch, and there is no separate protocol for the modules of this work in these browsers.
 
 ### 3.8 Committing the Changes
 
@@ -118,7 +118,7 @@ Figure 7 – The Application panel: site LocalStorage
 
 ## Conclusion
 
-Modular JavaScript is written for the DSLKit project: an entry point, storage and validation utilities and eight interactive components. Five event types and delegation are used, the form is validated with clear messages, and state is saved in LocalStorage and restored after a reload. Automated tests cover all the code, and the components are confirmed in a browser. What remains is to check the pages in Firefox and Edge.
+Modular JavaScript is written for the DSLKit project: an entry point, storage and validation utilities and eight interactive components. Five event types and delegation are used, the form is validated with clear messages, and state is saved in LocalStorage and restored after a reload. Automated tests cover all the code, and the components are confirmed in a browser. In Firefox and Edge the pages are checked only by the general run of the site of 14 October 2026.
 
 ## Appendix A – Listing of script.js
 

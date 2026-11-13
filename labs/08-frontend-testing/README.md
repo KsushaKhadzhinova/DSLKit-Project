@@ -44,7 +44,7 @@ npm run test:coverage    # отчёт о покрытии, HTML: react-app/cover
 
 Ответы ограничены вопросами n−1, n, n+1 варианта 26 (правило нужно подтвердить у преподавателя). Не выполнено и ждёт решения владельца:
 
-1. Снимки панелей Console, Sources (точка останова, Step Over и Step Into), Network и React DevTools в браузере.
-2. Проверка в Firefox и Edge.
+1. Снимки панелей Network и React DevTools (Console и Sources в отчёте есть).
+2. Проверка в Firefox и Edge (протокол `docs/metrics/browsers` от 14.10.2026 относится к сайту, а не к этой работе).
 3. PDF для СЭО и титульный лист по СТП.
 4. Слияние ветки в `main` после приёмки.
