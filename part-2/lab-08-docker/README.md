@@ -45,7 +45,8 @@ docker compose up --build
 ## 4 Проверки
 
 ```bash
-npm test                 # 6 проверок файлов Docker (без демона) и проверка отчётов
+npm test                 # 22 проверки файлов Docker (без демона) и проверка отчётов
+npm run smoke            # проба: docker compose up -d --build --wait, GET /api/health через Nginx, docker compose down (нужен запущенный Docker и .env)
 npm run shots            # скриншоты рисунков 1–4 в figures/ (нужен запущенный стек, Chrome или Edge, npm ci в ../lab-05-react-api)
 cd ../lab-03-auth && npm test   # 137 тестов сервера, включая /health
 ```

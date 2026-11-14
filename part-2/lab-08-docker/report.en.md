@@ -75,7 +75,7 @@ Figure 4 – The /health answers, the internal and public networks and the pgdat
 
 ### 3.6 Verification
 
-The structure of the Docker files is checked by twenty-one automated tests that run without a Docker daemon. They check the two-stage client build, installing production dependencies only, the `node` user, the `service_healthy` conditions, the database volume, the closed network, the absence of secret values in the sample file and the Nginx proxy. Twelve of them cover hardening: image versions without the `latest` tag, no passwords in images, closed ports and networks, dropped container rights and the Nginx headers. The server is covered by 137 tests, including two tests of the `/health` route. The launch is described in `README.md`. Repository branch: 28.
+The structure of the Docker files is checked by twenty-two automated tests that run without a Docker daemon. They check the two-stage client build, installing production dependencies only, the `node` user, the `service_healthy` conditions, the database volume, the closed network, the absence of secret values in the sample file and the Nginx proxy. Twelve of them cover hardening: image versions without the `latest` tag, no passwords in images, closed ports and networks, dropped container rights and the Nginx headers. The server is covered by 137 tests, including two tests of the `/health` route. The launch is described in `README.md`. Repository branch: 28.
 
 ## Conclusion
 
@@ -296,8 +296,14 @@ server {
   add_header Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'" always;
 
   # Reverse proxy: /api/health becomes /health on the backend service, found by its name in the compose network.
+  # A plain proxy_pass with a host name is resolved once at start, so a recreated backend container (new address) would give 502
+  # until Nginx is reloaded. With a variable Nginx asks the Docker DNS (127.0.0.11) again every 10 seconds.
+  # A variable also stops Nginx from cutting the /api/ prefix itself, so the rewrite does it.
   location /api/ {
-    proxy_pass http://backend:3000/;
+    resolver 127.0.0.11 valid=10s;
+    set $backend_upstream http://backend:3000;
+    rewrite ^/api/(.*)$ /$1 break;
+    proxy_pass $backend_upstream;
     limit_req zone=api burst=20 nodelay;
     proxy_set_header Host $host;
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;

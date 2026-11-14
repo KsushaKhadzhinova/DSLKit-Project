@@ -75,7 +75,7 @@
 
 ### 3.6 Проверка работы
 
-Структура файлов Docker проверена двадцатью одним автоматическим тестом, которые работают без запущенного Docker. Они проверяют двухэтапную сборку клиента, установку только рабочих зависимостей, пользователя `node`, условия `service_healthy`, том базы, закрытую сеть, отсутствие значений секретов в образце и прокси Nginx. Двенадцать из них проверяют защиту: версии образов без тега `latest`, отсутствие паролей в образах, закрытые порты и сети, снятые права контейнеров и заголовки Nginx. Сервер проверен 137 тестами, включая два теста маршрута `/health`. Запуск описан в `README.md`. Ветка репозитория: 28.
+Структура файлов Docker проверена двадцатью двумя автоматическими тестами, которые работают без запущенного Docker. Они проверяют двухэтапную сборку клиента, установку только рабочих зависимостей, пользователя `node`, условия `service_healthy`, том базы, закрытую сеть, отсутствие значений секретов в образце и прокси Nginx. Двенадцать из них проверяют защиту: версии образов без тега `latest`, отсутствие паролей в образах, закрытые порты и сети, снятые права контейнеров и заголовки Nginx. Сервер проверен 137 тестами, включая два теста маршрута `/health`. Запуск описан в `README.md`. Ветка репозитория: 28.
 
 ## Заключение
 
@@ -296,8 +296,14 @@ server {
   add_header Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'" always;
 
   # Reverse proxy: /api/health becomes /health on the backend service, found by its name in the compose network.
+  # A plain proxy_pass with a host name is resolved once at start, so a recreated backend container (new address) would give 502
+  # until Nginx is reloaded. With a variable Nginx asks the Docker DNS (127.0.0.11) again every 10 seconds.
+  # A variable also stops Nginx from cutting the /api/ prefix itself, so the rewrite does it.
   location /api/ {
-    proxy_pass http://backend:3000/;
+    resolver 127.0.0.11 valid=10s;
+    set $backend_upstream http://backend:3000;
+    rewrite ^/api/(.*)$ /$1 break;
+    proxy_pass $backend_upstream;
     limit_req zone=api burst=20 nodelay;
     proxy_set_header Host $host;
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;

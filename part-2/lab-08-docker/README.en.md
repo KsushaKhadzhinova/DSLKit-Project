@@ -45,7 +45,8 @@ If Docker Hub is unavailable, put `REGISTRY=mirror.gcr.io/` (with the trailing s
 ## 4 Checks
 
 ```bash
-npm test                 # 6 checks of the Docker files (no daemon needed) and the report checks
+npm test                 # 22 checks of the Docker files (no daemon needed) and the report checks
+npm run smoke            # smoke run: docker compose up -d --build --wait, GET /api/health through Nginx, docker compose down (needs a running Docker and .env)
 npm run shots            # screenshots of figures 1–4 in figures/ (needs the running stack, Chrome or Edge, npm ci in ../lab-05-react-api)
 cd ../lab-03-auth && npm test   # 137 server tests, including /health
 ```
