@@ -1,0 +1,60 @@
+# Render Blueprint for the DSLKit course project (branch course-app).
+# Deploy: Render dashboard, New, Blueprint, pick this repository and branch. Render reads this file from the repository root.
+# No secret value is stored here: every variable with "sync: false" is typed by the owner in the Render dashboard.
+# The commands match course-project/app/server/package.json and the CMD of docker/backend/Dockerfile.
+databases:
+  - name: dslkit-db
+    databaseName: dslkit
+    user: dslkit
+    plan: free
+    ipAllowList: [] # only services of this Render account reach the database, no access from the internet
+
+services:
+  # Express API (Sequelize, JWT). Tables are created by the migrations at every start, the seed is idempotent.
+  - type: web
+    name: dslkit-api
+    runtime: node
+    rootDir: course-project/app/server
+    plan: free
+    buildCommand: npm ci --omit=dev
+    startCommand: npx sequelize-cli db:migrate && npx sequelize-cli db:seed:all && node server.js
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_VERSION
+        value: '22'
+      - key: DATABASE_URL
+        fromDatabase:
+          name: dslkit-db
+          property: connectionString
+      # Not NODE_ENV=production: in production the server demands DATABASE_SSL=true with a verified certificate chain (DATABASE_SSL_CA),
+      # which the internal Render connection does not need. See the README section on deployment.
+      - key: JWT_SECRET # at least 32 random characters
+        sync: false
+      - key: JWT_EXPIRES_IN
+        value: 1h
+      - key: CORS_ORIGIN # address of the static site below, for example https://dslkit-web.onrender.com
+        sync: false
+      - key: ADMIN_EMAIL # first administrator, created by the seed; leave empty to skip
+        sync: false
+      - key: ADMIN_PASSWORD # 10 characters or more
+        sync: false
+      - key: DEMO_USER_PASSWORD # optional: demo users and diagrams; leave empty to skip
+        sync: false
+      - key: TRUST_PROXY # one reverse proxy (the Render load balancer) stands in front of the server
+        value: '1'
+
+  # React client (Vite). VITE_API_URL is baked into the bundle at build time.
+  - type: web
+    name: dslkit-web
+    runtime: static
+    rootDir: course-project/app/client
+    buildCommand: npm ci && npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: VITE_API_URL # address of dslkit-api, for example https://dslkit-api.onrender.com
+        sync: false
+    routes:
+      # Single-page application: unknown paths return index.html (React Router).
+      - type: rewrite
+        source: /*
+        destination: /index.html
