@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 400" font-family="Arial, sans-serif" font-size="13">
+  <rect width="720" height="400" fill="#ffffff"/>
+  <rect x="40" y="20" width="140" height="36" rx="6" fill="#e8eef9" stroke="#2b4a8b"/>
+  <text x="110" y="43" text-anchor="middle">Client A (alice)</text>
+  <rect x="290" y="20" width="140" height="36" rx="6" fill="#e8f5e9" stroke="#2e7d32"/>
+  <text x="360" y="43" text-anchor="middle">Server (Socket.IO)</text>
+  <rect x="540" y="20" width="140" height="36" rx="6" fill="#e8eef9" stroke="#2b4a8b"/>
+  <text x="610" y="43" text-anchor="middle">Client B (bob)</text>
+  <g stroke="#999" stroke-dasharray="4 4"><line x1="110" y1="56" x2="110" y2="390"/><line x1="360" y1="56" x2="360" y2="390"/><line x1="610" y1="56" x2="610" y2="390"/></g>
+  <g stroke="#222" fill="#222">
+    <line x1="110" y1="90" x2="354" y2="90"/><polygon points="360,90 350,85 350,95"/>
+    <line x1="354" y1="120" x2="116" y2="120"/><polygon points="110,120 120,115 120,125"/>
+    <line x1="366" y1="150" x2="604" y2="150"/><polygon points="610,150 600,145 600,155"/>
+    <line x1="110" y1="190" x2="354" y2="190"/><polygon points="360,190 350,185 350,195"/>
+    <line x1="366" y1="220" x2="604" y2="220"/><polygon points="610,220 600,215 600,225"/>
+    <line x1="354" y1="250" x2="116" y2="250"/><polygon points="110,250 120,245 120,255"/>
+    <line x1="610" y1="290" x2="366" y2="290"/><polygon points="360,290 370,285 370,295"/>
+    <line x1="354" y1="320" x2="116" y2="320"/><polygon points="110,320 120,315 120,325"/>
+    <line x1="610" y1="355" x2="366" y2="355"/><polygon points="360,355 370,350 370,360"/>
+  </g>
+  <g fill="#222">
+    <text x="120" y="84">connect, auth: username</text>
+    <text x="120" y="114">welcome</text>
+    <text x="380" y="144">user:online (to the others)</text>
+    <text x="120" y="184">room:join diagram-1</text>
+    <text x="380" y="214">room:joined, presence:update</text>
+    <text x="120" y="244">ack: history and users</text>
+    <text x="380" y="284">chat:message (from bob)</text>
+    <text x="120" y="314">chat:message (to the room)</text>
+    <text x="380" y="349">disconnect, then room:left and user:offline</text>
+  </g>
+</svg>
