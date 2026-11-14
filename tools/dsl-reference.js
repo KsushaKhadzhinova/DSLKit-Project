@@ -1,6 +1,6 @@
 import { writeFileSync } from 'node:fs';
 import { GRAMMAR, listNotations } from './render-api.js';
-import { TEMPLATES } from '../site/js/notations/index.js';
+import { TEMPLATES, TEMPLATES_RU } from '../site/js/notations/index.js';
 
 const TEXT = {
   ru: {
@@ -22,6 +22,7 @@ const TEXT = {
     edges: 'Связи',
     formats: 'Экспорт',
     example: 'Пример',
+    exampleOther: 'Тот же пример на английском',
     none: 'пишутся в коде, см. пример',
     imports: 'Импорт файлов и картинок',
     importsIntro:
@@ -57,6 +58,7 @@ const TEXT = {
     edges: 'Links',
     formats: 'Export',
     example: 'Example',
+    exampleOther: 'The same example in Russian',
     none: 'written in the code, see the example',
     imports: 'Importing files and pictures',
     importsIntro:
@@ -140,7 +142,8 @@ export const buildReference = (lang = 'ru') => {
       '',
     );
     const key = item.id;
-    if (TEMPLATES[key]) lines.push(`${t.example}:`, '', '```', TEMPLATES[key], '```', '');
+    const [own, other] = lang === 'en' ? [TEMPLATES, TEMPLATES_RU] : [TEMPLATES_RU, TEMPLATES];
+    if (own[key]) lines.push(`${t.example}:`, '', '```', own[key], '```', '', `${t.exampleOther}:`, '', '```', other[key], '```', '');
   });
   return `${lines.join('\n').trimEnd()}\n`;
 };

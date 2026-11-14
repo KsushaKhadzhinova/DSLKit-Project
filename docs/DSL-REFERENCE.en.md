@@ -87,6 +87,31 @@ arrow A1.output -> A2.input
 arrow A2.output -> A3.input
 ```
 
+The same example in Russian:
+
+```
+diagram idef0 "Обработка заказа"
+box A1 "Принять заказ" {
+ input: Заказ
+ control: Политика продаж
+ output: Принятый заказ
+ mechanism: Менеджер
+}
+box A2 "Проверить склад" {
+ input: Принятый заказ
+ control: Правила склада
+ output: Зарезервированный товар
+}
+box A3 "Отгрузить товар" {
+ input: Зарезервированный товар
+ control: Правила доставки
+ output: Отправление
+ mechanism: Курьер
+}
+arrow A1.output -> A2.input
+arrow A2.output -> A3.input
+```
+
 ### IDEF1 — information modelling
 
 - Header: `diagram idef1`
@@ -107,6 +132,21 @@ entity Order {
   total: decimal
 }
 relationship Customer 1:N Order "places"
+```
+
+The same example in Russian:
+
+```
+diagram idef1 "Информация о заказах"
+entity Клиент {
+  id: int pk
+  имя: string
+}
+entity Заказ {
+  id: int pk
+  сумма: decimal
+}
+relationship Клиент 1:N Заказ "оформляет"
 ```
 
 ### IDEF1X — data modelling
@@ -149,6 +189,39 @@ identifying Order -> OrderLine "contains" P
 category Account complete kind: Savings, Checking
 ```
 
+The same example in Russian:
+
+```
+diagram idef1x "Заказы"
+entity Клиент {
+  код_клиента: int pk
+  имя: string
+}
+entity Заказ {
+  код_заказа: int pk
+  код_клиента: int fk
+  оформлен: date
+}
+entity ПозицияЗаказа dependent {
+  код_заказа: int pk fk
+  номер_позиции: int pk
+  количество: int
+}
+entity Счёт {
+  код_счёта: int pk
+  вид: string
+}
+entity Сберегательный {
+  код_счёта: int pk fk
+}
+entity Расчётный {
+  код_счёта: int pk fk
+}
+nonidentifying Клиент -> Заказ "оформляет"
+identifying Заказ -> ПозицияЗаказа "содержит" P
+category Счёт complete вид: Сберегательный, Расчётный
+```
+
 ### IDEF3 — process flows
 
 - Header: `diagram idef3`
@@ -167,6 +240,26 @@ uob u3 "Reject order"
 xor j2
 uob u4 "Close order"
 referent r1 "Stock policy"
+precedence u1 -> j1
+precedence j1 -> u2
+precedence j1 -> u3
+precedence u2 -> j2
+precedence u3 -> j2
+precedence j2 -> u4
+relational r1 -> u2
+```
+
+The same example in Russian:
+
+```
+diagram idef3 "Выполнение заказа"
+uob u1 "Принять заказ"
+xor j1
+uob u2 "Проверить склад"
+uob u3 "Отклонить заказ"
+xor j2
+uob u4 "Закрыть заказ"
+referent r1 "Политика склада"
 precedence u1 -> j1
 precedence j1 -> u2
 precedence j1 -> u3
@@ -201,6 +294,24 @@ Car --|> Vehicle
 Car "1" *-- "1" Engine : has
 ```
 
+The same example in Russian:
+
+```
+diagram idef4 "Транспорт"
+class Транспорт {
+  - скорость: int
+  + двигаться(): void
+}
+class Автомобиль {
+  + двери: int
+}
+class Двигатель {
+  + мощность: int
+}
+Автомобиль --|> Транспорт
+Автомобиль "1" *-- "1" Двигатель : имеет
+```
+
 ### IDEF5 — ontology description
 
 - Header: `diagram idef5`
@@ -221,6 +332,21 @@ isa Manager -> Employee
 partof Employee -> Team
 instanceof alice -> Manager
 relation Manager -> hire "performs"
+```
+
+The same example in Russian:
+
+```
+diagram idef5 "Организация"
+kind Employee "Сотрудник"
+kind Manager "Руководитель"
+kind Team "Команда"
+individual alice "Алиса"
+process hire "Найм"
+isa Manager -> Employee
+partof Employee -> Team
+instanceof alice -> Manager
+relation Manager -> hire "выполняет"
 ```
 
 ### DFD — data flow diagram
@@ -245,6 +371,23 @@ flow D1 -> 2 "order to pay"
 flow 2 -> Bank "payment request"
 flow Bank -> 2 "payment result"
 flow 2 -> Customer "receipt"
+```
+
+The same example in Russian:
+
+```
+diagram dfd "Заказ в интернет-магазине"
+entity Клиент
+entity Bank "Банк платежей"
+process 1 "Проверить заказ"
+process 2 "Принять оплату"
+store D1 "Заказы"
+flow Клиент -> 1 "заказ"
+flow 1 -> D1 "проверенный заказ"
+flow D1 -> 2 "заказ к оплате"
+flow 2 -> Bank "запрос платежа"
+flow Bank -> 2 "результат платежа"
+flow 2 -> Клиент "чек"
 ```
 
 ### ERD — entity-relationship diagram
@@ -275,6 +418,27 @@ relationship Customer 1:N Order "places"
 relationship Order N:M Product "contains"
 ```
 
+The same example in Russian:
+
+```
+diagram erd "Магазин"
+entity Клиент {
+  id: int pk
+  почта: string unique
+}
+entity Заказ {
+  id: int pk
+  код_клиента: int fk -> Клиент
+  сумма: decimal
+}
+entity Товар {
+  id: int pk
+  название: string
+}
+relationship Клиент 1:N Заказ "оформляет"
+relationship Заказ N:M Товар "содержит"
+```
+
 ### BPMN — business processes
 
 - Header: `diagram bpmn`
@@ -302,6 +466,26 @@ flow t3 -> g2
 flow g2 -> e
 ```
 
+The same example in Russian:
+
+```
+diagram bpmn "Обработка заказа"
+start s "Заказ получен"
+task t1 "Проверить заказ"
+exclusive g1 "Товар в наличии?"
+task t2 "Отгрузить товар"
+task t3 "Уведомить клиента"
+exclusive g2
+end e "Готово"
+flow s -> t1
+flow t1 -> g1
+flow g1 -> t2 "да"
+flow g1 -> t3 "нет"
+flow t2 -> g2
+flow t3 -> g2
+flow g2 -> e
+```
+
 ### Petri nets
 
 - Header: `diagram petri`
@@ -317,6 +501,20 @@ place free "Free slots" tokens=2
 place used "Used slots"
 transition put "Produce"
 transition take "Consume"
+arc free -> put
+arc put -> used weight=2
+arc used -> take
+arc take -> free
+```
+
+The same example in Russian:
+
+```
+diagram petri "Производитель и потребитель"
+place free "Свободные места" tokens=2
+place used "Занятые места"
+transition put "Произвести"
+transition take "Потребить"
 arc free -> put
 arc put -> used weight=2
 arc used -> take
@@ -350,6 +548,26 @@ flow d -> out "No"
 flow out -> e
 ```
 
+The same example in Russian:
+
+```
+diagram gost "Сумма чисел"
+start s "Начало"
+io in "Ввод n"
+preparation p "i = 1, sum = 0"
+decision d "i <= n?"
+process a "sum = sum + i, i = i + 1"
+io out "Вывод sum"
+end e "Конец"
+flow s -> in
+flow in -> p
+flow p -> d
+flow d -> a "Да"
+flow a -> d
+flow d -> out "Нет"
+flow out -> e
+```
+
 ### Graphs
 
 - Header: `diagram graph`
@@ -361,6 +579,23 @@ Example:
 
 ```
 diagram graph "Roads"
+mode undirected
+vertex A
+vertex B
+vertex C
+vertex D
+edge A -- B weight=4
+edge A -- C weight=2
+edge B -- C weight=1
+edge B -- D weight=5
+edge C -- D weight=8
+path A -> D
+```
+
+The same example in Russian:
+
+```
+diagram graph "Дороги"
 mode undirected
 vertex A
 vertex B
@@ -390,6 +625,22 @@ task compile "Compile" duration=5
 task test "Test" duration=8
 task lint "Lint" duration=3
 task package "Package" duration=2
+depend fetch -> compile
+depend fetch -> lint
+depend compile -> test
+depend lint -> package
+depend test -> package
+```
+
+The same example in Russian:
+
+```
+diagram dag "Конвейер сборки"
+task fetch "Загрузка" duration=2
+task compile "Компиляция" duration=5
+task test "Тесты" duration=8
+task lint "Линтер" duration=3
+task package "Упаковка" duration=2
 depend fetch -> compile
 depend fetch -> lint
 depend compile -> test
@@ -431,6 +682,33 @@ Customer "1" --> "0..*" Order : places
 Order "1" *-- "1..*" Item : contains
 ```
 
+The same example in Russian:
+
+```
+diagram uml class "Магазин"
+interface Оплачиваемый {
+  + оплатить(сумма: Деньги): Чек
+}
+abstract class Человек {
+  - имя: String
+  + получитьИмя(): String
+}
+class Покупатель {
+  - почта: String
+  + оформитьЗаказ(товар: Товар): Заказ
+}
+class Заказ {
+  + итого(): Деньги
+}
+class Товар {
+  + цена: Деньги
+}
+Покупатель --|> Человек
+Заказ ..|> Оплачиваемый
+Покупатель "1" --> "0..*" Заказ : оформляет
+Заказ "1" *-- "1..*" Товар : содержит
+```
+
 ### UML — object diagram
 
 - Header: `diagram uml object`
@@ -449,6 +727,17 @@ link c1 -> o1 "places"
 link o1 -> i1 "contains"
 ```
 
+The same example in Russian:
+
+```
+diagram uml object "Снимок заказа"
+object c1 "алиса : Покупатель"
+object o1 "заказ42 : Заказ"
+object i1 "книга : Товар"
+link c1 -> o1 "оформляет"
+link o1 -> i1 "содержит"
+```
+
 ### UML — component diagram
 
 - Header: `diagram uml component`
@@ -463,6 +752,21 @@ diagram uml component "Shop services"
 component web "Web UI"
 component api "Order API"
 component db "Database driver"
+interface IOrder
+interface ISql
+provide api -> IOrder
+require web -> IOrder
+require api -> ISql
+provide db -> ISql
+```
+
+The same example in Russian:
+
+```
+diagram uml component "Сервисы магазина"
+component web "Веб-интерфейс"
+component api "API заказов"
+component db "Драйвер базы данных"
 interface IOrder
 interface ISql
 provide api -> IOrder
@@ -490,6 +794,18 @@ port p2 "axle" of=wheel
 connect p1 -> p2 "torque"
 ```
 
+The same example in Russian:
+
+```
+diagram uml composite "Автомобиль"
+classifier car "Автомобиль"
+part engine "Двигатель" in=car
+part wheel "Колесо" in=car
+port p1 "привод" of=engine
+port p2 "ось" of=wheel
+connect p1 -> p2 "крутящий момент"
+```
+
 ### UML — deployment diagram
 
 - Header: `diagram uml deployment`
@@ -504,6 +820,21 @@ diagram uml deployment "Shop deployment"
 node server "Application server"
 environment tomcat "Tomcat"
 device phone "Mobile phone"
+artifact app "shop.war"
+artifact mobile "shop.apk"
+deploy app -> tomcat
+deploy mobile -> phone
+communicate tomcat -> phone "HTTPS"
+communicate server -> tomcat
+```
+
+The same example in Russian:
+
+```
+diagram uml deployment "Развёртывание магазина"
+node server "Сервер приложений"
+environment tomcat "Tomcat"
+device phone "Мобильный телефон"
 artifact app "shop.war"
 artifact mobile "shop.apk"
 deploy app -> tomcat
@@ -533,6 +864,20 @@ contains domain -> order
 import ui -> domain
 ```
 
+The same example in Russian:
+
+```
+diagram uml package "Модули магазина"
+package shop "магазин"
+package ui "интерфейс"
+package domain "предметная область"
+element order "Заказ"
+contains shop -> ui
+contains shop -> domain
+contains domain -> order
+import ui -> domain
+```
+
 ### UML — profile diagram
 
 - Header: `diagram uml profile`
@@ -550,6 +895,18 @@ stereotype Entity
 stereotype Service
 extend Entity -> Class
 extend Service -> Class
+```
+
+The same example in Russian:
+
+```
+diagram uml profile "Профиль магазина"
+profile shopProfile "Магазин"
+metaclass Class
+stereotype Сущность
+stereotype Сервис
+extend Сущность -> Class
+extend Сервис -> Class
 ```
 
 ### UML — use case diagram
@@ -572,6 +929,23 @@ usecase gift "Add gift wrap"
 link Customer -> browse
 link Customer -> order
 link Clerk -> order
+include order -> pay
+extend gift -> order
+```
+
+The same example in Russian:
+
+```
+diagram uml usecase "Интернет-магазин"
+actor Покупатель
+actor Продавец
+usecase browse "Просмотреть каталог"
+usecase order "Оформить заказ"
+usecase pay "Оплатить"
+usecase gift "Добавить подарочную упаковку"
+link Покупатель -> browse
+link Покупатель -> order
+link Продавец -> order
 include order -> pay
 extend gift -> order
 ```
@@ -605,6 +979,28 @@ flow m -> a4
 flow a4 -> e
 ```
 
+The same example in Russian:
+
+```
+diagram uml activity "Ход заказа"
+start s
+action a1 "Принять заказ"
+decision d "Товар в наличии?"
+action a2 "Упаковать"
+action a3 "Заказать у поставщика"
+merge m
+action a4 "Отправить"
+end e
+flow s -> a1
+flow a1 -> d
+flow d -> a2 "да"
+flow d -> a3 "нет"
+flow a2 -> m
+flow a3 -> m
+flow m -> a4
+flow a4 -> e
+```
+
 ### UML — state machine diagram
 
 - Header: `diagram uml state`
@@ -628,6 +1024,22 @@ transition paused -> running "resume"
 transition running -> f "stop"
 ```
 
+The same example in Russian:
+
+```
+diagram uml state "Плеер"
+initial i
+state idle "Ожидание"
+state running "Воспроизведение"
+state paused "Пауза"
+final f
+transition i -> idle
+transition idle -> running "старт"
+transition running -> paused "пауза"
+transition paused -> running "продолжить"
+transition running -> f "стоп"
+```
+
 ### UML — sequence diagram
 
 - Header: `diagram uml sequence`
@@ -649,6 +1061,20 @@ Shop ->> Customer : confirmation email
 Shop --> Customer : order accepted
 ```
 
+The same example in Russian:
+
+```
+diagram uml sequence "Оформление заказа"
+actor Покупатель
+participant Магазин "Интернет-магазин"
+participant Банк
+Покупатель -> Магазин : оформить заказ
+Магазин -> Банк : списать с карты
+Банк --> Магазин : одобрено
+Магазин ->> Покупатель : письмо с подтверждением
+Магазин --> Покупатель : заказ принят
+```
+
 ### UML — communication diagram
 
 - Header: `diagram uml communication`
@@ -666,6 +1092,18 @@ object b "bank : Bank"
 message c -> s "1: place order"
 message s -> b "1.1: charge card"
 message s -> c "2: confirm"
+```
+
+The same example in Russian:
+
+```
+diagram uml communication "Оформление заказа"
+object c "покупатель : Покупатель"
+object s "магазин : Магазин"
+object b "банк : Банк"
+message c -> s "1: оформить заказ"
+message s -> b "1.1: списать с карты"
+message s -> c "2: подтвердить"
 ```
 
 ### UML — timing diagram
@@ -688,6 +1126,21 @@ at 30 car Moving
 at 60 light Yellow
 at 70 light Red
 at 80 car Stopped
+```
+
+The same example in Russian:
+
+```
+diagram uml timing "Перекрёсток"
+lifeline light "Светофор" states Красный, Зелёный, Жёлтый
+lifeline car "Автомобиль" states Стоит, Едет
+at 0 light Красный
+at 0 car Стоит
+at 30 light Зелёный
+at 30 car Едет
+at 60 light Жёлтый
+at 70 light Красный
+at 80 car Стоит
 ```
 
 ### UML — interaction overview diagram
@@ -717,6 +1170,26 @@ flow i3 -> m
 flow m -> e
 ```
 
+The same example in Russian:
+
+```
+diagram uml overview "Обзор оформления заказа"
+start s
+interaction i1 "Вход"
+decision d "Данные верны?"
+interaction i2 "Оформление"
+interaction i3 "Показать ошибку"
+merge m
+end e
+flow s -> i1
+flow i1 -> d
+flow d -> i2 "да"
+flow d -> i3 "нет"
+flow i2 -> m
+flow i3 -> m
+flow m -> e
+```
+
 ### Mind map
 
 - Header: `diagram mindmap`
@@ -734,6 +1207,27 @@ topic client "Client"
 topic ops "Operations"
 topic api "REST API"
 topic auth "Authentication"
+topic react "React"
+topic docker "Docker"
+branch r -> server
+branch r -> client
+branch r -> ops
+branch server -> api
+branch server -> auth
+branch client -> react
+branch ops -> docker
+```
+
+The same example in Russian:
+
+```
+diagram mindmap "План обучения"
+root r "Курс DSLKit"
+topic server "Сервер"
+topic client "Клиент"
+topic ops "Эксплуатация"
+topic api "REST API"
+topic auth "Аутентификация"
 topic react "React"
 topic docker "Docker"
 branch r -> server
@@ -769,6 +1263,23 @@ leads lead -> dev1
 leads qa -> tester
 ```
 
+The same example in Russian:
+
+```
+diagram orgchart "Команда проекта"
+person head "Руководитель проекта"
+unit dev "Разработка"
+unit qa "Качество"
+person lead "Технический лидер"
+person dev1 "Разработчик"
+person tester "Тестировщик"
+leads head -> dev
+leads head -> qa
+leads dev -> lead
+leads lead -> dev1
+leads qa -> tester
+```
+
 ### C4 — context and containers
 
 - Header: `diagram c4`
@@ -791,6 +1302,21 @@ uses dslkit -> api "calls"
 uses api -> db "reads and writes"
 ```
 
+The same example in Russian:
+
+```
+diagram c4 "Контекст DSLKit"
+person user "Автор диаграмм"
+system dslkit "DSLKit"
+external kroki "Сервис отрисовки Kroki"
+container api "REST API"
+database db "PostgreSQL"
+uses user -> dslkit "пишет диаграммы"
+uses dslkit -> kroki "просит нарисовать"
+uses dslkit -> api "вызывает"
+uses api -> db "читает и пишет"
+```
+
 ### Network diagram
 
 - Header: `diagram network`
@@ -809,6 +1335,25 @@ server web "Web server"
 database db "Database"
 client c1 "Laptop"
 client c2 "Phone"
+link net -> r1
+link r1 -> sw
+link sw -> web
+link web -> db
+link sw -> c1
+link sw -> c2
+```
+
+The same example in Russian:
+
+```
+diagram network "Сеть офиса"
+cloud net "Интернет"
+router r1 "Маршрутизатор"
+switch sw "Коммутатор"
+server web "Веб-сервер"
+database db "База данных"
+client c1 "Ноутбук"
+client c2 "Телефон"
 link net -> r1
 link r1 -> sw
 link sw -> web
@@ -839,6 +1384,21 @@ answer q2 -> pg "yes"
 answer q2 -> mongo "no"
 ```
 
+The same example in Russian:
+
+```
+diagram decision "Выбор базы данных"
+question q1 "Много пользователей одновременно?"
+question q2 "Строгие связи между данными?"
+outcome sqlite "SQLite"
+outcome pg "PostgreSQL"
+outcome mongo "MongoDB"
+answer q1 -> q2 "да"
+answer q1 -> sqlite "нет"
+answer q2 -> pg "да"
+answer q2 -> mongo "нет"
+```
+
 ### eEPC — event-driven process chain
 
 - Header: `diagram epc`
@@ -859,6 +1419,29 @@ function f2 "Ship goods"
 function f3 "Reject order"
 event e4 "Goods shipped"
 event e5 "Order rejected"
+flow e1 -> f1
+flow f1 -> g1
+flow g1 -> e2
+flow g1 -> e3
+flow e2 -> f2
+flow e3 -> f3
+flow f2 -> e4
+flow f3 -> e5
+```
+
+The same example in Russian:
+
+```
+diagram epc "Обработка заказа"
+event e1 "Заказ получен"
+function f1 "Проверить заказ"
+xor g1 "XOR"
+event e2 "Заказ верен"
+event e3 "Заказ неверен"
+function f2 "Отгрузить товар"
+function f3 "Отклонить заказ"
+event e4 "Товар отгружен"
+event e5 "Заказ отклонён"
 flow e1 -> f1
 flow f1 -> g1
 flow g1 -> e2

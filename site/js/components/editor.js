@@ -1,11 +1,14 @@
-import { NOTATIONS, TEMPLATES } from '../notations/index.js';
+import { NOTATIONS, TEMPLATE_LANGS, templateFor } from '../notations/index.js';
 import { ui } from '../notations/messages.js';
-import { showCode } from './code-lines.js';
+import { readCode, showCode } from './code-lines.js';
 import { initSourceAutosave } from './source-autosave.js';
 import { pageLanguage, pick } from '../utils/lang.js';
 
 const TEXTS = {
   closeFile: { ru: 'Закрыть файл', en: 'Close the file' },
+  templateLang: { ru: 'Язык шаблона', en: 'Template language' },
+  templateRu: { ru: 'Шаблон: русский', en: 'Template: Russian' },
+  templateEn: { ru: 'Шаблон: English', en: 'Template: English' },
   closeAsk: {
     ru: 'Закрыть файл {name}? Несохранённые изменения будут потеряны, если не сохранить.',
     en: 'Close the file {name}? Unsaved changes are lost unless you save.',
@@ -175,9 +178,15 @@ const initRun = ({ page, root }) => {
 const initTemplates = ({ page, root }) => {
   const lang = pageLanguage(root);
   const codeLines = page.querySelector('.code__lines');
+  // The template comes in two languages: the language of the page is the first choice, the select next to the list changes it.
+  const asked = new root.defaultView.URLSearchParams(root.defaultView.location.search).get('tl');
+  let templateLang = TEMPLATE_LANGS.includes(asked) ? asked : lang;
+  let loaded = null;
   const loadTemplate = (key) => {
-    if (!codeLines || !Object.hasOwn(TEMPLATES, key)) return false;
-    showCode(root, codeLines, TEMPLATES[key]);
+    const source = templateFor(key, templateLang);
+    if (!codeLines || source === undefined) return false;
+    showCode(root, codeLines, source);
+    loaded = { key, source };
     announceRun(page, root);
     return true;
   };
@@ -218,6 +227,26 @@ const initTemplates = ({ page, root }) => {
   page.querySelectorAll('[data-template]').forEach((button) => button.addEventListener('click', () => loadTemplate(button.dataset.template)));
   const picker = page.querySelector('[data-notation-select]');
   if (picker) {
+    const choice = root.createElement('select');
+    choice.className = 'settings-row__select templates__select templates__lang';
+    choice.dataset.templateLang = '';
+    choice.setAttribute('aria-label', pick(TEXTS.templateLang, lang));
+    [
+      ['ru', TEXTS.templateRu],
+      ['en', TEXTS.templateEn],
+    ].forEach(([value, text]) => {
+      const option = root.createElement('option');
+      option.value = value;
+      option.textContent = pick(text, lang);
+      choice.append(option);
+    });
+    choice.value = templateLang;
+    choice.addEventListener('change', () => {
+      templateLang = choice.value;
+      // The template that was loaded and not edited since is shown again in the new language; the text of the user is never replaced.
+      if (loaded && readCode(codeLines) === loaded.source) loadTemplate(loaded.key);
+    });
+    picker.before(choice);
     picker.setAttribute('aria-label', ui('template', {}, lang));
     picker.replaceChildren(
       ...Object.entries(NOTATIONS).map(([key, notation]) => {

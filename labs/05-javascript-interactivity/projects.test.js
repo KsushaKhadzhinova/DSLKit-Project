@@ -5,7 +5,7 @@ import { JSDOM } from 'jsdom';
 import { readCode, showCode } from '../../site/js/components/code-lines.js';
 import { initDashboard } from '../../site/js/components/dashboard.js';
 import { PROJECT_AUTOSAVE_MS, initEditorProjects } from '../../site/js/components/editor-projects.js';
-import { TEMPLATES } from '../../site/js/notations/index.js';
+import { TEMPLATES, TEMPLATES_RU } from '../../site/js/notations/index.js';
 import { createProjectStore, titleOf } from '../../site/js/storage/projects.js';
 import { createMemoryBackend, createStorage } from '../../site/js/utils/storage.js';
 
@@ -82,15 +82,22 @@ test('a page without the editor returns null', () => {
 });
 
 test('a new diagram starts from a valid starter and a template in the address picks the starter', () => {
-  assert.equal(open().code(), TEMPLATES.idef0);
-  assert.equal(open({ search: '?template=erd' }).code(), TEMPLATES.erd);
-  assert.equal(open({ search: '?template=unknown' }).code(), TEMPLATES.idef0);
+  assert.equal(open().code(), TEMPLATES_RU.idef0);
+  assert.equal(open({ search: '?template=erd' }).code(), TEMPLATES_RU.erd);
+  assert.equal(open({ search: '?template=unknown' }).code(), TEMPLATES_RU.idef0);
+});
+
+test('?tl= picks the language of the starter, a wrong value is the language of the page', () => {
+  assert.equal(open({ search: '?template=erd&tl=en' }).code(), TEMPLATES.erd);
+  assert.equal(open({ search: '?template=erd&tl=ru', lang: 'en' }).code(), TEMPLATES_RU.erd);
+  assert.equal(open({ search: '?template=erd&tl=xx' }).code(), TEMPLATES_RU.erd);
+  assert.equal(open({ search: '?template=erd&tl=xx', lang: 'en' }).code(), TEMPLATES.erd);
 });
 
 test('?template=__proto__ (or constructor, toString) cannot reach an inherited property and picks the default starter instead', () => {
   for (const key of ['__proto__', 'constructor', 'toString', 'hasOwnProperty']) {
     const opened = open({ search: `?template=${key}` });
-    assert.equal(opened.code(), TEMPLATES.idef0);
+    assert.equal(opened.code(), TEMPLATES_RU.idef0);
     assert.equal(opened.api.current(), null);
   }
 });
@@ -99,11 +106,11 @@ test('Save creates a project, names the file and the address, and Save again upd
   const { dom, document, api, code, save, storage } = open({ search: '?template=erd' });
   save();
   const [project] = createProjectStore({ storage }).list();
-  assert.equal(project.title, 'Shop');
+  assert.equal(project.title, 'Магазин');
   assert.equal(project.notation, 'erd');
   assert.equal(dom.window.location.search, `?p=${project.id}`);
-  assert.equal(document.querySelector('.editor-topbar__title').textContent, 'shop.dsl');
-  assert.match(document.querySelector('.editor-status__saved').textContent, /Сохранено в «Мои проекты»: Shop/);
+  assert.equal(document.querySelector('.editor-topbar__title').textContent, 'магазин.dsl');
+  assert.match(document.querySelector('.editor-status__saved').textContent, /Сохранено в «Мои проекты»: Магазин/);
   showCode(document, document.querySelector('.code__lines'), `${code()}\n// n`);
   save();
   assert.equal(createProjectStore({ storage }).list().length, 1);
@@ -126,7 +133,7 @@ test('a saved project opens from the address, an unknown one says so and opens a
   assert.equal(opened.code(), 'diagram idef0 "My one"');
   assert.equal(opened.document.querySelector('.editor-tabs__tab--active span').textContent, 'my-one.dsl');
   const missing = open({ search: '?p=none', storage });
-  assert.equal(missing.code(), TEMPLATES.idef0);
+  assert.equal(missing.code(), TEMPLATES_RU.idef0);
   assert.match(missing.document.querySelector('.editor-status__saved').textContent, /не найден/);
 });
 
@@ -305,11 +312,11 @@ test('a shared example can be copied to the saved projects and opens its own sta
   press(sample.querySelector('.project-card__menu'));
   press(sample.querySelector('[data-act="copy"]'));
   const [copy] = createProjectStore({ storage }).list();
-  assert.equal(copy.title, 'Order process');
-  assert.equal(copy.source, TEMPLATES.idef0);
+  assert.equal(copy.title, 'Обработка заказа');
+  assert.equal(copy.source, TEMPLATES_RU.idef0);
   assert.equal(visible().length, 33);
   press(document.querySelector('[data-section="mine"]'));
-  assert.deepEqual(visible(), ['Order process']);
+  assert.deepEqual(visible(), ['Обработка заказа']);
 });
 
 test('the English dashboard gets English labels, and an unknown starter falls back to IDEF0', () => {
@@ -331,7 +338,7 @@ test('a tampered href of ?template=__proto__ on a shared card cannot reach an in
   sample.querySelector('.project-card__link').setAttribute('href', 'editor.html?template=__proto__');
   press(sample.querySelector('.project-card__menu'));
   press(sample.querySelector('[data-act="copy"]'));
-  assert.equal(createProjectStore({ storage }).list()[0].source, TEMPLATES.idef0);
+  assert.equal(createProjectStore({ storage }).list()[0].source, TEMPLATES_RU.idef0);
 });
 
 test('a card without its own menu button gets one', () => {
@@ -426,7 +433,7 @@ test('an unsaved diagram is the first entry of the explorer, saving turns it int
   assert.equal(t.document.querySelector('.file-tree__item').textContent, 'Новая диаграмма (не сохранена)');
   t.save();
   assert.equal(t.document.querySelectorAll('.file-tree__item').length, 1);
-  assert.equal(t.document.querySelector('.file-tree__item--active').textContent, 'order-process.dsl');
+  assert.equal(t.document.querySelector('.file-tree__item--active').textContent, 'обработка-заказа.dsl');
   t.document.querySelector('.app-page--editor').dispatchEvent(new t.dom.window.CustomEvent('dslkit:close', { bubbles: true }));
   assert.deepEqual(went, ['dashboard.html']);
 });

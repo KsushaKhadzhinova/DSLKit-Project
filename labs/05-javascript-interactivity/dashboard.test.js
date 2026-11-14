@@ -41,7 +41,7 @@ test('a filter chip shows only projects of that notation and is saved', () => {
   const storage = memory();
   initDashboard({ root: document, storage });
   chip(document, 'erd').dispatchEvent(new window.MouseEvent('click', { bubbles: true }));
-  assert.deepEqual(titles(document), ['Shop']);
+  assert.deepEqual(titles(document), ['Магазин']);
   assert.equal(chip(document, 'erd').getAttribute('aria-pressed'), 'true');
   assert.ok(chip(document, 'erd').classList.contains('filter__chip--active'));
   assert.equal(storage.get('dashboard').filter, 'erd');
@@ -80,9 +80,9 @@ test('the search box filters by title ignoring case and shows an empty message',
   const { document } = window;
   initDashboard({ root: document, storage: memory() });
   const search = document.querySelector('.app-topbar__search-input');
-  search.value = ' ORDER process ';
+  search.value = ' ВЫПОЛНЕНИЕ заказа ';
   search.dispatchEvent(new window.Event('input', { bubbles: true }));
-  assert.deepEqual(titles(document), ['Order process']);
+  assert.deepEqual(titles(document), ['Выполнение заказа']);
   search.value = 'zzz';
   search.dispatchEvent(new window.Event('input', { bubbles: true }));
   assert.equal(titles(document).length, 0);
@@ -112,11 +112,11 @@ test('the sort select reorders the list by name and in reverse', () => {
 
 test('the saved state is restored after a reload', () => {
   const storage = memory();
-  storage.set('dashboard', { filter: 'bpmn', query: 'o', sort: 'name' });
+  storage.set('dashboard', { filter: 'bpmn', query: 'о', sort: 'name' });
   const { document } = load();
   initDashboard({ root: document, storage });
   assert.equal(titles(document).length, 1);
-  assert.equal(document.querySelector('.app-topbar__search-input').value, 'o');
+  assert.equal(document.querySelector('.app-topbar__search-input').value, 'о');
   assert.equal(document.querySelector('#project-sort').value, 'name');
   const other = memory();
   other.set('dashboard', { filter: 'uml-state', query: '', sort: 'newest' });

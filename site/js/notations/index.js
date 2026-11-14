@@ -6,6 +6,8 @@ import { erGenerators, erd, idef1, idef1x, renderEr } from './er.js';
 import { dag, graphNotation, parseGraphTheory } from './graphs.js';
 import { parseIdef0 } from './idef0.js';
 import { strictProblems } from './strict.js';
+import { TEMPLATES } from './templates.js';
+import { TEMPLATES_RU } from './templates.ru.js';
 import { renderIdef0 } from './idef0-render.js';
 import { generators as sequenceGenerators, parseSequence, render as renderSequence } from './sequence.js';
 import { activity, bpmn, dfd, gostFlow, idef3, petri, state, usecase } from './specs.js';
@@ -17,6 +19,16 @@ export { analyzeDag, analyzeGraph, dijkstra, topologicalOrder } from './graphs.j
 export { MESSAGES, formatProblem } from './messages.js';
 export { enabledTransitions, fire, initialMarking, isDeadlock } from './specs.js';
 export { KEYWORDS, TEMPLATES } from './templates.js';
+export { TEMPLATES_RU } from './templates.ru.js';
+
+// A template is offered in two languages; the language of the page is the default, the second one stays one choice away.
+export const TEMPLATE_LANGS = ['ru', 'en'];
+const BY_LANGUAGE = { ru: TEMPLATES_RU, en: TEMPLATES };
+export const templateFor = (key, lang = 'en') => {
+  // The default of the argument is English, an unknown code is the default language of the site (see normalizeLanguage).
+  const table = BY_LANGUAGE[normalizeLanguage(lang)];
+  return Object.hasOwn(table, key) ? table[key] : undefined;
+};
 
 // A graph notation also tells its node and edge keywords, the palette of the editor is built from them.
 const fromSpec = (impl) => ({ parse: impl.parse, generators: impl.generators, render: impl.render, nodes: impl.spec?.nodes, edges: impl.spec?.edges });
