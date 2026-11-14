@@ -1,5 +1,6 @@
 import { NOTATIONS, formatProblem, parseDiagram } from '../notations/index.js';
 import { declares, setNodePosition } from './node-position.js';
+import { languageIndex, pick } from './lang.js';
 
 // Names of the elements for the palette; a keyword without a name is shown as it is written in the code.
 const NAMES = {
@@ -72,25 +73,28 @@ const NAMES = {
   data: ['Данные', 'Data'],
 };
 
+const BOX = {
+  ru: 'box {id} "{id} Функция" {\n input: Вход\n control: Правило\n output: Выход\n}',
+  en: 'box {id} "{id} function" {\n input: Input\n control: Rule\n output: Output\n}',
+};
+const BOX_MECHANISM = {
+  ru: 'box {id} "{id} Функция" {\n input: Вход\n control: Правило\n output: Выход\n mechanism: Исполнитель\n}',
+  en: 'box {id} "{id} function" {\n input: Input\n control: Rule\n output: Output\n mechanism: Performer\n}',
+};
+
 // Elements of the notations whose statements are not plain `<keyword> <id> "Label"` lines.
 const OWN = {
   idef0: [
     {
       keyword: 'box',
       prefix: 'A',
-      make: (id, code, lang) =>
-        lang === 'ru'
-          ? `box ${id} "${id} Функция" {\n input: Вход\n control: Правило\n output: Выход\n}`
-          : `box ${id} "${id} function" {\n input: Input\n control: Rule\n output: Output\n}`,
+      make: (id, code, lang) => pick(BOX, lang, { id }),
     },
     {
       keyword: 'box',
       prefix: 'A',
       label: ['Блок с механизмом', 'Box with mechanism'],
-      make: (id, code, lang) =>
-        lang === 'ru'
-          ? `box ${id} "${id} Функция" {\n input: Вход\n control: Правило\n output: Выход\n mechanism: Исполнитель\n}`
-          : `box ${id} "${id} function" {\n input: Input\n control: Rule\n output: Output\n mechanism: Performer\n}`,
+      make: (id, code, lang) => pick(BOX_MECHANISM, lang, { id }),
     },
   ],
   idef1: [{ keyword: 'entity', prefix: 'E', make: (id) => `entity ${id} {\n  id: int pk\n}` }],
@@ -149,7 +153,7 @@ const nameOf = (keyword) => NAMES[keyword] ?? [keyword, keyword];
 // The elements that can be put on the board of a notation.
 // The new element is written in the language of the interface: a Russian page puts Russian names into the code.
 export const paletteFor = (notation, lang = 'en') => {
-  const at = lang === 'ru' ? 0 : 1;
+  const at = languageIndex(lang);
   const own = OWN[notation];
   if (own) return own.map((item) => ({ ...item, label: item.label ?? nameOf(item.keyword), make: (id, code) => item.make(id, code, lang) }));
   const nodes = NOTATIONS[notation]?.nodes ?? {};

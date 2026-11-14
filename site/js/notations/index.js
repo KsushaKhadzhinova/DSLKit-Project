@@ -1,4 +1,5 @@
 import { toDot, toMermaid, toPlantUml } from '../utils/dataParser.js';
+import { normalizeLanguage } from '../utils/lang.js';
 import { generators as classGenerators, parseClassModel, render as renderClass } from './class.js';
 import { parseHeader, problem, sourceLines } from './common.js';
 import { erGenerators, erd, idef1, idef1x, renderEr } from './er.js';
@@ -142,5 +143,5 @@ export const generate = (model, format) => NOTATIONS[keyOf(model)].generators[pi
 export const hasLocalRenderer = (model) => model.notation !== undefined;
 export const renderNotation = (model) => NOTATIONS[keyOf(model)].render(model);
 
-export const notationName = (model, lang) => NOTATIONS[keyOf(model)].name[lang === 'en' ? 'en' : 'ru'];
+export const notationName = (model, lang) => NOTATIONS[keyOf(model)].name[normalizeLanguage(lang)];
 export const notationShort = (model) => NOTATIONS[keyOf(model)].short;

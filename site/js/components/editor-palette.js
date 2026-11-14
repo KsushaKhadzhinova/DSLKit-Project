@@ -4,7 +4,7 @@ import { pointInDrawing } from './canvas-drag.js';
 import { parseDiagram } from '../notations/index.js';
 import { addElement, connectElements, gate, glyphFor, labelOf, linksFor, paletteFor, removeElement, renameElement } from '../utils/palette.js';
 import { setNodePosition } from '../utils/node-position.js';
-import { pageLanguage } from '../utils/lang.js';
+import { languageIndex, pageLanguage } from '../utils/lang.js';
 
 const TEXTS = {
   heading: { ru: 'Элементы', en: 'Elements' },
@@ -143,7 +143,7 @@ export const initEditorPalette = ({ root = document } = {}) => {
         const button = el('button', 'button button--quiet palette__item');
         button.type = 'button';
         button.innerHTML = icon(glyphFor(item.keyword));
-        button.append(el('span', 'palette__name', item.label[lang === 'en' ? 1 : 0]));
+        button.append(el('span', 'palette__name', item.label[languageIndex(lang)]));
         button.dataset.index = String(index);
         button.dataset.keyword = item.keyword;
         li.append(button);

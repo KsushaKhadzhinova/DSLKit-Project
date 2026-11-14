@@ -205,6 +205,9 @@ const DATA_PATTERNS = {
 };
 const isMany = (quant) => new RegExp(`^${MANY}$`, 'i').test(quant);
 
+// The words of a relation that a sentence does not name, in the language of the description.
+const RELATION = { related: { ru: 'связаны', en: 'related' }, has: { ru: 'имеет', en: 'has' } };
+
 // Entities (name -> { name, attrs }) and relations ({ from, to, card, label }), by the patterns above.
 export const parseData = (items, lang) => {
   const p = DATA_PATTERNS[lang];
@@ -232,7 +235,7 @@ export const parseData = (items, lang) => {
   items.forEach((item) => {
     let m;
     if ((m = item.match(p.list))) return (strong += 1) && splitList(m[1]).forEach(touch);
-    if ((m = item.match(p.manyToMany))) return (strong += 1) && relate(m[1], m[2], 'N:M', lang === 'ru' ? 'связаны' : 'related');
+    if ((m = item.match(p.manyToMany))) return (strong += 1) && relate(m[1], m[2], 'N:M', RELATION.related[lang]);
     if ((m = item.match(p.quant)) && isMany(m[2])) return (strong += 1) && verbs.push({ line: 'quant', m });
     if ((m = item.match(p.has) ?? item.match(p.hasVerb))) return (strong += 1) && verbs.push({ line: 'has', m });
     if ((m = item.match(p.verb))) return verbs.push({ line: 'verb', m });
@@ -241,11 +244,11 @@ export const parseData = (items, lang) => {
   });
   // The second pass: an entity named in a list may be needed before it is used, so the facts are decided when all names are known.
   verbs.forEach(({ line, m }) => {
-    if (line === 'quant') return relate(m[1], m[3], '1:N', lang === 'ru' ? 'имеет' : 'has');
+    if (line === 'quant') return relate(m[1], m[3], '1:N', RELATION.has[lang]);
     if (line === 'has') {
       const objects = splitList(m[2]);
       const entityLike = objects.length === 1 && known(objects[0]);
-      return entityLike ? relate(m[1], objects[0], '1:N', lang === 'ru' ? 'имеет' : 'has') : addAttrs(touch(m[1]), m[2]);
+      return entityLike ? relate(m[1], objects[0], '1:N', RELATION.has[lang]) : addAttrs(touch(m[1]), m[2]);
     }
     const [, subject, verb, quant, object] = m;
     const lowVerb = verb.toLowerCase();
@@ -264,6 +267,11 @@ const EN_VERBS = new Set(
     ' ',
   ),
 );
+// The test of a word as a verb of a sentence, by the language of the description.
+const VERB_TEST = {
+  ru: (token) => RU_VERB.test(token),
+  en: (token) => EN_VERBS.has(token.toLowerCase()) || (/^[a-z]{3,}s$/i.test(token) && !/ss$/i.test(token)),
+};
 const REPLY = /^(?:возвращает|отвечает|сообщает|подтверждает|уведомляет|присылает ответ|returns|replies|responds|confirms|notifies|answers)$/i;
 const PREPOSITIONS = new Set(['в', 'на', 'к', 'для', 'to', 'from', 'in', 'into', 'with', 'by']);
 const TRIMMED = new Set(['the', 'a', 'an', 'в', 'на', 'к', 'для', 'to', 'from', 'in', 'into', 'with', 'by']);
@@ -279,10 +287,7 @@ export const isExternal = (name) => EXTERNAL_WORDS.test(name.toLowerCase());
 export const parseMessages = (items, lang) => {
   const heads = items.map((item) => {
     const tokens = item.split(/\s+/);
-    const at = tokens.findIndex(
-      (token, index) =>
-        index > 0 && (lang === 'ru' ? RU_VERB.test(token) : EN_VERBS.has(token.toLowerCase()) || (/^[a-z]{3,}s$/i.test(token) && !/ss$/i.test(token))),
-    );
+    const at = tokens.findIndex((token, index) => index > 0 && VERB_TEST[lang](token));
     if (at < 1) return null;
     const subject = tokens
       .slice(0, at)

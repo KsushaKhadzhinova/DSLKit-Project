@@ -325,7 +325,7 @@ export const initDecision = ({ root = document, storage, clipboard } = {}) => {
     const scroll = el('div', 'decision__scroll');
     scroll.append(sensTable);
     sensitivityBox.append(el('p', 'decision__hint', t('sensitivityHint')), scroll);
-    openLink.href = `editor.html#${SHARE_KEY}${pack(toDsl(problem, result))}`;
+    openLink.href = `editor.html#${SHARE_KEY}${pack(toDsl(problem, result, lang))}`;
     return result;
   };
   const pack = (text) =>
@@ -412,7 +412,7 @@ export const initDecision = ({ root = document, storage, clipboard } = {}) => {
     }
   };
   q('[data-decision-copy-md]').addEventListener('click', () => (last ? copy(toMarkdown(problem, last, lang)) : say(t('invalid'), 'error')));
-  q('[data-decision-copy-dsl]').addEventListener('click', () => (last ? copy(toDsl(problem, last)) : say(t('invalid'), 'error')));
+  q('[data-decision-copy-dsl]').addEventListener('click', () => (last ? copy(toDsl(problem, last, lang)) : say(t('invalid'), 'error')));
   q('[data-decision-save]').addEventListener('click', () => {
     const result = store.save(currentUser(storage), nameBox.value, { problem, method, pairs });
     if (!result.ok) return say(t(result.error === 'name' ? 'saveFailed' : 'storage'), 'error');

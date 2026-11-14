@@ -1,5 +1,7 @@
 // Decision support: the weighted sum, the analytic hierarchy process (AHP) with the consistency ratio, TOPSIS, and the sensitivity of the winner to the weights.
 // A problem is { criteria: [{ name, weight, direction: 'max' | 'min' }], alternatives: [{ name, scores: [number per criterion] }] }.
+import { formatNumber, pick } from '../utils/lang.js';
+
 export const METHODS = ['wsm', 'ahp', 'topsis'];
 // The random index of Saaty for matrices of order 1..10.
 const RANDOM_INDEX = [0, 0, 0.58, 0.9, 1.12, 1.24, 1.32, 1.41, 1.45, 1.49];
@@ -7,6 +9,16 @@ export const CR_LIMIT = 0.1;
 // The scale of Saaty: 1 equal, 3 moderate, 5 strong, 7 very strong, 9 extreme; the even numbers lie between, the inverse means "less important".
 export const SAATY_SCALE = [1 / 9, 1 / 8, 1 / 7, 1 / 6, 1 / 5, 1 / 4, 1 / 3, 1 / 2, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 
+const EXPLAIN = {
+  best: {
+    ru: 'Лучшая альтернатива — «{first}» ({score}), впереди «{second}» на {margin} п.п.',
+    en: 'The best alternative is "{first}" ({score}), ahead of "{second}" by {margin} points.',
+  },
+  leads: { ru: 'Лидирует по критериям: {names}.', en: 'It leads in: {names}.' },
+};
+
+// A share (0 to 1) as a percentage with the decimal mark of the language.
+export const percent = (share, lang) => `${formatNumber(share * 100, lang, { maximumFractionDigits: 1 })} %`;
 const round = (value, digits = 4) => Math.round(value * 10 ** digits) / 10 ** digits;
 const sum = (list) => list.reduce((total, value) => total + value, 0);
 const column = (problem, index) => problem.alternatives.map((alternative) => alternative.scores[index]);
@@ -160,7 +172,12 @@ export const explainResult = (problem, result, lang = 'ru') => {
     .map((item) => item.name);
   const margin = round((first.score - second.score) * 100, 1);
   const names = strong.join(', ');
-  if (lang === 'en')
-    return `The best alternative is "${first.name}" (${round(first.score * 100, 1)} %), ahead of "${second.name}" by ${margin} points.${names ? ` It leads in: ${names}.` : ''}`;
-  return `Лучшая альтернатива — «${first.name}» (${round(first.score * 100, 1)} %), впереди «${second.name}» на ${margin} п.п.${names ? ` Лидирует по критериям: ${names}.` : ''}`;
+  const params = {
+    first: first.name,
+    second: second.name,
+    score: percent(first.score, lang),
+    margin: formatNumber(margin, lang, { maximumFractionDigits: 1 }),
+    names,
+  };
+  return `${pick(EXPLAIN.best, lang, params)}${names ? ` ${pick(EXPLAIN.leads, lang, params)}` : ''}`;
 };

@@ -483,7 +483,7 @@ import { ui } from '../notations/messages.js';
 import { sanitizeSvg, sourceKey } from '../utils/dataParser.js';
 import { createTranslator } from '../utils/i18n.js';
 import { showProblems } from './problems-panel.js';
-import { pageLanguage } from '../utils/lang.js';
+import { formatDateTime, pageLanguage } from '../utils/lang.js';
 
 const MESSAGES = {
   empty: 'В редакторе нет кода диаграммы.',
@@ -504,8 +504,6 @@ const errorMessage = (error) => {
   }
   return MESSAGES[error.kind] ?? MESSAGES.network;
 };
-
-const formatTime = (ms) => new Date(ms).toISOString().slice(0, 16).replace('T', ' ');
 
 export const initDiagramRunner = ({
   root = document,
@@ -534,6 +532,7 @@ export const initDiagramRunner = ({
 
   const tr = createTranslator(root);
   const lang = pageLanguage(root);
+  const savedCopy = (ms) => `${tr('Показана сохранённая копия от')} ${formatDateTime(ms, lang)}.`;
   // The plain "ready" note is only for screen readers: a sighted user sees the drawing. Every other note (saved copy, loading, errors) stays visible.
   const setStatus = (text) => {
     status.textContent = tr(text);
@@ -579,7 +578,7 @@ export const initDiagramRunner = ({
         button.type = 'button';
         button.className = 'button button--quiet canvas__history-item';
         button.dataset.key = entry.key;
-        button.textContent = `${entry.title || tr('Без названия')} · ${formatTime(entry.at)}`;
+        button.textContent = `${entry.title || tr('Без названия')} · ${formatDateTime(entry.at, lang)}`;
         item.append(button);
         return item;
       }),
@@ -616,7 +615,7 @@ export const initDiagramRunner = ({
 ${input}`);
     const cached = cache.get(key);
 
-    if (cached && !cached.expired && !refresh && show(cached.data, `Показана сохранённая копия от ${formatTime(cached.savedAt)}.`, engine)) {
+    if (cached && !cached.expired && !refresh && show(cached.data, savedCopy(cached.savedAt), engine)) {
       status.textContent += fallback;
       if (fallback) status.dataset.state = 'note';
       setBusy(false);
@@ -642,7 +641,8 @@ ${input}`);
     } catch (error) {
       if (error.kind !== 'aborted') {
         logger.error('DSLKit: не удалось получить диаграмму', error.kind, error.status ?? '');
-        const shown = cached && show(cached.data, `Кэшированные данные от ${formatTime(cached.savedAt)}. ${errorMessage(error)}`, engine);
+        const shown =
+          cached && show(cached.data, `${tr('Кэшированные данные от')} ${formatDateTime(cached.savedAt, lang)}. ${tr(errorMessage(error))}`, engine);
         if (!shown) {
           // The drawing of an earlier run and the sample drawing of the page belong to other code, so neither may stay next to this error.
           remote.replaceChildren();
@@ -678,7 +678,7 @@ ${input}`);
     const cached = cache.get(button.dataset.key);
     controller?.abort();
     setBusy(false);
-    if (cached) show(cached.data, `Показана сохранённая копия от ${formatTime(cached.savedAt)}.`);
+    if (cached) show(cached.data, savedCopy(cached.savedAt));
     else setStatus('Сохранённая копия этой диаграммы уже удалена из кэша.');
   });
 

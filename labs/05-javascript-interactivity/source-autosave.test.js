@@ -77,7 +77,7 @@ test('the saved time is shown in English on the English page', async () => {
   api.loadTemplate('erd');
   await settle();
   timers.fire();
-  assert.match(document.querySelector('.editor-status__saved').textContent, /^Saved \d\d:\d\d$/);
+  assert.match(document.querySelector('.editor-status__saved').textContent, /^Saved \d{1,2}:\d\d/);
 });
 
 test('a save also clears the unsaved marks of the tabs', async () => {

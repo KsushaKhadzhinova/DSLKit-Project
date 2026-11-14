@@ -1,6 +1,9 @@
 import { NOTATIONS } from '../notations/index.js';
+import { pageLanguage, pick } from '../utils/lang.js';
+
+const TEXTS = { mine: { ru: 'Мой шаблон', en: 'My template' } };
 import { currentUser } from '../storage/accounts.js';
-import { createTemplateStore } from '../storage/projects.js';
+import { createTemplateStore, titleOf } from '../storage/projects.js';
 
 // The templates of the user are listed after the built-in ones on the page "Templates"; a card opens a new diagram from the template.
 export const initWelcome = ({ root = document, storage } = {}) => {
@@ -20,11 +23,11 @@ export const initWelcome = ({ root = document, storage } = {}) => {
     const link = root.createElement('a');
     link.className = 'template-card__link';
     link.href = `editor.html?my=${encodeURIComponent(template.id)}`;
-    link.textContent = template.title;
+    link.textContent = titleOf(template, pageLanguage(root));
     title.append(link);
     const caption = root.createElement('p');
     caption.className = 'template-card__caption';
-    caption.textContent = `${NOTATIONS[template.notation]?.short ?? template.notation.toUpperCase()} · ${root.documentElement.lang === 'en' ? 'My template' : 'Мой шаблон'}`;
+    caption.textContent = `${NOTATIONS[template.notation]?.short ?? template.notation.toUpperCase()} · ${pick(TEXTS.mine, pageLanguage(root))}`;
     card.append(preview, title, caption);
     item.append(card);
     list.append(item);

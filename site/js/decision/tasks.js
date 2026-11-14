@@ -1,3 +1,5 @@
+import { normalizeLanguage } from '../utils/lang.js';
+
 // Ready tasks of the decision page. The scores are examples (1 = poor, 10 = excellent; for a criterion where less is better, a smaller number is better): change them to your case.
 const criterion = (ru, en, weight, direction = 'max') => ({ name: { ru, en }, weight, direction });
 const alt = (ru, en, scores) => ({ name: { ru, en }, scores });
@@ -62,7 +64,7 @@ export const TASK_KEYS = Object.keys(TASKS);
 // A problem of the methods from a template, with the names in one language.
 export const taskProblem = (key, lang = 'ru') => {
   const task = TASKS[key];
-  const pick = (name) => name[lang === 'en' ? 'en' : 'ru'];
+  const pick = (name) => name[normalizeLanguage(lang)];
   return {
     title: pick(task.title),
     criteria: task.criteria.map((item) => ({ name: pick(item.name), weight: item.weight, direction: item.direction })),

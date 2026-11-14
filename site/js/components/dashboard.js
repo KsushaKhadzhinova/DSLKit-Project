@@ -2,8 +2,8 @@ import { NOTATIONS, NOTATION_KEYS, TEMPLATES, parseDiagram } from '../notations/
 import { currentUser, isUnlimited } from '../storage/accounts.js';
 import { notify } from './toast.js';
 import { starterProjects } from '../storage/seeds.js';
-import { TRASH_DAYS, createProjectStore, createTemplateStore, showQuota } from '../storage/projects.js';
-import { pageLanguage } from '../utils/lang.js';
+import { TRASH_DAYS, createProjectStore, createTemplateStore, showQuota, titleOf } from '../storage/projects.js';
+import { formatDateTime, pageLanguage } from '../utils/lang.js';
 
 const FILTERS = ['all', ...NOTATION_KEYS];
 const SORTS = ['newest', 'oldest', 'name'];
@@ -154,7 +154,7 @@ export const initDashboard = ({ root = document, storage, now = () => Date.now()
   emptyTrash.type = 'button';
   emptyTrash.hidden = true;
   newTemplate?.after(emptyTrash);
-  const time = (ms) => new Date(ms).toISOString().slice(0, 16).replace('T', ' ');
+  const time = (ms) => formatDateTime(ms, lang);
 
   // A card of a saved project, built like the sample cards of the page. A project in the trash cannot be opened.
   const card = (project, kind = 'project') => {
@@ -166,7 +166,7 @@ export const initDashboard = ({ root = document, storage, now = () => Date.now()
     item.dataset.notation = FILTERS.includes(project.notation) ? project.notation : 'other';
     const article = el('article', 'project-card');
     const headingBox = el('h2', 'project-card__title');
-    const link = el('a', 'project-card__link', project.title);
+    const link = el('a', 'project-card__link', titleOf(project, lang));
     if (trashed) link.setAttribute('aria-disabled', 'true');
     else link.href = `editor.html?${kind === 'template' ? 'my' : 'p'}=${encodeURIComponent(project.id)}`;
     headingBox.append(link);
@@ -257,7 +257,7 @@ export const initDashboard = ({ root = document, storage, now = () => Date.now()
   const chipKeys = new Set(chips.map((chip) => chip.dataset.filter));
   if (others) {
     NOTATION_KEYS.filter((key) => !chipKeys.has(key)).forEach((key) => {
-      const option = el('option', '', NOTATIONS[key].name[lang === 'ru' ? 'ru' : 'en']);
+      const option = el('option', '', NOTATIONS[key].name[lang]);
       option.value = key;
       others.append(option);
     });

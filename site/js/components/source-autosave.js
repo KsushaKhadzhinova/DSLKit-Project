@@ -1,11 +1,14 @@
 import { readCode, showCode } from './code-lines.js';
 import { notify } from './toast.js';
-import { pageLanguage } from '../utils/lang.js';
+import { formatClock, pageLanguage, pick } from '../utils/lang.js';
 
 export const AUTOSAVE_DELAY_MS = 1000;
 const SOURCE_KEY = 'editor-source';
 
-const clock = (ms) => new Date(ms).toTimeString().slice(0, 5);
+const TEXTS = {
+  full: { ru: 'Не сохранено: хранилище браузера переполнено', en: 'Not saved: the browser storage is full' },
+  saved: { ru: 'Сохранено', en: 'Saved' },
+};
 
 // Saves the code of the editor one second after the last change, when the autosave switch is on.
 // The saved text comes back when the page is opened again. A damaged value is ignored.
@@ -38,12 +41,12 @@ export const initSourceAutosave = ({
     if (!force && switchButton && switchButton.getAttribute('aria-checked') !== 'true') return false;
     // A full browser storage refuses the write: the page says so instead of claiming the code is saved.
     if (!storage.set(SOURCE_KEY, readCode(codeLines))) {
-      const full = lang === 'en' ? 'Not saved: the browser storage is full' : 'Не сохранено: хранилище браузера переполнено';
+      const full = pick(TEXTS.full, lang);
       if (note) note.textContent = full;
       notify(root, full, 'error');
       return false;
     }
-    if (note) note.textContent = `${lang === 'en' ? 'Saved' : 'Сохранено'} ${clock(now())}`;
+    if (note) note.textContent = `${pick(TEXTS.saved, lang)} ${formatClock(now(), lang)}`;
     onSaved();
     return true;
   };

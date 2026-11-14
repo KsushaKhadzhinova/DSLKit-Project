@@ -26,7 +26,7 @@ test('the template store creates, lists newest first, updates, renames and delet
   const a = store.save({ title: ' First ', notation: 'idef0', source: 'a' });
   const b = store.save({ title: '', notation: 'erd', source: 'b' });
   assert.equal(a.title, 'First');
-  assert.equal(b.title, 'Без названия');
+  assert.equal(b.title, '');
   assert.deepEqual(
     store.list().map((item) => item.id),
     [b.id, a.id],
@@ -285,12 +285,12 @@ test('templates of a signed-in user are theirs', async () => {
   assert.equal(storage.get('templates'), null);
 });
 
-test('a template saved from code without a title is called Untitled', () => {
+test('a template saved from code without a title is stored without one', () => {
   const storage = memory();
   const opened = editor({ storage, lang: 'en' });
   showCode(opened.document, opened.document.querySelector('.code__lines'), 'just text');
   opened.document.querySelector('[data-action="save-template"]').click();
   const [saved] = createTemplateStore({ storage }).list();
-  assert.equal(saved.title, 'Untitled');
+  assert.equal(saved.title, '');
   assert.equal(saved.notation, 'idef0');
 });

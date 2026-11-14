@@ -1,3 +1,5 @@
+import { normalizeLanguage } from '../utils/lang.js';
+
 // Problem texts in Russian (the source language of the site) and English. {name} is replaced from the problem parameters.
 export const MESSAGES = {
   syntax: { ru: 'Строка не распознана: «{text}»', en: 'Unrecognized line: "{text}"' },
@@ -317,6 +319,6 @@ export const UI = {
 
 const fill = (template, params) => template.replace(/\{(\w+)\}/g, (_, key) => String(params[key]));
 
-export const formatProblem = (item, lang) => fill(MESSAGES[item.code][lang === 'en' ? 'en' : 'ru'], item.params);
+export const formatProblem = (item, lang) => fill(MESSAGES[item.code][normalizeLanguage(lang)], item.params);
 
-export const ui = (key, params, lang) => fill(UI[key][lang === 'en' ? 'en' : 'ru'], params);
+export const ui = (key, params, lang) => fill(UI[key][normalizeLanguage(lang)], params);
