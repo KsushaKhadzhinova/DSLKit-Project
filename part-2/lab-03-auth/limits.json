@@ -7,6 +7,8 @@
   "bodyBytes": "100kb",
   "loginMaxAttempts": 5,
   "loginLockMinutes": 15,
+  "generalRateMax": 300,
+  "generalRateWindowMinutes": 1,
   "loginRateMax": 20,
   "loginRateWindowMinutes": 15,
   "registerRateMax": 10,

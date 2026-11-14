@@ -6,7 +6,7 @@ const SECRET = 'test-secret-test-secret-test-secret-123';
 const PASSWORD = 'correct horse 42';
 // Four rounds keep bcrypt fast enough for tests.
 // The rate limits are high here so ordinary tests are never throttled; the security tests start their own server with small ones.
-const SETTINGS = { jwtSecret: SECRET, bcryptRounds: 4, loginRateMax: 10000, registerRateMax: 10000, loginMaxAttempts: 10000 };
+const SETTINGS = { jwtSecret: SECRET, bcryptRounds: 4, generalRateMax: 1000000, loginRateMax: 10000, registerRateMax: 10000, loginMaxAttempts: 10000 };
 
 // Starts the real app on a free port over a migrated temporary SQLite database.
 const startServer = async (settings = {}) => {
