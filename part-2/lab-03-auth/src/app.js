@@ -10,6 +10,7 @@ const { securityHeaders, requireJson } = require('./middleware/http');
 const { createRequestLogger } = require('./middleware/request-log');
 const { createRateLimiter, createLoginGuard } = require('./middleware/rate-limit');
 const { routeNotFound, errorHandler } = require('./middleware/error-handler');
+const { createCors } = require('./middleware/cors');
 const { checkJwtSettings } = require('./settings');
 const LIMITS = require('../limits.json');
 
@@ -17,6 +18,8 @@ const MINUTE = 60 * 1000;
 const DEFAULTS = {
   jwtExpiresIn: '1h',
   bcryptRounds: 10,
+  // Origin of the React client of lab 5 that may call the API.
+  corsOrigin: 'http://localhost:5178',
   // Failed logins per email before it is locked, and for how long.
   loginMaxAttempts: LIMITS.loginMaxAttempts,
   loginLockMs: LIMITS.loginLockMinutes * MINUTE,
@@ -27,7 +30,7 @@ const DEFAULTS = {
   registerRateWindowMs: LIMITS.registerRateWindowMinutes * MINUTE,
 };
 
-// settings: { jwtSecret, jwtExpiresIn?, bcryptRounds?, login*/register* limits?, trustProxy? }
+// settings: { jwtSecret, jwtExpiresIn?, bcryptRounds?, login*/register* limits?, trustProxy?, corsOrigin? }
 const createApp = (models, settings) => {
   const config = { ...DEFAULTS, ...settings };
   checkJwtSettings(config);
@@ -39,6 +42,7 @@ const createApp = (models, settings) => {
   };
   const app = express();
   app.disable('x-powered-by');
+  app.use(createCors(config.corsOrigin));
   // Behind a reverse proxy req.ip is the proxy unless this is set (TRUST_PROXY), and the limits would count everyone as one client.
   if (config.trustProxy !== undefined) app.set('trust proxy', config.trustProxy);
   app.use(securityHeaders);

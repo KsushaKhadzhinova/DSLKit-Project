@@ -110,7 +110,7 @@ Figure 8 – Answers 403 for an outsider and the answer 200 for the administrato
 
 ### 3.5 Verification
 
-The work is verified by automated tests on a temporary SQLite database with the real migrations and real HTTP requests. The tests start the server on a free port, and bcrypt uses four rounds for speed. They cover: registration with email normalization, no hash in the response and a check that the database holds a bcrypt hash rather than the password, duplicate emails in any letter case, data validation errors, login and the token contents, the same response for a wrong password and an unknown email, tampered, unsigned, expired and foreign-signed tokens, user deletion and a role change with an old token, the rights of an administrator, an owner and an outsider, migrations with rollback, the seeds of the administrator, the demo users and the demo diagrams. There are 140 application tests, including the partial update with `PATCH` and a database failure. A separate run on a real PostgreSQL 16 in a container was made on 28 October 2026: the migrations, the admin seed, registration, login, the protected route with and without a token and the role checks worked the same as on SQLite. The screenshots are in the folder `figures-pg`.
+The default database of the work is PostgreSQL, and SQLite is used only by the tests. The work is verified by automated tests on a temporary SQLite database (a file in a temporary folder, so the tests need no database server) with the real migrations and real HTTP requests. The tests start the server on a free port, and bcrypt uses four rounds for speed. They cover: registration with email normalization, no hash in the response and a check that the database holds a bcrypt hash rather than the password, duplicate emails in any letter case, data validation errors, login and the token contents, the same response for a wrong password and an unknown email, tampered, unsigned, expired and foreign-signed tokens, user deletion and a role change with an old token, the rights of an administrator, an owner and an outsider, migrations with rollback and the admin seed. There are 164 application tests, including the partial update with `PATCH` and a database failure. A run on a real PostgreSQL has not been done yet.
 
 The result of the `npm test` command with the number of tests and the code coverage is shown in figure 9.
 
@@ -140,7 +140,7 @@ The `PATCH /diagrams/:id` route changes only the fields that are sent. The check
 
 ### 3.9 How to trigger a 500 response with a real failure
 
-A 500 response is caused by a database failure, not by a button. For SQLite, start the server with `npm start`, then run `npx sequelize-cli db:migrate:undo:all` in a second window. The tables vanish under the running server, and the very first request cannot write a row to the `RequestLogs` log. The client gets 500 with the body `{ "error": "Internal server error" }`, and the details stay only in the server console. For PostgreSQL it is enough to stop the database service or container: requests give 500, and `GET /health` answers 503. The commands `npm run db:migrate` and `npm run db:seed` restore the work. The same failure is reproduced in an automated test by dropping the `Diagrams` table while the server runs.
+A 500 response is caused by a database failure, not by a button. The shortest way is a temporary SQLite database: set `SQLITE_STORAGE` instead of `DATABASE_URL`, start the server with `npm start`, then run `npx sequelize-cli db:migrate:undo:all` in a second window. The tables vanish under the running server, and the very first request cannot write a row to the `RequestLogs` log. The client gets 500 with the body `{ "error": "Internal server error" }`, and the details stay only in the server console. On the main PostgreSQL database it is enough to stop the service or container (`docker compose stop db`): requests give 500, and `GET /health` answers 503. The commands `npm run db:migrate` and `npm run db:seed` restore the work. The same failure is reproduced in an automated test by dropping the `Diagrams` table while the server runs.
 
 The migrations are undone with `npx sequelize-cli db:migrate:undo:all` under the running server, and the very first request to `http://localhost:3000/diagrams` gets the answer 500, as in figure 11.
 
@@ -175,10 +175,6 @@ A security layer is added to the layers of the second lab: the token check, the 
 The main trade-off concerns state. A JWT is not stored on the server, which makes scaling simpler, but a token cannot be revoked before it expires. So the lifetime is short and the role is read from the database on every request, and a deleted user loses access at once. The login attempt counters live in process memory. This is fast and simple, but with several server instances the counters are not shared. The decision is recorded in the report, and a production system would move the counters to a shared store. In Fowler's Patterns of Enterprise Application Architecture this is the usual price of choosing between simplicity and distributed state.
 
 Sources: Martin R. Clean Architecture: A Craftsman's Guide to Software Structure and Design. Prentice Hall, 2017. Fowler M. Patterns of Enterprise Application Architecture. Addison-Wesley, 2002. Fowler M. Refactoring: Improving the Design of Existing Code, 2nd ed. Addison-Wesley, 2018.
-
-### 3.12 Database
-
-PostgreSQL is the main database. A local server is started with `docker compose up -d db`, and the connection string lives in the variable `DATABASE_URL` of the `.env` file. A SQLite file is needed only by the automatic tests. The migrations, the seed and the server ran on a real PostgreSQL 16 in a container: registration, login, creating a diagram, the notation filter and the title search work the same as on SQLite, and the user list answers 403 to an ordinary user.
 
 ## Conclusion
 
@@ -470,7 +466,7 @@ module.exports = { createUsersRouter };
 ## Appendix G (mandatory) Listing of diagrams.controller.js
 
 ```js
-const { notFound, forbidden } = require('../errors');
+const { notFound, forbidden, badRequest } = require('../errors');
 const { Op, fn, col, where } = require('sequelize');
 const { parseListQuery } = require('../middleware/list-query');
 const { NOTATIONS, LIMITS } = require('../models/diagram.constants');
@@ -494,8 +490,15 @@ const mayChange = (user, diagram) => user.role === 'admin' || diagram.ownerId ==
 // Express 5 forwards a rejected promise to the error handler, so no try/catch is needed here.
 const createDiagramsController = ({ Diagram }) => ({
   // ?limit=&offset=&sort=&order= (see list-query.js) page and sort the result, the answer stays an array and X-Total-Count holds the full size.
-  list: async (req, res) => {
-    const { limit, offset, sort, order, notation, q } = parseListQuery(req.query, SORTABLE, { notations: NOTATIONS, maxQuery: LIMITS.title });
+  list: async (req, res, next) => {
+    // The client of lab 5 sends the search text as ?search=. It means the same as ?q=, but a blank text keeps every diagram.
+    const { search, ...rest } = req.query;
+    if (search !== undefined && (typeof search !== 'string' || search.trim().length > LIMITS.title)) {
+      return next(badRequest(`search must be a string of at most ${LIMITS.title} characters`));
+    }
+    const term = (search ?? '').trim();
+    const query = term && rest.q === undefined ? { ...rest, q: term } : rest;
+    const { limit, offset, sort, order, notation, q } = parseListQuery(query, SORTABLE, { notations: NOTATIONS, maxQuery: LIMITS.title });
     const { count, rows } = await Diagram.findAndCountAll({
       where: filterFor(Diagram.sequelize.getDialect(), { notation, q }),
       order: [
@@ -506,7 +509,7 @@ const createDiagramsController = ({ Diagram }) => ({
       offset,
     });
     res.set('X-Total-Count', String(count));
-    res.json(rows);
+    return res.json(rows);
   },
 
   get: async (req, res, next) => {
@@ -612,7 +615,7 @@ const { badRequest } = require('../errors');
 const { NOTATIONS, PRIORITIES, DEFAULT_PRIORITY, LIMITS, MAX_ID } = require('../models/diagram.constants');
 
 // Spaces of every kind plus zero-width characters (joiners, word joiner, BOM) look empty, so they count as empty.
-const INVISIBLE = /[\s\u200B-\u200D\u2060\uFEFF]/g;
+const INVISIBLE = /[\s​-‍⁠﻿]/g;
 // Control characters (NUL, bell, escape) are not text; a single-line field must not carry them.
 const CONTROL = /[\u0000-\u001F\u007F]/;
 

@@ -110,7 +110,7 @@
 
 ### 3.5 Проверка
 
-Работа проверена автоматическими тестами на временной базе SQLite с настоящими миграциями и настоящими HTTP-запросами. Тесты запускают сервер на свободном порту, а bcrypt использует четыре раунда для скорости. Покрыто следующее: регистрация с нормализацией email, отсутствие хеша в ответе и проверка, что в базе лежит хеш bcrypt, а не пароль, дубликаты email в любом регистре, ошибки проверки данных, вход и содержимое токена, одинаковый ответ на неверный пароль и неизвестный email, подделанные, неподписанные, просроченные и подписанные чужим ключом токены, удаление пользователя и смена роли при старом токене, права администратора, владельца и постороннего пользователя, миграции с откатом, сид администратора, демонстрационных пользователей и диаграмм. Выполнено 140 тестов приложения, включая частичное обновление `PATCH` и сбой базы. Отдельно 28 октября 2026 выполнен прогон на настоящем PostgreSQL 16 в контейнере: миграции, сид администратора, регистрация, вход, защищённый маршрут с токеном и без него и проверка ролей отработали так же, как на SQLite. Снимки лежат в папке `figures-pg`.
+База данных работы по умолчанию PostgreSQL, SQLite нужен только тестам. Работа проверена автоматическими тестами на временной базе SQLite (файл во временной папке, чтобы тестам не нужен был сервер баз данных) с настоящими миграциями и настоящими HTTP-запросами. Тесты запускают сервер на свободном порту, а bcrypt использует четыре раунда для скорости. Покрыто следующее: регистрация с нормализацией email, отсутствие хеша в ответе и проверка, что в базе лежит хеш bcrypt, а не пароль, дубликаты email в любом регистре, ошибки проверки данных, вход и содержимое токена, одинаковый ответ на неверный пароль и неизвестный email, подделанные, неподписанные, просроченные и подписанные чужим ключом токены, удаление пользователя и смена роли при старом токене, права администратора, владельца и постороннего пользователя, миграции с откатом и сид администратора. Выполнено 164 теста приложения, включая частичное обновление `PATCH` и сбой базы. Проверка на настоящем PostgreSQL пока не выполнялась.
 
 Результат команды `npm test` с числом тестов и покрытием кода показан на рисунке 9.
 
@@ -140,7 +140,7 @@
 
 ### 3.9 Как вызвать ответ 500 настоящим сбоем
 
-Ответ 500 вызывается сбоем базы, а не кнопкой. Для SQLite нужно запустить сервер командой `npm start`, затем во втором окне выполнить `npx sequelize-cli db:migrate:undo:all`. Таблицы исчезают под работающим сервером, и первый же запрос не может записать строку в журнал `RequestLogs`. Клиент получает 500 с телом `{ "error": "Internal server error" }`, а подробности остаются только в консоли сервера. Для PostgreSQL достаточно остановить службу базы или контейнер: запросы дают 500, а `GET /health` отвечает 503. Работу восстанавливают команды `npm run db:migrate` и `npm run db:seed`. В автоматическом тесте тот же сбой воспроизведён удалением таблицы `Diagrams` при работающем сервере.
+Ответ 500 вызывается сбоем базы, а не кнопкой. Самый короткий путь – временная база SQLite для проверки: задать `SQLITE_STORAGE` вместо `DATABASE_URL`, запустить сервер командой `npm start`, затем во втором окне выполнить `npx sequelize-cli db:migrate:undo:all`. Таблицы исчезают под работающим сервером, и первый же запрос не может записать строку в журнал `RequestLogs`. Клиент получает 500 с телом `{ "error": "Internal server error" }`, а подробности остаются только в консоли сервера. На основной базе PostgreSQL достаточно остановить службу или контейнер (`docker compose stop db`): запросы дают 500, а `GET /health` отвечает 503. Работу восстанавливают команды `npm run db:migrate` и `npm run db:seed`. В автоматическом тесте тот же сбой воспроизведён удалением таблицы `Diagrams` при работающем сервере.
 
 Миграции откатаны командой `npx sequelize-cli db:migrate:undo:all` под работающим сервером, и первый же запрос `http://localhost:3000/diagrams` получает ответ 500, как на рисунке 11.
 
@@ -175,10 +175,6 @@
 Главный компромисс связан с состоянием. Токен JWT не хранится на сервере, это упрощает масштабирование, но токен нельзя отозвать до истечения срока. Поэтому срок выбран коротким, а роль берётся из базы при каждом запросе, и удалённый пользователь теряет доступ сразу. Счётчики попыток входа лежат в памяти процесса. Это быстро и просто, но при нескольких экземплярах сервера счётчики не общие. Решение зафиксировано в отчёте, а для боевой системы счётчики переносят в общее хранилище. По Фаулеру («Шаблоны корпоративных приложений») это обычная цена выбора между простотой и распределённым состоянием.
 
 Источники: Мартин Р. Чистая архитектура. Искусство разработки программного обеспечения. СПб.: Питер, 2018. Фаулер М. Шаблоны корпоративных приложений. М.: Вильямс, 2016. Фаулер М. Рефакторинг. Улучшение существующего кода. 2-е изд. СПб.: Питер, 2019.
-
-### 3.12 База данных
-
-Основной базой выбран PostgreSQL. Локальный сервер поднимается командой `docker compose up -d db`, строка подключения лежит в переменной `DATABASE_URL` файла `.env`. Файл SQLite нужен только автоматическим тестам. Миграции, сид и сервер проверены на настоящем PostgreSQL 16 в контейнере: регистрация, вход, создание диаграммы, фильтр по нотации и поиск по названию работают так же, как на SQLite, а чужому пользователю список пользователей отвечает 403.
 
 ## Заключение
 
@@ -470,7 +466,7 @@ module.exports = { createUsersRouter };
 ## Приложение Ж (обязательное) Листинг файла diagrams.controller.js
 
 ```js
-const { notFound, forbidden } = require('../errors');
+const { notFound, forbidden, badRequest } = require('../errors');
 const { Op, fn, col, where } = require('sequelize');
 const { parseListQuery } = require('../middleware/list-query');
 const { NOTATIONS, LIMITS } = require('../models/diagram.constants');
@@ -494,8 +490,15 @@ const mayChange = (user, diagram) => user.role === 'admin' || diagram.ownerId ==
 // Express 5 forwards a rejected promise to the error handler, so no try/catch is needed here.
 const createDiagramsController = ({ Diagram }) => ({
   // ?limit=&offset=&sort=&order= (see list-query.js) page and sort the result, the answer stays an array and X-Total-Count holds the full size.
-  list: async (req, res) => {
-    const { limit, offset, sort, order, notation, q } = parseListQuery(req.query, SORTABLE, { notations: NOTATIONS, maxQuery: LIMITS.title });
+  list: async (req, res, next) => {
+    // The client of lab 5 sends the search text as ?search=. It means the same as ?q=, but a blank text keeps every diagram.
+    const { search, ...rest } = req.query;
+    if (search !== undefined && (typeof search !== 'string' || search.trim().length > LIMITS.title)) {
+      return next(badRequest(`search must be a string of at most ${LIMITS.title} characters`));
+    }
+    const term = (search ?? '').trim();
+    const query = term && rest.q === undefined ? { ...rest, q: term } : rest;
+    const { limit, offset, sort, order, notation, q } = parseListQuery(query, SORTABLE, { notations: NOTATIONS, maxQuery: LIMITS.title });
     const { count, rows } = await Diagram.findAndCountAll({
       where: filterFor(Diagram.sequelize.getDialect(), { notation, q }),
       order: [
@@ -506,7 +509,7 @@ const createDiagramsController = ({ Diagram }) => ({
       offset,
     });
     res.set('X-Total-Count', String(count));
-    res.json(rows);
+    return res.json(rows);
   },
 
   get: async (req, res, next) => {
@@ -612,7 +615,7 @@ const { badRequest } = require('../errors');
 const { NOTATIONS, PRIORITIES, DEFAULT_PRIORITY, LIMITS, MAX_ID } = require('../models/diagram.constants');
 
 // Spaces of every kind plus zero-width characters (joiners, word joiner, BOM) look empty, so they count as empty.
-const INVISIBLE = /[\s\u200B-\u200D\u2060\uFEFF]/g;
+const INVISIBLE = /[\s​-‍⁠﻿]/g;
 // Control characters (NUL, bell, escape) are not text; a single-line field must not carry them.
 const CONTROL = /[\u0000-\u001F\u007F]/;
 
