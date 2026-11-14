@@ -24,3 +24,11 @@ Russian version: [`HANDOVER-SESSION-2026-11-12.md`](HANDOVER-SESSION-2026-11-12.
 ## Open for the owner
 
 Unchanged from section 3 of the 28 October file: fill `.env` (labs 2, 3, 6), Postman screenshots, Atlas, Docker Hub (only after an explicit go-ahead), upload the PDFs, the decision on merging into `main`, pushes only on an explicit request.
+
+## State on 14 November 2026
+
+- The `main` branch on GitHub holds everything: part 1, the site and editor with the new features (import of files and pictures, check and fix of a diagram, clarifying questions, multilingual support), labs 1-8, practicals 1-4 and the course project (`course-project/`, `render.yaml`). CI and the GitHub Pages deploy are green: https://ksushakhadzhinova.github.io/DSLKit-Project/.
+- The branches of the works stay separate; their copies inside `main` were combined like this: own files come from the branch of the work, lab 3 comes from branch `23` with CORS and search from branch `25`.
+- Part 2 has its own report linter `tools/part2/lint-report.js` (appendices "Приложение А (обязательное)"), part 1 keeps `tools/lint-report.js`.
+- Lab 8: the backend image installs `sequelize-cli` itself (it is a dev dependency of lab 3). `npm run smoke` passed on 14 November: three containers healthy, `/api/health` answers 200. With an old volume and another password use another `COMPOSE_PROJECT_NAME` or `docker compose down -v`.
+- Open for the owner: Postman and database screenshots, the Atlas string in the `.env` of lab 6, a Render service from `render.yaml`, Docker Hub images, the course project in Word, the Anthropic API key in `.env`, the Firefox and Edge confirmation for labs 5-8, the thesis.

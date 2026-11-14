@@ -4,7 +4,7 @@ Russian version: [`PROJECT-STATE.md`](PROJECT-STATE.md). This document is writte
 
 Skills for AI agents (Accelerator) are installed in `.claude/skills/`; details and the reasons for the choice are in [`ACCELERATOR.en.md`](ACCELERATOR.en.md) (installed on 4 November 2026).
 
-State as of 23 October 2026.
+State as of 23 October 2026. The latest state (14 November 2026) is in [`HANDOVER-SESSION-2026-11-12.en.md`](HANDOVER-SESSION-2026-11-12.en.md).
 
 ## 1 Goal and context
 
