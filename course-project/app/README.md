@@ -22,11 +22,11 @@ docker compose up --build
 
 ## Облачное развёртывание на Render / Deployment on Render
 
-Файл `render.yaml` лежит в корне репозитория (ветка `course-app`) и описывает три ресурса: базу PostgreSQL `dslkit-db`, сервер `dslkit-api` (Node.js) и клиент `dslkit-web` (статический сайт). Секретов в файле нет, они вводятся в панели Render.
+Файл `render.yaml` лежит в корне репозитория (ветка `main`) и описывает три ресурса: базу PostgreSQL `dslkit-db`, сервер `dslkit-api` (Node.js) и клиент `dslkit-web` (статический сайт). Секретов в файле нет: `JWT_SECRET` создаёт сам Render, его можно прочитать во вкладке Environment.
 
 1. В панели Render выберите New, Blueprint, подключите репозиторий и ветку с `render.yaml`.
-2. Render создаст три ресурса и попросит значения переменных с `sync: false`: `JWT_SECRET` (не короче 32 случайных символов), `ADMIN_EMAIL`, `ADMIN_PASSWORD` (10 символов и больше), `DEMO_USER_PASSWORD` (необязательно), `CORS_ORIGIN` и `VITE_API_URL`.
-3. Адреса сервисов известны только после создания. Впишите в `CORS_ORIGIN` сервера адрес клиента (`https://dslkit-web.onrender.com` или фактический), в `VITE_API_URL` клиента адрес сервера (`https://dslkit-api.onrender.com`), затем перезапустите сервер и пересоберите клиент (Manual Deploy), потому что `VITE_API_URL` попадает в сборку.
+2. Render создаст три ресурса без вопросов о значениях: `JWT_SECRET` будет сгенерирован, адреса `CORS_ORIGIN` и `VITE_API_URL` уже вписаны. Первого администратора и демо-пользователей файл не создаёт: добавьте во вкладке Environment сервера `ADMIN_EMAIL`, `ADMIN_PASSWORD` (10 символов и больше) и при желании `DEMO_USER_PASSWORD`, затем перезапустите сервер.
+3. Если Render дал сервисам другие имена (имя занято), поправьте адреса. Затем перезапустите сервер и пересоберите клиент (Manual Deploy), потому что `VITE_API_URL` вшивается при сборке.
 4. Сервер запускается командой `npx sequelize-cli db:migrate && npx sequelize-cli db:seed:all && node server.js` (как в Dockerfile), состояние проверяется по `/health`, сборка: `npm ci --omit=dev`.
 5. Бесплатные план базы и сервера Render ограничены по сроку и засыпают без запросов: первый ответ после простоя медленный. Проверьте актуальные условия плана перед защитой.
 
@@ -35,8 +35,8 @@ docker compose up --build
 The `render.yaml` file in the repository root (branch `course-app`) describes three resources: the PostgreSQL database `dslkit-db`, the Node.js server `dslkit-api` and the static client `dslkit-web`. It holds no secrets: they are typed in the Render dashboard.
 
 1. In the Render dashboard choose New, Blueprint, connect the repository and the branch that has `render.yaml`.
-2. Render creates the three resources and asks for the variables marked `sync: false`: `JWT_SECRET` (at least 32 random characters), `ADMIN_EMAIL`, `ADMIN_PASSWORD` (10 characters or more), `DEMO_USER_PASSWORD` (optional), `CORS_ORIGIN` and `VITE_API_URL`.
-3. The service addresses are known only after creation. Put the client address into the server variable `CORS_ORIGIN` (`https://dslkit-web.onrender.com` or the real one) and the server address into the client variable `VITE_API_URL` (`https://dslkit-api.onrender.com`), then restart the server and rebuild the client (Manual Deploy), because `VITE_API_URL` is baked into the build.
+2. Render creates the three resources without asking for values: `JWT_SECRET` is generated, the addresses `CORS_ORIGIN` and `VITE_API_URL` are already filled in. The file does not create the first administrator and demo users: add `ADMIN_EMAIL`, `ADMIN_PASSWORD` (10 characters or more) and optionally `DEMO_USER_PASSWORD` in the Environment tab of the server, then restart it.
+3. If Render gave the services other names (a name is taken), fix the addresses. Then restart the server and rebuild the client (Manual Deploy), because `VITE_API_URL` is baked into the build.
 4. The server starts with `npx sequelize-cli db:migrate && npx sequelize-cli db:seed:all && node server.js` (as in the Dockerfile), health is checked at `/health`, the build is `npm ci --omit=dev`.
 5. The free Render plans of the database and the server are time-limited and sleep without traffic: the first answer after idle is slow. Check the current plan terms before the defense.
 
