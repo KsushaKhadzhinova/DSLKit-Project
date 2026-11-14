@@ -8,6 +8,8 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: './src/setupTests.js',
     globals: true,
+    // Workers start slowly on Windows: parallel files hit the worker start timeout and the run prints "no tests".
+    fileParallelism: false,
     // report.test.mjs uses node:test, it runs with the second command of npm test.
     exclude: ['**/node_modules/**', 'report.test.mjs'],
     coverage: { include: ['src/**'], exclude: ['src/**/*.test.*', 'src/main.jsx', 'src/setupTests.js'] },

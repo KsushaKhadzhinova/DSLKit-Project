@@ -118,7 +118,7 @@
 
 ### 3.8 Проверка работы
 
-Основной компонент и его состояния показаны в приложении В. Работа проверена 123 автоматическими тестами Vitest с имитацией сервера. Тесты покрывают состояния загрузки и ошибки, повтор, оптимистичное добавление, удаление и правку с откатом, поиск с отменой предыдущего запроса, вход и выход, заголовок с токеном и обработку кода 401, двойной щелчок по удалению, загрузку по частям (двойной щелчок, ошибка страницы, запоздавший ответ прежнего поиска, дубли, смещение отступа), индикатор правки и удаления, предел и счётчик многострочного поля, записи с временным идентификатором и вывод разметки из ответа сервера как обычного текста. Серверная часть с CORS и поиском проверена десятью тестами в лабораторной работе 3. Для ручной проверки нужно запустить сервер командой `npm run dev` в папке `part-2/lab-03-auth` и клиент той же командой в папке `part-2/lab-05-react-api`. Скриншоты рисунков 1–10 снимает скрипт `shots/shots.mjs`.
+Основной компонент и его состояния показаны в приложении В. Работа проверена 125 автоматическими тестами Vitest с имитацией сервера. Тесты покрывают состояния загрузки и ошибки, повтор, оптимистичное добавление, удаление и правку с откатом, поиск с отменой предыдущего запроса, вход и выход, заголовок с токеном и обработку кода 401, двойной щелчок по удалению, загрузку по частям (двойной щелчок, ошибка страницы, запоздавший ответ прежнего поиска, добавление во время смены поиска (список читается заново), дубли, смещение отступа), индикатор правки и удаления, предел и счётчик многострочного поля, записи с временным идентификатором и вывод разметки из ответа сервера как обычного текста. Серверная часть с CORS и поиском проверена десятью тестами в лабораторной работе 3. Для ручной проверки нужно запустить сервер командой `npm run dev` в папке `part-2/lab-03-auth` и клиент той же командой в папке `part-2/lab-05-react-api`. Скриншоты рисунков 1–10 снимает скрипт `shots/shots.mjs`.
 
 Ветка репозитория: 25.
 
@@ -297,11 +297,14 @@ function usePagedList(search, onNotice) {
   const localIds = useRef(new Set());
   const moreController = useRef(null);
   const loadingMoreRef = useRef(false);
+  // Counts the list reloads (new search text, retry). An add that started before a reload belongs to a list that is gone.
+  const generation = useRef(0);
 
   const changeTotal = (delta) => setPaging((current) => (current.total === null ? current : { ...current, total: Math.max(0, current.total + delta) }));
 
   useEffect(() => {
     const controller = new AbortController();
+    generation.current += 1;
     setLoading(true);
     setLoadingMore(false);
     loadingMoreRef.current = false;
@@ -366,7 +369,7 @@ function usePagedList(search, onNotice) {
     }
   }, [search, onNotice]);
 
-  return { items, setItems, itemsRef, paging, setPaging, changeTotal, localIds, loading, loadingMore, error, errorKind, retry, loadMore };
+  return { items, setItems, itemsRef, paging, setPaging, changeTotal, localIds, generation, loading, loadingMore, error, errorKind, retry, loadMore };
 }
 
 // Owns the server state of the list: the pages plus the optimistic add, delete and edit.
@@ -375,7 +378,7 @@ export function useDiagrams(search) {
   const tempCounter = useRef(0);
   const { busy, isBusy, markBusy, unmarkBusy } = useBusyIds();
   const list = usePagedList(search, setNotice);
-  const { items, setItems, itemsRef, paging, setPaging, changeTotal, localIds } = list;
+  const { items, setItems, itemsRef, paging, setPaging, changeTotal, localIds, generation, retry } = list;
 
   const dismissNotice = useCallback(() => setNotice(null), []);
 
@@ -383,16 +386,26 @@ export function useDiagrams(search) {
   const add = useCallback(async (fields) => {
     tempCounter.current += 1;
     const tempId = `temp-${tempCounter.current}`;
+    const startedIn = generation.current;
     setItems((current) => [...current, { ...fields, id: tempId, createdAt: new Date().toISOString(), pending: true }]);
     changeTotal(1);
     try {
       const { data } = await addDiagram(fields);
+      // The list was reloaded while the request was in flight (the search text changed): the temporary row is gone and
+      // the new list may have been read before the record existed, so read it again instead of patching a list that is not there.
+      if (generation.current !== startedIn) {
+        retry();
+        return true;
+      }
       localIds.current.add(data.id);
       setItems((current) => current.map((item) => (item.id === tempId ? data : item)));
       return true;
     } catch (failure) {
-      setItems((current) => current.filter((item) => item.id !== tempId));
-      changeTotal(-1);
+      // After a reload the temporary row and its +1 belong to the old list, the new total must stay as the server sent it.
+      if (generation.current === startedIn) {
+        setItems((current) => current.filter((item) => item.id !== tempId));
+        changeTotal(-1);
+      }
       setNotice(`Не удалось добавить диаграмму. ${errorMessage(failure)}`);
       return false;
     }

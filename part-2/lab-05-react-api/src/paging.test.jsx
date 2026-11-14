@@ -358,3 +358,50 @@ describe('limits in the forms', () => {
     expect(api.addDiagram).toHaveBeenCalledWith({ title: 'Multi', notation: 'UML', sourceCode: 'a -> b\nb -> c', priority: 'normal' });
   });
 });
+
+describe('add while the list is reloaded', () => {
+  const fillAndAdd = async (user, title) => {
+    await user.type(screen.getByLabelText('Название'), title);
+    await user.type(screen.getByLabelText('Исходный код'), 'x -> y');
+    await user.click(screen.getByRole('button', { name: 'Добавить' }));
+  };
+
+  it('reads the list again when the search changed during a successful add, so the new record stays visible', async () => {
+    const user = userEvent.setup();
+    const pending = deferred();
+    api.fetchDiagrams.mockResolvedValueOnce(reply([record(1, 'Old')], 1));
+    api.addDiagram.mockReturnValue(pending.promise);
+    render(<App />);
+    await screen.findByText('Old');
+    await fillAndAdd(user, 'Fresh');
+    // The search reloads the list before the server answers the add.
+    api.fetchDiagrams.mockResolvedValueOnce(reply([], 0));
+    await user.type(screen.getByLabelText('Поиск по названию'), 'F');
+    await waitFor(() => expect(titles()).toEqual([]));
+    const callsBefore = api.fetchDiagrams.mock.calls.length;
+    // After the add succeeds the list is read again and now contains the record.
+    api.fetchDiagrams.mockResolvedValue(reply([record(7, 'Fresh')], 1));
+    pending.resolve({ data: record(7, 'Fresh') });
+    await waitFor(() => expect(titles()).toEqual(['Fresh']));
+    expect(api.fetchDiagrams.mock.calls.length).toBe(callsBefore + 1);
+    expect(screen.getByText('Показано 1 из 1')).toBeInTheDocument();
+  });
+
+  it('does not lower the total of the new list when an add of the old list fails', async () => {
+    const user = userEvent.setup();
+    const pending = deferred();
+    api.fetchDiagrams.mockResolvedValueOnce(reply([record(1, 'Old')], 1));
+    api.addDiagram.mockReturnValue(pending.promise);
+    render(<App />);
+    await screen.findByText('Old');
+    await fillAndAdd(user, 'Fresh');
+    api.fetchDiagrams.mockResolvedValueOnce(reply(page(10, SIZE), 25));
+    await user.type(screen.getByLabelText('Поиск по названию'), 'F');
+    await screen.findByText('Diagram 10');
+    expect(screen.getByText(`Показано ${SIZE} из 25`)).toBeInTheDocument();
+    pending.reject(serverError(500, 'boom'));
+    await screen.findByText(/Не удалось добавить диаграмму/);
+    expect(screen.getByText(`Показано ${SIZE} из 25`)).toBeInTheDocument();
+    expect(titles()).toHaveLength(SIZE);
+  });
+});
