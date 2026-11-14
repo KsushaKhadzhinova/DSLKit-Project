@@ -3,11 +3,10 @@ const { createModels } = require('./src/models');
 const { startLogRetention } = require('./src/middleware/request-log');
 
 const port = Number(process.env.PORT) || 3000;
-const { JWT_SECRET, JWT_EXPIRES_IN, TRUST_PROXY, CORS_ORIGIN, GENERAL_RATE_MAX, GENERAL_RATE_WINDOW_MINUTES } = process.env;
+const { JWT_SECRET, JWT_EXPIRES_IN, TRUST_PROXY, GENERAL_RATE_MAX, GENERAL_RATE_WINDOW_MINUTES } = process.env;
 const settings = {
   jwtSecret: JWT_SECRET,
   jwtExpiresIn: JWT_EXPIRES_IN || '1h',
-  corsOrigin: CORS_ORIGIN || 'http://localhost:5178',
   // Optional overrides of the general per-address limit from limits.json.
   ...(Number(GENERAL_RATE_MAX) > 0 && { generalRateMax: Number(GENERAL_RATE_MAX) }),
   ...(Number(GENERAL_RATE_WINDOW_MINUTES) > 0 && { generalRateWindowMs: Number(GENERAL_RATE_WINDOW_MINUTES) * 60 * 1000 }),
