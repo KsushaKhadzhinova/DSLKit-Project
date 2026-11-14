@@ -30,7 +30,7 @@ docker compose up --build
 4. Сервер запускается командой `npx sequelize-cli db:migrate && npx sequelize-cli db:seed:all && node server.js` (как в Dockerfile), состояние проверяется по `/health`, сборка: `npm ci --omit=dev`.
 5. Бесплатные план базы и сервера Render ограничены по сроку и засыпают без запросов: первый ответ после простоя медленный. Проверьте актуальные условия плана перед защитой.
 
-Не проверено: развёртывание на самом Render не выполнялось. В `render.yaml` не задан `NODE_ENV=production`, потому что в этом режиме сервер требует `DATABASE_SSL=true` и проверяемый сертификат (`DATABASE_SSL_CA`); подходит ли внутреннее соединение Render с этой проверкой, нужно выяснить при первом запуске.
+Не проверено: развёртывание на самом Render не выполнялось. Render по умолчанию ставит `NODE_ENV=production`, и в этом режиме сервер требует `DATABASE_SSL=true` и проверяемый сертификат (`DATABASE_SSL_CA`), поэтому первый запуск 14 ноября упал с этой ошибкой. В `render.yaml` теперь `NODE_ENV=development`: база доступна только по частной сети аккаунта (`ipAllowList` пуст). Для боевого режима нужен сертификат центра выдачи Render в `DATABASE_SSL_CA`.
 
 The `render.yaml` file in the repository root (branch `main`) describes three resources: the PostgreSQL database `dslkit-db`, the Node.js server `dslkit-api` and the static client `dslkit-web`. It holds no secrets: they are typed in the Render dashboard.
 
@@ -40,7 +40,7 @@ The `render.yaml` file in the repository root (branch `main`) describes three re
 4. The server starts with `npx sequelize-cli db:migrate && npx sequelize-cli db:seed:all && node server.js` (as in the Dockerfile), health is checked at `/health`, the build is `npm ci --omit=dev`.
 5. The free Render plans of the database and the server are time-limited and sleep without traffic: the first answer after idle is slow. Check the current plan terms before the defense.
 
-Not verified: no deployment to Render was performed. `render.yaml` does not set `NODE_ENV=production` because in that mode the server requires `DATABASE_SSL=true` with a verifiable certificate (`DATABASE_SSL_CA`); whether the internal Render connection fits that check has to be found out at the first start.
+Not verified: no deployment to Render was performed. Render sets `NODE_ENV=production` by default, and in that mode the server requires `DATABASE_SSL=true` and a verifiable certificate (`DATABASE_SSL_CA`), so the first start on 14 November failed with that error. `render.yaml` now sets `NODE_ENV=development`: the database is reached only through the private network of the account (`ipAllowList` is empty). A production mode needs the certificate authority of Render in `DATABASE_SSL_CA`.
 
 ## Запуск без Docker
 
