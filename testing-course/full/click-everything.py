@@ -7,9 +7,10 @@ import sys
 from urllib.parse import urljoin, urlparse
 from pathlib import Path
 from playwright.sync_api import sync_playwright
+from e2e_env import OUT, SHOTS, launch
 
 base = sys.argv[1] if len(sys.argv) > 1 else "http://localhost:5173"
-out = Path(__file__).parent
+out = OUT
 PAGES = [
     "/", "/privacy.html", "/thanks.html", "/app/welcome.html", "/app/dashboard.html", "/app/settings.html",
     "/app/editor.html?template=idef0", "/app/editor.html?template=dfd", "/en/", "/en/app/dashboard.html", "/en/app/editor.html?template=erd",
@@ -24,7 +25,7 @@ new MutationObserver((list) => { window.__m += list.length; }).observe(document,
 checked, dead, pages = [], [], {}
 
 with sync_playwright() as p:
-    b = p.chromium.launch(channel="msedge")
+    b = launch(p)
     for vp_name, w, h in VIEWPORTS:
         ctx = b.new_context(viewport={"width": w, "height": h}, accept_downloads=True)
         ctx.add_init_script("try { localStorage.setItem('dslkit.tour-done', 'true'); } catch (e) {}")

@@ -3,9 +3,10 @@ import json
 import sys
 from pathlib import Path
 from playwright.sync_api import sync_playwright
+from e2e_env import OUT, SHOTS, launch
 
 base = sys.argv[1] if len(sys.argv) > 1 else "http://localhost:5173"
-out = Path(__file__).parent
+out = OUT
 results = []
 PAGES = ["/", "/privacy.html", "/thanks.html", "/app/welcome.html", "/app/dashboard.html", "/app/settings.html", "/app/editor.html", "/en/", "/en/app/dashboard.html", "/en/app/editor.html"]
 
@@ -24,7 +25,7 @@ def yes(v, msg):
 
 
 with sync_playwright() as p:
-    b = p.chromium.launch(channel="msedge")
+    b = launch(p)
     ctx = b.new_context(viewport={"width": 1366, "height": 800})
     # Pages of the application are for signed-in users; the starter projects are marked as already added.
     ctx.add_init_script("(" + """() => { try { localStorage.setItem('dslkit.tour-done', 'true'); if (localStorage.getItem('dslkit.accounts') === null) {

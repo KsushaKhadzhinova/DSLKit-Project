@@ -39,6 +39,18 @@ python testing-course/screenshots.py   # скрины сайта и консол
 python testing-course/build-docs.py    # документы в documents/ (PDF делается из DOCX через Word)
 ```
 
+### Сквозные проверки в браузере (`full/*-e2e.py`) и CI
+
+```bash
+npm start                                  # сервер сайта на :5173, в отдельном терминале
+pip install playwright && playwright install chromium
+npm run e2e                                # editor, palette, extra, critical-path, auth, scenarios, затем e2e-gate.py
+```
+
+Скрипты читают окружение (общий помощник `full/e2e_env.py`): `E2E_BROWSER` (`msedge` по умолчанию, `chromium` в CI), `E2E_OUT` (папка для `*-e2e.json`, по умолчанию `full/`, то есть закоммиченные результаты), `E2E_SHOTS` (папка для скриншотов, по умолчанию `screens/`). `full/e2e-gate.py` завершается с кодом 1, если хоть один результат не `Passed`. В GitHub Actions задача `e2e` (`.github/workflows/ci.yml`) запускает всё это с `E2E_BROWSER=chromium` и временными папками, чтобы не менять закоммиченные JSON, и выкладывает результаты и скриншоты провалов артефактом `e2e-results`. `click-everything.py` в CI и в `npm run e2e` не входит (запускается вручную).
+
+English: `npm run e2e` runs the Playwright scripts of `full/` in order and then the gate `full/e2e-gate.py`; set `E2E_BROWSER=chromium` (default `msedge`), `E2E_OUT` and `E2E_SHOTS` to choose the browser and keep the committed JSON files clean. The `e2e` job in `.github/workflows/ci.yml` does exactly that and uploads the `e2e-results` artifact.
+
 ### Пересборка отчётов
 
 Отчёты собирает [report-gen](https://github.com/KsushaKhadzhinova/report-gen) (нужен Python 3.10+; для PDF нужен XeLaTeX).

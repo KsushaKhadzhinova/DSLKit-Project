@@ -4,9 +4,10 @@ import json
 import sys
 from pathlib import Path
 from playwright.sync_api import sync_playwright
+from e2e_env import OUT, SHOTS, launch
 
 base = sys.argv[1] if len(sys.argv) > 1 else "http://localhost:5173"
-out = Path(__file__).parent
+out = OUT
 results = []
 errors = []
 PAGE = [None]
@@ -18,8 +19,8 @@ def check(id_, title, fn):
         results.append({"id": id_, "kind": "critical", "title": title, "status": "Passed", "note": ""})
     except Exception as e:  # noqa: BLE001
         try:
-            (out.parent / "screens").mkdir(exist_ok=True)
-            PAGE[0].screenshot(path=str(out.parent / "screens" / f"fail-{id_}.png"))
+            SHOTS.mkdir(exist_ok=True)
+            PAGE[0].screenshot(path=str(SHOTS / f"fail-{id_}.png"))
         except Exception:  # noqa: BLE001
             pass
         results.append({"id": id_, "kind": "critical", "title": title, "status": "Failed", "note": " ".join(str(e).splitlines()[:8])[:600]})
@@ -36,7 +37,7 @@ def yes(v, msg):
 
 
 with sync_playwright() as p:
-    b = p.chromium.launch(channel="msedge")
+    b = launch(p)
     ctx = b.new_context(viewport={"width": 1366, "height": 800}, accept_downloads=True)
     # Pages of the application are for signed-in users; the starter projects are marked as already added.
     ctx.add_init_script("(" + """() => { try { if (localStorage.getItem('dslkit.accounts') === null) {
@@ -58,7 +59,7 @@ with sync_playwright() as p:
         page.wait_for_url("**/app/editor.html**")
         page.wait_for_timeout(700)
         if page.locator(".tour").count() and page.locator(".tour").first.is_visible():
-            page.click("text=Пропустить")
+            page.click(".tour >> text=Пропустить")
 
     check("CP-01", "Главная: кнопка «Создать диаграмму» ведёт в редактор", home)
 
@@ -144,7 +145,7 @@ with sync_playwright() as p:
         page.reload()
         page.wait_for_timeout(800)
         if page.locator(".tour").count() and page.locator(".tour").first.is_visible():
-            page.click("text=Пропустить")
+            page.click(".tour >> text=Пропустить")
         eq(code(), state["saved_code"], "после перезагрузки:")
 
     check("CP-09", "После перезагрузки открывается сохранённый проект с теми же положениями блоков", reload_restores)
@@ -180,7 +181,7 @@ with sync_playwright() as p:
         page.wait_for_url("**/editor.html?p=*")
         page.wait_for_timeout(800)
         if page.locator(".tour").count() and page.locator(".tour").first.is_visible():
-            page.click("text=Пропустить")
+            page.click(".tour >> text=Пропустить")
         yes("Мой заказ" in code(), code()[:60])
         yes(page.locator(".canvas__remote svg").count() == 1, "нет диаграммы")
 
@@ -263,7 +264,7 @@ with sync_playwright() as p:
         page.goto(base + "/app/editor.html?template=dfd")
         page.wait_for_timeout(700)
         if page.locator(".tour").count() and page.locator(".tour").first.is_visible():
-            page.click("text=Пропустить")
+            page.click(".tour >> text=Пропустить")
         page.evaluate("""() => {
           const ol = document.querySelector('.code__lines');
           const li = document.createElement('li'); li.className='code__line';
@@ -281,7 +282,7 @@ with sync_playwright() as p:
         page.goto(base + "/app/editor.html?template=idef0")
         page.wait_for_timeout(700)
         if page.locator(".tour").count() and page.locator(".tour").first.is_visible():
-            page.click("text=Пропустить")
+            page.click(".tour >> text=Пропустить")
         with page.expect_download() as dl:
             page.locator("text=Экспорт SVG").first.evaluate("e => e.click()")
         yes(dl.value.suggested_filename.endswith(".svg"), dl.value.suggested_filename)

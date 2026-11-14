@@ -3,9 +3,10 @@ import json
 import sys
 from pathlib import Path
 from playwright.sync_api import sync_playwright
+from e2e_env import OUT, SHOTS, launch
 
 base = sys.argv[1] if len(sys.argv) > 1 else "http://localhost:5173"
-out = Path(__file__).parent
+out = OUT
 results = []
 errors = []
 PAGE = [None]
@@ -17,8 +18,8 @@ def check(id_, title, fn):
         results.append({"id": id_, "kind": "palette", "title": title, "status": "Passed", "note": ""})
     except Exception as e:  # noqa: BLE001
         try:
-            (out.parent / "screens").mkdir(exist_ok=True)
-            PAGE[0].screenshot(path=str(out.parent / "screens" / f"fail-{id_}.png"))
+            SHOTS.mkdir(exist_ok=True)
+            PAGE[0].screenshot(path=str(SHOTS / f"fail-{id_}.png"))
         except Exception:  # noqa: BLE001
             pass
         results.append({"id": id_, "kind": "palette", "title": title, "status": "Failed", "note": " ".join(str(e).splitlines()[:6])[:500]})
@@ -39,7 +40,7 @@ NOTATIONS = ["idef0", "idef1", "idef1x", "idef3", "idef4", "idef5", "dfd", "erd"
              "uml-communication", "uml-timing", "uml-overview", "mindmap", "orgchart", "c4", "network", "decision", "epc"]
 
 with sync_playwright() as p:
-    b = p.chromium.launch(channel="msedge")
+    b = launch(p)
     ctx = b.new_context(viewport={"width": 1366, "height": 900})
     # Pages of the application are for signed-in users; the starter projects are marked as already added.
     ctx.add_init_script("(" + """() => { try { localStorage.setItem('dslkit.tour-done', 'true'); if (localStorage.getItem('dslkit.accounts') === null) {

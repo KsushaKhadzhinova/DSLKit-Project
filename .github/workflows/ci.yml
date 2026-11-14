@@ -62,3 +62,54 @@ jobs:
       - run: npm ci
       - run: npm test
       - run: npm run build
+
+  e2e:
+    name: Browser end-to-end checks (Playwright)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      # Chromium of Playwright instead of Edge; results and screenshots go to a temporary folder, the committed JSON files stay clean.
+      E2E_BROWSER: chromium
+      E2E_OUT: ${{ runner.temp }}/e2e/results
+      E2E_SHOTS: ${{ runner.temp }}/e2e/screens
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: npm ci
+      - run: pip install playwright
+      - run: playwright install --with-deps chromium
+      - name: Start the site on port 5173
+        run: |
+          node tools/serve.js site 5173 > "$RUNNER_TEMP/serve.log" 2>&1 &
+          for i in $(seq 1 30); do
+            curl -fsS http://localhost:5173/ > /dev/null && exit 0
+            sleep 1
+          done
+          cat "$RUNNER_TEMP/serve.log"
+          exit 1
+      - name: Run the scripts
+        run: |
+          status=0
+          for s in editor palette extra critical-path auth scenarios; do
+            echo "::group::$s"
+            python testing-course/full/$s-e2e.py || status=1
+            echo "::endgroup::"
+          done
+          exit $status
+      - name: Fail when any result is not Passed
+        run: python testing-course/full/e2e-gate.py
+      - name: Keep the working tree clean
+        if: always()
+        run: git status --porcelain --untracked-files=no | tee /dev/stderr | (! grep .)
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: e2e-results
+          path: ${{ runner.temp }}/e2e
+          retention-days: 14

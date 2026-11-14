@@ -4,9 +4,10 @@ import json
 import sys
 from pathlib import Path
 from playwright.sync_api import sync_playwright
+from e2e_env import OUT, SHOTS, launch
 
 base = sys.argv[1] if len(sys.argv) > 1 else "http://localhost:5173"
-out = Path(__file__).parent
+out = OUT
 results = []
 errors = []
 PAGE = [None]
@@ -20,8 +21,8 @@ def check(id_, title, fn):
         print("ok", id_, flush=True)
     except Exception as e:  # noqa: BLE001
         try:
-            (out.parent / "screens").mkdir(exist_ok=True)
-            PAGE[0].screenshot(path=str(out.parent / "screens" / f"fail-{id_}.png"))
+            SHOTS.mkdir(exist_ok=True)
+            PAGE[0].screenshot(path=str(SHOTS / f"fail-{id_}.png"))
         except Exception:  # noqa: BLE001
             pass
         results.append({"id": id_, "kind": "auth", "title": title, "status": "Failed", "note": " ".join(str(e).splitlines()[:8])[:600]})
@@ -47,7 +48,7 @@ def run_variant(p, tag, root, lang, viewport):
         "logout": "Выйти" if ru else "Sign out",
         "saved": "Сохранено" if ru else "Saved",
     }
-    b = p.chromium.launch(channel="msedge")
+    b = launch(p)
     ctx = b.new_context(viewport=viewport)
     ctx.add_init_script("try { localStorage.setItem('dslkit.tour-done', 'true'); } catch (e) {}")
     page = ctx.new_page()

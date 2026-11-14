@@ -4,9 +4,10 @@ import json
 import sys
 from pathlib import Path
 from playwright.sync_api import sync_playwright
+from e2e_env import OUT, SHOTS, launch
 
 base = sys.argv[1] if len(sys.argv) > 1 else "http://localhost:5173"
-out = Path(__file__).parent
+out = OUT
 results = []
 errors = []
 
@@ -30,7 +31,7 @@ def yes(v, msg):
 
 
 with sync_playwright() as p:
-    b = p.chromium.launch(channel="msedge")
+    b = launch(p)
     ctx = b.new_context(viewport={"width": 1366, "height": 800}, accept_downloads=True)
     page = ctx.new_page()
     page.on("console", lambda m: errors.append(m.text) if m.type == "error" else None)
@@ -40,7 +41,7 @@ with sync_playwright() as p:
     page.wait_for_timeout(600)
     tour_shown = page.locator(".tour").count() > 0 and page.locator(".tour").first.is_visible()
     if tour_shown:
-        page.click("text=Пропустить")
+        page.click(".tour >> text=Пропустить")
     code = lambda: page.evaluate("[...document.querySelectorAll('.code__line code')].map(e=>e.textContent).join('\\n')")  # noqa: E731
     status = lambda: page.inner_text(".canvas__status")  # noqa: E731
 
@@ -207,9 +208,9 @@ with sync_playwright() as p:
         yes(over <= 1, f"горизонтальная прокрутка {over}px")
 
     check("E2E-20", "Мобильный вид: нижняя навигация работает, нет горизонтальной прокрутки", mobile)
-    page.screenshot(path=str(out.parent / "screens" / "editor-mobile.png"))
+    page.screenshot(path=str(SHOTS / "editor-mobile.png"))
     page.set_viewport_size({"width": 1366, "height": 800})
-    page.screenshot(path=str(out.parent / "screens" / "editor-desktop.png"))
+    page.screenshot(path=str(SHOTS / "editor-desktop.png"))
 
     ctx2 = b.new_context(viewport={"width": 1366, "height": 800})
     en = ctx2.new_page()

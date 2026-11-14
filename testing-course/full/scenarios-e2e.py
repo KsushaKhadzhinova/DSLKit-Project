@@ -6,9 +6,10 @@ import sys
 import tempfile
 from pathlib import Path
 from playwright.sync_api import sync_playwright
+from e2e_env import OUT, SHOTS, launch
 
 base = sys.argv[1] if len(sys.argv) > 1 else "http://localhost:5173"
-out = Path(__file__).parent
+out = OUT
 scenarios = []
 errors = []
 
@@ -50,7 +51,7 @@ def eq(a, b, msg=""):
 
 
 with sync_playwright() as p:
-    b = p.chromium.launch(channel="msedge")
+    b = launch(p)
 
     # Pages of the application are for signed-in users, so a test account and its session are put in place before the page loads.
     # The starter projects are marked as already added, so the scenarios start from an empty list as they were written.
@@ -77,7 +78,7 @@ with sync_playwright() as p:
     def tour(pg):
         pg.wait_for_timeout(500)
         if pg.locator(".tour").count() and pg.locator(".tour").first.is_visible():
-            pg.click("text=Пропустить")
+            pg.click(".tour >> text=Пропустить")
 
     def problems(pg):
         return pg.inner_text(".problems__status")
