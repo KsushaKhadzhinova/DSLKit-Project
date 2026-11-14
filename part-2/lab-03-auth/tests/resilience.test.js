@@ -16,7 +16,7 @@ const boot = async (settings = {}) => {
   const models = createModels({ dialect: 'sqlite', storage: db.storage, logging: false });
   // The test database lives in a temporary file; fsync on every write would measure the disk of the computer, not the server.
   await models.sequelize.query('PRAGMA synchronous = OFF');
-  const config = { jwtSecret: SECRET, bcryptRounds: 4, loginRateMax: 100000, registerRateMax: 100000, loginMaxAttempts: 100000, ...settings };
+  const config = { jwtSecret: SECRET, bcryptRounds: 4, generalRateMax: 1000000, loginRateMax: 100000, registerRateMax: 100000, loginMaxAttempts: 100000, ...settings };
   const server = createApp(models, config).listen(0);
   await new Promise((resolve) => server.once('listening', resolve));
   const base = `http://127.0.0.1:${server.address().port}`;
