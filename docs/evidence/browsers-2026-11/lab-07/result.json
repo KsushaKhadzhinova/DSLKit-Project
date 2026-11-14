@@ -1,0 +1,62 @@
+[
+  {
+    "browser": "firefox",
+    "width": 1366,
+    "ok": true,
+    "steps": [
+      "two contexts connected (login): ok",
+      "both joined the room, alice sees bob in members: ok",
+      "room message alice -> bob arrived: ok",
+      "private message alice -> bob arrived: ok",
+      "room message bob -> alice arrived: ok"
+    ],
+    "console_errors": [],
+    "failed_requests": [],
+    "http_4xx_5xx": []
+  },
+  {
+    "browser": "firefox",
+    "width": 390,
+    "ok": true,
+    "steps": [
+      "two contexts connected (login): ok",
+      "both joined the room, alice sees bob in members: ok",
+      "room message alice -> bob arrived: ok",
+      "private message alice -> bob arrived: ok",
+      "room message bob -> alice arrived: ok"
+    ],
+    "console_errors": [],
+    "failed_requests": [],
+    "http_4xx_5xx": []
+  },
+  {
+    "browser": "msedge",
+    "width": 1366,
+    "ok": true,
+    "steps": [
+      "two contexts connected (login): ok",
+      "both joined the room, alice sees bob in members: ok",
+      "room message alice -> bob arrived: ok",
+      "private message alice -> bob arrived: ok",
+      "room message bob -> alice arrived: ok"
+    ],
+    "console_errors": [],
+    "failed_requests": [],
+    "http_4xx_5xx": []
+  },
+  {
+    "browser": "msedge",
+    "width": 390,
+    "ok": true,
+    "steps": [
+      "two contexts connected (login): ok",
+      "both joined the room, alice sees bob in members: ok",
+      "room message alice -> bob arrived: ok",
+      "private message alice -> bob arrived: ok",
+      "room message bob -> alice arrived: ok"
+    ],
+    "console_errors": [],
+    "failed_requests": [],
+    "http_4xx_5xx": []
+  }
+]
