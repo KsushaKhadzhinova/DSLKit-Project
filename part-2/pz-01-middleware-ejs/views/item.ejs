@@ -1,0 +1,29 @@
+<%- include('partials/header') %>
+<section class="section" aria-labelledby="page-title">
+  <h1 class="section__title" id="page-title"><%= item.title %></h1>
+  <p><span class="badge"><%= item.notation %></span></p>
+  <p class="section__lead"><%= item.description %></p>
+  <dl class="facts">
+    <dt><%= t('page.item.number') %></dt>
+    <dd><%= item.id %></dd>
+    <dt><%= t('page.item.revision') %></dt>
+    <dd><%= item.revision %></dd>
+    <dt><%= t('page.item.created') %></dt>
+    <dd><time datetime="<%= item.createdAt %>"><%= formatTime(item.createdAt) %></time></dd>
+  </dl>
+  <% if (item.code) { %>
+    <h2><%= t('page.item.source') %></h2>
+    <pre class="code"><%= item.code %></pre>
+  <% } %>
+  <div class="page-actions">
+    <a class="button button--primary" href="/<%= authQuery %>"><%= t('page.item.back') %></a>
+    <% if (!user.guest) { %>
+      <a class="button button--tonal" href="/item/<%= item.id %>/edit<%= authQuery %>"><%= t('page.item.edit') %><span class="visually-hidden"> <%= item.title %></span></a>
+      <form class="inline-form" method="post" action="/item/<%= item.id %>/delete<%= authQuery %>">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+        <button class="button button--quiet" type="submit"><%= t('page.item.delete') %><span class="visually-hidden"> <%= item.title %></span></button>
+      </form>
+    <% } %>
+  </div>
+</section>
+<%- include('partials/footer') %>
