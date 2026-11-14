@@ -60,12 +60,12 @@ test('other paths are not answered', async () => {
 
 test('the status tells whether the key is there and never shows it', async () => {
   const on = await run(make([]).handler, { method: 'GET', url: '/api/ai/status' });
-  assert.deepEqual(on.json(), { available: true, model: DEFAULT_MODEL, maxImageMb: 5 });
+  assert.deepEqual(on.json(), { available: true, provider: 'anthropic', model: DEFAULT_MODEL, maxImageMb: 5 });
   assert.ok(!on.text.includes(KEY));
   const off = await run(make([], { AI_MODEL: ' custom-model ', AI_MAX_IMAGE_MB: '2' }).handler, { method: 'GET', url: '/api/ai/status' });
-  assert.deepEqual(off.json(), { available: false, model: 'custom-model', maxImageMb: 2 });
+  assert.deepEqual(off.json(), { available: false, provider: 'anthropic', model: 'custom-model', maxImageMb: 2 });
   const blank = await run(make([], { ANTHROPIC_API_KEY: '  ', AI_MODEL: 5, AI_MAX_IMAGE_MB: 'x' }).handler, { method: 'GET', url: '/api/ai/status' });
-  assert.deepEqual(blank.json(), { available: false, model: DEFAULT_MODEL, maxImageMb: 5 });
+  assert.deepEqual(blank.json(), { available: false, provider: 'anthropic', model: DEFAULT_MODEL, maxImageMb: 5 });
   assert.equal((await run(make([]).handler, { method: 'POST', url: '/api/ai/status' })).status, 405);
   assert.equal((await run(make([]).handler, { method: 'GET' })).status, 405);
 });

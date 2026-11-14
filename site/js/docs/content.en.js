@@ -361,7 +361,7 @@ The preview of the code, the check (errors and warnings with lines), the review 
 
 ## How to turn the AI on
 
-Put the key in the .env file on the server (the names of the variables are in .env.example: ANTHROPIC_API_KEY, AI_MODEL, AI_DAILY_LIMIT, AI_MAX_IMAGE_MB) and start the server with \`npm run start:ai\`. The key is read only from the environment of the server and never reaches the page, the logs or the answers.`,
+Put the settings in the .env file on the server (the names of the variables are in .env.example: AI_PROVIDER, ANTHROPIC_API_KEY for Anthropic, AI_API_KEY and AI_BASE_URL for free OpenAI-compatible providers: Google Gemini, Groq, OpenRouter, Mistral; AI_MODEL, AI_DAILY_LIMIT, AI_MAX_IMAGE_MB) and start the server with \`npm run start:ai\`. An example for the free Gemini: AI_PROVIDER=openai, AI_BASE_URL=https://generativelanguage.googleapis.com/v1beta/openai/, AI_MODEL=gemini-2.0-flash. PDF is read only by the Anthropic provider. The key is read only from the environment of the server and never reaches the page, the logs or the answers.`,
     },
     {
       id: 'expert-system',
@@ -1484,7 +1484,7 @@ For more on the policy see SECURITY.md in the repository root.`,
 - site/js/automation/describe.js: reading a description (steps, conditions, loops, entities, relations, messages).
 - site/js/automation/builders.js: the builders of BPMN, GOST, ERD, DFD and the sequence diagram.
 - site/js/automation/build.js: \`buildFromDescription\`, \`buildFromCode\`, \`check\` (a result always passes \`parseDiagram\`).
-- tools/ai-api.js: \`POST /api/ai/generate\` (body: mode — idea, code or image; text; image and mediaType; notation; lang) and \`GET /api/ai/status\`. Answers: 200 with the code, 503 no key, 429 limit, 422 no correct DSL was obtained, 502 failure of the API. The key is read from \`process.env.ANTHROPIC_API_KEY\`, the model from AI_MODEL (claude-sonnet-5-5 by default), the daily ceiling from AI_DAILY_LIMIT, the size of a picture from AI_MAX_IMAGE_MB.
+- tools/ai-api.js: \`POST /api/ai/generate\` (body: mode — idea, code or image; text; image and mediaType; notation; lang) and \`GET /api/ai/status\`. Answers: 200 with the code, 503 no key, 429 limit, 422 no correct DSL was obtained, 502 failure of the API. The provider is chosen by AI_PROVIDER (anthropic by default, or openai: any Chat Completions API, code in tools/ai-provider.js); \`GET /api/ai/status\` shows provider and model, never the key. The key is read from \`process.env.ANTHROPIC_API_KEY\` (or AI_API_KEY and AI_BASE_URL for openai, https only), the model from AI_MODEL (claude-sonnet-5-5 by default for anthropic), the daily ceiling from AI_DAILY_LIMIT, the size of a picture from AI_MAX_IMAGE_MB.
 
 ## Expert system
 

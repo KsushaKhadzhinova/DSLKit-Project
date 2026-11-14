@@ -69,7 +69,7 @@ test('without a key the wizard says so and builds a description by rules, with t
   click('[data-auto-open]');
   await wait(() => !$('.auto').hidden && /не подключён/.test($('.auto__note').textContent));
   assert.equal($('.auto').hidden, false);
-  assert.match($('.auto__note').textContent, /ИИ не подключён: добавьте ключ в \.env сервера/);
+  assert.match($('.auto__note').textContent, /ИИ не подключён: настройте ИИ-провайдера в \.env сервера/);
   assert.equal($('.auto__check').hidden, true);
   text(DESCRIPTION);
   await api.build();
@@ -159,7 +159,7 @@ test('with a key the description goes to the server, the answer is shown with it
   await wait(() => /claude-test/.test($('.auto__note').textContent));
   assert.equal($('.auto').hidden, false);
   assert.match($('.auto__note').textContent, /ИИ подключён \(модель claude-test\)/);
-  assert.match($('.auto__note').textContent, /отправляются в Anthropic/);
+  assert.match($('.auto__note').textContent, /отправляются ИИ-провайдеру/);
   assert.equal($('.auto__check').hidden, false);
   text('интернет-магазин');
   $('#auto-notation').value = 'dfd';
@@ -208,7 +208,7 @@ test('a result without warnings and a result of an unknown shape are both shown'
 
 test('every failure of the server has its own word and the build button comes back', async () => {
   const cases = [
-    [() => refuse(503), /ИИ не подключён: добавьте ключ в \.env сервера/],
+    [() => refuse(503), /ИИ не подключён: настройте ИИ-провайдера в \.env сервера/],
     [() => refuse(429), /Лимит запросов к ИИ/],
     [() => refuse(422, { problems: [] }), /не смог получить корректный код/],
     [() => refuse(413), /слишком велик/],

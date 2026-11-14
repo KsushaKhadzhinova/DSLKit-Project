@@ -3,12 +3,13 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { NOTATION_KEYS, formatProblem, parseDiagram } from '../site/js/notations/index.js';
 import { handleClarify } from './ai-questions.js';
+import { PROVIDERS, checkBaseUrl, createAsk } from './ai-provider.js';
 import { reviewWithAi } from './ai-review.js';
 import { listNotations } from './render-api.js';
 import { VISION_SIGNATURES, VISION_TASK, VISION_TYPES, retryMessage, visionBlock, visionIssues } from './ai-vision.js';
 
-// The AI endpoints of DSLKit: a description, a piece of code in another language or a picture becomes DSLKit code through the Claude API.
-// The key is read only from the environment of the server (ANTHROPIC_API_KEY). It is never written to a file, a log or an answer.
+// The AI endpoints of DSLKit: a description, a piece of code in another language or a picture becomes DSLKit code through an AI provider (AI_PROVIDER: anthropic by default, or openai for any OpenAI-compatible API).
+// The key is read only from the environment of the server (ANTHROPIC_API_KEY, or AI_API_KEY for the provider openai). It is never written to a file, a log or an answer.
 // Every result is checked by parseDiagram; a result with errors goes back to the model with the list of problems, at most twice.
 export const MODES = ['idea', 'code', 'image', 'review'];
 export const IMAGE_TYPES = { 'image/png': 'png', 'image/jpeg': 'jpeg', 'image/webp': 'webp', 'image/gif': 'gif', ...VISION_TYPES };
@@ -19,10 +20,6 @@ const DEFAULT_DAILY = 200;
 const DEFAULT_IMAGE_MB = 5;
 const RATE_LIMIT = 6;
 const RATE_WINDOW_MS = 60_000;
-const API_URL = 'https://api.anthropic.com/v1/messages';
-const API_VERSION = '2023-06-01';
-const TIMEOUT_MS = 60_000;
-const MAX_TOKENS = 4096;
 const LANGS = ['ru', 'en'];
 const REFERENCE_FILE = join(dirname(fileURLToPath(import.meta.url)), '..', 'docs', 'DSL-REFERENCE.en.md');
 const MAX_REFERENCE = 40_000;
@@ -101,12 +98,23 @@ export const createAiHandler = ({ env = process.env, fetchImpl = globalThis.fetc
   const hits = new Map();
   const day = { key: '', count: 0 };
   const reference = readReference ?? (() => readFileSync(REFERENCE_FILE, 'utf8'));
-  const settings = () => ({
-    key: typeof env.ANTHROPIC_API_KEY === 'string' ? env.ANTHROPIC_API_KEY.trim() : '',
-    model: (typeof env.AI_MODEL === 'string' && env.AI_MODEL.trim()) || DEFAULT_MODEL,
-    daily: positive(env.AI_DAILY_LIMIT, DEFAULT_DAILY),
-    imageBytes: positive(env.AI_MAX_IMAGE_MB, DEFAULT_IMAGE_MB) * 1024 * 1024,
-  });
+  const clean = (value) => (typeof value === 'string' ? value.trim() : '');
+  const settings = () => {
+    const provider = clean(env.AI_PROVIDER).toLowerCase() || 'anthropic';
+    const openai = provider === 'openai';
+    const key = clean(openai ? env.AI_API_KEY : env.ANTHROPIC_API_KEY);
+    const baseUrl = clean(env.AI_BASE_URL);
+    const model = clean(env.AI_MODEL) || (openai ? '' : DEFAULT_MODEL);
+    const ready = PROVIDERS.includes(provider) && key !== '' && model !== '' && (!openai || checkBaseUrl(baseUrl));
+    return {
+      provider,
+      key: ready ? key : '',
+      baseUrl,
+      model,
+      daily: positive(env.AI_DAILY_LIMIT, DEFAULT_DAILY),
+      imageBytes: positive(env.AI_MAX_IMAGE_MB, DEFAULT_IMAGE_MB) * 1024 * 1024,
+    };
+  };
 
   // A sliding window per address: the times of the latest requests are kept, the old ones are forgotten.
   const rateLimited = (ip) => {
@@ -127,19 +135,7 @@ export const createAiHandler = ({ env = process.env, fetchImpl = globalThis.fetc
     return false;
   };
 
-  const ask = async ({ key, model }, system, messages) => {
-    const answer = await fetchImpl(API_URL, {
-      method: 'POST',
-      headers: { 'x-api-key': key, 'anthropic-version': API_VERSION, 'content-type': 'application/json' },
-      body: JSON.stringify({ model, max_tokens: MAX_TOKENS, system: [{ type: 'text', text: system, cache_control: { type: 'ephemeral' } }], messages }),
-      signal: AbortSignal.timeout(TIMEOUT_MS),
-    });
-    if (!answer.ok) throw new Error('upstream status');
-    const body = await answer.json();
-    const text = (body.content ?? []).find((block) => block.type === 'text')?.text;
-    if (typeof text !== 'string' || text.trim() === '') throw new Error('upstream empty');
-    return text;
-  };
+  const ask = (config, system, messages) => createAsk({ ...config, fetchImpl })(system, messages);
 
   const firstMessage = ({ mode, text, notation, image, mediaType }) => {
     const parts = [];
@@ -211,7 +207,7 @@ export const createAiHandler = ({ env = process.env, fetchImpl = globalThis.fetc
       const config = settings();
       if (pathname === '/api/ai/status') {
         if (req.method !== 'GET') return fail(res, 405, 'method', 'Use GET', {}, { Allow: 'GET' });
-        return json(res, 200, { available: config.key !== '', model: config.model, maxImageMb: config.imageBytes / 1024 / 1024 });
+        return json(res, 200, { available: config.key !== '', provider: config.provider, model: config.model, maxImageMb: config.imageBytes / 1024 / 1024 });
       }
       if (pathname === '/api/ai/clarify') {
         const system = (lang) => buildSystemPrompt(safeReference(), lang);
@@ -219,7 +215,7 @@ export const createAiHandler = ({ env = process.env, fetchImpl = globalThis.fetc
       }
       if (pathname !== '/api/ai/generate') return fail(res, 404, 'not-found', `Unknown endpoint ${pathname}`);
       if (req.method !== 'POST') return fail(res, 405, 'method', 'Use POST', {}, { Allow: 'POST' });
-      if (config.key === '') return fail(res, 503, 'no-key', 'The AI is not connected: the server has no key');
+      if (config.key === '') return fail(res, 503, 'no-key', 'The AI is not connected: the server has no AI provider key');
       let body;
       try {
         body = JSON.parse(await readBody(req, Math.ceil(config.imageBytes * 1.4) + MAX_TEXT * 4 + 4096));
@@ -243,7 +239,8 @@ export const createAiHandler = ({ env = process.env, fetchImpl = globalThis.fetc
           );
         }
         result = await generate(config, checked.input, body.lang ?? 'ru');
-      } catch {
+      } catch (error) {
+        if (error.code === 'pdf-provider') return fail(res, 415, 'pdf-provider', error.message);
         return fail(res, 502, 'upstream', 'The AI service failed, try again later');
       }
       if (result.errors.length > 0) {

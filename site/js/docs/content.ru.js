@@ -361,7 +361,7 @@ flow 1 -> Customer "receipt"
 
 ## Как включить ИИ
 
-Положите ключ в файл .env на сервере (имена переменных есть в .env.example: ANTHROPIC_API_KEY, AI_MODEL, AI_DAILY_LIMIT, AI_MAX_IMAGE_MB) и запустите сервер командой \`npm run start:ai\`. Ключ читается только из окружения сервера и никогда не попадает на страницу, в логи или ответы.`,
+Положите настройки в файл .env на сервере (имена переменных есть в .env.example: AI_PROVIDER, ANTHROPIC_API_KEY для Anthropic, AI_API_KEY и AI_BASE_URL для бесплатных провайдеров, совместимых с OpenAI: Google Gemini, Groq, OpenRouter, Mistral; AI_MODEL, AI_DAILY_LIMIT, AI_MAX_IMAGE_MB) и запустите сервер командой \`npm run start:ai\`. Пример для бесплатного Gemini: AI_PROVIDER=openai, AI_BASE_URL=https://generativelanguage.googleapis.com/v1beta/openai/, AI_MODEL=gemini-2.0-flash. PDF читает только провайдер Anthropic. Ключ читается только из окружения сервера и никогда не попадает на страницу, в логи или ответы.`,
     },
     {
       id: 'expert-system',
@@ -1484,7 +1484,7 @@ PBKDF2-SHA-256, 100 000 итераций, случайная соль 16 бай�
 - site/js/automation/describe.js: разбор описания (шаги, условия, циклы, сущности, связи, сообщения).
 - site/js/automation/builders.js: построители BPMN, ГОСТ, ERD, DFD и диаграммы последовательности.
 - site/js/automation/build.js: \`buildFromDescription\`, \`buildFromCode\`, \`check\` (результат всегда проходит \`parseDiagram\`).
-- tools/ai-api.js: \`POST /api/ai/generate\` (тело: mode — idea, code или image; text; image и mediaType; notation; lang) и \`GET /api/ai/status\`. Ответы: 200 с кодом, 503 нет ключа, 429 лимит, 422 не удалось получить корректный DSL, 502 сбой API. Ключ читается из \`process.env.ANTHROPIC_API_KEY\`, модель из AI_MODEL (по умолчанию claude-sonnet-5-5), потолок в сутки из AI_DAILY_LIMIT, размер картинки из AI_MAX_IMAGE_MB.
+- tools/ai-api.js: \`POST /api/ai/generate\` (тело: mode — idea, code или image; text; image и mediaType; notation; lang) и \`GET /api/ai/status\`. Ответы: 200 с кодом, 503 нет ключа, 429 лимит, 422 не удалось получить корректный DSL, 502 сбой API. Провайдер выбирает AI_PROVIDER (anthropic по умолчанию или openai: любой API Chat Completions, код в tools/ai-provider.js); \`GET /api/ai/status\` показывает provider и model, но не ключ. Ключ читается из \`process.env.ANTHROPIC_API_KEY\` (или AI_API_KEY и AI_BASE_URL для openai, адрес только https), модель из AI_MODEL (для anthropic по умолчанию claude-sonnet-5-5), потолок в сутки из AI_DAILY_LIMIT, размер картинки из AI_MAX_IMAGE_MB.
 
 ## Экспертная система
 
