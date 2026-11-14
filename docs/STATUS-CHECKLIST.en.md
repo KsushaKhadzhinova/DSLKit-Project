@@ -1,0 +1,76 @@
+# DSLKit project status checklist
+
+Russian version: [`STATUS-CHECKLIST.md`](STATUS-CHECKLIST.md). State on 14 November 2026. Legend: ✅ done and verified, 🟡 partly done or not fully verified, ⏳ in progress, 🙋 needs your decision or your hands, 💡 could be added, ⬜ not started.
+
+## 1 The works of the course: status of each
+
+| Work                            | Branch                         | Folder                         | Code and tests                                                                         | Report RU+EN | What is left                                                                                  |
+| ------------------------------- | ------------------------------ | ------------------------------ | -------------------------------------------------------------------------------------- | ------------ | --------------------------------------------------------------------------------------------- |
+| Part 1, labs 1-8, the site      | `main`, `testing-course-full`  | `labs/`, `site/`               | ✅ 1229 tests, coverage 100%                                                           | ✅           | 🙋 PWA check in a real Chrome                                                                 |
+| Lab 1 Express, array            | `lab21`                        | `part-2/lab-01-node-server`    | ✅ 77 of 78 (the load test "1000 sockets" fails on this Windows and in its own branch) | ✅           | 🙋 Postman screenshots (at least five operations), question to the teacher: array or database |
+| Lab 2 Sequelize                 | `lab12`                        | `part-2/lab-02-sequelize`      | ✅ 120, PostgreSQL 16 verified, seeds                                                  | ✅           | 🙋 database structure screenshot (pgAdmin or DBeaver), Postman                                |
+| Lab 3 Authentication            | `23`                           | `part-2/lab-03-auth`           | ✅ 182, general rate limiter                                                           | ✅           | ⏳ advanced authentication (refresh, 2FA, permissions), 🙋 Postman, database structure        |
+| Lab 4 React state               | `24`                           | `part-2/lab-04-react-state`    | ✅ 104                                                                                 | ✅           | 🟡 Firefox and Edge were not in the November protocol                                         |
+| Lab 5 React and server          | `25`                           | `part-2/lab-05-react-api`      | ✅ 125                                                                                 | ✅           | ✅ Firefox and Edge                                                                           |
+| Lab 6 MongoDB                   | `26`                           | `part-2/lab-06-mongodb`        | ✅ 152, Atlas connected, data loaded                                                   | ✅           | 🙋 Postman; 🟡 no page, checked through the API                                               |
+| Lab 7 WebSocket                 | `27`                           | `part-2/lab-07-websocket`      | ✅ 109                                                                                 | ✅           | 🟡 not checked on a live MongoDB                                                              |
+| Lab 8 Docker                    | `28`                           | `part-2/lab-08-docker`         | ✅ 24, stack up, `/api/health` 200                                                     | ✅           | ✅ images on Docker Hub (`rnxdhehe`); 🙋 screenshots of `docker ps` and of the Hub page       |
+| Practical 1 Middleware and EJS  | `pz21`                         | `part-2/pz-01-middleware-ejs`  | ✅ 165                                                                                 | ✅           | 💡 DevTools screenshot                                                                        |
+| Practical 2 REST API            | `pz22`                         | `part-2/pz-02-rest-api`        | ✅ 119                                                                                 | ✅           | 🙋 Postman screenshots                                                                        |
+| Practical 3 Routing             | `pz23`                         | `part-2/pz-03-routing`         | ✅ 160                                                                                 | ✅           | 🙋 decision on the router version (v7 in the repository, `pz-03-routing-v6` also lies there)  |
+| Practical 4 Context and reducer | `pz24`                         | `part-2/pz-04-context-reducer` | ✅ 82                                                                                  | ✅           | 💡 React DevTools screenshots                                                                 |
+| Course project                  | `course-app`, `course-project` | `course-project/`              | ✅ note, application, measurements                                                     | 🟡           | 🙋 title page, assignment, contents, sources, screenshots in Word; ✅ deployed on Render      |
+
+Every work lives in its own branch (pushed), all are merged into `main`. The branches have their own `ci.yml`, which is not merged into `main`.
+
+## 2 What is implemented in the project
+
+| Area                                                                                                                       | Status                                                        |
+| -------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| Diagram-as-code editor: 33 notations, 4 rendering engines, light and dark themes, Russian and English                      | ✅                                                            |
+| Palette, dragging blocks (`pos=XxY`), undo and redo, quick element adding                                                  | ✅                                                            |
+| Projects, trash, explorer, versions, Share by link, user templates                                                         | ✅                                                            |
+| Export to SVG, PNG, JPEG, draw.io, HTML                                                                                    | ✅                                                            |
+| File import: draw.io, SVG, JSON, BPMN, XMI, GraphML, GEXF, Visio, DOT, CSV, Mermaid, PlantUML; pictures and PDF through AI | ✅ tests, 🟡 not checked on real Graphviz and Mermaid exports |
+| Diagram check and fix variants                                                                                             | ✅ by rules, 🟡 with AI only on a fake API                    |
+| Clarifying questions and completion from answers                                                                           | ✅ by rules, 🟡 with AI only on a fake API                    |
+| AI modes through the free Gemini (`AI_PROVIDER=openai`), Anthropic as the fallback                                         | ✅ text call verified, 🟡 pictures not verified               |
+| RU and EN multilingual support, guard tests against divergence                                                             | ✅                                                            |
+| Russian and English variants of the templates                                                                              | ✅                                                            |
+| Responsiveness, 44 px touch targets, print, forced-colors                                                                  | ✅                                                            |
+| Browser accounts (PBKDF2), roles user, developer, admin                                                                    | ✅                                                            |
+| Advanced authentication on the site: password policy, lockout, sessions, 2FA TOTP, permissions                             | ⏳                                                            |
+| Advanced authentication in lab 3: refresh tokens, 2FA, permissions, audit                                                  | ⏳                                                            |
+| Tests: 1229 root tests, 14 e2e scenarios, 6 e2e scripts in CI, Firefox and Edge protocol for labs 5-8                      | ✅                                                            |
+| CI on GitHub (tests, build, React, e2e) and the site deploy on Pages                                                       | ✅                                                            |
+| CI on the work branches                                                                                                    | ✅                                                            |
+| Course project deploy on Render (database, API, site)                                                                      | ✅, 🙋 the course administrator is not created                |
+| Images on Docker Hub                                                                                                       | ✅                                                            |
+
+## 3 In progress now
+
+| What                                                                                                          | Who                               |
+| ------------------------------------------------------------------------------------------------------------- | --------------------------------- |
+| Dependency and GitHub Actions updates (13 PRs)                                                                | an agent                          |
+| Authentication on the site and in lab 3                                                                       | two agents                        |
+| Vulnerability search (local only), UI audit, UX audit, scenarios under different accounts in Firefox and Edge | four agents                       |
+| Fixing what was found                                                                                         | after the reports of these agents |
+
+## 4 Needs your decision, approval or your hands
+
+- 🙋 Postman and database structure screenshots for labs 1-3 and practical 2: I have no tool to click in desktop applications.
+- 🙋 Questions to the teacher: lab 1 data in a database or in an array, router version in practical 3, SQLite or PostgreSQL, whether a screenshot of every endpoint is needed.
+- 🙋 Course project in Word: title page, assignment, contents, sources, final screenshots.
+- 🙋 Course administrator on Render: add `ADMIN_EMAIL` and `ADMIN_PASSWORD`.
+- 🙋 An Anthropic key is not needed while Gemini works; the personal Gmail was used with your permission.
+- 🙋 Thesis (June 2027): topic and scope from the supervisor.
+
+## 5 Ideas that could be added
+
+- 💡 A real server for the editor: accounts and projects in a database instead of the browser, collaboration.
+- 💡 Block properties panel, export of PlantUML and Mermaid code as a file, Gantt diagram.
+- 💡 Upload of the new notations and feature frames to Figma.
+- 💡 Own fonts.
+- 💡 PWA install with a check on a phone.
+- 💡 Firefox and Edge check for lab 4 and the practicals.
+- 💡 Make the load test of lab 1 stable on Windows.
