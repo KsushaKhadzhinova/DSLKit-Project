@@ -361,7 +361,7 @@ flow 1 -> Customer "receipt"
 
 ## Как включить ИИ
 
-Положите настройки в файл .env на сервере (имена переменных есть в .env.example: AI_PROVIDER, ANTHROPIC_API_KEY для Anthropic, AI_API_KEY и AI_BASE_URL для бесплатных провайдеров, совместимых с OpenAI: Google Gemini, Groq, OpenRouter, Mistral; AI_MODEL, AI_DAILY_LIMIT, AI_MAX_IMAGE_MB) и запустите сервер командой \`npm run start:ai\`. Пример для бесплатного Gemini: AI_PROVIDER=openai, AI_BASE_URL=https://generativelanguage.googleapis.com/v1beta/openai/, AI_MODEL=gemini-2.0-flash. PDF читает только провайдер Anthropic. Ключ читается только из окружения сервера и никогда не попадает на страницу, в логи или ответы.`,
+Положите настройки в файл .env на сервере (имена переменных есть в .env.example: AI_PROVIDER, ANTHROPIC_API_KEY для Anthropic, AI_API_KEY и AI_BASE_URL для бесплатных провайдеров, совместимых с OpenAI: Google Gemini, Groq, OpenRouter, Mistral; AI_MODEL, AI_DAILY_LIMIT, AI_MAX_IMAGE_MB) и запустите сервер командой \`npm run start:ai\`. Пример для бесплатного Gemini: AI_PROVIDER=openai, AI_BASE_URL=https://generativelanguage.googleapis.com/v1beta/openai/, AI_MODEL=gemini-3.1-flash-lite. PDF читает только провайдер Anthropic. Ключ читается только из окружения сервера и никогда не попадает на страницу, в логи или ответы.`,
     },
     {
       id: 'expert-system',

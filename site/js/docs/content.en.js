@@ -361,7 +361,7 @@ The preview of the code, the check (errors and warnings with lines), the review 
 
 ## How to turn the AI on
 
-Put the settings in the .env file on the server (the names of the variables are in .env.example: AI_PROVIDER, ANTHROPIC_API_KEY for Anthropic, AI_API_KEY and AI_BASE_URL for free OpenAI-compatible providers: Google Gemini, Groq, OpenRouter, Mistral; AI_MODEL, AI_DAILY_LIMIT, AI_MAX_IMAGE_MB) and start the server with \`npm run start:ai\`. An example for the free Gemini: AI_PROVIDER=openai, AI_BASE_URL=https://generativelanguage.googleapis.com/v1beta/openai/, AI_MODEL=gemini-2.0-flash. PDF is read only by the Anthropic provider. The key is read only from the environment of the server and never reaches the page, the logs or the answers.`,
+Put the settings in the .env file on the server (the names of the variables are in .env.example: AI_PROVIDER, ANTHROPIC_API_KEY for Anthropic, AI_API_KEY and AI_BASE_URL for free OpenAI-compatible providers: Google Gemini, Groq, OpenRouter, Mistral; AI_MODEL, AI_DAILY_LIMIT, AI_MAX_IMAGE_MB) and start the server with \`npm run start:ai\`. An example for the free Gemini: AI_PROVIDER=openai, AI_BASE_URL=https://generativelanguage.googleapis.com/v1beta/openai/, AI_MODEL=gemini-3.1-flash-lite. PDF is read only by the Anthropic provider. The key is read only from the environment of the server and never reaches the page, the logs or the answers.`,
     },
     {
       id: 'expert-system',
