@@ -1,0 +1,91 @@
+### VS Code REST Client (extension humao.rest-client). Start the server first: npm run dev
+### Run `npm run seed`, then GET /diagrams and copy an "id" and a comment "id" into the variables below.
+@base = http://localhost:3000
+
+### Health check -> 200
+GET {{base}}/health
+@id = 000000000000000000000001
+@commentId = 000000000000000000000002
+
+### List all diagrams -> 200
+GET {{base}}/diagrams
+
+### Filter by tag (array contains) and owner -> 200
+GET {{base}}/diagrams?tag=shop&owner=anna
+
+### One diagram -> 200
+GET {{base}}/diagrams/{{id}}
+
+### Well-formed but unknown ObjectId -> 404
+GET {{base}}/diagrams/64b7f0c2a1b2c3d4e5f60718
+
+### Not an ObjectId -> 400
+GET {{base}}/diagrams/abc
+
+### Create with tags -> 201 + Location
+POST {{base}}/diagrams
+Content-Type: application/json
+
+{
+  "title": "Login flow",
+  "notation": "UML",
+  "sourceCode": "user -> server",
+  "priority": 1,
+  "owner": "carol",
+  "tags": ["auth", "web"]
+}
+
+### Invalid data -> 400 with details
+POST {{base}}/diagrams
+Content-Type: application/json
+
+{ "title": "", "notation": "XYZ", "tags": [""] }
+
+### Malformed JSON -> 400
+POST {{base}}/diagrams
+Content-Type: application/json
+
+{ "title":
+
+### Replace (comments are kept) -> 200
+PUT {{base}}/diagrams/{{id}}
+Content-Type: application/json
+
+{
+  "title": "Order processing v2",
+  "notation": "BPMN",
+  "sourceCode": "start -> check -> pay -> ship",
+  "priority": 0,
+  "owner": "anna",
+  "tags": ["shop"]
+}
+
+### Add a comment: $push into the nested array -> 201
+POST {{base}}/diagrams/{{id}}/comments
+Content-Type: application/json
+
+{ "author": "boris", "text": "Add a refund branch" }
+
+### Edit one comment inside the array: positional $ -> 200
+PUT {{base}}/diagrams/{{id}}/comments/{{commentId}}
+Content-Type: application/json
+
+{ "text": "Refund branch added" }
+
+### Remove one comment: $pull -> 200
+DELETE {{base}}/diagrams/{{id}}/comments/{{commentId}}
+
+### Delete the diagram with its comments -> 204 (repeat it -> 404)
+DELETE {{base}}/diagrams/{{id}}
+
+### Unknown route -> 404
+GET {{base}}/projects
+
+### Aggregation: count, average priority and comments per notation -> 200
+GET {{base}}/diagrams/stats
+
+### Search inside the nested comments array -> 200
+GET {{base}}/diagrams?commentAuthor=boris
+
+### Paging -> 200
+GET {{base}}/diagrams?limit=2&skip=1
