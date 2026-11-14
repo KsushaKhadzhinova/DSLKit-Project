@@ -55,7 +55,7 @@ with sync_playwright() as p:
     check("EX-01", "У каждой видимой кнопки, ссылки и поля есть доступное имя (все страницы, ru и en)", names)
 
     def keyboard():
-        page.goto(base + "/app/editor.html?template=idef0")
+        page.goto(base + "/app/editor.html?template=idef0&tl=en")
         page.wait_for_timeout(600)
         seen = set()
         for _ in range(80):
@@ -122,7 +122,7 @@ with sync_playwright() as p:
         pg = ctx2.new_page()
         errs = []
         pg.on("pageerror", lambda e: errs.append(str(e)))
-        pg.goto(base + "/app/editor.html?template=dfd")
+        pg.goto(base + "/app/editor.html?template=dfd&tl=en")
         pg.wait_for_timeout(800)
         yes(pg.locator(".canvas__remote svg").count() == 1, "без хранилища диаграмма не нарисована")
         # Without storage there is no session, so the application pages send a guest to the sign-in page, and that page must still open.
@@ -136,7 +136,7 @@ with sync_playwright() as p:
 
     def two_tabs():
         pg1 = ctx.new_page()
-        pg1.goto(base + "/app/editor.html?template=idef0")
+        pg1.goto(base + "/app/editor.html?template=idef0&tl=en")
         pg1.wait_for_timeout(500)
         pg1.click('[data-action="save"]')
         pg1.wait_for_timeout(300)
@@ -159,7 +159,7 @@ with sync_playwright() as p:
     check("EX-08", "Страница 404 с заголовком и ссылкой назад", errors_pages)
 
     def large_code():
-        page.goto(base + "/app/editor.html?template=idef0")
+        page.goto(base + "/app/editor.html?template=idef0&tl=en")
         page.wait_for_timeout(500)
         page.evaluate("""() => {
           const ol = document.querySelector('.code__lines');
@@ -172,7 +172,7 @@ with sync_playwright() as p:
     check("EX-09", "Редактор не падает на коде из 400 строк комментариев", large_code)
 
     def long_label():
-        page.goto(base + "/app/editor.html?template=idef0")
+        page.goto(base + "/app/editor.html?template=idef0&tl=en")
         page.wait_for_timeout(500)
         page.evaluate("""() => { const c = document.querySelector('.code__line code'); c.textContent = 'diagram idef0 "' + 'Очень длинное название '.repeat(30) + '"'; }""")
         page.click(".button--run", force=True)
@@ -182,7 +182,7 @@ with sync_playwright() as p:
     check("EX-10", "Очень длинное название диаграммы не ломает отрисовку", long_label)
 
     def xss_title():
-        page.goto(base + "/app/editor.html?template=idef0")
+        page.goto(base + "/app/editor.html?template=idef0&tl=en")
         page.wait_for_timeout(500)
         page.evaluate("""() => { window.__xss = 0; const c = document.querySelector('.code__line code'); c.textContent = 'diagram idef0 "<img src=x onerror=window.__xss=1><script>window.__xss=2</script>"'; }""")
         page.click(".button--run", force=True)

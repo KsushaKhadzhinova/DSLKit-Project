@@ -134,7 +134,7 @@ with sync_playwright() as p:
         page.click('[data-action="save"]')
         page.wait_for_timeout(400)
         yes("Сохранено" in page.inner_text(".editor-status__saved"), page.inner_text(".editor-status__saved"))
-        yes("?p=" in page.url, page.url)
+        yes(("?p=" in page.url or "&p=" in page.url), page.url)
         eq(page.inner_text(".editor-topbar__title"), "мой-заказ.dsl")
         state["url"] = page.url
         state["saved_code"] = code()
@@ -178,7 +178,7 @@ with sync_playwright() as p:
 
     def open_saved():
         page.locator(".project-list__item").first.locator(".project-card__link").click()
-        page.wait_for_url("**/editor.html?p=*")
+        page.wait_for_url("**/editor.html?*p=*")
         page.wait_for_timeout(800)
         if page.locator(".tour").count() and page.locator(".tour").first.is_visible():
             page.click(".tour >> text=Пропустить")
@@ -233,7 +233,7 @@ with sync_playwright() as p:
         page.locator("[data-section=mine]").click()
         eq(page.locator(".project-list__item[data-project]:visible").count(), 1)
         page.locator(".project-list__item[data-project]:visible .project-card__link").first.click()
-        page.wait_for_url("**/editor.html?p=*")
+        page.wait_for_url("**/editor.html?*p=*")
         page.wait_for_timeout(600)
         yes(code().startswith("diagram "), code()[:30])
 
@@ -261,7 +261,7 @@ with sync_playwright() as p:
     check("CP-17", "Страница «Создать»: карточка шаблона открывает редактор с этим шаблоном", welcome)
 
     def strict_self_loop():
-        page.goto(base + "/app/editor.html?template=dfd")
+        page.goto(base + "/app/editor.html?template=dfd&tl=en")
         page.wait_for_timeout(700)
         if page.locator(".tour").count() and page.locator(".tour").first.is_visible():
             page.click(".tour >> text=Пропустить")
@@ -279,7 +279,7 @@ with sync_playwright() as p:
     check("CP-18", "Строгая проверка нотации: связь элемента с самим собой показывается как ошибка", strict_self_loop)
 
     def export_download():
-        page.goto(base + "/app/editor.html?template=idef0")
+        page.goto(base + "/app/editor.html?template=idef0&tl=en")
         page.wait_for_timeout(700)
         if page.locator(".tour").count() and page.locator(".tour").first.is_visible():
             page.click(".tour >> text=Пропустить")

@@ -108,17 +108,17 @@ with sync_playwright() as p:
     s.step("Добавляет блок из палитры перетаскиванием на доску", lambda: (lambda item, svg: (pg.mouse.move(item["x"] + 10, item["y"] + 10), pg.mouse.down(), pg.mouse.move(svg["x"] + svg["width"] * 0.55, svg["y"] + svg["height"] * 0.75, steps=10), pg.mouse.up(), pg.wait_for_timeout(600), yes(pg.locator(".canvas__remote .notation__node").count() == 5, "нового блока нет"), yes("box A4" in code(pg), "блок не в коде")))(pal(pg).first.bounding_box(), pg.locator(".canvas__remote svg").bounding_box()))
     s.step("Соединяет блок A3 с блоком A4 стрелкой в режиме «Соединить»", lambda: (pg.click(".palette__mode"), pg.locator('.notation__node[data-id="A3"]').click(), pg.locator('.notation__node[data-id="A4"]').click(), pg.wait_for_timeout(500), yes("arrow A3.output -> A4.input" in code(pg), "стрелки нет в коде")))
     s.step("Перетаскивает блок A1 мышью, положение пишется в код", lambda: (pg.keyboard.press("Escape"), (lambda box: (pg.mouse.move(box["x"] + box["width"] / 2, box["y"] + box["height"] / 2), pg.mouse.down(), pg.mouse.move(box["x"] + box["width"] / 2 + 50, box["y"] + box["height"] / 2 + 40, steps=8), pg.mouse.up()))(pg.locator('.notation__node[data-id="A1"]').bounding_box()), pg.wait_for_timeout(500), yes(re.search(r"box A1 [^\n]*pos=", code(pg)), "pos= не записан")))
-    s.step("Нажимает «Сохранить»: проект получает имя и адрес", lambda: (pg.click('[data-action="save"]'), pg.wait_for_timeout(400), yes("?p=" in pg.url, pg.url), eq(pg.inner_text(".editor-topbar__title"), "заказ-в-магазине.dsl")))
+    s.step("Нажимает «Сохранить»: проект получает имя и адрес", lambda: (pg.click('[data-action="save"]'), pg.wait_for_timeout(400), yes(("?p=" in pg.url or "&p=" in pg.url), pg.url), eq(pg.inner_text(".editor-topbar__title"), "заказ-в-магазине.dsl")))
     saved_url = {}
     s.step("Запоминает адрес проекта и уходит на панель проектов", lambda: (saved_url.update(u=pg.url), pg.click(".editor-toolbar__logo"), pg.wait_for_url("**/dashboard.html")))
-    s.step("Находит проект первым в «Мои проекты» и открывает его", lambda: (eq(pg.locator(".project-list__item").first.locator(".project-card__link").inner_text(), "Заказ в магазине"), pg.locator(".project-list__item").first.locator(".project-card__link").click(), pg.wait_for_url("**/editor.html?p=*"), tour(pg), pg.wait_for_timeout(1000), yes("arrow A3.output -> A4.input" in code(pg) and "pos=" in code(pg), "проект открылся не со всем содержимым"), yes(pg.locator(".canvas__remote .notation__node").count() == 5, f"диаграмма не нарисована: узлов {pg.locator('.canvas__remote .notation__node').count()}")))
+    s.step("Находит проект первым в «Мои проекты» и открывает его", lambda: (eq(pg.locator(".project-list__item").first.locator(".project-card__link").inner_text(), "Заказ в магазине"), pg.locator(".project-list__item").first.locator(".project-card__link").click(), pg.wait_for_url("**/editor.html?*p=*"), tour(pg), pg.wait_for_timeout(1000), yes("arrow A3.output -> A4.input" in code(pg) and "pos=" in code(pg), "проект открылся не со всем содержимым"), yes(pg.locator(".canvas__remote .notation__node").count() == 5, f"диаграмма не нарисована: узлов {pg.locator('.canvas__remote .notation__node').count()}")))
     ctx.close()
     s.done()
 
     # ---------------------------------------------------------------- S1b export files
     s = Scenario("S2", "Студентка выгружает результат", "Получить диаграмму в SVG, PNG, JPEG, draw.io и HTML и убедиться, что файлы настоящие")
     ctx, pg = new_user()
-    pg.goto(base + "/app/editor.html?template=idef0")
+    pg.goto(base + "/app/editor.html?template=idef0&tl=en")
     tour(pg)
     pg.wait_for_timeout(500)
 
@@ -141,7 +141,7 @@ with sync_playwright() as p:
     # ---------------------------------------------------------------- S3
     s = Scenario("S3", "Аналитик рисует потоки данных (DFD)", "Построить DFD по правилам нотации, не нарушив их")
     ctx, pg = new_user()
-    pg.goto(base + "/app/editor.html?template=dfd")
+    pg.goto(base + "/app/editor.html?template=dfd&tl=en")
     tour(pg)
     pg.wait_for_timeout(600)
     s.step("Шаблон DFD открыт без ошибок", lambda: yes(code(pg).startswith("diagram dfd") and pg.locator(".canvas__remote svg").count() == 1, code(pg)[:30]))
@@ -156,7 +156,7 @@ with sync_playwright() as p:
     # ---------------------------------------------------------------- S4
     s = Scenario("S4", "Разработчик переносит схему из Mermaid и PlantUML", "Импортировать готовые диаграммы, не печатая их заново")
     ctx, pg = new_user()
-    pg.goto(base + "/app/editor.html?template=idef0")
+    pg.goto(base + "/app/editor.html?template=idef0&tl=en")
     tour(pg)
     pg.wait_for_timeout(500)
     mermaid = "flowchart TD\n  A[Начало] --> B{Проверка}\n  B -->|да| C[Готово]\n  B -->|нет| A"
@@ -180,7 +180,7 @@ with sync_playwright() as p:
     # ---------------------------------------------------------------- S5
     s = Scenario("S5", "Новичок ошибается в коде и исправляет с подсказкой", "Понять ошибку, исправить с помощью помощника и вернуться к рабочей диаграмме")
     ctx, pg = new_user()
-    pg.goto(base + "/app/editor.html?template=idef0")
+    pg.goto(base + "/app/editor.html?template=idef0&tl=en")
     tour(pg)
     pg.wait_for_timeout(500)
     s.step("Опечатка в слове control: показана ошибка со строкой, «Запустить» заблокирована", lambda: (set_code(pg, code(pg).replace(" control: Sales policy", " contro: Sales policy")), yes("order.dsl:" in pg.inner_text(".problems__list") or ".dsl:" in pg.inner_text(".problems__list"), "строка ошибки не указана"), eq(pg.locator(".button--run").first.get_attribute("aria-disabled"), "true")))
@@ -194,7 +194,7 @@ with sync_playwright() as p:
     # ---------------------------------------------------------------- S6
     s = Scenario("S6", "Тимлид ведёт историю версий и переименовывает по всему коду", "Безопасно переименовать блок и при необходимости вернуть старую версию")
     ctx, pg = new_user()
-    pg.goto(base + "/app/editor.html?template=idef0")
+    pg.goto(base + "/app/editor.html?template=idef0&tl=en")
     tour(pg)
     pg.wait_for_timeout(500)
     first = {}
@@ -213,7 +213,7 @@ with sync_playwright() as p:
     names = {"idef0": "Заказ", "dfd": "Платежи", "erd": "Магазин"}
 
     def make(tpl, title):
-        pg.goto(f"{base}/app/editor.html?template={tpl}")
+        pg.goto(f"{base}/app/editor.html?template={tpl}&tl=en")
         tour(pg)
         pg.wait_for_timeout(400)
         src = code(pg)
@@ -239,10 +239,10 @@ with sync_playwright() as p:
     # ---------------------------------------------------------------- S8
     s = Scenario("S8", "Пользователь телефона (390 px)", "Создать диаграмму на телефоне и сохранить её")
     ctx, pg = new_user(390, 800)
-    s.step("Открывает главную и редактор, горизонтальной прокрутки нет", lambda: (pg.goto(base + "/app/editor.html?template=idef0"), tour(pg), pg.wait_for_timeout(500), yes(pg.evaluate("document.documentElement.scrollWidth - innerWidth") <= 1, "есть прокрутка вбок")))
+    s.step("Открывает главную и редактор, горизонтальной прокрутки нет", lambda: (pg.goto(base + "/app/editor.html?template=idef0&tl=en"), tour(pg), pg.wait_for_timeout(500), yes(pg.evaluate("document.documentElement.scrollWidth - innerWidth") <= 1, "есть прокрутка вбок")))
     s.step("Нижняя навигация переключает «Код» и «Холст»", lambda: (pg.click('.editor-bottom-nav [data-view="code"]'), pg.wait_for_timeout(300), yes(pg.locator("#editor-panel").is_visible(), "код не виден"), pg.click('.editor-bottom-nav [data-view="canvas"]'), pg.wait_for_timeout(300), yes(pg.locator(".canvas__remote svg").is_visible(), "холст не виден")))
     s.step("Кнопка «Меню» открывает проводник с шаблонами и палитрой", lambda: (pg.click('.editor-bottom-nav [data-action="sidebar"]'), pg.wait_for_timeout(300), yes(pal(pg).first.is_visible(), "палитра не видна")))
-    s.step("Нажимает элемент палитры: блок добавлен, затем сохраняет", lambda: (pal(pg).first.click(), pg.wait_for_timeout(500), yes("box A4" in code(pg), "блок не добавлен"), pg.click('[data-action="save"]'), pg.wait_for_timeout(400), yes("?p=" in pg.url, pg.url)))
+    s.step("Нажимает элемент палитры: блок добавлен, затем сохраняет", lambda: (pal(pg).first.click(), pg.wait_for_timeout(500), yes("box A4" in code(pg), "блок не добавлен"), pg.click('[data-action="save"]'), pg.wait_for_timeout(400), yes(("?p=" in pg.url or "&p=" in pg.url), pg.url)))
     ctx.close()
     s.done()
 
@@ -259,7 +259,7 @@ with sync_playwright() as p:
     # ---------------------------------------------------------------- S10
     s = Scenario("S10", "Пользователь закрыл вкладку, не сохранив", "Не потерять работу: автосохранение сохранённого проекта и восстановление")
     ctx, pg = new_user()
-    pg.goto(base + "/app/editor.html?template=bpmn")
+    pg.goto(base + "/app/editor.html?template=bpmn&tl=en")
     tour(pg)
     pg.wait_for_timeout(500)
     st = {}
@@ -273,11 +273,11 @@ with sync_playwright() as p:
     # ---------------------------------------------------------------- S11
     s = Scenario("S11", "Пользователь в плохой сети", "Работать без интернета и при недоступном сервисе Kroki")
     ctx, pg = new_user()
-    pg.goto(base + "/app/editor.html?template=idef0")
+    pg.goto(base + "/app/editor.html?template=idef0&tl=en")
     tour(pg)
     pg.wait_for_timeout(1500)
     s.step("Собственный движок рисует без сети: интернет отключён, диаграмма перерисовывается", lambda: (ctx.set_offline(True), set_code(pg, code(pg).replace('"Order process"', '"Офлайн"')), yes("Офлайн" in pg.inner_text(".canvas__remote"), "не нарисовано без сети")))
-    s.step("Выбирает движок Kroki в настройках: без сети получает понятное сообщение, а не белый экран", lambda: (ctx.set_offline(False), pg.goto(base + "/app/settings.html"), pg.select_option("#diagram-engine", "graphviz"), ctx.set_offline(True), pg.goto(base + "/app/editor.html?template=idef0"), tour(pg), pg.wait_for_timeout(1500), yes(any(w in pg.inner_text(".canvas__status") for w in ("Нет соединения", "недоступен", "Сервер")), pg.inner_text(".canvas__status")), yes(pg.locator("body").inner_text() != "", "пустая страница")))
+    s.step("Выбирает движок Kroki в настройках: без сети получает понятное сообщение, а не белый экран", lambda: (ctx.set_offline(False), pg.goto(base + "/app/settings.html"), pg.select_option("#diagram-engine", "graphviz"), ctx.set_offline(True), pg.goto(base + "/app/editor.html?template=idef0&tl=en"), tour(pg), pg.wait_for_timeout(1500), yes(any(w in pg.inner_text(".canvas__status") for w in ("Нет соединения", "недоступен", "Сервер")), pg.inner_text(".canvas__status")), yes(pg.locator("body").inner_text() != "", "пустая страница")))
     s.step("Страница редактора открывается из кэша без сети", lambda: (pg.goto(base + "/app/dashboard.html"), yes("Мои проекты" in pg.title(), pg.title())))
     ctx.close()
     s.done()
@@ -294,7 +294,7 @@ with sync_playwright() as p:
     # ---------------------------------------------------------------- S13
     s = Scenario("S13", "Автор правит диаграмму руками и убирает лишнее с доски", "Печатать код, добавлять и удалять блоки, не ломая диаграмму")
     ctx, pg = new_user()
-    pg.goto(base + "/app/editor.html?template=dfd")
+    pg.goto(base + "/app/editor.html?template=dfd&tl=en")
     tour(pg)
     pg.wait_for_timeout(700)
     s.step("Печатает с клавиатуры новое хранилище и поток: диаграмма обновляется без нажатия «Запустить»", lambda: (pg.click(".code__input", position={"x": 300, "y": 40}), pg.keyboard.press("Control+End"), pg.keyboard.press("Enter"), pg.keyboard.type('store D2 "Archive"'), pg.keyboard.press("Enter"), pg.keyboard.type('flow 2 -> D2 "copy"'), pg.wait_for_timeout(1200), yes('store D2 "Archive"' in code(pg), code(pg)[-60:]), yes("Archive" in pg.inner_text(".canvas__remote"), "хранилища нет на диаграмме"), yes(pg.locator(".canvas__remote .notation__node").count() == 6, "узлов не шесть")))
@@ -311,7 +311,7 @@ with sync_playwright() as p:
     ctx, pg = new_user()
     s.step("В «Общие примеры» есть пример для каждой из 33 нотаций", lambda: (pg.goto(base + "/app/dashboard.html"), pg.wait_for_timeout(500), pg.click("[data-section=shared]"), pg.wait_for_timeout(300), eq(pg.locator(".project-list__item:visible").count(), 33)))
     s.step("Список «Другие нотации» содержит остальные 29, выбор «UML · Состояния» оставляет один пример", lambda: (eq(pg.locator("#notation-filter option").count(), 30), pg.select_option("#notation-filter", "uml-state"), pg.wait_for_timeout(300), eq(pg.locator(".project-list__item:visible").count(), 1)))
-    s.step("Открывает пример: в редакторе нужная нотация, диаграмма нарисована, ошибок нет", lambda: (pg.locator(".project-list__item:visible .project-card__link").click(), pg.wait_for_url("**/editor.html?template=uml-state"), tour(pg), pg.wait_for_timeout(600), yes(code(pg).startswith("diagram uml state"), code(pg)[:30]), yes(pg.locator(".canvas__remote svg").count() == 1, "нет диаграммы"), eq(pg.locator(".button--run").first.get_attribute("aria-disabled"), "false")))
+    s.step("Открывает пример: в редакторе нужная нотация, диаграмма нарисована, ошибок нет", lambda: (pg.locator(".project-list__item:visible .project-card__link").click(), pg.wait_for_url("**/editor.html?template=uml-state*"), tour(pg), pg.wait_for_timeout(600), yes(code(pg).startswith("diagram uml state"), code(pg)[:30]), yes(pg.locator(".canvas__remote svg").count() == 1, "нет диаграммы"), eq(pg.locator(".button--run").first.get_attribute("aria-disabled"), "false")))
     s.step("Сохраняет копию и находит её в «Мои проекты» с тегом нотации", lambda: (pg.click('[data-action="save"]'), pg.wait_for_timeout(400), pg.goto(base + "/app/dashboard.html"), pg.wait_for_timeout(500), eq(pg.locator(".project-list__item:visible").count(), 1), yes("UML" in pg.locator(".project-list__item:visible .project-card__tag").inner_text(), "тега нет")))
     s.step("Счётчик беты показывает одну созданную сегодня диаграмму", lambda: yes("создано 1 из 5" in pg.inner_text(".app-nav__quota-text"), pg.inner_text(".app-nav__quota-text")))
     s.step("Поиск в верхней строке с другой страницы открывает список с запросом", lambda: (pg.goto(base + "/app/welcome.html"), pg.fill(".app-topbar__search-input", "state"), pg.keyboard.press("Enter"), pg.wait_for_url("**/dashboard.html?q=state"), pg.wait_for_timeout(400), yes(pg.input_value(".app-topbar__search-input") == "state", "запрос не подставлен")))

@@ -80,11 +80,11 @@ def run_variant(p, tag, root, lang, viewport):
         page.wait_for_url("**/login.html")
         eq(page.locator("[data-project]").count(), 0, "гостю не должны показываться проекты:")
         # The editor stays open to a guest: a template opens and a save gives the project an address.
-        page.goto(prefix + "/app/editor.html?template=idef0")
+        page.goto(prefix + "/app/editor.html?template=idef0&tl=en")
         page.wait_for_timeout(500)
         page.click('[data-action="save"]')
         page.wait_for_timeout(400)
-        yes("?p=" in page.url, page.url)
+        yes(("?p=" in page.url or "&p=" in page.url), page.url)
         page.goto(prefix + "/app/dashboard.html")
         page.wait_for_url("**/login.html")
 
@@ -153,7 +153,7 @@ def run_variant(p, tag, root, lang, viewport):
         page.click('[data-action="save"]')
         page.wait_for_timeout(500)
         yes(word["saved"] in page.inner_text(".editor-status__saved"), page.inner_text(".editor-status__saved"))
-        yes("?p=" in page.url, page.url)
+        yes(("?p=" in page.url or "&p=" in page.url), page.url)
         user_keys = page.evaluate("Object.keys(localStorage).filter(k => k.startsWith('dslkit.projects.'))")
         eq(len(user_keys), 1, "проект должен лежать под ключом пользователя:")
         page.goto(prefix + "/app/dashboard.html")
@@ -161,7 +161,7 @@ def run_variant(p, tag, root, lang, viewport):
         eq(page.locator("[data-project] .project-card__link").first.inner_text(), title, "первая карточка:")
         eq(page.locator("[data-project]").count(), total + 1, "число проектов:")
         page.locator("[data-project] .project-card__link").first.click()
-        page.wait_for_url("**/editor.html?p=*")
+        page.wait_for_url("**/editor.html?*p=*")
         page.wait_for_timeout(700)
         yes(title in code(), "проект из списка не открылся")
         yes(page.locator(".canvas__remote svg").count() == 1, "нет диаграммы")
@@ -169,7 +169,7 @@ def run_variant(p, tag, root, lang, viewport):
     check(f"AUTH-{tag}-06", f"[{tag}] После входа: «Новая диаграмма» -> шаблон -> правка кода -> сохранение -> карточка в списке -> открытие", lambda: create_after_login("First after login"))
 
     def palette_after_login():
-        page.goto(prefix + "/app/editor.html?template=dfd")
+        page.goto(prefix + "/app/editor.html?template=dfd&tl=en")
         page.wait_for_timeout(600)
         before = code().count("process")
         page.evaluate("document.querySelector(\".palette__item\").click()")
@@ -178,7 +178,7 @@ def run_variant(p, tag, root, lang, viewport):
         yes(page.locator(".palette__message").count() >= 1, "нет сообщения палитры")
         page.click('[data-action="save"]')
         page.wait_for_timeout(500)
-        yes("?p=" in page.url, page.url)
+        yes(("?p=" in page.url or "&p=" in page.url), page.url)
         _ = before
 
     check(f"AUTH-{tag}-07", f"[{tag}] После входа: блок из палитры добавляется и проект сохраняется", palette_after_login)
@@ -241,7 +241,7 @@ def run_variant(p, tag, root, lang, viewport):
             )
             page.evaluate("document.querySelector(\".button--run\").click()")
             page.wait_for_timeout(1800)
-            yes("?p=" in page.url or page.locator(".editor-status__saved").inner_text() != "", f"круг {n}: проект не создан автоматически")
+            yes(("?p=" in page.url or "&p=" in page.url) or page.locator(".editor-status__saved").inner_text() != "", f"круг {n}: проект не создан автоматически")
             page.go_back() if n == 2 else None
             page.goto(prefix + "/app/dashboard.html")
             page.wait_for_timeout(400)

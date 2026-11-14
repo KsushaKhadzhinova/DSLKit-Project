@@ -61,7 +61,7 @@ with sync_playwright() as p:
         return page.locator(".palette__item", **kw)
 
     def load(template):
-        page.goto(f"{base}/app/editor.html?template={template}")
+        page.goto(f"{base}/app/editor.html?template={template}&tl=en")
         page.wait_for_timeout(600)
 
     def drop(index, dx=0.5, dy=0.5):
