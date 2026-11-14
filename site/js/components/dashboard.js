@@ -1,4 +1,4 @@
-import { NOTATIONS, NOTATION_KEYS, TEMPLATES, parseDiagram } from '../notations/index.js';
+import { NOTATIONS, NOTATION_KEYS, TEMPLATE_LANGS, parseDiagram, templateFor } from '../notations/index.js';
 import { currentUser, isUnlimited } from '../storage/accounts.js';
 import { notify } from './toast.js';
 import { starterProjects } from '../storage/seeds.js';
@@ -54,6 +54,8 @@ const LABELS = {
     askPurge: (title) => `Удалить проект «${title}» навсегда? Это нельзя отменить.`,
     actions: (title) => `Действия с проектом ${title}`,
     titles: { mine: 'Мои проекты', templates: 'Мои шаблоны', shared: 'Общие примеры', trash: 'Корзина' },
+    templateLang: 'Язык шаблонов',
+    templateOption: { ru: 'Шаблон: русский', en: 'Шаблон: English' },
   },
   en: {
     found: (count) => `Projects found: ${count}`,
@@ -99,6 +101,8 @@ const LABELS = {
     askPurge: (title) => `Delete the project "${title}" forever? This cannot be undone.`,
     actions: (title) => `Actions for the project ${title}`,
     titles: { mine: 'My projects', templates: 'My templates', shared: 'Shared examples', trash: 'Trash' },
+    templateLang: 'Template language',
+    templateOption: { ru: 'Template: Russian', en: 'Template: English' },
   },
 };
 
@@ -205,6 +209,17 @@ export const initDashboard = ({ root = document, storage, now = () => Date.now()
   };
 
   // One shared example for every notation of the editor, the page asks for them with the attribute data-examples.
+  // The language of the examples: the language of the page first, the select above the list changes it.
+  let exampleLang = lang;
+  let exampleChoice = null;
+  const fillExamples = () =>
+    list.querySelectorAll('.project-list__item:not([data-project]):not([data-template])').forEach((item) => {
+      const link = item.querySelector('.project-card__link');
+      const key = item.dataset.notation;
+      link.textContent = parseDiagram(templateFor(key, exampleLang)).title;
+      link.href = `editor.html?template=${key}&tl=${exampleLang}`;
+      item.querySelector('.project-card__menu').setAttribute('aria-label', labels.actions(link.textContent));
+    });
   const examples = () => {
     if (list.dataset.examples === undefined) return;
     NOTATION_KEYS.forEach((key) => {
@@ -212,8 +227,8 @@ export const initDashboard = ({ root = document, storage, now = () => Date.now()
       item.dataset.notation = key;
       const article = el('article', 'project-card');
       const headingBox = el('h2', 'project-card__title');
-      const link = el('a', 'project-card__link', parseDiagram(TEMPLATES[key]).title);
-      link.href = `editor.html?template=${key}`;
+      const link = el('a', 'project-card__link', parseDiagram(templateFor(key, exampleLang)).title);
+      link.href = `editor.html?template=${key}&tl=${exampleLang}`;
       headingBox.append(link);
       const tag = el('p', 'project-card__notation');
       tag.append(el('span', 'project-card__tag', NOTATIONS[key].short));
@@ -221,6 +236,20 @@ export const initDashboard = ({ root = document, storage, now = () => Date.now()
       item.append(article);
       list.append(item);
     });
+    exampleChoice = el('select', 'filter__select templates__lang');
+    exampleChoice.setAttribute('aria-label', labels.templateLang);
+    TEMPLATE_LANGS.forEach((code) => {
+      const option = el('option', '', labels.templateOption[code]);
+      option.value = code;
+      exampleChoice.append(option);
+    });
+    exampleChoice.value = exampleLang;
+    exampleChoice.addEventListener('change', () => {
+      exampleLang = exampleChoice.value;
+      fillExamples();
+      render();
+    });
+    list.before(exampleChoice);
   };
   examples();
 
@@ -306,6 +335,7 @@ export const initDashboard = ({ root = document, storage, now = () => Date.now()
     if (search) search.value = state.query;
     if (sortSelect) sortSelect.value = state.sort;
     if (newTemplate) newTemplate.hidden = section !== 'templates';
+    if (exampleChoice) exampleChoice.hidden = section !== 'shared';
     // The notation filters have no meaning among the templates and in the trash.
     root.querySelectorAll('.filter, #notation-filter').forEach((node) => (node.hidden = section === 'templates' || section === 'trash'));
     emptyTrash.hidden = section !== 'trash' || store.listTrash().length === 0;
@@ -381,8 +411,14 @@ export const initDashboard = ({ root = document, storage, now = () => Date.now()
       if (!view.confirm(labels.askPurge(title(item)))) return false;
       store.remove(id);
     } else {
-      const key = new view.URL(item.querySelector('.project-card__link').href).searchParams.get('template');
-      const copy = { title: title(item), notation: item.dataset.notation, source: Object.hasOwn(TEMPLATES, key) ? TEMPLATES[key] : TEMPLATES.idef0 };
+      const params = new view.URL(item.querySelector('.project-card__link').href).searchParams;
+      const key = params.get('template');
+      const tl = TEMPLATE_LANGS.includes(params.get('tl')) ? params.get('tl') : lang;
+      const copy = {
+        title: title(item),
+        notation: item.dataset.notation,
+        source: templateFor(key, tl) ?? templateFor('idef0', tl),
+      };
       if (action === 'copy-template') templates.save(copy);
       else if (action === 'like') {
         const liked = likes();
@@ -415,7 +451,7 @@ export const initDashboard = ({ root = document, storage, now = () => Date.now()
   newTemplate?.addEventListener('click', () => {
     const name = view.prompt(labels.askNewTemplate, '');
     if (name === null || name.trim() === '') return;
-    const template = templates.save({ title: name, notation: 'idef0', source: TEMPLATES.idef0 });
+    const template = templates.save({ title: name, notation: 'idef0', source: templateFor('idef0', lang) });
     go(`editor.html?tpl=${encodeURIComponent(template.id)}`);
   });
   list.addEventListener('click', (event) => {

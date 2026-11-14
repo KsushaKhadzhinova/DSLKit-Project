@@ -1,6 +1,6 @@
 import { readCode, showCode } from './code-lines.js';
 import { notify } from './toast.js';
-import { TEMPLATES, parseDiagram } from '../notations/index.js';
+import { TEMPLATE_LANGS, parseDiagram, templateFor } from '../notations/index.js';
 import { currentUser, isUnlimited } from '../storage/accounts.js';
 import { starterProjects } from '../storage/seeds.js';
 import { createProjectStore, createTemplateStore, showQuota, titleOf } from '../storage/projects.js';
@@ -80,9 +80,11 @@ export const initEditorProjects = ({
     lastSaved = project.source;
   } else {
     const key = params.get('template');
-    // Object.hasOwn keeps an address such as ?template=__proto__ or ?template=constructor from reaching an
-    // inherited property of TEMPLATES, which is not a diagram source and breaks the rest of this component.
-    baseline = start?.source ?? (Object.hasOwn(TEMPLATES, key) ? TEMPLATES[key] : TEMPLATES.idef0);
+    // templateFor looks only at own keys, so an address such as ?template=__proto__ or ?template=constructor does not reach an
+    // inherited property, which is not a diagram source and breaks the rest of this component.
+    // ?tl=<ru|en> picks the language of the starter, the language of the page is the default.
+    const tl = TEMPLATE_LANGS.includes(params.get('tl')) ? params.get('tl') : lang;
+    baseline = start?.source ?? templateFor(key, tl) ?? templateFor('idef0', tl);
     showCode(root, codeLines, baseline);
     if ((params.has('p') || params.has('tpl') || params.has('my')) && !start && note) note.textContent = TEXTS.notFound[lang];
   }

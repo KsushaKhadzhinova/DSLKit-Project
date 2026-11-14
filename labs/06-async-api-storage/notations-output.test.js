@@ -10,6 +10,7 @@ import { renderLocal } from '../../site/js/engines/local-engine.js';
 import {
   NOTATIONS,
   TEMPLATES,
+  TEMPLATES_RU,
   analyzeDag,
   analyzeGraph,
   dijkstra,
@@ -225,10 +226,10 @@ test('loading a template replaces the code, highlights keywords and draws the di
   const { window, $, $$, editor, document } = page();
   assert.equal(editor.loadTemplate('dfd'), true);
   await flush();
-  assert.equal($$('.code__line').length, TEMPLATES.dfd.split('\n').length);
+  assert.equal($$('.code__line').length, TEMPLATES_RU.dfd.split('\n').length);
   assert.equal($('.code__line .code__keyword').textContent, 'diagram');
   assert.equal($$('.code__line')[5].querySelector('.code__keyword').textContent, 'store');
-  assert.equal($$('.code__line')[1].textContent, 'entity Customer');
+  assert.equal($$('.code__line')[1].textContent, 'entity Клиент');
   assert.match($('.canvas__remote').innerHTML, /notation__node/);
   assert.equal($('.editor-status__type').textContent, 'DFD');
   assert.equal($('[data-notation-label]').textContent, 'Диаграмма: DFD');
