@@ -3,6 +3,7 @@
 // Everything is deterministic: a small XML reader of our own (no DOMParser, so it runs in Node too), no network, no AI.
 // Result: { ok, notation, code, warnings } or { ok: false, reason, warnings }.
 import { parseDiagram } from '../notations/index.js';
+import { normalizeLanguage } from './lang.js';
 
 export const MAX_FILE_BYTES = 10 * 1024 * 1024;
 const MAX_LABEL = 80;
@@ -31,7 +32,7 @@ const WORDS = {
     'class-members': 'From the UML classes the names, attributes and operations are taken, without types.',
   },
 };
-const say = (lang, key, params = {}) => WORDS[lang === 'en' ? 'en' : 'ru'][key].replace(/\{(\w+)\}/g, (_, name) => params[name]);
+const say = (lang, key, params = {}) => WORDS[normalizeLanguage(lang)][key].replace(/\{(\w+)\}/g, (_, name) => params[name]);
 
 // ---------- a small XML reader ----------
 const ENTITY = /&(?:#x([0-9a-f]+)|#(\d+)|(lt|gt|amp|quot|apos));/gi;

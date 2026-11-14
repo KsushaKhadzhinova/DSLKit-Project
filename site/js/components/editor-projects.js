@@ -3,13 +3,12 @@ import { notify } from './toast.js';
 import { TEMPLATES, parseDiagram } from '../notations/index.js';
 import { currentUser, isUnlimited } from '../storage/accounts.js';
 import { starterProjects } from '../storage/seeds.js';
-import { createProjectStore, createTemplateStore, showQuota } from '../storage/projects.js';
+import { createProjectStore, createTemplateStore, showQuota, titleOf } from '../storage/projects.js';
 import { pageLanguage } from '../utils/lang.js';
 
 const TEXTS = {
   saved: { ru: 'Сохранено в «Мои проекты»: {title}', en: 'Saved to "My projects": {title}' },
   notFound: { ru: 'Проект не найден, открыта новая диаграмма.', en: 'The project is not found, a new diagram is open.' },
-  untitled: { ru: 'Без названия', en: 'Untitled' },
   templateSaved: { ru: 'Шаблон сохранён в «Мои шаблоны»: {title}', en: 'Template saved to "My templates": {title}' },
   templateDeleted: {
     ru: 'Этот шаблон удалён в другой вкладке. Правка не сохранена, сохраните её как новый шаблон или проект.',
@@ -77,7 +76,7 @@ export const initEditorProjects = ({
 
   if (project) {
     showCode(root, codeLines, project.source);
-    name(project.title);
+    name(titleOf(project, lang));
     lastSaved = project.source;
   } else {
     const key = params.get('template');
@@ -102,7 +101,7 @@ export const initEditorProjects = ({
   const renderTree = () => {
     showQuota(quotaText, quotaBar, store.createdOn(), lang, isUnlimited(user));
     if (!tree) return;
-    const rows = store.list().map((item) => ({ id: item.id, label: fileName(item.title), active: item.id === project?.id }));
+    const rows = store.list().map((item) => ({ id: item.id, label: fileName(titleOf(item, lang)), active: item.id === project?.id }));
     if (!project) rows.unshift({ id: '', label: (template ? TEXTS.editingTemplate : TEXTS.fresh)[lang], active: true });
     tree.replaceChildren(
       ...rows.map((row) => {
@@ -130,7 +129,7 @@ export const initEditorProjects = ({
   const describe = () => {
     const source = readCode(codeLines);
     const model = parseDiagram(source);
-    return { source, title: model.title || TEXTS.untitled[lang], notation: model.notation ?? 'idef0' };
+    return { source, title: model.title, notation: model.notation ?? 'idef0' };
   };
   const saveTemplate = (id) => {
     const saved = templates.save({ id, ...describe() });
@@ -140,7 +139,7 @@ export const initEditorProjects = ({
       notify(root, saidDeleted, 'error');
       return null;
     }
-    const saidTemplate = TEXTS.templateSaved[lang].replace('{title}', saved.title);
+    const saidTemplate = TEXTS.templateSaved[lang].replace('{title}', titleOf(saved, lang));
     if (note) note.textContent = saidTemplate;
     notify(root, saidTemplate, 'success');
     return saved;
@@ -151,7 +150,7 @@ export const initEditorProjects = ({
       if (saved === null) return null;
       template = saved;
       lastSaved = template.source;
-      name(template.title);
+      name(titleOf(template, lang));
       return template;
     }
     const { source, title, notation } = describe();
@@ -163,13 +162,13 @@ export const initEditorProjects = ({
     }
     project = saved;
     lastSaved = source;
-    name(project.title);
+    name(titleOf(project, lang));
     params.set('p', project.id);
     params.delete('template');
     view.history.replaceState(null, '', `${view.location.pathname}?${params}`);
     carryQuery();
     renderTree();
-    if (note) note.textContent = TEXTS.saved[lang].replace('{title}', project.title);
+    if (note) note.textContent = TEXTS.saved[lang].replace('{title}', titleOf(project, lang));
     return project;
   };
 

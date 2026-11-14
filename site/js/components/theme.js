@@ -1,4 +1,10 @@
 import { notify } from './toast.js';
+import { pageLanguage, pick } from '../utils/lang.js';
+
+const TEXTS = {
+  dark: { ru: 'Тема: тёмная', en: 'Theme: dark' },
+  light: { ru: 'Тема: светлая', en: 'Theme: light' },
+};
 
 export const THEMES = ['light', 'dark'];
 
@@ -58,8 +64,7 @@ export const initTheme = ({ root = document, storage, matchMedia = defaultMatchM
     const value = current === 'dark' ? 'light' : 'dark';
     storage.set(STORAGE_KEY, value);
     apply(value);
-    const english = html.lang === 'en';
-    notify(root, english ? `Theme: ${value}` : `Тема: ${value === 'dark' ? 'тёмная' : 'светлая'}`, 'info');
+    notify(root, pick(TEXTS[value], pageLanguage(root)), 'info');
   });
 
   root.addEventListener('change', (event) => {

@@ -2,7 +2,15 @@ import { NOTATIONS, TEMPLATES } from '../notations/index.js';
 import { ui } from '../notations/messages.js';
 import { showCode } from './code-lines.js';
 import { initSourceAutosave } from './source-autosave.js';
-import { pageLanguage } from '../utils/lang.js';
+import { pageLanguage, pick } from '../utils/lang.js';
+
+const TEXTS = {
+  closeFile: { ru: 'Закрыть файл', en: 'Close the file' },
+  closeAsk: {
+    ru: 'Закрыть файл {name}? Несохранённые изменения будут потеряны, если не сохранить.',
+    en: 'Close the file {name}? Unsaved changes are lost unless you save.',
+  },
+};
 
 const VIEWS = ['code', 'canvas'];
 const KEY_STEPS = { ArrowRight: 1, ArrowLeft: -1 };
@@ -36,7 +44,7 @@ const initTabs = ({ page, root, storage, tabs }) => {
       panels[position].hidden = !active;
     });
     if (focus) tabs[index].focus();
-    closeButton?.setAttribute('aria-label', `${root.documentElement.lang === 'en' ? 'Close the file' : 'Закрыть файл'} ${tabName(index)}`);
+    closeButton?.setAttribute('aria-label', `${pick(TEXTS.closeFile, pageLanguage(root))} ${tabName(index)}`);
     storage.set('editor-tab', index);
   };
 
@@ -92,10 +100,7 @@ const initCloseDialog = ({ page, root, tabs, tabsApi }) => {
     dialog.returnValue = '';
     if (dialogText) {
       const name = tabName(current());
-      dialogText.textContent =
-        root.documentElement.lang === 'en'
-          ? `Close the file ${name}? Unsaved changes are lost unless you save.`
-          : `Закрыть файл ${name}? Несохранённые изменения будут потеряны, если не сохранить.`;
+      dialogText.textContent = pick(TEXTS.closeAsk, pageLanguage(root), { name });
     }
     if (typeof dialog.showModal === 'function') dialog.showModal();
     else dialog.setAttribute('open', '');

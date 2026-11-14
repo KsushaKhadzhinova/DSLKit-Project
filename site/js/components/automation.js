@@ -1,4 +1,5 @@
 import { NOTATIONS } from '../notations/index.js';
+import { pageLanguage } from '../utils/lang.js';
 import { BUILDABLE } from '../automation/builders.js';
 import { buildFromDescription } from '../automation/build.js';
 import { ACCEPT, MAX_FILE_BYTES, importUpload, pictureType, uploadKind } from '../automation/upload.js';
@@ -162,7 +163,7 @@ export const initAutomation = ({ root = document, storage, fetchImpl } = {}) => 
   const codeLines = page?.querySelector('.code__lines');
   if (!codeLines) return null;
   const view = root.defaultView;
-  const lang = root.documentElement.lang === 'en' ? 'en' : 'ru';
+  const lang = pageLanguage(root);
   const t = (key, params = {}) => TEXTS[lang][key].replace(/\{(\w+)\}/g, (_, name) => params[name]);
   const call = fetchImpl ?? ((...args) => view.fetch(...args));
   const store = expertStore(storage);

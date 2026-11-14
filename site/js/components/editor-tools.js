@@ -2,7 +2,7 @@ import { readCode, showCode } from './code-lines.js';
 import { createExpertPanel } from './expert-panel.js';
 import { notify } from './toast.js';
 import { addCommit, assistant, diffLines, diffText, replaceAll, searchLines } from '../utils/editor-tools.js';
-import { pageLanguage } from '../utils/lang.js';
+import { formatDateTime, formatTime, pageLanguage } from '../utils/lang.js';
 
 const TEXTS = {
   search: { ru: 'Поиск', en: 'Search' },
@@ -167,7 +167,7 @@ export const initEditorTools = ({ root = document, storage, now = () => Date.now
       const item = el('li', 'editor-tools__commit');
       item.dataset.id = commit.id;
       const title = el('span', 'editor-tools__commit-title', `${commit.id} ${commit.message}`);
-      const time = el('time', 'editor-tools__commit-time', new Date(commit.at).toISOString().slice(0, 16).replace('T', ' '));
+      const time = el('time', 'editor-tools__commit-time', formatDateTime(commit.at, lang));
       const compare = button(t('diff'));
       compare.dataset.act = 'diff';
       const back = button(t('restore'));
@@ -355,7 +355,7 @@ export const initEditorTools = ({ root = document, storage, now = () => Date.now
   page.addEventListener('dslkit:run', () => {
     setTimeout(() => {
       const text = page.querySelector('.problems__status')?.textContent ?? '';
-      lines.unshift(el('li', '', `${new Date(now()).toISOString().slice(11, 19)} ${t('run', { status: text })}`));
+      lines.unshift(el('li', '', `${formatTime(now(), lang)} ${t('run', { status: text })}`));
       lines.length = Math.min(lines.length, 50);
       if (!outputList.hidden) showOutput();
     }, 0);

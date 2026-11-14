@@ -1,4 +1,9 @@
-import { pageLanguage } from '../utils/lang.js';
+import { pageLanguage, pick } from '../utils/lang.js';
+
+const TEXTS = {
+  region: { ru: 'Уведомления', en: 'Notifications' },
+  close: { ru: 'Закрыть уведомление', en: 'Close the notification' },
+};
 // Toasts: a short note in the corner after an action of the user, so the system always answers.
 // Any module reports through notify(root, text, kind); the component listens, shows the toast, and clears it after a few seconds.
 const EVENT = 'dslkit:toast';
@@ -29,7 +34,7 @@ export const initToasts = ({ root = document, storage, setTimer = setTimeout, cl
   region.className = 'toasts';
   region.setAttribute('role', 'region');
   region.setAttribute('aria-live', 'polite');
-  region.setAttribute('aria-label', lang === 'en' ? 'Notifications' : 'Уведомления');
+  region.setAttribute('aria-label', pick(TEXTS.region, lang));
   root.body.append(region);
 
   const close = (toast, timer) => {
@@ -54,7 +59,7 @@ export const initToasts = ({ root = document, storage, setTimer = setTimeout, cl
     const button = root.createElement('button');
     button.type = 'button';
     button.className = 'toast__close';
-    button.setAttribute('aria-label', lang === 'en' ? 'Close the notification' : 'Закрыть уведомление');
+    button.setAttribute('aria-label', pick(TEXTS.close, lang));
     button.textContent = '×';
     toast.append(mark, body, button);
     region.append(toast);

@@ -2,6 +2,7 @@ import { normalize } from '../expert/review.js';
 import { ID, parseHeader, sourceLines } from '../notations/common.js';
 import { KEYWORDS, NOTATIONS, NOTATION_KEYS, formatProblem, parseDiagram } from '../notations/index.js';
 import { formatCode } from './format-code.js';
+import { normalizeLanguage } from './lang.js';
 
 // The review of a user's diagram: what is wrong with the code and the corrected variants of it.
 // Everything here is deterministic and works without a network: the problems come from the parser and the validator of the notation
@@ -130,7 +131,7 @@ const context = (code, lang) => {
     shape,
     header: sourceLines(code)[0]?.n ?? 1,
     last,
-    text: (ru, en) => (lang === 'en' ? en : ru),
+    text: (ru, en) => ({ ru, en })[normalizeLanguage(lang)],
     // A new identifier that is free; the same request gives the same identifier again.
     fresh: (base, tag = '') => {
       const key = `${base}|${tag}`;

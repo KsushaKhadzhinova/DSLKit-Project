@@ -156,6 +156,76 @@ test('every dictionary written in a component or a module has the same keys in e
     );
 });
 
+test('the dictionaries of the panels, the toasts, the report and the quota are found by the scan', () => {
+  const found = new Set();
+  for (const file of modules) for (const [name] of literals(readFileSync(file, 'utf8'))) found.add(`${posix(file)}:${name}`);
+  for (const expected of [
+    'js/components/review-panel.js:TEXTS',
+    'js/components/clarify-panel.js:TEXTS',
+    'js/components/toast.js:TEXTS',
+    'js/components/theme.js:TEXTS',
+    'js/components/settings.js:TEXTS',
+    'js/components/welcome.js:TEXTS',
+    'js/components/editor.js:TEXTS',
+    'js/components/auth.js:TEXTS',
+    'js/components/source-autosave.js:TEXTS',
+    'js/decision/report.js:TEXTS',
+    'js/decision/methods.js:EXPLAIN',
+    'js/storage/projects.js:TEXTS',
+    'js/utils/diagram-file-import.js:WORDS',
+    'js/utils/exporters.js:CODE_TITLE',
+    'js/utils/palette.js:BOX',
+  ])
+    assert.ok(found.has(expected), expected);
+});
+
+// ---- the language is chosen in one place ----
+
+const withoutComments = (source) => source.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+
+test('no module of the site chooses a text or a language by comparing a language code', () => {
+  const found = [];
+  for (const file of modules.filter((name) => !name.endsWith(join('utils', 'lang.js')))) {
+    withoutComments(readFileSync(file, 'utf8'))
+      .split('\n')
+      .forEach((line, at) => {
+        // a ternary or a comparison on a code of a language, and a direct read of the lang attribute of a page
+        if (/[!=]==?\s*['"](?:ru|en)['"]|['"](?:ru|en)['"]\s*[!=]==?|documentElement\??\.lang|\.lang\s*[!=]==?/.test(line))
+          found.push(`${posix(file)}:${at + 1}: ${line.trim()}`);
+      });
+  }
+  assert.deepEqual(found, []);
+});
+
+test('every component takes the language of the page from pageLanguage and never from the lang attribute', () => {
+  const without = [];
+  for (const file of modules.filter((name) => /components/.test(name))) {
+    const source = withoutComments(readFileSync(file, 'utf8'));
+    if (/\blang\b/.test(source) && /\bconst lang = /.test(source) && !/const lang = pageLanguage\(/.test(source)) without.push(posix(file));
+    if (/documentElement/.test(source) && /\.lang\b/.test(source)) without.push(posix(file));
+  }
+  assert.deepEqual(without, []);
+});
+
+test('dates and numbers shown to the user are not written as ISO text', () => {
+  const found = [];
+  for (const file of modules) {
+    withoutComments(readFileSync(file, 'utf8'))
+      .split('\n')
+      .forEach((line, at) => {
+        if (/toISOString\(\)\.(?:slice|substr)|toTimeString|toLocale(?:Date|Time)?String/.test(line)) found.push(`${posix(file)}:${at + 1}`);
+      });
+  }
+  assert.deepEqual(found, []);
+});
+
+test('the title of a project is stored without a language: the store writes an empty title, not a word', () => {
+  for (const file of ['js/storage/projects.js', 'js/components/editor-projects.js']) {
+    const source = withoutComments(readFileSync(join(SITE, file), 'utf8'));
+    assert.doesNotMatch(source.replace(/untitled:\s*\{[^}]*\}/, ''), /\|\|\s*['"](?:Без названия|Untitled)['"]/, file);
+  }
+});
+
 test('every { ru, en } text exported by the modules of the site is complete in every language', async () => {
   const problems = [];
   for (const file of modules.filter((name) => !/components/.test(name))) {

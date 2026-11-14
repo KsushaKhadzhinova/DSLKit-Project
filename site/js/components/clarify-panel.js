@@ -1,3 +1,4 @@
+import { pageLanguage } from '../utils/lang.js';
 import { buildQuestions, completeFromAnswers } from '../utils/diagram-questions.js';
 import { readCode, showCode } from './code-lines.js';
 import { notify } from './toast.js';
@@ -60,7 +61,7 @@ export const initClarify = ({ root = document, fetchImpl } = {}) => {
   const codeLines = page?.querySelector('.code__lines');
   if (!codeLines) return null;
   const view = root.defaultView;
-  const lang = root.documentElement.lang === 'en' ? 'en' : 'ru';
+  const lang = pageLanguage(root);
   const t = (key, params = {}) => TEXTS[lang][key].replace(/\{(\w+)\}/g, (_, name) => params[name]);
   const call = fetchImpl ?? ((...args) => view.fetch(...args));
   const el = (tag, className, text) => {

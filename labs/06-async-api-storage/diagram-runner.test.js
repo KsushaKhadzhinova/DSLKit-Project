@@ -4,6 +4,7 @@ import { mock, test } from 'node:test';
 import { JSDOM } from 'jsdom';
 import { ApiError } from '../../site/js/api/apiService.js';
 import { initDiagramRunner } from '../../site/js/components/diagram-runner.js';
+import { formatDateTime } from '../../site/js/utils/lang.js';
 import { createMemoryBackend, createStorage } from '../../site/js/utils/storage.js';
 
 const html = readFileSync('site/app/editor.html', 'utf8');
@@ -70,7 +71,7 @@ test('a run sends DOT built from the editor code and shows a sanitized SVG', asy
   assert.match($('.canvas__status').textContent, /Диаграмма готова/);
   assert.equal($('.canvas').getAttribute('aria-busy'), 'false');
   assert.equal(document.querySelectorAll('.canvas__history-item').length, 1);
-  assert.match($('.canvas__history-item').textContent, /Order process · 2023-11-14 22:13/);
+  assert.equal($('.canvas__history-item').textContent, `Order process · ${formatDateTime(1_700_000_000_000, 'ru')}`);
 });
 
 test('the loader is shown while the request is running', async () => {
@@ -169,7 +170,7 @@ test('offline with a saved copy shows it labelled as cached data', async () => {
   const second = setup({ storage, online: false });
   click(second.window, second.$('.canvas__refresh'));
   await flush();
-  assert.match(second.$('.canvas__status').textContent, /Кэшированные данные от 2023-11-14 22:13\. Нет соединения/);
+  assert.equal(second.$('.canvas__status').textContent.startsWith(`Кэшированные данные от ${formatDateTime(1_700_000_000_000, 'ru')}. Нет соединения`), true);
   assert.equal(second.$('.canvas__remote').hidden, false);
 });
 

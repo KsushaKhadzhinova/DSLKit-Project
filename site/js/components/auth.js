@@ -19,7 +19,13 @@ const MESSAGES = {
 const FIELDS = { login: ['email', 'password'], register: ['name', 'email', 'password', 'confirm'] };
 
 import { flash } from './toast.js';
-import { pageLanguage } from '../utils/lang.js';
+import { pageLanguage, pick } from '../utils/lang.js';
+
+const TEXTS = {
+  signedOut: { ru: 'Вы вышли из аккаунта.', en: 'You are signed out.' },
+  created: { ru: 'Аккаунт создан, добро пожаловать!', en: 'The account is created, welcome!' },
+  signedIn: { ru: 'Вы вошли в аккаунт.', en: 'You are signed in.' },
+};
 
 const goTo = (root) => (url) => root.defaultView.location.assign(url);
 
@@ -51,7 +57,7 @@ export const initAuthMenu = ({ root = document, storage, crypto, navigate = goTo
     if (!button) return;
     store.logout();
     render();
-    flash(storage, root.documentElement.lang === 'en' ? 'You are signed out.' : 'Вы вышли из аккаунта.', 'info');
+    flash(storage, pick(TEXTS.signedOut, pageLanguage(root)), 'info');
     navigate(button.closest('[data-auth]')?.dataset.home ?? './');
   });
 
@@ -119,18 +125,7 @@ export const initAuthForm = ({ root = document, storage, crypto, navigate = goTo
       field(mode === 'register' && result.error === 'exists' ? 'email' : 'password').focus();
       return false;
     }
-    const english = root.documentElement.lang === 'en';
-    flash(
-      storage,
-      mode === 'register'
-        ? english
-          ? 'The account is created, welcome!'
-          : 'Аккаунт создан, добро пожаловать!'
-        : english
-          ? 'You are signed in.'
-          : 'Вы вошли в аккаунт.',
-      'success',
-    );
+    flash(storage, pick(mode === 'register' ? TEXTS.created : TEXTS.signedIn, pageLanguage(root)), 'success');
     navigate(mode === 'register' ? 'welcome.html' : 'dashboard.html');
     return true;
   };

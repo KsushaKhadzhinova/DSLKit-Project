@@ -6,7 +6,7 @@ import { readCode, showCode } from '../../site/js/components/code-lines.js';
 import { initDashboard } from '../../site/js/components/dashboard.js';
 import { PROJECT_AUTOSAVE_MS, initEditorProjects } from '../../site/js/components/editor-projects.js';
 import { TEMPLATES } from '../../site/js/notations/index.js';
-import { createProjectStore } from '../../site/js/storage/projects.js';
+import { createProjectStore, titleOf } from '../../site/js/storage/projects.js';
 import { createMemoryBackend, createStorage } from '../../site/js/utils/storage.js';
 
 const memory = () => createStorage(createMemoryBackend());
@@ -25,7 +25,11 @@ test('the store saves, updates, lists newest first, renames and removes', () => 
   const a = store.save({ title: ' First ', notation: 'idef0', source: 'a' });
   const b = store.save({ title: '', notation: 'erd', source: 'b' });
   assert.equal(a.title, 'First');
-  assert.equal(b.title, 'Без названия');
+  assert.equal(b.title, '');
+  assert.equal(titleOf(b, 'ru'), 'Без названия');
+  assert.equal(titleOf(b, 'en'), 'Untitled');
+  assert.equal(titleOf({ title: 'Без названия' }, 'en'), 'Untitled');
+  assert.equal(titleOf(a, 'en'), 'First');
   assert.notEqual(a.id, b.id);
   assert.deepEqual(
     store.list().map((p) => p.id),
@@ -106,12 +110,12 @@ test('Save creates a project, names the file and the address, and Save again upd
   assert.equal(api.current().id, project.id);
 });
 
-test('an untitled diagram is saved as Untitled and the English page says so', () => {
+test('an untitled diagram is stored without a title and each page names it in its own language', () => {
   const { document, save, storage } = open({ lang: 'en' });
   showCode(document, document.querySelector('.code__lines'), 'diagram idef0');
   save();
-  assert.equal(createProjectStore({ storage }).list()[0].title, 'Untitled');
-  assert.match(document.querySelector('.editor-status__saved').textContent, /Saved to "My projects"/);
+  assert.equal(createProjectStore({ storage }).list()[0].title, '');
+  assert.match(document.querySelector('.editor-status__saved').textContent, /Saved to "My projects": Untitled/);
 });
 
 test('a saved project opens from the address, an unknown one says so and opens a new diagram', () => {

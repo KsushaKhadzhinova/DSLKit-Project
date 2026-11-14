@@ -1,3 +1,5 @@
+import { pick } from '../utils/lang.js';
+
 const KEY = 'projects';
 const LIMIT = 200;
 
@@ -50,7 +52,7 @@ export const createProjectStore = ({ storage, now = () => Date.now(), owner = nu
     const stamp = now();
     const project = {
       id: at >= 0 ? id : makeId(),
-      title: title.trim() || 'Без названия',
+      title: title.trim(),
       notation,
       source,
       created: at >= 0 ? (projects[at].created ?? stamp) : stamp,
@@ -150,7 +152,7 @@ export const createTemplateStore = ({ storage, now = () => Date.now(), owner = n
     const stamp = now();
     const template = {
       id: at >= 0 ? id : `t${stamp.toString(36)}${(counter++).toString(36)}`,
-      title: title.trim() || 'Без названия',
+      title: title.trim(),
       notation,
       source,
       created: at >= 0 ? items[at].created : stamp,
@@ -182,12 +184,21 @@ export const createTemplateStore = ({ storage, now = () => Date.now(), owner = n
 
 export const DAILY_LIMIT = 5;
 
+const TEXTS = {
+  untitled: { ru: 'Без названия', en: 'Untitled' },
+  unlimited: { ru: 'Бета: сегодня создано {used}, без дневного лимита', en: 'Beta: {used} created today, no daily limit' },
+  over: { ru: 'Бета: сегодня создано {used}, лимит {limit} в день превышен', en: 'Beta: {used} created today, the limit of {limit} a day is exceeded' },
+  within: { ru: 'Бета: сегодня создано {used} из {limit}', en: 'Beta: {used} of {limit} created today' },
+};
+
+// A project or a template without a title is stored with an empty one; the page names it in its own language.
+// The title of the older versions, written in Russian, is shown in the language of the page as well.
+export const titleOf = (item, lang) => (item.title === '' || item.title === TEXTS.untitled.ru ? pick(TEXTS.untitled, lang) : item.title);
+
 // The text under the quota bar: the beta allows five new diagrams a day to a user, none to a developer and an admin; a sixth new project of a user is refused by the store.
 export const quotaLabel = (used, lang, unlimited = false) => {
-  if (unlimited) return lang === 'en' ? `Beta: ${used} created today, no daily limit` : `Бета: сегодня создано ${used}, без дневного лимита`;
-  if (lang === 'en')
-    return used > DAILY_LIMIT ? `Beta: ${used} created today, the limit of ${DAILY_LIMIT} a day is exceeded` : `Beta: ${used} of ${DAILY_LIMIT} created today`;
-  return used > DAILY_LIMIT ? `Бета: сегодня создано ${used}, лимит ${DAILY_LIMIT} в день превышен` : `Бета: сегодня создано ${used} из ${DAILY_LIMIT}`;
+  const text = unlimited ? TEXTS.unlimited : used > DAILY_LIMIT ? TEXTS.over : TEXTS.within;
+  return pick(text, lang, { used, limit: DAILY_LIMIT });
 };
 
 // Writes the quota into a text and a progress bar of a page.

@@ -1,3 +1,6 @@
+import { normalizeLanguage, pick } from './lang.js';
+
+const CODE_TITLE = { ru: 'Код диаграммы', en: 'Diagram code' };
 const SVG_NAMESPACE = 'http://www.w3.org/2000/svg';
 const DEFAULT_SIZE = { width: 800, height: 600 };
 
@@ -84,9 +87,9 @@ export const drawioFile = ({ title, svgText, width, height }) => {
 export const htmlFile = ({ title, svgText, source, lang = 'ru' }) => {
   const heading = escapeXml(title || 'DSLKit');
   const inline = svgText.replace(/^<\?xml[^>]*\?>\s*/, '');
-  const codeTitle = lang === 'en' ? 'Diagram code' : 'Код диаграммы';
+  const codeTitle = pick(CODE_TITLE, lang);
   return `<!doctype html>
-<html lang="${lang === 'en' ? 'en' : 'ru'}">
+<html lang="${normalizeLanguage(lang)}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">

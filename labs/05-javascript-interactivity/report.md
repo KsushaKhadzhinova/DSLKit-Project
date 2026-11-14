@@ -567,8 +567,8 @@ import { NOTATIONS, NOTATION_KEYS, TEMPLATES, parseDiagram } from '../notations/
 import { currentUser, isUnlimited } from '../storage/accounts.js';
 import { notify } from './toast.js';
 import { starterProjects } from '../storage/seeds.js';
-import { TRASH_DAYS, createProjectStore, createTemplateStore, showQuota } from '../storage/projects.js';
-import { pageLanguage } from '../utils/lang.js';
+import { TRASH_DAYS, createProjectStore, createTemplateStore, showQuota, titleOf } from '../storage/projects.js';
+import { formatDateTime, pageLanguage } from '../utils/lang.js';
 
 const FILTERS = ['all', ...NOTATION_KEYS];
 const SORTS = ['newest', 'oldest', 'name'];
@@ -719,7 +719,7 @@ export const initDashboard = ({ root = document, storage, now = () => Date.now()
   emptyTrash.type = 'button';
   emptyTrash.hidden = true;
   newTemplate?.after(emptyTrash);
-  const time = (ms) => new Date(ms).toISOString().slice(0, 16).replace('T', ' ');
+  const time = (ms) => formatDateTime(ms, lang);
 
   // A card of a saved project, built like the sample cards of the page. A project in the trash cannot be opened.
   const card = (project, kind = 'project') => {
@@ -731,7 +731,7 @@ export const initDashboard = ({ root = document, storage, now = () => Date.now()
     item.dataset.notation = FILTERS.includes(project.notation) ? project.notation : 'other';
     const article = el('article', 'project-card');
     const headingBox = el('h2', 'project-card__title');
-    const link = el('a', 'project-card__link', project.title);
+    const link = el('a', 'project-card__link', titleOf(project, lang));
     if (trashed) link.setAttribute('aria-disabled', 'true');
     else link.href = `editor.html?${kind === 'template' ? 'my' : 'p'}=${encodeURIComponent(project.id)}`;
     headingBox.append(link);
@@ -822,7 +822,7 @@ export const initDashboard = ({ root = document, storage, now = () => Date.now()
   const chipKeys = new Set(chips.map((chip) => chip.dataset.filter));
   if (others) {
     NOTATION_KEYS.filter((key) => !chipKeys.has(key)).forEach((key) => {
-      const option = el('option', '', NOTATIONS[key].name[lang === 'ru' ? 'ru' : 'en']);
+      const option = el('option', '', NOTATIONS[key].name[lang]);
       option.value = key;
       others.append(option);
     });
@@ -1015,7 +1015,15 @@ import { NOTATIONS, TEMPLATES } from '../notations/index.js';
 import { ui } from '../notations/messages.js';
 import { showCode } from './code-lines.js';
 import { initSourceAutosave } from './source-autosave.js';
-import { pageLanguage } from '../utils/lang.js';
+import { pageLanguage, pick } from '../utils/lang.js';
+
+const TEXTS = {
+  closeFile: { ru: 'Закрыть файл', en: 'Close the file' },
+  closeAsk: {
+    ru: 'Закрыть файл {name}? Несохранённые изменения будут потеряны, если не сохранить.',
+    en: 'Close the file {name}? Unsaved changes are lost unless you save.',
+  },
+};
 
 const VIEWS = ['code', 'canvas'];
 const KEY_STEPS = { ArrowRight: 1, ArrowLeft: -1 };
@@ -1049,7 +1057,7 @@ const initTabs = ({ page, root, storage, tabs }) => {
       panels[position].hidden = !active;
     });
     if (focus) tabs[index].focus();
-    closeButton?.setAttribute('aria-label', `${root.documentElement.lang === 'en' ? 'Close the file' : 'Закрыть файл'} ${tabName(index)}`);
+    closeButton?.setAttribute('aria-label', `${pick(TEXTS.closeFile, pageLanguage(root))} ${tabName(index)}`);
     storage.set('editor-tab', index);
   };
 
@@ -1105,10 +1113,7 @@ const initCloseDialog = ({ page, root, tabs, tabsApi }) => {
     dialog.returnValue = '';
     if (dialogText) {
       const name = tabName(current());
-      dialogText.textContent =
-        root.documentElement.lang === 'en'
-          ? `Close the file ${name}? Unsaved changes are lost unless you save.`
-          : `Закрыть файл ${name}? Несохранённые изменения будут потеряны, если не сохранить.`;
+      dialogText.textContent = pick(TEXTS.closeAsk, pageLanguage(root), { name });
     }
     if (typeof dialog.showModal === 'function') dialog.showModal();
     else dialog.setAttribute('open', '');
