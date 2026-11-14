@@ -68,11 +68,15 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
-      # Chromium of Playwright instead of Edge; results and screenshots go to a temporary folder, the committed JSON files stay clean.
+      # Chromium of Playwright instead of Edge.
       E2E_BROWSER: chromium
-      E2E_OUT: ${{ runner.temp }}/e2e/results
-      E2E_SHOTS: ${{ runner.temp }}/e2e/screens
     steps:
+      # The runner context is not available in the env of a job, so the temporary folders are set in the first step:
+      # results and screenshots go there, the committed JSON files stay clean.
+      - name: Set the output folders
+        run: |
+          echo "E2E_OUT=$RUNNER_TEMP/e2e/results" >> "$GITHUB_ENV"
+          echo "E2E_SHOTS=$RUNNER_TEMP/e2e/screens" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
