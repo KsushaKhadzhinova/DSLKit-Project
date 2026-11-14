@@ -1,16 +1,46 @@
 name: CI
+
 on:
   push:
   pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# Each work folder of this branch is a separate npm project, so the tests run
+# per folder. The repository root is not run here: the branch root has no tests
+# of its own and the root format check does not belong to the lab folders.
 jobs:
   test:
+    name: test (${{ matrix.folder }})
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - folder: part-2/lab-01-node-server
+            cache: npm
+          - folder: part-2/lab-02-sequelize
+            cache: npm
+          - folder: part-2/lab-06-mongodb
+            cache: npm
+    defaults:
+      run:
+        working-directory: ${{ matrix.folder }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-          cache: npm
-      - run: npm ci
-      - run: npm run format:check
-      - run: npm test
+          cache: ${{ matrix.cache }}
+          cache-dependency-path: ${{ matrix.folder }}/package-lock.json
+      - name: Install dependencies
+        run: |
+          if [ -f package-lock.json ]; then npm ci; else npm install; fi
+      - name: Test
+        run: npm test
