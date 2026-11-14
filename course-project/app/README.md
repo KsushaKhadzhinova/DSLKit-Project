@@ -32,7 +32,7 @@ docker compose up --build
 
 Не проверено: развёртывание на самом Render не выполнялось. В `render.yaml` не задан `NODE_ENV=production`, потому что в этом режиме сервер требует `DATABASE_SSL=true` и проверяемый сертификат (`DATABASE_SSL_CA`); подходит ли внутреннее соединение Render с этой проверкой, нужно выяснить при первом запуске.
 
-The `render.yaml` file in the repository root (branch `course-app`) describes three resources: the PostgreSQL database `dslkit-db`, the Node.js server `dslkit-api` and the static client `dslkit-web`. It holds no secrets: they are typed in the Render dashboard.
+The `render.yaml` file in the repository root (branch `main`) describes three resources: the PostgreSQL database `dslkit-db`, the Node.js server `dslkit-api` and the static client `dslkit-web`. It holds no secrets: they are typed in the Render dashboard.
 
 1. In the Render dashboard choose New, Blueprint, connect the repository and the branch that has `render.yaml`.
 2. Render creates the three resources without asking for values: `JWT_SECRET` is generated, the addresses `CORS_ORIGIN` and `VITE_API_URL` are already filled in. The file does not create the first administrator and demo users: add `ADMIN_EMAIL`, `ADMIN_PASSWORD` (10 characters or more) and optionally `DEMO_USER_PASSWORD` in the Environment tab of the server, then restart it.
