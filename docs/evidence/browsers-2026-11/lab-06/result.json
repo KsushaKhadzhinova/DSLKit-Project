@@ -1,0 +1,108 @@
+[
+  {
+    "browser": "firefox",
+    "width": 1366,
+    "ok": true,
+    "steps": [
+      "POST /diagrams (HTTP client, not the browser) -> 201",
+      "PATCH priority -> 200",
+      "POST comment -> 201",
+      "browser GET /health -> 200, 15 chars, JSON ok: True",
+      "browser GET /diagrams/:id -> 200, 354 chars, JSON ok: True",
+      "browser GET /diagrams/count -> 200, 11 chars, JSON ok: True",
+      "browser GET /diagrams/stats -> 200, 61 chars, JSON ok: True",
+      "browser GET /diagrams/abc -> 400, 57 chars, JSON ok: True",
+      "browser GET /diagrams -> 200, 566 chars, JSON ok: True",
+      "DELETE -> 204"
+    ],
+    "console_errors": [
+      "[JavaScript Error: \"Content-Security-Policy: The page’s settings blocked the loading of a resource (img-src) at http://localhost:3006/favicon.ico because it violates the following directive: “default-",
+      "[JavaScript Error: \"Content-Security-Policy: The page’s settings blocked the loading of a resource (img-src) at http://localhost:3006/favicon.ico because it violates the following directive: “default-",
+      "[JavaScript Error: \"Content-Security-Policy: The page’s settings blocked the loading of a resource (img-src) at http://localhost:3006/favicon.ico because it violates the following directive: “default-",
+      "[JavaScript Error: \"Content-Security-Policy: The page’s settings blocked the loading of a resource (img-src) at http://localhost:3006/favicon.ico because it violates the following directive: “default-",
+      "[JavaScript Error: \"Content-Security-Policy: The page’s settings blocked the loading of a resource (img-src) at http://localhost:3006/favicon.ico because it violates the following directive: “default-",
+      "[JavaScript Error: \"Content-Security-Policy: The page’s settings blocked the loading of a resource (img-src) at http://localhost:3006/favicon.ico because it violates the following directive: “default-"
+    ],
+    "failed_requests": [],
+    "http_4xx_5xx": [
+      "400 GET http://localhost:3006/diagrams/abc"
+    ]
+  },
+  {
+    "browser": "firefox",
+    "width": 390,
+    "ok": true,
+    "steps": [
+      "POST /diagrams (HTTP client, not the browser) -> 201",
+      "PATCH priority -> 200",
+      "POST comment -> 201",
+      "browser GET /health -> 200, 15 chars, JSON ok: True",
+      "browser GET /diagrams/:id -> 200, 353 chars, JSON ok: True",
+      "browser GET /diagrams/count -> 200, 11 chars, JSON ok: True",
+      "browser GET /diagrams/stats -> 200, 61 chars, JSON ok: True",
+      "browser GET /diagrams/abc -> 400, 57 chars, JSON ok: True",
+      "browser GET /diagrams -> 200, 565 chars, JSON ok: True",
+      "DELETE -> 204"
+    ],
+    "console_errors": [
+      "[JavaScript Error: \"Content-Security-Policy: The page’s settings blocked the loading of a resource (img-src) at http://localhost:3006/favicon.ico because it violates the following directive: “default-",
+      "[JavaScript Error: \"Content-Security-Policy: The page’s settings blocked the loading of a resource (img-src) at http://localhost:3006/favicon.ico because it violates the following directive: “default-",
+      "[JavaScript Error: \"Content-Security-Policy: The page’s settings blocked the loading of a resource (img-src) at http://localhost:3006/favicon.ico because it violates the following directive: “default-",
+      "[JavaScript Error: \"Content-Security-Policy: The page’s settings blocked the loading of a resource (img-src) at http://localhost:3006/favicon.ico because it violates the following directive: “default-",
+      "[JavaScript Error: \"Content-Security-Policy: The page’s settings blocked the loading of a resource (img-src) at http://localhost:3006/favicon.ico because it violates the following directive: “default-",
+      "[JavaScript Error: \"Content-Security-Policy: The page’s settings blocked the loading of a resource (img-src) at http://localhost:3006/favicon.ico because it violates the following directive: “default-"
+    ],
+    "failed_requests": [],
+    "http_4xx_5xx": [
+      "400 GET http://localhost:3006/diagrams/abc"
+    ]
+  },
+  {
+    "browser": "msedge",
+    "width": 1366,
+    "ok": true,
+    "steps": [
+      "POST /diagrams (HTTP client, not the browser) -> 201",
+      "PATCH priority -> 200",
+      "POST comment -> 201",
+      "browser GET /health -> 200, 15 chars, JSON ok: True",
+      "browser GET /diagrams/:id -> 200, 353 chars, JSON ok: True",
+      "browser GET /diagrams/count -> 200, 11 chars, JSON ok: True",
+      "browser GET /diagrams/stats -> 200, 61 chars, JSON ok: True",
+      "browser GET /diagrams/abc -> 400, 57 chars, JSON ok: True",
+      "browser GET /diagrams -> 200, 565 chars, JSON ok: True",
+      "DELETE -> 204"
+    ],
+    "console_errors": [
+      "Failed to load resource: the server responded with a status of 400 (Bad Request)"
+    ],
+    "failed_requests": [],
+    "http_4xx_5xx": [
+      "400 GET http://localhost:3006/diagrams/abc"
+    ]
+  },
+  {
+    "browser": "msedge",
+    "width": 390,
+    "ok": true,
+    "steps": [
+      "POST /diagrams (HTTP client, not the browser) -> 201",
+      "PATCH priority -> 200",
+      "POST comment -> 201",
+      "browser GET /health -> 200, 15 chars, JSON ok: True",
+      "browser GET /diagrams/:id -> 200, 352 chars, JSON ok: True",
+      "browser GET /diagrams/count -> 200, 11 chars, JSON ok: True",
+      "browser GET /diagrams/stats -> 200, 61 chars, JSON ok: True",
+      "browser GET /diagrams/abc -> 400, 57 chars, JSON ok: True",
+      "browser GET /diagrams -> 200, 564 chars, JSON ok: True",
+      "DELETE -> 204"
+    ],
+    "console_errors": [
+      "Failed to load resource: the server responded with a status of 400 (Bad Request)"
+    ],
+    "failed_requests": [],
+    "http_4xx_5xx": [
+      "400 GET http://localhost:3006/diagrams/abc"
+    ]
+  }
+]

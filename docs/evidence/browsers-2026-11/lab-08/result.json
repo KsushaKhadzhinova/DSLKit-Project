@@ -1,0 +1,70 @@
+[
+  {
+    "browser": "firefox",
+    "width": 1366,
+    "ok": true,
+    "steps": [
+      "register + sign in: ok",
+      "create diagram: ok",
+      "save answered 200",
+      "edit diagram: ok",
+      "reload keeps the session and the diagram (data came from PostgreSQL through /api): ok",
+      "delete diagram: ok",
+      "7 requests went to http://127.0.0.1:8080/api/ (Nginx proxy)"
+    ],
+    "console_errors": [],
+    "failed_requests": [],
+    "http_4xx_5xx": []
+  },
+  {
+    "browser": "firefox",
+    "width": 390,
+    "ok": true,
+    "steps": [
+      "register + sign in: ok",
+      "create diagram: ok",
+      "save answered 200",
+      "edit diagram: ok",
+      "reload keeps the session and the diagram (data came from PostgreSQL through /api): ok",
+      "delete diagram: ok",
+      "7 requests went to http://127.0.0.1:8080/api/ (Nginx proxy)"
+    ],
+    "console_errors": [],
+    "failed_requests": [],
+    "http_4xx_5xx": []
+  },
+  {
+    "browser": "msedge",
+    "width": 1366,
+    "ok": true,
+    "steps": [
+      "register + sign in: ok",
+      "create diagram: ok",
+      "save answered 200",
+      "edit diagram: ok",
+      "reload keeps the session and the diagram (data came from PostgreSQL through /api): ok",
+      "delete diagram: ok",
+      "7 requests went to http://127.0.0.1:8080/api/ (Nginx proxy)"
+    ],
+    "console_errors": [],
+    "failed_requests": [],
+    "http_4xx_5xx": []
+  },
+  {
+    "browser": "msedge",
+    "width": 390,
+    "ok": true,
+    "steps": [
+      "register + sign in: ok",
+      "create diagram: ok",
+      "save answered 200",
+      "edit diagram: ok",
+      "reload keeps the session and the diagram (data came from PostgreSQL through /api): ok",
+      "delete diagram: ok",
+      "7 requests went to http://127.0.0.1:8080/api/ (Nginx proxy)"
+    ],
+    "console_errors": [],
+    "failed_requests": [],
+    "http_4xx_5xx": []
+  }
+]

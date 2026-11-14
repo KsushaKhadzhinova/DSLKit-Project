@@ -1,0 +1,66 @@
+[
+  {
+    "browser": "firefox",
+    "width": 1366,
+    "ok": true,
+    "steps": [
+      "register + sign in: ok",
+      "create diagram: ok",
+      "edit diagram: ok",
+      "search 'edited': 1 card(s)",
+      "load more: 20 -> 33 cards",
+      "delete diagram: ok"
+    ],
+    "console_errors": [],
+    "failed_requests": [],
+    "http_4xx_5xx": []
+  },
+  {
+    "browser": "firefox",
+    "width": 390,
+    "ok": true,
+    "steps": [
+      "register + sign in: ok",
+      "create diagram: ok",
+      "edit diagram: ok",
+      "search 'edited': 1 card(s)",
+      "load more: 20 -> 33 cards",
+      "delete diagram: ok"
+    ],
+    "console_errors": [],
+    "failed_requests": [],
+    "http_4xx_5xx": []
+  },
+  {
+    "browser": "msedge",
+    "width": 1366,
+    "ok": true,
+    "steps": [
+      "register + sign in: ok",
+      "create diagram: ok",
+      "edit diagram: ok",
+      "search 'edited': 1 card(s)",
+      "load more: 20 -> 33 cards",
+      "delete diagram: ok"
+    ],
+    "console_errors": [],
+    "failed_requests": [],
+    "http_4xx_5xx": []
+  },
+  {
+    "browser": "msedge",
+    "width": 390,
+    "ok": true,
+    "steps": [
+      "register + sign in: ok",
+      "create diagram: ok",
+      "edit diagram: ok",
+      "search 'edited': 1 card(s)",
+      "load more: 20 -> 33 cards",
+      "delete diagram: ok"
+    ],
+    "console_errors": [],
+    "failed_requests": [],
+    "http_4xx_5xx": []
+  }
+]
