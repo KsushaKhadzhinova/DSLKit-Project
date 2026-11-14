@@ -98,7 +98,9 @@ ARG REGISTRY=
 FROM ${REGISTRY}library/node:22-alpine AS deps
 WORKDIR /app
 COPY package.json package-lock.json ./
-RUN npm ci --omit=dev && npm cache clean --force
+# sequelize-cli is a development dependency of lab 3, but the container runs the migrations and the seeder at the start:
+# it is installed here on purpose, pinned to the version of the lockfile, otherwise npx tries to download it into a read-only file system.
+RUN npm ci --omit=dev && npm install --no-save --no-package-lock --ignore-scripts sequelize-cli@6.6.5 && npm cache clean --force
 
 # Stage 2: small runtime image without npm cache, tests and reports (see Dockerfile.dockerignore).
 FROM ${REGISTRY}library/node:22-alpine
