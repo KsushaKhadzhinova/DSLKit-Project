@@ -15,7 +15,8 @@ const makeRoom = (map) => {
 };
 
 // Fixed window counter per client address. The state is in memory, so it is per process (see AUDIT.md).
-const createRateLimiter = ({ windowMs, max, now = Date.now }) => {
+// onLimited(req, key) is called once per client and window, at the first refused request, so a flood is reported once and not row by row.
+const createRateLimiter = ({ windowMs, max, now = Date.now, onLimited }) => {
   const clients = new Map();
   return (req, _res, next) => {
     const time = now();
@@ -28,7 +29,10 @@ const createRateLimiter = ({ windowMs, max, now = Date.now }) => {
       clients.set(key, entry);
     }
     entry.count += 1;
-    if (entry.count > max) return next(tooManyRequests('Too many requests, try again later', Math.ceil((entry.resetAt - time) / 1000)));
+    if (entry.count > max) {
+      if (entry.count === max + 1 && onLimited) onLimited(req, key);
+      return next(tooManyRequests('Too many requests, try again later', Math.ceil((entry.resetAt - time) / 1000)));
+    }
     return next();
   };
 };

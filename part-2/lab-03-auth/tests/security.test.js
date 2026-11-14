@@ -262,6 +262,53 @@ test('failed logins from one address do not lock the account for the owner on an
   }
 });
 
+test('the general limiter refuses a flood before the request log, counts it once and leaves /health and other clients alone', async (t) => {
+  const warn = t.mock.method(console, 'warn', () => {});
+  const strict = await startServer({ generalRateMax: 5, generalRateWindowMs: 60000, trustProxy: true });
+  const from = (ip) => ({ 'x-forwarded-for': ip });
+  try {
+    for (let i = 0; i < 5; i += 1) assert.equal((await strict.call('GET', '/x', { headers: from('203.0.113.9') })).res.status, 404);
+    for (let i = 0; i < 20; i += 1) {
+      const { res, body } = await strict.call('GET', '/x', { headers: from('203.0.113.9') });
+      assert.equal(res.status, 429);
+      assert.deepEqual(body, { error: 'Too many requests, try again later' });
+      assert.ok(Number(res.headers.get('retry-after')) > 0);
+    }
+    await pause();
+    // Only the five allowed requests are in the table, the twenty refused ones are not.
+    assert.equal(await strict.models.RequestLog.count(), 5);
+    assert.equal(warn.mock.callCount(), 1);
+    // A forged header changes the address only through the proxy setting: another real client has its own bucket.
+    assert.equal((await strict.call('GET', '/x', { headers: from('198.51.100.7') })).res.status, 404);
+    // The health check is never limited.
+    for (let i = 0; i < 10; i += 1) assert.equal((await strict.call('GET', '/health', { headers: from('203.0.113.9') })).res.status, 200);
+  } finally {
+    await strict.close();
+  }
+});
+
+test('without trust proxy a forged X-Forwarded-For does not give a new general bucket', async () => {
+  const strict = await startServer({ generalRateMax: 3, generalRateWindowMs: 60000 });
+  try {
+    for (let i = 0; i < 3; i += 1) await strict.call('GET', '/x', { headers: { 'x-forwarded-for': `203.0.113.${i}` } });
+    assert.equal((await strict.call('GET', '/x', { headers: { 'x-forwarded-for': '203.0.113.99' } })).res.status, 429);
+  } finally {
+    await strict.close();
+  }
+});
+
+test('normal traffic stays under the default general limit and the lockout still works', async () => {
+  const strict = await startServer({ generalRateMax: require('../limits.json').generalRateMax, loginMaxAttempts: 3, loginLockMs: 60000 });
+  try {
+    await strict.call('POST', '/auth/register', creds('calm@example.com'));
+    for (let i = 0; i < 20; i += 1) assert.equal((await strict.call('GET', '/diagrams')).res.status, 401);
+    for (let i = 0; i < 3; i += 1) assert.equal((await strict.call('POST', '/auth/login', creds('calm@example.com', 'wrong password'))).res.status, 401);
+    assert.equal((await strict.call('POST', '/auth/login', creds('calm@example.com'))).res.status, 429);
+  } finally {
+    await strict.close();
+  }
+});
+
 test('too many login requests from one address answer 429', async () => {
   const strict = await startServer({ loginRateMax: 3, registerRateMax: 2 });
   try {

@@ -20,6 +20,9 @@ const DEFAULTS = {
   // Failed logins per email before it is locked, and for how long.
   loginMaxAttempts: LIMITS.loginMaxAttempts,
   loginLockMs: LIMITS.loginLockMinutes * MINUTE,
+  // Requests per client address in a window, for every route except /health. It runs before the request log.
+  generalRateMax: LIMITS.generalRateMax,
+  generalRateWindowMs: LIMITS.generalRateWindowMinutes * MINUTE,
   // Requests per client address in a window: login and registration are limited separately.
   loginRateMax: LIMITS.loginRateMax,
   loginRateWindowMs: LIMITS.loginRateWindowMinutes * MINUTE,
@@ -37,6 +40,12 @@ const createApp = (models, settings) => {
     loginLimiter: createRateLimiter({ windowMs: config.loginRateWindowMs, max: config.loginRateMax }),
     registerLimiter: createRateLimiter({ windowMs: config.registerRateWindowMs, max: config.registerRateMax }),
   };
+  const generalLimiter = createRateLimiter({
+    windowMs: config.generalRateWindowMs,
+    max: config.generalRateMax,
+    // One console line per address and window, nothing is written to the database.
+    onLimited: (req, key) => console.warn(`Rate limit reached by ${String(key).replace(/[^ -~]/g, '?').slice(0, 64)}: further requests in this window are refused and not logged`),
+  });
   const app = express();
   app.disable('x-powered-by');
   // Behind a reverse proxy req.ip is the proxy unless this is set (TRUST_PROXY), and the limits would count everyone as one client.
@@ -51,6 +60,8 @@ const createApp = (models, settings) => {
       res.status(503).json({ status: 'unavailable' });
     }
   });
+  // Refused requests never reach the request log, so a flood from one address cannot grow the RequestLogs table.
+  app.use(generalLimiter);
   app.use(createRequestLogger(models));
   // The limit is set explicitly (limits.json), so it does not change with the library default.
   app.use(express.json({ limit: LIMITS.bodyBytes }));
