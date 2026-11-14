@@ -427,6 +427,40 @@ textarea.form__input {
   .editor-tabs__tab--active {
     border: 2px solid Highlight;
   }
+
+  /* Track and knob are drawn with backgrounds, which are removed: system colors keep both the shape and the on/off state */
+  .switch__input,
+  .editor-toolbar__switch-track {
+    forced-color-adjust: none;
+    border: 1px solid ButtonText;
+    background: Canvas;
+  }
+  .switch__input::before,
+  .editor-toolbar__switch-track::after {
+    background: ButtonText;
+  }
+  .switch__input:checked,
+  .editor-toolbar__switch[aria-checked='true'] .editor-toolbar__switch-track {
+    background: Highlight;
+  }
+  .switch__input:checked::before,
+  .editor-toolbar__switch[aria-checked='true'] .editor-toolbar__switch-track::after {
+    background: HighlightText;
+  }
+  .app-topbar__avatar,
+  .editor-toolbar__avatar {
+    border: 1px solid ButtonText;
+  }
+  .review__line--add {
+    border-inline-start: 4px solid Highlight;
+  }
+  .review__line--del {
+    border-inline-start: 4px dashed GrayText;
+  }
+  :focus-visible:not([tabindex='-1']) {
+    outline: 2px solid Highlight;
+    outline-offset: 2px;
+  }
 }
 
 /* Large call-to-action on the first screen: height 40 x phi, the primary button without a panel. */

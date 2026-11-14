@@ -40,7 +40,7 @@ with sync_playwright() as p:
     page.wait_for_timeout(600)
     tour_shown = page.locator(".tour").count() > 0 and page.locator(".tour").first.is_visible()
     if tour_shown:
-        page.click("text=Пропустить")
+        page.click(".tour >> text=Пропустить")
     code = lambda: page.evaluate("[...document.querySelectorAll('.code__line code')].map(e=>e.textContent).join('\\n')")  # noqa: E731
     status = lambda: page.inner_text(".canvas__status")  # noqa: E731
 

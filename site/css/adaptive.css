@@ -128,7 +128,8 @@
 .app-topbar__logo,
 .editor-toolbar__logo,
 .canvas__engine-link,
-.problems__location {
+.problems__location,
+.review__location {
   display: inline-flex;
   align-items: center;
   min-height: var(--target-size-small);

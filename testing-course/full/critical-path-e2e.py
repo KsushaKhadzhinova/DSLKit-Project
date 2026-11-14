@@ -58,7 +58,7 @@ with sync_playwright() as p:
         page.wait_for_url("**/app/editor.html**")
         page.wait_for_timeout(700)
         if page.locator(".tour").count() and page.locator(".tour").first.is_visible():
-            page.click("text=Пропустить")
+            page.click(".tour >> text=Пропустить")
 
     check("CP-01", "Главная: кнопка «Создать диаграмму» ведёт в редактор", home)
 
@@ -144,7 +144,7 @@ with sync_playwright() as p:
         page.reload()
         page.wait_for_timeout(800)
         if page.locator(".tour").count() and page.locator(".tour").first.is_visible():
-            page.click("text=Пропустить")
+            page.click(".tour >> text=Пропустить")
         eq(code(), state["saved_code"], "после перезагрузки:")
 
     check("CP-09", "После перезагрузки открывается сохранённый проект с теми же положениями блоков", reload_restores)
@@ -180,7 +180,7 @@ with sync_playwright() as p:
         page.wait_for_url("**/editor.html?p=*")
         page.wait_for_timeout(800)
         if page.locator(".tour").count() and page.locator(".tour").first.is_visible():
-            page.click("text=Пропустить")
+            page.click(".tour >> text=Пропустить")
         yes("Мой заказ" in code(), code()[:60])
         yes(page.locator(".canvas__remote svg").count() == 1, "нет диаграммы")
 
@@ -263,7 +263,7 @@ with sync_playwright() as p:
         page.goto(base + "/app/editor.html?template=dfd")
         page.wait_for_timeout(700)
         if page.locator(".tour").count() and page.locator(".tour").first.is_visible():
-            page.click("text=Пропустить")
+            page.click(".tour >> text=Пропустить")
         page.evaluate("""() => {
           const ol = document.querySelector('.code__lines');
           const li = document.createElement('li'); li.className='code__line';
@@ -281,7 +281,7 @@ with sync_playwright() as p:
         page.goto(base + "/app/editor.html?template=idef0")
         page.wait_for_timeout(700)
         if page.locator(".tour").count() and page.locator(".tour").first.is_visible():
-            page.click("text=Пропустить")
+            page.click(".tour >> text=Пропустить")
         with page.expect_download() as dl:
             page.locator("text=Экспорт SVG").first.evaluate("e => e.click()")
         yes(dl.value.suggested_filename.endswith(".svg"), dl.value.suggested_filename)

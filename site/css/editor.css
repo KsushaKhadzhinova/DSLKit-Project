@@ -23,6 +23,7 @@
 
 /* Toolbar */
 .editor-toolbar {
+  position: relative;
   grid-area: toolbar;
   z-index: 10;
   border-bottom: 1px solid var(--color-border);
@@ -40,6 +41,7 @@
 
 .editor-toolbar__logo {
   display: none;
+  min-inline-size: var(--target-size-small);
   margin-right: var(--space-1);
   color: var(--color-text);
   font-size: var(--step-0);
@@ -186,8 +188,8 @@
 .editor-activity__button {
   display: grid;
   place-items: center;
-  width: 2.5rem;
-  height: 2.5rem;
+  width: var(--target-size-small);
+  height: var(--target-size-small);
   border: 0;
   border-radius: var(--radius-small);
   background: transparent;
@@ -306,7 +308,7 @@
 
 .editor-segmented__button {
   flex: 1;
-  min-height: 2.25rem;
+  min-height: var(--target-size-small);
   border: 0;
   border-radius: 62.4375rem;
   background: transparent;
@@ -350,7 +352,7 @@
   display: inline-flex;
   align-items: center;
   gap: var(--space-1);
-  min-height: 2.5rem;
+  min-height: var(--target-size-small);
   padding: 0 var(--space-2);
   border: 0;
   border-bottom: 2px solid transparent;
@@ -872,6 +874,18 @@
     display: revert;
   }
 
+  .editor-toolbar .editor-menu {
+    position: relative;
+  }
+
+  .editor-toolbar .editor-menu__panel {
+    top: calc(100% + 0.5rem);
+    right: 0;
+    left: auto;
+    min-width: 15rem;
+    max-height: calc(100dvh - var(--toolbar-height) - var(--space-3));
+  }
+
   .editor-toolbar__run {
     display: flex;
   }
@@ -1029,7 +1043,7 @@
 }
 
 .editor-menu {
-  position: relative;
+  position: static;
 }
 
 .editor-menu__summary {
@@ -1043,13 +1057,14 @@
 
 .editor-menu__panel {
   position: absolute;
-  top: calc(100% + 0.5rem);
-  right: 0;
+  top: calc(100% + 0.25rem);
+  right: var(--space-1);
+  left: var(--space-1);
   z-index: 20;
   display: grid;
   gap: 0.25rem;
-  min-width: 15rem;
-  max-height: calc(100dvh - var(--toolbar-height) - var(--space-3));
+  min-width: 0;
+  max-height: calc(100dvh - var(--toolbar-height) * 5);
   overflow-y: auto;
   padding: var(--space-1);
   border: 1px solid var(--color-border);
@@ -1749,7 +1764,7 @@
 .problems .editor-tools__view .editor-tools__input {
   grid-column: 1;
   min-width: 0;
-  block-size: 2.25rem;
+  block-size: var(--target-size-small);
   padding-block: 0;
 }
 .problems .editor-tools__view .button {
@@ -1784,13 +1799,13 @@
 .editor-toolbar__row .button {
   flex: 0 0 auto;
   inline-size: auto;
-  min-block-size: clamp(2.75rem, 2.5rem + 0.4vw, 3rem);
+  min-block-size: max(var(--target-size-small), clamp(2.75rem, 2.5rem + 0.4vw, 3rem));
   padding-inline: clamp(0.5rem, 0.25rem + 0.9vw, 1rem);
   font-size: clamp(0.75rem, 0.68rem + 0.3vw, 0.9375rem);
   white-space: nowrap;
 }
 .editor-toolbar__row .button--icon {
-  min-inline-size: clamp(2.75rem, 2.5rem + 0.4vw, 3rem);
+  min-inline-size: max(var(--target-size-small), clamp(2.75rem, 2.5rem + 0.4vw, 3rem));
   padding-inline: 0;
 }
 .editor-toolbar__row .board-tools__add {
@@ -1802,8 +1817,9 @@
 }
 .board-tools .palette__link {
   inline-size: auto;
-  max-inline-size: clamp(5rem, 3rem + 6vw, 9rem);
-  min-block-size: clamp(2.75rem, 2.5rem + 0.4vw, 3rem);
+  min-inline-size: 9.5rem;
+  max-inline-size: clamp(9.5rem, 3rem + 6vw, 12rem);
+  min-block-size: max(var(--target-size-small), clamp(2.75rem, 2.5rem + 0.4vw, 3rem));
   font-size: clamp(0.75rem, 0.68rem + 0.3vw, 0.9375rem);
 }
 .board-tools .icon,
@@ -1814,8 +1830,8 @@
 .app-topbar__theme {
   display: inline-grid;
   place-items: center;
-  inline-size: clamp(2.75rem, 2.5rem + 0.4vw, 3rem);
-  block-size: clamp(2.75rem, 2.5rem + 0.4vw, 3rem);
+  inline-size: max(var(--target-size-small), clamp(2.75rem, 2.5rem + 0.4vw, 3rem));
+  block-size: max(var(--target-size-small), clamp(2.75rem, 2.5rem + 0.4vw, 3rem));
   border: 1px solid var(--color-border);
   border-radius: 50%;
   color: var(--color-text);
@@ -2042,7 +2058,7 @@ html.js:not(.is-ready)
 .editor-toolbar__row .editor-toolbar__avatar::after {
   content: '';
   position: absolute;
-  inset: -0.25rem;
+  inset: calc((100% - var(--target-size-small)) / 2);
 }
 .app-topbar .app-topbar__avatar .icon,
 .app-topbar .app-topbar__theme .icon,
@@ -2136,6 +2152,7 @@ html.js:not(.is-ready)
   overflow-wrap: anywhere;
 }
 .toast__close {
+  position: relative;
   flex: none;
   inline-size: 1.5rem;
   block-size: 1.5rem;
@@ -2146,4 +2163,10 @@ html.js:not(.is-ready)
   font-size: 1.125rem;
   line-height: 1;
   cursor: pointer;
+}
+/* The cross is small, the touch area around it is 44 px */
+.toast__close::after {
+  content: '';
+  position: absolute;
+  inset: calc((100% - var(--target-size-small)) / 2);
 }

@@ -4,7 +4,7 @@
 .auto {
   position: fixed;
   z-index: 40;
-  inset-block: var(--toolbar-height) var(--status-height);
+  inset-block: 0 var(--status-height);
   inset-inline: 0;
   display: flex;
   flex-direction: column;
@@ -126,7 +126,14 @@
 }
 .auto__output {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-1);
+}
+.auto__list {
+  grid-template-columns: minmax(0, 1fr);
+}
+.auto__list > li {
+  min-inline-size: 0;
 }
 .auto__progress {
   inline-size: 100%;
@@ -281,6 +288,7 @@
 
 @media (min-width: 48rem) {
   .auto {
+    inset-block-start: var(--toolbar-height);
     inset-inline-start: auto;
     inline-size: 26rem;
   }

@@ -77,7 +77,7 @@ with sync_playwright() as p:
     def tour(pg):
         pg.wait_for_timeout(500)
         if pg.locator(".tour").count() and pg.locator(".tour").first.is_visible():
-            pg.click("text=Пропустить")
+            pg.click(".tour >> text=Пропустить")
 
     def problems(pg):
         return pg.inner_text(".problems__status")

@@ -192,3 +192,51 @@ test('every colour mix has a fallback for browsers without color-mix', () => {
     .filter(([, lines]) => lines.length);
   assert.deepEqual(offenders, []);
 });
+
+const ruleBody = (css, selector) => {
+  const at = css.indexOf(`${selector} {`);
+  assert.notEqual(at, -1, `no rule for ${selector}`);
+  return css.slice(at, css.indexOf('}', at));
+};
+const TOUCH_AREA = /inset:\s*calc\(\(100% - var\(--target-size-small\)\) \/ 2/;
+
+test('rem sizes of touch targets never fall below 44 px: the root font size is 15 px on a phone', () => {
+  assert.doesNotMatch(allCss, /(?:min-)?(?:block|inline)-size:\s*clamp\(2\.75rem/);
+  assert.match(sheets['editor.css'], /max\(var\(--target-size-small\), clamp\(2\.75rem/);
+  for (const [name, selector] of [
+    ['editor.css', '.editor-segmented__button'],
+    ['editor.css', '.editor-tabs__tab'],
+    ['editor.css', '.editor-activity__button'],
+    ['clarify.css', '.clarify__option'],
+    ['clarify.css', '.clarify__nav .button'],
+    ['review.css', '.review__apply'],
+  ]) {
+    assert.match(ruleBody(sheets[name], selector), /var\(--target-size-small\)/, `${name} ${selector}`);
+  }
+});
+
+test('round buttons, switches and the toast cross keep a 44 px touch area around the drawn shape', () => {
+  assert.match(ruleBody(sheets['app.css'], '.switch__input::after'), TOUCH_AREA);
+  assert.match(ruleBody(sheets['editor.css'], '.toast__close::after'), TOUCH_AREA);
+  assert.match(ruleBody(sheets['editor.css'], '.editor-toolbar__row .editor-toolbar__avatar::after'), TOUCH_AREA);
+});
+
+test('the panels of the editor cover the whole phone screen below 768 px, and the toolbar menu spans the phone width', () => {
+  for (const [name, selector] of [
+    ['expert.css', '.auto'],
+    ['review.css', '.review'],
+  ]) {
+    assert.match(ruleBody(sheets[name], selector), /inset-block:\s*0 var\(--status-height\)/, name);
+    assert.match(sheets[name], /@media \(min-width: (?:768px|48rem)\) \{\s*\.(?:auto|review) \{\s*inset-block-start: var\(--toolbar-height\)/, name);
+  }
+  assert.match(ruleBody(sheets['editor.css'], '\n.editor-menu__panel'), /left:\s*var\(--space-1\)/);
+});
+
+test('forced colors keep the state of switches and the focus ring visible, with system colors only', () => {
+  const css = sheets['components.css'];
+  const block = css.slice(css.indexOf('@media (forced-colors: active)'));
+  assert.match(block, /\.switch__input:checked,[^{]*\{\s*background: Highlight/);
+  assert.match(block, /\.editor-toolbar__switch\[aria-checked='true'\]/);
+  assert.match(block, /:focus-visible:not\(\[tabindex='-1'\]\)\s*\{\s*outline: 2px solid Highlight/);
+  assert.deepEqual(hardcodedColors(block), []);
+});

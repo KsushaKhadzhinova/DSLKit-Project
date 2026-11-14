@@ -2,7 +2,7 @@
 .review {
   position: fixed;
   z-index: 40;
-  inset-block: var(--toolbar-height) var(--status-height);
+  inset-block: 0 var(--status-height);
   inset-inline: 0;
   display: flex;
   flex-direction: column;
@@ -128,17 +128,25 @@
 .review__line--add {
   background: rgb(22 163 74 / 0.35);
 }
+.review__location {
+  justify-content: center;
+  min-inline-size: var(--target-size-small);
+}
 .review__apply {
   justify-self: start;
-  min-block-size: 2.75rem;
+  min-block-size: var(--target-size-small);
 }
 
 @media (min-width: 768px) {
   .review {
+    inset-block-start: var(--toolbar-height);
     inset-inline-start: auto;
     inline-size: min(60rem, 80vw);
   }
+}
+
+@media (min-width: 1024px) {
   .review__diff {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }

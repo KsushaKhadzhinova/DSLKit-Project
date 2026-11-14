@@ -519,6 +519,9 @@ time {
   top: var(--space-1);
   left: var(--space-1);
   z-index: 1000;
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--target-size-small);
   padding: var(--space-1) var(--space-2);
   border-radius: var(--radius-small);
   background: var(--color-primary);
@@ -1263,7 +1266,8 @@ label > span {
 .app-topbar__logo,
 .editor-toolbar__logo,
 .canvas__engine-link,
-.problems__location {
+.problems__location,
+.review__location {
   display: inline-flex;
   align-items: center;
   min-height: var(--target-size-small);
