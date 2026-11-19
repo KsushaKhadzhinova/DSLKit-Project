@@ -387,3 +387,23 @@ test('unknown and empty results are reported, not guessed', async () => {
   const same = await run(JSON.stringify({ nodes: [{ id: 'a b' }, { id: 'a_b' }, { id: '--' }, { id: 'é' }], edges: [] }));
   assert.match(same.code, /vertex a_b_2/);
 });
+
+test('RT-03: a decompression bomb is refused with a clear message, a normal file still unpacks', async () => {
+  const bomb = deflateRawSync(Buffer.alloc(9 * 1024 * 1024));
+  assert.ok(bomb.length < 100000);
+  await assert.rejects(inflateRaw(bomb), { code: 'inflate-limit' });
+  assert.equal((await inflateRaw(deflateRawSync(Buffer.from('abc')))).length, 3);
+  assert.equal((await inflateRaw(deflateRawSync(Buffer.alloc(5000, 1)), 10000)).length, 5000);
+  await assert.rejects(inflateRaw(deflateRawSync(Buffer.alloc(5000, 1)), 100), { code: 'inflate-limit' });
+  const packed = bomb.toString('base64');
+  const ru = await run(`<mxfile><diagram>${packed}</diagram></mxfile>`, { inflate: inflateRaw });
+  assert.equal(ru.ok, false);
+  const en = await run(`<mxfile><diagram>${packed}</diagram></mxfile>`, { inflate: inflateRaw, lang: 'en' });
+  assert.equal(en.ok, false);
+  const refuse = async () => {
+    throw Object.assign(new Error('x'), { code: 'inflate-limit' });
+  };
+  const svg = await run(`<svg xmlns="http://www.w3.org/2000/svg"><g/></svg>`, { inflate: refuse });
+  assert.equal(typeof svg.ok, 'boolean');
+  await assert.rejects(vsdxToXml(zipOf('visio/pages/page1.xml', Buffer.from('<a/>'), 8), refuse), { code: 'inflate-limit' });
+});

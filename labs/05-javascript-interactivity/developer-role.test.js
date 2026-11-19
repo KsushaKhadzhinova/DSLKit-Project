@@ -2,8 +2,10 @@ import assert from 'node:assert/strict';
 import { mkdtempSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { webcrypto } from 'node:crypto';
 import { test } from 'node:test';
-import { DEVELOPER_CODE_SHA256 } from '../../site/js/config/roles.js';
+import { checkRoleCode } from '../../site/js/auth/role-code.js';
+import { ADMIN_CODE_VERIFIER, DEVELOPER_CODE_VERIFIER } from '../../site/js/config/roles.js';
 import { createAccountStore } from '../../site/js/storage/accounts.js';
 import { createMemoryBackend, createStorage } from '../../site/js/utils/storage.js';
 import { hashCode, writeRolesConfig } from '../../tools/dev-code.js';
@@ -11,8 +13,9 @@ import { hashCode, writeRolesConfig } from '../../tools/dev-code.js';
 const person = { name: 'Dev', email: 'dev@example.com', password: 'correct horse' };
 
 test('the code of the developer role is stored only as a hash', () => {
-  assert.match(DEVELOPER_CODE_SHA256, /^[0-9a-f]{64}$/);
-  assert.equal(hashCode('abc'), 'ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad');
+  assert.match(DEVELOPER_CODE_VERIFIER, /^p1s[$]100000[$][0-9a-f]{32}[$][0-9a-f]{64}$/);
+  assert.match(ADMIN_CODE_VERIFIER, /^p1s[$]100000[$][0-9a-f]{32}[$][0-9a-f]{64}$/);
+  assert.match(hashCode('abc'), /^p1[$]100000[$][0-9a-f]{32}[$][0-9a-f]{64}$/);
 });
 
 test('a user becomes a developer with the right code only, and can leave the role', async () => {
@@ -43,8 +46,13 @@ test('with the right code the role is written, survives a new session and can be
   assert.deepEqual(await broken.becomeDeveloper('my-secret-code'), { ok: false, error: 'storage' });
 });
 
-test('the config writer saves the hash of the new code', () => {
+test('the config writer saves the salted record of the new code', async () => {
   const file = join(mkdtempSync(join(tmpdir(), 'roles-')), 'roles.js');
+  writeRolesConfig(file, 'my-secret-code', 'my-admin-code');
+  const [developer, admin] = [...readFileSync(file, 'utf8').matchAll(/'(p1[$][^']+)'/g)].map((item) => item[1]);
+  assert.equal(await checkRoleCode(webcrypto, 'my-secret-code', developer), true);
+  assert.equal(await checkRoleCode(webcrypto, 'my-admin-code', admin), true);
+  assert.equal(await checkRoleCode(webcrypto, 'other', developer), false);
   writeRolesConfig(file, 'my-secret-code');
-  assert.equal(readFileSync(file, 'utf8').match(/'([0-9a-f]{64})'/)[1], hashCode('my-secret-code'));
+  assert.equal(readFileSync(file, 'utf8').match(/p1[$]/g).length, 2);
 });

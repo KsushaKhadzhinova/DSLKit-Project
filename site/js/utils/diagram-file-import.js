@@ -19,6 +19,7 @@ const WORDS = {
     'cut-nodes': 'Элементов слишком много, оставлено {n}.',
     'csv-directed': 'Строки таблицы прочитаны как направленные связи.',
     'no-inflate': 'Сжатое содержимое draw.io не удалось распаковать: сохраните файл без сжатия (Файл, Свойства, Сжатый XML выключить).',
+    'too-large-inflate': 'Сжатое содержимое draw.io после распаковки больше 8 МБ, файл отклонён: сохраните файл без сжатия или уменьшите диаграмму.',
     'class-members': 'Из UML-классов взяты имена, атрибуты и операции без типов.',
   },
   en: {
@@ -29,6 +30,8 @@ const WORDS = {
     'cut-nodes': 'Too many elements, {n} are kept.',
     'csv-directed': 'The table rows are read as directed links.',
     'no-inflate': 'The compressed content of draw.io could not be unpacked: save the file uncompressed (File, Properties, turn Compressed XML off).',
+    'too-large-inflate':
+      'The compressed content of draw.io is larger than 8 MB when unpacked, the file is refused: save the file uncompressed or make the diagram smaller.',
     'class-members': 'From the UML classes the names, attributes and operations are taken, without types.',
   },
 };
@@ -306,9 +309,27 @@ const fromMxGraph = (graph, lang) => {
 };
 
 // The content of a compressed <diagram>: base64, raw deflate, URL-encoded XML.
-export const inflateRaw = async (bytes) => {
-  const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
-  return new Uint8Array(await new Response(stream).arrayBuffer());
+// The unpacked size is capped (a small file may unpack to hundreds of megabytes): the stream is read in parts and stopped at the limit.
+export const MAX_INFLATED_BYTES = 8 * 1024 * 1024;
+export const inflateRaw = async (bytes, limit = MAX_INFLATED_BYTES) => {
+  const reader = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('deflate-raw')).getReader();
+  const parts = [];
+  let total = 0;
+  for (let part = await reader.read(); !part.done; part = await reader.read()) {
+    total += part.value.length;
+    if (total > limit) {
+      await reader.cancel();
+      throw Object.assign(new Error('inflate limit'), { code: 'inflate-limit' });
+    }
+    parts.push(part.value);
+  }
+  const out = new Uint8Array(total);
+  let at = 0;
+  parts.forEach((part) => {
+    out.set(part, at);
+    at += part.length;
+  });
+  return out;
 };
 const fromBase64 = (text) => Uint8Array.from(atob(text.replace(/\s+/g, '')), (char) => char.charCodeAt(0));
 
@@ -322,9 +343,9 @@ const drawio = async (root, { lang, inflate }) => {
     const xml = decodeURIComponent(new TextDecoder().decode(await inflate(fromBase64(packed))));
     const graph = all(parseXml(xml), 'mxGraphModel')[0];
     return graph ? fromMxGraph(graph, lang) : null;
-  } catch {
+  } catch (error) {
     const model = newModel();
-    model.warnings.push(say(lang, 'no-inflate'));
+    model.warnings.push(say(lang, error?.code === 'inflate-limit' ? 'too-large-inflate' : 'no-inflate'));
     return model;
   }
 };
@@ -855,7 +876,7 @@ export const importDiagramFile = async (source, { fileName = '', lang = 'ru', fo
     } else if (BUILDERS_XML[kind]) model = BUILDERS_XML[kind](parseXml(text));
     else return { ok: false, reason: 'unknown', warnings: [] };
     return model ? emitModel(model, lang) : { ok: false, reason: 'no-structure', warnings: [] };
-  } catch {
-    return { ok: false, reason: 'bad-file', warnings: [] };
+  } catch (error) {
+    return { ok: false, reason: error?.code === 'inflate-limit' ? 'too-large' : 'bad-file', warnings: [] };
   }
 };
