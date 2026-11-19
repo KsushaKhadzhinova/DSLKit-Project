@@ -1,0 +1,958 @@
+{
+ "tag": "edge-ru-desktop",
+ "tasks": [
+  {
+   "id": "T1",
+   "title": "First visit to the first saved diagram",
+   "lang": "ru",
+   "device": "desktop",
+   "browser": "edge",
+   "steps": 8,
+   "secs": 9.3,
+   "success": true,
+   "note": "url http://127.0.0.1:5391/app/editor.html?p=pmwgrqmuu0",
+   "friction": [
+    "5-step tour must be clicked through (or skipped) before the first action",
+    "feedback after save: 'Диаграмма готова. | Проблем нет | Сохранено 19:58 | ✓\\nСохранено в «Мои проекты»: Обработка заказа\\n×'",
+    "guest file tree shows 34 files (starter examples, duplicated names)"
+   ],
+   "log": [
+    {
+     "n": 1,
+     "label": "open landing",
+     "ms": 3735,
+     "error": null
+    },
+    {
+     "n": 2,
+     "label": "click the main CTA",
+     "ms": 313,
+     "error": null
+    },
+    {
+     "n": 3,
+     "label": "tour step 1: next",
+     "ms": 98,
+     "error": null
+    },
+    {
+     "n": 4,
+     "label": "tour step 2: next",
+     "ms": 68,
+     "error": null
+    },
+    {
+     "n": 5,
+     "label": "tour step 3: next",
+     "ms": 102,
+     "error": null
+    },
+    {
+     "n": 6,
+     "label": "tour step 4: next",
+     "ms": 75,
+     "error": null
+    },
+    {
+     "n": 7,
+     "label": "tour step 5: next",
+     "ms": 53,
+     "error": null
+    },
+    {
+     "n": 8,
+     "label": "press Save",
+     "ms": 206,
+     "error": null
+    }
+   ],
+   "evidence": [
+    "shots/t1-landing-edge-ru-desktop.jpg",
+    "shots/t1-editor-first-edge-ru-desktop.jpg",
+    "shots/t1-saved-edge-ru-desktop.jpg"
+   ]
+  },
+  {
+   "id": "T2",
+   "title": "Register, sign out, wrong password, sign in, forgot",
+   "lang": "ru",
+   "device": "desktop",
+   "browser": "edge",
+   "steps": 17,
+   "secs": 15.0,
+   "success": true,
+   "note": "http://127.0.0.1:5391/app/dashboard.html",
+   "friction": [
+    "empty submit message: 'Имя\\n\\nОт 2 до 60 букв. Допустимы пробел, дефис и апостроф.\\n\\nИмя не принято: поле  | auth-error | Please fill out this field. | Имя не принято: поле пустое, короче двух символов или содержит цифры и знаки. Вв | Please fill out this field. | Адрес не принят: он пустой или не похож на электронную почту. Проверьте, что ест | Please fill out this field. | Пароль не принят: нужно от 8 до 128 символов, не только пробелы. | Please fill out this field. | Пароли не совпадают. Введите тот же пароль ещё раз.'",
+    "weak/mismatch feedback: Регистрация /  / Создайте аккаунт, чтобы подписать свои проекты именем. Аккаунт хранится в этом браузере: сервера нет, пароль сохраняется только в виде хеша. /  / Имя /  / От 2 до 60 букв. Допустимы п",
+    "after register lands on welcome.html",
+    "after sign out: index.html",
+    "wrong password: Вход в аккаунт /  / Войдите, чтобы открыть свои проекты. Аккаунт хранится в этом браузере: сервера нет, пароль не передаётся и не сохраняется в открытом виде. /  / Неверная почта или пароль. Проверьте",
+    "forgot-password link present: False"
+   ],
+   "log": [
+    {
+     "n": 1,
+     "label": "open register",
+     "ms": 821,
+     "error": null
+    },
+    {
+     "n": 2,
+     "label": "submit empty",
+     "ms": 207,
+     "error": null
+    },
+    {
+     "n": 3,
+     "label": "fill name",
+     "ms": 45,
+     "error": null
+    },
+    {
+     "n": 4,
+     "label": "fill email",
+     "ms": 29,
+     "error": null
+    },
+    {
+     "n": 5,
+     "label": "fill short password",
+     "ms": 40,
+     "error": null
+    },
+    {
+     "n": 6,
+     "label": "fill mismatching confirm",
+     "ms": 45,
+     "error": null
+    },
+    {
+     "n": 7,
+     "label": "submit",
+     "ms": 141,
+     "error": null
+    },
+    {
+     "n": 8,
+     "label": "fix password",
+     "ms": 18,
+     "error": null
+    },
+    {
+     "n": 9,
+     "label": "fix confirm",
+     "ms": 30,
+     "error": null
+    },
+    {
+     "n": 10,
+     "label": "submit",
+     "ms": 130,
+     "error": null
+    },
+    {
+     "n": 11,
+     "label": "find and press sign out",
+     "ms": 288,
+     "error": null
+    },
+    {
+     "n": 12,
+     "label": "open login",
+     "ms": 2887,
+     "error": null
+    },
+    {
+     "n": 13,
+     "label": "fill email",
+     "ms": 233,
+     "error": null
+    },
+    {
+     "n": 14,
+     "label": "wrong password",
+     "ms": 22,
+     "error": null
+    },
+    {
+     "n": 15,
+     "label": "submit",
+     "ms": 67,
+     "error": null
+    },
+    {
+     "n": 16,
+     "label": "right password",
+     "ms": 22,
+     "error": null
+    },
+    {
+     "n": 17,
+     "label": "submit",
+     "ms": 90,
+     "error": null
+    }
+   ],
+   "evidence": [
+    "shots/t2-register-empty-edge-ru-desktop.jpg",
+    "shots/t2-register-bad-edge-ru-desktop.jpg",
+    "shots/t2-after-register-edge-ru-desktop.jpg",
+    "shots/t2-login-wrong-edge-ru-desktop.jpg"
+   ]
+  },
+  {
+   "id": "T3",
+   "title": "Draw a diagram by code and by the board",
+   "lang": "ru",
+   "device": "desktop",
+   "browser": "edge",
+   "steps": 13,
+   "secs": 13.5,
+   "success": true,
+   "note": "see friction and shots",
+   "friction": [
+    "live render after typing: True",
+    "problem feedback for a broken line: Проблемы / 2 /  / Проблем: 2 (ошибки: 2, предупреждения: 0) /  / Ошибка / Узел «zz» недостижим от начала / обработка-заказа.dsl:16 / Ошибка / Строка не распознана: «nonsense ->» / обработка-заказа.dsl:17",
+    "palette items: 6",
+    "step 12 'delete selected with nothing selected' failed: Locator.click: Timeout 3000ms exceeded. Call log:",
+    "delete button disabled state: True"
+   ],
+   "log": [
+    {
+     "n": 1,
+     "label": "open editor with the BPMN template",
+     "ms": 1216,
+     "error": null
+    },
+    {
+     "n": 2,
+     "label": "click code",
+     "ms": 170,
+     "error": null
+    },
+    {
+     "n": 3,
+     "label": "go to end and type a new task line",
+     "ms": 345,
+     "error": null
+    },
+    {
+     "n": 4,
+     "label": "type a broken line",
+     "ms": 142,
+     "error": null
+    },
+    {
+     "n": 5,
+     "label": "undo (toolbar)",
+     "ms": 127,
+     "error": null
+    },
+    {
+     "n": 6,
+     "label": "undo again",
+     "ms": 115,
+     "error": null
+    },
+    {
+     "n": 7,
+     "label": "redo",
+     "ms": 106,
+     "error": null
+    },
+    {
+     "n": 8,
+     "label": "open add element",
+     "ms": 115,
+     "error": null
+    },
+    {
+     "n": 9,
+     "label": "add task",
+     "ms": 95,
+     "error": null
+    },
+    {
+     "n": 10,
+     "label": "add gateway",
+     "ms": 210,
+     "error": null
+    },
+    {
+     "n": 11,
+     "label": "connect mode",
+     "ms": 63,
+     "error": null
+    },
+    {
+     "n": 12,
+     "label": "delete selected with nothing selected",
+     "ms": 3182,
+     "error": "Locator.click: Timeout 3000ms exceeded. Call log:"
+    },
+    {
+     "n": 13,
+     "label": "keyboard Delete in canvas",
+     "ms": 12,
+     "error": null
+    }
+   ],
+   "evidence": [
+    "shots/t3-code-typed-edge-ru-desktop.jpg",
+    "shots/t3-code-error-edge-ru-desktop.jpg",
+    "shots/t3-palette-edge-ru-desktop.jpg",
+    "shots/t3-connect-edge-ru-desktop.jpg"
+   ]
+  },
+  {
+   "id": "T4",
+   "title": "Import files of each format and a picture without AI",
+   "lang": "ru",
+   "device": "desktop",
+   "browser": "edge",
+   "steps": 16,
+   "secs": 305.4,
+   "success": true,
+   "note": "per-format results in friction list",
+   "friction": [
+    "a.dot: 'Формат не распознан: нужен текст Mermaid или PlantUML. Проблем нет Сохранено 19:58 ✓\\nФормат не распознан: нужен текст Mermaid или PlantUML.\\n×'",
+    "a.csv: 'Формат не распознан: нужен текст Mermaid или PlantUML. Проблем нет Сохранено 19:59 ✓\\nФормат не распознан: нужен текст Mermaid или PlantUML.\\n×'",
+    "a.json: 'Формат не распознан: нужен текст Mermaid или PlantUML. Проблем нет Сохранено 19:59 ✓\\nФормат не распознан: нужен текст Mermaid или PlantUML.\\n×'",
+    "a.graphml: 'Формат не распознан: нужен текст Mermaid или PlantUML. Проблем нет Сохранено 19:59 ✓\\nФормат не распознан: нужен текст Mermaid или PlantUML.\\n×'",
+    "a.gexf: 'Формат не распознан: нужен текст Mermaid или PlantUML. Проблем нет Сохранено 19:59 ✓\\nФормат не распознан: нужен текст Mermaid или PlantUML.\\n×'",
+    "a.mmd: 'Импортировано: блок-схема. Проблем: 0 (ошибки: 0, предупреждения: 0) Сохранено в «Мои проекты»: Imported flowchart ✓\\nИмпортировано: блок-схема.\\n×'",
+    "a.puml: 'Импортировано: диаграмма последовательности. Проблем нет Сохранено в «Мои проекты»: Imported sequence ✓\\nИмпортировано: диаграмма последовательности.\\n×'",
+    "a.dsl: 'Импортировано: код DSLKit. Проблем: 3 (ошибки: 3, предупреждения: 0) Сохранено в «Мои проекты»: Mine ✓\\nИмпортировано: код DSLKit.\\n×'",
+    "a.txt: 'Формат не распознан: нужен текст Mermaid или PlantUML. Проблем нет Сохранено 20:00 ✓\\nФормат не распознан: нужен текст Mermaid или PlantUML.\\n×'",
+    "a.bpmn: 'Формат не распознан: нужен текст Mermaid или PlantUML. Проблем нет Сохранено 20:01 ✓\\nФормат не распознан: нужен текст Mermaid или PlantUML.\\n×'",
+    "a.drawio: 'Формат не распознан: нужен текст Mermaid или PlantUML. Проблем нет Сохранено 20:01 ✓\\nФормат не распознан: нужен текст Mermaid или PlantUML.\\n×'",
+    "a.svg: 'Формат не распознан: нужен текст Mermaid или PlantUML. Проблем нет Сохранено 20:02 ✓\\nФормат не распознан: нужен текст Mermaid или PlantUML.\\n×'",
+    "a.xmi: 'Формат не распознан: нужен текст Mermaid или PlantUML. Проблем нет Сохранено 20:02 ✓\\nФормат не распознан: нужен текст Mermaid или PlantUML.\\n×'",
+    "broken.json: 'Формат не распознан: нужен текст Mermaid или PlantUML. Проблем нет Сохранено 20:02 ✓\\nФормат не распознан: нужен текст Mermaid или PlantUML.\\n×'",
+    "empty.dsl: 'В тексте нет диаграммы для импорта. Проблем нет Сохранено 20:03 ✓\\nВ тексте нет диаграммы для импорта.\\n×'",
+    "pic.png: 'Формат не распознан: нужен текст Mermaid или PlantUML. Проблем нет Сохранено 20:03 ✓\\nФормат не распознан: нужен текст Mermaid или PlantUML.\\n×'",
+    "11 MB file: Текст слишком большой для импорта: не больше 200 000 знаков и 2 000 знаков в строке. Проблем нет Сохранено 20:03 ✓\nТекст слишком большой для импорта: не больше 200 000 знаков и 2 000 знаков в строке.\n"
+   ],
+   "log": [
+    {
+     "n": 1,
+     "label": "import a.dot",
+     "ms": 0,
+     "error": null
+    },
+    {
+     "n": 2,
+     "label": "import a.csv",
+     "ms": 0,
+     "error": null
+    },
+    {
+     "n": 3,
+     "label": "import a.json",
+     "ms": 0,
+     "error": null
+    },
+    {
+     "n": 4,
+     "label": "import a.graphml",
+     "ms": 0,
+     "error": null
+    },
+    {
+     "n": 5,
+     "label": "import a.gexf",
+     "ms": 0,
+     "error": null
+    },
+    {
+     "n": 6,
+     "label": "import a.mmd",
+     "ms": 0,
+     "error": null
+    },
+    {
+     "n": 7,
+     "label": "import a.puml",
+     "ms": 0,
+     "error": null
+    },
+    {
+     "n": 8,
+     "label": "import a.dsl",
+     "ms": 0,
+     "error": null
+    },
+    {
+     "n": 9,
+     "label": "import a.txt",
+     "ms": 0,
+     "error": null
+    },
+    {
+     "n": 10,
+     "label": "import a.bpmn",
+     "ms": 0,
+     "error": null
+    },
+    {
+     "n": 11,
+     "label": "import a.drawio",
+     "ms": 0,
+     "error": null
+    },
+    {
+     "n": 12,
+     "label": "import a.svg",
+     "ms": 0,
+     "error": null
+    },
+    {
+     "n": 13,
+     "label": "import a.xmi",
+     "ms": 0,
+     "error": null
+    },
+    {
+     "n": 14,
+     "label": "import broken.json",
+     "ms": 0,
+     "error": null
+    },
+    {
+     "n": 15,
+     "label": "import empty.dsl",
+     "ms": 0,
+     "error": null
+    },
+    {
+     "n": 16,
+     "label": "import pic.png",
+     "ms": 0,
+     "error": null
+    }
+   ],
+   "evidence": [
+    "shots/t4-a-txt-edge-ru-desktop.jpg",
+    "shots/t4-a-drawio-edge-ru-desktop.jpg",
+    "shots/t4-broken-json-edge-ru-desktop.jpg",
+    "shots/t4-pic-png-edge-ru-desktop.jpg",
+    "shots/t4-big-edge-ru-desktop.jpg"
+   ]
+  },
+  {
+   "id": "T5-noai",
+   "title": "Review & fix and clarify panels (noai)",
+   "lang": "ru",
+   "device": "desktop",
+   "browser": "edge",
+   "steps": 5,
+   "secs": 63.4,
+   "success": true,
+   "note": "",
+   "friction": [
+    "review panel text:  /   / без изменений: / exclusive g2 /   / без изменений: / end e \"Готово\" /   / без изменений: / flow s -> t1 /   / без изменений: / flow t1 -> g1 /   / без изменений: / flow g1 -> t2 \"да\" /   / без изменений: / flow g1 -> t3 \"нет\" /   / без изменений: / flow t2 -> g2 /   / без изменений: / flow t3 -> g2 /   / без изменений: / flow g2 -> e / Применить этот вариант / Код диаграммы /  / Пишите диаграмму текстом: одна строка описывает один элемент или связь. /  / Шаг 1 из 5 /  / Пропустить / Далее",
+    "step 5 'Clarify' failed: Locator.click: Timeout 45000ms exceeded. Call log:",
+    "clarify state: Диаграмма готова. | Проблем: 1 (ошибки: 1, предупреждения: 0) | Сохранено в «Мои проекты»: Обработка заказа | Найдено: ошибок 1, предупреждений 0, советов 1."
+   ],
+   "log": [
+    {
+     "n": 1,
+     "label": "break the code",
+     "ms": 1131,
+     "error": null
+    },
+    {
+     "n": 2,
+     "label": "open menu",
+     "ms": 156,
+     "error": null
+    },
+    {
+     "n": 3,
+     "label": "Check and fix",
+     "ms": 327,
+     "error": null
+    },
+    {
+     "n": 4,
+     "label": "open menu",
+     "ms": 49,
+     "error": null
+    },
+    {
+     "n": 5,
+     "label": "Clarify",
+     "ms": 45023,
+     "error": "Locator.click: Timeout 45000ms exceeded. Call log:"
+    }
+   ],
+   "evidence": [
+    "shots/t5-review-noai-edge-ru-desktop.jpg",
+    "shots/t5-clarify-noai-edge-ru-desktop.jpg"
+   ]
+  },
+  {
+   "id": "T5-fakeai",
+   "title": "Review & fix and clarify panels (fakeai)",
+   "lang": "ru",
+   "device": "desktop",
+   "browser": "edge",
+   "steps": 5,
+   "secs": 66.1,
+   "success": true,
+   "note": "",
+   "friction": [
+    "review panel text:  /   / без изменений: / exclusive g2 /   / без изменений: / end e \"Готово\" /   / без изменений: / flow s -> t1 /   / без изменений: / flow t1 -> g1 /   / без изменений: / flow g1 -> t2 \"да\" /   / без изменений: / flow g1 -> t3 \"нет\" /   / без изменений: / flow t2 -> g2 /   / без изменений: / flow t3 -> g2 /   / без изменений: / flow g2 -> e / Применить этот вариант / Код диаграммы /  / Пишите диаграмму текстом: одна строка описывает один элемент или связь. /  / Шаг 1 из 5 /  / Пропустить / Далее",
+    "step 5 'Clarify' failed: Locator.click: Timeout 45000ms exceeded. Call log:",
+    "clarify state: Диаграмма готова. | Проблем: 1 (ошибки: 1, предупреждения: 0) | Сохранено в «Мои проекты»: Обработка заказа | Найдено: ошибок 1, предупреждений 0, советов 1."
+   ],
+   "log": [
+    {
+     "n": 1,
+     "label": "break the code",
+     "ms": 550,
+     "error": null
+    },
+    {
+     "n": 2,
+     "label": "open menu",
+     "ms": 109,
+     "error": null
+    },
+    {
+     "n": 3,
+     "label": "Check and fix",
+     "ms": 298,
+     "error": null
+    },
+    {
+     "n": 4,
+     "label": "open menu",
+     "ms": 234,
+     "error": null
+    },
+    {
+     "n": 5,
+     "label": "Clarify",
+     "ms": 45063,
+     "error": "Locator.click: Timeout 45000ms exceeded. Call log:"
+    }
+   ],
+   "evidence": [
+    "shots/t5-review-fakeai-edge-ru-desktop.jpg",
+    "shots/t5-clarify-fakeai-edge-ru-desktop.jpg"
+   ]
+  },
+  {
+   "id": "T6",
+   "title": "Projects: search, filter, rename, trash, restore, share, versions",
+   "lang": "ru",
+   "device": "desktop",
+   "browser": "edge",
+   "steps": 15,
+   "secs": 98.8,
+   "success": true,
+   "note": "",
+   "friction": [
+    "empty search message: Проектов не найдено",
+    "count after search: Найдено проектов: 9",
+    "count after search+filter: Найдено проектов: 1",
+    "card menu items: Переименовать | Сохранить как шаблон | В корзину",
+    "rename uses a native prompt: ['prompt: Новое название проекта']",
+    "trash uses a native confirm: ['confirm: Переместить проект «My renamed project» в корзину?']",
+    "step 12 'restore' failed: Locator.click: Timeout 45000ms exceeded. Call log:",
+    "restore feedback: Найдено проектов: 32",
+    "share feedback: ",
+    "versions panel: Проблемы / 3"
+   ],
+   "log": [
+    {
+     "n": 1,
+     "label": "open dashboard",
+     "ms": 4001,
+     "error": null
+    },
+    {
+     "n": 2,
+     "label": "search 'zzzz' (no result)",
+     "ms": 137,
+     "error": null
+    },
+    {
+     "n": 3,
+     "label": "clear search",
+     "ms": 76,
+     "error": null
+    },
+    {
+     "n": 4,
+     "label": "search 'order'",
+     "ms": 39,
+     "error": null
+    },
+    {
+     "n": 5,
+     "label": "filter BPMN chip",
+     "ms": 71,
+     "error": null
+    },
+    {
+     "n": 6,
+     "label": "reset",
+     "ms": 123,
+     "error": null
+    },
+    {
+     "n": 7,
+     "label": "open card menu",
+     "ms": 93,
+     "error": null
+    },
+    {
+     "n": 8,
+     "label": "rename",
+     "ms": 1436,
+     "error": null
+    },
+    {
+     "n": 9,
+     "label": "open card menu",
+     "ms": 92,
+     "error": null
+    },
+    {
+     "n": 10,
+     "label": "move to trash",
+     "ms": 173,
+     "error": null
+    },
+    {
+     "n": 11,
+     "label": "open trash",
+     "ms": 33,
+     "error": null
+    },
+    {
+     "n": 12,
+     "label": "restore",
+     "ms": 45037,
+     "error": "Locator.click: Timeout 45000ms exceeded. Call log:"
+    },
+    {
+     "n": 13,
+     "label": "open project",
+     "ms": 18406,
+     "error": null
+    },
+    {
+     "n": 14,
+     "label": "share",
+     "ms": 5333,
+     "error": null
+    },
+    {
+     "n": 15,
+     "label": "versions tab",
+     "ms": 50,
+     "error": null
+    }
+   ],
+   "evidence": [
+    "shots/t6-dashboard-edge-ru-desktop.jpg",
+    "shots/t6-card-menu-edge-ru-desktop.jpg",
+    "shots/t6-trash-edge-ru-desktop.jpg",
+    "shots/t6-share-edge-ru-desktop.jpg",
+    "shots/t6-versions-edge-ru-desktop.jpg"
+   ]
+  },
+  {
+   "id": "T7",
+   "title": "Export in every format",
+   "lang": "ru",
+   "device": "desktop",
+   "browser": "edge",
+   "steps": 6,
+   "secs": 16.4,
+   "success": true,
+   "note": "",
+   "friction": [
+    "export items: ['svg:', 'png:', 'jpeg:', 'drawio:', 'html:']",
+    "export svg -> обработка-заказа.svg",
+    "export png -> обработка-заказа.png",
+    "export jpeg -> обработка-заказа.jpg",
+    "export drawio -> обработка-заказа.drawio",
+    "export html -> обработка-заказа.html"
+   ],
+   "log": [
+    {
+     "n": 1,
+     "label": "open menu",
+     "ms": 322,
+     "error": null
+    },
+    {
+     "n": 2,
+     "label": "export svg",
+     "ms": 678,
+     "error": null
+    },
+    {
+     "n": 3,
+     "label": "export png",
+     "ms": 341,
+     "error": null
+    },
+    {
+     "n": 4,
+     "label": "export jpeg",
+     "ms": 469,
+     "error": null
+    },
+    {
+     "n": 5,
+     "label": "export drawio",
+     "ms": 191,
+     "error": null
+    },
+    {
+     "n": 6,
+     "label": "export html",
+     "ms": 328,
+     "error": null
+    }
+   ],
+   "evidence": [
+    "shots/t7-menu-edge-ru-desktop.jpg"
+   ]
+  },
+  {
+   "id": "T8",
+   "title": "Settings, theme and language switch keeping the page",
+   "lang": "ru",
+   "device": "desktop",
+   "browser": "edge",
+   "steps": 4,
+   "secs": 79.7,
+   "success": true,
+   "note": "",
+   "friction": [
+    "step 3 'switch language' failed: Locator.click: Timeout 45000ms exceeded. Call log:",
+    "after language switch url /app/editor.html?p=pmwgs39ay0; unsaved note kept: True",
+    "settings text: Редактор / Тема / Настройки · Редактор / Размер шрифта кода / 13 px / Номера строк / Перенос строк / Автодополнение / По первому символу / Автосохранение / Сетка холста / Точки / Движок генерации диаграмм / Kroki · Graphviz / Kroki · Mermaid / Kroki · PlantUML / Сервер DSLKit (свой API) / Собственный движок (в браузере) / Направляющие и отступы / Тема / Светлая / Тёмная / Авто"
+   ],
+   "log": [
+    {
+     "n": 1,
+     "label": "type into code",
+     "ms": 789,
+     "error": null
+    },
+    {
+     "n": 2,
+     "label": "open menu",
+     "ms": 377,
+     "error": null
+    },
+    {
+     "n": 3,
+     "label": "switch language",
+     "ms": 45039,
+     "error": "Locator.click: Timeout 45000ms exceeded. Call log:"
+    },
+    {
+     "n": 4,
+     "label": "settings",
+     "ms": 21616,
+     "error": null
+    }
+   ],
+   "evidence": [
+    "shots/t8-lang-edge-ru-desktop.jpg",
+    "shots/t8-settings-edge-ru-desktop.jpg"
+   ]
+  },
+  {
+   "id": "T9",
+   "title": "5 diagrams per day quota messaging",
+   "lang": "ru",
+   "device": "desktop",
+   "browser": "edge",
+   "steps": 6,
+   "secs": 100.7,
+   "success": true,
+   "note": "",
+   "friction": [
+    "quota text: Бета: сегодня создано 0 из 5",
+    "#1: Диаграмма готова. | Проблем: 1 (ошибки: 1, предупреждения: 0) | Сохранено 20:09 | ✓\nСохранено в «Мои проекты»: Обработка",
+    "#2: Диаграмма готова. | Проблем: 1 (ошибки: 1, предупреждения: 0) | Сохранено в «Мои проекты»: Обработка заказа | ✓\nСохранен",
+    "#3: Диаграмма готова. | Проблем: 1 (ошибки: 1, предупреждения: 0) | Сохранено в «Мои проекты»: Обработка заказа | ✓\nСохранен",
+    "#4: Диаграмма готова. | Проблем: 1 (ошибки: 1, предупреждения: 0) | Сохранено 20:10 | ✓\nСохранено в «Мои проекты»: Обработка",
+    "#5: Диаграмма готова. | Проблем: 1 (ошибки: 1, предупреждения: 0) | Сохранено в «Мои проекты»: Обработка заказа | ✓\nСохранен",
+    "#6: Диаграмма готова. | Проблем: 1 (ошибки: 1, предупреждения: 0) | Лимит беты: 5 новых диаграмм в день. Проект не сохранён,",
+    "quota text after: Бета: сегодня создано 5 из 5"
+   ],
+   "log": [
+    {
+     "n": 1,
+     "label": "save new diagram #1",
+     "ms": 12616,
+     "error": null
+    },
+    {
+     "n": 2,
+     "label": "save new diagram #2",
+     "ms": 7738,
+     "error": null
+    },
+    {
+     "n": 3,
+     "label": "save new diagram #3",
+     "ms": 10280,
+     "error": null
+    },
+    {
+     "n": 4,
+     "label": "save new diagram #4",
+     "ms": 14377,
+     "error": null
+    },
+    {
+     "n": 5,
+     "label": "save new diagram #5",
+     "ms": 10318,
+     "error": null
+    },
+    {
+     "n": 6,
+     "label": "save new diagram #6",
+     "ms": 21234,
+     "error": null
+    }
+   ],
+   "evidence": [
+    "shots/t9-quota-edge-ru-desktop.jpg"
+   ]
+  },
+  {
+   "id": "T10",
+   "title": "Docs pages",
+   "lang": "ru",
+   "device": "desktop",
+   "browser": "edge",
+   "steps": 1,
+   "secs": 16.4,
+   "success": true,
+   "note": "",
+   "friction": [
+    "docs head: Документация / Программа / Гайды / Код / Что такое DSLKit / Обзор экранов / Аккаунт и хранение данных в браузере / Проекты: создание, чтение, изменение, удаление, список / Корзина (30 дней) / Общие примеры, лайки и копирование / Мои шаблоны / Квота «5 диаграмм в день» / Редактор: код, холст, нижняя панель / Панель инструмент",
+    "docs search input present: 0"
+   ],
+   "log": [
+    {
+     "n": 1,
+     "label": "open docs",
+     "ms": 9718,
+     "error": null
+    }
+   ],
+   "evidence": [
+    "shots/t10-docs-edge-ru-desktop.jpg"
+   ]
+  },
+  {
+   "id": "T11",
+   "title": "Error situations",
+   "lang": "ru",
+   "device": "desktop",
+   "browser": "edge",
+   "steps": 4,
+   "secs": 66.1,
+   "success": true,
+   "note": "",
+   "friction": [
+    "offline save feedback: Диаграмма готова. | Проблем нет | Сохранено в «Мои проекты»: Обработка заказа | ✓\nСохранено в «Мои проекты»: Обработка заказа\n×",
+    "offline review: Диаграмма готова. | Проблем нет | Сохранено в «Мои проекты»: Обработка заказа | Найдено: ошибок 0, предупреждений 0, советов 1.",
+    "corrupted storage: url login.html; text Перейти к основному содержимому / DSLKit / English / Тёмная тема / Вход в аккаунт /  / Войдите, чтобы открыть свои проекты. Аккаунт хранится в этом браузере: сервера нет, пароль не передаётся и не сох",
+    "save after session removed: Диаграмма готова. | Проблем нет | Сохранено в «Мои проекты»: Обработка заказа | ✓\nСохранено в «Мои проекты»: Обработка заказа\n× url editor.html?p=pmwgs8b9e0",
+    "dashboard after session removed -> login.html",
+    "save with storage full: Диаграмма готова. | Проблем нет | Сохранено в «Мои проекты»: Обработка заказа | ✓\nСохранено в «Мои проекты»: Обработка заказа\n×; status: Сохранено в «Мои проекты»: Обработка заказа",
+    "404 page: Перейти к основному содержимому / Skip to the main content /  DSLKit /  / Код ошибки: 404 /  / Ошибка 404: страница не найдена /  / По этому адресу нет страницы DSLKit. Возможно, в адресе есть опечатк"
+   ],
+   "log": [
+    {
+     "n": 1,
+     "label": "go offline",
+     "ms": 176,
+     "error": null
+    },
+    {
+     "n": 2,
+     "label": "save while offline",
+     "ms": 715,
+     "error": null
+    },
+    {
+     "n": 3,
+     "label": "export svg offline",
+     "ms": 0,
+     "error": null
+    },
+    {
+     "n": 4,
+     "label": "open Check and fix offline",
+     "ms": 1556,
+     "error": null
+    }
+   ],
+   "evidence": [
+    "shots/t11-offline-edge-ru-desktop.jpg",
+    "shots/t11-corrupt-edge-ru-desktop.jpg",
+    "shots/t11-full-edge-ru-desktop.jpg"
+   ]
+  },
+  {
+   "id": "T12",
+   "title": "Keyboard-only traversal, skip links, live regions, reduced motion",
+   "lang": "ru",
+   "device": "desktop",
+   "browser": "edge",
+   "steps": 2,
+   "secs": 11.9,
+   "success": true,
+   "note": "",
+   "friction": [
+    "tab order: BODY:Перейти к основному содер [NO-FOCUS-RING] > A:Перейти к основному содер > A:К коду диаграммы > A:DSLKit > BUTTON:Запустить > BUTTON:Отменить > BUTTON:Повторить > BUTTON:Сохранить > BUTTON:Добавить элемент > BUTTON:Соединить > SELECT:Тип связи > BUTTON:Переименовать выбранный ( > BUTTON:Удалить выбранный > SUMMARY:Ещё действия",
+    "a11y probe: {\"liveRegions\": 11, \"unlabeledButtons\": [\"button button--quiet\", \"button button--quiet\", \"button button--quiet\", \"button button--quiet\", \"button button--quiet\", \"button button--quiet\", \"button button--quiet\", \"button button--quiet\", \"button button--quiet\", \"button button--quiet\", \"button button--quiet\", \"button button--quiet\", \"button button--quiet\", \"button button--quiet\", \"button button--quiet\", \"button button--quiet\", \"button button--quiet\", \"button button--quiet\", \"button button--quiet\", \"button button--quiet\", \"button button--quiet canvas__r\", \"editor-toolbar__switch\", \"button button--quiet\", \"button button--quiet\", \"button button--quiet\"], \"h1\": 1, \"lang\": \"ru\", \"animations\": 0}",
+    "targets under 44 px in editor: 1 e.g. [{'t': 'Настройки', 'w': 39, 'h': 39}]",
+    "Ctrl+S feedback: Диаграмма готова. | Проблем нет | Сохранено в «Мои проекты»: Обработка заказа | ✓\nСохранено в «Мои п",
+    "menu closed on Escape: True"
+   ],
+   "log": [
+    {
+     "n": 1,
+     "label": "Ctrl+S in code",
+     "ms": 229,
+     "error": null
+    },
+    {
+     "n": 2,
+     "label": "Escape closes menu",
+     "ms": 85,
+     "error": null
+    }
+   ],
+   "evidence": [
+    "shots/t12-focus-edge-ru-desktop.jpg"
+   ]
+  }
+ ],
+ "errors": [
+  "console: Failed to load resource: net::ERR_FAILED",
+  "console: Failed to load resource: the server responded with a status of 404 (Not Found)"
+ ],
+ "dialogs": [
+  "prompt: Новое название проекта",
+  "confirm: Переместить проект «My renamed project» в корзину?"
+ ]
+}
