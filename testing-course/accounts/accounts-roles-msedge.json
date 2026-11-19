@@ -1,0 +1,104 @@
+{
+ "suite": "roles",
+ "results": [
+  {
+   "id": "ROL-01",
+   "title": "Documentation: only the developer sees and uses Edit; guest/user/admin do not; wrong codes give no role",
+   "browser": "msedge",
+   "status": "Passed",
+   "severity": "",
+   "note": ""
+  },
+  {
+   "id": "ROL-02",
+   "title": "Expert rules: only the developer can edit rules",
+   "browser": "msedge",
+   "status": "Passed",
+   "severity": "",
+   "note": ""
+  },
+  {
+   "id": "ROL-03",
+   "title": "Admin role scope",
+   "browser": "msedge",
+   "status": "Passed",
+   "severity": "",
+   "note": "OBSERVATION: role admin = no daily limit only; admin cannot edit documentation or expert rules (only developer can) and the site has no admin screen or example-publishing action"
+  },
+  {
+   "id": "ROL-10",
+   "title": "Import (Mermaid flow/sequence/state, PlantUML sequence/state, DSL, junk, oversized, clipboard) as guest",
+   "browser": "msedge",
+   "status": "Passed",
+   "severity": "",
+   "note": ""
+  },
+  {
+   "id": "ROL-11",
+   "title": "Import (Mermaid flow/sequence/state, PlantUML sequence/state, DSL, junk, oversized, clipboard) as user",
+   "browser": "msedge",
+   "status": "Passed",
+   "severity": "",
+   "note": ""
+  },
+  {
+   "id": "ROL-12",
+   "title": "Import (Mermaid flow/sequence/state, PlantUML sequence/state, DSL, junk, oversized, clipboard) as developer",
+   "browser": "msedge",
+   "status": "Passed",
+   "severity": "",
+   "note": ""
+  },
+  {
+   "id": "ROL-13",
+   "title": "Import (Mermaid flow/sequence/state, PlantUML sequence/state, DSL, junk, oversized, clipboard) as admin",
+   "browser": "msedge",
+   "status": "Passed",
+   "severity": "",
+   "note": ""
+  },
+  {
+   "id": "ROL-20",
+   "title": "Trash: move, restore, delete forever, empty, a trashed project does not open",
+   "browser": "msedge",
+   "status": "Failed",
+   "severity": "Medium",
+   "note": "Locator.click: Timeout 60000ms exceeded. Call log:   - waiting for locator(\"[data-project], [data-template]\").filter(has=locator(\".project-card__link\").filter(has_text=\"Cycle one\")).first.locator(\".project-card__menu\")",
+   "screenshot": "fail-ROL-20-msedge.png"
+  },
+  {
+   "id": "ROL-21",
+   "title": "Trash: items older than 30 days are erased",
+   "browser": "msedge",
+   "status": "Failed",
+   "severity": "Medium",
+   "note": "Locator.click: Timeout 60000ms exceeded. Call log:   - waiting for locator(\"[data-project], [data-template]\").filter(has=locator(\".project-card__link\").filter(has_text=\"Old trash\")).first.locator(\".project-card__menu\")",
+   "screenshot": "fail-ROL-21-msedge.png"
+  },
+  {
+   "id": "ROL-22",
+   "title": "Templates: create from a project and delete, for user, developer and admin",
+   "browser": "msedge",
+   "status": "Failed",
+   "severity": "Medium",
+   "note": "Locator.click: Timeout 60000ms exceeded. Call log:   - waiting for locator(\"[data-project], [data-template]\").filter(has=locator(\".project-card__link\").filter(has_text=\"Tpl user\")).first.locator(\".project-card__menu\")",
+   "screenshot": "fail-ROL-22-msedge.png"
+  },
+  {
+   "id": "ROL-23",
+   "title": "Versions: commit, change, restore returns the committed code, Versions tab lists it",
+   "browser": "msedge",
+   "status": "Passed",
+   "severity": "",
+   "note": ""
+  },
+  {
+   "id": "ROL-24",
+   "title": "Role belongs to the account: kept after reload and re-login, other accounts unchanged",
+   "browser": "msedge",
+   "status": "Passed",
+   "severity": "",
+   "note": ""
+  }
+ ]
+}
