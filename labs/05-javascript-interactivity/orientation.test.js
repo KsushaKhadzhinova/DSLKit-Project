@@ -138,15 +138,15 @@ describe('the splitter', () => {
     api.splitter.style.setProperty('--split-axis', 'y');
     fire('pointermove', { clientY: 400 });
     assert.equal(api.ratio(), 45 > 600 ? 0 : 50);
-    let captured = null;
-    api.splitter.setPointerCapture = (id) => {
-      captured = id;
+    let captured = 0;
+    api.splitter.setPointerCapture = () => {
+      captured += 1;
     };
     fire('pointerup');
     fire('pointermove', { clientY: 100 });
     assert.equal(api.ratio(), 50, 'released');
     fire('pointerdown');
-    assert.notEqual(captured, undefined);
+    assert.equal(captured, 1);
     fire('pointercancel');
     fire('pointermove', { clientY: 100 });
     assert.equal(api.ratio(), 50);
@@ -250,7 +250,7 @@ describe('rotation', () => {
     window.dispatchEvent(new window.Event('resize'));
     size(canvas, { scrollWidth: 2000, scrollHeight: 1200 });
     await sleep(160);
-    assert.deepEqual([canvas.scrollLeft, canvas.scrollTop], [1300, 750]);
+    assert.deepEqual([canvas.scrollLeft, canvas.scrollTop], [800, 450]);
     size(canvas, { scrollWidth: 0, scrollHeight: 0 });
     window.dispatchEvent(new window.Event('resize'));
     await sleep(160);

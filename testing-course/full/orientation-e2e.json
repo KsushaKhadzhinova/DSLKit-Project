@@ -1,0 +1,1432 @@
+{
+  "results": [
+    {
+      "id": "ORI-edge-iPhone-13-/index.html-portrait",
+      "kind": "e2e",
+      "title": "edge iPhone 13 /index.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-iPhone-13-/app/dashboard.html-portrait",
+      "kind": "e2e",
+      "title": "edge iPhone 13 /app/dashboard.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-iPhone-13-/app/editor.html-portrait",
+      "kind": "e2e",
+      "title": "edge iPhone 13 /app/editor.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-iPhone-13-/app/welcome.html-portrait",
+      "kind": "e2e",
+      "title": "edge iPhone 13 /app/welcome.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-iPhone-13-/app/docs.html-portrait",
+      "kind": "e2e",
+      "title": "edge iPhone 13 /app/docs.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-iPhone-13-/app/login.html-portrait",
+      "kind": "e2e",
+      "title": "edge iPhone 13 /app/login.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-iPhone-13-/app/register.html-portrait",
+      "kind": "e2e",
+      "title": "edge iPhone 13 /app/register.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-iPhone-13-state",
+      "kind": "e2e",
+      "title": "edge iPhone 13: после поворота код и выделение сохранены",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-iPhone-13-landscape-overflow",
+      "kind": "e2e",
+      "title": "edge iPhone 13 landscape: редактор без горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-iPhone-13-landscape-mode",
+      "kind": "e2e",
+      "title": "edge iPhone 13 landscape: страница знает, что она в альбомной ориентации",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-iPhone-13-landscape-panes",
+      "kind": "e2e",
+      "title": "edge iPhone 13 landscape: код и холст видны одновременно",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-iPhone-13-landscape-targets",
+      "kind": "e2e",
+      "title": "edge iPhone 13 landscape: видимые элементы управления не меньше 44 px",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-iPhone-13-back",
+      "kind": "e2e",
+      "title": "edge iPhone 13: после обратного поворота состояние то же",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-iPad-gen-7-/index.html-portrait",
+      "kind": "e2e",
+      "title": "edge iPad (gen 7) /index.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-iPad-gen-7-/app/dashboard.html-portrait",
+      "kind": "e2e",
+      "title": "edge iPad (gen 7) /app/dashboard.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-iPad-gen-7-/app/editor.html-portrait",
+      "kind": "e2e",
+      "title": "edge iPad (gen 7) /app/editor.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-iPad-gen-7-/app/welcome.html-portrait",
+      "kind": "e2e",
+      "title": "edge iPad (gen 7) /app/welcome.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-iPad-gen-7-/app/docs.html-portrait",
+      "kind": "e2e",
+      "title": "edge iPad (gen 7) /app/docs.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-iPad-gen-7-/app/login.html-portrait",
+      "kind": "e2e",
+      "title": "edge iPad (gen 7) /app/login.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-iPad-gen-7-/app/register.html-portrait",
+      "kind": "e2e",
+      "title": "edge iPad (gen 7) /app/register.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-iPad-gen-7-state",
+      "kind": "e2e",
+      "title": "edge iPad (gen 7): после поворота код и выделение сохранены",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-iPad-gen-7-landscape-overflow",
+      "kind": "e2e",
+      "title": "edge iPad (gen 7) landscape: редактор без горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-iPad-gen-7-landscape-mode",
+      "kind": "e2e",
+      "title": "edge iPad (gen 7) landscape: страница знает, что она в альбомной ориентации",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-iPad-gen-7-landscape-panes",
+      "kind": "e2e",
+      "title": "edge iPad (gen 7) landscape: код и холст видны одновременно",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-iPad-gen-7-landscape-targets",
+      "kind": "e2e",
+      "title": "edge iPad (gen 7) landscape: видимые элементы управления не меньше 44 px",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-iPad-gen-7-back",
+      "kind": "e2e",
+      "title": "edge iPad (gen 7): после обратного поворота состояние то же",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-Pixel-7-/index.html-portrait",
+      "kind": "e2e",
+      "title": "edge Pixel 7 /index.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-Pixel-7-/app/dashboard.html-portrait",
+      "kind": "e2e",
+      "title": "edge Pixel 7 /app/dashboard.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-Pixel-7-/app/editor.html-portrait",
+      "kind": "e2e",
+      "title": "edge Pixel 7 /app/editor.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-Pixel-7-/app/welcome.html-portrait",
+      "kind": "e2e",
+      "title": "edge Pixel 7 /app/welcome.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-Pixel-7-/app/docs.html-portrait",
+      "kind": "e2e",
+      "title": "edge Pixel 7 /app/docs.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-Pixel-7-/app/login.html-portrait",
+      "kind": "e2e",
+      "title": "edge Pixel 7 /app/login.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-Pixel-7-/app/register.html-portrait",
+      "kind": "e2e",
+      "title": "edge Pixel 7 /app/register.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-Pixel-7-state",
+      "kind": "e2e",
+      "title": "edge Pixel 7: после поворота код и выделение сохранены",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-Pixel-7-landscape-overflow",
+      "kind": "e2e",
+      "title": "edge Pixel 7 landscape: редактор без горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-Pixel-7-landscape-mode",
+      "kind": "e2e",
+      "title": "edge Pixel 7 landscape: страница знает, что она в альбомной ориентации",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-Pixel-7-landscape-panes",
+      "kind": "e2e",
+      "title": "edge Pixel 7 landscape: код и холст видны одновременно",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-Pixel-7-landscape-targets",
+      "kind": "e2e",
+      "title": "edge Pixel 7 landscape: видимые элементы управления не меньше 44 px",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-Pixel-7-back",
+      "kind": "e2e",
+      "title": "edge Pixel 7: после обратного поворота состояние то же",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-Galaxy-Z-Fold-6-/index.html-portrait",
+      "kind": "e2e",
+      "title": "edge Galaxy Z Fold 6 /index.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-Galaxy-Z-Fold-6-/app/dashboard.html-portrait",
+      "kind": "e2e",
+      "title": "edge Galaxy Z Fold 6 /app/dashboard.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-Galaxy-Z-Fold-6-/app/editor.html-portrait",
+      "kind": "e2e",
+      "title": "edge Galaxy Z Fold 6 /app/editor.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-Galaxy-Z-Fold-6-/app/welcome.html-portrait",
+      "kind": "e2e",
+      "title": "edge Galaxy Z Fold 6 /app/welcome.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-Galaxy-Z-Fold-6-/app/docs.html-portrait",
+      "kind": "e2e",
+      "title": "edge Galaxy Z Fold 6 /app/docs.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-Galaxy-Z-Fold-6-/app/login.html-portrait",
+      "kind": "e2e",
+      "title": "edge Galaxy Z Fold 6 /app/login.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-Galaxy-Z-Fold-6-/app/register.html-portrait",
+      "kind": "e2e",
+      "title": "edge Galaxy Z Fold 6 /app/register.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-Galaxy-Z-Fold-6-state",
+      "kind": "e2e",
+      "title": "edge Galaxy Z Fold 6: после поворота код и выделение сохранены",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-Galaxy-Z-Fold-6-landscape-overflow",
+      "kind": "e2e",
+      "title": "edge Galaxy Z Fold 6 landscape: редактор без горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-Galaxy-Z-Fold-6-landscape-mode",
+      "kind": "e2e",
+      "title": "edge Galaxy Z Fold 6 landscape: страница знает, что она в альбомной ориентации",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-Galaxy-Z-Fold-6-landscape-panes",
+      "kind": "e2e",
+      "title": "edge Galaxy Z Fold 6 landscape: код и холст видны одновременно",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-Galaxy-Z-Fold-6-landscape-targets",
+      "kind": "e2e",
+      "title": "edge Galaxy Z Fold 6 landscape: видимые элементы управления не меньше 44 px",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-Galaxy-Z-Fold-6-back",
+      "kind": "e2e",
+      "title": "edge Galaxy Z Fold 6: после обратного поворота состояние то же",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-square-/index.html",
+      "kind": "e2e",
+      "title": "edge square 800x800 /index.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-square-/app/dashboard.html",
+      "kind": "e2e",
+      "title": "edge square 800x800 /app/dashboard.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-square-/app/editor.html",
+      "kind": "e2e",
+      "title": "edge square 800x800 /app/editor.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-square-/app/welcome.html",
+      "kind": "e2e",
+      "title": "edge square 800x800 /app/welcome.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-square-/app/docs.html",
+      "kind": "e2e",
+      "title": "edge square 800x800 /app/docs.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-square-/app/login.html",
+      "kind": "e2e",
+      "title": "edge square 800x800 /app/login.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-square-/app/register.html",
+      "kind": "e2e",
+      "title": "edge square 800x800 /app/register.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-ultrawide-/index.html",
+      "kind": "e2e",
+      "title": "edge ultrawide 2560x1080 /index.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-ultrawide-/app/dashboard.html",
+      "kind": "e2e",
+      "title": "edge ultrawide 2560x1080 /app/dashboard.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-ultrawide-/app/editor.html",
+      "kind": "e2e",
+      "title": "edge ultrawide 2560x1080 /app/editor.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-ultrawide-/app/welcome.html",
+      "kind": "e2e",
+      "title": "edge ultrawide 2560x1080 /app/welcome.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-ultrawide-/app/docs.html",
+      "kind": "e2e",
+      "title": "edge ultrawide 2560x1080 /app/docs.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-ultrawide-/app/login.html",
+      "kind": "e2e",
+      "title": "edge ultrawide 2560x1080 /app/login.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-ultrawide-/app/register.html",
+      "kind": "e2e",
+      "title": "edge ultrawide 2560x1080 /app/register.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-ultrawide-3440-/index.html",
+      "kind": "e2e",
+      "title": "edge ultrawide-3440 3440x1440 /index.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-ultrawide-3440-/app/dashboard.html",
+      "kind": "e2e",
+      "title": "edge ultrawide-3440 3440x1440 /app/dashboard.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-ultrawide-3440-/app/editor.html",
+      "kind": "e2e",
+      "title": "edge ultrawide-3440 3440x1440 /app/editor.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-ultrawide-3440-/app/welcome.html",
+      "kind": "e2e",
+      "title": "edge ultrawide-3440 3440x1440 /app/welcome.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-ultrawide-3440-/app/docs.html",
+      "kind": "e2e",
+      "title": "edge ultrawide-3440 3440x1440 /app/docs.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-ultrawide-3440-/app/login.html",
+      "kind": "e2e",
+      "title": "edge ultrawide-3440 3440x1440 /app/login.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-ultrawide-3440-/app/register.html",
+      "kind": "e2e",
+      "title": "edge ultrawide-3440 3440x1440 /app/register.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-narrow-split-/index.html",
+      "kind": "e2e",
+      "title": "edge narrow-split 320x900 /index.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-narrow-split-/app/dashboard.html",
+      "kind": "e2e",
+      "title": "edge narrow-split 320x900 /app/dashboard.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-narrow-split-/app/editor.html",
+      "kind": "e2e",
+      "title": "edge narrow-split 320x900 /app/editor.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-narrow-split-/app/welcome.html",
+      "kind": "e2e",
+      "title": "edge narrow-split 320x900 /app/welcome.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-narrow-split-/app/docs.html",
+      "kind": "e2e",
+      "title": "edge narrow-split 320x900 /app/docs.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-narrow-split-/app/login.html",
+      "kind": "e2e",
+      "title": "edge narrow-split 320x900 /app/login.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-narrow-split-/app/register.html",
+      "kind": "e2e",
+      "title": "edge narrow-split 320x900 /app/register.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-folded-/index.html",
+      "kind": "e2e",
+      "title": "edge folded 280x653 /index.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-folded-/app/dashboard.html",
+      "kind": "e2e",
+      "title": "edge folded 280x653 /app/dashboard.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-folded-/app/editor.html",
+      "kind": "e2e",
+      "title": "edge folded 280x653 /app/editor.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-folded-/app/welcome.html",
+      "kind": "e2e",
+      "title": "edge folded 280x653 /app/welcome.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-folded-/app/docs.html",
+      "kind": "e2e",
+      "title": "edge folded 280x653 /app/docs.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-folded-/app/login.html",
+      "kind": "e2e",
+      "title": "edge folded 280x653 /app/login.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-folded-/app/register.html",
+      "kind": "e2e",
+      "title": "edge folded 280x653 /app/register.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-fold-unfolded-/index.html",
+      "kind": "e2e",
+      "title": "edge fold-unfolded 673x841 /index.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-fold-unfolded-/app/dashboard.html",
+      "kind": "e2e",
+      "title": "edge fold-unfolded 673x841 /app/dashboard.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-fold-unfolded-/app/editor.html",
+      "kind": "e2e",
+      "title": "edge fold-unfolded 673x841 /app/editor.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-fold-unfolded-/app/welcome.html",
+      "kind": "e2e",
+      "title": "edge fold-unfolded 673x841 /app/welcome.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-fold-unfolded-/app/docs.html",
+      "kind": "e2e",
+      "title": "edge fold-unfolded 673x841 /app/docs.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-fold-unfolded-/app/login.html",
+      "kind": "e2e",
+      "title": "edge fold-unfolded 673x841 /app/login.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-fold-unfolded-/app/register.html",
+      "kind": "e2e",
+      "title": "edge fold-unfolded 673x841 /app/register.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-fold-inner-/index.html",
+      "kind": "e2e",
+      "title": "edge fold-inner 1768x2208 /index.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-fold-inner-/app/dashboard.html",
+      "kind": "e2e",
+      "title": "edge fold-inner 1768x2208 /app/dashboard.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-fold-inner-/app/editor.html",
+      "kind": "e2e",
+      "title": "edge fold-inner 1768x2208 /app/editor.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-fold-inner-/app/welcome.html",
+      "kind": "e2e",
+      "title": "edge fold-inner 1768x2208 /app/welcome.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-fold-inner-/app/docs.html",
+      "kind": "e2e",
+      "title": "edge fold-inner 1768x2208 /app/docs.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-fold-inner-/app/login.html",
+      "kind": "e2e",
+      "title": "edge fold-inner 1768x2208 /app/login.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-fold-inner-/app/register.html",
+      "kind": "e2e",
+      "title": "edge fold-inner 1768x2208 /app/register.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-edge-errors",
+      "kind": "e2e",
+      "title": "edge: нет ошибок скриптов",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-iPhone-13-/index.html-portrait",
+      "kind": "e2e",
+      "title": "firefox iPhone 13 /index.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-iPhone-13-/app/dashboard.html-portrait",
+      "kind": "e2e",
+      "title": "firefox iPhone 13 /app/dashboard.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-iPhone-13-/app/editor.html-portrait",
+      "kind": "e2e",
+      "title": "firefox iPhone 13 /app/editor.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-iPhone-13-/app/welcome.html-portrait",
+      "kind": "e2e",
+      "title": "firefox iPhone 13 /app/welcome.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-iPhone-13-/app/docs.html-portrait",
+      "kind": "e2e",
+      "title": "firefox iPhone 13 /app/docs.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-iPhone-13-/app/login.html-portrait",
+      "kind": "e2e",
+      "title": "firefox iPhone 13 /app/login.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-iPhone-13-/app/register.html-portrait",
+      "kind": "e2e",
+      "title": "firefox iPhone 13 /app/register.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-iPhone-13-state",
+      "kind": "e2e",
+      "title": "firefox iPhone 13: после поворота код и выделение сохранены",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-iPhone-13-landscape-overflow",
+      "kind": "e2e",
+      "title": "firefox iPhone 13 landscape: редактор без горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-iPhone-13-landscape-mode",
+      "kind": "e2e",
+      "title": "firefox iPhone 13 landscape: страница знает, что она в альбомной ориентации",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-iPhone-13-landscape-panes",
+      "kind": "e2e",
+      "title": "firefox iPhone 13 landscape: код и холст видны одновременно",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-iPhone-13-landscape-targets",
+      "kind": "e2e",
+      "title": "firefox iPhone 13 landscape: видимые элементы управления не меньше 44 px",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-iPhone-13-back",
+      "kind": "e2e",
+      "title": "firefox iPhone 13: после обратного поворота состояние то же",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-iPad-gen-7-/index.html-portrait",
+      "kind": "e2e",
+      "title": "firefox iPad (gen 7) /index.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-iPad-gen-7-/app/dashboard.html-portrait",
+      "kind": "e2e",
+      "title": "firefox iPad (gen 7) /app/dashboard.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-iPad-gen-7-/app/editor.html-portrait",
+      "kind": "e2e",
+      "title": "firefox iPad (gen 7) /app/editor.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-iPad-gen-7-/app/welcome.html-portrait",
+      "kind": "e2e",
+      "title": "firefox iPad (gen 7) /app/welcome.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-iPad-gen-7-/app/docs.html-portrait",
+      "kind": "e2e",
+      "title": "firefox iPad (gen 7) /app/docs.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-iPad-gen-7-/app/login.html-portrait",
+      "kind": "e2e",
+      "title": "firefox iPad (gen 7) /app/login.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-iPad-gen-7-/app/register.html-portrait",
+      "kind": "e2e",
+      "title": "firefox iPad (gen 7) /app/register.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-iPad-gen-7-state",
+      "kind": "e2e",
+      "title": "firefox iPad (gen 7): после поворота код и выделение сохранены",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-iPad-gen-7-landscape-overflow",
+      "kind": "e2e",
+      "title": "firefox iPad (gen 7) landscape: редактор без горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-iPad-gen-7-landscape-mode",
+      "kind": "e2e",
+      "title": "firefox iPad (gen 7) landscape: страница знает, что она в альбомной ориентации",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-iPad-gen-7-landscape-panes",
+      "kind": "e2e",
+      "title": "firefox iPad (gen 7) landscape: код и холст видны одновременно",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-iPad-gen-7-landscape-targets",
+      "kind": "e2e",
+      "title": "firefox iPad (gen 7) landscape: видимые элементы управления не меньше 44 px",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-iPad-gen-7-back",
+      "kind": "e2e",
+      "title": "firefox iPad (gen 7): после обратного поворота состояние то же",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-Pixel-7-/index.html-portrait",
+      "kind": "e2e",
+      "title": "firefox Pixel 7 /index.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-Pixel-7-/app/dashboard.html-portrait",
+      "kind": "e2e",
+      "title": "firefox Pixel 7 /app/dashboard.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-Pixel-7-/app/editor.html-portrait",
+      "kind": "e2e",
+      "title": "firefox Pixel 7 /app/editor.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-Pixel-7-/app/welcome.html-portrait",
+      "kind": "e2e",
+      "title": "firefox Pixel 7 /app/welcome.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-Pixel-7-/app/docs.html-portrait",
+      "kind": "e2e",
+      "title": "firefox Pixel 7 /app/docs.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-Pixel-7-/app/login.html-portrait",
+      "kind": "e2e",
+      "title": "firefox Pixel 7 /app/login.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-Pixel-7-/app/register.html-portrait",
+      "kind": "e2e",
+      "title": "firefox Pixel 7 /app/register.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-Pixel-7-state",
+      "kind": "e2e",
+      "title": "firefox Pixel 7: после поворота код и выделение сохранены",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-Pixel-7-landscape-overflow",
+      "kind": "e2e",
+      "title": "firefox Pixel 7 landscape: редактор без горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-Pixel-7-landscape-mode",
+      "kind": "e2e",
+      "title": "firefox Pixel 7 landscape: страница знает, что она в альбомной ориентации",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-Pixel-7-landscape-panes",
+      "kind": "e2e",
+      "title": "firefox Pixel 7 landscape: код и холст видны одновременно",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-Pixel-7-landscape-targets",
+      "kind": "e2e",
+      "title": "firefox Pixel 7 landscape: видимые элементы управления не меньше 44 px",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-Pixel-7-back",
+      "kind": "e2e",
+      "title": "firefox Pixel 7: после обратного поворота состояние то же",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-Galaxy-Z-Fold-6-/index.html-portrait",
+      "kind": "e2e",
+      "title": "firefox Galaxy Z Fold 6 /index.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-Galaxy-Z-Fold-6-/app/dashboard.html-portrait",
+      "kind": "e2e",
+      "title": "firefox Galaxy Z Fold 6 /app/dashboard.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-Galaxy-Z-Fold-6-/app/editor.html-portrait",
+      "kind": "e2e",
+      "title": "firefox Galaxy Z Fold 6 /app/editor.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-Galaxy-Z-Fold-6-/app/welcome.html-portrait",
+      "kind": "e2e",
+      "title": "firefox Galaxy Z Fold 6 /app/welcome.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-Galaxy-Z-Fold-6-/app/docs.html-portrait",
+      "kind": "e2e",
+      "title": "firefox Galaxy Z Fold 6 /app/docs.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-Galaxy-Z-Fold-6-/app/login.html-portrait",
+      "kind": "e2e",
+      "title": "firefox Galaxy Z Fold 6 /app/login.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-Galaxy-Z-Fold-6-/app/register.html-portrait",
+      "kind": "e2e",
+      "title": "firefox Galaxy Z Fold 6 /app/register.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-Galaxy-Z-Fold-6-state",
+      "kind": "e2e",
+      "title": "firefox Galaxy Z Fold 6: после поворота код и выделение сохранены",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-Galaxy-Z-Fold-6-landscape-overflow",
+      "kind": "e2e",
+      "title": "firefox Galaxy Z Fold 6 landscape: редактор без горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-Galaxy-Z-Fold-6-landscape-mode",
+      "kind": "e2e",
+      "title": "firefox Galaxy Z Fold 6 landscape: страница знает, что она в альбомной ориентации",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-Galaxy-Z-Fold-6-landscape-panes",
+      "kind": "e2e",
+      "title": "firefox Galaxy Z Fold 6 landscape: код и холст видны одновременно",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-Galaxy-Z-Fold-6-landscape-targets",
+      "kind": "e2e",
+      "title": "firefox Galaxy Z Fold 6 landscape: видимые элементы управления не меньше 44 px",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-Galaxy-Z-Fold-6-back",
+      "kind": "e2e",
+      "title": "firefox Galaxy Z Fold 6: после обратного поворота состояние то же",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-square-/index.html",
+      "kind": "e2e",
+      "title": "firefox square 800x800 /index.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-square-/app/dashboard.html",
+      "kind": "e2e",
+      "title": "firefox square 800x800 /app/dashboard.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-square-/app/editor.html",
+      "kind": "e2e",
+      "title": "firefox square 800x800 /app/editor.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-square-/app/welcome.html",
+      "kind": "e2e",
+      "title": "firefox square 800x800 /app/welcome.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-square-/app/docs.html",
+      "kind": "e2e",
+      "title": "firefox square 800x800 /app/docs.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-square-/app/login.html",
+      "kind": "e2e",
+      "title": "firefox square 800x800 /app/login.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-square-/app/register.html",
+      "kind": "e2e",
+      "title": "firefox square 800x800 /app/register.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-ultrawide-/index.html",
+      "kind": "e2e",
+      "title": "firefox ultrawide 2560x1080 /index.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-ultrawide-/app/dashboard.html",
+      "kind": "e2e",
+      "title": "firefox ultrawide 2560x1080 /app/dashboard.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-ultrawide-/app/editor.html",
+      "kind": "e2e",
+      "title": "firefox ultrawide 2560x1080 /app/editor.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-ultrawide-/app/welcome.html",
+      "kind": "e2e",
+      "title": "firefox ultrawide 2560x1080 /app/welcome.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-ultrawide-/app/docs.html",
+      "kind": "e2e",
+      "title": "firefox ultrawide 2560x1080 /app/docs.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-ultrawide-/app/login.html",
+      "kind": "e2e",
+      "title": "firefox ultrawide 2560x1080 /app/login.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-ultrawide-/app/register.html",
+      "kind": "e2e",
+      "title": "firefox ultrawide 2560x1080 /app/register.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-ultrawide-3440-/index.html",
+      "kind": "e2e",
+      "title": "firefox ultrawide-3440 3440x1440 /index.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-ultrawide-3440-/app/dashboard.html",
+      "kind": "e2e",
+      "title": "firefox ultrawide-3440 3440x1440 /app/dashboard.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-ultrawide-3440-/app/editor.html",
+      "kind": "e2e",
+      "title": "firefox ultrawide-3440 3440x1440 /app/editor.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-ultrawide-3440-/app/welcome.html",
+      "kind": "e2e",
+      "title": "firefox ultrawide-3440 3440x1440 /app/welcome.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-ultrawide-3440-/app/docs.html",
+      "kind": "e2e",
+      "title": "firefox ultrawide-3440 3440x1440 /app/docs.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-ultrawide-3440-/app/login.html",
+      "kind": "e2e",
+      "title": "firefox ultrawide-3440 3440x1440 /app/login.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-ultrawide-3440-/app/register.html",
+      "kind": "e2e",
+      "title": "firefox ultrawide-3440 3440x1440 /app/register.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-narrow-split-/index.html",
+      "kind": "e2e",
+      "title": "firefox narrow-split 320x900 /index.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-narrow-split-/app/dashboard.html",
+      "kind": "e2e",
+      "title": "firefox narrow-split 320x900 /app/dashboard.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-narrow-split-/app/editor.html",
+      "kind": "e2e",
+      "title": "firefox narrow-split 320x900 /app/editor.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-narrow-split-/app/welcome.html",
+      "kind": "e2e",
+      "title": "firefox narrow-split 320x900 /app/welcome.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-narrow-split-/app/docs.html",
+      "kind": "e2e",
+      "title": "firefox narrow-split 320x900 /app/docs.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-narrow-split-/app/login.html",
+      "kind": "e2e",
+      "title": "firefox narrow-split 320x900 /app/login.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-narrow-split-/app/register.html",
+      "kind": "e2e",
+      "title": "firefox narrow-split 320x900 /app/register.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-folded-/index.html",
+      "kind": "e2e",
+      "title": "firefox folded 280x653 /index.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-folded-/app/dashboard.html",
+      "kind": "e2e",
+      "title": "firefox folded 280x653 /app/dashboard.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-folded-/app/editor.html",
+      "kind": "e2e",
+      "title": "firefox folded 280x653 /app/editor.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-folded-/app/welcome.html",
+      "kind": "e2e",
+      "title": "firefox folded 280x653 /app/welcome.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-folded-/app/docs.html",
+      "kind": "e2e",
+      "title": "firefox folded 280x653 /app/docs.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-folded-/app/login.html",
+      "kind": "e2e",
+      "title": "firefox folded 280x653 /app/login.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-folded-/app/register.html",
+      "kind": "e2e",
+      "title": "firefox folded 280x653 /app/register.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-fold-unfolded-/index.html",
+      "kind": "e2e",
+      "title": "firefox fold-unfolded 673x841 /index.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-fold-unfolded-/app/dashboard.html",
+      "kind": "e2e",
+      "title": "firefox fold-unfolded 673x841 /app/dashboard.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-fold-unfolded-/app/editor.html",
+      "kind": "e2e",
+      "title": "firefox fold-unfolded 673x841 /app/editor.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-fold-unfolded-/app/welcome.html",
+      "kind": "e2e",
+      "title": "firefox fold-unfolded 673x841 /app/welcome.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-fold-unfolded-/app/docs.html",
+      "kind": "e2e",
+      "title": "firefox fold-unfolded 673x841 /app/docs.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-fold-unfolded-/app/login.html",
+      "kind": "e2e",
+      "title": "firefox fold-unfolded 673x841 /app/login.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-fold-unfolded-/app/register.html",
+      "kind": "e2e",
+      "title": "firefox fold-unfolded 673x841 /app/register.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-fold-inner-/index.html",
+      "kind": "e2e",
+      "title": "firefox fold-inner 1768x2208 /index.html: нет горизонтальной прокрутки",
+      "status": "Failed",
+      "note": "не открылась http://localhost:5180/index.html: Page.goto: Timeout 15000ms exceeded."
+    },
+    {
+      "id": "ORI-firefox-fold-inner-/app/dashboard.html",
+      "kind": "e2e",
+      "title": "firefox fold-inner 1768x2208 /app/dashboard.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-fold-inner-/app/editor.html",
+      "kind": "e2e",
+      "title": "firefox fold-inner 1768x2208 /app/editor.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-fold-inner-/app/welcome.html",
+      "kind": "e2e",
+      "title": "firefox fold-inner 1768x2208 /app/welcome.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-fold-inner-/app/docs.html",
+      "kind": "e2e",
+      "title": "firefox fold-inner 1768x2208 /app/docs.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-fold-inner-/app/login.html",
+      "kind": "e2e",
+      "title": "firefox fold-inner 1768x2208 /app/login.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-fold-inner-/app/register.html",
+      "kind": "e2e",
+      "title": "firefox fold-inner 1768x2208 /app/register.html: нет горизонтальной прокрутки",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "ORI-firefox-errors",
+      "kind": "e2e",
+      "title": "firefox: нет ошибок скриптов",
+      "status": "Passed",
+      "note": ""
+    }
+  ]
+}
