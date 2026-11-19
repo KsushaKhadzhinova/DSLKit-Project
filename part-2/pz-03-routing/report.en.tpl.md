@@ -6,7 +6,7 @@ To master routing in a React application: configure routes, build a single-page 
 
 ## 2 Choice of the React Router Version
 
-The assignment names React Router v6 with a note "v6?". The `react-router-dom` library version 7.18.4 is used. The whole API from the assignment (`BrowserRouter`, `Routes`, `Route`, `Link`, `NavLink`, `Outlet`, `Navigate`, `useParams`, `useNavigate`, `useLocation`) works in version 7 library mode the same way as in v6. Version 7 is maintained, compatible with React 19 and already used in the application from the first part of the course. If needed, the code moves to v6 with `npm i react-router-dom@6` without changes.
+The assignment names React Router v6 with a note "v6?". This variant of the work uses the `react-router-dom` library version 6.30, so it follows the assignment exactly. The whole API from the assignment (`BrowserRouter`, `Routes`, `Route`, `Link`, `NavLink`, `Outlet`, `Navigate`, `useParams`, `useNavigate`, `useLocation`, `useSearchParams`) works unchanged in version 6. Version 6.30 is supported and compatible with React 19.
 
 ## 3 Work Progress
 
@@ -86,6 +86,8 @@ For an unknown path a styled 404 page is shown, and it is visible in figure 6.
 
 Figure 6 – The page "Ошибка 404: страница не найдена" in the site style
 
+The error pages are built from one catalogue of texts, `src/shell/errorCatalog.js`, and each answers three questions: what the error is, why it happened and how to solve it. This is how 404 (no such page), 403 (the role is not enough), 500 (a failure while showing a page) and the "No connection to the server" page work, and the error boundary shows the last one when a piece of code could not be downloaded. Error 401 is explained on the sign-in form: a guest whom `PrivateRoute` sent to `/login` sees a folded block "Error 401: why am I here and what to do".
+
 A guest who opens `/dashboard` lands on the login form with a hint, as in figure 7.
 
 ![Redirect to login](figures/06-redirect-to-login.png)
@@ -136,7 +138,7 @@ Figure 14 – Template catalog in the dark theme
 
 ### 3.7 Testing
 
-One hundred and sixty automated tests on `MemoryRouter` check all the pages, the nested dashboard routes (a direct link to every tab, an unknown continuation of the address, fast switching between tabs), the catalog filter in the address (a huge and a whitespace-only query, a forged sort, a repeated key, markup in the query), the memoized list and cards, lazy loading with the fallback message and with a failed chunk download, breadcrumbs, the admin-only route (guest, user, admin, a logout in another tab), a double click on the sign-in button, the `NavLink` highlight, the dynamic route, the 404 page, the guest redirect, the return with query parameters, the name check, a forged return address, a logout in another tab, the focus move, markup rendered as text and the 500 page. The manual check is described in `README.md`.
+One hundred and eighty-four automated tests on `MemoryRouter` check all the pages, the nested dashboard routes (a direct link to every tab, an unknown continuation of the address, fast switching between tabs), the catalog filter in the address (a huge and a whitespace-only query, a forged sort, a repeated key, markup in the query), the memoized list and cards, lazy loading with the fallback message and with a failed chunk download, breadcrumbs, the admin-only route (guest, user, admin, a logout in another tab), a double click on the sign-in button, the `NavLink` highlight, the dynamic route, the 404 page, the guest redirect, the return with query parameters, the name check, a forged return address, a logout in another tab, the focus move, markup rendered as text and the 500 page. The manual check is described in `README.md`.
 
 ### 3.8 Addresses and hosting
 
@@ -152,7 +154,7 @@ State in this project lives in React Context (`AuthProvider`, the session and th
 
 ## Conclusion
 
-The Vite application contains eleven routes, three of them nested inside the dashboard, a menu with the active item highlighted, a dynamic route handling an unknown parameter, a 404 page, a protected dashboard with simulated sign-in and programmatic navigation, a catalog filter through `useSearchParams`, memoized list and cards, lazy page loading, breadcrumbs and a section for the admin role only. `react-router-dom` 7 is chosen, its API for the tasks of this work matches v6.
+The Vite application contains eleven routes, three of them nested inside the dashboard, a menu with the active item highlighted, a dynamic route handling an unknown parameter, a 404 page, a protected dashboard with simulated sign-in and programmatic navigation, a catalog filter through `useSearchParams`, memoized list and cards, lazy page loading, breadcrumbs and a section for the admin role only. `react-router-dom` 6.30 is chosen, as the assignment requires.
 
 ## Answers to Control Questions
 
