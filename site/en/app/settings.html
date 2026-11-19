@@ -153,6 +153,14 @@
               <span>Theme</span>
             </a>
           </li>
+          <li class="settings-nav__item">
+            <a class="settings-nav__link" href="#account-security">
+              <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M10 2l6 2v5c0 4-3 7-6 9-3-2-6-5-6-9V4z" />
+              </svg>
+              <span>Account and security</span>
+            </a>
+          </li>
         </ul>
       </nav>
 
@@ -236,6 +244,114 @@
             </div>
           </fieldset>
         </div>
+
+        <section id="account-security" class="settings-group security" aria-labelledby="security-title" data-security data-home="../index.html">
+          <h2 class="settings-group__title" id="security-title">Account and security</h2>
+          <p class="form__hint">
+            The account is kept in this browser only: there is no server. The password is protected by a PBKDF2 hash, but whoever opens the browser profile can
+            read and change all data. This is a study model of accounts, not server-grade protection; see the documentation.
+          </p>
+          <p data-security-guest>
+            Sign in to manage your password, sessions and two-factor authentication. <a class="form__link" href="login.html">Sign in</a>
+          </p>
+          <div data-security-user hidden>
+            <form class="form" id="security-password-form" novalidate>
+              <h3 class="security__title">Change password</h3>
+              <div class="form__field">
+                <label class="form__label" for="security-old">Old password</label>
+                <input class="form__input" id="security-old" type="password" autocomplete="current-password" maxlength="128" required />
+              </div>
+              <div class="form__field">
+                <label class="form__label" for="security-new">New password</label>
+                <input class="form__input" id="security-new" type="password" autocomplete="new-password" maxlength="128" required />
+                <div class="password-meter" data-password-meter>
+                  <meter class="password-meter__bar" min="0" max="4" value="0" aria-label="Password strength"></meter>
+                  <span class="password-meter__text" data-meter-text aria-live="polite"></span>
+                </div>
+              </div>
+              <div class="form__field">
+                <label class="form__label" for="security-confirm">Repeat the new password</label>
+                <input class="form__input" id="security-confirm" type="password" autocomplete="new-password" maxlength="128" required />
+              </div>
+              <button class="button button--primary" type="submit">Change password</button>
+              <p class="form__hint">After the change every other session is revoked.</p>
+              <p class="security__status" role="status" data-status="password"></p>
+            </form>
+
+            <h3 class="security__title">Sessions</h3>
+            <p class="form__hint">A session lives up to 7 days with "Remember me" and up to 12 hours without it; it ends after 30 minutes without activity.</p>
+            <ul class="security-list" data-session-list></ul>
+            <button class="button" type="button" data-revoke-others hidden>Revoke all other sessions</button>
+            <p class="security__status" role="status" data-status="sessions"></p>
+
+            <h3 class="security__title">Two-factor authentication (TOTP)</h3>
+            <p class="form__hint">One-time codes of RFC 6238: SHA-1, 30 seconds, 6 digits. Any authenticator app works.</p>
+            <p data-totp-state></p>
+            <button class="button" type="button" data-totp-start>Set up</button>
+            <div data-totp-setup hidden>
+              <p class="form__hint">Secret (type it into the app): <code data-totp-secret></code></p>
+              <p class="form__hint">otpauth:// link: <code class="security__uri" data-totp-uri></code></p>
+              <form class="form" id="totp-setup-form" novalidate>
+                <div class="form__field">
+                  <label class="form__label" for="totp-code">Code from the app</label>
+                  <input class="form__input" id="totp-code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="8" />
+                </div>
+                <button class="button button--primary" type="submit">Turn on</button>
+              </form>
+            </div>
+            <div data-recovery hidden>
+              <p class="form__hint">Recovery codes (shown once, each works once)</p>
+              <ul class="security-codes" data-recovery-list></ul>
+            </div>
+            <form class="form" id="totp-disable-form" data-totp-disable novalidate hidden>
+              <div class="form__field">
+                <label class="form__label" for="totp-password">Password to turn it off</label>
+                <input class="form__input" id="totp-password" type="password" autocomplete="current-password" maxlength="128" />
+              </div>
+              <button class="button" type="submit">Turn off</button>
+            </form>
+            <p class="security__status" role="status" data-status="totp"></p>
+
+            <div data-security-admin hidden>
+              <h3 class="security__title">Accounts of this browser</h3>
+              <p class="form__hint">Visible to the admin role only. The last admin cannot be demoted.</p>
+              <table class="security-table">
+                <thead>
+                  <tr>
+                    <th scope="col">Name</th>
+                    <th scope="col">Email</th>
+                    <th scope="col">Role</th>
+                    <th scope="col">2FA</th>
+                    <th scope="col">Created</th>
+                  </tr>
+                </thead>
+                <tbody data-account-list></tbody>
+              </table>
+              <p class="security__status" role="status" data-status="accounts"></p>
+            </div>
+
+            <h3 class="security__title">Security log</h3>
+            <div class="form__field form__field--checkbox" id="audit-all-field" hidden>
+              <input class="form__checkbox" id="audit-all" type="checkbox" />
+              <label class="form__label" for="audit-all">Show the events of all accounts</label>
+            </div>
+            <ul class="security-list" data-audit-list></ul>
+
+            <form class="form" id="security-delete-form" novalidate>
+              <h3 class="security__title">Delete the account</h3>
+              <p class="form__hint">
+                The account, its sessions and its log are removed from this browser. Projects stay in the browser storage without an owner. The password is
+                required.
+              </p>
+              <div class="form__field">
+                <label class="form__label" for="security-delete-password">Password</label>
+                <input class="form__input" id="security-delete-password" type="password" autocomplete="current-password" maxlength="128" />
+              </div>
+              <button class="button" type="submit">Delete the account</button>
+              <p class="security__status" role="status" data-status="delete"></p>
+            </form>
+          </div>
+        </section>
       </div>
     </main>
     <script type="module" src="../../js/script.js"></script>

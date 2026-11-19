@@ -94,13 +94,24 @@
               autocomplete="new-password"
               aria-describedby="password-hint"
             />
-            <p class="form__hint" id="password-hint">От 8 до 128 символов. Лучше длинная фраза, которую легко запомнить.</p>
+            <p class="form__hint" id="password-hint">
+              От 8 до 128 символов. Не из списка частых паролей, не совпадает с почтой и именем. Лучше длинная фраза, которую легко запомнить.
+            </p>
+            <div class="password-meter" data-password-meter>
+              <meter class="password-meter__bar" min="0" max="4" value="0" aria-label="Надёжность пароля"></meter>
+              <span class="password-meter__text" data-meter-text aria-live="polite"></span>
+            </div>
             <p class="form__error" role="alert" id="password-error" hidden>Пароль не принят: нужно от 8 до 128 символов, не только пробелы.</p>
           </div>
           <div class="form__field">
             <label class="form__label" for="confirm">Повторите пароль</label>
             <input class="form__input" id="confirm" name="confirm" type="password" required minlength="8" maxlength="128" autocomplete="new-password" />
             <p class="form__error" role="alert" id="confirm-error" hidden>Пароли не совпадают. Введите тот же пароль ещё раз.</p>
+          </div>
+          <div class="form__field form__field--checkbox">
+            <input class="form__checkbox" id="remember" name="remember" type="checkbox" checked aria-describedby="remember-hint" />
+            <label class="form__label" for="remember">Запомнить меня на 7 дней</label>
+            <p class="form__hint" id="remember-hint">Без галочки сессия короткая: до 12 часов.</p>
           </div>
           <button class="button button--primary form__submit" type="submit">Создать аккаунт</button>
           <p class="form__hint">Уже есть аккаунт? <a class="form__link" href="login.html">Войти</a></p>
