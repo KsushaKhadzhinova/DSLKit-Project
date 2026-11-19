@@ -3,6 +3,7 @@ import { answerQuestion, conclusions, createFacts, infer, nextQuestion } from '.
 import { factsFromDescription, reviewDiagram, traceLines } from '../expert/review.js';
 import { NOTATIONS } from '../notations/index.js';
 import { createAccountStore } from '../storage/accounts.js';
+import { can } from '../auth/permissions.js';
 import { notify } from './toast.js';
 import { pageLanguage } from '../utils/lang.js';
 
@@ -138,7 +139,7 @@ export const initExpert = ({ root = document, storage, developerHash, adminHash 
     if (text !== '') notify(root, text, kind);
     return text;
   };
-  const developer = () => accounts.current()?.role === 'developer';
+  const developer = () => can(accounts.current(), 'docs.developer');
   const rules = () => store.rules(kb);
   const base = () => BASES[kb];
   const percent = (cf) => Math.round(cf * 100);

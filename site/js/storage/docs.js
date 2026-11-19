@@ -1,5 +1,7 @@
 // The documentation of the program. The texts are in site/js/docs; a developer can change a section, the change is kept in the browser and shown instead of the original.
 // Only the role "developer" may write: the store refuses everybody else.
+import { can } from '../auth/permissions.js';
+
 const KEY = 'docs';
 
 export const createDocsStore = ({ storage, defaults }) => {
@@ -18,13 +20,13 @@ export const createDocsStore = ({ storage, defaults }) => {
     return typeof edited === 'string' ? { ...base, body: edited, edited: true } : { ...base, edited: false };
   };
   const set = (user, lang, kind, id, body) => {
-    if (user?.role !== 'developer') return { ok: false, error: 'forbidden' };
+    if (!can(user, 'docs.developer')) return { ok: false, error: 'forbidden' };
     if (original(lang, kind, id) === null) return { ok: false, error: 'unknown' };
     if (typeof body !== 'string' || body.trim() === '' || body.length > 100000) return { ok: false, error: 'invalid' };
     return storage.set(KEY, { ...read(), [slot(lang, kind, id)]: body }) ? { ok: true } : { ok: false, error: 'storage' };
   };
   const reset = (user, lang, kind, id) => {
-    if (user?.role !== 'developer') return { ok: false, error: 'forbidden' };
+    if (!can(user, 'docs.developer')) return { ok: false, error: 'forbidden' };
     const { [slot(lang, kind, id)]: removed, ...rest } = read();
     return storage.set(KEY, rest) ? { ok: true, was: removed !== undefined } : { ok: false, error: 'storage' };
   };

@@ -6,7 +6,8 @@ import { initDocs } from '../../site/js/components/docs.js';
 import { initEditorProjects } from '../../site/js/components/editor-projects.js';
 import { initQuota } from '../../site/js/components/quota.js';
 import { showCode } from '../../site/js/components/code-lines.js';
-import { createAccountStore, isUnlimited } from '../../site/js/storage/accounts.js';
+import { can } from '../../site/js/auth/permissions.js';
+import { createAccountStore } from '../../site/js/storage/accounts.js';
 import { createProjectStore, quotaLabel } from '../../site/js/storage/projects.js';
 import { createMemoryBackend, createStorage } from '../../site/js/utils/storage.js';
 import { hashCode } from '../../tools/dev-code.js';
@@ -15,10 +16,10 @@ const memory = () => createStorage(createMemoryBackend());
 const at = 1_700_000_000_000;
 
 test('a developer and an admin have no daily limit, a user and a guest have one', () => {
-  assert.equal(isUnlimited({ role: 'developer' }), true);
-  assert.equal(isUnlimited({ role: 'admin' }), true);
-  assert.equal(isUnlimited({ role: 'user' }), false);
-  assert.equal(isUnlimited(null), false);
+  assert.equal(can({ role: 'developer' }, 'diagram.unlimited'), true);
+  assert.equal(can({ role: 'admin' }, 'diagram.unlimited'), true);
+  assert.equal(can({ role: 'user' }, 'diagram.unlimited'), false);
+  assert.equal(can(null, 'diagram.unlimited'), false);
   assert.equal(quotaLabel(7, 'ru', true), 'Бета: сегодня создано 7, без дневного лимита');
   assert.equal(quotaLabel(7, 'en', true), 'Beta: 7 created today, no daily limit');
 });
@@ -28,11 +29,15 @@ test('the admin code gives the role admin, the developer code gives developer, a
   const store = createAccountStore({ storage, developerHash: hashCode('dev-code-1'), adminHash: hashCode('admin-code-1') });
   await store.register({ name: 'Boss', email: 'boss@example.com', password: 'correct horse' });
   assert.deepEqual(await store.becomeDeveloper('nothing'), { ok: false, error: 'invalid' });
-  assert.equal((await store.becomeDeveloper('admin-code-1')).user.role, 'admin');
-  assert.equal(isUnlimited(store.current()), true);
   assert.equal((await store.becomeDeveloper('dev-code-1')).user.role, 'developer');
   assert.equal(store.leaveDeveloper(), true);
   assert.equal(store.current().role, 'user');
+  assert.equal((await store.becomeDeveloper('admin-code-1')).user.role, 'admin');
+  assert.equal(can(store.current(), 'diagram.unlimited'), true);
+  // The only admin cannot give the role away.
+  assert.deepEqual(await store.becomeDeveloper('dev-code-1'), { ok: false, error: 'last-admin' });
+  assert.equal(store.leaveDeveloper(), false);
+  assert.equal(store.current().role, 'admin');
 });
 
 const quotaPage = (storage) => {

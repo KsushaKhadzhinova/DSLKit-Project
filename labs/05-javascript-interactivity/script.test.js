@@ -43,6 +43,7 @@ test('the dashboard, the settings and the editor start their own components', ()
     'initQuota',
     'initAppSearch',
     'initSettings',
+    'initSecurity',
   ]);
   assert.deepEqual(boot(load('app/editor.html')), [
     'initTheme',
