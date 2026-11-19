@@ -24,6 +24,7 @@ import { initLangSwitch } from './components/lang-switch.js';
 import { registerServiceWorker } from './components/pwa.js';
 import { initNotationFilter } from './components/notation-filter.js';
 import { initPopups } from './components/popups.js';
+import { initSecurity } from './components/security.js';
 import { initSettings } from './components/settings.js';
 import { initTheme } from './components/theme.js';
 import { initQuota } from './components/quota.js';
@@ -52,6 +53,7 @@ export const COMPONENTS = [
   initDecision,
   initAppSearch,
   initSettings,
+  initSecurity,
   initEditor,
   initEditorProjects,
   initCodeInput,

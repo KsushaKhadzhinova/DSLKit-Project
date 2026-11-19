@@ -68,6 +68,26 @@
             <input class="form__input" id="password" name="password" type="password" required maxlength="128" autocomplete="current-password" />
             <p class="form__error" role="alert" id="password-error" hidden>Введите пароль.</p>
           </div>
+          <div class="form__field" id="code-field" hidden>
+            <label class="form__label" for="code">Код подтверждения</label>
+            <input
+              class="form__input"
+              id="code"
+              name="code"
+              type="text"
+              inputmode="numeric"
+              maxlength="16"
+              autocomplete="one-time-code"
+              aria-describedby="code-hint"
+            />
+            <p class="form__hint" id="code-hint">Шесть цифр из приложения-аутентификатора или резервный код вида XXXXX-XXXXX.</p>
+            <p class="form__error" role="alert" id="code-error" hidden>Введите код подтверждения.</p>
+          </div>
+          <div class="form__field form__field--checkbox">
+            <input class="form__checkbox" id="remember" name="remember" type="checkbox" checked aria-describedby="remember-hint" />
+            <label class="form__label" for="remember">Запомнить меня на 7 дней</label>
+            <p class="form__hint" id="remember-hint">Без галочки сессия короткая: до 12 часов, и она закрывается после 30 минут без действий.</p>
+          </div>
           <button class="button button--primary form__submit" type="submit">Войти</button>
           <p class="form__hint">Нет аккаунта? <a class="form__link" href="register.html">Зарегистрироваться</a></p>
         </form>

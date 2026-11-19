@@ -1,5 +1,6 @@
 // The rules of the expert system. The originals are in site/js/expert; a developer can change a rule, the change is kept in the browser and used instead of the original.
 // Only the role "developer" may write: the store refuses everybody else (the same rule as the documentation store).
+import { can } from '../auth/permissions.js';
 import { ruleProblems } from '../expert/engine.js';
 
 const KEY = 'expert-rules';
@@ -11,7 +12,7 @@ export const createExpertStore = ({ storage, bases }) => {
   };
   const slot = (kb, id) => `${kb}/${id}`;
   const original = (kb, id) => bases[kb]?.rules.find((item) => item.id === id) ?? null;
-  const isDeveloper = (user) => user?.role === 'developer';
+  const isDeveloper = (user) => can(user, 'docs.developer');
 
   // The rules of a base as they work now: the edited rule instead of the original one.
   const rules = (kb) => {
