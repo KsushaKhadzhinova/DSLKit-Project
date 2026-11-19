@@ -1,0 +1,17 @@
+PASS  messages are acknowledged with ids
+PASS  the documents are in the collection
+PASS  history survives a server restart in the original order
+PASS  rooms do not leak into each other
+PASS  ids are unique after the restart
+PASS  ids grow in order across the restart
+PASS  history after the restart has the old and the new messages in order
+PASS  index {room:1,_id:-1} exists in Atlas
+PASS  no TTL index when HISTORY_TTL_SECONDS is not set
+PASS  50 concurrent messages from 10 clients are all saved
+PASS  concurrent ids are unique
+PASS  a reconnected client gets the history again
+PASS  a reconnected client receives new messages
+PASS  the TTL index is created with HISTORY_TTL_SECONDS
+PASS  an expired message is deleted by MongoDB (30 s)
+
+15 passed, 0 failed; test collections dropped

@@ -207,10 +207,8 @@ describe('lazy pages and Suspense', () => {
         </MemoryRouter>
       </ErrorBoundary>,
     );
-    // This variant's ErrorBoundary does not yet tell a failed chunk download from any other crash
-    // (that distinction is var6-only, see errorCatalog.js there), so every throw ends on the same 500 page.
-    expect(await screen.findByRole('heading', { level: 1 })).toHaveTextContent('Ошибка 500');
-    expect(screen.getByRole('button', { name: 'Обновить страницу' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { level: 1 })).toHaveTextContent('Нет связи с сервером');
+    expect(screen.getByRole('button', { name: 'Повторить' })).toBeInTheDocument();
     spy.mockRestore();
   });
 
