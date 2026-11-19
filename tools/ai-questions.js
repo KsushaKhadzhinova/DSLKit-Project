@@ -11,7 +11,8 @@ const KINDS = ['choice', 'text', 'yesno'];
 const both = (value) => ({ ru: value, en: value });
 
 // The first JSON array in the text of the model; anything else gives an empty list.
-export const parseExtra = (text) => {
+export const parseExtra = (raw) => {
+  const text = /```[\w-]*\r?\n([\s\S]*?)```/.exec(raw)?.[1] ?? raw;
   const from = text.indexOf('[');
   const to = text.lastIndexOf(']');
   let list = [];
@@ -71,7 +72,7 @@ const extraQuestions = async (c, body) => {
   const task = [
     'Read the DSLKit diagram and write up to 3 short clarifying questions about what is still missing or ambiguous in it.',
     'Do not repeat what the syntax checker finds (names, start, end, unlabeled links). Answer ONLY a JSON array of objects',
-    '{"text": "...", "kind": "choice" | "text" | "yesno", "options": ["..."]}, written in the language of the labels.',
+    `{"text": "...", "kind": "choice" | "text" | "yesno", "options": ["..."]}, no Markdown fence, written in ${body.lang === 'en' ? 'English' : 'Russian'}.`,
     `\nDiagram:\n${body.code}`,
   ].join(' ');
   const text = await c.ask(c.config, c.system(body.lang ?? 'ru'), [{ role: 'user', content: task }]);

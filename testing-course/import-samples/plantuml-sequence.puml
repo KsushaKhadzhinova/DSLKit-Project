@@ -1,0 +1,9 @@
+@startuml
+actor User
+participant Web
+database Store
+User -> Web : open page
+Web -> Store : load data
+Store --> Web : rows
+Web --> User : html
+@enduml

@@ -1,0 +1,3 @@
+digraph G { rankdir=TB; node [fontname="Arial"];
+s [label="Start" shape=ellipse]; a [label="Read order" shape=box]; d [label="In stock?" shape=diamond]; b [label="Ship order" shape=box]; c [label="Back order" shape=box]; e [label="End" shape=ellipse];
+s->a; a->d; d->b [label="yes"]; d->c [label="no"]; b->e; c->e; }

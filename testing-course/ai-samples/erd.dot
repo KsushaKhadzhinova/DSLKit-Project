@@ -1,0 +1,4 @@
+graph G { rankdir=LR; node [fontname="Arial"];
+customer [shape=box label="Customer"]; order [shape=box label="Order"]; product [shape=box label="Product"];
+places [shape=diamond label="places"]; contains [shape=diamond label="contains"];
+customer -- places [label="1"]; places -- order [label="N"]; order -- contains [label="N"]; contains -- product [label="M"]; }
