@@ -18,10 +18,10 @@ test('migrations create the table with the priority column added by the third mi
   await sequelize.close();
 });
 
-test('the first migration creates Users with a unique email and a checked role', async () => {
+test('the first migration creates Users with a unique email and a role that must exist in Roles', async () => {
   const { sequelize, User } = open();
   const table = await sequelize.getQueryInterface().describeTable('Users');
-  assert.deepEqual(Object.keys(table).sort(), ['createdAt', 'email', 'id', 'passwordHash', 'role', 'updatedAt']);
+  assert.deepEqual(Object.keys(table).sort(), ['createdAt', 'email', 'id', 'passwordChangedAt', 'passwordHash', 'roleId', 'twoFactorEnabled', 'twoFactorLastStep', 'twoFactorSecret', 'updatedAt']);
   await User.create({ email: 'a@b.co', passwordHash: 'x' });
   await assert.rejects(User.create({ email: 'a@b.co', passwordHash: 'x' }), /Validation error/);
   await assert.rejects(User.create({ email: 'c@b.co', passwordHash: 'x', role: 'root' }), /Validation error/);
@@ -33,9 +33,16 @@ const tableSql = async (sequelize, table) => (await sequelize.query(`SELECT sql 
 // Sequelize wraps the SQLite error, the original message still names the CHECK or the foreign key.
 const isCheckViolation = (error) => /CHECK constraint/i.test(error.original?.message ?? '');
 
-test('undoing migrations one by one drops the log table, then the priority column, and keeps every CHECK and the foreign key rule', async () => {
-  db.cli('db:migrate:undo');
+test('undoing migrations one by one drops the auth tables, the log table, then the priority column, and keeps every CHECK and the foreign key rule', async () => {
+  // The four migrations of the extended authentication come off first: roles, role id, auth tables, security columns.
+  for (let i = 0; i < 4; i += 1) db.cli('db:migrate:undo');
   let { sequelize } = open();
+  assert.deepEqual((await sequelize.getQueryInterface().showAllTables()).sort(), ['Diagrams', 'RequestLogs', 'SequelizeMeta', 'Users']);
+  assert.match(await tableSql(sequelize, 'Users'), /users_role_check/, 'the old role column and its CHECK are back');
+  assert.match(await tableSql(sequelize, 'Users'), /users_email_lowercase_check/);
+  await sequelize.close();
+  db.cli('db:migrate:undo');
+  ({ sequelize } = open());
   assert.equal(await tableSql(sequelize, 'RequestLogs'), undefined);
   assert.equal((await columns(sequelize)).includes('priority'), true);
   await sequelize.close();
@@ -66,7 +73,7 @@ test('undoing all migrations leaves an empty database and migrating again works 
   await sequelize.close();
   db.cli('db:migrate');
   ({ sequelize } = open());
-  assert.deepEqual((await sequelize.getQueryInterface().showAllTables()).sort(), ['Diagrams', 'RequestLogs', 'SequelizeMeta', 'Users']);
+  assert.deepEqual((await sequelize.getQueryInterface().showAllTables()).sort(), ['AuditEvents', 'Diagrams', 'PasswordResets', 'RecoveryCodes', 'RefreshTokens', 'RequestLogs', 'RolePermissions', 'Roles', 'SequelizeMeta', 'Users']);
   await sequelize.close();
 });
 
@@ -74,13 +81,13 @@ test('CHECK constraints reject bad rows even when the model is bypassed', async 
   const { sequelize } = open();
   const q = (sql, replacements) => sequelize.query(sql, { replacements });
   const now = "datetime('now')";
-  const user = (email, hash, role) =>
-    q(`INSERT INTO Users (email, passwordHash, role, createdAt, updatedAt) VALUES (?, ?, ?, ${now}, ${now})`, [email, hash, role]);
-  await assert.rejects(user('Upper@Example.com', 'h', 'user'), isCheckViolation);
-  await assert.rejects(user('a@b.co', 'h', 'root'), isCheckViolation);
-  await assert.rejects(user('a@b.co', '', 'user'), isCheckViolation);
-  await assert.rejects(user(`${'x'.repeat(250)}@b.co`, 'h', 'user'), isCheckViolation);
-  await user('owner@example.com', 'h', 'user');
+  const user = (email, hash, roleId = 1) =>
+    q(`INSERT INTO Users (email, passwordHash, roleId, createdAt, updatedAt) VALUES (?, ?, ?, ${now}, ${now})`, [email, hash, roleId]);
+  await assert.rejects(user('Upper@Example.com', 'h'), isCheckViolation);
+  await assert.rejects(user('a@b.co', 'h', 9999), /FOREIGN KEY/i, 'a role that is not in Roles');
+  await assert.rejects(user('a@b.co', ''), isCheckViolation);
+  await assert.rejects(user(`${'x'.repeat(250)}@b.co`, 'h'), isCheckViolation);
+  await user('owner@example.com', 'h');
   const [{ id }] = await sequelize.query("SELECT id FROM Users WHERE email = 'owner@example.com'", { type: 'SELECT' });
   const diagram = (title, source, owner = id) =>
     q(`INSERT INTO Diagrams (title, notation, sourceCode, priority, ownerId, createdAt, updatedAt) VALUES (?, 'UML', ?, 'low', ?, ${now}, ${now})`, [
@@ -112,10 +119,10 @@ test('the seeds insert the demo diagrams, an admin and demo users with hashed pa
   assert.ok(ROWS.length >= 30);
   assert.deepEqual([...new Set(rows.map((d) => d.notation))].sort(), ['BPMN', 'DFD', 'ERD', 'IDEF0', 'Petri', 'UML']);
   assert.equal(new Set(rows.map((d) => d.ownerId)).size, 5);
-  assert.equal(await User.count({ where: { role: 'user' } }), 4);
+  assert.equal(await User.count({ where: { '$Role.name$': 'user' } }), 4);
   const demo = await User.findOne({ where: { email: 'alice@example.test' } });
   assert.equal(await bcrypt.compare('demo password 1', demo.passwordHash), true);
-  const admin = await User.findOne({ where: { role: 'admin' } });
+  const admin = (await User.findAll({ where: { '$Role.name$': 'admin' } }))[0];
   assert.deepEqual({ email: admin.email, role: admin.role }, { email: 'root@example.com', role: 'admin' });
   assert.equal(await bcrypt.compare('seed password 1', admin.passwordHash), true);
   await sequelize.close();
@@ -170,7 +177,7 @@ test('the demo user seed refuses a weak password, skips quietly without DEMO_USE
   const seeder = require('../seeders/20261016000001-demo-users');
   const inserted = [];
   const fake = {
-    rawSelect: async (_table, { where }) => (where.email === seeder.DEMO_EMAILS[0] ? 1 : null),
+    rawSelect: async (table, { where }) => (table === 'Roles' ? 7 : where.email === seeder.DEMO_EMAILS[0] ? 1 : null),
     bulkInsert: async (_table, rows) => inserted.push(rows[0]),
   };
   const saved = process.env.DEMO_USER_PASSWORD;
@@ -183,7 +190,7 @@ test('the demo user seed refuses a weak password, skips quietly without DEMO_USE
     process.env.DEMO_USER_PASSWORD = 'a long demo password';
     await seeder.up(fake);
     assert.deepEqual(inserted.map((u) => u.email), seeder.DEMO_EMAILS.slice(1));
-    assert.ok(inserted.every((u) => u.role === 'user' && u.passwordHash !== 'a long demo password'));
+    assert.ok(inserted.every((u) => u.roleId === 7 && u.passwordHash !== 'a long demo password'));
   } finally {
     process.env.DEMO_USER_PASSWORD = saved ?? '';
   }

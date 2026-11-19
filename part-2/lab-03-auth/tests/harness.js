@@ -6,14 +6,17 @@ const SECRET = 'test-secret-test-secret-test-secret-123';
 const PASSWORD = 'correct horse 42';
 // Four rounds keep bcrypt fast enough for tests.
 // The rate limits are high here so ordinary tests are never throttled; the security tests start their own server with small ones.
-const SETTINGS = { jwtSecret: SECRET, bcryptRounds: 4, generalRateMax: 1000000, loginRateMax: 10000, registerRateMax: 10000, loginMaxAttempts: 10000 };
+const SETTINGS = { jwtSecret: SECRET, bcryptRounds: 4, generalRateMax: 1000000, loginRateMax: 10000, registerRateMax: 10000, resetRateMax: 10000, refreshRateMax: 10000, loginMaxAttempts: 10000 };
 
 // Starts the real app on a free port over a migrated temporary SQLite database.
 const startServer = async (settings = {}) => {
   const db = createTempDatabase();
   db.cli('db:migrate');
   const models = createModels({ dialect: 'sqlite', storage: db.storage, logging: false });
-  const server = createApp(models, { ...SETTINGS, ...settings }).listen(0);
+  // The mailer of the tests keeps the messages in a list, so a test can read the reset token the way a user reads the mail.
+  const outbox = [];
+  const mailer = async (message) => outbox.push(message);
+  const server = createApp(models, { ...SETTINGS, mailer, ...settings }).listen(0);
   await new Promise((resolve) => server.once('listening', resolve));
   const base = `http://localhost:${server.address().port}`;
 
@@ -41,7 +44,7 @@ const startServer = async (settings = {}) => {
     db.cleanup();
   };
 
-  return { models, call, tokenFor, close, port: server.address().port };
+  return { models, call, tokenFor, close, outbox, port: server.address().port };
 };
 
 module.exports = { startServer, SECRET, PASSWORD };
