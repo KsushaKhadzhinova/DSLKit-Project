@@ -169,3 +169,18 @@ test('the mode review keeps the checks and the limits of the endpoint and falls 
   const keyless = createAiHandler({ env: {}, fetchImpl: down.fetchImpl });
   assert.equal((await run(keyless, { mode: 'review', text: BROKEN })).status, 503);
 });
+
+test('a fenced JSON block wins over prose with brackets; a failing first call is tried once more', async () => {
+  const { parseVariants, reviewWithAi } = await import('./ai-review.js');
+  const wrapped = 'Here [is] my answer:\n```json\n{"variants":[{"title":"t","code":"diagram graph\\nvertex a"}]}\n```\nbye {x}';
+  assert.equal(parseVariants(wrapped).length, 1);
+  let calls = 0;
+  const flaky = async () => {
+    calls += 1;
+    if (calls === 1) throw new Error('503');
+    return '{"variants":[]}';
+  };
+  const result = await reviewWithAi({ code: 'diagram graph\nvertex a\nedge a -> b', lang: 'en', ask: flaky });
+  assert.equal(result.ai, true);
+  assert.equal(calls, 2);
+});

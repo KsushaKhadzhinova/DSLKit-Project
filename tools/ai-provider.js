@@ -9,7 +9,7 @@ const TIMEOUT_MS = 60_000;
 const MAX_TOKENS = 4096;
 const LOCAL_HOSTS = ['localhost', '127.0.0.1', '[::1]'];
 
-export const PDF_MESSAGE = 'PDF needs the Anthropic provider / Для PDF нужен провайдер Anthropic';
+export const PDF_MESSAGE = 'PDF needs the Anthropic or the Gemini provider / Для PDF нужен провайдер Anthropic или Gemini';
 
 // https only; plain http is allowed for a local server (tests, Ollama and the like).
 export const checkBaseUrl = (value) => {
@@ -43,6 +43,24 @@ export const toOpenAiMessages = (system, messages) => [
   })),
 ];
 
+// Gemini takes a PDF only through its native generateContent API (inlineData), not through the OpenAI-compatible layer.
+export const GEMINI_HOST = 'generativelanguage.googleapis.com';
+const hasPdf = (messages) => messages.some((message) => Array.isArray(message.content) && message.content.some((block) => block.type === 'document'));
+
+const toGeminiPart = (block) => {
+  if (block.type === 'text') return { text: block.text };
+  return { inlineData: { mimeType: block.source.media_type, data: block.source.data } };
+};
+
+export const toGeminiBody = (system, messages) => ({
+  systemInstruction: { parts: [{ text: system }] },
+  contents: messages.map((message) => ({
+    role: message.role === 'assistant' ? 'model' : 'user',
+    parts: typeof message.content === 'string' ? [{ text: message.content }] : message.content.map(toGeminiPart),
+  })),
+  generationConfig: { maxOutputTokens: MAX_TOKENS },
+});
+
 export const createAsk = ({ provider = 'anthropic', key, baseUrl = '', model, fetchImpl = globalThis.fetch }) => {
   if (provider === 'anthropic') {
     return async (system, messages) => {
@@ -63,7 +81,23 @@ export const createAsk = ({ provider = 'anthropic', key, baseUrl = '', model, fe
   if (provider !== 'openai') throw new Error('unknown provider');
   if (!checkBaseUrl(baseUrl)) throw new Error('The base URL must be https');
   const url = `${baseUrl.replace(/\/+$/, '')}/chat/completions`;
+  const gemini = new URL(baseUrl).hostname === GEMINI_HOST;
+  const nativeUrl = `https://${GEMINI_HOST}/v1beta/models/${encodeURIComponent(String(model).replace(/^models\//, ''))}:generateContent`;
   return async (system, messages) => {
+    if (gemini && hasPdf(messages)) {
+      const answer = await fetchImpl(nativeUrl, {
+        method: 'POST',
+        headers: { 'x-goog-api-key': key, 'content-type': 'application/json' },
+        body: JSON.stringify(toGeminiBody(system, messages)),
+        signal: AbortSignal.timeout(TIMEOUT_MS),
+        redirect: 'error',
+      });
+      if (!answer.ok) throw new Error('upstream status');
+      const body = await answer.json();
+      const text = (body.candidates?.[0]?.content?.parts ?? []).map((part) => part.text ?? '').join('');
+      if (text.trim() === '') throw new Error('upstream empty');
+      return text;
+    }
     const payload = JSON.stringify({ model, max_tokens: MAX_TOKENS, messages: toOpenAiMessages(system, messages) });
     const answer = await fetchImpl(url, {
       method: 'POST',

@@ -1,0 +1,10 @@
+graph Network {
+  a [label="Router"];
+  b [label="Switch A"];
+  c [label="Switch B"];
+  d [label="Server"];
+  a -- b;
+  a -- c;
+  b -- d;
+  c -- d;
+}
