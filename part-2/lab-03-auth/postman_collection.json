@@ -1,6 +1,6 @@
 {
   "info": {
-    "name": "DSLKit lab-03-auth",
+    "name": "DSLKit lab 3",
     "description": "Generated from requests.http by tools/make-postman.js. Start the server first.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
@@ -11,6 +11,10 @@
     },
     {
       "key": "token",
+      "value": ""
+    },
+    {
+      "key": "refresh",
       "value": ""
     }
   ],
@@ -668,6 +672,796 @@
               "key": "sort",
               "value": "password"
             }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Login returns accessToken and refreshToken; the refresh token is kept for the next requests",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.collectionVariables.set('refresh', pm.response.json().refreshToken);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{ \"email\": \"alice@example.com\", \"password\": \"correct horse 42\", \"deviceName\": \"REST Client\" }",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base}}/auth/login",
+          "host": [
+            "{{base}}"
+          ],
+          "path": [
+            "auth",
+            "login"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Exchange the refresh token -> 200 (a new pair; the old refresh token stops working, reusing it revokes the session)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{ \"refreshToken\": \"{{refresh}}\" }",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base}}/auth/refresh",
+          "host": [
+            "{{base}}"
+          ],
+          "path": [
+            "auth",
+            "refresh"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Own sessions -> 200",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{base}}/auth/sessions",
+          "host": [
+            "{{base}}"
+          ],
+          "path": [
+            "auth",
+            "sessions"
+          ]
+        }
+      }
+    },
+    {
+      "name": "End one session -> 204 (404 for an id that is not yours)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 204', () => pm.response.to.have.status(204));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{base}}/auth/sessions/00000000-0000-4000-8000-000000000000",
+          "host": [
+            "{{base}}"
+          ],
+          "path": [
+            "auth",
+            "sessions",
+            "00000000-0000-4000-8000-000000000000"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Log out with the refresh token -> 204",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 204', () => pm.response.to.have.status(204));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{ \"refreshToken\": \"{{refresh}}\" }",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base}}/auth/logout",
+          "host": [
+            "{{base}}"
+          ],
+          "path": [
+            "auth",
+            "logout"
+          ]
+        }
+      }
+    },
+    {
+      "name": "End all sessions -> 204",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 204', () => pm.response.to.have.status(204));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{base}}/auth/logout-all",
+          "host": [
+            "{{base}}"
+          ],
+          "path": [
+            "auth",
+            "logout-all"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Change the password -> 204 (other sessions end)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 204', () => pm.response.to.have.status(204));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{ \"currentPassword\": \"correct horse 42\", \"newPassword\": \"another horse 43\" }",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base}}/auth/change-password",
+          "host": [
+            "{{base}}"
+          ],
+          "path": [
+            "auth",
+            "change-password"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Ask for a reset -> 202 (the token is written to the server console, never to the response)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 202', () => pm.response.to.have.status(202));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{ \"email\": \"alice@example.com\" }",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base}}/auth/password-reset/request",
+          "host": [
+            "{{base}}"
+          ],
+          "path": [
+            "auth",
+            "password-reset",
+            "request"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Confirm the reset with the token from the console -> 204",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 204', () => pm.response.to.have.status(204));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{ \"token\": \"paste-the-token-here\", \"newPassword\": \"a brand new horse 44\" }",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base}}/auth/password-reset/confirm",
+          "host": [
+            "{{base}}"
+          ],
+          "path": [
+            "auth",
+            "password-reset",
+            "confirm"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Two-factor state -> 200",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{base}}/auth/2fa",
+          "host": [
+            "{{base}}"
+          ],
+          "path": [
+            "auth",
+            "2fa"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Start two-factor setup -> 201 { secret, otpauthUrl }",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 201', () => pm.response.to.have.status(201));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{ \"password\": \"correct horse 42\" }",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base}}/auth/2fa/setup",
+          "host": [
+            "{{base}}"
+          ],
+          "path": [
+            "auth",
+            "2fa",
+            "setup"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Enable it with a code from the authenticator -> 200 { recoveryCodes }",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{ \"code\": \"123456\" }",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base}}/auth/2fa/enable",
+          "host": [
+            "{{base}}"
+          ],
+          "path": [
+            "auth",
+            "2fa",
+            "enable"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Second step of a login with 2FA -> 200 (challengeToken comes from the login answer)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{ \"challengeToken\": \"paste-the-challenge-here\", \"code\": \"123456\" }",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base}}/auth/2fa/verify",
+          "host": [
+            "{{base}}"
+          ],
+          "path": [
+            "auth",
+            "2fa",
+            "verify"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Disable two-factor -> 204",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 204', () => pm.response.to.have.status(204));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{ \"password\": \"correct horse 42\", \"code\": \"123456\" }",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base}}/auth/2fa/disable",
+          "host": [
+            "{{base}}"
+          ],
+          "path": [
+            "auth",
+            "2fa",
+            "disable"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Admin: audit trail -> 200 (needs the audit:read permission)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{base}}/admin/audit",
+          "host": [
+            "{{base}}"
+          ],
+          "path": [
+            "admin",
+            "audit"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Admin: roles and permissions -> 200",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{base}}/admin/roles",
+          "host": [
+            "{{base}}"
+          ],
+          "path": [
+            "admin",
+            "roles"
+          ]
+        }
+      }
+    },
+    {
+      "name": "",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{base}}/admin/permissions",
+          "host": [
+            "{{base}}"
+          ],
+          "path": [
+            "admin",
+            "permissions"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Admin: create a role from permissions you hold -> 201 (403 for a permission you lack)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 201', () => pm.response.to.have.status(201));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{ \"name\": \"reviewer\", \"description\": \"Reads diagrams\", \"permissions\": [\"diagram:read\", \"profile:read\"] }",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base}}/admin/roles",
+          "host": [
+            "{{base}}"
+          ],
+          "path": [
+            "admin",
+            "roles"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Admin: assign a role -> 200 (the last administrator cannot be demoted)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{ \"role\": \"moderator\" }",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base}}/users/2/role",
+          "host": [
+            "{{base}}"
+          ],
+          "path": [
+            "users",
+            "2",
+            "role"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Admin: unlock an account -> 200",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{base}}/users/2/unlock",
+          "host": [
+            "{{base}}"
+          ],
+          "path": [
+            "users",
+            "2",
+            "unlock"
           ]
         }
       }

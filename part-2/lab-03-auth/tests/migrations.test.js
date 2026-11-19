@@ -119,7 +119,7 @@ test('the seeds insert the demo diagrams, an admin and demo users with hashed pa
   assert.ok(ROWS.length >= 30);
   assert.deepEqual([...new Set(rows.map((d) => d.notation))].sort(), ['BPMN', 'DFD', 'ERD', 'IDEF0', 'Petri', 'UML']);
   assert.equal(new Set(rows.map((d) => d.ownerId)).size, 5);
-  assert.equal(await User.count({ where: { '$Role.name$': 'user' } }), 4);
+  assert.equal(await User.count({ where: { '$Role.name$': 'user' }, distinct: true, col: 'User.id' }), 4);
   const demo = await User.findOne({ where: { email: 'alice@example.test' } });
   assert.equal(await bcrypt.compare('demo password 1', demo.passwordHash), true);
   const admin = (await User.findAll({ where: { '$Role.name$': 'admin' } }))[0];
@@ -130,7 +130,7 @@ test('the seeds insert the demo diagrams, an admin and demo users with hashed pa
   db.cli('db:seed:undo:all');
   const again = open();
   assert.equal(await again.Diagram.count(), 0);
-  assert.equal(await again.User.count(), 0);
+  assert.equal(await again.User.count({ distinct: true, col: 'User.id' }), 0);
   await again.sequelize.close();
 });
 
@@ -150,7 +150,7 @@ test('the seeds are idempotent per row: a deleted demo diagram comes back, nothi
   db.cli('db:seed:all');
   ({ sequelize, Diagram, User } = open());
   assert.deepEqual((await Diagram.findAll()).map((d) => d.title).sort(), ROWS.map((row) => row.title).sort());
-  assert.equal(await User.count(), 5);
+  assert.equal(await User.count({ distinct: true, col: 'User.id' }), 5);
   await sequelize.close();
   db.cli('db:seed:undo:all');
 });

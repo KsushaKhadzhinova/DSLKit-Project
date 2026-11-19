@@ -350,7 +350,7 @@ test('repeated wrong passwords lock the email, even for the right password, and 
 });
 
 test('a successful login resets the failed attempts and a lock ends after its time', async () => {
-  const strict = await startServer({ loginMaxAttempts: 3, loginLockMs: 400 });
+  const strict = await startServer({ loginMaxAttempts: 3, loginLockMs: 2500 });
   try {
     await strict.call('POST', '/auth/register', creds('reset@example.com'));
     for (let round = 0; round < 3; round += 1) {
@@ -359,7 +359,7 @@ test('a successful login resets the failed attempts and a lock ends after its ti
     }
     for (let i = 0; i < 3; i += 1) await strict.call('POST', '/auth/login', creds('reset@example.com', 'wrong password'));
     assert.equal((await strict.call('POST', '/auth/login', creds('reset@example.com'))).res.status, 429);
-    await pause(500);
+    await pause(2700);
     assert.equal((await strict.call('POST', '/auth/login', creds('reset@example.com'))).res.status, 200);
   } finally {
     await strict.close();
