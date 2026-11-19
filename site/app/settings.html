@@ -153,6 +153,14 @@
               <span>Тема</span>
             </a>
           </li>
+          <li class="settings-nav__item">
+            <a class="settings-nav__link" href="#account-security">
+              <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M10 2l6 2v5c0 4-3 7-6 9-3-2-6-5-6-9V4z" />
+              </svg>
+              <span>Аккаунт и безопасность</span>
+            </a>
+          </li>
         </ul>
       </nav>
 
@@ -236,6 +244,113 @@
             </div>
           </fieldset>
         </div>
+
+        <section id="account-security" class="settings-group security" aria-labelledby="security-title" data-security data-home="../index.html">
+          <h2 class="settings-group__title" id="security-title">Аккаунт и безопасность</h2>
+          <p class="form__hint">
+            Аккаунт хранится только в этом браузере: сервера нет. Пароль защищён хешем PBKDF2, но тот, кто открыл профиль браузера, видит и меняет все данные.
+            Это учебная модель аккаунтов, а не серверная защита; подробности в документации.
+          </p>
+          <p data-security-guest>
+            Войдите в аккаунт, чтобы управлять паролем, сессиями и двухфакторной аутентификацией. <a class="form__link" href="login.html">Войти</a>
+          </p>
+          <div data-security-user hidden>
+            <form class="form" id="security-password-form" novalidate>
+              <h3 class="security__title">Смена пароля</h3>
+              <div class="form__field">
+                <label class="form__label" for="security-old">Старый пароль</label>
+                <input class="form__input" id="security-old" type="password" autocomplete="current-password" maxlength="128" required />
+              </div>
+              <div class="form__field">
+                <label class="form__label" for="security-new">Новый пароль</label>
+                <input class="form__input" id="security-new" type="password" autocomplete="new-password" maxlength="128" required />
+                <div class="password-meter" data-password-meter>
+                  <meter class="password-meter__bar" min="0" max="4" value="0" aria-label="Надёжность пароля"></meter>
+                  <span class="password-meter__text" data-meter-text aria-live="polite"></span>
+                </div>
+              </div>
+              <div class="form__field">
+                <label class="form__label" for="security-confirm">Повторите новый пароль</label>
+                <input class="form__input" id="security-confirm" type="password" autocomplete="new-password" maxlength="128" required />
+              </div>
+              <button class="button button--primary" type="submit">Сменить пароль</button>
+              <p class="form__hint">После смены пароля все остальные сессии завершаются.</p>
+              <p class="security__status" role="status" data-status="password"></p>
+            </form>
+
+            <h3 class="security__title">Сессии</h3>
+            <p class="form__hint">Сессия живёт до 7 дней с галочкой «Запомнить меня» и до 12 часов без неё; через 30 минут без действий она закрывается.</p>
+            <ul class="security-list" data-session-list></ul>
+            <button class="button" type="button" data-revoke-others hidden>Завершить все остальные сессии</button>
+            <p class="security__status" role="status" data-status="sessions"></p>
+
+            <h3 class="security__title">Двухфакторная аутентификация (TOTP)</h3>
+            <p class="form__hint">Одноразовые коды по RFC 6238: SHA-1, 30 секунд, 6 цифр. Подойдёт любое приложение-аутентификатор.</p>
+            <p data-totp-state></p>
+            <button class="button" type="button" data-totp-start>Настроить</button>
+            <div data-totp-setup hidden>
+              <p class="form__hint">Секрет (введите его в приложение): <code data-totp-secret></code></p>
+              <p class="form__hint">Ссылка otpauth://: <code class="security__uri" data-totp-uri></code></p>
+              <form class="form" id="totp-setup-form" novalidate>
+                <div class="form__field">
+                  <label class="form__label" for="totp-code">Код из приложения</label>
+                  <input class="form__input" id="totp-code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="8" />
+                </div>
+                <button class="button button--primary" type="submit">Включить</button>
+              </form>
+            </div>
+            <div data-recovery hidden>
+              <p class="form__hint">Резервные коды (показаны один раз, у каждого одно использование)</p>
+              <ul class="security-codes" data-recovery-list></ul>
+            </div>
+            <form class="form" id="totp-disable-form" data-totp-disable novalidate hidden>
+              <div class="form__field">
+                <label class="form__label" for="totp-password">Пароль для отключения</label>
+                <input class="form__input" id="totp-password" type="password" autocomplete="current-password" maxlength="128" />
+              </div>
+              <button class="button" type="submit">Отключить</button>
+            </form>
+            <p class="security__status" role="status" data-status="totp"></p>
+
+            <div data-security-admin hidden>
+              <h3 class="security__title">Аккаунты этого браузера</h3>
+              <p class="form__hint">Видно только роли администратора. Последнего администратора понизить нельзя.</p>
+              <table class="security-table">
+                <thead>
+                  <tr>
+                    <th scope="col">Имя</th>
+                    <th scope="col">Почта</th>
+                    <th scope="col">Роль</th>
+                    <th scope="col">2FA</th>
+                    <th scope="col">Создан</th>
+                  </tr>
+                </thead>
+                <tbody data-account-list></tbody>
+              </table>
+              <p class="security__status" role="status" data-status="accounts"></p>
+            </div>
+
+            <h3 class="security__title">Журнал безопасности</h3>
+            <div class="form__field form__field--checkbox" id="audit-all-field" hidden>
+              <input class="form__checkbox" id="audit-all" type="checkbox" />
+              <label class="form__label" for="audit-all">Показать события всех аккаунтов</label>
+            </div>
+            <ul class="security-list" data-audit-list></ul>
+
+            <form class="form" id="security-delete-form" novalidate>
+              <h3 class="security__title">Удаление аккаунта</h3>
+              <p class="form__hint">
+                Аккаунт, его сессии и журнал удаляются из этого браузера. Проекты остаются в хранилище браузера без владельца. Нужен пароль.
+              </p>
+              <div class="form__field">
+                <label class="form__label" for="security-delete-password">Пароль</label>
+                <input class="form__input" id="security-delete-password" type="password" autocomplete="current-password" maxlength="128" />
+              </div>
+              <button class="button" type="submit">Удалить аккаунт</button>
+              <p class="security__status" role="status" data-status="delete"></p>
+            </form>
+          </div>
+        </section>
       </div>
     </main>
     <script type="module" src="../js/script.js"></script>

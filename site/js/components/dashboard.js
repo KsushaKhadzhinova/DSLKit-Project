@@ -1,5 +1,6 @@
 import { NOTATIONS, NOTATION_KEYS, TEMPLATE_LANGS, parseDiagram, templateFor } from '../notations/index.js';
-import { currentUser, isUnlimited } from '../storage/accounts.js';
+import { currentUser } from '../storage/accounts.js';
+import { can } from '../auth/permissions.js';
 import { notify } from './toast.js';
 import { starterProjects } from '../storage/seeds.js';
 import { TRASH_DAYS, createProjectStore, createTemplateStore, showQuota, titleOf } from '../storage/projects.js';
@@ -121,7 +122,7 @@ export const initDashboard = ({ root = document, storage, now = () => Date.now()
   const labels = LABELS[lang];
   const user = currentUser(storage);
   const owner = user?.id ?? null;
-  const store = createProjectStore({ storage, now, owner, unlimited: isUnlimited(user) });
+  const store = createProjectStore({ storage, now, owner, unlimited: can(user, 'diagram.unlimited') });
   const templates = createTemplateStore({ storage, now, owner });
   const go = navigate ?? ((url) => view.location.assign(url));
   store.purgeExpired();
@@ -353,7 +354,7 @@ export const initDashboard = ({ root = document, storage, now = () => Date.now()
       if (shown > 0) count.textContent = own ? labels.foundTemplates(shown) : labels.found(shown);
       else count.textContent = own ? labels.noneTemplates : labels.none;
     }
-    showQuota(quotaText, quotaBar, store.createdOn(), lang, isUnlimited(user));
+    showQuota(quotaText, quotaBar, store.createdOn(), lang, can(user, 'diagram.unlimited'));
     storage.set('dashboard', state);
   };
 

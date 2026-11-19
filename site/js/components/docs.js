@@ -1,6 +1,7 @@
 import { renderMarkdown } from '../utils/markdown.js';
 import { notify } from './toast.js';
 import { createAccountStore } from '../storage/accounts.js';
+import { can } from '../auth/permissions.js';
 import { createDocsStore } from '../storage/docs.js';
 import { DOCS as RU } from '../docs/content.ru.js';
 import { DOCS as EN } from '../docs/content.en.js';
@@ -63,7 +64,7 @@ export const initDocs = ({ root = document, storage, developerHash, adminHash } 
     notify(root, message);
     return message;
   };
-  const developer = () => accounts.current()?.role === 'developer';
+  const developer = () => can(accounts.current(), 'docs.developer');
 
   const showSection = (id) => {
     const section = docs.get(lang, kind, id);
