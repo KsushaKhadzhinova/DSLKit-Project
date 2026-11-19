@@ -22,6 +22,7 @@ import { initExport } from './components/export-menu.js';
 import { initImport } from './components/import-menu.js';
 import { initLangSwitch } from './components/lang-switch.js';
 import { registerServiceWorker } from './components/pwa.js';
+import { initOrientation } from './components/orientation.js';
 import { initNotationFilter } from './components/notation-filter.js';
 import { initPopups } from './components/popups.js';
 import { initSettings } from './components/settings.js';
@@ -65,6 +66,7 @@ export const COMPONENTS = [
   initImport,
   initTour,
   initCanvasDrag,
+  initOrientation,
   initDiagramRunner,
   initPopups,
 ];
