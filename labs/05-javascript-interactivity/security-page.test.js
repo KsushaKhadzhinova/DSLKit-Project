@@ -222,8 +222,10 @@ test('an account without a creation date is listed and an unknown author of an e
   const { $, document, storage, store, window } = await open();
   await store.becomeDeveloper('admin-code');
   window.dispatchEvent(new window.Event('storage'));
+  assert.notEqual(document.querySelectorAll('[data-account-list] tr td:last-child')[0].textContent, '');
   const accounts = storage.get('accounts');
   delete accounts[0].created;
+  accounts[0].totp = { enabled: true, secret: 'JBSWY3DPEHPK3PXP' };
   storage.set('accounts', accounts);
   const stranger = { userId: 'uXX', type: 'sign-in', at: now() };
   storage.set('audit', [...storage.get('audit'), stranger]);
@@ -232,6 +234,7 @@ test('an account without a creation date is listed and an unknown author of an e
   $('#audit-all').dispatchEvent(new document.defaultView.Event('change', { bubbles: true }));
   assert.ok([...document.querySelectorAll('[data-audit-list] li')].some((item) => item.textContent.includes('uXX: ')));
   assert.equal(document.querySelectorAll('[data-account-list] tr td:last-child')[0].textContent, '');
+  assert.ok([...document.querySelectorAll('[data-account-list] tr td')].some((cell) => cell.textContent === '2FA'));
 });
 
 test('an empty log is explained', async () => {
@@ -266,4 +269,9 @@ test('the default navigation uses the location of the window', async () => {
   document.querySelector('#security-delete-password').value = person.password;
   document.querySelector('#security-delete-form').dispatchEvent(new window.Event('submit', { bubbles: true, cancelable: true }));
   await until(() => window.location.hash === '#home');
+});
+
+test('the page runs on the real clock when none is given', async () => {
+  const { storage, window } = await open();
+  assert.ok(initSecurity({ root: window.document, storage, navigate: () => {} }));
 });

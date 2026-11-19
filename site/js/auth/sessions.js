@@ -74,10 +74,8 @@ export const resolveSession = (storage, userId, { now, crypto, device, config = 
     return null;
   }
   if (now - record.lastSeen >= config.touchMs) {
-    storage.set(
-      LIST,
-      list.map((item) => (item.id === record.id ? { ...item, lastSeen: now } : item)),
-    );
+    record.lastSeen = now;
+    storage.set(LIST, list);
   }
   return record;
 };

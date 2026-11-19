@@ -11,7 +11,6 @@ const TEXTS = {
   sessionLine: { ru: 'Вход: {created} · Активность: {seen} · Сессия: {kind}', en: 'Signed in: {created} · Last seen: {seen} · Session: {kind}' },
   revoke: { ru: 'Завершить', en: 'Revoke' },
   signOut: { ru: 'Выйти', en: 'Sign out' },
-  noSessions: { ru: 'Нет активных сессий.', en: 'No active sessions.' },
   revoked: { ru: 'Сессия завершена.', en: 'The session is revoked.' },
   revokedOthers: { ru: 'Завершено других сессий: {ended}.', en: 'Other sessions revoked: {ended}.' },
   totpOn: {
@@ -111,7 +110,6 @@ export const initSecurity = ({ root = document, storage, crypto, now = () => Dat
     const list = section.querySelector('[data-session-list]');
     list.replaceChildren();
     const items = store.sessions();
-    if (items.length === 0) list.append(build('li', 'security-item', t('noSessions')));
     items.forEach((item) => {
       const row = build('li', 'security-item');
       const text = build('span', 'security-item__text');

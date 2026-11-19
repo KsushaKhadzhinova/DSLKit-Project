@@ -43,7 +43,7 @@ const hasTotp = (account) => account.totp?.enabled === true && typeof account.to
 
 const recoveryOf = (account) => (Array.isArray(account.totp.recovery) ? account.totp.recovery : []);
 
-const defaultAgent = () => globalThis.navigator?.userAgent ?? '';
+const defaultAgent = () => String(globalThis.navigator.userAgent);
 
 // The signed-in user, or null for a guest, an unknown id, a revoked or ended session or a damaged one. Any page may ask without the crypto API:
 // a session of the old form { userId } is upgraded when random numbers exist, and the "last seen" mark moves at most once a minute.

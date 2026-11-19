@@ -251,6 +251,27 @@ test('an old session { userId } is upgraded by the store and by currentUser', as
   assert.equal(currentUser(storage), null);
 });
 
+test('a role change reports a storage failure', async () => {
+  const backend = createMemoryBackend();
+  let broken = false;
+  const flaky = {
+    ...backend,
+    setItem: (key, value) => {
+      if (broken) throw new Error('full');
+      backend.setItem(key, value);
+    },
+  };
+  const codes = { developerHash: hashCode('dev-code'), adminHash: hashCode('admin-code') };
+  const { store, now } = await setup({ storage: createStorage(flaky), store: codes });
+  const member = other(createStorage(flaky), now);
+  await member.register({ name: 'Иван', email: 'ivan@example.com', password: 'another horse 7' });
+  await store.login({ email: person.email, password: person.password });
+  await store.becomeDeveloper('admin-code');
+  const ivan = store.listAccounts().accounts[1].id;
+  broken = true;
+  assert.deepEqual(store.setRole({ id: ivan, role: 'developer' }), { ok: false, error: 'storage' });
+});
+
 test('admin: the list of accounts and the change of roles go through the permission table', async () => {
   const codes = { developerHash: hashCode('dev-code'), adminHash: hashCode('admin-code') };
   const { storage, store, now } = await setup({ store: codes });
