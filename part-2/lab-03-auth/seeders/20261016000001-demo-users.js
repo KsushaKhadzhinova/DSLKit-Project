@@ -1,4 +1,5 @@
 const bcrypt = require('bcrypt');
+const { DEFAULT_ROLE } = require('../src/permissions');
 
 try {
   process.loadEnvFile();
@@ -23,10 +24,12 @@ module.exports = {
       throw new Error(`DEMO_USER_PASSWORD must be ${MIN_PASSWORD} characters or more and at most 72 bytes`);
     }
     const passwordHash = await bcrypt.hash(DEMO_USER_PASSWORD, 10);
+    const roleId = await queryInterface.rawSelect('Roles', { where: { name: DEFAULT_ROLE } }, ['id']);
+    if (!roleId) throw new Error('The Roles table has no such role: run npm run db:migrate first');
     const now = new Date();
     for (const email of DEMO_EMAILS) {
       if (await queryInterface.rawSelect('Users', { where: { email } }, ['id'])) continue;
-      await queryInterface.bulkInsert('Users', [{ email, passwordHash, role: 'user', createdAt: now, updatedAt: now }]);
+      await queryInterface.bulkInsert('Users', [{ email, passwordHash, roleId, createdAt: now, updatedAt: now }]);
     }
   },
 

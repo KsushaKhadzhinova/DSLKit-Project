@@ -56,10 +56,24 @@ const createLoginGuard = ({ maxAttempts, lockMs, now = Date.now }) => {
       const fresh = !entry || expiry(entry) <= time;
       if (!entry) makeRoom(failures);
       const count = fresh ? 1 : entry.count + 1;
-      failures.set(key(email), { count, lastFailure: time, lockedUntil: count >= maxAttempts ? time + lockMs : undefined });
+      const locked = count >= maxAttempts;
+      failures.set(key(email), { count, lastFailure: time, lockedUntil: locked ? time + lockMs : undefined });
+      // True when this failure locked the key, so the caller can write one audit event for it.
+      return locked && (fresh || !entry.lockedUntil);
     },
     succeed(email) {
       failures.delete(key(email));
+    },
+    // Forgets every counter whose key matches (an administrator unlock, a finished password reset). Returns how many were removed.
+    clearWhere(matches) {
+      let removed = 0;
+      for (const name of [...failures.keys()]) {
+        if (matches(name)) {
+          failures.delete(name);
+          removed += 1;
+        }
+      }
+      return removed;
     },
   };
 };

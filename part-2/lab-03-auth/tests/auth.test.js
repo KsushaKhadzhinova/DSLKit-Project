@@ -63,13 +63,13 @@ test('registration answers 400 with details for bad email or password', async ()
   assert.equal((await app.call('POST', '/auth/register', { body: [] })).res.status, 400);
 });
 
-test('POST /auth/login returns a signed token with email and role that expires in an hour', async () => {
+test('POST /auth/login returns a signed token with email and role that expires in 15 minutes', async () => {
   const { res, body } = await app.call('POST', '/auth/login', creds(' CAROL@example.com'));
   assert.equal(res.status, 200);
   assert.equal(body.tokenType, 'Bearer');
   const payload = jwt.verify(body.token, SECRET);
   assert.deepEqual({ email: payload.email, role: payload.role }, { email: 'carol@example.com', role: 'user' });
-  assert.equal(payload.exp - payload.iat, 3600);
+  assert.equal(payload.exp - payload.iat, 900);
   assert.equal('passwordHash' in payload, false);
 });
 

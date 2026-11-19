@@ -42,7 +42,7 @@ test('a token signed with the right secret but with a wrong issuer or a not-befo
 
 test('a token whose id is a string, null or missing answers 401 and never 500', async () => {
   for (const payload of [{ id: 'abc' }, { id: null }, { id: {} }, {}]) {
-    const token = jwt.sign({ role: 'admin', ...payload }, SECRET, { expiresIn: '1h', issuer: 'dslkit' });
+    const token = jwt.sign({ role: 'admin', ...payload }, SECRET, { expiresIn: '1h', issuer: 'dslkit', audience: 'dslkit-api' });
     const { res, body } = await app.call('GET', '/profile', { token });
     assert.equal(res.status, 401, JSON.stringify(payload));
     assert.equal(body.error, 'Invalid token');
@@ -52,7 +52,7 @@ test('a token whose id is a string, null or missing answers 401 and never 500', 
 test('a token that claims the admin role is refused on admin routes when the database says user', async () => {
   const token = await app.tokenFor('claims-admin@example.com');
   const id = await userId('claims-admin@example.com');
-  const forged = jwt.sign({ id, email: 'claims-admin@example.com', role: 'admin' }, SECRET, { expiresIn: '1h', issuer: 'dslkit' });
+  const forged = jwt.sign({ id, email: 'claims-admin@example.com', role: 'admin' }, SECRET, { expiresIn: '1h', issuer: 'dslkit', audience: 'dslkit-api' });
   assert.equal((await app.call('GET', '/users', { token: forged })).res.status, 403);
   assert.equal((await app.call('PATCH', `/users/${id}/role`, { token: forged, body: { role: 'admin' } })).res.status, 403);
   assert.equal((await app.call('GET', '/users', { token })).res.status, 403);
