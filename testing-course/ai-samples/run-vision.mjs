@@ -8,9 +8,15 @@ const pause = (ms) => new Promise((done) => setTimeout(done, ms));
 for (const name of files) {
   const bytes = readFileSync(new URL(name, import.meta.url));
   const body = { mode: 'image', lang: 'en', mediaType: TYPES[name.split('.').pop()], image: bytes.toString('base64') };
-  const answer = await fetch(`http://localhost:${port}/api/ai/generate`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
+  const answer = await fetch(`http://localhost:${port}/api/ai/generate`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(body),
+  });
   const json = await answer.json();
-  console.log(`== ${name} -> HTTP ${answer.status} ${json.error?.code ?? ''} notation=${json.notation ?? '-'} attempts=${json.attempts ?? json.error?.attempts ?? '-'}`);
+  console.log(
+    `== ${name} -> HTTP ${answer.status} ${json.error?.code ?? ''} notation=${json.notation ?? '-'} attempts=${json.attempts ?? json.error?.attempts ?? '-'}`,
+  );
   console.log(json.code ?? json.error?.code ?? json.error?.message ?? '');
   await pause(13000);
 }

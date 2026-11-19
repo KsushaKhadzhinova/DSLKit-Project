@@ -70,3 +70,16 @@ test('a compressed and an uncompressed draw.io file give nodes and links', async
   assert.equal(packed.ok, true);
   assert.ok(links(packed.dsl) >= 28);
 });
+
+test('XMI associations: a named one becomes a labelled link, an incomplete one and an untyped element are skipped', async () => {
+  const xmi =
+    '<xmi:XMI xmlns:xmi="x" xmlns:uml="u"><uml:Model>' +
+    '<packagedElement xmi:type="uml:Class" xmi:id="A" name="A"/><packagedElement xmi:type="uml:Class" xmi:id="B" name="B"/>' +
+    '<packagedElement xmi:id="N" name="untyped"/>' +
+    '<packagedElement xmi:type="uml:Association" xmi:id="X1" name="owns"><ownedEnd type="A"/><ownedEnd type="B"/></packagedElement>' +
+    '<packagedElement xmi:type="uml:Association" xmi:id="X2"><ownedEnd type="A"/></packagedElement>' +
+    '</uml:Model></xmi:XMI>';
+  const result = await importUpload(xmi, { fileName: 'm.xmi', lang: 'en' });
+  assert.match(result.dsl, /A --> B : owns/);
+  assert.equal(links(result.dsl), 1);
+});

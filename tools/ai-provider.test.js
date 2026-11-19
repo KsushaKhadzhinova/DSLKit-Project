@@ -171,7 +171,13 @@ test('gemini: a PDF goes through the native generateContent API as inlineData, t
 
 test('gemini: a request without a PDF still uses the OpenAI-compatible endpoint; native failures stay clean', async () => {
   const plain = fake([chat('ok')]);
-  assert.equal(await gemini(plain.fetchImpl)('S', [{ role: 'user', content: 'hi' }, { role: 'user', content: [{ type: 'text', text: 'x' }] }]), 'ok');
+  assert.equal(
+    await gemini(plain.fetchImpl)('S', [
+      { role: 'user', content: 'hi' },
+      { role: 'user', content: [{ type: 'text', text: 'x' }] },
+    ]),
+    'ok',
+  );
   assert.equal(plain.calls[0].url, `${GEMINI_BASE}chat/completions`);
   const pdf = [{ role: 'user', content: [PDF_BLOCK] }];
   await assert.rejects(gemini(fake([{ ok: false, status: 429 }]).fetchImpl)('S', pdf), /upstream status/);
