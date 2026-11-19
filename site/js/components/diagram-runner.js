@@ -1,3 +1,4 @@
+import { scopedKey } from '../storage/scope.js';
 import { renderDiagram, checkHealth } from '../api/apiService.js';
 import { API_CONFIG } from '../api/config.js';
 import { createCache, createHistory } from '../storage/localStorage.js';
@@ -70,7 +71,7 @@ export const initDiagramRunner = ({
 
   // The engine is chosen on the settings page and read again on every run.
   const currentEngine = () => {
-    const saved = storage.get('settings', {});
+    const saved = storage.get(scopedKey(storage, 'settings'), {});
     return findEngine(saved !== null && typeof saved === 'object' ? saved['diagram-engine'] : undefined);
   };
 

@@ -21,6 +21,14 @@ const TEXTS = {
     en: 'Beta limit: 5 new diagrams a day. The project is not saved, the limit renews tomorrow.',
   },
   fresh: { ru: 'Новая диаграмма (не сохранена)', en: 'New diagram (not saved)' },
+  storage: {
+    ru: 'Не сохранено: хранилище браузера переполнено или отключено. Освободите место (удалите ненужные проекты) и повторите.',
+    en: 'Not saved: the browser storage is full or off. Free some space (delete projects you do not need) and try again.',
+  },
+  gone: {
+    ru: 'Этот проект удалён в другой вкладке. Правка не сохранена, сохраните её как новый проект.',
+    en: 'This project was deleted in another tab. The change is not saved; save it as a new project.',
+  },
 };
 export const PROJECT_AUTOSAVE_MS = 1000;
 
@@ -136,8 +144,8 @@ export const initEditorProjects = ({
   };
   const saveTemplate = (id) => {
     const saved = templates.save({ id, ...describe() });
-    if (saved === null) {
-      const saidDeleted = TEXTS.templateDeleted[lang];
+    if (!saved) {
+      const saidDeleted = saved === false ? TEXTS.storage[lang] : TEXTS.templateDeleted[lang];
       if (note) note.textContent = saidDeleted;
       notify(root, saidDeleted, 'error');
       return null;
@@ -158,9 +166,16 @@ export const initEditorProjects = ({
     }
     const { source, title, notation } = describe();
     const saved = store.save({ id: project?.id, title, notation, source });
-    if (saved === null) {
-      if (note) note.textContent = TEXTS.limit[lang];
-      notify(root, TEXTS.limit[lang], 'error');
+    if (!saved) {
+      const text = saved === null ? TEXTS.limit[lang] : saved === false ? TEXTS.storage[lang] : TEXTS.gone[lang];
+      // One message: the plain "ready" note of the drawing must not stand next to "not saved".
+      if (note) note.textContent = text;
+      const canvasNote = page.querySelector('.canvas__status');
+      if (canvasNote) {
+        canvasNote.textContent = text;
+        canvasNote.dataset.state = 'note';
+      }
+      notify(root, text, 'error');
       return null;
     }
     project = saved;
@@ -187,6 +202,16 @@ export const initEditorProjects = ({
   };
   new view.MutationObserver(schedule).observe(codeLines, { childList: true, subtree: true, characterData: true });
   page.addEventListener('dslkit:save', save);
+  // Signing in or out in another tab changes the owner of the projects: the pending change is kept for the old owner, then the page opens again
+  // for the new one, so a save never lands in the wrong account.
+  view.addEventListener?.('storage', (event) => {
+    if (event.key !== null && !/(^|\.)sessions?$/.test(event.key)) return;
+    if ((currentUser(storage)?.id ?? null) === owner) return;
+    if (timer !== null) clearTimer(timer);
+    timer = null;
+    maybeSave();
+    go(view.location.pathname);
+  });
   // A click on a language link or on "sign out" leaves the page before the autosave timer fires; pagehide
   // flushes the pending change first so the last second of editing is never lost.
   view.addEventListener?.('pagehide', () => {

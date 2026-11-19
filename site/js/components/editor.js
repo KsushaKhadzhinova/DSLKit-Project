@@ -1,3 +1,4 @@
+import { scopedKey } from '../storage/scope.js';
 import { NOTATIONS, TEMPLATE_LANGS, templateFor } from '../notations/index.js';
 import { ui } from '../notations/messages.js';
 import { readCode, showCode } from './code-lines.js';
@@ -23,10 +24,10 @@ const isPlainObject = (value) => typeof value === 'object' && value !== null && 
 // Settings live under one storage key, a damaged value is treated as "no settings".
 const createSettings = (storage) => {
   const read = () => {
-    const saved = storage.get('settings', {});
+    const saved = storage.get(scopedKey(storage, 'settings'), {});
     return isPlainObject(saved) ? saved : {};
   };
-  return { read, save: (key, value) => storage.set('settings', { ...read(), [key]: value }) };
+  return { read, save: (key, value) => storage.set(scopedKey(storage, 'settings'), { ...read(), [key]: value }) };
 };
 
 const announceRun = (page, root) => page.dispatchEvent(new root.defaultView.CustomEvent('dslkit:run', { bubbles: true }));

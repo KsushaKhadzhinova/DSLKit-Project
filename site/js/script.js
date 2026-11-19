@@ -22,6 +22,7 @@ import { initExport } from './components/export-menu.js';
 import { initImport } from './components/import-menu.js';
 import { initLangSwitch } from './components/lang-switch.js';
 import { registerServiceWorker } from './components/pwa.js';
+import { initNativeValidation } from './components/native-validation.js';
 import { initNotationFilter } from './components/notation-filter.js';
 import { initPopups } from './components/popups.js';
 import { initSecurity } from './components/security.js';
@@ -45,6 +46,7 @@ export const COMPONENTS = [
   initNotationFilter,
   initWaitlistForm,
   initAuthForm,
+  initNativeValidation,
   initDashboard,
   initQuota,
   initWelcome,

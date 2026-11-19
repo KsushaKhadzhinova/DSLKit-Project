@@ -17,3 +17,12 @@ Include: where the problem is (file or address), how to repeat it, and what it a
 ## Supported versions
 
 Only the latest commit of each working branch is supported.
+
+## Accounts and roles of the site: what is and is not protected
+
+The site has no server for accounts: they live in the `localStorage` of the browser, so whoever controls the browser profile controls the data. This section is the honest limit of the client-side model (audit finding RT-01, RT-02).
+
+- A role (`developer`, `admin`) is sealed: an HMAC-SHA-256 of `id:role` under a random key of the account, made at registration and kept in the same record (`site/js/auth/role-seal.js`). A role without a valid seal counts as `user`, so editing `role: "admin"` in the storage gives nothing. Accounts made before this change keep the role `user` until the role code is entered again.
+- This does NOT stop a person who writes a whole new account with their own key: the key lives in the same storage. A real boundary needs a server with signed sessions. The roles of the site protect the documentation and the rules of the expert system from accidental edits, nothing more.
+- The role codes are kept as salted PBKDF2-SHA-256 records with the parameters of the passwords (`site/js/auth/role-code.js`, `npm run dev:code`). The shipped records wrap the old hash; run `npm run dev:code -- "<developer code>" "<admin code>"` to replace them with records of new codes.
+- Draw.io and Visio files are unpacked with a cap of 8 MB; a larger result is refused with a message (finding RT-03).

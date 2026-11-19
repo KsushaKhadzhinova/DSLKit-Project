@@ -1,3 +1,4 @@
+import { scopedKey } from '../storage/scope.js';
 import { readCode, showCode } from './code-lines.js';
 import { createExpertPanel } from './expert-panel.js';
 import { notify } from './toast.js';
@@ -19,6 +20,7 @@ const TEXTS = {
   message: { ru: 'Сообщение коммита', en: 'Commit message' },
   commit: { ru: 'Закоммитить', en: 'Commit' },
   committed: { ru: 'Коммит {id} создан.', en: 'Commit {id} created.' },
+  full: { ru: 'Версия не сохранена: хранилище браузера переполнено или отключено.', en: 'The version is not saved: the browser storage is full or off.' },
   unchanged: { ru: 'Нет изменений с прошлого коммита.', en: 'No changes since the last commit.' },
   empty: { ru: 'Коммитов пока нет.', en: 'No commits yet.' },
   changes: { ru: 'Изменений с последнего коммита: +{add} −{del}', en: 'Changes since the last commit: +{add} −{del}' },
@@ -95,11 +97,14 @@ export const initEditorTools = ({ root = document, storage, now = () => Date.now
   };
 
   const loadCommits = () => {
-    const saved = storage.get(STORAGE_KEY, []);
-    return Array.isArray(saved) ? saved : [];
+    const saved = storage.get(scopedKey(storage, STORAGE_KEY), []);
+    // A damaged value, or an entry of a wrong shape, is dropped instead of breaking the panel.
+    const sound = (item) =>
+      item !== null && typeof item === 'object' && ['id', 'message', 'text'].every((field) => typeof item[field] === 'string') && Number.isFinite(item.at);
+    return Array.isArray(saved) ? saved.filter(sound) : [];
   };
   let commits = loadCommits();
-  const saveCommits = () => storage.set(STORAGE_KEY, commits);
+  const saveCommits = () => storage.set(scopedKey(storage, STORAGE_KEY), commits);
 
   // ----- search and replace
   const searchView = el('section', 'editor-tools__view');
@@ -181,8 +186,12 @@ export const initEditorTools = ({ root = document, storage, now = () => Date.now
   const commit = () => {
     const result = addCommit(commits, code(), messageBox.value, now());
     if (!result.added) return tell(t('unchanged'));
+    const before = commits;
     commits = result.commits;
-    saveCommits();
+    if (!saveCommits()) {
+      commits = before;
+      return tell(t('full'));
+    }
     messageBox.value = '';
     renderLog();
     return tell(t('committed', { id: commits[0].id }));

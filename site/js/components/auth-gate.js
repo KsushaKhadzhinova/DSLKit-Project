@@ -12,7 +12,7 @@ export const initAuthGate = ({ root = document, storage, navigate = (url) => roo
   };
   const redirected = guard();
   root.defaultView?.addEventListener?.('storage', (event) => {
-    if (event.key === null || event.key === 'session' || event.key === 'sessions') guard();
+    if (event.key === null || /(^|\.)sessions?$/.test(event.key)) guard();
   });
   return redirected ? { redirected: true } : null;
 };
