@@ -29,7 +29,7 @@ The DSLKit project (diagrams as code, SaaS). Assignment: `materials/text/part-2/
 - The email is lowercased, duplicates are caught by a unique index (a 409 answer also under a race of requests).
 - The `JWT_SECRET` secret is mandatory (32 characters or more), and without it the server does not start. Only `.env.example` is in the repository.
 - Brute-force protection: 20 logins per address in 15 minutes (a 429 answer with `Retry-After`), after 5 failed attempts the email is locked for 15 minutes, unknown emails included. The counters live in process memory. The token lifetime is at most 24 hours, the secret is 32 characters or more, the issuer is `dslkit`, security headers are set and the request log goes to the `RequestLogs` table. A general limit applies to every route except `/health`: 300 requests per address per minute (a 429 answer with `Retry-After`, values in `limits.json`, override with `GENERAL_RATE_MAX` and `GENERAL_RATE_WINDOW_MINUTES`). It runs before the request log, so limited requests are counted, not stored individually: one console line per address and window is printed, and only accepted requests become `RequestLogs` rows. Length limits are in `limits.json`.
-- Not implemented: logout with token revocation and refresh tokens. The report describes this as a limitation.
+- Logout with token revocation and refresh tokens are done, see section 8.
 
 ## 3 Running
 
@@ -73,7 +73,7 @@ The `ownerId` field of a diagram is now set by the server from the token, not by
 
 ## 5 Checking
 
-`npm test` runs 142 tests on a temporary SQLite database with the real migrations (bcrypt with 4 rounds for speed) and the check of the reports (`report.test.mjs`). The connection to a real PostgreSQL was not checked. `npm audit` shows remarks in development tools (`nodemon`, `sequelize-cli`).
+`npm test` runs 193 tests on a temporary SQLite database with the real migrations (bcrypt with 4 rounds for speed) and the check of the reports (`report.test.mjs`). The connection to a real PostgreSQL was not checked. `npm audit` shows remarks in development tools (`nodemon`, `sequelize-cli`).
 
 ## 6 PUT and PATCH
 
@@ -86,3 +86,33 @@ The 500 answer is caused by a database failure, not by a button.
 - SQLite: run `npm start`, and in a second window run `npx sequelize-cli db:migrate:undo:all`. The tables vanish under the running server, the very first request cannot write a row to the `RequestLogs` log and gets 500 with the body `{ "error": "Internal server error" }`, and the details stay only in the server console. To restore work: `npm run db:migrate` and `npm run db:seed`.
 - PostgreSQL (Neon, Supabase or local): stop the database service or container, requests give 500, and `GET /health` answers 503.
 - A start with an unreachable database does not exit: the server keeps running, a message goes to the console, and `GET /health` and the routes that need the database answer 503 until the database is reachable.
+
+## 8 Advanced authentication and authorization
+
+Added beyond the task (owner request). All routes are below; security details follow the table.
+
+| Method | Path | Access | Purpose |
+| ------ | ---- | ------ | ------- |
+| `POST` | `/auth/refresh` | refresh token in the body | New token pair, the old refresh token is spent |
+| `POST` | `/auth/logout` | refresh token in the body | Ends the session, always 204 |
+| `POST` | `/auth/logout-all` | token | Ends all sessions |
+| `GET` | `/auth/sessions` | token | Own sessions (device, address, dates) |
+| `DELETE` | `/auth/sessions/:id` | token | Ends an own session, another user's id gives 404 |
+| `POST` | `/auth/change-password` | token | Changes the password, other sessions end |
+| `POST` | `/auth/password-reset/request` | everyone | One-time token by "mail" (console or `MAIL_OUTBOX_FILE`), always 202 |
+| `POST` | `/auth/password-reset/confirm` | everyone | New password by token, valid once and for 30 minutes |
+| `GET` | `/auth/2fa` | token | Two-factor state |
+| `POST` | `/auth/2fa/setup`, `/enable`, `/disable` | token | TOTP (RFC 6238, `node:crypto`), 8 recovery codes |
+| `POST` | `/auth/2fa/verify` | challenge token | Second login step: a code or a recovery code |
+| `GET` | `/admin/audit` | `audit:read` | Security events (table `AuditEvents`) |
+| `GET`, `POST` | `/admin/roles` | `role:read`, `role:manage` | List roles, create a custom role from permissions the caller holds |
+| `DELETE` | `/admin/roles/:id` | `role:manage` | Delete a custom role that nobody holds |
+| `GET` | `/admin/permissions` | `role:read` | List permissions |
+| `POST` | `/users/:id/unlock` | `user:unlock` | Lift a login lock |
+
+- The access token lives 15 minutes (HS256, `iss` and `aud` checked, 5 seconds of clock tolerance). The refresh token is opaque, only its SHA-256 is stored, and it is replaced at every exchange. Showing a token that was already used revokes the whole family (session) and is audited.
+- TOTP secrets are encrypted with AES-256-GCM, the key comes from `TWO_FACTOR_KEY` (or from `JWT_SECRET` with another label), recovery codes are stored hashed, and a code of an already accepted time step is refused.
+- Password: 8 characters or more, at most 72 bytes, not a common one, not equal to the email. Login and reset answer the same for a known and an unknown address.
+- Roles and permissions live in the database: tables `Roles`, `RolePermissions`, foreign key `Users.roleId`. The roles `user`, `moderator`, `admin` are generated from `src/permissions.js` (a test compares the database with it); the first administrator comes from `ADMIN_EMAIL` and `ADMIN_PASSWORD`. A caller cannot grant a permission they lack, delete a role in use or demote the last administrator.
+- Not done: real mail delivery (console and file only), a check against a large breached-password database, binding a session to a device.
+- Example: `curl -s -X POST http://localhost:3000/auth/refresh -H "Content-Type: application/json" -d '{"refreshToken":"<token>"}'`, the rest is in [`requests.http`](requests.http).

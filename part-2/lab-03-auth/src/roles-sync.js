@@ -5,10 +5,12 @@ const { BUILTIN_ROLES } = require('./permissions');
 const syncBuiltinRoles = async (queryInterface) => {
   const { sequelize } = queryInterface;
   const now = new Date();
+  // bulkUpdate binds a Date as a number in SQLite, which Sequelize cannot read back, so it gets the text form.
+  const stamp = now.toISOString().replace('T', ' ').replace('Z', ' +00:00');
   for (const [name, { description, permissions }] of Object.entries(BUILTIN_ROLES)) {
     let id = await queryInterface.rawSelect('Roles', { where: { name } }, ['id']);
     if (id) {
-      await queryInterface.bulkUpdate('Roles', { description, builtIn: true, updatedAt: now }, { id });
+      await queryInterface.bulkUpdate('Roles', { description, builtIn: true, updatedAt: stamp }, { id });
     } else {
       await queryInterface.bulkInsert('Roles', [{ name, description, builtIn: true, createdAt: now, updatedAt: now }]);
       id = await queryInterface.rawSelect('Roles', { where: { name } }, ['id']);

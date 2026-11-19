@@ -83,7 +83,7 @@ test('a registration email with a space inside or a NUL character answers 400 an
 });
 
 test('a password of 72 bytes is accepted, 73 bytes is refused, counting bytes not letters', async () => {
-  assert.equal((await app.call('POST', '/auth/register', creds('edge72@example.com', 'a'.repeat(72)))).res.status, 201);
+  assert.equal((await app.call('POST', '/auth/register', creds('edge72@example.com', 'Ab1'.repeat(24)))).res.status, 201);
   const { res, body } = await app.call('POST', '/auth/register', creds('edge73@example.com', `${'é'.repeat(36)}a`));
   assert.equal(res.status, 400);
   assert.deepEqual(body.details, [{ field: 'password', message: 'must be at most 72 bytes' }]);
@@ -93,7 +93,7 @@ test('ten parallel registrations of one email create one account and answer 409 
   const results = await Promise.all(Array.from({ length: 10 }, () => app.call('POST', '/auth/register', creds('race@example.com'))));
   const statuses = results.map(({ res }) => res.status).sort();
   assert.deepEqual(statuses, [201, ...Array(9).fill(409)]);
-  assert.equal(await app.models.User.count({ where: { email: 'race@example.com' } }), 1);
+  assert.equal(await app.models.User.count({ where: { email: 'race@example.com' }, distinct: true, col: 'User.id' }), 1);
 });
 
 test('a very long Authorization header answers 401 or 431, not a crash', async () => {

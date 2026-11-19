@@ -90,7 +90,8 @@ test('an expired, unknown, malformed or missing refresh token is refused', async
   const first = await login('r7@example.com');
   await app.models.RefreshToken.update({ expiresAt: new Date(Date.now() - 1000) }, { where: { familyId: first.sessionId } });
   assert.equal((await refresh(first.refreshToken)).res.status, 401);
-  for (const bad of ['x', 'a'.repeat(43), 'a'.repeat(500)]) assert.equal((await refresh(bad)).res.status, 401, bad.slice(0, 5));
+  for (const bad of ['x', 'a'.repeat(43)]) assert.equal((await refresh(bad)).res.status, 401, bad.slice(0, 5));
+  assert.equal((await refresh('a'.repeat(500))).res.status, 400);
   for (const body of [{}, { refreshToken: 5 }, { refreshToken: '' }, []]) assert.equal((await app.call('POST', '/auth/refresh', { body })).res.status, 400, JSON.stringify(body));
 });
 
