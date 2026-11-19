@@ -1,0 +1,72 @@
+{
+ "suite": "ai",
+ "results": [
+  {
+   "id": "AIO-01",
+   "title": "AI without a key: status says unavailable, the AI button is hidden, the rules-based review works, the API answers 503",
+   "browser": "firefox",
+   "status": "Passed",
+   "severity": "",
+   "note": ""
+  },
+  {
+   "id": "AIO-02",
+   "title": "Fake provider answering correctly: AI button appears and the review/generate answers with code",
+   "browser": "firefox",
+   "status": "Failed",
+   "severity": "Medium",
+   "note": "api ok: 422 {\"error\":{\"code\":\"invalid-dsl\",\"message\":\"The AI did not return correct DSLKit code\"},\"code\":\"diagram idef0 \\\"AI made\\\"\\",
+   "screenshot": "fail-AIO-02-firefox.png"
+  },
+  {
+   "id": "AIO-03",
+   "title": "Provider errors (500, 429, garbage, empty, dropped connection): UI shows a failure, never stays busy, no JS error, key never leaked",
+   "browser": "firefox",
+   "status": "Passed",
+   "severity": "",
+   "note": ""
+  },
+  {
+   "id": "AIO-04",
+   "title": "Slow provider: the button is disabled while waiting and enabled again after the failure",
+   "browser": "firefox",
+   "status": "Failed",
+   "severity": "Medium",
+   "note": "no busy state during a slow answer",
+   "screenshot": "fail-AIO-04-firefox.png"
+  },
+  {
+   "id": "AIO-05",
+   "title": "AI panel for a guest works the same as for a signed-in user (server-side key)",
+   "browser": "firefox",
+   "status": "Passed",
+   "severity": "",
+   "note": ""
+  },
+  {
+   "id": "AIO-06",
+   "title": "Clarify panel opens without errors with and without a key",
+   "browser": "firefox",
+   "status": "Passed",
+   "severity": "",
+   "note": ""
+  },
+  {
+   "id": "AIO-07",
+   "title": "Offline (service worker): dashboard, editor, settings, docs open, saving, sign-out and sign-in work",
+   "browser": "firefox",
+   "status": "Passed",
+   "severity": "",
+   "note": ""
+  },
+  {
+   "id": "AIO-08",
+   "title": "390 px phone: sign-up -> template -> first saved diagram -> list -> sign-out, no horizontal scroll",
+   "browser": "firefox",
+   "status": "Failed",
+   "severity": "Medium",
+   "note": "phone: login form not visible",
+   "screenshot": "fail-AIO-08-firefox.png"
+  }
+ ]
+}
