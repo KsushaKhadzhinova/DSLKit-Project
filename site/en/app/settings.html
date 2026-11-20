@@ -337,6 +337,16 @@
             </div>
             <ul class="security-list" data-audit-list></ul>
 
+            <div data-account-transfer>
+              <h3 class="security__title">Account transfer</h3>
+              <p class="form__hint">
+                The account lives only in this browser. The file holds the name, the email and the password hash, but not the password itself, the second factor
+                or the role. Load it on the sign-in page of another browser.
+              </p>
+              <button class="button" type="button" data-account-export>Export the account</button>
+              <p class="security__status" role="status" data-transfer-status="export"></p>
+            </div>
+
             <form class="form" id="security-delete-form" novalidate>
               <h3 class="security__title">Delete the account</h3>
               <p class="form__hint">

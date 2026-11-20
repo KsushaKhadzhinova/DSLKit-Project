@@ -91,6 +91,19 @@
           <button class="button button--primary form__submit" type="submit">Войти</button>
           <p class="form__hint">Нет аккаунта? <a class="form__link" href="register.html">Зарегистрироваться</a></p>
         </form>
+        <section aria-labelledby="forgot-title">
+          <h2 class="security__title" id="forgot-title">Забыли пароль?</h2>
+          <p class="form__hint">
+            Сервера нет, аккаунт хранится только в этом браузере, поэтому сбросить пароль по почте нельзя. Если пароль забыт, доступ к аккаунту вернуть
+            невозможно: создайте новый аккаунт. Чтобы перенести аккаунт в другой браузер, выгрузите его в настройках, в разделе «Аккаунт и безопасность», и
+            загрузите файл здесь. В файле нет пароля, только его хеш.
+          </p>
+          <div class="form__field">
+            <label class="form__label" for="account-file">Файл аккаунта (.json)</label>
+            <input class="form__input" id="account-file" type="file" accept="application/json,.json" data-account-import />
+            <p class="security__status" role="status" data-transfer-status="import"></p>
+          </div>
+        </section>
       </section>
     </main>
     <footer class="footer">

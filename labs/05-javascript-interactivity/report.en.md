@@ -152,6 +152,7 @@ import { initNativeValidation } from './components/native-validation.js';
 import { initNotationFilter } from './components/notation-filter.js';
 import { initPopups } from './components/popups.js';
 import { initSecurity } from './components/security.js';
+import { initAccountTransfer } from './components/account-transfer.js';
 import { initSettings } from './components/settings.js';
 import { initTheme } from './components/theme.js';
 import { initQuota } from './components/quota.js';
@@ -182,6 +183,7 @@ export const COMPONENTS = [
   initAppSearch,
   initSettings,
   initSecurity,
+  initAccountTransfer,
   initEditor,
   initEditorProjects,
   initCodeInput,
