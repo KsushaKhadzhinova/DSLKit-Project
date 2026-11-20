@@ -222,10 +222,13 @@ def run_variant(p, tag, root, lang, viewport):
     check(f"AUTH-{tag}-11", f"[{tag}] После повторного входа создание диаграммы работает", lambda: create_after_login("Second after login"))
 
     def repeat_create():
-        # A user has a daily limit of five new diagrams and the earlier checks of this run already used some of it, so the user
-        # gets the developer role (no limit) here; the limit itself is covered by labs/05-javascript-interactivity/quota-*.test.js.
-        page.evaluate("""() => { const key = 'dslkit.accounts'; const list = JSON.parse(localStorage.getItem(key)); localStorage.setItem(key, JSON.stringify(list.map((a) => ({ ...a, role: 'developer' })))); }""")
+        # A user has a daily limit of five new diagrams and the earlier checks of this run already used some of it. The role of an account is sealed
+        # now, so it cannot be edited here; the day of creation of the existing projects is moved back instead, and they stop counting for today.
+        # The limit itself is covered by labs/05-javascript-interactivity/quota-*.test.js.
+        age_projects = """() => { const old = Date.now() - 3 * 86400000; Object.keys(localStorage).filter((k) => k.startsWith('dslkit.projects')).forEach((k) => { const list = JSON.parse(localStorage.getItem(k)); localStorage.setItem(k, JSON.stringify(list.map((p) => ({ ...p, created: old })))); }); }"""
         for n in range(1, 4):
+            page.goto(prefix + "/app/dashboard.html")
+            page.evaluate(age_projects)
             page.goto(prefix + "/app/dashboard.html")
             page.wait_for_timeout(300)
             total = page.locator("[data-project]").count()
@@ -263,6 +266,7 @@ def run_variant(p, tag, root, lang, viewport):
         card = page.locator("[data-template]:visible").first
         card.locator(".project-card__menu").click()
         card.locator('[data-act="rename"]').click()
+        page.wait_for_timeout(400)  # the own dialog is answered on the next tick
         eq(page.locator("[data-template]:visible .project-card__link").first.inner_text(), "Мой шаблон" if ru else "My template", "переименование:")
         card = page.locator("[data-template]:visible").first
         card.locator(".project-card__menu").click()

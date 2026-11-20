@@ -10,11 +10,13 @@
         return null;
       }
     };
-    var saved = read('theme');
+    var session = read('session');
+    var owner = session && typeof session.userId === 'string' ? session.userId : null;
+    // The theme is kept per account ("theme.<id>"); a guest, or an account that never chose, uses the plain key.
+    var saved = (owner && read('theme.' + owner)) || read('theme');
     var dark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
     root.dataset.theme = saved === 'light' || saved === 'dark' ? saved : dark ? 'dark' : 'light';
     if (/\/dashboard\.html\/?$/i.test(location.pathname)) {
-      var session = read('session');
       var accounts = read('accounts');
       var known =
         session &&
