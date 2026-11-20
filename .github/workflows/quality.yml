@@ -45,7 +45,6 @@ jobs:
         working-directory: part-2/${{ matrix.folder }}
         run: npm run lint
 
-
   typecheck:
     name: Types of site/js (tsc --checkJs)
     runs-on: ubuntu-latest
@@ -59,7 +58,6 @@ jobs:
       - run: npm ci
       - run: npm run typecheck
 
-
   actionlint:
     name: actionlint (workflows)
     runs-on: ubuntu-latest
@@ -69,7 +67,6 @@ jobs:
       - name: Download actionlint
         run: bash <(curl -fsSL https://raw.githubusercontent.com/rhysd/actionlint/v1.7.12/scripts/download-actionlint.bash) 1.7.12
       - run: ./actionlint -color
-
 
   accessibility:
     name: Accessibility (axe-core, Lighthouse)
@@ -129,7 +126,6 @@ jobs:
             .lighthouseci
           retention-days: 14
 
-
   size-budget:
     name: Bundle size budget
     runs-on: ubuntu-latest
@@ -144,7 +140,6 @@ jobs:
       - run: npm run build
       - run: node ci/size-budget.mjs dist
 
-
   flaky:
     name: Flaky tests (two runs, second shuffled)
     runs-on: ubuntu-latest
@@ -157,7 +152,6 @@ jobs:
           cache: npm
       - run: npm ci
       - run: node ci/flaky.mjs
-
 
   markdown-links:
     name: Markdown links (relative, no network)
