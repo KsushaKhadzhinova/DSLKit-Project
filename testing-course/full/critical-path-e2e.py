@@ -4,7 +4,7 @@ import json
 import sys
 from pathlib import Path
 from playwright.sync_api import sync_playwright
-from e2e_env import OUT, SHOTS, launch
+from e2e_env import OUT, SHOTS, launch, answer
 
 base = sys.argv[1] if len(sys.argv) > 1 else "http://localhost:5173"
 out = OUT
@@ -200,13 +200,13 @@ with sync_playwright() as p:
     check("CP-13", "Список проектов: поиск и сортировка работают с сохранёнными", search_dashboard)
 
     def rename_delete():
-        page.once("dialog", lambda d: d.accept("Переименованный"))
+        answer(page, "Переименованный")
         item = page.locator(".project-list__item[data-project]").first
         item.locator(".project-card__menu").click()
         item.locator('[data-act="rename"]').click()
         page.wait_for_timeout(300)
         eq(page.locator(".project-list__item[data-project] .project-card__link").first.inner_text(), "Переименованный")
-        page.once("dialog", lambda d: d.accept())
+        answer(page, True)
         page.locator(".project-list__item[data-project] .project-card__menu").first.click()
         page.locator('.project-list__item[data-project] [data-act="remove"]').first.click()
         page.wait_for_timeout(300)
@@ -217,7 +217,7 @@ with sync_playwright() as p:
         page.locator("[data-act=restore]:visible").first.click()
         page.locator("[data-section=mine]").click()
         eq(page.locator(".project-list__item[data-project]:visible").count(), 1, "после восстановления:")
-        page.once("dialog", lambda d: d.accept())
+        answer(page, True)
         page.locator(".project-list__item[data-project]:visible .project-card__menu").first.click()
         page.locator("[data-act=remove]:visible").first.click()
         page.wait_for_timeout(300)

@@ -22,3 +22,29 @@ def launch(p):
     if browser == "chromium":
         return p.chromium.launch()
     return p.chromium.launch(channel=browser)
+
+
+def answer(page, value=True):
+    """Answer the next own dialog of the site (rename, trash, delete): a string types it and accepts, True accepts, False or None cancels."""
+    page.evaluate(
+        """(value) => {
+          window.__answer = value;
+          if (window.__answerWatch) return;
+          window.__answerWatch = new MutationObserver(() => {
+            const box = document.querySelector('.dialog');
+            if (!box || window.__answer === undefined) return;
+            const given = window.__answer;
+            window.__answer = undefined;
+            setTimeout(() => {
+              if (given === false || given === null) box.querySelector('.dialog__actions .button--quiet').click();
+              else {
+                const field = box.querySelector('.dialog__input');
+                if (field && typeof given === 'string') field.value = given;
+                box.querySelector('form').requestSubmit();
+              }
+            }, 0);
+          });
+          window.__answerWatch.observe(document.body, { childList: true });
+        }""",
+        value,
+    )

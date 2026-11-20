@@ -4,7 +4,7 @@ import json
 import sys
 from pathlib import Path
 from playwright.sync_api import sync_playwright
-from e2e_env import OUT, SHOTS, launch
+from e2e_env import OUT, SHOTS, launch, answer
 
 base = sys.argv[1] if len(sys.argv) > 1 else "http://localhost:5173"
 out = OUT
@@ -259,7 +259,7 @@ def run_variant(p, tag, root, lang, viewport):
         item.locator('[data-act="template"]').click()
         page.locator("[data-section=templates]").click()
         eq(page.locator("[data-template]:visible").count(), 1, "создание шаблона из проекта:")
-        page.once("dialog", lambda d: d.accept("Мой шаблон" if ru else "My template"))
+        answer(page, "Мой шаблон" if ru else "My template")
         card = page.locator("[data-template]:visible").first
         card.locator(".project-card__menu").click()
         card.locator('[data-act="rename"]').click()
@@ -280,7 +280,7 @@ def run_variant(p, tag, root, lang, viewport):
         eq(page.locator("[data-template]:visible").count(), 1, "после правки шаблона:")
         total = page.locator("[data-section=mine]").count()
         _ = total
-        page.once("dialog", lambda d: d.accept("Blank one"))
+        answer(page, "Blank one")
         page.locator("[data-new-template]").click()
         page.wait_for_url("**/editor.html?tpl=*")
         page.goto(prefix + "/app/dashboard.html")
@@ -293,7 +293,7 @@ def run_variant(p, tag, root, lang, viewport):
         page.goto(prefix + "/app/dashboard.html")
         page.locator("[data-section=templates]").click()
         for left in (1, 0):
-            page.once("dialog", lambda d: d.accept())
+            answer(page, True)
             card = page.locator("[data-template]:visible").first
             card.locator(".project-card__menu").click()
             card.locator('[data-act="remove-template"]').click()
@@ -301,12 +301,12 @@ def run_variant(p, tag, root, lang, viewport):
             eq(page.locator("[data-template]:visible").count(), left, "удаление шаблона:")
         page.locator("[data-section=mine]").click()
         item = page.locator("[data-project]:visible").first
-        page.once("dialog", lambda d: d.accept())
+        answer(page, True)
         item.locator(".project-card__menu").click()
         item.locator('[data-act="remove"]').click()
         page.locator("[data-section=trash]").click()
         yes(page.locator("[data-trashed]:visible").count() >= 1, "корзина пуста после удаления")
-        page.once("dialog", lambda d: d.accept())
+        answer(page, True)
         page.locator("[data-trashed]:visible .project-card__menu").first.click()
         page.locator("[data-act=purge]:visible").first.click()
 
