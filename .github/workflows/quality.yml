@@ -69,3 +69,62 @@ jobs:
       - name: Download actionlint
         run: bash <(curl -fsSL https://raw.githubusercontent.com/rhysd/actionlint/v1.7.12/scripts/download-actionlint.bash) 1.7.12
       - run: ./actionlint -color
+
+
+  accessibility:
+    name: Accessibility (axe-core, Lighthouse)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      # Chromium of Playwright instead of Edge.
+      E2E_BROWSER: chromium
+    steps:
+      - name: Set the output folders
+        run: |
+          echo "E2E_OUT=$RUNNER_TEMP/axe/results" >> "$GITHUB_ENV"
+          echo "E2E_SHOTS=$RUNNER_TEMP/axe/screens" >> "$GITHUB_ENV"
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - run: npm ci
+      - run: pip install playwright
+      - run: playwright install --with-deps chromium
+      - name: Start the site on port 5173
+        run: |
+          node tools/serve.js site 5173 > "$RUNNER_TEMP/serve.log" 2>&1 &
+          for i in $(seq 1 30); do
+            curl -fsS http://localhost:5173/ > /dev/null && exit 0
+            sleep 1
+          done
+          cat "$RUNNER_TEMP/serve.log"
+          exit 1
+      - name: axe-core on index, editor, dashboard and sign-in, light and dark theme
+        run: python testing-course/full/axe-e2e.py
+      - name: Build the site and serve dist for Lighthouse
+        run: |
+          npm run build
+          node tools/serve.js dist 5174 > "$RUNNER_TEMP/serve-dist.log" 2>&1 &
+          for i in $(seq 1 30); do
+            curl -fsS http://localhost:5174/ > /dev/null && exit 0
+            sleep 1
+          done
+          cat "$RUNNER_TEMP/serve-dist.log"
+          exit 1
+      - name: Lighthouse budgets (accessibility, best practices, performance)
+        run: |
+          CHROME_PATH="$(python -c 'from playwright.sync_api import sync_playwright as s; p=s().start(); print(p.chromium.executable_path); p.stop()')"
+          export CHROME_PATH
+          npx --yes @lhci/cli@0.15.1 autorun --config=lighthouserc.json
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: accessibility-results
+          path: |
+            ${{ runner.temp }}/axe
+            .lighthouseci
+          retention-days: 14

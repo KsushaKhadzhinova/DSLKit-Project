@@ -65,7 +65,7 @@ test('a run sends DOT built from the editor code and shows a sanitized SVG', asy
   assert.match(dot, /^digraph diagram/);
   assert.match(dot, /A0 Process order/);
   assert.equal($('.canvas__remote').hidden, false);
-  assert.equal($('.canvas__remote svg').getAttribute('role'), 'img');
+  assert.equal($('.canvas__remote svg').getAttribute('role'), 'group');
   assert.equal($('.canvas__remote script'), null);
   assert.equal($('.canvas__diagram').hasAttribute('hidden'), true);
   assert.match($('.canvas__status').textContent, /Диаграмма готова/);

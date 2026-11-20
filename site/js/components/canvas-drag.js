@@ -39,7 +39,7 @@ export const initCanvasDrag = ({ root = document } = {}) => {
     remote.querySelectorAll(NODE).forEach((node) => {
       node.setAttribute('tabindex', '0');
       node.setAttribute('role', 'button');
-      node.setAttribute('aria-label', `${node.dataset.id}`);
+      // No aria-label on purpose: the name comes from the title and the text of the block, so the visible text is part of it (WCAG 2.5.3).
       if (node.dataset.id === refocus) node.focus();
     });
   new root.defaultView.MutationObserver(() => {
