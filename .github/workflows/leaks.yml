@@ -1,0 +1,81 @@
+name: Memory leaks
+# Slow checks kept out of `npm test`: the heap of the work-folder servers after thousands of requests or sockets, open handles
+# after close, and the DOM nodes and listeners of the editor after many cycles in a real browser.
+on:
+  pull_request:
+  schedule:
+    - cron: '41 3 * * 1'
+  workflow_dispatch:
+# The token of the workflow may only read the code.
+permissions:
+  contents: read
+concurrency:
+  group: leaks-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  node:
+    name: Node leaks ${{ matrix.folder }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        folder:
+          - lab-01-node-server
+          - lab-02-sequelize
+          - lab-03-auth
+          - lab-06-mongodb
+          - lab-07-websocket
+          - pz-01-middleware-ejs
+          - pz-02-rest-api
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - name: Install the folder
+        working-directory: part-2/${{ matrix.folder }}
+        run: npm ci
+      # node --expose-gc: the tests force a garbage collection before every heap reading.
+      - name: Leak tests of the folder
+        working-directory: part-2/${{ matrix.folder }}
+        run: npm run test:leaks
+
+  browser:
+    name: Browser leaks (editor and dashboard)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      # Chromium of Playwright instead of Edge; the DevTools counters are a Chromium feature.
+      E2E_BROWSER: chromium
+    steps:
+      # The runner context is not available in the env of a job, so the temporary folder is set in the first step.
+      - name: Set the output folder
+        run: echo "E2E_OUT=$RUNNER_TEMP/leaks" >> "$GITHUB_ENV"
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - run: npm ci
+      - run: pip install playwright
+      - run: playwright install --with-deps chromium
+      - name: Start the site on port 5173
+        run: |
+          node tools/serve.js site 5173 > "$RUNNER_TEMP/serve.log" 2>&1 &
+          for i in $(seq 1 30); do
+            curl -fsS http://localhost:5173/ > /dev/null && exit 0
+            sleep 1
+          done
+          cat "$RUNNER_TEMP/serve.log"
+          exit 1
+      - run: python testing-course/full/leaks-e2e.py
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: leaks-results
+          path: ${{ runner.temp }}/leaks
+          retention-days: 14
