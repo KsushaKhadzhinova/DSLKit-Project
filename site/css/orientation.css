@@ -1,0 +1,413 @@
+/* Rotation and aspect ratio. The width breakpoints (576, 768, 1024 px) stay in adaptive.css; this file adds what width alone cannot tell:
+   the orientation, a short window (a phone on its side), the aspect ratio (square, ultra-wide) and the notch of the screen.
+   Every media query below is written once and combines a min-width, an orientation, a height limit or an aspect ratio; there is no max-width. */
+
+/* Notches: in landscape the cut-out is on the left or the right, so the pages keep their content out of the safe areas. */
+body:not(.app-page--editor) {
+  padding-inline: env(safe-area-inset-left, 0px) env(safe-area-inset-right, 0px);
+}
+
+/* The splitter between the code and the canvas; the JavaScript adds it, the layouts below show it. */
+.editor-splitter {
+  --split-axis: none;
+  position: relative;
+  display: none;
+  background: var(--color-border);
+  touch-action: none;
+}
+
+.editor-splitter::before {
+  content: '';
+  position: absolute;
+  inset: 0 -1rem;
+}
+
+.editor-splitter::after {
+  content: '';
+  position: absolute;
+  inset: 50% auto auto 50%;
+  width: 0.25rem;
+  height: 2rem;
+  border-radius: 62.4375rem;
+  background: var(--color-text-light);
+  transform: translate(-50%, -50%);
+}
+
+.editor-splitter:hover,
+.editor-splitter:focus-visible {
+  background: var(--color-primary);
+}
+
+.editor-splitter:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* The on-screen keyboard covers the bottom of the layout viewport: the bottom bars give way and the editor follows the visual viewport. */
+html[data-keyboard='open'] .editor-bottom-nav,
+html[data-keyboard='open'] .editor-banner,
+html[data-keyboard='open'] .editor-segmented {
+  display: none;
+}
+
+html[data-keyboard='open'] .app-page--editor {
+  max-height: var(--vv-height, 100dvh);
+}
+
+/* Workspace: the IDE layout (rail, toolbar, code and canvas together) from 576 px, and in any window that is short and wide, a phone on its side. */
+@media (min-width: 576px), (orientation: landscape) and (max-height: 500px) {
+  .editor-main[data-view='code'] .canvas {
+    display: grid;
+  }
+
+  .editor-main[data-view='canvas'] .editor-panel {
+    display: block;
+  }
+
+  .app-page--editor {
+    display: grid;
+    height: 100dvh;
+    min-height: 0;
+    padding-bottom: 0;
+    overflow: hidden;
+  }
+
+  .editor-toolbar {
+    position: static;
+    top: auto;
+  }
+
+  .editor-toolbar__row {
+    flex-wrap: wrap;
+    gap: var(--space-1) var(--space-2);
+    min-height: var(--toolbar-height);
+    padding: var(--space-1) max(var(--space-3), env(safe-area-inset-right, 0px)) var(--space-1) max(var(--space-3), env(safe-area-inset-left, 0px));
+  }
+
+  .editor-toolbar__logo,
+  .editor-toolbar__run {
+    display: inline-flex;
+  }
+
+  .editor-toolbar .editor-menu {
+    position: relative;
+  }
+
+  .editor-toolbar .editor-menu__panel {
+    top: calc(100% + 0.5rem);
+    right: 0;
+    left: auto;
+    min-width: 15rem;
+    max-height: calc(100dvh - var(--toolbar-height) - var(--space-3));
+    overflow-y: auto;
+  }
+
+  .editor-activity {
+    display: flex;
+    padding-left: max(var(--space-1), env(safe-area-inset-left, 0px));
+    overflow-y: auto;
+  }
+
+  .editor-topbar,
+  .editor-segmented,
+  .editor-banner,
+  .editor-bottom-nav {
+    display: none;
+  }
+
+  .editor-status {
+    display: flex;
+  }
+
+  .editor-main {
+    display: grid;
+    overflow: hidden;
+  }
+
+  .editor-panel {
+    max-height: none;
+  }
+
+  .canvas {
+    min-height: 0;
+    padding-bottom: 0;
+  }
+
+  .canvas__zoom {
+    bottom: var(--space-3);
+  }
+
+  .problems {
+    overflow: auto;
+  }
+
+  .problems__item {
+    grid-template-columns: 1.25rem auto minmax(0, 1fr) auto auto;
+  }
+
+  .board-tools__text {
+    display: inline;
+  }
+}
+
+/* A phone on its side (844 x 390, 667 x 375): every pixel of height counts, so the rail replaces the bottom bar, the toolbar is one row of icons,
+   the explorer and the problems list are overlays, and the code and the canvas sit side by side with a draggable divider. */
+@media (orientation: landscape) and (max-height: 500px) {
+  .app-page--editor {
+    --toolbar-height: var(--target-size-small);
+    --activity-width: calc(var(--target-size-small) + var(--space-2));
+    height: min(100dvh, var(--vv-height, 100dvh));
+    padding-inline-end: env(safe-area-inset-right, 0px);
+    grid-template-columns: calc(var(--activity-width) + env(safe-area-inset-left, 0px)) minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr) 3.5rem;
+    grid-template-areas:
+      'toolbar toolbar'
+      'activity main'
+      'activity problems';
+  }
+
+  .editor-toolbar__row {
+    flex-wrap: nowrap;
+    min-height: var(--toolbar-height);
+    padding-block: 0.125rem;
+  }
+
+  .editor-toolbar__row > * {
+    flex: none;
+  }
+
+  .editor-toolbar__row select {
+    flex: 0 1 auto;
+    min-width: 0;
+    max-inline-size: 7rem;
+  }
+
+  .editor-toolbar__logo .app-topbar__logo-text,
+  .editor-toolbar__run .button--run span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .editor-toolbar__run .button--run {
+    min-width: var(--target-size-small);
+    padding: 0;
+  }
+
+  .editor-toolbar__avatar {
+    margin-left: 0;
+  }
+
+  .board-tools__text {
+    display: none;
+  }
+
+  .editor-status {
+    display: none;
+  }
+
+  .editor-main {
+    grid-template-columns: calc(var(--split-ratio, 38.2) * 1%) auto minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+
+  .editor-tabs {
+    grid-column: 1 / -1;
+  }
+
+  .editor-panel {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .editor-splitter {
+    --split-axis: x;
+    display: block;
+    grid-column: 2;
+    grid-row: 2;
+    inline-size: 0.75rem;
+    cursor: col-resize;
+  }
+
+  .canvas {
+    grid-column: 3;
+    grid-row: 2;
+  }
+
+  /* The explorer is an overlay beside the rail, not a column. */
+  .app-page--editor .editor-sidebar {
+    position: fixed;
+    z-index: 30;
+    inset-block: var(--toolbar-height) 0;
+    inset-inline-start: calc(var(--activity-width) + env(safe-area-inset-left, 0px));
+    display: none;
+    inline-size: min(20rem, calc(100vw - var(--activity-width) - env(safe-area-inset-left, 0px) - var(--space-5)));
+    box-shadow: var(--shadow-large);
+  }
+
+  .app-page--editor .editor-sidebar.editor-sidebar--open {
+    display: grid;
+  }
+
+  /* The problems panel is one row of tabs; touching it opens the list over the work area. */
+  .problems {
+    padding-block: 0.125rem;
+    overflow: hidden;
+  }
+
+  .problems:focus-within,
+  .problems.problems--open {
+    position: fixed;
+    z-index: 35;
+    inset-inline: calc(var(--activity-width) + env(safe-area-inset-left, 0px)) env(safe-area-inset-right, 0px);
+    bottom: 0;
+    max-block-size: 70dvh;
+    overflow: auto;
+    box-shadow: var(--shadow-large);
+  }
+
+  .editor-tools {
+    inset-block: var(--toolbar-height) 0;
+    inset-inline-start: calc(var(--activity-width) + env(safe-area-inset-left, 0px));
+  }
+
+  /* The other app pages: a sticky header would take a quarter of the height. */
+  .header {
+    position: static;
+  }
+
+  .app-topbar {
+    position: static;
+    min-height: 0;
+  }
+}
+
+/* Portrait from 576 px (a tablet, an unfolded foldable): the code lies above the canvas, a horizontal divider moves the border. */
+@media (min-width: 576px) and (orientation: portrait) {
+  .editor-main {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto calc(var(--split-ratio, 38.2) * 1%) auto minmax(0, 1fr);
+  }
+
+  .editor-tabs,
+  .editor-panel,
+  .canvas {
+    grid-column: 1;
+  }
+
+  .editor-tabs {
+    grid-row: 1;
+  }
+
+  .editor-panel {
+    grid-row: 2;
+  }
+
+  .editor-splitter {
+    --split-axis: y;
+    display: block;
+    grid-column: 1;
+    grid-row: 3;
+    block-size: 0.75rem;
+    cursor: row-resize;
+  }
+
+  .editor-splitter::before {
+    inset: -1rem 0;
+  }
+
+  .editor-splitter::after {
+    width: 2rem;
+    height: 0.25rem;
+  }
+
+  .canvas {
+    grid-row: 4;
+  }
+}
+
+/* A square window (1:1, a split screen, a foldable half open): side by side again, with a shorter problems panel to keep the height. */
+@media (min-width: 576px) and (min-aspect-ratio: 9/10) and (max-aspect-ratio: 11/10) {
+  .app-page--editor {
+    --problems-height: 9rem;
+  }
+
+  .editor-main {
+    grid-template-columns: calc(var(--split-ratio, 38.2) * 1%) auto minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+
+  .editor-tabs {
+    grid-column: 1 / -1;
+  }
+
+  .editor-panel {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .editor-splitter {
+    --split-axis: x;
+    grid-column: 2;
+    grid-row: 2;
+    block-size: auto;
+    inline-size: 0.75rem;
+    cursor: col-resize;
+  }
+
+  .editor-splitter::before {
+    inset: 0 -1rem;
+  }
+
+  .editor-splitter::after {
+    width: 0.25rem;
+    height: 2rem;
+  }
+
+  .canvas {
+    grid-column: 3;
+    grid-row: 2;
+  }
+}
+
+/* Ultra-wide (2560 x 1080, 3440 x 1440): the content has a limit and stays in the middle instead of stretching over a metre of glass. */
+@media (min-width: 1024px) and (min-aspect-ratio: 2/1) {
+  .app-page--editor {
+    inline-size: 100%;
+    max-inline-size: 120rem;
+    margin-inline: auto;
+    border-inline: 1px solid var(--color-border);
+  }
+
+  .app-page:not(.app-page--editor) > :is(main, header, footer) {
+    max-inline-size: 100rem;
+    margin-inline: auto;
+    width: 100%;
+  }
+}
+
+@media (forced-colors: active) {
+  .editor-splitter {
+    border: 1px solid CanvasText;
+    background: ButtonFace;
+  }
+
+  .editor-splitter::after {
+    background: CanvasText;
+  }
+
+  .editor-splitter:hover,
+  .editor-splitter:focus-visible {
+    background: Highlight;
+  }
+}
+
+@media print {
+  .editor-splitter {
+    display: none;
+  }
+}

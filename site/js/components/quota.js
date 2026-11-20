@@ -1,4 +1,5 @@
-import { currentUser, isUnlimited } from '../storage/accounts.js';
+import { currentUser } from '../storage/accounts.js';
+import { can } from '../auth/permissions.js';
 import { createProjectStore, showQuota } from '../storage/projects.js';
 import { pageLanguage } from '../utils/lang.js';
 
@@ -8,7 +9,7 @@ export const initQuota = ({ root = document, storage, now = () => Date.now() } =
   if (!text) return null;
   const user = currentUser(storage);
   const store = createProjectStore({ storage, now, owner: user?.id ?? null });
-  const refresh = () => showQuota(text, root.querySelector('.app-nav__progress'), store.createdOn(), pageLanguage(root), isUnlimited(user));
+  const refresh = () => showQuota(text, root.querySelector('.app-nav__progress'), store.createdOn(), pageLanguage(root), can(user, 'diagram.unlimited'));
   refresh();
   return { refresh };
 };

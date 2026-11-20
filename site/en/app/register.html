@@ -96,7 +96,13 @@
               autocomplete="new-password"
               aria-describedby="password-hint"
             />
-            <p class="form__hint" id="password-hint">From 8 to 128 characters. A long phrase that is easy to remember works well.</p>
+            <p class="form__hint" id="password-hint">
+              From 8 to 128 characters. Not a common password, not the email or the name. A long phrase that is easy to remember works well.
+            </p>
+            <div class="password-meter" data-password-meter>
+              <meter class="password-meter__bar" min="0" max="4" value="0" aria-label="Password strength"></meter>
+              <span class="password-meter__text" data-meter-text aria-live="polite"></span>
+            </div>
             <p class="form__error" role="alert" id="password-error" hidden>
               The password was not accepted: it needs from 8 to 128 characters and not only spaces.
             </p>
@@ -105,6 +111,11 @@
             <label class="form__label" for="confirm">Repeat the password</label>
             <input class="form__input" id="confirm" name="confirm" type="password" required minlength="8" maxlength="128" autocomplete="new-password" />
             <p class="form__error" role="alert" id="confirm-error" hidden>The passwords do not match. Enter the same password again.</p>
+          </div>
+          <div class="form__field form__field--checkbox">
+            <input class="form__checkbox" id="remember" name="remember" type="checkbox" checked aria-describedby="remember-hint" />
+            <label class="form__label" for="remember">Remember me for 7 days</label>
+            <p class="form__hint" id="remember-hint">Without the tick the session is short: up to 12 hours.</p>
           </div>
           <button class="button button--primary form__submit" type="submit">Create account</button>
           <p class="form__hint">Already have an account? <a class="form__link" href="login.html">Sign in</a></p>

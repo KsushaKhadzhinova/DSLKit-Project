@@ -1,7 +1,8 @@
 import { readCode, showCode } from './code-lines.js';
 import { notify } from './toast.js';
 import { TEMPLATE_LANGS, parseDiagram, templateFor } from '../notations/index.js';
-import { currentUser, isUnlimited } from '../storage/accounts.js';
+import { currentUser } from '../storage/accounts.js';
+import { can } from '../auth/permissions.js';
 import { starterProjects } from '../storage/seeds.js';
 import { createProjectStore, createTemplateStore, showQuota, titleOf } from '../storage/projects.js';
 import { pageLanguage } from '../utils/lang.js';
@@ -51,7 +52,7 @@ export const initEditorProjects = ({
   const lang = pageLanguage(root);
   const user = currentUser(storage);
   const owner = user?.id ?? null;
-  const store = createProjectStore({ storage, now, owner, unlimited: isUnlimited(user) });
+  const store = createProjectStore({ storage, now, owner, unlimited: can(user, 'diagram.unlimited') });
   const templates = createTemplateStore({ storage, now, owner });
   if (seed) store.seed(starterProjects());
   const note = page.querySelector('.editor-status__saved');
@@ -101,7 +102,7 @@ export const initEditorProjects = ({
   const quotaText = page.querySelector('#quota-text');
   const quotaBar = page.querySelector('.editor-sidebar__beta progress');
   const renderTree = () => {
-    showQuota(quotaText, quotaBar, store.createdOn(), lang, isUnlimited(user));
+    showQuota(quotaText, quotaBar, store.createdOn(), lang, can(user, 'diagram.unlimited'));
     if (!tree) return;
     const rows = store.list().map((item) => ({ id: item.id, label: fileName(titleOf(item, lang)), active: item.id === project?.id }));
     if (!project) rows.unshift({ id: '', label: (template ? TEXTS.editingTemplate : TEXTS.fresh)[lang], active: true });

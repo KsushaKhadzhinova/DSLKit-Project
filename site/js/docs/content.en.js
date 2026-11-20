@@ -56,9 +56,23 @@ Each screen is described in detail in the next sections.`,
 
 - Sign-up asks for a name, an email, a password and its confirmation. The email is lower-cased and must be unique in this browser.
 - The password is never stored. Only a PBKDF2-SHA-256 hash (100,000 iterations) with a random salt is saved. At sign-in the password is hashed again and compared in constant time.
-- The session is the id of the signed-in account. The Sign out button removes it, and signing in in another tab is seen in this one at once.
+- The session is a random token: a record in the list of sessions and a pointer in this browser. It lives up to 7 days with "Remember me" and up to 12 hours without it, and ends after 30 minutes without activity (the numbers are in \`site/js/config/auth.js\`). The Sign out button removes it, and signing in in another tab is seen in this one at once. Old sessions of the form \`{ userId }\` are upgraded when first read.
 - A wrong email and a wrong password give the same message, so nobody can learn which addresses are registered.
 - Hashing needs a secure context: open the site over https or on localhost.
+
+## Password, lockout and the second factor
+
+- Password rules: 8 to 128 characters, not in the small bundled list of common passwords (digits and signs around a word do not help), not a repeat of one or two characters, not equal to the email, the part before "@" or the name. The strength bar shows a level from 0 to 4.
+- After 5 wrong sign-ins in a row the address is locked for 30 seconds; every next failure doubles the pause (15 minutes at most), and a countdown is shown. The counter is kept for unregistered addresses too, so the answer does not reveal whether an account exists.
+- Changing the password needs the old one and ends every other session. Deleting the account is confirmed with the password.
+- The settings ("Account and security") list the sessions: device, time of sign-in and of the last activity, with "Revoke" and "Revoke all other sessions".
+- Two-factor authentication (optional): one-time TOTP codes of RFC 6238 (SHA-1, 30 seconds, 6 digits), one step of tolerance, a code cannot be used twice. Instead of a QR code the secret and an \`otpauth://\` link are shown. Eight recovery codes are shown once and kept only as hashes. Once it is on, a code is needed at every sign-in.
+- Rights come from one table (\`site/js/auth/permissions.js\`): \`diagram.create\`, \`diagram.unlimited\`, \`docs.developer\`, \`admin.users\`. An admin sees the accounts of this browser and changes roles; the last admin cannot be demoted.
+- The security log in the settings: sign-in, failure, lockout, password change, second-factor change, role change, revoked session.
+
+## The honest limits
+
+This is a study model of accounts in a browser, not server-grade protection: everything is in localStorage, and whoever opens the browser profile or the console can read and change accounts, sessions, roles and the log. The lockout and the session times are checked by the browser itself. What a server must do is written in \`docs/agent-reports/feature-auth.en.md\`.
 
 ## What this means for security
 
@@ -1265,7 +1279,7 @@ diagram_cache, run_history   SVG cache (20 entries, TTL 24 h) and the last 5 run
 
 ## accounts.js
 
-\`createAccountStore({ storage, crypto, now })\`: \`register, login, logout, current\`. The hash is PBKDF2-SHA-256, \`ITERATIONS = 100000\`, a 16-byte salt; the comparison takes constant time (\`same\`); for an unknown email the hash is computed with a fixed salt so the response time does not reveal whether an account exists. \`currentUser(storage)\` only reads the session. Every method returns \`{ ok, ... }\` and throws nothing for wrong data.
+\`createAccountStore({ storage, crypto, now, userAgent, config })\`: \`register, login, logout, current, changePassword, deleteAccount, sessions, revoke, revokeOthers, beginTotp, enableTotp, disableTotp, totpStatus, listAccounts, setRole, audit\`. The rules live in \`site/js/auth\` (permissions, password-policy, lockout, sessions, totp, audit), the numbers in \`site/js/config/auth.js\`. The hash is PBKDF2-SHA-256, \`ITERATIONS = 100000\`, a 16-byte salt; the comparison takes constant time (\`same\`); for an unknown email the hash is computed with a fixed salt so the response time does not reveal whether an account exists. \`currentUser(storage)\` only reads the session. Every method returns \`{ ok, ... }\` and throws nothing for wrong data.
 
 ## seeds.js
 
@@ -1463,7 +1477,7 @@ Any SVG passes \`sanitizeSvg\` before insertion (see "Rendering"): no scripts, e
 
 ## Passwords and the session
 
-PBKDF2-SHA-256, 100,000 iterations, a random 16-byte salt, constant-time comparison, the same error for a wrong email and a wrong password, time equalisation for a nonexistent account. The password is written neither to storage nor to a log. As the data lives in the browser, the hash protects against reading the password directly, but not against a person with access to the browser profile.
+PBKDF2-SHA-256, 100,000 iterations, a random 16-byte salt, constant-time comparison, the same error for a wrong email and a wrong password, time equalisation for a nonexistent account. The password is written neither to storage nor to a log; the lockout after failures, the session token and times, TOTP and the permission table are described in "Account and data storage in the browser". As the data lives in the browser, the hash protects against reading the password directly, but not against a person with access to the browser profile.
 
 ## User input
 

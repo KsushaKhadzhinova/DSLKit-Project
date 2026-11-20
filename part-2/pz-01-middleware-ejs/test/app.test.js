@@ -385,3 +385,28 @@ withServer('signing in with a percent-encoded "auth" parameter name still hides 
   assert.doesNotMatch(row.url, /auth=1/);
   assert.match(row.url, /auth=\*\*\*/);
 });
+
+// Decision: the request log is a row of the SQLite table `request_log`, not a line in a file. The check opens the
+// database file with a separate connection, so it reads what is really stored and not what the log object remembers.
+test('a served request is stored as a row of the SQLite table request_log', async () => {
+  const { DatabaseSync } = await import('node:sqlite');
+  const dir = mkdtempSync(join(tmpdir(), 'pz1-table-'));
+  const file = join(dir, 'log.db');
+  const log = openRequestLog(file);
+  const server = createApp({ log, write: () => {}, writeError: () => {} }).listen(0);
+  await new Promise((resolve) => server.once('listening', resolve));
+  try {
+    await fetch(`http://127.0.0.1:${server.address().port}/item/1`).then((res) => res.arrayBuffer());
+    const db = new DatabaseSync(file, { readOnly: true });
+    const table = db.prepare("SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'request_log'").get();
+    const rows = db.prepare('SELECT method, url, status FROM request_log WHERE url = ?').all('/item/1');
+    db.close();
+    assert.equal(table?.name, 'request_log');
+    assert.deepEqual(rows.map((r) => ({ ...r })), [{ method: 'GET', url: '/item/1', status: 200 }]);
+  } finally {
+    server.close();
+    server.closeAllConnections();
+    log.close();
+    rmSync(dir, { recursive: true, force: true });
+  }
+});

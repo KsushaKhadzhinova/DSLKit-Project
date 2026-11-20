@@ -18,7 +18,8 @@ const start = async () => {
     server.closeAllConnections();
     server.close();
   };
-  return { store, base, port: server.address().port, close };
+  const connections = () => new Promise((resolve) => server.getConnections((_, count) => resolve(count)));
+  return { store, base, port: server.address().port, close, connections };
 };
 
 const percentile = (values, p) => {
@@ -115,6 +116,19 @@ test('spike: 1000 sockets open at once and are dropped, then the server answers 
     });
     await new Promise((resolve) => setTimeout(resolve, 500));
     sockets.forEach((socket) => socket.destroy());
+    // Why the wait: on Windows the listen queue is far smaller than the 1000 asked for, the overflow is refused at once,
+    // and the sockets that did queue are accepted by Node one batch at a time. Right after the drop the queue still holds
+    // connections the clients have already closed, so a new request is refused (ECONNREFUSED) until the server has
+    // accepted and discarded them. "The server recovers" therefore means: the stale connections drain within a deadline,
+    // and from then on every request is answered. The assertions below stay strict (200 of 200).
+    const deadline = performance.now() + 15000;
+    while (performance.now() < deadline) {
+      const drained = (await app.connections()) === 0;
+      const alive = await fetch(`${app.base}/health`, { headers: { Connection: 'close' } }).then((res) => res.arrayBuffer().then(() => res.status === 200), () => false);
+      if (drained && alive) break;
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    }
+    assert.equal(await app.connections(), 0, 'the dropped connections were not released by the server');
     const result = await load(() => fetch(`${app.base}/health`), 200, 20);
     assert.equal(result.statuses.get(200), 200, 'the server did not recover after the spike');
   } finally {
