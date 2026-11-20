@@ -53,7 +53,11 @@ process.env.AI_MODEL = 'redteam-fake-model';
 process.env.AI_BASE_URL = 'http://127.0.0.1:1'; // nothing listens here; checkBaseUrl() allows http for localhost
 let limited = false;
 for (let i = 0; i < 8 && !limited; i += 1) {
-  const res = await fetch(`${base}/api/ai/generate`, { method: 'POST', body: JSON.stringify({ mode: 'idea', text: 'x' }), headers: { 'Content-Type': 'application/json' } });
+  const res = await fetch(`${base}/api/ai/generate`, {
+    method: 'POST',
+    body: JSON.stringify({ mode: 'idea', text: 'x' }),
+    headers: { 'Content-Type': 'application/json' },
+  });
   if (res.status === 429) limited = true;
 }
 let bypassed = false;

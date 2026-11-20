@@ -52,8 +52,12 @@ const b64 = (o) => Buffer.from(JSON.stringify(o)).toString('base64url');
     check('CORS: hostile Origin gets no Allow-Origin', !cors.headers.get('access-control-allow-origin'));
 
     let locked = false;
-    for (let i = 0; i < 6 && !locked; i += 1) locked = (await s.call('POST', '/auth/login', { body: { email: 'alice@example.test', password: 'bad-bad-bad-1' } })).res.status === 429;
-    const spoof = await s.call('POST', '/auth/login', { body: { email: 'alice@example.test', password: 'bad-bad-bad-1' }, headers: { 'X-Forwarded-For': '9.9.9.9' } });
+    for (let i = 0; i < 6 && !locked; i += 1)
+      locked = (await s.call('POST', '/auth/login', { body: { email: 'alice@example.test', password: 'bad-bad-bad-1' } })).res.status === 429;
+    const spoof = await s.call('POST', '/auth/login', {
+      body: { email: 'alice@example.test', password: 'bad-bad-bad-1' },
+      headers: { 'X-Forwarded-For': '9.9.9.9' },
+    });
     check('lockout not bypassed by X-Forwarded-For', locked && spoof.res.status === 429, `(locked=${locked}, spoof=${spoof.res.status})`);
 
     const bad = await fetch(`http://localhost:${s.port}/auth/login`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{bad' });

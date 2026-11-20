@@ -6,15 +6,15 @@ Status: partial. The run is not complete. The Edge run of the scripts produced n
 
 ## What was run
 
-| Work | Browser | Width | Result | Console errors | Notes |
-| ---- | ------- | ----- | ------ | -------------- | ----- |
-| e2e auth (testing-course/full) | Firefox | 1366, 390 | 7 of 29 | not collected | most: Timeout 8000 ms on `goto` |
-| e2e critical-path | Firefox | 1366 | 1 of 21 | not collected | same cause |
-| e2e extra | Firefox | 1366 | 2 of 11 | not collected | same cause |
-| e2e editor, scenarios, palette, click-everything | Firefox | - | not completed | - | run interrupted |
-| all e2e | Edge (`msedge`) | - | not done | - | `e2e/edge` folder is empty |
-| Home page load, `probe.py` | Firefox | 1366 | loaded in 4.7 s, no failed requests | - | `browser.close` hung (exit 124) |
-| pz-01, pz-03, pz-04, lab-04, course client | - | - | not checked with scenarios | - | servers started, see below |
+| Work                                             | Browser         | Width     | Result                              | Console errors | Notes                           |
+| ------------------------------------------------ | --------------- | --------- | ----------------------------------- | -------------- | ------------------------------- |
+| e2e auth (testing-course/full)                   | Firefox         | 1366, 390 | 7 of 29                             | not collected  | most: Timeout 8000 ms on `goto` |
+| e2e critical-path                                | Firefox         | 1366      | 1 of 21                             | not collected  | same cause                      |
+| e2e extra                                        | Firefox         | 1366      | 2 of 11                             | not collected  | same cause                      |
+| e2e editor, scenarios, palette, click-everything | Firefox         | -         | not completed                       | -              | run interrupted                 |
+| all e2e                                          | Edge (`msedge`) | -         | not done                            | -              | `e2e/edge` folder is empty      |
+| Home page load, `probe.py`                       | Firefox         | 1366      | loaded in 4.7 s, no failed requests | -              | `browser.close` hung (exit 124) |
+| pz-01, pz-03, pz-04, lab-04, course client       | -               | -         | not checked with scenarios          | -              | servers started, see below      |
 
 Servers started by hand: site `tools/serve.js site 5173`; pz-01 on 3000; lab-04 on 5175; pz-03 on 5176; pz-04 on 5177; course server on 3100 (SQLite in a temporary file, no `.env`); course client on 5178. All returned HTTP 200 on the home page.
 

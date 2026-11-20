@@ -25,7 +25,11 @@ console.log('=== RT-02: role-unlock code hash strength vs. account password hash
 const sha256Rate = benchmark('Unsalted single-round SHA-256 (roles.js check)', (i) => createHash('sha256').update(`guess-${i}`).digest('hex'), 200_000);
 
 const salt = randomBytes(16);
-const pbkdf2Rate = benchmark('PBKDF2-SHA-256, 100000 iterations (accounts.js password check)', (i) => pbkdf2Sync(`guess-${i}`, salt, 100_000, 32, 'sha256'), 50);
+const pbkdf2Rate = benchmark(
+  'PBKDF2-SHA-256, 100000 iterations (accounts.js password check)',
+  (i) => pbkdf2Sync(`guess-${i}`, salt, 100_000, 32, 'sha256'),
+  50,
+);
 
 const ratio = sha256Rate / pbkdf2Rate;
 console.log(`\nSHA-256 is ~${Math.round(ratio).toLocaleString()}x faster to brute-force per guess than the PBKDF2 hash used for real passwords.`);

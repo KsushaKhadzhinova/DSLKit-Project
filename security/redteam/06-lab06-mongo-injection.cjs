@@ -30,7 +30,7 @@ const check = (name, ok, detail = '') => {
     check('operator injection owner[$gt] rejected (400)', r2.res.status === 400, `(status ${r2.res.status})`);
 
     // $where / server-side JS injection attempt through a filter value.
-    const r3 = await call('GET', '/diagrams?owner=' + encodeURIComponent('victim\'; return true; var x=\''));
+    const r3 = await call('GET', '/diagrams?owner=' + encodeURIComponent("victim'; return true; var x='"));
     check('string-based $where-style payload treated as a literal string, no 500', [200].includes(r3.res.status), `(status ${r3.res.status})`);
 
     // sort= must be one of a fixed allow-list, not an arbitrary key (sort-key injection / information probing).

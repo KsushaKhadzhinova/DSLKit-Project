@@ -42,5 +42,7 @@ const user = currentUser(storage, { crypto: webcrypto });
 console.log('currentUser() after the forged write:', user);
 
 const ok = user?.role === 'admin' && isUnlimited(user);
-console.log(ok ? 'CONFIRMED: attacker is now role=admin with no daily diagram limit, no code used.' : 'NOT confirmed (unexpected result, re-check the module).');
+console.log(
+  ok ? 'CONFIRMED: attacker is now role=admin with no daily diagram limit, no code used.' : 'NOT confirmed (unexpected result, re-check the module).',
+);
 process.exit(ok ? 0 : 1);
