@@ -48,3 +48,19 @@ def answer(page, value=True):
         }""",
         value,
     )
+
+
+# Firefox of Playwright has no clipboard permissions: the page gets an in-memory clipboard with the same two calls, so the scripts still check what the site writes and reads.
+FIREFOX_CLIPBOARD = """(() => {
+  let held = '';
+  const board = { writeText: (t) => { held = String(t); return Promise.resolve(); }, readText: () => Promise.resolve(held) };
+  Object.defineProperty(navigator, 'clipboard', { value: board, configurable: true });
+})()"""
+
+
+def allow_clipboard(ctx, base):
+    """Let the page use the clipboard: the permission in Chromium, an in-memory clipboard in Firefox."""
+    if os.environ.get("E2E_BROWSER") == "firefox":
+        ctx.add_init_script(FIREFOX_CLIPBOARD)
+    else:
+        ctx.grant_permissions(["clipboard-read", "clipboard-write"], origin=base)

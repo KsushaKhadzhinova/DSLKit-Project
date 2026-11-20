@@ -20,3 +20,5 @@ testing-course/reports/*/output/tex/*.out
 testing-course/screens/fail-*.png
 
 .lighthouseci/
+reports/
+.stryker-tmp/
