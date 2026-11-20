@@ -89,3 +89,118 @@ Authorization: Bearer {{token}}
 ### Unknown sort field -> 400
 GET {{base}}/diagrams?sort=password
 Authorization: Bearer {{token}}
+
+### --- Advanced authentication (refresh, 2FA, password reset, roles, audit) ---
+### Login returns accessToken and refreshToken; the refresh token is kept for the next requests
+# @name login2
+POST {{base}}/auth/login
+Content-Type: application/json
+
+{ "email": "alice@example.com", "password": "correct horse 42", "deviceName": "REST Client" }
+
+###
+@refresh = {{login2.response.body.refreshToken}}
+
+### Exchange the refresh token -> 200 (a new pair; the old refresh token stops working, reusing it revokes the session)
+POST {{base}}/auth/refresh
+Content-Type: application/json
+
+{ "refreshToken": "{{refresh}}" }
+
+### Own sessions -> 200
+GET {{base}}/auth/sessions
+Authorization: Bearer {{token}}
+
+### End one session -> 204 (404 for an id that is not yours)
+DELETE {{base}}/auth/sessions/00000000-0000-4000-8000-000000000000
+Authorization: Bearer {{token}}
+
+### Log out with the refresh token -> 204
+POST {{base}}/auth/logout
+Content-Type: application/json
+
+{ "refreshToken": "{{refresh}}" }
+
+### End all sessions -> 204
+POST {{base}}/auth/logout-all
+Authorization: Bearer {{token}}
+
+### Change the password -> 204 (other sessions end)
+POST {{base}}/auth/change-password
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{ "currentPassword": "correct horse 42", "newPassword": "another horse 43" }
+
+### Ask for a reset -> 202 (the token is written to the server console, never to the response)
+POST {{base}}/auth/password-reset/request
+Content-Type: application/json
+
+{ "email": "alice@example.com" }
+
+### Confirm the reset with the token from the console -> 204
+POST {{base}}/auth/password-reset/confirm
+Content-Type: application/json
+
+{ "token": "paste-the-token-here", "newPassword": "a brand new horse 44" }
+
+### Two-factor state -> 200
+GET {{base}}/auth/2fa
+Authorization: Bearer {{token}}
+
+### Start two-factor setup -> 201 { secret, otpauthUrl }
+POST {{base}}/auth/2fa/setup
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{ "password": "correct horse 42" }
+
+### Enable it with a code from the authenticator -> 200 { recoveryCodes }
+POST {{base}}/auth/2fa/enable
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{ "code": "123456" }
+
+### Second step of a login with 2FA -> 200 (challengeToken comes from the login answer)
+POST {{base}}/auth/2fa/verify
+Content-Type: application/json
+
+{ "challengeToken": "paste-the-challenge-here", "code": "123456" }
+
+### Disable two-factor -> 204
+POST {{base}}/auth/2fa/disable
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{ "password": "correct horse 42", "code": "123456" }
+
+### Admin: audit trail -> 200 (needs the audit:read permission)
+GET {{base}}/admin/audit
+Authorization: Bearer {{token}}
+
+### Admin: roles and permissions -> 200
+GET {{base}}/admin/roles
+Authorization: Bearer {{token}}
+
+###
+GET {{base}}/admin/permissions
+Authorization: Bearer {{token}}
+
+### Admin: create a role from permissions you hold -> 201 (403 for a permission you lack)
+POST {{base}}/admin/roles
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{ "name": "reviewer", "description": "Reads diagrams", "permissions": ["diagram:read", "profile:read"] }
+
+### Admin: assign a role -> 200 (the last administrator cannot be demoted)
+PATCH {{base}}/users/2/role
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{ "role": "moderator" }
+
+### Admin: unlock an account -> 200
+POST {{base}}/users/2/unlock
+Authorization: Bearer {{token}}

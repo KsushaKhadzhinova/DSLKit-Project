@@ -1,4 +1,5 @@
 const { notFound, forbidden, badRequest } = require('../errors');
+const { mayModifyDiagram } = require('../permissions');
 const { Op, fn, col, where } = require('sequelize');
 const { parseListQuery } = require('../middleware/list-query');
 const { NOTATIONS, LIMITS } = require('../models/diagram.constants');
@@ -17,7 +18,7 @@ const filterFor = (dialect, { notation, q }) => {
 };
 
 // Only the owner or an admin may change or delete a diagram.
-const mayChange = (user, diagram) => user.role === 'admin' || diagram.ownerId === user.id;
+const mayChange = mayModifyDiagram;
 
 // Express 5 forwards a rejected promise to the error handler, so no try/catch is needed here.
 const createDiagramsController = ({ Diagram }) => ({

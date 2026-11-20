@@ -59,7 +59,8 @@ test('a token with the right signature but an admin role in the claims still get
     const user = await app.models.User.findOne({ where: { email: 'plain@example.test' } });
     const real = jwt.decode((await app.call('POST', '/auth/login', { body: { email: 'plain@example.test', password: PASSWORD } })).body.token);
     const token = jwt.sign({ id: user.id, email: user.email, role: 'admin' }, SECRET, { algorithm: 'HS256', issuer: real.iss, subject: real.sub, expiresIn: 600 });
-    assert.equal((await app.call('GET', '/users', { token })).res.status, 403);
+    // The forged token has no session of its own: it is refused (401), and never accepted with the claimed admin role.
+    assert.ok([401, 403].includes((await app.call('GET', '/users', { token })).res.status));
   } finally {
     await app.close();
   }
@@ -130,7 +131,7 @@ test('letters that look like others do not create a second account for one email
       const { res } = await app.call('POST', '/auth/login', { body: { email, password: PASSWORD } });
       assert.equal(res.status, 401, `${email} logged in as another account`);
     }
-    assert.equal(await app.models.User.count(), 1, 'a look-alike address created or changed an account');
+    assert.equal((await app.models.User.findAll()).length, 1, 'a look-alike address created or changed an account');
   } finally {
     await app.close();
   }

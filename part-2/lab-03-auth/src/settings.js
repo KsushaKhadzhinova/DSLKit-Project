@@ -3,6 +3,11 @@ const MIN_SECRET_LENGTH = 32;
 const MIN_DISTINCT_CHARACTERS = 8;
 const MAX_LIFETIME_SECONDS = 24 * 60 * 60;
 const ISSUER = 'dslkit';
+// Access tokens are for the API only; the 2FA challenge token has its own audience, so neither can be used as the other.
+const AUDIENCE = 'dslkit-api';
+const CHALLENGE_AUDIENCE = 'dslkit-2fa';
+// A small tolerance for clocks that differ a little; a long one would lengthen the life of a stolen token.
+const CLOCK_TOLERANCE_SECONDS = 5;
 
 const UNIT_SECONDS = { s: 1, m: 60, h: 3600, d: 86400 };
 
@@ -25,4 +30,11 @@ const checkJwtSettings = ({ jwtSecret, jwtExpiresIn }) => {
   return seconds;
 };
 
-module.exports = { checkJwtSettings, lifetimeSeconds, ISSUER, MIN_SECRET_LENGTH, MAX_LIFETIME_SECONDS };
+// The key that encrypts the TOTP secrets is derived (HKDF) from TWO_FACTOR_KEY, or from the JWT secret with another label
+// when it is not set, so it is never the key that signs tokens.
+const checkTwoFactorKey = (key) => {
+  if (key === undefined || key === '') return;
+  if (typeof key !== 'string' || key.length < MIN_SECRET_LENGTH) throw new Error(`twoFactorKey must be at least ${MIN_SECRET_LENGTH} characters`);
+};
+
+module.exports = { checkJwtSettings, checkTwoFactorKey, lifetimeSeconds, ISSUER, AUDIENCE, CHALLENGE_AUDIENCE, CLOCK_TOLERANCE_SECONDS, MIN_SECRET_LENGTH, MAX_LIFETIME_SECONDS };

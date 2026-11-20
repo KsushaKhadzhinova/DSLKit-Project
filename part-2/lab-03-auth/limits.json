@@ -12,5 +12,16 @@
   "loginRateMax": 20,
   "loginRateWindowMinutes": 15,
   "registerRateMax": 10,
-  "registerRateWindowMinutes": 60
+  "registerRateWindowMinutes": 60,
+  "refreshRateMax": 60,
+  "refreshRateWindowMinutes": 15,
+  "resetRateMax": 5,
+  "resetRateWindowMinutes": 60,
+  "resetTokenMinutes": 30,
+  "refreshTokenDays": 7,
+  "sessionMaxDays": 30,
+  "maxSessionsPerUser": 10,
+  "twoFactorChallengeMinutes": 5,
+  "twoFactorMaxAttempts": 5,
+  "auditPageMax": 200
 }

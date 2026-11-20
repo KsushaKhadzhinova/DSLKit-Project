@@ -110,7 +110,7 @@ Figure 8 – Answers 403 for an outsider and the answer 200 for the administrato
 
 ### 3.5 Verification
 
-The work is verified by automated tests on a temporary SQLite database with the real migrations and real HTTP requests. The tests start the server on a free port, and bcrypt uses four rounds for speed. They cover: registration with email normalization, no hash in the response and a check that the database holds a bcrypt hash rather than the password, duplicate emails in any letter case, data validation errors, login and the token contents, the same response for a wrong password and an unknown email, tampered, unsigned, expired and foreign-signed tokens, user deletion and a role change with an old token, the rights of an administrator, an owner and an outsider, migrations with rollback, the seeds of the administrator, the demo users and the demo diagrams. There are 140 application tests, including the partial update with `PATCH` and a database failure. A separate run on a real PostgreSQL 16 in a container was made on 28 October 2026: the migrations, the admin seed, registration, login, the protected route with and without a token and the role checks worked the same as on SQLite. The screenshots are in the folder `figures-pg`.
+The work is verified by automated tests on a temporary SQLite database with the real migrations and real HTTP requests. The tests start the server on a free port, and bcrypt uses four rounds for speed. They cover: registration with email normalization, no hash in the response and a check that the database holds a bcrypt hash rather than the password, duplicate emails in any letter case, data validation errors, login and the token contents, the same response for a wrong password and an unknown email, tampered, unsigned, expired and foreign-signed tokens, user deletion and a role change with an old token, the rights of an administrator, an owner and an outsider, migrations with rollback, the seeds of the administrator, the demo users and the demo diagrams. There are 191 application tests, including refresh tokens, two-factor authentication, password reset and the roles in the database, including the partial update with `PATCH` and a database failure. A separate run on a real PostgreSQL 16 in a container was made on 28 October 2026: the migrations, the admin seed, registration, login, the protected route with and without a token and the role checks worked the same as on SQLite. The screenshots are in the folder `figures-pg`.
 
 The result of the `npm test` command with the number of tests and the code coverage is shown in figure 9.
 
@@ -189,8 +189,6 @@ DSLKit now has users with bcrypt password hashes, registration, login with a JWT
 ```js
 const { DataTypes } = require('sequelize');
 
-const ROLES = ['user', 'admin'];
-
 const defineUser = (sequelize) => {
   const User = sequelize.define('User', {
     // Lowercased on the way in, the database also checks it, so one address is one account.
@@ -203,9 +201,29 @@ const defineUser = (sequelize) => {
       },
     },
     passwordHash: { type: DataTypes.STRING(100), allowNull: false },
-    role: { type: DataTypes.STRING(10), allowNull: false, defaultValue: 'user', validate: { isIn: [ROLES] } },
+    // Encrypted with AES-256-GCM (see crypto-box.js); never leaves the server.
+    twoFactorSecret: { type: DataTypes.STRING(255), allowNull: true },
+    twoFactorEnabled: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
+    twoFactorLastStep: { type: DataTypes.INTEGER, allowNull: true },
+    passwordChangedAt: { type: DataTypes.DATE, allowNull: true },
+    // The role lives in the Roles table. roleId is the foreign key; role is the name, read from the loaded Role. Setting it by name
+    // (User.create({ role: 'admin' }), User.update({ role }, ...)) is resolved to roleId by the hooks in roles.js.
+    roleId: { type: DataTypes.INTEGER, allowNull: false },
+    role: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return this.Role ? this.Role.name : this.getDataValue('role');
+      },
+      set(value) {
+        this.setDataValue('role', value);
+      },
+    },
   });
 
+  // The permissions of the role, from the rows loaded with the user (see the default scope in roles.js).
+  User.prototype.permissionList = function permissionList() {
+    return (this.Role?.RolePermissions ?? []).map((row) => row.permission);
+  };
   // The hash must never leave the server, so the public view is built in one place.
   User.prototype.toPublic = function toPublic() {
     return { id: this.id, email: this.email, role: this.role, createdAt: this.createdAt };
@@ -217,7 +235,7 @@ const defineUser = (sequelize) => {
   return User;
 };
 
-module.exports = { defineUser, ROLES };
+module.exports = { defineUser };
 ```
 
 ## Appendix B (mandatory) Listing of the Users table migration
@@ -275,59 +293,100 @@ module.exports = {
 ## Appendix C (mandatory) Listing of auth.js
 
 ```js
-const jwt = require('jsonwebtoken');
-const { unauthorized, forbidden } = require('../errors');
-const { ISSUER } = require('../settings');
+const { unauthorized } = require('../errors');
 
 const bearerToken = (req) => {
   const [scheme, token, ...rest] = (req.get('Authorization') || '').split(' ');
   return scheme === 'Bearer' && token && rest.length === 0 ? token : undefined;
 };
 
-// Verifies the Bearer token, then loads the user so a deleted account or a changed role takes effect at once.
-// req.user holds { id, email, role } taken from the database, not from the token.
+// Verifies the Bearer token (HS256 only, issuer and audience checked, 5 seconds of clock tolerance), then loads the user so a
+// deleted account or a changed role takes effect at once. A token issued at login carries the id of its session (sid); once that
+// session is revoked (logout, password change, reuse of a refresh token) the access token stops working before it expires.
+// req.user holds { id, email, role, permissions, sessionId } taken from the database, not from the token.
 const createAuthenticate =
-  ({ User }, { jwtSecret }) =>
+  ({ User }, tokens) =>
   async (req, _res, next) => {
     const token = bearerToken(req);
     if (!token) return next(unauthorized('Missing Bearer token'));
     let payload;
     try {
-      payload = jwt.verify(token, jwtSecret, { algorithms: ['HS256'], issuer: ISSUER });
+      payload = tokens.verifyAccess(token);
     } catch (error) {
       return next(unauthorized(error.name === 'TokenExpiredError' ? 'Token expired' : 'Invalid token'));
     }
     // A signed token without a usable integer id cannot name a user; it is refused like any other bad token.
     if (!Number.isSafeInteger(payload.id)) return next(unauthorized('Invalid token'));
+    if (payload.sid !== undefined && typeof payload.sid !== 'string') return next(unauthorized('Invalid token'));
     const user = await User.findByPk(payload.id);
     if (!user) return next(unauthorized('User no longer exists'));
-    req.user = { id: user.id, email: user.email, role: user.role };
+    if (payload.sid && !(await tokens.isActive(user.id, payload.sid))) return next(unauthorized('Session was ended'));
+    req.user = { id: user.id, email: user.email, role: user.role, permissions: user.permissionList(), sessionId: payload.sid };
     return next();
   };
 
-const requireRole = (role) => (req, _res, next) => (req.user.role === role ? next() : next(forbidden(`Requires the ${role} role`)));
-
-module.exports = { createAuthenticate, requireRole };
+module.exports = { createAuthenticate };
 ```
 
 ## Appendix D (mandatory) Listing of auth.controller.js
 
 ```js
+const { randomBytes } = require('node:crypto');
 const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
-const { unauthorized, conflict, tooManyRequests } = require('../errors');
-const { ISSUER } = require('../settings');
+const { Op } = require('sequelize');
+const { unauthorized, conflict, tooManyRequests, badRequest, notFound } = require('../errors');
+const { sha256 } = require('../security/crypto-box');
+const { passwordProblem } = require('../security/password-policy');
+const LIMITS = require('../../limits.json');
 
-const createAuthController = ({ User }, { jwtSecret, jwtExpiresIn, bcryptRounds }, loginGuard) => {
+const MINUTE = 60 * 1000;
+const ctxOf = (req) => ({ ip: req.ip ?? 'unknown', userAgent: req.get('User-Agent'), label: typeof req.body?.deviceName === 'string' ? req.body.deviceName.slice(0, 80) : undefined });
+
+// Keys of the failure counter: the login uses address and email; the other checks use the account id, so an administrator can lift them all.
+const loginKey = (req, email) => `${req.ip}|${email}`;
+const accountKey = (kind, req, user) => `${kind}|${req.ip}|u:${user.id}`;
+
+const createAuthController = (models, config, loginGuard, { tokens, secondFactor, audit, mailer }) => {
+  const { User, PasswordReset } = models;
+  const { bcryptRounds } = config;
   // Compared when the email is unknown, so a missing account costs the same time as a wrong password.
   const dummyHash = bcrypt.hashSync('not-a-real-password', bcryptRounds);
+
+  const sessionAnswer = (session) => ({
+    token: session.accessToken,
+    accessToken: session.accessToken,
+    tokenType: 'Bearer',
+    expiresIn: config.jwtExpiresIn,
+    refreshToken: session.refreshToken,
+    refreshExpiresAt: session.refreshExpiresAt,
+    sessionId: session.sessionId,
+  });
+
+  const openSession = async (user, req, res, how) => {
+    const session = await tokens.startSession(user, ctxOf(req));
+    await audit.record('login_success', { userId: user.id, actorId: user.id, ip: req.ip, detail: how });
+    return res.json(sessionAnswer(session));
+  };
+
+  // Checks the current password with the same failure counter as the login, so a stolen access token cannot be used to guess it.
+  const confirmPassword = async (req, user, password) => {
+    const key = accountKey('pw', req, user);
+    const wait = loginGuard.retryAfter(key);
+    if (wait > 0) throw tooManyRequests('Too many wrong passwords, try again later', wait);
+    if (!(await bcrypt.compare(password, user.passwordHash))) {
+      if (loginGuard.fail(key)) await audit.record('account_locked', { userId: user.id, ip: req.ip, detail: 'password confirmation' });
+      throw unauthorized('Invalid password');
+    }
+    loginGuard.succeed(key);
+  };
 
   return {
     register: async (req, res, next) => {
       const { email, password } = req.credentials;
       const passwordHash = await bcrypt.hash(password, bcryptRounds);
       try {
-        const user = await User.create({ email, passwordHash });
+        const user = await User.create({ email, passwordHash, passwordChangedAt: new Date() });
+        await audit.record('register', { userId: user.id, actorId: user.id, ip: req.ip });
         res.status(201).location('/profile').json(user.toPublic());
       } catch (error) {
         if (error.name !== 'SequelizeUniqueConstraintError') throw error;
@@ -339,25 +398,129 @@ const createAuthController = ({ User }, { jwtSecret, jwtExpiresIn, bcryptRounds 
       const { email, password } = req.credentials;
       // A locked email is refused before the password is looked at, so guessing cannot continue and the answer does not depend on the account.
       // The counter is kept per address and email: someone elsewhere cannot lock the account of the real owner.
-      const guardKey = `${req.ip}|${email}`;
+      const guardKey = loginKey(req, email);
       const wait = loginGuard.retryAfter(guardKey);
       if (wait > 0) return next(tooManyRequests('Too many failed logins, try again later', wait));
       const user = await User.findOne({ where: { email } });
       const matches = await bcrypt.compare(password, user ? user.passwordHash : dummyHash);
       if (!user || !matches) {
-        loginGuard.fail(guardKey);
+        const locked = loginGuard.fail(guardKey);
+        await audit.record(locked ? 'account_locked' : 'login_failed', { userId: user?.id, ip: req.ip, detail: user ? '' : 'unknown email' });
         return next(unauthorized('Invalid email or password'));
       }
       loginGuard.succeed(guardKey);
-      // The role in the token is only a hint for the client: the server asks the database on every request.
-      const token = jwt.sign({ id: user.id, email: user.email, role: user.role }, jwtSecret, {
-        algorithm: 'HS256',
-        expiresIn: jwtExpiresIn,
-        issuer: ISSUER,
-        subject: String(user.id),
-      });
-      return res.json({ token, tokenType: 'Bearer', expiresIn: jwtExpiresIn });
+      if (user.twoFactorEnabled) {
+        await audit.record('login_2fa_challenge', { userId: user.id, ip: req.ip });
+        return res.json({ twoFactorRequired: true, challengeToken: secondFactor.signChallenge(user), expiresIn: `${LIMITS.twoFactorChallengeMinutes}m` });
+      }
+      return openSession(user, req, res, 'password');
     },
+
+    // Second step of a login with two-factor authentication: the challenge from the login plus a TOTP or a recovery code.
+    verifyTwoFactor: async (req, res, next) => {
+      const user = await User.findByPk(secondFactor.verifyChallenge(req.challengeToken));
+      if (!user || !user.twoFactorEnabled) return next(unauthorized('Invalid or expired challenge'));
+      const key = accountKey('2fa', req, user);
+      const wait = loginGuard.retryAfter(key);
+      if (wait > 0) return next(tooManyRequests('Too many wrong codes, try again later', wait));
+      const kind = await secondFactor.check(user, req.code);
+      if (!kind) {
+        const locked = loginGuard.fail(key);
+        await audit.record(locked ? 'account_locked' : '2fa_failed', { userId: user.id, ip: req.ip, detail: 'login' });
+        return next(unauthorized('Invalid code'));
+      }
+      loginGuard.succeed(key);
+      return openSession(user, req, res, kind === 'recovery' ? '2fa recovery code' : '2fa');
+    },
+
+    refresh: async (req, res, next) => {
+      const result = await tokens.rotate(req.refreshToken, ctxOf(req));
+      if (result.reused) {
+        await audit.record('refresh_reuse', { userId: result.userId, ip: req.ip, detail: 'session family revoked' });
+        return next(unauthorized('Invalid refresh token'));
+      }
+      await audit.record('token_refreshed', { userId: result.user.id, ip: req.ip });
+      return res.json(sessionAnswer(result));
+    },
+
+    // Always 204: the answer does not tell whether the token existed.
+    logout: async (req, res) => {
+      const row = await tokens.familyOf(req.refreshToken);
+      if (row) {
+        await tokens.revokeFamily(row.familyId);
+        await audit.record('logout', { userId: row.userId, ip: req.ip });
+      }
+      res.status(204).end();
+    },
+
+    logoutAll: async (req, res) => {
+      const count = await tokens.revokeAll(req.user.id);
+      await audit.record('logout_all', { userId: req.user.id, actorId: req.user.id, ip: req.ip, detail: `${count} tokens` });
+      res.status(204).end();
+    },
+
+    sessions: async (req, res) => res.json(await tokens.listSessions(req.user.id, req.user.sessionId)),
+
+    // The id belongs to the caller or the session does not exist: another user's session id gets the same 404.
+    revokeSession: async (req, res, next) => {
+      const count = await tokens.revokeFamily(req.params.id, req.user.id);
+      if (count === 0) return next(notFound('Session not found'));
+      await audit.record('session_revoked', { userId: req.user.id, actorId: req.user.id, ip: req.ip });
+      return res.status(204).end();
+    },
+
+    changePassword: async (req, res) => {
+      const user = await User.findByPk(req.user.id);
+      await confirmPassword(req, user, req.body.currentPassword);
+      const passwordHash = await bcrypt.hash(req.body.newPassword, bcryptRounds);
+      await user.update({ passwordHash, passwordChangedAt: new Date() });
+      // Every other device has to log in again with the new password; the session that made the change stays.
+      const count = await tokens.revokeAll(user.id, req.user.sessionId);
+      await audit.record('password_changed', { userId: user.id, actorId: user.id, ip: req.ip, detail: `${count} other tokens revoked` });
+      return res.status(204).end();
+    },
+
+    // The answer is the same for a known and an unknown address, and the same work is done, so neither the text nor the time shows which exist.
+    requestPasswordReset: async (req, res) => {
+      const user = await User.findOne({ where: { email: req.resetEmail } });
+      const plain = randomBytes(32).toString('base64url');
+      const tokenHash = sha256(plain);
+      // An unknown address runs a query of the same shape, so the time is alike.
+      const recent = user ? await PasswordReset.count({ where: { userId: user.id, usedAt: null, createdAt: { [Op.gt]: new Date(Date.now() - MINUTE) } } }) : await PasswordReset.count({ where: { id: 0 } });
+      if (user && recent === 0) {
+        await PasswordReset.create({ userId: user.id, tokenHash, expiresAt: new Date(Date.now() + LIMITS.resetTokenMinutes * MINUTE) });
+        await audit.record('password_reset_requested', { userId: user.id, ip: req.ip });
+        // Not awaited: a slow mail server must not make a known address slower than an unknown one.
+        Promise.resolve(
+          mailer({
+            to: user.email,
+            subject: 'DSLKit password reset',
+            text: `Reset token (valid ${LIMITS.resetTokenMinutes} minutes, use it once): ${plain}\nSend it with the new password to POST /auth/password-reset/confirm.`,
+          }),
+        ).catch((error) => console.error('Cannot send the reset mail:', error.message));
+      } else {
+        await audit.record('password_reset_requested', { ip: req.ip, detail: user ? 'throttled' : 'unknown email' });
+      }
+      res.status(202).json({ message: 'If this address has an account, a reset message was sent.' });
+    },
+
+    confirmPasswordReset: async (req, res, next) => {
+      const row = await PasswordReset.findOne({ where: { tokenHash: sha256(req.resetToken), usedAt: null, expiresAt: { [Op.gt]: new Date() } } });
+      if (!row) return next(badRequest('Invalid or expired reset token'));
+      const user = await User.findByPk(row.userId);
+      const problem = passwordProblem(req.newPassword, { email: user.email });
+      if (problem) return next(badRequest('Invalid password', [{ field: 'newPassword', message: problem }]));
+      // The token is claimed first with one conditional update, so it works once even for two parallel requests.
+      const [claimed] = await PasswordReset.update({ usedAt: new Date() }, { where: { id: row.id, usedAt: null } });
+      if (claimed === 0) return next(badRequest('Invalid or expired reset token'));
+      await PasswordReset.update({ usedAt: new Date() }, { where: { userId: user.id, usedAt: null } });
+      await user.update({ passwordHash: await bcrypt.hash(req.newPassword, bcryptRounds), passwordChangedAt: new Date() });
+      await tokens.revokeAll(user.id);
+      loginGuard.clearWhere((name) => name.endsWith(`|${user.email}`));
+      await audit.record('password_reset_done', { userId: user.id, ip: req.ip });
+      return res.status(204).end();
+    },
+
   };
 };
 
@@ -368,12 +531,12 @@ module.exports = { createAuthController };
 
 ```js
 const { badRequest, unauthorized } = require('../errors');
-const { ROLES } = require('../models/user');
+const { PERMISSIONS } = require('../permissions');
+const { passwordProblem } = require('../security/password-policy');
 const LIMITS = require('../../limits.json');
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const MIN_PASSWORD = LIMITS.passwordMin;
-// bcrypt ignores everything after the 72nd byte, so longer passwords would silently weaken.
+// bcrypt ignores everything after the 72nd byte, so longer passwords would silently weaken (the policy refuses them).
 const MAX_PASSWORD_BYTES = LIMITS.passwordMaxBytes;
 
 const objectBody = (body) => body !== null && typeof body === 'object' && !Array.isArray(body);
@@ -384,14 +547,6 @@ const CONTROL = /[\u0000-\u001F\u007F]/;
 
 const validEmail = (email) => typeof email === 'string' && email.length <= LIMITS.email && EMAIL.test(email) && !CONTROL.test(email);
 
-const passwordProblem = (password) => {
-  if (typeof password !== 'string') return 'must be a string';
-  if (password.trim() === '') return 'must not be empty or only spaces';
-  if (password.length < MIN_PASSWORD) return `must be at least ${MIN_PASSWORD} characters`;
-  if (Buffer.byteLength(password) > MAX_PASSWORD_BYTES) return `must be at most ${MAX_PASSWORD_BYTES} bytes`;
-  return undefined;
-};
-
 const reject = (next, details) => next(badRequest('Invalid credentials data', details));
 
 const validateRegistration = (req, _res, next) => {
@@ -399,7 +554,7 @@ const validateRegistration = (req, _res, next) => {
   const email = normalizeEmail(req.body.email);
   const details = [];
   if (!validEmail(email)) details.push({ field: 'email', message: 'must be a valid email address' });
-  const problem = passwordProblem(req.body.password);
+  const problem = passwordProblem(req.body.password, { email });
   if (problem) details.push({ field: 'password', message: problem });
   if (details.length > 0) return reject(next, details);
   req.credentials = { email, password: req.body.password };
@@ -421,46 +576,148 @@ const validateLogin = (req, _res, next) => {
   return next();
 };
 
+const ROLE_NAME = /^[a-z][a-z0-9_-]{0,29}$/;
+
 const validateRole = (req, _res, next) => {
   const role = objectBody(req.body) ? req.body.role : undefined;
-  if (!ROLES.includes(role)) return next(badRequest('Invalid role data', [{ field: 'role', message: `must be one of ${ROLES.join(', ')}` }]));
+  // Only the form is checked here; the controller looks the name up in the Roles table.
+  if (typeof role !== 'string' || !ROLE_NAME.test(role)) return next(badRequest('Invalid role data', [{ field: 'role', message: 'must be the name of an existing role' }]));
   req.newRole = role;
   return next();
 };
 
-module.exports = { validateRegistration, validateLogin, validateRole };
+const text = (value, max) => typeof value === 'string' && value.trim() !== '' && value.length <= max;
+const bad = (next, field, message) => next(badRequest('Invalid data', [{ field, message }]));
+
+const validateRefreshToken = (req, _res, next) => {
+  const refreshToken = objectBody(req.body) ? req.body.refreshToken : undefined;
+  if (!text(refreshToken, 200)) return bad(next, 'refreshToken', 'must be a non-empty string');
+  req.refreshToken = refreshToken;
+  return next();
+};
+
+const validateChangePassword = (req, _res, next) => {
+  if (!objectBody(req.body)) return next(badRequest('Request body must be a JSON object'));
+  const { currentPassword, newPassword } = req.body;
+  if (!text(currentPassword, 1000)) return bad(next, 'currentPassword', 'must be a non-empty string');
+  const problem = passwordProblem(newPassword, { email: req.user.email });
+  if (problem) return bad(next, 'newPassword', problem);
+  if (newPassword === currentPassword) return bad(next, 'newPassword', 'must differ from the current password');
+  return next();
+};
+
+const validateResetRequest = (req, _res, next) => {
+  const email = objectBody(req.body) ? normalizeEmail(req.body.email) : undefined;
+  // A value that cannot be an address still gets the neutral answer, not a hint, so only the form is checked.
+  if (!validEmail(email)) return bad(next, 'email', 'must be a valid email address');
+  req.resetEmail = email;
+  return next();
+};
+
+const validateResetConfirm = (req, _res, next) => {
+  if (!objectBody(req.body)) return next(badRequest('Request body must be a JSON object'));
+  const { token } = req.body;
+  if (!text(token, 200)) return bad(next, 'token', 'must be a non-empty string');
+  req.resetToken = token;
+  req.newPassword = req.body.newPassword;
+  return next();
+};
+
+// A TOTP code is six digits, a recovery code is letters, digits and a dash; both are short.
+const validateCode = (req, _res, next) => {
+  const code = objectBody(req.body) ? req.body.code : undefined;
+  if (!text(code, 32)) return bad(next, 'code', 'must be a non-empty string');
+  req.code = code.trim();
+  return next();
+};
+
+const validatePasswordField = (req, _res, next) => {
+  const password = objectBody(req.body) ? req.body.password : undefined;
+  if (!text(password, 1000)) return bad(next, 'password', 'must be a non-empty string');
+  req.password = password;
+  return next();
+};
+
+const validateChallenge = (req, _res, next) => {
+  const challengeToken = objectBody(req.body) ? req.body.challengeToken : undefined;
+  if (!text(challengeToken, 2000)) return bad(next, 'challengeToken', 'must be a non-empty string');
+  req.challengeToken = challengeToken;
+  return validateCode(req, _res, next);
+};
+
+// A custom role: a name, a short description and a list of known permissions without repeats.
+const validateNewRole = (req, _res, next) => {
+  if (!objectBody(req.body)) return next(badRequest('Request body must be a JSON object'));
+  const { name, description = '', permissions } = req.body;
+  const details = [];
+  if (typeof name !== 'string' || !ROLE_NAME.test(name)) details.push({ field: 'name', message: 'must be 1 to 30 characters: a lower case letter, then letters, digits, - or _' });
+  if (typeof description !== 'string' || description.length > 200 || CONTROL.test(description)) details.push({ field: 'description', message: 'must be text of at most 200 characters' });
+  if (!Array.isArray(permissions) || permissions.length > Object.keys(PERMISSIONS).length) details.push({ field: 'permissions', message: 'must be a list of permission names' });
+  else {
+    const unknown = permissions.filter((permission) => typeof permission !== 'string' || !(permission in PERMISSIONS));
+    if (unknown.length > 0) details.push({ field: 'permissions', message: 'unknown permission in the list' });
+    else if (new Set(permissions).size !== permissions.length) details.push({ field: 'permissions', message: 'must not repeat a permission' });
+  }
+  if (details.length > 0) return next(badRequest('Invalid role data', details));
+  req.newRoleData = { name, description, permissions };
+  return next();
+};
+
+module.exports = { validateNewRole, validateRegistration, validateLogin, validateRole, validateRefreshToken, validateChangePassword, validateResetRequest, validateResetConfirm, validateCode, validatePasswordField, validateChallenge };
 ```
 
 ## Appendix F (mandatory) Listing of users.routes.js
 
 ```js
 const { Router } = require('express');
-const { requireRole } = require('../middleware/auth');
+const { requirePermission } = require('../permissions');
 const { parseId } = require('../middleware/validate');
-const { validateRole } = require('../middleware/validate-auth');
+const { validateRole, validateNewRole } = require('../middleware/validate-auth');
 const { allowMethods } = require('../middleware/http');
 
 // Every route here needs a valid token; the /users routes also need the admin role.
 // The 405 and OPTIONS answers come without a token, because they say nothing about the data.
-const createUsersRouter = (controller, authenticate) => {
+const createUsersRouter = (controller, authenticate, roles) => {
   const router = Router();
-  const admin = [authenticate, requireRole('admin')];
+  // Each route names the permission it needs (see permissions.js); no role name appears here.
+  const guard = (permission) => [authenticate, requirePermission(permission)];
   router
     .route('/profile')
     .get(authenticate, controller.profile)
     .all(allowMethods(['GET']));
   router
     .route('/users')
-    .get(...admin, controller.list)
+    .get(...guard('user:list'), controller.list)
     .all(allowMethods(['GET']));
   router
     .route('/users/:id/role')
-    .patch(...admin, parseId('userId', 'User'), validateRole, controller.setRole)
+    .patch(...guard('user:role'), parseId('userId', 'User'), validateRole, controller.setRole)
     .all(allowMethods(['PATCH']));
   router
     .route('/users/:id')
-    .delete(...admin, parseId('userId', 'User'), controller.remove)
+    .delete(...guard('user:delete'), parseId('userId', 'User'), controller.remove)
     .all(allowMethods(['DELETE']));
+  router
+    .route('/users/:id/unlock')
+    .post(...guard('user:unlock'), parseId('userId', 'User'), controller.unlock)
+    .all(allowMethods(['POST']));
+  router
+    .route('/admin/audit')
+    .get(...guard('audit:read'), controller.audit)
+    .all(allowMethods(['GET']));
+  router
+    .route('/admin/roles')
+    .get(...guard('role:read'), roles.list)
+    .post(...guard('role:manage'), validateNewRole, roles.create)
+    .all(allowMethods(['GET', 'POST']));
+  router
+    .route('/admin/roles/:id')
+    .delete(...guard('role:manage'), parseId('roleId', 'Role'), roles.remove)
+    .all(allowMethods(['DELETE']));
+  router
+    .route('/admin/permissions')
+    .get(...guard('role:read'), roles.permissions)
+    .all(allowMethods(['GET']));
   return router;
 };
 
@@ -471,6 +728,7 @@ module.exports = { createUsersRouter };
 
 ```js
 const { notFound, forbidden, badRequest } = require('../errors');
+const { mayModifyDiagram } = require('../permissions');
 const { Op, fn, col, where } = require('sequelize');
 const { parseListQuery } = require('../middleware/list-query');
 const { NOTATIONS, LIMITS } = require('../models/diagram.constants');
@@ -489,7 +747,7 @@ const filterFor = (dialect, { notation, q }) => {
 };
 
 // Only the owner or an admin may change or delete a diagram.
-const mayChange = (user, diagram) => user.role === 'admin' || diagram.ownerId === user.id;
+const mayChange = mayModifyDiagram;
 
 // Express 5 forwards a rejected promise to the error handler, so no try/catch is needed here.
 const createDiagramsController = ({ Diagram }) => ({
