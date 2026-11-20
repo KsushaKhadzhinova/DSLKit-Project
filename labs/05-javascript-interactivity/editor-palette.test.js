@@ -232,6 +232,8 @@ test('a pressed block is selected, Delete and the button remove it with its link
   t.fire(button, 'click');
   assert.equal(t.$('.palette__message').textContent, 'Сначала нажмите на блок на доске.');
   // The blocks of the drawing are focusable (tabindex 0), the test markup is not.
+  // The board of the page is shown while the user works; jsdom 31 does not focus inside a hidden element.
+  t.remote.hidden = false;
   t.remote.querySelectorAll('.notation__node').forEach((node) => node.setAttribute('tabindex', '0'));
   press(t.remote.querySelector('[data-id="Bank"]'));
   assert.equal(t.api.picked(), 'Bank');

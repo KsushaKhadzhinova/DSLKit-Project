@@ -52,7 +52,7 @@ export const COMMON_PASSWORDS = new Set(
   ].map((item) => item.toLowerCase()),
 );
 
-const normalized = (value) => String(value ?? '').toLowerCase();
+const normalized = (value) => [value].join('').toLowerCase();
 
 // "Password123!" is the common "password": digits, signs and spaces around the letters do not make a new password.
 const core = (password) =>

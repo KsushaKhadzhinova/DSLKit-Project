@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="windows-1251"?>
+<xmi:XMI xmi:version="2.1" xmlns:uml="http://schema.omg.org/spec/UML/2.1" xmlns:xmi="http://schema.omg.org/spec/XMI/2.1">
+<xmi:Documentation exporter="Enterprise Architect" exporterVersion="6.5"/>
+<uml:Model xmi:type="uml:Model" name="EA_Model" visibility="public">
+<packagedElement xmi:type="uml:Package" xmi:id="P1" name="Shop">
+<packagedElement xmi:type="uml:Class" xmi:id="C1" name="Customer"><ownedAttribute xmi:type="uml:Property" xmi:id="A1" name="name" visibility="private"/><ownedOperation xmi:type="uml:Operation" xmi:id="O1" name="order" visibility="public"/></packagedElement>
+<packagedElement xmi:type="uml:Class" xmi:id="C2" name="Order"><generalization xmi:type="uml:Generalization" xmi:id="G1" general="C3"/></packagedElement>
+<packagedElement xmi:type="uml:Class" xmi:id="C3" name="Document" isAbstract="true"/>
+<packagedElement xmi:type="uml:Association" xmi:id="AS1" memberEnd="E1 E2"><ownedEnd xmi:type="uml:Property" xmi:id="E1" type="C1" association="AS1"/><ownedEnd xmi:type="uml:Property" xmi:id="E2" type="C2" association="AS1"/></packagedElement>
+</packagedElement></uml:Model></xmi:XMI>

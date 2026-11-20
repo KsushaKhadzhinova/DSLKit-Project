@@ -1,0 +1,133 @@
+{
+ "suite": "storage",
+ "results": [
+  {
+   "id": "STO-01",
+   "title": "Reload keeps the session and the projects (dashboard and editor)",
+   "browser": "firefox",
+   "status": "Passed",
+   "severity": "",
+   "note": ""
+  },
+  {
+   "id": "STO-02",
+   "title": "Clearing site data: guest again, old login fails with a message, the same email registers again with a clean state",
+   "browser": "firefox",
+   "status": "Passed",
+   "severity": "",
+   "note": ""
+  },
+  {
+   "id": "STO-03",
+   "title": "Corrupted dslkit.accounts (8 payloads x 4 pages): no JS errors, pages render",
+   "browser": "firefox",
+   "status": "Failed",
+   "severity": "Medium",
+   "note": "accounts='\"a string\"' on /app/dashboard.html: JS errors ['[JavaScript Error: \"Failed to load ‘http://localhost:55192/js/script.js’. A ServiceWorker intercepted the request and encountered an unexpected error.\" {file: \"http://localhost:55192/sw.js\" line: 87}]']",
+   "screenshot": "fail-STO-03-firefox.png"
+  },
+  {
+   "id": "STO-04",
+   "title": "Corrupted dslkit.session",
+   "browser": "firefox",
+   "status": "Failed",
+   "severity": "Medium",
+   "note": "session='{bad json' on /app/dashboard.html: JS errors ['[JavaScript Error: \"Failed to load ‘http://localhost:55192/js/script.js’. A ServiceWorker intercepted the request and encountered an unexpected error.\" {file: \"http://localhost:55192/sw.js\" line: 87}]']",
+   "screenshot": "fail-STO-04-firefox.png"
+  },
+  {
+   "id": "STO-05",
+   "title": "Corrupted dslkit.projects.<id>",
+   "browser": "firefox",
+   "status": "Passed",
+   "severity": "",
+   "note": ""
+  },
+  {
+   "id": "STO-06",
+   "title": "Corrupted dslkit.templates.<id>",
+   "browser": "firefox",
+   "status": "Failed",
+   "severity": "Medium",
+   "note": "templates='[]': blank page on /app/login.html",
+   "screenshot": "fail-STO-06-firefox.png"
+  },
+  {
+   "id": "STO-07",
+   "title": "Corrupted dslkit.seeded.<id>, settings, theme, dashboard, git-commits, editor-source",
+   "browser": "firefox",
+   "status": "Failed",
+   "severity": "Medium",
+   "note": "theme='[1,null,{\"id\":1}]' on /app/dashboard.html: JS errors ['[JavaScript Error: \"Failed to load ‘http://localhost:55192/js/notations/index.js’. A ServiceWorker intercepted the request and encountered an unexpected error.\" {file: \"http://localhost:55192/sw.js\" line: 87}]']",
+   "screenshot": "fail-STO-07-firefox.png"
+  },
+  {
+   "id": "STO-08",
+   "title": "Tour flag absent / corrupted: the tour opens for a new visitor, Skip stores the flag, no JS errors",
+   "browser": "firefox",
+   "status": "Passed",
+   "severity": "",
+   "note": ""
+  },
+  {
+   "id": "STO-09",
+   "title": "Session of a deleted account and a missing project id: sent to sign-in / a clear note, not a crash",
+   "browser": "firefox",
+   "status": "Passed",
+   "severity": "",
+   "note": ""
+  },
+  {
+   "id": "STO-10",
+   "title": "The address ?p=<id> of another user's project does not open it",
+   "browser": "firefox",
+   "status": "Passed",
+   "severity": "",
+   "note": ""
+  },
+  {
+   "id": "STO-11",
+   "title": "Full storage (QuotaExceededError): sign-up shows the storage message, no session, no JS error",
+   "browser": "firefox",
+   "status": "Passed",
+   "severity": "",
+   "note": ""
+  },
+  {
+   "id": "STO-12",
+   "title": "Full storage while saving a project: the page must not claim 'Saved' when nothing was stored",
+   "browser": "firefox",
+   "status": "Failed",
+   "severity": "High",
+   "note": "Timeout 60000ms exceeded. =========================== logs =========================== waiting for navigation to \"**/welcome.html\" until 'load' ============================================================",
+   "screenshot": "fail-STO-12-firefox.png"
+  },
+  {
+   "id": "STO-13",
+   "title": "Full storage on the settings page: no false 'The setting is saved'",
+   "browser": "firefox",
+   "status": "Failed",
+   "severity": "Low",
+   "note": "Timeout 60000ms exceeded. =========================== logs =========================== waiting for navigation to \"**/welcome.html\" until 'load' ============================================================",
+   "screenshot": "fail-STO-13-firefox.png"
+  },
+  {
+   "id": "STO-14",
+   "title": "Disabled storage (private mode simulation): every page opens, sign-up says why it fails, the editor still draws",
+   "browser": "firefox",
+   "status": "Failed",
+   "severity": "High",
+   "note": "/app/dashboard.html: JS errors with storage disabled: ['[JavaScript Error: \"Failed to load ‘http://localhost:55192/js/script.js’. A ServiceWorker intercepted the request and encountered an unexpected error.\" {file: \"http://localhost:55192/sw.js\" line: 87}]']",
+   "screenshot": "fail-STO-14-firefox.png"
+  },
+  {
+   "id": "STO-15",
+   "title": "Language switch (RU <-> EN) keeps the session, the open project, the unsaved edit and the dashboard section",
+   "browser": "firefox",
+   "status": "Failed",
+   "severity": "Medium",
+   "note": "Locator.click: Timeout 60000ms exceeded. Call log:   - waiting for locator(\"a[hreflang=en]\").first     - locator resolved to <a lang=\"en\" hreflang=\"en\" class=\"button button--quiet\" href=\"../en/app/editor.html?tl=en&p=pmwgtxmnb0\">English</a>   - attempting click action     2 × waiting for element to be visible, enabled and stable",
+   "screenshot": "fail-STO-15-firefox.png"
+  }
+ ]
+}

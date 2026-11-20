@@ -51,6 +51,12 @@ npm run e2e                                # editor, palette, extra, critical-pa
 
 English: `npm run e2e` runs the Playwright scripts of `full/` in order and then the gate `full/e2e-gate.py`; set `E2E_BROWSER=chromium` (default `msedge`), `E2E_OUT` and `E2E_SHOTS` to choose the browser and keep the committed JSON files clean. The `e2e` job in `.github/workflows/ci.yml` does exactly that and uploads the `e2e-results` artifact.
 
+### Проверки под разными аккаунтами (`accounts/*.py`)
+
+`npm run e2e:accounts` запускает в Edge и Firefox (по процессу на браузер) сценарии `isolation.py` (изоляция данных, квоты, вкладки, ссылка «поделиться»), `roles_projects.py` (роли, импорт, шаблоны, корзина, версии), `storage_states.py` (перезагрузка, очистка данных сайта, повреждённое, переполненное и отключённое хранилище, смена языка), `ai_offline_mobile.py` (ИИ без ключа и с поддельным локальным сервером, офлайн через service worker, телефон 390 px), `course_app.py` (приложение курсового проекта: два пользователя и администратор), затем `accounts-gate.py` (код 1, если хоть одна строка не `Passed`). Сайт и сервер поднимаются самими скриптами. Окружение: `ACC_BROWSERS` (`msedge,firefox`, для CI `chromium`), `E2E_OUT` (папка `accounts-*.json`), `E2E_SHOTS` (скриншоты провалов, по умолчанию `docs/evidence/accounts-2026-11/screens`). Роли developer и admin записываются в запись аккаунта тестового профиля: настоящие коды не используются. Протокол: `docs/evidence/accounts-2026-11/README.md`.
+
+English: `npm run e2e:accounts` runs the account scenarios of `accounts/` in Edge and Firefox (one process per browser) and then `accounts-gate.py`, which exits 1 if any row is not `Passed`. The scripts start the site and the course-app server themselves. Variables: `ACC_BROWSERS`, `E2E_OUT`, `E2E_SHOTS`. The roles developer and admin are written into the account record of the test profile, the real codes are never used. Protocol: `docs/evidence/accounts-2026-11/README.en.md`.
+
 ### Пересборка отчётов
 
 Отчёты собирает [report-gen](https://github.com/KsushaKhadzhinova/report-gen) (нужен Python 3.10+; для PDF нужен XeLaTeX).

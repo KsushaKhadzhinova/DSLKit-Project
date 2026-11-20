@@ -174,3 +174,8 @@ test('parseExtra keeps at most three sane questions', () => {
   assert.deepEqual(list[0].options, []);
   assert.equal(parseExtra('[{"text":"q","kind":"choice","options":"no"}]')[0].kind, 'text');
 });
+
+test('extra questions are read from a fenced JSON block', async () => {
+  const { parseExtra } = await import('./ai-questions.js');
+  assert.equal(parseExtra('Sure [ok]:\n```json\n[{"text":"Who pays?","kind":"text"}]\n```').length, 1);
+});

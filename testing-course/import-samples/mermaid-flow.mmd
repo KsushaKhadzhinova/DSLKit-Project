@@ -1,0 +1,7 @@
+flowchart TD
+    A([Start]) --> B[Read order]
+    B --> C{In stock?}
+    C -->|yes| D[Ship order]
+    C -->|no| E[Back order]
+    D --> F([End])
+    E --> F

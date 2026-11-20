@@ -16,6 +16,7 @@ export const buildReviewSystem = (reference, lang) =>
     'Answer with JSON ONLY, no Markdown fence and no comment: {"variants":[{"title":"short name","code":"the whole corrected DSLKit code","changes":["what was changed"]}]}.',
     `Offer at most ${MAX_AI_VARIANTS} variants. Each variant is the WHOLE code, starts with the header \`diagram <notation> ["Title"]\` and keeps the notation of the original.`,
     'Fix the listed problems first, then anything else that is wrong by the rules of the notation. Keep the meaning, the labels and the language of the original; do not invent new content.',
+    'Syntax reminder: a link label is a quoted string after the link (`flow a -> b "yes"`, `edge a -> b "text"`), never `[label=...]`; no Markdown inside the code; only keywords and identifiers of the reference.',
     `Write the titles and the changes in ${lang === 'en' ? 'English' : 'Russian'}.`,
     `Language reference:\n${String(reference).slice(0, 40_000)}`,
   ].join('\n\n');
@@ -29,12 +30,15 @@ export const buildReviewTask = (code, issues, lang) => {
 };
 
 // The variants of an answer: the JSON object or array inside the text, however the model wrapped it.
-export const parseVariants = (text) => {
-  const start = String(text).search(/[[{]/);
-  const end = Math.max(String(text).lastIndexOf('}'), String(text).lastIndexOf(']'));
+// A fenced block (```json ... ```) wins over any prose with brackets around it.
+const unfence = (text) => /```[\w-]*\r?\n([\s\S]*?)```/.exec(text)?.[1] ?? text;
+export const parseVariants = (raw) => {
+  const text = unfence(String(raw));
+  const start = text.search(/[[{]/);
+  const end = Math.max(text.lastIndexOf('}'), text.lastIndexOf(']'));
   if (start < 0 || end < start) return [];
   try {
-    const data = JSON.parse(String(text).slice(start, end + 1));
+    const data = JSON.parse(text.slice(start, end + 1));
     return Array.isArray(data) ? data : (data.variants ?? []);
   } catch {
     return [];
@@ -79,7 +83,10 @@ export const reviewWithAi = async ({ code, lang = 'ru', ask, reference = '', mod
   const result = { ...base, ai: false, model };
   if (typeof ask !== 'function') return result;
   try {
-    const answer = await ask(buildReviewSystem(reference, lang), [{ role: 'user', content: buildReviewTask(code, base.issues, lang) }]);
+    const system = buildReviewSystem(reference, lang);
+    const messages = [{ role: 'user', content: buildReviewTask(code, base.issues, lang) }];
+    // One more try when the service fails once (a busy free tier answers 429 or 503 now and then).
+    const answer = await ask(system, messages).catch(() => ask(system, messages));
     const extra = acceptVariants(
       parseVariants(answer),
       code,

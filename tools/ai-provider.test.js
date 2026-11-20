@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { PDF_MESSAGE, checkBaseUrl, createAsk, toOpenAiMessages } from './ai-provider.js';
+import { PDF_MESSAGE, checkBaseUrl, createAsk, toGeminiBody, toOpenAiMessages } from './ai-provider.js';
 import { createAiHandler } from './ai-api.js';
 
 const SECRET = 'sk-secret-key-123';
@@ -144,6 +144,38 @@ test('an upstream failure is a 502 without the key; an image reaches the model a
   const refused = await generate(make(ENV).handler, { mode: 'image', mediaType: 'application/pdf', image: pdf });
   assert.equal(refused.status, 415);
   assert.equal(refused.json().error.code, 'pdf-provider');
-  assert.match(refused.json().error.message, /PDF needs the Anthropic provider/);
+  assert.match(refused.json().error.message, /PDF needs the Anthropic or the Gemini provider/);
   assert.ok(!refused.text.includes(SECRET));
+});
+
+const GEMINI_BASE = 'https://generativelanguage.googleapis.com/v1beta/openai/';
+const gemini = (fetchImpl, model = 'gemini-3.1-flash-lite') => createAsk({ provider: 'openai', key: SECRET, baseUrl: GEMINI_BASE, model, fetchImpl });
+const PDF_BLOCK = { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: 'JVBERg==' } };
+
+test('gemini: a PDF goes through the native generateContent API as inlineData, the key in the header only', async () => {
+  const api = fake([{ candidates: [{ content: { parts: [{ text: 'diagram graph' }, {}, { text: '\nvertex a' }] } }] }]);
+  const messages = [
+    { role: 'user', content: [{ type: 'text', text: 'read' }, PDF_BLOCK] },
+    { role: 'assistant', content: 'earlier' },
+  ];
+  assert.equal(await gemini(api.fetchImpl, 'models/gemini-x')('SYS', messages), 'diagram graph\nvertex a');
+  const [call] = api.calls;
+  assert.equal(call.url, 'https://generativelanguage.googleapis.com/v1beta/models/gemini-x:generateContent');
+  assert.equal(call.options.headers['x-goog-api-key'], SECRET);
+  assert.equal(call.options.redirect, 'error');
+  assert.ok(!call.url.includes(SECRET) && !call.options.body.includes(SECRET));
+  assert.deepEqual(call.body.systemInstruction, { parts: [{ text: 'SYS' }] });
+  assert.deepEqual(call.body.contents[0].parts, [{ text: 'read' }, { inlineData: { mimeType: 'application/pdf', data: 'JVBERg==' } }]);
+  assert.deepEqual(call.body.contents[1], { role: 'model', parts: [{ text: 'earlier' }] });
+});
+
+test('gemini: a request without a PDF still uses the OpenAI-compatible endpoint; native failures stay clean', async () => {
+  const plain = fake([chat('ok')]);
+  assert.equal(await gemini(plain.fetchImpl)('S', [{ role: 'user', content: 'hi' }, { role: 'user', content: [{ type: 'text', text: 'x' }] }]), 'ok');
+  assert.equal(plain.calls[0].url, `${GEMINI_BASE}chat/completions`);
+  const pdf = [{ role: 'user', content: [PDF_BLOCK] }];
+  await assert.rejects(gemini(fake([{ ok: false, status: 429 }]).fetchImpl)('S', pdf), /upstream status/);
+  await assert.rejects(gemini(fake([{ candidates: [] }]).fetchImpl)('S', pdf), /upstream empty/);
+  await assert.rejects(gemini(fake([{}]).fetchImpl)('S', pdf), /upstream empty/);
+  assert.deepEqual(toGeminiBody('S', [{ role: 'user', content: 'a' }]).contents, [{ role: 'user', parts: [{ text: 'a' }] }]);
 });
