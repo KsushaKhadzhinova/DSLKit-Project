@@ -41,7 +41,9 @@ jobs:
       - name: Turn on auto-merge
         run: |
           set -euo pipefail
-          gh pr merge "$BRANCH" --auto --squash
+          # --auto is refused when the pull request is already mergeable or only a non-required check fails ("unstable"):
+          # then the pull request is merged directly, which the branch ruleset still allows only when every required check passed.
+          gh pr merge "$BRANCH" --auto --squash || gh pr merge "$BRANCH" --squash
       # A merge made with the workflow token does not start the workflows of main by itself (a GitHub rule),
       # so after the merge the checks and the site deploy are started by hand on main.
       - name: Verify and deploy main after the merge
