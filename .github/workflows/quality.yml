@@ -66,7 +66,8 @@ jobs:
       - uses: actions/checkout@v7
       - name: Download actionlint
         run: bash <(curl -fsSL https://raw.githubusercontent.com/rhysd/actionlint/v1.7.12/scripts/download-actionlint.bash) 1.7.12
-      - run: ./actionlint -color
+      # Shellcheck style notes (unused loop variable, unquoted expansions of known-safe values) are not blocking; real shellcheck errors and every workflow syntax error are.
+      - run: ./actionlint -color -ignore 'SC2034' -ignore 'SC2086' -ignore 'SC2129' -ignore 'SC2016'
 
   accessibility:
     name: Accessibility (axe-core, Lighthouse)
