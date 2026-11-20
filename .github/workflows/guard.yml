@@ -1,0 +1,42 @@
+name: Guard
+# Nothing unclear gets in: no secrets, personal or generated files, no huge blobs, no tool or AI attribution in commit messages.
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+concurrency:
+  group: guard-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  guard:
+    name: Repository guard
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - name: Forbidden files, secrets and big blobs in the whole tree
+        run: node .github/scripts/check-files.mjs
+      - name: Commit messages of the change
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            base="${{ github.event.pull_request.base.sha }}"; head="${{ github.event.pull_request.head.sha }}"
+          else
+            base=$(git merge-base origin/main "${{ github.sha }}" 2>/dev/null || true); head="${{ github.sha }}"
+          fi
+          if [ -n "$base" ] && [ "$base" != "$head" ]; then node .github/scripts/check-commits.mjs "$base" "$head"; else echo "No commits to check."; fi
+      - name: Workflow files do not use unpinned third-party scripts from the network
+        run: |
+          if grep -RInE 'curl[^|]*\|\s*(sudo )?(ba)?sh' .github/workflows; then echo "Piping a download into a shell is not allowed."; exit 1; fi
+          echo ok
+      - name: Every workflow limits the permissions of its token
+        run: |
+          missing=0
+          for f in .github/workflows/*.yml; do grep -q '^permissions:' "$f" || { echo "$f has no top-level permissions"; missing=1; }; done
+          exit $missing
