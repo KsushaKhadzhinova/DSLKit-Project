@@ -1,6 +1,7 @@
 import { createDialogs } from './dialog.js';
 import { NOTATIONS, NOTATION_KEYS, TEMPLATE_LANGS, parseDiagram, templateFor } from '../notations/index.js';
 import { currentUser } from '../storage/accounts.js';
+import { scopedKey } from '../storage/scope.js';
 import { can } from '../auth/permissions.js';
 import { notify } from './toast.js';
 import { starterProjects } from '../storage/seeds.js';
@@ -301,7 +302,7 @@ export const initDashboard = ({ root = document, storage, now = () => Date.now()
   }
 
   const fromAddress = new view.URLSearchParams(view.location.search).get('q');
-  let state = normalize(storage.get('dashboard'));
+  let state = normalize(storage.get(scopedKey(storage, 'dashboard')));
   if (fromAddress !== null) state.query = fromAddress;
   // A link from another page such as dashboard.html#shared or #trash opens straight into that section.
   const fromHash = view.location.hash.slice(1);
@@ -361,7 +362,7 @@ export const initDashboard = ({ root = document, storage, now = () => Date.now()
       else count.textContent = own ? labels.noneTemplates : labels.none;
     }
     showQuota(quotaText, quotaBar, store.createdOn(), lang, can(user, 'diagram.unlimited'));
-    storage.set('dashboard', state);
+    storage.set(scopedKey(storage, 'dashboard'), state);
   };
 
   const update = (change) => {

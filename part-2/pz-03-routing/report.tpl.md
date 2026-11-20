@@ -6,7 +6,7 @@
 
 ## 2 Выбор версии React Router
 
-Условие называет React Router v6 с пометкой «v6?». Этот вариант работы использует библиотеку `react-router-dom` версии 6.30, то есть точно следует условию. Весь API из условия (`BrowserRouter`, `Routes`, `Route`, `Link`, `NavLink`, `Outlet`, `Navigate`, `useParams`, `useNavigate`, `useLocation`, `useSearchParams`) в версии 6 работает без изменений. Версия 6.30 поддерживается и совместима с React 19.
+Условие называет React Router v6 с пометкой «v6?». Текст условия называет v6, но владелец работы 20.11.2026 утвердил версию 7 (`react-router-dom` 7.18), потому что в линии 6.x нет исправления двух находок `npm audit`. Весь API из условия (`BrowserRouter`, `Routes`, `Route`, `Link`, `NavLink`, `Outlet`, `Navigate`, `useParams`, `useNavigate`, `useLocation`, `useSearchParams`) в версии 7 работает без изменений. Версия 7.18 совместима с React 19.
 
 ## 3 Ход работы
 

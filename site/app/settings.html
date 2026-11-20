@@ -337,6 +337,16 @@
             </div>
             <ul class="security-list" data-audit-list></ul>
 
+            <div data-account-transfer>
+              <h3 class="security__title">Перенос аккаунта</h3>
+              <p class="form__hint">
+                Аккаунт живёт только в этом браузере. Файл с аккаунтом содержит имя, почту и хеш пароля, но не сам пароль, второй фактор и роль. Загрузите его
+                на странице входа в другом браузере.
+              </p>
+              <button class="button" type="button" data-account-export>Выгрузить аккаунт</button>
+              <p class="security__status" role="status" data-transfer-status="export"></p>
+            </div>
+
             <form class="form" id="security-delete-form" novalidate>
               <h3 class="security__title">Удаление аккаунта</h3>
               <p class="form__hint">

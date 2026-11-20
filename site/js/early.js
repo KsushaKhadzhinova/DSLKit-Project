@@ -10,11 +10,13 @@
         return null;
       }
     };
-    const saved = read('theme');
+    const session = read('session');
+    const owner = session && typeof session.userId === 'string' ? session.userId : null;
+    // The theme is kept per account ("theme.<id>"); a guest, or an account that never chose, uses the plain key.
+    const saved = (owner && read('theme.' + owner)) || read('theme');
     const dark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
     root.dataset.theme = saved === 'light' || saved === 'dark' ? saved : dark ? 'dark' : 'light';
     if (/\/dashboard\.html\/?$/i.test(location.pathname)) {
-      const session = read('session');
       const accounts = read('accounts');
       const known =
         session &&

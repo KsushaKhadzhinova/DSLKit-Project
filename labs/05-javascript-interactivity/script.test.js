@@ -46,6 +46,7 @@ test('the dashboard, the settings and the editor start their own components', ()
     'initAppSearch',
     'initSettings',
     'initSecurity',
+    'initAccountTransfer',
   ]);
   assert.deepEqual(boot(load('app/editor.html')), [
     'initTheme',
@@ -76,8 +77,10 @@ test('the welcome page lists templates and shows the quota', () => {
 });
 
 test('the sign-in and registration pages start the form', () => {
-  for (const page of ['app/login.html', 'app/register.html', 'en/app/login.html', 'en/app/register.html'])
+  for (const page of ['app/register.html', 'en/app/register.html'])
     assert.deepEqual(boot(load(page)), ['initTheme', 'initLangSwitch', 'initToasts', 'initAuthForm', 'initNativeValidation'], page);
+  for (const page of ['app/login.html', 'en/app/login.html'])
+    assert.deepEqual(boot(load(page)), ['initTheme', 'initLangSwitch', 'initToasts', 'initAuthForm', 'initNativeValidation', 'initAccountTransfer'], page);
 });
 
 test('a page without interactive markup starts only the theme', () => {
