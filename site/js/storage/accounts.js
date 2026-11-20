@@ -116,6 +116,7 @@ export const createAccountStore = ({
 
   const register = async ({ name, email, password, remember = true }) => {
     if (!supported()) return { ok: false, error: 'unsupported' };
+    if (storage.volatile) return { ok: false, error: 'storage' };
     const accounts = read();
     const address = normalizeEmail(email);
     const issues = passwordIssues(password, { name, email: address });
@@ -145,6 +146,7 @@ export const createAccountStore = ({
   // asks for a code ("code-required"); a wrong code counts as a failed attempt.
   const login = async ({ email, password, code = '', remember = true }) => {
     if (!supported()) return { ok: false, error: 'unsupported' };
+    if (storage.volatile) return { ok: false, error: 'storage' };
     const address = normalizeEmail(email);
     const wait = locked(address);
     if (wait) return wait;
