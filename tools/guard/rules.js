@@ -37,7 +37,11 @@ const SECRET_PATTERNS = [
 export const MAX_BYTES = 5 * 1024 * 1024;
 // Large files that belong to the repository on purpose (measured network captures of lab 1).
 export const LARGE_FILE_ALLOWED = [/^labs\/01-network\/data\/[^/]+\.har$/];
-export const sizeProblem = (path, size) => (size > MAX_BYTES && !LARGE_FILE_ALLOWED.some((pattern) => pattern.test(path)) ? `larger than 5 MB (${(size / 1048576).toFixed(1)} MB)` : undefined);
+export const sizeProblem = (path, size) =>
+  size > MAX_BYTES && !LARGE_FILE_ALLOWED.some((pattern) => pattern.test(path)) ? `larger than 5 MB (${(size / 1048576).toFixed(1)} MB)` : undefined;
 export const pathProblems = (path) => FORBIDDEN_PATHS.filter((pattern) => pattern.test(path)).map((pattern) => `forbidden path (${pattern})`);
 export const secretProblems = (text) => SECRET_PATTERNS.filter((pattern) => pattern.test(text)).map((pattern) => `looks like a secret (${pattern})`);
-export const scansForSecrets = (path) => /\.(js|mjs|cjs|jsx|json|md|yml|yaml|html|css|toml|env|txt|py|sh|ps1|ejs|tpl)$/i.test(path) && !/(^|\/)(package-lock\.json|\.gitleaks\.toml)$/.test(path) && !/^tools\/guard\//.test(path);
+export const scansForSecrets = (path) =>
+  /\.(js|mjs|cjs|jsx|json|md|yml|yaml|html|css|toml|env|txt|py|sh|ps1|ejs|tpl)$/i.test(path) &&
+  !/(^|\/)(package-lock\.json|\.gitleaks\.toml)$/.test(path) &&
+  !/^tools\/guard\//.test(path);

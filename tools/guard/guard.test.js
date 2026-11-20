@@ -18,7 +18,14 @@ test('tool and AI attribution lines are refused', () => {
 });
 
 test('secret files, personal files and dependencies are forbidden paths', () => {
-  for (const path of ['.env', 'part-2/lab-06-mongodb/.env', '.claude/admin-test-account.txt', '.playwright-mcp/x.png', 'a/node_modules/b.js', 'keys/server.pem']) {
+  for (const path of [
+    '.env',
+    'part-2/lab-06-mongodb/.env',
+    '.claude/admin-test-account.txt',
+    '.playwright-mcp/x.png',
+    'a/node_modules/b.js',
+    'keys/server.pem',
+  ]) {
     assert.equal(pathProblems(path).length >= 1, true, path);
   }
   for (const path of ['.env.example', 'site/js/script.js', 'docs/README.md']) assert.deepEqual(pathProblems(path), [], path);
