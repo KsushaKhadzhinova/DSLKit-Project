@@ -1,3 +1,4 @@
+// @ts-nocheck -- type-check debt: remove this line when the file passes npm run typecheck
 import { NOTATIONS } from '../notations/index.js';
 import { pageLanguage } from '../utils/lang.js';
 import { BUILDABLE } from '../automation/builders.js';

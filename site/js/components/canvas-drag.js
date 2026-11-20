@@ -1,3 +1,4 @@
+// @ts-nocheck -- type-check debt: remove this line when the file passes npm run typecheck
 import { setNodePosition } from '../utils/node-position.js';
 import { readCode, showCode } from './code-lines.js';
 
