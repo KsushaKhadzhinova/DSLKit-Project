@@ -19,6 +19,8 @@ Branching: GitHub Flow and trunk-based. `main` is always green, every change is 
 | CodeQL (`security-and-quality`)   | `security.yml`, also weekly                | static security findings                                                                                                                                                |
 | Dependency review                 | `security.yml`, pull requests only         | a new dependency with a high vulnerability                                                                                                                              |
 
+Auto-merge (`auto-merge.yml`): when the CI run of a work branch is green, the workflow opens a pull request and turns on auto-merge (squash); GitHub merges it into `main` only when all required checks of the branch protection ruleset pass. `wip/*` and `dependabot/*` branches are skipped.
+
 Everything locally at once: `npm run verify` (lint, format, tests).
 
 ## What is not checked automatically

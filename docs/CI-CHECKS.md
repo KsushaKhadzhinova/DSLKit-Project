@@ -19,6 +19,8 @@
 | CodeQL (`security-and-quality`)   | `security.yml`, также раз в неделю       | находки статического анализа безопасности                                                                                                           |
 | Dependency review                 | `security.yml`, только pull request      | новая зависимость с уязвимостью high                                                                                                                |
 
+Автослияние (`auto-merge.yml`): когда CI на рабочей ветке зелёный, workflow открывает pull request и включает автослияние (squash); GitHub вливает его в `main`, только когда пройдены все обязательные проверки правила защиты ветки. Ветки `wip/*` и `dependabot/*` пропускаются.
+
 Локально всё сразу: `npm run verify` (lint, format, тесты).
 
 ## Что не проверяется автоматически
