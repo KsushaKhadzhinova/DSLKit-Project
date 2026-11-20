@@ -128,3 +128,18 @@ jobs:
             ${{ runner.temp }}/axe
             .lighthouseci
           retention-days: 14
+
+
+  size-budget:
+    name: Bundle size budget
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - run: node ci/size-budget.mjs dist
