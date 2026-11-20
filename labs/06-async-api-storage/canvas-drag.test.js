@@ -173,7 +173,7 @@ test('arrow keys move a focused block by 10 units, with Shift by 50', () => {
   const { send, node, code, runs } = setup();
   assert.equal(node().getAttribute('tabindex'), '0');
   assert.equal(node().getAttribute('role'), 'button');
-  assert.equal(node().getAttribute('aria-label'), 't');
+  assert.equal(node().hasAttribute('aria-label'), false, 'the name comes from the content of the block');
   const right = send(node(), 'keydown', { key: 'ArrowRight' });
   assert.equal(right.defaultPrevented, true);
   assert.match(code(), /^task t "Work" pos=110x50$/m);

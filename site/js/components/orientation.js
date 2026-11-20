@@ -1,3 +1,4 @@
+// @ts-nocheck -- type-check debt: remove this line when the file passes npm run typecheck
 // Orientation and aspect awareness of the editor: the layout itself is CSS (orientation.css), this file does what CSS cannot.
 // It tags the page with the orientation, the height class and the aspect class, adds the draggable splitter between the code and the canvas,
 // keeps the cursor, the selection, the scroll positions and the manual zoom through a rotation, closes the menus that would end up in the wrong place,

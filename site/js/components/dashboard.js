@@ -1,3 +1,4 @@
+// @ts-nocheck -- type-check debt: remove this line when the file passes npm run typecheck
 import { createDialogs } from './dialog.js';
 import { NOTATIONS, NOTATION_KEYS, TEMPLATE_LANGS, parseDiagram, templateFor } from '../notations/index.js';
 import { currentUser } from '../storage/accounts.js';

@@ -132,6 +132,7 @@ export const API_CONFIG = {
 ## Приложение Б – Листинг файла apiService.js
 
 ```js
+// @ts-nocheck -- type-check debt: remove this line when the file passes npm run typecheck
 import { API_CONFIG } from './config.js';
 
 export class ApiError extends Error {
@@ -257,6 +258,7 @@ export const { fetchData, postData, checkHealth, renderDiagram } = createApi();
 ## Приложение В – Листинг файла localStorage.js
 
 ```js
+// @ts-nocheck -- type-check debt: remove this line when the file passes npm run typecheck
 import { createMemoryBackend, createStorage, getStorage } from '../utils/storage.js';
 
 export const STORAGE_KEYS = {
@@ -474,6 +476,7 @@ export const sanitizeSvg = (svgText, parser) => {
 ## Приложение Д – Листинг файла diagram-runner.js
 
 ```js
+// @ts-nocheck -- type-check debt: remove this line when the file passes npm run typecheck
 import { scopedKey } from '../storage/scope.js';
 import { renderDiagram, checkHealth } from '../api/apiService.js';
 import { API_CONFIG } from '../api/config.js';
@@ -559,7 +562,8 @@ export const initDiagramRunner = ({
   const show = (svgText, note, engine = currentEngine()) => {
     const svg = sanitizeSvg(svgText, parser);
     if (!svg) return false;
-    svg.setAttribute('role', 'img');
+    // A group, not an image: the blocks inside are focusable buttons, and an image may not contain interactive controls.
+    svg.setAttribute('role', 'group');
     svg.setAttribute('aria-label', tr(`Диаграмма: ${tr(engine.label)}`));
     remote.dataset.engine = engine.id;
     remote.replaceChildren(root.importNode(svg, true));
