@@ -21,6 +21,8 @@ Branching: GitHub Flow and trunk-based. `main` is always green, every change is 
 
 Repository guard (`guard.yml`, `npm run guard`): forbidden files (`.env`, personal files, `node_modules`, keys), strings that look like secrets (API keys, connection strings with a password), files over 5 MB (except the lab 1 captures) and tool or AI attribution in commit messages. It also checks that every workflow sets `permissions` and has no `curl | sh`. Locally the pre-push hook does the same (`npm run hooks:install`).
 
+Auto-merge (`auto-merge.yml`): when the CI run of a work branch is green, the workflow opens a pull request and turns on auto-merge (squash); GitHub merges it into `main` only when all required checks of the branch protection ruleset pass. `wip/*` and `dependabot/*` branches are skipped.
+
 Everything locally at once: `npm run verify` (lint, format, tests).
 
 ## What is not checked automatically
