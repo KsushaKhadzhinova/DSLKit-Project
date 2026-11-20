@@ -38,7 +38,7 @@ const check = (name, ok, detail = '') => {
     check('arbitrary sort key rejected (400)', r4.res.status === 400, `(status ${r4.res.status})`);
 
     // Mass assignment: fields outside the schema (role/isAdmin-equivalent here: priority out of range, or an extra field).
-    const r5 = await call('POST', '/diagrams', { title: 'x', notation: 'bpmn', sourceCode: 'diagram bpmn', __proto__: { polluted: true } });
+    await call('POST', '/diagrams', { title: 'x', notation: 'bpmn', sourceCode: 'diagram bpmn', __proto__: { polluted: true } });
     check('prototype-pollution-shaped body does not pollute Object.prototype', Object.prototype.polluted === undefined);
 
     // Array-shaped query param where a plain string is expected.

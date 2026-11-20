@@ -22,10 +22,49 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
+      # Real mistakes (unused or undefined names, loose equality, var) fail the build; Prettier owns the formatting.
+      - run: npm run lint
       - run: npm run format:check
       - run: npm test
       # Known vulnerabilities in the libraries that reach the user fail the build; development tools are reported by Dependabot.
       - run: npm audit --omit=dev --audit-level=high
+
+  work-folders:
+    name: Work folder ${{ matrix.folder }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        folder:
+          - lab-01-node-server
+          - lab-02-sequelize
+          - lab-03-auth
+          - lab-04-react-state
+          - lab-05-react-api
+          - lab-06-mongodb
+          - lab-07-websocket
+          - lab-08-docker
+          - pz-01-middleware-ejs
+          - pz-02-rest-api
+          - pz-03-routing
+          - pz-04-context-reducer
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      # The report tests of the folders use the tools of the repository root.
+      - run: npm ci
+      - name: Install the folder
+        working-directory: part-2/${{ matrix.folder }}
+        run: if [ -f package-lock.json ]; then npm ci; else npm install; fi
+      - name: Test the folder
+        working-directory: part-2/${{ matrix.folder }}
+        run: npm test
+      - name: Known vulnerabilities in the production libraries
+        working-directory: part-2/${{ matrix.folder }}
+        run: if [ -f package-lock.json ]; then npm audit --omit=dev --audit-level=high; fi
 
   build:
     name: Production build of the site

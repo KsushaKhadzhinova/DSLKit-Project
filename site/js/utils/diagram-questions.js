@@ -223,7 +223,7 @@ const typeQuestion = (ctx, item) => {
 
 // An element used in a link but never declared: the user says what it is (graphs) or whether it is an actor (sequence).
 const declareQuestion = (ctx, item) => {
-  const { spec, model, key } = ctx;
+  const { spec, key } = ctx;
   const id = item.params.id;
   const text = both(`«${id}» используется, но не описан. Что это?`, `"${id}" is used but never declared. What is it?`);
   if (key === 'uml-sequence') {

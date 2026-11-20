@@ -137,7 +137,7 @@ describe('the splitter', () => {
     assert.equal(api.ratio(), 40);
     api.splitter.style.setProperty('--split-axis', 'y');
     fire('pointermove', { clientY: 400 });
-    assert.equal(api.ratio(), 45 > 600 ? 0 : 50);
+    assert.equal(api.ratio(), 50);
     let captured = 0;
     api.splitter.setPointerCapture = () => {
       captured += 1;

@@ -6,7 +6,6 @@ import { buildQuestions, checkCompletion, completeFromAnswers, describeQuestion 
 // than the code it started from; the answer is then the result of the rules.
 export const CLARIFY_LIMITS = { body: 120_000, code: 20_000, answers: 60, answer: 500, extra: 3, retries: 1 };
 const STEPS = ['questions', 'complete'];
-const KINDS = ['choice', 'text', 'yesno'];
 
 const both = (value) => ({ ru: value, en: value });
 

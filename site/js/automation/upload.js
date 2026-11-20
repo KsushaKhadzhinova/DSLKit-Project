@@ -53,7 +53,7 @@ const failure = (reason, extra = {}) => ({ ok: false, reason, ...extra });
 // A text of a file becomes { ok: true, source: 'import', format, dsl, notation, problems, valid } or { ok: false, reason }.
 // Reasons: empty, too-long, unknown, unsupported (the existing import), too-big, no-structure, bad-file.
 export const importUpload = async (source, { fileName = '', lang = 'ru' } = {}) => {
-  const text = String(source ?? '').replace(/^﻿/, '');
+  const text = String(source ?? '').replace(/^\uFEFF/, '');
   if (text.length > MAX_FILE_BYTES) return failure('too-big');
   if (text.trim() === '') return failure('empty');
   let format = sniffFormat(text, fileName);

@@ -99,7 +99,7 @@ test('a second run with the same code uses the saved copy and the refresh button
 });
 
 test('an expired copy is requested again', async () => {
-  const { window, api, $, clock } = setup();
+  const { window, api, clock } = setup();
   run(window);
   await flush();
   clock.time += 25 * 60 * 60 * 1000;
@@ -142,7 +142,7 @@ test('without a saved copy each failure shows its own message and is logged', as
 });
 
 test('an error without a status is logged with an empty status', async () => {
-  const { window, $, logger } = setup({
+  const { window, logger } = setup({
     api: {
       renderDiagram: async () => {
         throw new ApiError('x', { kind: 'network' });
@@ -275,7 +275,7 @@ test('a newer run cancels the previous request and the cancelled one stays silen
 });
 
 test('a history item shows its saved copy and an unknown item does nothing', async () => {
-  const { window, $, document, clock } = setup();
+  const { window, $, clock } = setup();
   run(window);
   await flush();
   $('.canvas__remote').replaceChildren();
@@ -362,7 +362,7 @@ test('each Kroki engine sends its own text type to its own endpoint', async () =
   ]) {
     const storage = memory();
     useEngine(storage, engine);
-    const { window, api, $ } = setup({ storage });
+    const { window, api } = setup({ storage });
     run(window);
     await flush();
     const [source, options] = api.renderDiagram.mock.calls[0].arguments;
@@ -397,7 +397,7 @@ test('the own engine draws live SVG in the browser without any request, even off
 });
 
 test('the engine is read from the settings on every run', async () => {
-  const { window, api, $, storage } = setup();
+  const { window, api, storage } = setup();
   run(window);
   await flush();
   useEngine(storage, 'mermaid');
@@ -420,7 +420,7 @@ test('an unknown or broken engine setting falls back to the own engine', async (
 });
 
 test('the same code is cached separately for every engine', async () => {
-  const { window, api, $, storage } = setup();
+  const { window, api, storage } = setup();
   run(window);
   await flush();
   useEngine(storage, 'mermaid');

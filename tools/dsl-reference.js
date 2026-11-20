@@ -112,7 +112,7 @@ export const buildReference = (lang = 'ru') => {
   lines.push(
     '| Method | Path | Body and answer |',
     '| --- | --- | --- |',
-    ...API_ROWS.map(([method, path, body]) => `| ${method} | \`${path}\` | ${body.replaceAll('|', '\|')} |`),
+    ...API_ROWS.map(([method, path, body]) => `| ${method} | \`${path}\` | ${body.replaceAll('|', '\\|')} |`),
     '',
     `## ${t.imports}`,
     '',
