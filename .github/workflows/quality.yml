@@ -1,0 +1,46 @@
+name: Quality
+# Extra quality gates (lint of the work folders, types, workflows, accessibility, size, flaky tests, Markdown links).
+# The main checks stay in ci.yml; this file is separate so that the two can change independently.
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+# The token of the workflow may only read the code: a compromised step cannot push or change settings.
+permissions:
+  contents: read
+# A newer push to the same branch cancels the older run of it.
+concurrency:
+  group: quality-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  lint-work-folders:
+    name: ESLint ${{ matrix.folder }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        folder:
+          - lab-01-node-server
+          - lab-02-sequelize
+          - lab-03-auth
+          - lab-04-react-state
+          - lab-05-react-api
+          - lab-06-mongodb
+          - lab-07-websocket
+          - lab-08-docker
+          - pz-01-middleware-ejs
+          - pz-02-rest-api
+          - pz-03-routing
+          - pz-04-context-reducer
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - name: Install the folder
+        working-directory: part-2/${{ matrix.folder }}
+        run: npm ci
+      - name: Lint the folder
+        working-directory: part-2/${{ matrix.folder }}
+        run: npm run lint

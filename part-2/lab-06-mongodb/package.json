@@ -10,7 +10,8 @@
     "dev": "nodemon server.js",
     "seed": "node scripts/seed.js",
     "seed:undo": "node scripts/seed.js --undo",
-    "test": "node --test --experimental-test-coverage --test-coverage-include=\"src/**\" \"tests/*.test.js\" report.test.mjs"
+    "test": "node --test --experimental-test-coverage --test-coverage-include=\"src/**\" \"tests/*.test.js\" report.test.mjs",
+    "lint": "eslint ."
   },
   "engines": {
     "node": ">=22"
@@ -21,6 +22,9 @@
     "mongoose": "^8.19.2"
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.5",
+    "eslint": "^9.39.5",
+    "globals": "^17.14.0",
     "mongodb-memory-server": "^10.2.3",
     "nodemon": "^3.1.14",
     "puppeteer-core": "^25.14.0"

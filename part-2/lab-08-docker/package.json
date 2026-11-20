@@ -8,6 +8,12 @@
     "down": "docker compose down",
     "smoke": "node scripts/smoke.mjs",
     "shots": "node shots/shots.mjs",
-    "test": "node --test docker.test.mjs hardening.test.mjs report.test.mjs"
+    "test": "node --test docker.test.mjs hardening.test.mjs report.test.mjs",
+    "lint": "eslint ."
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.5",
+    "eslint": "^9.39.5",
+    "globals": "^17.14.0"
   }
 }
