@@ -1,0 +1,8 @@
+#!/bin/sh
+# Local guard before a push: forbidden files and commit messages. The full checks run in CI.
+# Install once with: npm run hooks:install
+set -e
+base=$(git merge-base origin/main HEAD 2>/dev/null || true)
+[ -z "$base" ] && exit 0
+node .github/scripts/check-files.mjs "$base"
+node .github/scripts/check-commits.mjs "$base" HEAD

@@ -1,0 +1,43 @@
+name: Auto merge
+# GitHub Flow with a trunk: a branch whose CI run is green gets a pull request and auto-merge.
+# GitHub then merges it into main only when every required check of the ruleset passes on the pull request.
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+permissions:
+  contents: write
+  pull-requests: write
+concurrency:
+  group: auto-merge-${{ github.event.workflow_run.head_branch }}
+  cancel-in-progress: false
+jobs:
+  open-and-merge:
+    name: Pull request and auto-merge
+    # Only green pushes to a work branch; not main, not Dependabot (it has its own pull requests), not branches that start with wip/.
+    if: >
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.head_branch != 'main' &&
+      !startsWith(github.event.workflow_run.head_branch, 'wip/') &&
+      !startsWith(github.event.workflow_run.head_branch, 'dependabot/')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GH_REPO: ${{ github.repository }}
+      BRANCH: ${{ github.event.workflow_run.head_branch }}
+    steps:
+      - name: Open the pull request when there is none
+        run: |
+          set -euo pipefail
+          existing=$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number // empty')
+          if [ -z "$existing" ]; then
+            gh pr create --base main --head "$BRANCH" \
+              --title "$(gh api "repos/$GH_REPO/commits/${{ github.event.workflow_run.head_sha }}" --jq '.commit.message | split("\n")[0]')" \
+              --body "Opened automatically: the CI run of this branch passed. It merges into main when all required checks pass."
+          fi
+      - name: Turn on auto-merge
+        run: |
+          set -euo pipefail
+          gh pr merge "$BRANCH" --auto --squash
