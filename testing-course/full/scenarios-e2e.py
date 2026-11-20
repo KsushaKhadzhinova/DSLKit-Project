@@ -6,7 +6,7 @@ import sys
 import tempfile
 from pathlib import Path
 from playwright.sync_api import sync_playwright
-from e2e_env import OUT, SHOTS, launch, answer
+from e2e_env import OUT, SHOTS, launch, answer, allow_clipboard
 
 base = sys.argv[1] if len(sys.argv) > 1 else "http://localhost:5173"
 out = OUT
@@ -65,7 +65,7 @@ with sync_playwright() as p:
         ctx = b.new_context(viewport={"width": width, "height": height}, accept_downloads=True, locale=lang)
         if signed_in:
             ctx.add_init_script("(" + SIGN_IN + ")()")
-        ctx.grant_permissions(["clipboard-read", "clipboard-write"], origin=base)
+        allow_clipboard(ctx, base)
         pg = ctx.new_page()
         pg.set_default_timeout(8000)
         pg.on("pageerror", lambda e: errors.append(str(e)))

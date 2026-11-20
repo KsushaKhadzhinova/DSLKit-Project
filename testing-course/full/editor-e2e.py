@@ -4,7 +4,7 @@ import json
 import sys
 from pathlib import Path
 from playwright.sync_api import sync_playwright
-from e2e_env import OUT, SHOTS, launch
+from e2e_env import OUT, SHOTS, launch, allow_clipboard
 
 base = sys.argv[1] if len(sys.argv) > 1 else "http://localhost:5173"
 out = OUT
@@ -33,6 +33,7 @@ def yes(v, msg):
 with sync_playwright() as p:
     b = launch(p)
     ctx = b.new_context(viewport={"width": 1366, "height": 800}, accept_downloads=True)
+    allow_clipboard(ctx, base)
     page = ctx.new_page()
     page.on("console", lambda m: errors.append(m.text) if m.type == "error" else None)
     page.on("pageerror", lambda e: errors.append(str(e)))
@@ -149,7 +150,6 @@ with sync_playwright() as p:
     check("E2E-14", "Кнопки панели: отмена, возврат, формат, раскладка, проверка, масштаб, сохранить, меню, тема", toolbar)
 
     def share():
-        ctx.grant_permissions(["clipboard-read", "clipboard-write"], origin=base)
         page.locator('[data-action="share"]').first.evaluate("e => e.click()")
         page.wait_for_timeout(300)
         # The button copies a link with the code packed after "#s=" (base64 of UTF-8, URL-safe, no padding).

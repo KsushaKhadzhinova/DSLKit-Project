@@ -1,0 +1,17 @@
+# Default gitleaks rules plus an allowlist for test fixtures that were checked by hand (see docs/CI-CHECKS.md).
+title = "DSLKit gitleaks configuration"
+
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Fixed test secrets of two test files: a made-up key for the two-factor tests and the RFC 6238 shared secret (base32 of 12345678901234567890)"
+condition = "AND"
+paths = [
+  '''part-2/lab-03-auth/tests/twofactor\.test\.js''',
+  '''labs/05-javascript-interactivity/auth-modules\.test\.js''',
+]
+regexes = [
+  '''two-factor-key-two-factor-key-1234''',
+  '''GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ''',
+]
