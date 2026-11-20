@@ -34,17 +34,28 @@ def context(browser, engine, device=None, size=None):
         options.pop("is_mobile", None)
     options["locale"] = "ru-RU"
     ctx = browser.new_context(**options)
-    ctx.add_init_script("try{localStorage.setItem('dslkit.tour-done','1')}catch(e){}")
+    ctx.add_init_script("try{localStorage.setItem('dslkit.tour-done','true')}catch(e){}")
     return ctx
 
 
 def small_targets(page):
+    """Controls under 44 px; the avatar is 36 px but its ::after widens the hit area to 44 px (editor.css), so it is not counted."""
     return page.evaluate(
         """() => [...document.querySelectorAll('button, a[href], [role=button], input:not([type=hidden]), select, summary')]
         .filter(e => { const r = e.getBoundingClientRect(); const s = getComputedStyle(e); return r.width > 0 && r.height > 0 && s.visibility !== 'hidden' && r.left >= 0 && r.right <= innerWidth && r.top >= 0 && r.bottom <= innerHeight && !e.closest('[hidden]'); })
-        .filter(e => { const r = e.getBoundingClientRect(); return Math.min(r.width, r.height) < 43.5 && !(e.tagName === 'A' && e.closest('p, li, footer, .docs-content')); })
+        .filter(e => { const r = e.getBoundingClientRect(); return Math.min(r.width, r.height) < 43.5 && !e.matches('.editor-toolbar__avatar') && !(e.tagName === 'A' && e.closest('p, li, footer, .docs-content')); })
         .map(e => (e.className || e.tagName) + ':' + Math.round(e.getBoundingClientRect().width) + 'x' + Math.round(e.getBoundingClientRect().height)).slice(0, 5)"""
     )
+
+
+def visit(page, url):
+    """Open a page; a page that does not load is a failed check, not a crash of the whole run."""
+    try:
+        page.goto(url, wait_until="commit", timeout=15000)
+        page.wait_for_load_state("load", timeout=5000)
+        page.wait_for_timeout(300)
+    except Exception as e:  # noqa: BLE001
+        raise AssertionError(f"не открылась {url}: {str(e).splitlines()[0][:120]}") from e
 
 
 def no_overflow(page):
@@ -67,9 +78,7 @@ with sync_playwright() as p:
             page.on("pageerror", lambda e: errors.append(str(e)))
             page.set_default_timeout(20000)
             for path in PAGES:
-                page.goto(base + path, wait_until="domcontentloaded")
-                page.wait_for_timeout(250)
-                check(f"ORI-{tag}-{name}-{path}-portrait", f"{tag} {portrait} {path}: нет горизонтальной прокрутки", lambda: no_overflow(page))
+                check(f"ORI-{tag}-{name}-{path}-portrait", f"{tag} {portrait} {path}: нет горизонтальной прокрутки", lambda: (visit(page, base + path), no_overflow(page)))
             page.goto(base + "/app/editor.html", wait_until="domcontentloaded")
             page.wait_for_timeout(500)
             if not page.locator(".code__input").is_visible():
@@ -98,9 +107,7 @@ with sync_playwright() as p:
             page = ctx.new_page()
             page.on("pageerror", lambda e: errors.append(str(e)))
             for path in PAGES:
-                page.goto(base + path, wait_until="domcontentloaded")
-                page.wait_for_timeout(200)
-                check(f"ORI-{tag}-{label}-{path}", f"{tag} {label} {size[0]}x{size[1]} {path}: нет горизонтальной прокрутки", lambda: no_overflow(page))
+                check(f"ORI-{tag}-{label}-{path}", f"{tag} {label} {size[0]}x{size[1]} {path}: нет горизонтальной прокрутки", lambda: (visit(page, base + path), no_overflow(page)))
             page.goto(base + "/app/editor.html", wait_until="domcontentloaded")
             page.wait_for_timeout(400)
             page.screenshot(path=str(SHOTS / f"orientation-{tag}-{label}.png"))

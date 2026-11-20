@@ -60,7 +60,7 @@ def shoot(p, browser):
         for name, spec, orient in jobs:
             options = dict(p.devices[spec]) if isinstance(spec, str) else {"viewport": {"width": spec[0], "height": spec[1]}}
             ctx = browser.new_context(color_scheme=scheme, locale="ru-RU", **options)
-            ctx.add_init_script("try{localStorage.setItem('dslkit.tour-done','1')}catch(e){}")
+            ctx.add_init_script("try{localStorage.setItem('dslkit.tour-done','true')}catch(e){}")
             page = ctx.new_page()
             for screen, path in SCREENS.items():
                 page.goto(BASE + path, wait_until="domcontentloaded")
