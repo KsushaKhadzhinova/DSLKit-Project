@@ -1,5 +1,6 @@
 import { notify } from './toast.js';
 import { pageLanguage, pick } from '../utils/lang.js';
+import { scopedKey } from '../storage/scope.js';
 
 const TEXTS = {
   dark: { ru: 'Тема: тёмная', en: 'Theme: dark' },
@@ -16,8 +17,9 @@ export const applyTheme = (documentElement, theme) => {
   documentElement.dataset.theme = theme;
 };
 
+// The choice belongs to the signed-in account ("theme.<id>"); a guest, or an account that never chose, uses the plain key.
 const readSaved = (storage) => {
-  const value = storage.get(STORAGE_KEY, null);
+  const value = storage.get(scopedKey(storage, STORAGE_KEY), storage.get(STORAGE_KEY, null));
   return SAVED_VALUES.includes(value) ? value : 'auto';
 };
 
@@ -54,7 +56,7 @@ export const initTheme = ({ root = document, storage, matchMedia = defaultMatchM
 
   toggle?.addEventListener('change', () => {
     const value = toggle.checked ? 'dark' : 'light';
-    storage.set(STORAGE_KEY, value);
+    storage.set(scopedKey(storage, STORAGE_KEY), value);
     apply(value);
   });
 
@@ -62,7 +64,7 @@ export const initTheme = ({ root = document, storage, matchMedia = defaultMatchM
   root.addEventListener('click', (event) => {
     if (!event.target.closest('[data-theme-switch]')) return;
     const value = current === 'dark' ? 'light' : 'dark';
-    storage.set(STORAGE_KEY, value);
+    storage.set(scopedKey(storage, STORAGE_KEY), value);
     apply(value);
     notify(root, pick(TEXTS[value], pageLanguage(root)), 'info');
   });
@@ -70,7 +72,7 @@ export const initTheme = ({ root = document, storage, matchMedia = defaultMatchM
   root.addEventListener('change', (event) => {
     const radio = event.target.closest('input[name="theme"]');
     if (!radio || !SAVED_VALUES.includes(radio.value)) return;
-    storage.set(STORAGE_KEY, radio.value);
+    storage.set(scopedKey(storage, STORAGE_KEY), radio.value);
     apply(radio.value);
   });
 

@@ -19,6 +19,8 @@ const SALT_BYTES = 16;
 const ID_BYTES = 8;
 const KEY_BYTES = 32;
 const ISSUER = 'DSLKit';
+export const EXPORT_FORMAT = 'dslkit-account';
+const MAX_NAME = 120;
 // A fixed salt for the check of an unknown address, so a missing account costs as much time as a wrong password.
 const DUMMY_SALT = '00'.repeat(SALT_BYTES);
 
@@ -114,6 +116,7 @@ export const createAccountStore = ({
 
   const register = async ({ name, email, password, remember = true }) => {
     if (!supported()) return { ok: false, error: 'unsupported' };
+    if (storage.volatile) return { ok: false, error: 'storage' };
     const accounts = read();
     const address = normalizeEmail(email);
     const issues = passwordIssues(password, { name, email: address });
@@ -143,6 +146,7 @@ export const createAccountStore = ({
   // asks for a code ("code-required"); a wrong code counts as a failed attempt.
   const login = async ({ email, password, code = '', remember = true }) => {
     if (!supported()) return { ok: false, error: 'unsupported' };
+    if (storage.volatile) return { ok: false, error: 'storage' };
     const address = normalizeEmail(email);
     const wait = locked(address);
     if (wait) return wait;
@@ -338,7 +342,53 @@ export const createAccountStore = ({
     return eventsFor(storage, all && can(user, 'admin.users') ? null : user.id, count);
   };
 
+  // The account of the signed-in user as a file record: the name, the address and the salted hash, nothing that is a plain secret.
+  // The second factor (its secret), the role and the sessions stay behind, so the file cannot lift anybody's rights.
+  const exportAccount = () => {
+    const user = current();
+    if (!user) return { ok: false, error: 'signed-out' };
+    const { id, name, email, salt, hash, iterations, created } = account(user.id);
+    return {
+      ok: true,
+      record: { format: EXPORT_FORMAT, version: 1, exported: now(), account: { id, name, email, salt, hash, iterations, created: created ?? null } },
+    };
+  };
+
+  // A record of exportAccount is added as a new account with the role "user" and no session. An address or an id that is already here is never
+  // overwritten, not even by the same account: the answer is "exists". A damaged or foreign record is "invalid-file".
+  const importAccount = (record) => {
+    const item = record?.account;
+    const fine =
+      record?.format === EXPORT_FORMAT &&
+      record.version === 1 &&
+      valid(item) &&
+      /^u[0-9a-f]{16}$/.test(item.id) &&
+      item.iterations <= 1000000 &&
+      item.name.length <= MAX_NAME &&
+      item.email === normalizeEmail(item.email) &&
+      item.email.includes('@') &&
+      (item.created === null || Number.isFinite(item.created));
+    if (!fine) return { ok: false, error: 'invalid-file' };
+    const accounts = read();
+    if (accounts.some((entry) => entry.email === item.email || entry.id === item.id)) return { ok: false, error: 'exists' };
+    const created = {
+      id: item.id,
+      name: item.name,
+      email: item.email,
+      salt: item.salt,
+      hash: item.hash,
+      iterations: item.iterations,
+      created: item.created ?? now(),
+      roleKey: newKey(),
+    };
+    if (!storage.set(ACCOUNTS, [...accounts, created])) return { ok: false, error: 'storage' };
+    log(created.id, 'account-created', 'import');
+    return { ok: true, email: created.email };
+  };
+
   return {
+    exportAccount,
+    importAccount,
     register,
     login,
     logout,

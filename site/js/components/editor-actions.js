@@ -1,3 +1,4 @@
+import { scopedKey } from '../storage/scope.js';
 import { applyTheme } from './theme.js';
 import { readCode, showCode } from './code-lines.js';
 import { notify } from './toast.js';
@@ -136,7 +137,7 @@ export const initEditorActions = ({ root = document, storage, clipboard = root.d
   };
   const theme = () => {
     const next = root.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
-    storage.set('theme', next);
+    storage.set(scopedKey(storage, 'theme'), next);
     applyTheme(root.documentElement, next);
     return next;
   };

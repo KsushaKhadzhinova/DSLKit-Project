@@ -91,6 +91,19 @@
           <button class="button button--primary form__submit" type="submit">Sign in</button>
           <p class="form__hint">No account yet? <a class="form__link" href="register.html">Sign up</a></p>
         </form>
+        <section aria-labelledby="forgot-title">
+          <h2 class="security__title" id="forgot-title">Forgot your password?</h2>
+          <p class="form__hint">
+            There is no server and the account lives only in this browser, so the password cannot be reset by email. If the password is forgotten, the access
+            cannot be restored: create a new account. To carry an account to another browser, export it in the settings, in the "Account and security" section,
+            and load the file here. The file holds no password, only its hash.
+          </p>
+          <div class="form__field">
+            <label class="form__label" for="account-file">Account file (.json)</label>
+            <input class="form__input" id="account-file" type="file" accept="application/json,.json" data-account-import />
+            <p class="security__status" role="status" data-transfer-status="import"></p>
+          </div>
+        </section>
       </section>
     </main>
     <footer class="footer">

@@ -47,14 +47,18 @@ export function createStorage(backend, prefix = 'dslkit.') {
   };
 }
 
+// When the browser gives no storage (private mode, blocked site data) the data lives in memory until the page closes; `volatile` tells the callers
+// that nothing is kept, so an account cannot be made or signed in to as if it were saved.
+const inMemory = () => ({ ...createStorage(createMemoryBackend()), volatile: true });
+
 export function getStorage(win = globalThis) {
   try {
     const local = win.localStorage;
     if (local === undefined || local === null) {
-      return createStorage(createMemoryBackend());
+      return inMemory();
     }
     return createStorage(local);
   } catch {
-    return createStorage(createMemoryBackend());
+    return inMemory();
   }
 }
