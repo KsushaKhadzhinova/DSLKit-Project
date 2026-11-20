@@ -8,6 +8,7 @@ on:
 permissions:
   contents: write
   pull-requests: write
+  actions: write
 concurrency:
   group: auto-merge-${{ github.event.workflow_run.head_branch }}
   cancel-in-progress: false
@@ -22,7 +23,7 @@ jobs:
       !startsWith(github.event.workflow_run.head_branch, 'wip/') &&
       !startsWith(github.event.workflow_run.head_branch, 'dependabot/')
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 60
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       GH_REPO: ${{ github.repository }}
@@ -40,4 +41,22 @@ jobs:
       - name: Turn on auto-merge
         run: |
           set -euo pipefail
-          gh pr merge "$BRANCH" --auto --squash
+          # --auto is refused when the pull request is already mergeable or only a non-required check fails ("unstable"):
+          # then the pull request is merged directly, which the branch ruleset still allows only when every required check passed.
+          gh pr merge "$BRANCH" --auto --squash || gh pr merge "$BRANCH" --squash
+      # A merge made with the workflow token does not start the workflows of main by itself (a GitHub rule),
+      # so after the merge the checks and the site deploy are started by hand on main.
+      - name: Verify and deploy main after the merge
+        run: |
+          set -euo pipefail
+          for _ in $(seq 1 100); do
+            state=$(gh pr view "$BRANCH" --json state --jq .state)
+            if [ "$state" = "MERGED" ]; then
+              for wf in ci.yml quality.yml pages.yml; do gh workflow run "$wf" --ref main; done
+              echo "Started the checks and the deploy on main."
+              exit 0
+            fi
+            [ "$state" = "CLOSED" ] && { echo "The pull request was closed without a merge."; exit 0; }
+            sleep 30
+          done
+          echo "The pull request was not merged within 50 minutes; nothing started."
