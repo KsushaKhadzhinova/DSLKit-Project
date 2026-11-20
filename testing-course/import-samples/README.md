@@ -3,16 +3,16 @@
 Files for the importer of diagram files (`site/js/utils/diagram-file-import.js`, `site/js/automation/upload.js`). Small files, total under 1 MB.
 `node testing-course/import-samples/run-importers.mjs` prints one row per file; `labs/05-javascript-interactivity/import-real-samples.test.js` keeps them as regression fixtures.
 
-| File | Made by | Source and licence |
-| --- | --- | --- |
-| graphviz-flow.dot, graphviz-graph.dot, graphviz-flow.out.dot, graphviz-*.svg | real Graphviz `dot` 14.1.2 (`-Tsvg`, `-Tdot`) | own sample graphs, project licence |
-| kroki-graphviz-flow.svg, mermaid-flow.svg/.png, plantuml-*.svg | real Kroki service (https://kroki.io) | own sample sources (`mermaid-flow.mmd`, `plantuml-*.puml`), project licence |
-| bpmnio-*.bpmn | public sample files of bpmn.io | bpmn-io projects, MIT-style licence of the examples |
-| drawio-bpmn-2-example.drawio, drawio-incident-response-bpmn.drawio, drawio-habit-tracker-dfd.drawio | public draw.io examples (compressed `<diagram>`) | jgraph/drawio-diagrams, Apache-2.0 |
-| drawio-template-*.xml | uncompressed templates of draw.io | jgraph/drawio, Apache-2.0 |
-| eclipse-uml2-library.uml | Eclipse UML2 sample model | Eclipse Public License |
-| gexf-hello-world.gexf | Gephi / GEXF sample (gexf.net) | GEXF primer example |
-| vsdx-py-*.vsdx | real Visio files from the vsdx python library tests | MIT |
-| yed-sample.graphml, excalidraw-sample.excalidraw, ea-xmi-sample.xmi, visio-sample.vdx, edges-*.csv/.tsv | HAND-BUILT after the documented formats (yEd, Excalidraw, Enterprise Architect XMI 2.1, Visio 2003 XML, CSV) | project licence; not exported by the real tools |
+| File                                                                                                    | Made by                                                                                                      | Source and licence                                                          |
+| ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------- |
+| graphviz-flow.dot, graphviz-graph.dot, graphviz-flow.out.dot, graphviz-*.svg                            | real Graphviz `dot` 14.1.2 (`-Tsvg`, `-Tdot`)                                                                | own sample graphs, project licence                                          |
+| kroki-graphviz-flow.svg, mermaid-flow.svg/.png, plantuml-*.svg                                          | real Kroki service (https://kroki.io)                                                                        | own sample sources (`mermaid-flow.mmd`, `plantuml-*.puml`), project licence |
+| bpmnio-*.bpmn                                                                                           | public sample files of bpmn.io                                                                               | bpmn-io projects, MIT-style licence of the examples                         |
+| drawio-bpmn-2-example.drawio, drawio-incident-response-bpmn.drawio, drawio-habit-tracker-dfd.drawio     | public draw.io examples (compressed `<diagram>`)                                                             | jgraph/drawio-diagrams, Apache-2.0                                          |
+| drawio-template-*.xml                                                                                   | uncompressed templates of draw.io                                                                            | jgraph/drawio, Apache-2.0                                                   |
+| eclipse-uml2-library.uml                                                                                | Eclipse UML2 sample model                                                                                    | Eclipse Public License                                                      |
+| gexf-hello-world.gexf                                                                                   | Gephi / GEXF sample (gexf.net)                                                                               | GEXF primer example                                                         |
+| vsdx-py-*.vsdx                                                                                          | real Visio files from the vsdx python library tests                                                          | MIT                                                                         |
+| yed-sample.graphml, excalidraw-sample.excalidraw, ea-xmi-sample.xmi, visio-sample.vdx, edges-*.csv/.tsv | HAND-BUILT after the documented formats (yEd, Excalidraw, Enterprise Architect XMI 2.1, Visio 2003 XML, CSV) | project licence; not exported by the real tools                             |
 
 Helper scripts: `run-importers.mjs`, `probe.mjs` (problems of one file), `unpack-drawio.mjs` (inflates a compressed draw.io page), `show.mjs`.

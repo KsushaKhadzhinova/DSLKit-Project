@@ -6,7 +6,11 @@ const what = process.argv[3] ?? 'both';
 const pause = (ms) => new Promise((done) => setTimeout(done, ms));
 const post = async (path, body) => {
   for (let tries = 0; tries < 4; tries += 1) {
-    const answer = await fetch(`http://localhost:${port}${path}`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
+    const answer = await fetch(`http://localhost:${port}${path}`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(body),
+    });
     if (answer.status !== 429) return { status: answer.status, json: await answer.json() };
     await pause(15000 * (tries + 1));
   }
@@ -18,14 +22,26 @@ for (const [name, code] of BROKEN) {
   if (what !== 'clarify') {
     const { status, json } = await post('/api/ai/generate', { mode: 'review', text: code, lang: 'en' });
     const ai = (json.variants ?? []).filter((v) => v.source === 'ai');
-    Object.assign(row, { reviewStatus: status, reviewAi: json.ai, aiError: json.aiError ?? null, rulesVariants: (json.variants ?? []).length - ai.length, aiVariants: ai.length, aiErrors: ai.map((v) => v.errors) });
+    Object.assign(row, {
+      reviewStatus: status,
+      reviewAi: json.ai,
+      aiError: json.aiError ?? null,
+      rulesVariants: (json.variants ?? []).length - ai.length,
+      aiVariants: ai.length,
+      aiErrors: ai.map((v) => v.errors),
+    });
     if (process.env.SHOWCODE) row.aiCode = ai.map((v) => v.code);
     await pause(11000);
   }
   if (what !== 'review') {
     const { status, json } = await post('/api/ai/clarify', { step: 'questions', code, lang: 'en' });
     const extra = (json.questions ?? []).filter((q) => String(q.id).startsWith('ai-'));
-    Object.assign(row, { clarifyStatus: status, clarifySource: json.source, rulesQuestions: (json.questions ?? []).length - extra.length, aiQuestions: extra.map((q) => `${q.kind}: ${q.text?.en}`) });
+    Object.assign(row, {
+      clarifyStatus: status,
+      clarifySource: json.source,
+      rulesQuestions: (json.questions ?? []).length - extra.length,
+      aiQuestions: extra.map((q) => `${q.kind}: ${q.text?.en}`),
+    });
     await pause(11000);
   }
   rows.push(row);
