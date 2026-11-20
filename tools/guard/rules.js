@@ -5,11 +5,16 @@ const FORBIDDEN_ATTRIBUTION = [
   /noreply@anthropic\.com/i,
 ];
 
+// A long subject is only a warning: it is cosmetic, and a squash merge takes the title of the pull request.
+export const warningsOf = (message) => {
+  const subject = message.split('\n')[0].trim();
+  return subject.length > 120 && !/^Merge /.test(subject) ? ['the subject line is longer than 120 characters'] : [];
+};
+
 export const problemsOf = (message) => {
   const found = [];
   const subject = message.split('\n')[0].trim();
   if (subject === '') found.push('the subject line is empty');
-  if (subject.length > 120 && !/^Merge /.test(subject)) found.push('the subject line is longer than 120 characters');
   for (const pattern of FORBIDDEN_ATTRIBUTION) if (pattern.test(message)) found.push(`forbidden attribution (${pattern})`);
   return found;
 };

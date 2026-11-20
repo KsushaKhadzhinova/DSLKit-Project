@@ -1,14 +1,16 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { problemsOf, pathProblems, secretProblems, scansForSecrets, sizeProblem } from './rules.js';
+import { problemsOf, warningsOf, pathProblems, secretProblems, scansForSecrets, sizeProblem } from './rules.js';
 
 test('a clean commit message passes', () => {
   assert.deepEqual(problemsOf('fix(site): report failed writes\n\nLonger text.'), []);
 });
 
-test('an empty subject and a long subject are refused', () => {
+test('an empty subject is refused and a long subject only warns', () => {
   assert.equal(problemsOf('').length, 1);
-  assert.equal(problemsOf('x'.repeat(121)).length, 1);
+  assert.equal(problemsOf('x'.repeat(121)).length, 0);
+  assert.equal(warningsOf('x'.repeat(121)).length, 1);
+  assert.equal(warningsOf('short').length, 0);
 });
 
 test('tool and AI attribution lines are refused', () => {
@@ -51,5 +53,5 @@ test('big files are refused unless they are the allowed network captures, and pl
   assert.equal(sizeProblem('a.bin', 1024), undefined);
   assert.equal(sizeProblem('labs/01-network/data/x.har', 20 * 1048576), undefined);
   assert.equal(secretProblems('mongodb+srv://<user>:<password>@<cluster>.mongodb.net/db').length, 0);
-  assert.equal(problemsOf("Merge remote-tracking branch 'origin/" + 'x'.repeat(130) + "'").length, 0);
+  assert.equal(warningsOf("Merge remote-tracking branch 'origin/" + 'x'.repeat(130) + "'").length, 0);
 });
