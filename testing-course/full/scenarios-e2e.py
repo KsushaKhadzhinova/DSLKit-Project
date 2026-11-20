@@ -6,7 +6,7 @@ import sys
 import tempfile
 from pathlib import Path
 from playwright.sync_api import sync_playwright
-from e2e_env import OUT, SHOTS, launch
+from e2e_env import OUT, SHOTS, launch, answer
 
 base = sys.argv[1] if len(sys.argv) > 1 else "http://localhost:5173"
 out = OUT
@@ -229,9 +229,9 @@ with sync_playwright() as p:
     s.step("Фильтр ERD оставляет только проект «Магазин»", lambda: (pg.click('.filter__chip[data-filter="erd"]'), pg.wait_for_timeout(300), eq(pg.locator(".project-list__item:visible .project-card__link").all_inner_texts(), ["Магазин"]), pg.click('.filter__chip[data-filter="all"]')))
     s.step("Поиск «плат» находит только «Платежи»", lambda: (pg.fill(".app-topbar__search-input", "плат"), pg.wait_for_timeout(300), eq(pg.locator(".project-list__item:visible .project-card__link").all_inner_texts(), ["Платежи"]), pg.fill(".app-topbar__search-input", "")))
     s.step("Сортировка по названию ставит «Заказ» раньше «Магазин»", lambda: (pg.select_option("#project-sort", "name"), pg.wait_for_timeout(300), (lambda t: yes(t.index("Заказ") < t.index("Магазин"), str(t)))(pg.locator(".project-list__item:visible .project-card__link").all_inner_texts()), pg.select_option("#project-sort", "newest")))
-    s.step("Переименовывает «Платежи» в «Оплата»", lambda: (pg.once("dialog", lambda d: d.accept("Оплата")), pg.locator(".project-list__item", has_text="Платежи").locator(".project-card__menu").click(), pg.locator(".project-list__item", has_text="Платежи").locator('[data-act="rename"]').click(), pg.wait_for_timeout(400), yes("Оплата" in pg.inner_text("#project-list"), "не переименовано")))
-    s.step("Удаляет «Заказ» с подтверждением", lambda: (pg.once("dialog", lambda d: d.accept()), pg.locator(".project-list__item:visible", has_text="Заказ").locator(".project-card__menu").first.click(), pg.locator(".project-list__item:visible", has_text="Заказ").locator('[data-act="remove"]').click(), pg.wait_for_timeout(400), eq(pg.locator(".project-list__item:visible").count(), 2)))
-    s.step("Отказ в диалоге удаления ничего не удаляет", lambda: (pg.once("dialog", lambda d: d.dismiss()), pg.locator(".project-list__item:visible").first.locator(".project-card__menu").click(), pg.locator(".project-list__item:visible").first.locator('[data-act="remove"]').click(), pg.wait_for_timeout(300), eq(pg.locator(".project-list__item:visible").count(), 2)))
+    s.step("Переименовывает «Платежи» в «Оплата»", lambda: (answer(pg, "Оплата"), pg.locator(".project-list__item", has_text="Платежи").locator(".project-card__menu").click(), pg.locator(".project-list__item", has_text="Платежи").locator('[data-act="rename"]').click(), pg.wait_for_timeout(400), yes("Оплата" in pg.inner_text("#project-list"), "не переименовано")))
+    s.step("Удаляет «Заказ» с подтверждением", lambda: (answer(pg, True), pg.locator(".project-list__item:visible", has_text="Заказ").locator(".project-card__menu").first.click(), pg.locator(".project-list__item:visible", has_text="Заказ").locator('[data-act="remove"]').click(), pg.wait_for_timeout(400), eq(pg.locator(".project-list__item:visible").count(), 2)))
+    s.step("Отказ в диалоге удаления ничего не удаляет", lambda: (answer(pg, False), pg.locator(".project-list__item:visible").first.locator(".project-card__menu").click(), pg.locator(".project-list__item:visible").first.locator('[data-act="remove"]').click(), pg.wait_for_timeout(300), eq(pg.locator(".project-list__item:visible").count(), 2)))
     s.step("После перезагрузки остались «Магазин» и «Оплата»", lambda: (pg.reload(), pg.wait_for_timeout(500), (lambda t: yes("Магазин" in t and "Оплата" in t and "Заказ" not in " ".join(pg.locator(".project-list__item:visible .project-card__link").all_inner_texts()), t))(pg.inner_text("#project-list"))))
     ctx.close()
     s.done()
