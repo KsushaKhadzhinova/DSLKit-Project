@@ -50,3 +50,6 @@ export const scansForSecrets = (path) =>
   /\.(js|mjs|cjs|jsx|json|md|yml|yaml|html|css|toml|env|txt|py|sh|ps1|ejs|tpl)$/i.test(path) &&
   !/(^|\/)(package-lock\.json|\.gitleaks\.toml)$/.test(path) &&
   !/^tools\/guard\//.test(path);
+
+// A merge conflict that was committed by mistake: the markers must never reach the repository.
+export const conflictMarkerProblems = (text) => (/^(<{7} |>{7} |={7}$)/m.test(text) ? ['contains an unresolved merge conflict marker'] : []);

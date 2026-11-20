@@ -1,7 +1,7 @@
 // Usage: node .github/scripts/check-files.mjs [base]   (with a base: files changed since it; without: all tracked files)
 import { execFileSync } from 'node:child_process';
 import { statSync, existsSync } from 'node:fs';
-import { MAX_BYTES, sizeProblem, pathProblems, secretProblems, scansForSecrets } from '../../tools/guard/rules.js';
+import { MAX_BYTES, conflictMarkerProblems, sizeProblem, pathProblems, secretProblems, scansForSecrets } from '../../tools/guard/rules.js';
 
 const base = process.argv[2];
 const git = (...args) => execFileSync('git', args, { encoding: 'utf8', maxBuffer: 256 * 1024 * 1024 });
@@ -13,7 +13,10 @@ for (const file of files) {
   const size = statSync(file).size;
   const big = sizeProblem(file, size);
   if (big) problems.push(big);
-  else if (size <= MAX_BYTES && scansForSecrets(file)) problems.push(...secretProblems(git('show', `HEAD:${file}`)));
+  else if (size <= MAX_BYTES && scansForSecrets(file)) {
+    const text = git('show', `HEAD:${file}`);
+    problems.push(...secretProblems(text), ...conflictMarkerProblems(text));
+  }
   for (const problem of problems) {
     failed += 1;
     console.error(`${file}: ${problem}`);
