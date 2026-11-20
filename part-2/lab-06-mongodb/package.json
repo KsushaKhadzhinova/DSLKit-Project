@@ -11,11 +11,8 @@
     "seed": "node scripts/seed.js",
     "seed:undo": "node scripts/seed.js --undo",
     "test": "node --test --experimental-test-coverage --test-coverage-include=\"src/**\" \"tests/*.test.js\" report.test.mjs",
-<<<<<<< HEAD
+    "lint": "eslint .",
     "test:leaks": "node --expose-gc --test --test-concurrency=1 \"tests/leaks/*.leak.js\""
-=======
-    "lint": "eslint ."
->>>>>>> origin/main
   },
   "engines": {
     "node": ">=22"
