@@ -10,6 +10,7 @@ import { createDocsStore } from '../../site/js/storage/docs.js';
 import { renderMarkdown } from '../../site/js/utils/markdown.js';
 import { createMemoryBackend, createStorage } from '../../site/js/utils/storage.js';
 import { hashCode } from '../../tools/dev-code.js';
+import { sealedRole } from '../../site/js/auth/role-seal.js';
 
 const doc = () => new JSDOM('<!doctype html><body></body>').window.document;
 const html = (source) => {
@@ -147,7 +148,7 @@ test('the role form refuses a wrong code and a guest; only a developer edits, sa
   const asDeveloper = () => {
     storage.set(
       'accounts',
-      raw.map((account) => ({ ...account, role: 'developer' })),
+      raw.map((account) => ({ ...account, ...sealedRole(account, 'developer', () => 'ab'.repeat(32)) })),
     );
     t.window.dispatchEvent(new t.window.Event('storage'));
   };
@@ -185,7 +186,7 @@ test('the role is turned on with the right code, and a failed save is reported',
   await accounts.register({ name: 'Dev', email: 'd@example.com', password: 'correct horse' });
   storage.set(
     'accounts',
-    storage.get('accounts').map((account) => ({ ...account, role: 'developer' })),
+    storage.get('accounts').map((account) => ({ ...account, ...sealedRole(account, 'developer', () => 'ab'.repeat(32)) })),
   );
   const t = open({ storage });
   t.press(t.$('[data-docs-edit]'));

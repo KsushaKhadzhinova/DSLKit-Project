@@ -176,9 +176,10 @@ test('the role form turns the developer role on and off, and says why it fails',
   const storage = createStorage(createMemoryBackend());
   const t = open({ storage, developerHash: hashCode('team-code'), adminHash: hashCode('boss-code') });
   const submit = async (code) => {
+    const before = t.status();
     t.$('.docs__role-input').value = code;
     t.$('[data-expert-role]').dispatchEvent(new t.window.Event('submit', { cancelable: true, bubbles: true }));
-    await tick(30);
+    for (let n = 0; n < 100 && t.status() === before; n += 1) await tick(50);
   };
   await submit('team-code');
   assert.equal(t.status(), 'Сначала войдите в аккаунт.');

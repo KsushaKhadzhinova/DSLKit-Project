@@ -52,8 +52,13 @@ export const initTour = ({ root = document, storage } = {}) => {
     card?.remove();
     card = null;
     root.removeEventListener('keydown', onKey);
+    root.removeEventListener('click', onOutside, true);
     if (finished) storage.set(TOUR_KEY, true);
   };
+  // A press outside the card closes the tour, so the panels under it can be reached again (on a phone the card covers a good part of the screen).
+  function onOutside(event) {
+    if (card && !card.contains(event.target) && !event.target.closest?.('[data-tour-start]')) close(true);
+  }
   function onKey(event) {
     if (event.key === 'Escape') close(true);
   }
@@ -104,6 +109,7 @@ export const initTour = ({ root = document, storage } = {}) => {
     card.setAttribute('aria-labelledby', 'tour-title');
     root.body.append(card);
     root.addEventListener('keydown', onKey);
+    root.addEventListener('click', onOutside, true);
     show(0);
   };
 

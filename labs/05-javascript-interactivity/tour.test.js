@@ -127,3 +127,20 @@ test('the outlined part is scrolled into view where the browser can do it', () =
   assert.deepEqual(scrolled, [[scrolled[0][0], { block: 'nearest' }]]);
   assert.match(scrolled[0][0], /tour__target/);
 });
+
+test('U2: a press outside the card closes the tour for good, a press inside or on the start button does not', () => {
+  const { document, window, storage, api } = setup();
+  const click = (node) => node.dispatchEvent(new window.MouseEvent('click', { bubbles: true, cancelable: true }));
+  click(card(document).querySelector('.tour__text'));
+  assert.equal(api.isOpen(), true);
+  const start = document.querySelector('[data-tour-start]');
+  click(start);
+  assert.equal(api.isOpen(), true);
+  click(document.querySelector('.problems') ?? document.body);
+  assert.equal(api.isOpen(), false);
+  assert.equal(storage.get(TOUR_KEY), true);
+  // After it is closed a press anywhere changes nothing, and the document itself is no element with closest().
+  click(document.body);
+  document.dispatchEvent(new window.MouseEvent('click', { bubbles: true }));
+  assert.equal(api.isOpen(), false);
+});

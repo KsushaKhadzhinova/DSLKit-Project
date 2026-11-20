@@ -16,11 +16,12 @@ test('the landing page starts the theme, burger, FAQ, filter and form components
     'initAccordion',
     'initNotationFilter',
     'initWaitlistForm',
+    'initNativeValidation',
   ]);
 });
 
 test('the English landing page starts the same components', () => {
-  assert.equal(boot(load('en/index.html')).length, 8);
+  assert.equal(boot(load('en/index.html')).length, 9);
 });
 
 test('the dashboard, the settings and the editor start their own components', () => {
@@ -40,6 +41,7 @@ test('the dashboard, the settings and the editor start their own components', ()
     'initLangSwitch',
     'initToasts',
     'initAuthMenu',
+    'initNativeValidation',
     'initQuota',
     'initAppSearch',
     'initSettings',
@@ -50,6 +52,7 @@ test('the dashboard, the settings and the editor start their own components', ()
     'initLangSwitch',
     'initToasts',
     'initAuthMenu',
+    'initNativeValidation',
     'initEditor',
     'initEditorProjects',
     'initCodeInput',
@@ -74,7 +77,7 @@ test('the welcome page lists templates and shows the quota', () => {
 
 test('the sign-in and registration pages start the form', () => {
   for (const page of ['app/login.html', 'app/register.html', 'en/app/login.html', 'en/app/register.html'])
-    assert.deepEqual(boot(load(page)), ['initTheme', 'initLangSwitch', 'initToasts', 'initAuthForm'], page);
+    assert.deepEqual(boot(load(page)), ['initTheme', 'initLangSwitch', 'initToasts', 'initAuthForm', 'initNativeValidation'], page);
 });
 
 test('a page without interactive markup starts only the theme', () => {
@@ -89,11 +92,20 @@ test('a failing component is reported and the others still start', () => {
   const started = boot(load('index.html'), { components: [broken, ...COMPONENTS], logger });
   assert.equal(logger.error.mock.callCount(), 1);
   assert.match(logger.error.mock.calls[0].arguments[0], /brokenComponent failed/);
-  assert.equal(started.length, 8);
+  assert.equal(started.length, 9);
 });
 
 test('the expert and decision pages start their own components', () => {
-  assert.deepEqual(boot(load('app/expert.html')), ['initTheme', 'initLangSwitch', 'initToasts', 'initAuthMenu', 'initQuota', 'initExpert', 'initAppSearch']);
+  assert.deepEqual(boot(load('app/expert.html')), [
+    'initTheme',
+    'initLangSwitch',
+    'initToasts',
+    'initAuthMenu',
+    'initNativeValidation',
+    'initQuota',
+    'initExpert',
+    'initAppSearch',
+  ]);
   assert.deepEqual(boot(load('en/app/decision.html')), [
     'initTheme',
     'initLangSwitch',

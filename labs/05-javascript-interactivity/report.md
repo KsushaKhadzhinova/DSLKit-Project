@@ -148,6 +148,7 @@ import { initImport } from './components/import-menu.js';
 import { initLangSwitch } from './components/lang-switch.js';
 import { registerServiceWorker } from './components/pwa.js';
 import { initOrientation } from './components/orientation.js';
+import { initNativeValidation } from './components/native-validation.js';
 import { initNotationFilter } from './components/notation-filter.js';
 import { initPopups } from './components/popups.js';
 import { initSecurity } from './components/security.js';
@@ -171,6 +172,7 @@ export const COMPONENTS = [
   initNotationFilter,
   initWaitlistForm,
   initAuthForm,
+  initNativeValidation,
   initDashboard,
   initQuota,
   initWelcome,
@@ -567,6 +569,7 @@ export const initWaitlistForm = ({
 ## Приложение Е – Листинг файла dashboard.js
 
 ```js
+import { createDialogs } from './dialog.js';
 import { NOTATIONS, NOTATION_KEYS, TEMPLATE_LANGS, parseDiagram, templateFor } from '../notations/index.js';
 import { currentUser } from '../storage/accounts.js';
 import { can } from '../auth/permissions.js';
@@ -600,6 +603,7 @@ const LABELS = {
     purge: 'Удалить навсегда',
     copy: 'Сохранить копию в «Мои проекты»',
     copyTemplate: 'Добавить в «Мои шаблоны»',
+    storage: 'Не сохранено: хранилище браузера переполнено или отключено. Освободите место (удалите ненужные проекты) и повторите.',
     limit: 'Лимит беты: 5 новых диаграмм в день. Попробуйте завтра или сохраните пример как шаблон.',
     like: 'Нравится',
     liked: 'В избранном',
@@ -647,6 +651,7 @@ const LABELS = {
     purge: 'Delete forever',
     copy: 'Save a copy to "My projects"',
     copyTemplate: 'Add to "My templates"',
+    storage: 'Not saved: the browser storage is full or off. Free some space (delete projects you do not need) and try again.',
     limit: 'Beta limit: 5 new diagrams a day. Try tomorrow, or save the example as a template.',
     like: 'Like',
     liked: 'Liked',
@@ -682,7 +687,10 @@ const normalize = (saved) => ({
   sort: SORTS.includes(saved?.sort) ? saved.sort : 'newest',
 });
 
-export const initDashboard = ({ root = document, storage, now = () => Date.now(), seed = true, navigate } = {}) => {
+// A dialog answers with a promise; a replaced (test) dialog may answer at once, and then nothing waits.
+const then = (value, next) => (typeof value?.then === 'function' ? value.then(next) : next(value));
+
+export const initDashboard = ({ root = document, storage, now = () => Date.now(), seed = true, navigate, dialogs = createDialogs(root) } = {}) => {
   const list = root.querySelector('#project-list');
   if (!list) return null;
 
@@ -951,12 +959,28 @@ export const initDashboard = ({ root = document, storage, now = () => Date.now()
     }),
   );
 
+  const storageFailed = () => {
+    if (count) count.textContent = labels.storage;
+    notify(root, labels.storage, 'error');
+    return false;
+  };
+  // Rename, trash and the deletions ask first, in a dialog of the page; the answer goes to `run`.
   const act = (action, item) => {
+    const ask = {
+      rename: () => dialogs.prompt(labels.askName, title(item)),
+      'remove-template': () => dialogs.confirm(labels.askRemoveTemplate(title(item))),
+      remove: () => dialogs.confirm(labels.askTrash(title(item))),
+      purge: () => dialogs.confirm(labels.askPurge(title(item))),
+    }[action];
+    return ask ? then(ask(), (answer) => run(action, item, answer)) : run(action, item);
+  };
+  const run = (action, item, answer) => {
     const id = item.dataset.project ?? item.dataset.template;
     let said = action;
     if (action === 'rename') {
-      const name = view.prompt(labels.askName, title(item));
+      const name = answer;
       const done = item.dataset.template ? templates.rename(id, name ?? '') : store.rename(id, name ?? '');
+      if (done === false) return storageFailed();
       if (done === null) {
         if (name !== null && name.trim() === '') {
           if (count) count.textContent = labels.nameEmpty;
@@ -966,20 +990,21 @@ export const initDashboard = ({ root = document, storage, now = () => Date.now()
       }
     } else if (action === 'template') {
       const project = store.get(id);
-      templates.save({ title: project.title, notation: project.notation, source: project.source });
+      if (!templates.save({ title: project.title, notation: project.notation, source: project.source })) return storageFailed();
     } else if (action === 'edit') {
       go(`editor.html?tpl=${encodeURIComponent(id)}`);
       return true;
     } else if (action === 'remove-template') {
-      if (!view.confirm(labels.askRemoveTemplate(title(item)))) return false;
-      templates.remove(id);
+      if (!answer) return false;
+      if (!templates.remove(id)) return storageFailed();
     } else if (action === 'remove') {
-      if (!view.confirm(labels.askTrash(title(item)))) return false;
-      store.trash(id);
-    } else if (action === 'restore') store.restore(id);
-    else if (action === 'purge') {
-      if (!view.confirm(labels.askPurge(title(item)))) return false;
-      store.remove(id);
+      if (!answer) return false;
+      if (!store.trash(id)) return storageFailed();
+    } else if (action === 'restore') {
+      if (!store.restore(id)) return storageFailed();
+    } else if (action === 'purge') {
+      if (!answer) return false;
+      if (!store.remove(id)) return storageFailed();
     } else {
       const params = new view.URL(item.querySelector('.project-card__link').href).searchParams;
       const key = params.get('template');
@@ -989,8 +1014,9 @@ export const initDashboard = ({ root = document, storage, now = () => Date.now()
         notation: item.dataset.notation,
         source: templateFor(key, tl) ?? templateFor('idef0', tl),
       };
-      if (action === 'copy-template') templates.save(copy);
-      else if (action === 'like') {
+      if (action === 'copy-template') {
+        if (!templates.save(copy)) return storageFailed();
+      } else if (action === 'like') {
         const liked = likes();
         said = liked.includes(key) ? 'unlike' : 'like';
         if (liked.includes(key))
@@ -999,10 +1025,14 @@ export const initDashboard = ({ root = document, storage, now = () => Date.now()
             liked.filter((entry) => entry !== key),
           );
         else storage.set(likesKey, [...liked, key]);
-      } else if (store.save(copy) === null) {
-        if (count) count.textContent = labels.limit;
-        notify(root, labels.limit, 'error');
-        return false;
+      } else {
+        const saved = store.save(copy);
+        if (saved === false) return storageFailed();
+        if (saved === null) {
+          if (count) count.textContent = labels.limit;
+          notify(root, labels.limit, 'error');
+          return false;
+        }
       }
     }
     rebuild();
@@ -1012,17 +1042,28 @@ export const initDashboard = ({ root = document, storage, now = () => Date.now()
   };
   emptyTrash.addEventListener('click', () => {
     const trashed = store.listTrash();
-    if (trashed.length === 0 || !view.confirm(labels.askEmpty(trashed.length))) return;
-    trashed.forEach((project) => store.remove(project.id));
-    rebuild();
-    render();
-    notify(root, labels.done.emptied, 'success');
+    if (trashed.length === 0) return;
+    then(dialogs.confirm(labels.askEmpty(trashed.length)), (yes) => {
+      if (!yes) return;
+      if (!trashed.every((project) => store.remove(project.id))) {
+        storageFailed();
+        return;
+      }
+      rebuild();
+      render();
+      notify(root, labels.done.emptied, 'success');
+    });
   });
   newTemplate?.addEventListener('click', () => {
-    const name = view.prompt(labels.askNewTemplate, '');
-    if (name === null || name.trim() === '') return;
-    const template = templates.save({ title: name, notation: 'idef0', source: templateFor('idef0', lang) });
-    go(`editor.html?tpl=${encodeURIComponent(template.id)}`);
+    then(dialogs.prompt(labels.askNewTemplate, ''), (name) => {
+      if (name === null || name.trim() === '') return;
+      const template = templates.save({ title: name, notation: 'idef0', source: templateFor('idef0', lang) });
+      if (!template) {
+        storageFailed();
+        return;
+      }
+      go(`editor.html?tpl=${encodeURIComponent(template.id)}`);
+    });
   });
   list.addEventListener('click', (event) => {
     const menu = event.target.closest('.project-card__menu');
@@ -1052,6 +1093,7 @@ export const initDashboard = ({ root = document, storage, now = () => Date.now()
 ## Приложение Ж – Листинг файла editor.js
 
 ```js
+import { scopedKey } from '../storage/scope.js';
 import { NOTATIONS, TEMPLATE_LANGS, templateFor } from '../notations/index.js';
 import { ui } from '../notations/messages.js';
 import { readCode, showCode } from './code-lines.js';
@@ -1077,10 +1119,10 @@ const isPlainObject = (value) => typeof value === 'object' && value !== null && 
 // Settings live under one storage key, a damaged value is treated as "no settings".
 const createSettings = (storage) => {
   const read = () => {
-    const saved = storage.get('settings', {});
+    const saved = storage.get(scopedKey(storage, 'settings'), {});
     return isPlainObject(saved) ? saved : {};
   };
-  return { read, save: (key, value) => storage.set('settings', { ...read(), [key]: value }) };
+  return { read, save: (key, value) => storage.set(scopedKey(storage, 'settings'), { ...read(), [key]: value }) };
 };
 
 const announceRun = (page, root) => page.dispatchEvent(new root.defaultView.CustomEvent('dslkit:run', { bubbles: true }));

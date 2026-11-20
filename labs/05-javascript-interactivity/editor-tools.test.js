@@ -362,3 +362,24 @@ test('an explicit save leaves a version once, and the same code leaves none agai
   save();
   assert.equal(document.querySelectorAll('.editor-tools__commit').length, 2);
 });
+
+test('F3: a version that cannot be stored is reported, and damaged entries of the history are dropped', () => {
+  const backend = createMemoryBackend();
+  const state = { full: false };
+  const storage = createStorage({
+    ...backend,
+    setItem: (key, value) => {
+      if (state.full) throw new Error('QuotaExceededError');
+      backend.setItem(key, value);
+    },
+  });
+  storage.set('git-commits', [null, 5, { id: 'a' }, { id: 'a1', message: 'ok', text: 'x', at: 1 }, { id: 'b', message: 'm', text: 't', at: 'late' }]);
+  const t = setup({ storage });
+  assert.equal(t.tools.commits().length, 1);
+  t.press('[data-panel="git"]');
+  state.full = true;
+  t.put('diagram idef0 "Full"');
+  t.press([...t.document.querySelectorAll('.editor-tools__view .button')].find((b) => b.textContent === 'Закоммитить'));
+  assert.match(t.$('.editor-tools__status').textContent, /не сохранена/);
+  assert.equal(t.tools.commits().length, 1);
+});

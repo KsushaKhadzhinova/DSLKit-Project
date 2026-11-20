@@ -45,10 +45,13 @@ export const createProjectStore = ({ storage, now = () => Date.now(), owner = nu
 
   // A project with a known id is updated, any other gets a new id and the time of its creation.
   // A new project is refused (null) once the daily limit of the beta is used up, unless the user has no limit.
+  // false: the browser refused the write (the storage is full or off). undefined: the id is in the trash.
   const save = ({ id, title, notation, source }) => {
     const projects = read();
     const at = projects.findIndex((item) => item.id === id && item.trashedAt === undefined);
     if (at < 0 && !unlimited && createdOn() >= DAILY_LIMIT) return null;
+    // An id that is in the trash or gone (another tab trashed or deleted the project) is not brought back to life by a save.
+    if (at < 0 && id !== undefined && projects.some((item) => item.id === id)) return undefined;
     const stamp = now();
     const project = {
       id: at >= 0 ? id : makeId(),
@@ -62,8 +65,7 @@ export const createProjectStore = ({ storage, now = () => Date.now(), owner = nu
     if (at >= 0 && projects[at].seed) project.seed = true;
     if (at >= 0) projects[at] = project;
     else projects.unshift(project);
-    write(projects);
-    return project;
+    return write(projects) ? project : false;
   };
   const rename = (id, title) => {
     const projects = read();
@@ -71,16 +73,14 @@ export const createProjectStore = ({ storage, now = () => Date.now(), owner = nu
     if (!project || title.trim() === '') return null;
     project.title = title.trim();
     project.updated = now();
-    write(projects);
-    return project;
+    return write(projects) ? project : false;
   };
   const change = (id, apply) => {
     const projects = read();
     const project = projects.find((item) => item.id === id);
     if (!project) return false;
     apply(project);
-    write(projects);
-    return true;
+    return write(projects);
   };
   // The trash keeps a deleted project until it is restored or deleted for good.
   const trash = (id) => change(id, (project) => (project.trashedAt = now()));
@@ -89,8 +89,7 @@ export const createProjectStore = ({ storage, now = () => Date.now(), owner = nu
     const projects = read();
     const rest = projects.filter((item) => item.id !== id);
     if (rest.length === projects.length) return false;
-    write(rest);
-    return true;
+    return write(rest);
   };
   // Deletes what stayed in the trash for 30 days; returns how many projects went.
   const purgeExpired = () => {
@@ -160,8 +159,7 @@ export const createTemplateStore = ({ storage, now = () => Date.now(), owner = n
     };
     if (at >= 0) items[at] = template;
     else items.unshift(template);
-    write(items);
-    return template;
+    return write(items) ? template : false;
   };
   const rename = (id, title) => {
     const items = read();
@@ -169,15 +167,13 @@ export const createTemplateStore = ({ storage, now = () => Date.now(), owner = n
     if (!template || title.trim() === '') return null;
     template.title = title.trim();
     template.updated = now();
-    write(items);
-    return template;
+    return write(items) ? template : false;
   };
   const remove = (id) => {
     const items = read();
     const rest = items.filter((item) => item.id !== id);
     if (rest.length === items.length) return false;
-    write(rest);
-    return true;
+    return write(rest);
   };
   return { list, get, save, rename, remove };
 };

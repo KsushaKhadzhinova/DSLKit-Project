@@ -39,15 +39,15 @@ export const initImport = ({ root = document, readClipboard } = {}) => {
   const words = TEXT[lang];
   const input = page.querySelector('.editor-import__file');
   const clipboard = readClipboard ?? (() => root.defaultView.navigator.clipboard.readText());
-  const say = (text) => {
+  const say = (text, kind = 'success') => {
     if (status) status.textContent = text;
-    notify(root, text);
+    notify(root, text, kind);
   };
 
   const load = (source) => {
     const result = importDiagram(source);
     if (!result.ok) {
-      say(result.reason === 'unsupported' ? words.unsupported(result.name) : words[result.reason]);
+      say(result.reason === 'unsupported' ? words.unsupported(result.name) : words[result.reason], 'error');
       return false;
     }
     showCode(root, codeLines, result.dsl);
@@ -60,7 +60,7 @@ export const initImport = ({ root = document, readClipboard } = {}) => {
     try {
       return load(await read());
     } catch {
-      say(words.unreadable);
+      say(words.unreadable, 'error');
       return false;
     }
   };

@@ -12,7 +12,7 @@ const KINDS = ['success', 'info', 'error'];
 const MAX_VISIBLE = 4;
 const SHOW_MS = { success: 3500, info: 3500, error: 7000 };
 const ERROR_WORDS =
-  /не удалось|не сохранен|не добавлен|отклонен|ошибк|лимит|нельзя|неверн|не может|failed|not saved|not added|refused|error|limit|cannot|wrong|could not/i;
+  /не удалось|не распознан|не поддерж|повреждён|слишком|не сохранен|не добавлен|отклонен|ошибк|лимит|нельзя|неверн|не может|failed|not recognised|not supported|damaged|too large|not saved|not added|refused|error|limit|cannot|wrong|could not/i;
 
 // The kind of a message that has none: words of refusal make an error, everything else is a success.
 export const kindOf = (text) => (ERROR_WORDS.test(text) ? 'error' : 'success');

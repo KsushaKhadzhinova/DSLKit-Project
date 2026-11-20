@@ -200,9 +200,8 @@ test('the editor works without the autosave switch', async () => {
 
 const dashboard = ({ lang = 'ru', storage = memory(), answers = {}, now = clock(), search = '' } = {}) => {
   const dom = new JSDOM(lang === 'ru' ? pages.dashboard : pages.en, { url: `http://localhost/app/dashboard.html${search}` });
-  dom.window.prompt = () => answers.prompt ?? null;
-  dom.window.confirm = () => answers.confirm ?? false;
-  const api = initDashboard({ root: dom.window.document, storage, now, seed: false });
+  const dialogs = { prompt: () => answers.prompt ?? null, confirm: () => answers.confirm ?? false };
+  const api = initDashboard({ root: dom.window.document, storage, now, seed: false, dialogs });
   const press = (node) => node.dispatchEvent(new dom.window.MouseEvent('click', { bubbles: true, cancelable: true }));
   const visible = () => [...dom.window.document.querySelectorAll('.project-list__item:not([hidden]) .project-card__link')].map((node) => node.textContent);
   return { dom, document: dom.window.document, api, press, visible, storage };
@@ -353,12 +352,14 @@ test('a card without its own menu button gets one', () => {
 test('the English dashboard asks in English before deleting for good, and the default clock stamps a copy', () => {
   const dom = new JSDOM(pages.en, { url: 'http://localhost/app/dashboard.html' });
   const asked = [];
-  dom.window.confirm = (text) => {
-    asked.push(text);
-    return true;
+  const dialogs = {
+    confirm: (text) => {
+      asked.push(text);
+      return true;
+    },
   };
   const storage = memory();
-  const api = initDashboard({ root: dom.window.document, storage, seed: false });
+  const api = initDashboard({ root: dom.window.document, storage, seed: false, dialogs });
   const press = (node) => node.dispatchEvent(new dom.window.MouseEvent('click', { bubbles: true }));
   api.show('shared');
   press(dom.window.document.querySelector('[data-act="copy"]'));
@@ -471,7 +472,7 @@ test('the store keeps a trash: trashed projects are not listed or opened, restor
   );
   assert.equal(store.get(a.id), null);
   assert.equal(store.rename(a.id, 'x'), null);
-  assert.notEqual(store.save({ id: a.id, title: 'again', notation: 'idef0', source: 'a2' }).id, a.id);
+  assert.equal(store.save({ id: a.id, title: 'again', notation: 'idef0', source: 'a2' }), undefined);
   assert.equal(store.restore(a.id), true);
   assert.equal(store.get(a.id).title, 'A');
   assert.equal(store.restore('none'), false);

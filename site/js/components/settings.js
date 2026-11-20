@@ -1,7 +1,11 @@
+import { scopedKey } from '../storage/scope.js';
 import { notify } from './toast.js';
 import { pageLanguage, pick } from '../utils/lang.js';
 
-const TEXTS = { saved: { ru: 'Настройка сохранена.', en: 'The setting is saved.' } };
+const TEXTS = {
+  saved: { ru: 'Настройка сохранена.', en: 'The setting is saved.' },
+  full: { ru: 'Не сохранено: хранилище браузера переполнено или отключено.', en: 'Not saved: the browser storage is full or off.' },
+};
 
 const CONTROLS = 'input.switch__input[type="checkbox"], select.settings-row__select';
 
@@ -14,7 +18,7 @@ export const initSettings = ({ root = document, storage } = {}) => {
 
   // Other components (the editor keeps autosave here) write to the same key, so the stored value is read again before every write.
   const readState = () => {
-    const saved = storage.get('settings', {});
+    const saved = storage.get(scopedKey(storage, 'settings'), {});
     return isPlainObject(saved) ? saved : {};
   };
   const state = readState();
@@ -33,7 +37,10 @@ export const initSettings = ({ root = document, storage } = {}) => {
     if (!control) return;
     Object.assign(state, readState());
     state[control.id] = control.type === 'checkbox' ? control.checked : control.value;
-    storage.set('settings', state);
+    if (!storage.set(scopedKey(storage, 'settings'), state)) {
+      notify(root, pick(TEXTS.full, pageLanguage(root)), 'error');
+      return;
+    }
     notify(root, pick(TEXTS.saved, pageLanguage(root)), 'success');
   });
 

@@ -1,10 +1,12 @@
 import { AUTH_CONFIG } from '../config/auth.js';
-import { ADMIN_CODE_SHA256, DEVELOPER_CODE_SHA256 } from '../config/roles.js';
+import { ADMIN_CODE_VERIFIER, DEVELOPER_CODE_VERIFIER } from '../config/roles.js';
+import { checkRoleCode } from '../auth/role-code.js';
+import { sealedRole, trustedRole } from '../auth/role-seal.js';
 import { recordEvent, eventsFor, forgetUser } from '../auth/audit.js';
 import { HEX, fromHex, randomHex, same, toHex } from '../auth/bytes.js';
 import { clearFailures, lockedFor, recordFailure } from '../auth/lockout.js';
 import { passwordIssues } from '../auth/password-policy.js';
-import { ROLES, can, roleOf } from '../auth/permissions.js';
+import { ROLES, can } from '../auth/permissions.js';
 import { createSession, deviceLabel, listSessions, resolveSession, revokeSession, revokeSessions } from '../auth/sessions.js';
 import { generateRecoveryCodes, generateSecret, hashRecoveryCode, otpauthUri, verifyTotp } from '../auth/totp.js';
 
@@ -15,11 +17,12 @@ const SESSION = 'session';
 const ITERATIONS = 100000;
 const SALT_BYTES = 16;
 const ID_BYTES = 8;
+const KEY_BYTES = 32;
 const ISSUER = 'DSLKit';
 // A fixed salt for the check of an unknown address, so a missing account costs as much time as a wrong password.
 const DUMMY_SALT = '00'.repeat(SALT_BYTES);
 
-const publicUser = (account) => ({ id: account.id, name: account.name, email: account.email, role: roleOf(account) });
+const publicUser = (account) => ({ id: account.id, name: account.name, email: account.email, role: trustedRole(account) });
 
 const normalizeEmail = (email) => String(email).trim().toLowerCase();
 
@@ -63,12 +66,13 @@ export const createAccountStore = ({
   now = () => Date.now(),
   userAgent = defaultAgent(),
   config = AUTH_CONFIG,
-  developerHash = DEVELOPER_CODE_SHA256,
-  adminHash = ADMIN_CODE_SHA256,
+  developerHash = DEVELOPER_CODE_VERIFIER,
+  adminHash = ADMIN_CODE_VERIFIER,
 }) => {
   const supported = () => typeof crypto?.subtle?.deriveBits === 'function' && typeof crypto.getRandomValues === 'function';
 
   const read = () => readAccounts(storage);
+  const newKey = () => randomHex(crypto, KEY_BYTES);
   const current = () => currentUser(storage, { now, crypto, userAgent, config });
   const log = (userId, type, detail) => recordEvent(storage, { userId, type, at: now(), detail }, config.auditEntries);
 
@@ -124,6 +128,7 @@ export const createAccountStore = ({
       hash: await derive(password, salt, ITERATIONS),
       iterations: ITERATIONS,
       created: now(),
+      roleKey: newKey(),
     };
     // Another tab may have registered the same address while the hash was computed.
     const latest = read();
@@ -177,18 +182,17 @@ export const createAccountStore = ({
     return storage.remove(SESSION);
   };
 
-  const lastAdmin = (id) => roleOf(account(id)) === 'admin' && read().filter((item) => roleOf(item) === 'admin').length === 1;
+  const lastAdmin = (id) => trustedRole(account(id)) === 'admin' && read().filter((item) => trustedRole(item) === 'admin').length === 1;
 
   // The role "developer" or "admin" is given by a code whose hash is in the config; it is written to the account of the signed-in user.
   const becomeDeveloper = async (code) => {
     const user = current();
     if (!user) return { ok: false, error: 'signed-out' };
     if (!supported()) return { ok: false, error: 'unsupported' };
-    const digest = toHex(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(String(code))));
-    const role = same(digest, developerHash) ? 'developer' : same(digest, adminHash) ? 'admin' : null;
+    const role = (await checkRoleCode(crypto, code, developerHash)) ? 'developer' : (await checkRoleCode(crypto, code, adminHash)) ? 'admin' : null;
     if (role === null) return { ok: false, error: 'invalid' };
     if (role !== user.role && lastAdmin(user.id)) return { ok: false, error: 'last-admin' };
-    if (!change(user.id, () => ({ role }))) return { ok: false, error: 'storage' };
+    if (!change(user.id, (item) => sealedRole(item, role, newKey))) return { ok: false, error: 'storage' };
     if (role !== user.role) log(user.id, 'role-change', `${user.role}>${role}`);
     return { ok: true, user: current() };
   };
@@ -196,7 +200,7 @@ export const createAccountStore = ({
   const leaveDeveloper = () => {
     const user = current();
     if (!user || lastAdmin(user.id)) return false;
-    const done = change(user.id, () => ({ role: 'user' }));
+    const done = change(user.id, (item) => sealedRole(item, 'user', newKey));
     if (done && user.role !== 'user') log(user.id, 'role-change', `${user.role}>user`);
     return done;
   };
@@ -319,10 +323,10 @@ export const createAccountStore = ({
     const target = account(id);
     if (!target) return { ok: false, error: 'unknown' };
     if (!ROLES.includes(role)) return { ok: false, error: 'invalid' };
-    const before = roleOf(target);
+    const before = trustedRole(target);
     if (before === role) return { ok: true, changed: false };
     if (lastAdmin(id)) return { ok: false, error: 'last-admin' };
-    if (!change(id, () => ({ role }))) return { ok: false, error: 'storage' };
+    if (!change(id, (item) => sealedRole(item, role, newKey))) return { ok: false, error: 'storage' };
     log(id, 'role-change', `${before}>${role}`);
     return { ok: true, changed: true };
   };

@@ -73,10 +73,8 @@ test('templates are kept per user, a guest has the shared ones, damaged data giv
 
 const dashboard = ({ lang = 'ru', storage = memory(), prompt = () => null, confirm = () => true } = {}) => {
   const dom = new JSDOM(lang === 'en' ? pages.en : pages.dashboard, { url: 'http://localhost/app/dashboard.html' });
-  dom.window.prompt = prompt;
-  dom.window.confirm = confirm;
   const navigate = mock.fn();
-  const api = initDashboard({ root: dom.window.document, storage, seed: false, now: clock(), navigate });
+  const api = initDashboard({ root: dom.window.document, storage, seed: false, now: clock(), navigate, dialogs: { prompt, confirm } });
   const { document } = dom.window;
   const visible = () =>
     [...document.querySelectorAll('.project-list__item')]
@@ -187,8 +185,7 @@ test('the English dashboard has English texts for templates', () => {
 
 test('the dashboard works with its own navigation when none is passed', () => {
   const dom = new JSDOM(pages.dashboard, { url: 'http://localhost/app/dashboard.html' });
-  dom.window.prompt = () => 'Blank';
-  const api = initDashboard({ root: dom.window.document, storage: memory(), seed: false });
+  const api = initDashboard({ root: dom.window.document, storage: memory(), seed: false, dialogs: { prompt: () => 'Blank' } });
   api.show('templates');
   assert.doesNotThrow(() => dom.window.document.querySelector('[data-new-template]').click());
 });
