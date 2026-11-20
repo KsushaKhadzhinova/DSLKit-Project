@@ -44,3 +44,28 @@ jobs:
       - name: Lint the folder
         working-directory: part-2/${{ matrix.folder }}
         run: npm run lint
+
+
+  typecheck:
+    name: Types of site/js (tsc --checkJs)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+
+
+  actionlint:
+    name: actionlint (workflows)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+      - name: Download actionlint
+        run: bash <(curl -fsSL https://raw.githubusercontent.com/rhysd/actionlint/v1.7.12/scripts/download-actionlint.bash) 1.7.12
+      - run: ./actionlint -color
