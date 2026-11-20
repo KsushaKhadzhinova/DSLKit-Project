@@ -10,7 +10,8 @@
     "dev": "nodemon server.js",
     "seed": "node scripts/seed.js",
     "seed:undo": "node scripts/seed.js --undo",
-    "test": "node --test --experimental-test-coverage --test-coverage-include=\"src/**\" \"tests/*.test.js\" report.test.mjs"
+    "test": "node --test --experimental-test-coverage --test-coverage-include=\"src/**\" \"tests/*.test.js\" report.test.mjs",
+    "test:leaks": "node --expose-gc --test --test-concurrency=1 \"tests/leaks/*.leak.js\""
   },
   "engines": {
     "node": ">=22"
