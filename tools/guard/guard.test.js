@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { problemsOf, warningsOf, pathProblems, secretProblems, scansForSecrets, sizeProblem } from './rules.js';
+import { problemsOf, warningsOf, pathProblems, secretProblems, scansForSecrets, sizeProblem, conflictMarkerProblems } from './rules.js';
 
 test('a clean commit message passes', () => {
   assert.deepEqual(problemsOf('fix(site): report failed writes\n\nLonger text.'), []);
@@ -54,4 +54,10 @@ test('big files are refused unless they are the allowed network captures, and pl
   assert.equal(sizeProblem('labs/01-network/data/x.har', 20 * 1048576), undefined);
   assert.equal(secretProblems('mongodb+srv://<user>:<password>@<cluster>.mongodb.net/db').length, 0);
   assert.equal(warningsOf("Merge remote-tracking branch 'origin/" + 'x'.repeat(130) + "'").length, 0);
+});
+
+test('an unresolved merge conflict marker is refused', () => {
+  const conflict = ['a', '<<<<<<< HEAD', 'b', '=======', 'c', '>>>>>>> main', ''].join('\n');
+  assert.equal(conflictMarkerProblems(conflict).length, 1);
+  assert.equal(conflictMarkerProblems(['a ======= b', 'plain text'].join('\n')).length, 0);
 });
