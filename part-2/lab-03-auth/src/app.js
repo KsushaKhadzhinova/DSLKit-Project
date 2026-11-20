@@ -16,6 +16,7 @@ const { securityHeaders, requireJson } = require('./middleware/http');
 const { createRequestLogger } = require('./middleware/request-log');
 const { createRateLimiter, createLoginGuard } = require('./middleware/rate-limit');
 const { routeNotFound, errorHandler } = require('./middleware/error-handler');
+const { createCors } = require('./middleware/cors');
 const { checkJwtSettings, checkTwoFactorKey } = require('./settings');
 const LIMITS = require('../limits.json');
 

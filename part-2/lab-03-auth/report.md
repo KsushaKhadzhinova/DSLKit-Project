@@ -727,7 +727,7 @@ module.exports = { createUsersRouter };
 ## Приложение Ж (обязательное) Листинг файла diagrams.controller.js
 
 ```js
-const { notFound, forbidden } = require('../errors');
+const { notFound, forbidden, badRequest } = require('../errors');
 const { mayModifyDiagram } = require('../permissions');
 const { Op, fn, col, where } = require('sequelize');
 const { parseListQuery } = require('../middleware/list-query');
@@ -746,8 +746,7 @@ const filterFor = (dialect, { notation, q }) => {
   return conditions.length > 0 ? { [Op.and]: conditions } : {};
 };
 
-// Reading is open to every signed-in user (the diagrams are a shared catalogue); changing and deleting follow the permission matrix:
-// the owner, or a role with diagram:modify:any. Another user's diagram answers 403, the same as the existing tests and the README say.
+// Only the owner or an admin may change or delete a diagram.
 const mayChange = mayModifyDiagram;
 
 // Express 5 forwards a rejected promise to the error handler, so no try/catch is needed here.

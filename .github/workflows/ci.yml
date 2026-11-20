@@ -1,46 +1,119 @@
 name: CI
-
 on:
   push:
   pull_request:
-
+  workflow_dispatch:
+# The token of the workflow may only read the code: a compromised step cannot push or change settings.
 permissions:
   contents: read
-
+# A newer push to the same branch cancels the older run of it.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ci-${{ github.ref }}
   cancel-in-progress: true
-
-# Each work folder of this branch is a separate npm project, so the tests run
-# per folder. The repository root is not run here: the branch root has no tests
-# of its own and the root format check does not belong to the lab folders.
 jobs:
   test:
-    name: test (${{ matrix.folder }})
+    name: Site tests, format, audit
     runs-on: ubuntu-latest
-    timeout-minutes: 15
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - folder: part-2/lab-01-node-server
-            cache: npm
-          - folder: part-2/lab-02-sequelize
-            cache: npm
-          - folder: part-2/lab-03-auth
-            cache: npm
-    defaults:
-      run:
-        working-directory: ${{ matrix.folder }}
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
         with:
           node-version: 24
-          cache: ${{ matrix.cache }}
-          cache-dependency-path: ${{ matrix.folder }}/package-lock.json
-      - name: Install dependencies
+          cache: npm
+      - run: npm ci
+      - run: npm run format:check
+      - run: npm test
+      # Known vulnerabilities in the libraries that reach the user fail the build; development tools are reported by Dependabot.
+      - run: npm audit --omit=dev --audit-level=high
+
+  build:
+    name: Production build of the site
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - uses: actions/upload-artifact@v7
+        with:
+          name: site-dist
+          path: dist
+          retention-days: 7
+
+  react:
+    name: React app (lab 7 and 8 of part 1)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: react-app
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: react-app/package-lock.json
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+
+  e2e:
+    name: Browser end-to-end checks (Playwright)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      # Chromium of Playwright instead of Edge.
+      E2E_BROWSER: chromium
+    steps:
+      # The runner context is not available in the env of a job, so the temporary folders are set in the first step:
+      # results and screenshots go there, the committed JSON files stay clean.
+      - name: Set the output folders
         run: |
-          if [ -f package-lock.json ]; then npm ci; else npm install; fi
-      - name: Test
-        run: npm test
+          echo "E2E_OUT=$RUNNER_TEMP/e2e/results" >> "$GITHUB_ENV"
+          echo "E2E_SHOTS=$RUNNER_TEMP/e2e/screens" >> "$GITHUB_ENV"
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - run: npm ci
+      - run: pip install playwright
+      - run: playwright install --with-deps chromium
+      - name: Start the site on port 5173
+        run: |
+          node tools/serve.js site 5173 > "$RUNNER_TEMP/serve.log" 2>&1 &
+          for i in $(seq 1 30); do
+            curl -fsS http://localhost:5173/ > /dev/null && exit 0
+            sleep 1
+          done
+          cat "$RUNNER_TEMP/serve.log"
+          exit 1
+      - name: Run the scripts
+        run: |
+          status=0
+          for s in editor palette extra critical-path auth scenarios; do
+            echo "::group::$s"
+            python testing-course/full/$s-e2e.py || status=1
+            echo "::endgroup::"
+          done
+          exit $status
+      - name: Fail when any result is not Passed
+        run: python testing-course/full/e2e-gate.py
+      - name: Keep the working tree clean
+        if: always()
+        run: git status --porcelain --untracked-files=no | tee /dev/stderr | (! grep .)
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: e2e-results
+          path: ${{ runner.temp }}/e2e
+          retention-days: 14

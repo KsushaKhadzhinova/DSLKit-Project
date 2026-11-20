@@ -3,9 +3,10 @@ const { createModels } = require('./src/models');
 const { startLogRetention } = require('./src/middleware/request-log');
 
 const port = Number(process.env.PORT) || 3000;
-const { JWT_SECRET, JWT_EXPIRES_IN, TRUST_PROXY, GENERAL_RATE_MAX, GENERAL_RATE_WINDOW_MINUTES, TWO_FACTOR_KEY, MAIL_OUTBOX_FILE } = process.env;
+const { JWT_SECRET, JWT_EXPIRES_IN, TRUST_PROXY, CORS_ORIGIN, GENERAL_RATE_MAX, GENERAL_RATE_WINDOW_MINUTES, TWO_FACTOR_KEY, MAIL_OUTBOX_FILE } = process.env;
 const settings = {
   jwtSecret: JWT_SECRET,
+  corsOrigin: CORS_ORIGIN || 'http://localhost:5178',
   // Access tokens are short (15 minutes by default); the refresh token renews them.
   jwtExpiresIn: JWT_EXPIRES_IN || '15m',
   // Key material for the encryption of the TOTP secrets (32 characters or more); without it a key is derived from JWT_SECRET.
