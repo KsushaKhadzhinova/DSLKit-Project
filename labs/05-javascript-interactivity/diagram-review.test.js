@@ -305,8 +305,8 @@ test('ERD: an entity without a key gets one, an existing id attribute becomes th
   );
   const fixed = variant(code, 'minimal');
   assert.match(fixed.code, /id : int pk/);
-  assert.match(fixed.code, /entity B \{\n  id : int pk/);
-  assert.match(fixed.code, /entity C \{\n  id : int pk\n\}/);
+  assert.match(fixed.code, /entity B \{\n {2}id : int pk/);
+  assert.match(fixed.code, /entity C \{\n {2}id : int pk\n\}/);
   assert.equal(fixed.errors, 0);
 });
 

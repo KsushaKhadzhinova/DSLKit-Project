@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node --test --experimental-test-coverage --test-coverage-lines=100 --test-coverage-branches=100 --test-coverage-functions=100 \"labs/**/*.test.js\" \"tools/**/*.test.js\"",
+    "test": "node --test --experimental-test-coverage --test-coverage-include=\"site/js/**\" --test-coverage-include=\"tools/**\" --test-coverage-exclude=\"**/*.test.js\" --test-coverage-lines=100 --test-coverage-branches=100 --test-coverage-functions=100 \"labs/**/*.test.js\" \"tools/**/*.test.js\"",
     "lab1:generate": "node labs/01-network/cli.js labs/01-network/data/draw-io-normal.har labs/01-network/data/draw-io-fast3g.har ru labs/01-network/generated/ru && node labs/01-network/cli.js labs/01-network/data/draw-io-normal.har labs/01-network/data/draw-io-fast3g.har en labs/01-network/generated/en",
     "lab1:report": "npm run lab1:generate && node tools/build.js labs/01-network",
     "dev": "nodemon --watch site --ext html,css,js,svg,json tools/serve.js site 5173",
@@ -33,13 +33,18 @@
     "build": "node tools/build-site-cli.js",
     "start:prod": "node tools/serve.js dist 5173",
     "dsl:reference": "node tools/dsl-reference-cli.js docs",
-    "design:build": "node tools/build-design.js"
+    "design:build": "node tools/build-design.js",
+    "lint": "eslint .",
+    "verify": "npm run lint && npm run format:check && npm test"
   },
   "dependencies": {
     "lodash": "^4.18.1"
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.5",
     "esbuild": "^0.28.2",
+    "eslint": "^9.39.5",
+    "globals": "^17.14.0",
     "html-validate": "^11.21.0",
     "jsdom": "^31.0.0",
     "nodemon": "^3.1.14",
