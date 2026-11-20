@@ -157,3 +157,15 @@ jobs:
           cache: npm
       - run: npm ci
       - run: node ci/flaky.mjs
+
+
+  markdown-links:
+    name: Markdown links (relative, no network)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - run: node ci/check-links.mjs
