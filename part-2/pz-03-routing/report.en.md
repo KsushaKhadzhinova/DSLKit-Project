@@ -6,7 +6,7 @@ To master routing in a React application: configure routes, build a single-page 
 
 ## 2 Choice of the React Router Version
 
-The assignment names React Router v6 with a note "v6?". This variant of the work uses the `react-router-dom` library version 6.30, so it follows the assignment exactly. The whole API from the assignment (`BrowserRouter`, `Routes`, `Route`, `Link`, `NavLink`, `Outlet`, `Navigate`, `useParams`, `useNavigate`, `useLocation`, `useSearchParams`) works unchanged in version 6. Version 6.30 is supported and compatible with React 19.
+The assignment names React Router v6 with a note "v6?". The assignment text names v6, but on 2026-11-20 the owner approved version 7 (`react-router-dom` 7.18), because the 6.x line has no fix for the two `npm audit` findings. The whole API from the assignment (`BrowserRouter`, `Routes`, `Route`, `Link`, `NavLink`, `Outlet`, `Navigate`, `useParams`, `useNavigate`, `useLocation`, `useSearchParams`) works unchanged in version 7. Version 7.18 is compatible with React 19.
 
 ## 3 Work Progress
 

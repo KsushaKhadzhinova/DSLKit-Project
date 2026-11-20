@@ -4,7 +4,7 @@
 
 ## Версия React Router
 
-В условии указан React Router v6 (цель работы: «Освоение библиотеки React Router v6»). В работе стоит **`react-router-dom` 6.30**, это точно соответствует условию. Решение и доказательство: [`docs/agent-reports/router-decision.md`](../../docs/agent-reports/router-decision.md).
+Текст условия называет React Router v6 (цель работы: «Освоение библиотеки React Router v6»). Владелец 20.11.2026 утвердил переход на **React Router v7** (`react-router-dom` 7.18): в линии 6.x нет исправления для двух находок `npm audit`. Используется тот же декларативный API (`BrowserRouter`, `Routes`, `Route`, `Link`, `NavLink`, `Navigate`, `useNavigate`), он совместим с v6. Решение: [`docs/agent-reports/router-decision.md`](../../docs/agent-reports/router-decision.md).
 
 ## Что сделано
 
