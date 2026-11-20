@@ -3,11 +3,16 @@ const { createModels } = require('./src/models');
 const { startLogRetention } = require('./src/middleware/request-log');
 
 const port = Number(process.env.PORT) || 3000;
-const { JWT_SECRET, JWT_EXPIRES_IN, TRUST_PROXY, CORS_ORIGIN, GENERAL_RATE_MAX, GENERAL_RATE_WINDOW_MINUTES } = process.env;
+const { JWT_SECRET, JWT_EXPIRES_IN, TRUST_PROXY, CORS_ORIGIN, GENERAL_RATE_MAX, GENERAL_RATE_WINDOW_MINUTES, TWO_FACTOR_KEY, MAIL_OUTBOX_FILE } = process.env;
 const settings = {
   jwtSecret: JWT_SECRET,
-  jwtExpiresIn: JWT_EXPIRES_IN || '1h',
   corsOrigin: CORS_ORIGIN || 'http://localhost:5178',
+  // Access tokens are short (15 minutes by default); the refresh token renews them.
+  jwtExpiresIn: JWT_EXPIRES_IN || '15m',
+  // Key material for the encryption of the TOTP secrets (32 characters or more); without it a key is derived from JWT_SECRET.
+  ...(TWO_FACTOR_KEY && { twoFactorKey: TWO_FACTOR_KEY }),
+  // Where the password reset "emails" are written in development; without it they go to the console.
+  ...(MAIL_OUTBOX_FILE && { mailOutboxFile: MAIL_OUTBOX_FILE }),
   // Optional overrides of the general per-address limit from limits.json.
   ...(Number(GENERAL_RATE_MAX) > 0 && { generalRateMax: Number(GENERAL_RATE_MAX) }),
   ...(Number(GENERAL_RATE_WINDOW_MINUTES) > 0 && { generalRateWindowMs: Number(GENERAL_RATE_WINDOW_MINUTES) * 60 * 1000 }),

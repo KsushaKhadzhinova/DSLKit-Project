@@ -1,0 +1,7 @@
+{"type":"excalidraw","version":2,"source":"https://excalidraw.com","elements":[
+{"id":"a","type":"rectangle","x":100,"y":100,"width":120,"height":60,"boundElements":[{"type":"text","id":"ta"},{"type":"arrow","id":"ar"}],"isDeleted":false},
+{"id":"ta","type":"text","x":110,"y":120,"width":60,"height":25,"text":"Client","containerId":"a","isDeleted":false},
+{"id":"b","type":"rectangle","x":400,"y":100,"width":120,"height":60,"boundElements":[{"type":"text","id":"tb"},{"type":"arrow","id":"ar"}],"isDeleted":false},
+{"id":"tb","type":"text","x":410,"y":120,"width":60,"height":25,"text":"Server","containerId":"b","isDeleted":false},
+{"id":"ar","type":"arrow","x":220,"y":130,"width":180,"height":0,"points":[[0,0],[180,0]],"startBinding":{"elementId":"a","focus":0,"gap":1},"endBinding":{"elementId":"b","focus":0,"gap":1},"endArrowhead":"arrow","isDeleted":false}
+],"appState":{"viewBackgroundColor":"#ffffff"},"files":{}}

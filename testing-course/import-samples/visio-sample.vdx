@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<VisioDocument xmlns="http://schemas.microsoft.com/visio/2003/core" xml:space="preserve">
+<Pages><Page ID="0" Name="Page-1"><Shapes>
+<Shape ID="1" Type="Shape" Master="2"><XForm><PinX>2</PinX><PinY>8</PinY><Width>2</Width><Height>1</Height></XForm><Text>Begin</Text></Shape>
+<Shape ID="2" Type="Shape" Master="2"><XForm><PinX>2</PinX><PinY>5</PinY><Width>2</Width><Height>1</Height></XForm><Text>Work</Text></Shape>
+<Shape ID="3" Type="Shape" Master="3"><XForm><PinX>2</PinX><PinY>6.5</PinY><Width>0</Width><Height>1</Height></XForm></Shape>
+</Shapes><Connects><Connect FromSheet="3" FromCell="BeginX" ToSheet="1"/><Connect FromSheet="3" FromCell="EndX" ToSheet="2"/></Connects></Page></Pages>
+</VisioDocument>

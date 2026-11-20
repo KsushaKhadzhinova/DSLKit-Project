@@ -1,0 +1,13 @@
+digraph Order {
+  rankdir=LR;
+  start [shape=ellipse, label="Start"];
+  check [shape=diamond, label="In stock?"];
+  ship [shape=box, label="Ship order"];
+  backorder [shape=box, label="Back order"];
+  done [shape=ellipse, label="End"];
+  start -> check;
+  check -> ship [label="yes"];
+  check -> backorder [label="no"];
+  ship -> done;
+  backorder -> done;
+}

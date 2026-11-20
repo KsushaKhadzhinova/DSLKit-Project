@@ -24,7 +24,7 @@ test('admin routes answer 401 without a token and 403 for a regular user', async
     assert.equal((await app.call(method, path, { body: { role: 'admin' } })).res.status, 401, `${method} ${path}`);
     const { res, body } = await app.call(method, path, { token: user, body: { role: 'admin' } });
     assert.equal(res.status, 403, `${method} ${path}`);
-    assert.equal(body.error, 'Requires the admin role');
+    assert.match(body.error, /^Requires the user:[a-z]+ permission$/);
   }
 });
 

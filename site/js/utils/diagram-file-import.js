@@ -375,20 +375,27 @@ const graphvizSvg = (svg) => {
   return model.nodes.size > 0 ? model : null;
 };
 
+// Mermaid 10 names a node "flowchart-A-0", Mermaid 11 puts the container id before it ("container-flowchart-A-0") and keeps the edge label under data-id.
+const MERMAID_NODE = /(?:^|-)flowchart-(.+)-\d+$/;
 const mermaidSvg = (svg) => {
   const model = newModel();
-  const nodes = all(svg, 'g').filter((group) => /^flowchart-(.+)-\d+$/.test(group.attrs.id ?? ''));
+  const nodes = all(svg, 'g').filter((group) => MERMAID_NODE.test(group.attrs.id ?? ''));
   nodes.forEach((group) => {
-    const id = /^flowchart-(.+)-\d+$/.exec(group.attrs.id)[1];
+    const id = MERMAID_NODE.exec(group.attrs.id)[1];
     const shape = all(group, 'polygon').length > 0 ? 'decision' : all(group, 'circle').length > 0 ? 'terminal' : 'process';
     addNode(model, id, { label: cleanLabel(textOf(group)), kind: shape, ...translateOf(group) });
   });
+  const labels = new Map(
+    all(svg, 'g')
+      .filter((group) => /^L[-_]/.test(group.attrs['data-id'] ?? ''))
+      .map((group) => [group.attrs['data-id'], cleanLabel(textOf(group))]),
+  );
   all(svg, 'path').forEach((path) => {
-    const rest = /^L[-_](.+)[-_]\d+$/.exec(path.attrs.id ?? '')?.[1];
+    const rest = /(?:^|-)L[-_](.+)[-_]\d+$/.exec(path.attrs.id ?? '')?.[1];
     if (!rest) return;
     const cuts = [...rest.matchAll(/[-_]/g)].map((hit) => hit.index);
     const cut = cuts.find((at) => model.nodes.has(rest.slice(0, at)) && model.nodes.has(rest.slice(at + 1)));
-    if (cut !== undefined) addEdge(model, rest.slice(0, cut), rest.slice(cut + 1));
+    if (cut !== undefined) addEdge(model, rest.slice(0, cut), rest.slice(cut + 1), labels.get(path.attrs.id.replace(/^.*?(?=L[-_])/, '')) ?? '');
   });
   return model.nodes.size > 0 ? model : null;
 };
@@ -496,9 +503,11 @@ const BPMN_KINDS = {
   callActivity: 'task',
   transaction: 'task',
 };
+const NESTED_BPMN = new Set(['subProcess', 'transaction', 'adHocSubProcess']);
 const bpmnFile = (root) => {
   const model = newModel('bpmn');
-  const process = all(root, 'process')[0] ?? root;
+  const found = all(root, 'process');
+  const processes = found.length > 0 ? found : [root];
   const bounds = new Map();
   all(root, 'BPMNShape').forEach((shape) => {
     const box = kid(shape, 'Bounds');
@@ -509,9 +518,10 @@ const bpmnFile = (root) => {
     node.children.forEach((child) => {
       const kind = BPMN_KINDS[child.name] ?? (/Task$/.test(child.name) || child.name === 'task' ? 'task' : undefined);
       if (kind) flowNodes.push([child, kind]);
-      visit(child);
+      // The inside of a sub-process is a separate flow: it stays one task, otherwise its start and end events break the outer process.
+      if (!NESTED_BPMN.has(child.name)) visit(child);
     });
-  visit(process);
+  processes.forEach(visit);
   flowNodes.forEach(([item, kind]) => {
     const box = bounds.get(item.attrs.id) ?? {};
     addNode(model, item.attrs.id, {
@@ -521,7 +531,11 @@ const bpmnFile = (root) => {
       y: number(box.y) === undefined ? undefined : number(box.y) + (number(box.height) ?? 0) / 2,
     });
   });
-  all(process, 'sequenceFlow').forEach((flow) => addEdge(model, flow.attrs.sourceRef, flow.attrs.targetRef, flow.attrs.name));
+  const known = new Set(flowNodes.map(([item]) => item.attrs.id));
+  processes
+    .flatMap((process) => all(process, 'sequenceFlow'))
+    .filter((flow) => known.has(flow.attrs.sourceRef) && known.has(flow.attrs.targetRef))
+    .forEach((flow) => addEdge(model, flow.attrs.sourceRef, flow.attrs.targetRef, flow.attrs.name));
   return model;
 };
 
@@ -558,6 +572,13 @@ const xmiFile = (root, lang) => {
     kids(item, 'generalization').forEach((general) => relations.push([item.attrs.id, general.attrs.general, '', '--|>']));
     kids(item, 'interfaceRealization').forEach((real) => relations.push([item.attrs.id, real.attrs.contract, '', '..|>']));
   });
+  // An association of Enterprise Architect and Papyrus is its own element with two ends that point at the classes.
+  elements
+    .filter((item) => /Association$/.test(item.attrs.type ?? ''))
+    .forEach((item) => {
+      const ends = [...kids(item, 'ownedEnd'), ...kids(item, 'ownedAttribute')].map((end) => end.attrs.type);
+      if (ends.length === 2) relations.push([ends[0], ends[1], item.attrs.name ?? '']);
+    });
   relations
     .filter(([from, to]) => idOf.has(from) && idOf.has(to))
     .forEach(([from, to, label, arrow = '-->']) => lines.push(`${idOf.get(from)} ${arrow} ${idOf.get(to)}${label ? ` : ${cleanLabel(label)}` : ''}`));

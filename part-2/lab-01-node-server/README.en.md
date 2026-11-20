@@ -6,7 +6,7 @@ By the assignment the branch of this work is called `lab21`; here the work lives
 
 ## 1 What is done
 
-A REST API for the `diagrams` resource on Express 5 with data in an in-memory array. A diagram stores `title`, `notation`, `sourceCode`, `priority`, `owner` and the creation time `createdAt`.
+A REST API for the `diagrams` resource on Express 5. Owner decision: data is written to an in-memory array and no database is used in this lab (after a server restart only the two sample records remain). A diagram stores `title`, `notation`, `sourceCode`, `priority`, `owner` and the creation time `createdAt`.
 
 | Method   | Path                         | Success            | Errors                                      |
 | -------- | ---------------------------- | ------------------ | ------------------------------------------- |

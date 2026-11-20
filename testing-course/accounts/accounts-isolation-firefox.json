@@ -1,0 +1,172 @@
+{
+ "suite": "isolation",
+ "results": [
+  {
+   "id": "ISO-01",
+   "title": "User A: sign-up through the form, creates a project, a template and a version",
+   "browser": "firefox",
+   "status": "Passed",
+   "severity": "",
+   "note": ""
+  },
+  {
+   "id": "ISO-02",
+   "title": "User A: moves a project to the trash",
+   "browser": "firefox",
+   "status": "Passed",
+   "severity": "",
+   "note": ""
+  },
+  {
+   "id": "ISO-03",
+   "title": "User B in the same profile: no projects, templates or trash of A, own 33 starter projects",
+   "browser": "firefox",
+   "status": "Passed",
+   "severity": "",
+   "note": ""
+  },
+  {
+   "id": "ISO-04",
+   "title": "Quota of B starts at 0 (A's diagrams are not counted)",
+   "browser": "firefox",
+   "status": "Passed",
+   "severity": "",
+   "note": ""
+  },
+  {
+   "id": "ISO-05",
+   "title": "Projects are stored under a key of each user",
+   "browser": "firefox",
+   "status": "Passed",
+   "severity": "",
+   "note": ""
+  },
+  {
+   "id": "ISO-06",
+   "title": "Version history (Git panel) of A is not visible to B",
+   "browser": "firefox",
+   "status": "Failed",
+   "severity": "High",
+   "note": "B sees the version history of A (key dslkit.git-commits is shared by all accounts): expected (0, False), got (2, True)",
+   "screenshot": "fail-ISO-06-firefox.png"
+  },
+  {
+   "id": "ISO-07",
+   "title": "Settings of A (editor guides) do not change the settings of B",
+   "browser": "firefox",
+   "status": "Failed",
+   "severity": "Medium",
+   "note": "B inherited the setting of A (key dslkit.settings is shared): expected True, got False",
+   "screenshot": "fail-ISO-07-firefox.png"
+  },
+  {
+   "id": "ISO-08",
+   "title": "Theme chosen by A is not applied to B (theme per account)",
+   "browser": "firefox",
+   "status": "Failed",
+   "severity": "Low",
+   "note": "Locator.check: Timeout 60000ms exceeded. Call log:   - waiting for locator(\"#theme-dark\")     - locator resolved to <input type=\"radio\" name=\"theme\" value=\"dark\" id=\"theme-dark\" class=\"theme-option__input\"/>   - attempting click action     2 × waiting for element to be visible, enabled and stable",
+   "screenshot": "fail-ISO-08-firefox.png"
+  },
+  {
+   "id": "ISO-09",
+   "title": "Search and filter state of the dashboard is not carried from A to B",
+   "browser": "firefox",
+   "status": "Failed",
+   "severity": "Low",
+   "note": "B sees the search text of A in the project search (key dslkit.dashboard): expected '', got 'A-secret'",
+   "screenshot": "fail-ISO-09-firefox.png"
+  },
+  {
+   "id": "ISO-10",
+   "title": "A signs in again: projects, template, trash and quota are exactly as left",
+   "browser": "firefox",
+   "status": "Passed",
+   "severity": "",
+   "note": ""
+  },
+  {
+   "id": "ISO-11",
+   "title": "Separate browser context: no accounts and no data of A, the same email can be registered there",
+   "browser": "firefox",
+   "status": "Passed",
+   "severity": "",
+   "note": ""
+  },
+  {
+   "id": "ISO-12",
+   "title": "User: five new diagrams a day, the sixth and a re-save after delete are refused, edits of an existing one work",
+   "browser": "firefox",
+   "status": "Passed",
+   "severity": "",
+   "note": ""
+  },
+  {
+   "id": "ISO-13",
+   "title": "Developer: 7 new diagrams, the quota says no daily limit",
+   "browser": "firefox",
+   "status": "Passed",
+   "severity": "",
+   "note": ""
+  },
+  {
+   "id": "ISO-14",
+   "title": "Admin: 7 new diagrams, the quota says no daily limit",
+   "browser": "firefox",
+   "status": "Passed",
+   "severity": "",
+   "note": ""
+  },
+  {
+   "id": "ISO-15",
+   "title": "Switching accounts in one profile keeps each user's quota separate",
+   "browser": "firefox",
+   "status": "Failed",
+   "severity": "Medium",
+   "note": "Timeout 60000ms exceeded. =========================== logs =========================== waiting for navigation to \"**/welcome.html\" until 'load' ============================================================",
+   "screenshot": "fail-ISO-15-firefox.png"
+  },
+  {
+   "id": "ISO-16",
+   "title": "Projects saved as a guest stay with the guest and do not enter a new account",
+   "browser": "firefox",
+   "status": "Passed",
+   "severity": "",
+   "note": ""
+  },
+  {
+   "id": "ISO-17",
+   "title": "Sign-out in tab 1 sends tab 2 to sign-in and updates the editor menu; sign-in updates it back",
+   "browser": "firefox",
+   "status": "Failed",
+   "severity": "Medium",
+   "note": "tab 2 (dashboard) stayed on a private page after sign-out in tab 1: http://localhost:60005/en/app/dashboard.html",
+   "screenshot": "fail-ISO-17-firefox.png"
+  },
+  {
+   "id": "ISO-18",
+   "title": "Two tabs save the same project: the last write wins, one record, valid JSON, no errors",
+   "browser": "firefox",
+   "status": "Passed",
+   "severity": "",
+   "note": ""
+  },
+  {
+   "id": "ISO-19",
+   "title": "A project trashed in tab 1 is not resurrected or duplicated by a save in tab 2",
+   "browser": "firefox",
+   "status": "Failed",
+   "severity": "Medium",
+   "note": "a project trashed in tab 1 came back or was duplicated by an edit in tab 2: ['Zombie edit']",
+   "screenshot": "fail-ISO-19-firefox.png"
+  },
+  {
+   "id": "ISO-20",
+   "title": "Share link: opens for a guest, for another account and in another context; a damaged link does not break the editor",
+   "browser": "firefox",
+   "status": "Passed",
+   "severity": "",
+   "note": ""
+  }
+ ]
+}

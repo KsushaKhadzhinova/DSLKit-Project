@@ -54,8 +54,9 @@ test('the token is HS256, carries issuer, subject and an expiry, and no password
   assert.deepEqual(header, { alg: 'HS256', typ: 'JWT' });
   assert.equal(payload.iss, 'dslkit');
   assert.equal(payload.sub, String(body.id));
-  assert.equal(payload.exp - payload.iat, 3600);
-  assert.deepEqual(Object.keys(payload).sort(), ['email', 'exp', 'iat', 'id', 'iss', 'role', 'sub']);
+  assert.equal(payload.exp - payload.iat, 900);
+  assert.equal(payload.aud, 'dslkit-api');
+  assert.deepEqual(Object.keys(payload).sort(), ['aud', 'email', 'exp', 'iat', 'id', 'iss', 'role', 'sid', 'sub']);
 });
 
 test('a token signed with the right secret but without the issuer is refused', async () => {
@@ -349,7 +350,7 @@ test('repeated wrong passwords lock the email, even for the right password, and 
 });
 
 test('a successful login resets the failed attempts and a lock ends after its time', async () => {
-  const strict = await startServer({ loginMaxAttempts: 3, loginLockMs: 400 });
+  const strict = await startServer({ loginMaxAttempts: 3, loginLockMs: 2500 });
   try {
     await strict.call('POST', '/auth/register', creds('reset@example.com'));
     for (let round = 0; round < 3; round += 1) {
@@ -358,7 +359,7 @@ test('a successful login resets the failed attempts and a lock ends after its ti
     }
     for (let i = 0; i < 3; i += 1) await strict.call('POST', '/auth/login', creds('reset@example.com', 'wrong password'));
     assert.equal((await strict.call('POST', '/auth/login', creds('reset@example.com'))).res.status, 429);
-    await pause(500);
+    await pause(2700);
     assert.equal((await strict.call('POST', '/auth/login', creds('reset@example.com'))).res.status, 200);
   } finally {
     await strict.close();

@@ -1,4 +1,5 @@
 const bcrypt = require('bcrypt');
+const { ADMIN_ROLE } = require('../src/permissions');
 
 try {
   process.loadEnvFile();
@@ -24,8 +25,11 @@ module.exports = {
       throw new Error(`ADMIN_PASSWORD must be ${MIN_ADMIN_PASSWORD} characters or more and at most 72 bytes`);
     }
     if (await queryInterface.rawSelect('Users', { where: { email } }, ['id'])) return;
+    // The role comes from the Roles table (migration 7, kept equal to src/permissions.js by the roles seed).
+    const roleId = await queryInterface.rawSelect('Roles', { where: { name: ADMIN_ROLE } }, ['id']);
+    if (!roleId) throw new Error('The Roles table has no such role: run npm run db:migrate first');
     const now = new Date();
-    await queryInterface.bulkInsert('Users', [{ email, passwordHash: await bcrypt.hash(ADMIN_PASSWORD, 10), role: 'admin', createdAt: now, updatedAt: now }]);
+    await queryInterface.bulkInsert('Users', [{ email, passwordHash: await bcrypt.hash(ADMIN_PASSWORD, 10), roleId, createdAt: now, updatedAt: now }]);
   },
 
   // Undo runs after the demo seed was undone, so the admin owns no diagrams any more.

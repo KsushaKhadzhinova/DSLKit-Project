@@ -1,0 +1,99 @@
+{
+ "suite": "course",
+ "results": [
+  {
+   "id": "CRS-01",
+   "title": "Two users sign up through the UI, sign out; a wrong password is refused with a message",
+   "browser": "msedge",
+   "status": "Passed",
+   "severity": "",
+   "note": ""
+  },
+  {
+   "id": "CRS-02",
+   "title": "User one creates a diagram in the UI; it stays after a reload",
+   "browser": "msedge",
+   "status": "Failed",
+   "severity": "Medium",
+   "note": "diagram lost after reload",
+   "screenshot": "fail-CRS-02-msedge.png"
+  },
+  {
+   "id": "CRS-03",
+   "title": "API ownership: a user cannot change/delete a foreign diagram, tag or comment (403/404); the owner and author can",
+   "browser": "msedge",
+   "status": "Failed",
+   "severity": "High",
+   "note": "comment by another user -> 400 {'error': 'Invalid comment data', 'details': [{'field': 'text', 'message': 'must be a non-empty string'}]}",
+   "screenshot": "fail-CRS-03-msedge.png"
+  },
+  {
+   "id": "CRS-04",
+   "title": "API roles: admin-only /users, no self-promotion, role set at sign-up ignored, role changes and deleted users take effect at once",
+   "browser": "msedge",
+   "status": "Failed",
+   "severity": "High",
+   "note": "'Suite' object has no attribute 'ids'",
+   "screenshot": "fail-CRS-04-msedge.png"
+  },
+  {
+   "id": "CRS-05",
+   "title": "API errors: 401 without a token, 400 invalid body, 404 unknown id/route, 405 wrong method",
+   "browser": "msedge",
+   "status": "Passed",
+   "severity": "",
+   "note": ""
+  },
+  {
+   "id": "CRS-06",
+   "title": "UI: guest redirected, user gets 403 on /admin, 404 pages, admin lists users",
+   "browser": "msedge",
+   "status": "Failed",
+   "severity": "Medium",
+   "note": "'Suite' object has no attribute 'ids'",
+   "screenshot": "fail-CRS-06-msedge.png"
+  },
+  {
+   "id": "CRS-07",
+   "title": "UI comments: another user posts, edits and deletes own comment; a tag on a foreign diagram is refused",
+   "browser": "msedge",
+   "status": "Failed",
+   "severity": "Medium",
+   "note": "'Suite' object has no attribute 'ids'",
+   "screenshot": "fail-CRS-07-msedge.png"
+  },
+  {
+   "id": "CRS-08",
+   "title": "Switching accounts in one profile: the token is replaced and each user sees the right data",
+   "browser": "msedge",
+   "status": "Failed",
+   "severity": "Medium",
+   "note": "owner does not see own diagram after switching accounts",
+   "screenshot": "fail-CRS-08-msedge.png"
+  },
+  {
+   "id": "CRS-09",
+   "title": "A damaged token in localStorage: the user is sent to sign-in, no crash",
+   "browser": "msedge",
+   "status": "Passed",
+   "severity": "",
+   "note": ""
+  },
+  {
+   "id": "CRS-10",
+   "title": "Storage disabled (private mode): the login page still renders without errors",
+   "browser": "msedge",
+   "status": "Passed",
+   "severity": "",
+   "note": ""
+  },
+  {
+   "id": "CRS-11",
+   "title": "Token expiry (JWT_EXPIRES_IN=5): after expiry the app shows the sign-in form",
+   "browser": "msedge",
+   "status": "Passed",
+   "severity": "",
+   "note": ""
+  }
+ ]
+}

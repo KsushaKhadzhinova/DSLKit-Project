@@ -1,0 +1,40 @@
+digraph Order {
+	graph [bb="0,0,441.06,90",
+		rankdir=LR
+	];
+	node [label="\N"];
+	start	[height=0.5,
+		label=Start,
+		pos="28.32,45",
+		shape=ellipse,
+		width=0.78667];
+	check	[height=0.5,
+		label="In stock?",
+		pos="156.85,45",
+		shape=diamond,
+		width=1.7559];
+	start -> check	[pos="e,91.849,45 57.088,45 64.19,45 72.175,45 80.447,45"];
+	ship	[height=0.5,
+		label="Ship order",
+		pos="312.06,72",
+		shape=box,
+		width=1.0139];
+	check -> ship	[label=yes,
+		lp="247.06,69.962",
+		pos="e,275.15,65.671 197.31,51.953 217.68,55.542 242.67,59.946 264.03,63.711"];
+	backorder	[height=0.5,
+		label="Back order",
+		pos="312.06,18",
+		shape=box,
+		width=1.0556];
+	check -> backorder	[label=no,
+		lp="247.06,38.94",
+		pos="e,273.59,24.604 197.31,38.047 217.13,34.553 241.34,30.288 262.32,26.591"];
+	done	[height=0.5,
+		label=End,
+		pos="414.06,44",
+		shape=ellipse,
+		width=0.75];
+	ship -> done	[pos="e,388.75,50.808 348.88,61.97 358.29,59.338 368.42,56.501 377.79,53.876"];
+	backorder -> done	[pos="e,388.54,37.624 350.3,27.681 359.18,29.99 368.64,32.449 377.44,34.738"];
+}

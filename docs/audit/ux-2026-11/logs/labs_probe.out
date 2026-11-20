@@ -1,0 +1,121 @@
+===== lab04 DSLKit: диаграмм 3
+Перейти к основному содержимому / DSLKit / Новая диаграмма / Список / Тёмная тема / Мои диаграммы /  / Список диаграмм проекта: добавляйте, переименовывайте, публикуйте и ищите. Данные хранятся в этом браузере. /  / Новая диаграмма / Название диаграммы / До 80 символов, пробелы по краям не считаются / Нотация / UML / BPMN / ERD / DFD / IDEF0 / Petri /   / Добавить / Список диаграмм / Поиск / Статус / Все / Опубликованные / Черновики / Фильтр по нотации / Все / UML / BPMN / ERD / DFD / IDEF0 / Petri / Сортировка / По дате изменения / По названию / Без сортировки /  / Всего: 
+A[] DSLKit -> /
+A[] Новая диаграмма -> #add
+A[] Список -> #list
+INPUT[checkbox] 
+INPUT[text] Например, схема оплаты
+SELECT[select-one] UML
+BPMN
+ERD
+DFD
+IDEF0
+Petri
+BUTTON[submit] Добавить
+INPUT[search] Часть названия
+SELECT[select-one] Все
+Опубликованные
+Черновики
+SELECT[select-one] Все
+UML
+BPMN
+ERD
+DFD
+IDEF0
+Petri
+SELECT[select-one] По дате изменения
+По названию
+Без сортир
+BUTTON[button] Черновик
+BUTTON[button] Изменить
+BUTTON[button] Удалить
+BUTTON[button] Опубликована
+BUTTON[button] Изменить
+BUTTON[button] Удалить
+BUTTON[button] Опубликована
+BUTTON[button] Изменить
+BUTTON[button] Удалить
+A[] Новая диаграмма -> #add
+A[] Список диаграмм -> #list
+===== lab05 Диаграммы проекта — DSLKit
+Перейти к основному содержимому / DSLKit / Диаграммы / Тёмная тема / Вход в DSLKit /  / Диаграммы хранятся на сервере и доступны после входа. /  / Вход по адресу почты / Электронная почта / Пароль / От 8 до 72 байт / Войти / Нужна регистрация / Сайт DSLKit / Контакты: hello@dslkit.io /  / DSLKit, лабораторная работа 5: клиент React и серверный API
+A[] DSLKit -> /
+A[] Диаграммы -> #main
+INPUT[checkbox] Тёмная тема
+INPUT[email] 
+INPUT[password] 
+BUTTON[submit] Войти
+BUTTON[button] Нужна регистрация
+A[] Сайт DSLKit -> https://dslkit.io/
+A[] hello@dslkit.io -> mailto:hello@dslkit.io
+===== pz03 DSLKit: диаграмм 3
+Перейти к основному содержимому / DSLKit / Новая диаграмма / Список / Тёмная тема / Мои диаграммы /  / Список диаграмм проекта: добавляйте, переименовывайте, публикуйте и ищите. Данные хранятся в этом браузере. /  / Новая диаграмма / Название диаграммы / До 80 символов, пробелы по краям не считаются / Нотация / UML / BPMN / ERD / DFD / IDEF0 / Petri /   / Добавить / Список диаграмм / Поиск / Статус / Все / Опубликованные / Черновики / Фильтр по нотации / Все / UML / BPMN / ERD / DFD / IDEF0 / Petri / Сортировка / По дате изменения / По названию / Без сортировки /  / Всего: 
+A[] DSLKit -> /
+A[] Новая диаграмма -> #add
+A[] Список -> #list
+INPUT[checkbox] 
+INPUT[text] Например, схема оплаты
+SELECT[select-one] UML
+BPMN
+ERD
+DFD
+IDEF0
+Petri
+BUTTON[submit] Добавить
+INPUT[search] Часть названия
+SELECT[select-one] Все
+Опубликованные
+Черновики
+SELECT[select-one] Все
+UML
+BPMN
+ERD
+DFD
+IDEF0
+Petri
+SELECT[select-one] По дате изменения
+По названию
+Без сортир
+BUTTON[button] Черновик
+BUTTON[button] Изменить
+BUTTON[button] Удалить
+BUTTON[button] Опубликована
+BUTTON[button] Изменить
+BUTTON[button] Удалить
+BUTTON[button] Опубликована
+BUTTON[button] Изменить
+BUTTON[button] Удалить
+A[] Новая диаграмма -> #add
+A[] Список диаграмм -> #list
+===== pz04 Главная — DSLKit
+Перейти к основному содержимому / DSLKit / Главная / Каталог / О проекте / Кабинет / Войти / Тёмная тема / DSLKit /  / Редактор диаграмм как кода: пишите текст, получайте UML, BPMN, ERD, DFD и IDEF0. /  / Открыть каталог шаблонов / Каталог шаблонов / О проекте /  / © 2026 DSLKit. Учебный проект БГУИР.
+A[] DSLKit -> /
+A[] Главная -> /
+A[] Каталог -> /catalog
+A[] О проекте -> /about
+A[] Кабинет -> /dashboard
+A[] Войти -> /login
+INPUT[checkbox] 
+A[] Открыть каталог шаблонов -> /catalog
+A[] Каталог шаблонов -> /catalog
+A[] О проекте -> /about
+===== pz01 Diagrams – DSLKit
+Skip to the main content / DSLKit / Diagrams / Add / Request log / Sign in / Guest / EN / RU / Dark theme / Diagrams /  / The catalogue of diagrams stored by the server. Every record shows when it was created. /  / Order service sequence /  / UML / #1 / Created 2026-10-01 09:00:00.000 UTC /  / Sequence diagram of a checkout request passing through the API gateway. /  / Open / Order service sequence / Approval workflow /  / BPMN / #2 / Created 2026-10-02 10:30:00.000 UTC /  / Business process: a diagram goes from draft to review to published. /  / Open / Approv
+A[] DSLKit -> /
+A[] Diagrams -> /
+A[] Add -> /add
+A[] Request log -> /log
+A[] Sign in -> /login
+A[] EN -> /?lang=en
+A[] RU -> /?lang=ru
+INPUT[checkbox] 
+A[] Open
+Order service sequence -> /item/1
+A[] Open
+Approval workflow -> /item/2
+A[] Open
+Project database -> /item/3
+A[] Add diagram -> /add
+A[] Diagrams -> /
+A[] Request log -> /log
+A[] Sign in -> /login
