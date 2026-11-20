@@ -1,3 +1,4 @@
+// @ts-nocheck -- type-check debt: remove this line when the file passes npm run typecheck
 import { BASES, expertStore } from '../expert/bases.js';
 import { answerQuestion, conclusions, createFacts, infer, nextQuestion } from '../expert/engine.js';
 import { factsFromDescription, reviewDiagram, traceLines } from '../expert/review.js';

@@ -10,5 +10,6 @@ export default defineConfig({
     globals: true,
     // report.test.mjs uses node:test, it runs with the second command of npm test.
     exclude: ['**/node_modules/**', 'report.test.mjs', 'report.test.js'],
+    coverage: { include: ['src/**'], exclude: ['src/**/*.test.*', 'src/main.jsx', 'src/setupTests.js'] },
   },
 });

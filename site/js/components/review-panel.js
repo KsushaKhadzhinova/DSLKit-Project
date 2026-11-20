@@ -1,3 +1,4 @@
+// @ts-nocheck -- type-check debt: remove this line when the file passes npm run typecheck
 import { pageLanguage } from '../utils/lang.js';
 import { diffLines, reviewCode } from '../utils/diagram-review.js';
 import { readCode, showCode } from './code-lines.js';

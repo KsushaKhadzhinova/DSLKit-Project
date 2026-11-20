@@ -18,3 +18,7 @@ testing-course/reports/*/output/tex/*.out
 
 # Screenshots written by failed end-to-end runs
 testing-course/screens/fail-*.png
+
+.lighthouseci/
+reports/
+.stryker-tmp/

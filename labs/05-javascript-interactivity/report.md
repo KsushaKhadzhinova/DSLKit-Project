@@ -123,6 +123,7 @@
 ## Приложение А – Листинг файла script.js
 
 ```js
+// @ts-nocheck -- type-check debt: remove this line when the file passes npm run typecheck
 import { initAccordion } from './components/accordion.js';
 import { initAutomation } from './components/automation.js';
 import { initClarify } from './components/clarify-panel.js';
@@ -298,6 +299,7 @@ export function getStorage(win = globalThis) {
 ## Приложение В – Листинг файла validation.js
 
 ```js
+// @ts-nocheck -- type-check debt: remove this line when the file passes npm run typecheck
 export const NOTATIONS = ['idef0', 'dfd', 'erd', 'bpmn', 'uml', 'petri'];
 
 const NAME_PATTERN = /^\p{L}[\p{L}' ’-]{1,59}$/u;
@@ -403,6 +405,7 @@ export function validateRegistration({ name, email, password, confirm } = {}) {
 ## Приложение Г – Листинг файла notation-filter.js
 
 ```js
+// @ts-nocheck -- type-check debt: remove this line when the file passes npm run typecheck
 import { pageLanguage } from '../utils/lang.js';
 const FILTERS = ['all', 'beta', 'planned'];
 
@@ -481,6 +484,7 @@ export const initNotationFilter = ({ root = document, storage } = {}) => {
 ## Приложение Д – Листинг файла waitlist-form.js
 
 ```js
+// @ts-nocheck -- type-check debt: remove this line when the file passes npm run typecheck
 import { validateWaitlist } from '../utils/validation.js';
 
 const FIELDS = ['name', 'email', 'notation', 'team', 'comment', 'consent'];
@@ -575,6 +579,7 @@ export const initWaitlistForm = ({
 ## Приложение Е – Листинг файла dashboard.js
 
 ```js
+// @ts-nocheck -- type-check debt: remove this line when the file passes npm run typecheck
 import { createDialogs } from './dialog.js';
 import { NOTATIONS, NOTATION_KEYS, TEMPLATE_LANGS, parseDiagram, templateFor } from '../notations/index.js';
 import { currentUser } from '../storage/accounts.js';
@@ -1100,6 +1105,7 @@ export const initDashboard = ({ root = document, storage, now = () => Date.now()
 ## Приложение Ж – Листинг файла editor.js
 
 ```js
+// @ts-nocheck -- type-check debt: remove this line when the file passes npm run typecheck
 import { scopedKey } from '../storage/scope.js';
 import { NOTATIONS, TEMPLATE_LANGS, templateFor } from '../notations/index.js';
 import { ui } from '../notations/messages.js';

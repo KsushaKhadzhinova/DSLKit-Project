@@ -1,7 +1,7 @@
 // Same behaviour as the Part 1 site: the saved choice wins, otherwise the system theme decides.
 (function () {
-  var root = document.documentElement;
-  var saved = null;
+  const root = document.documentElement;
+  let saved = null;
   try {
     saved = localStorage.getItem('theme');
   } catch (e) {
@@ -9,11 +9,11 @@
   }
   if (saved === 'light' || saved === 'dark') root.dataset.theme = saved;
   document.addEventListener('DOMContentLoaded', function () {
-    var toggle = document.getElementById('theme-toggle');
-    var dark = root.dataset.theme ? root.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+    const toggle = document.getElementById('theme-toggle');
+    const dark = root.dataset.theme ? root.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
     toggle.checked = dark;
     toggle.addEventListener('change', function () {
-      var value = toggle.checked ? 'dark' : 'light';
+      const value = toggle.checked ? 'dark' : 'light';
       root.dataset.theme = value;
       try {
         localStorage.setItem('theme', value);

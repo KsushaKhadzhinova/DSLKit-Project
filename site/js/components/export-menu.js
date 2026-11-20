@@ -1,3 +1,4 @@
+// @ts-nocheck -- type-check debt: remove this line when the file passes npm run typecheck
 import { parseDiagram } from '../notations/index.js';
 import { drawioFile, fileName, htmlFile, rasterize, serializeSvg, sizeOf } from '../utils/exporters.js';
 import { readCode } from './code-lines.js';

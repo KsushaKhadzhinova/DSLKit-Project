@@ -73,7 +73,7 @@ test('Nginx hides its version, limits bodies and requests and sends a strict con
 });
 
 test('Nginx serves the single-page application and proxies /api to the backend service by name', () => {
-  const api = nginx.match(/location \/api\/ \{[\s\S]*?\n  \}/)[0];
+  const api = nginx.match(/location \/api\/ \{[\s\S]*?\n {2}\}/)[0];
   assert.match(api, /set \$backend_upstream http:\/\/backend:3000;/);
   assert.match(api, /rewrite \^\/api\/\(\.\*\)\$ \/\$1 break;/);
   assert.match(api, /proxy_pass \$backend_upstream;/);
@@ -81,7 +81,7 @@ test('Nginx serves the single-page application and proxies /api to the backend s
 });
 
 test('Nginx asks the Docker DNS again, so a recreated backend container does not give 502 until a reload', () => {
-  const api = nginx.match(/location \/api\/ \{[\s\S]*?\n  \}/)[0];
+  const api = nginx.match(/location \/api\/ \{[\s\S]*?\n {2}\}/)[0];
   assert.match(api, /resolver 127\.0\.0\.11 valid=10s;/);
   // A literal host name in proxy_pass is resolved once at start, the address must go through a variable.
   assert.doesNotMatch(api, /proxy_pass\s+http:\/\/backend/);

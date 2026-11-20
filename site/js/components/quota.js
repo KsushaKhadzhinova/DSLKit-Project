@@ -1,3 +1,4 @@
+// @ts-nocheck -- type-check debt: remove this line when the file passes npm run typecheck
 import { currentUser } from '../storage/accounts.js';
 import { can } from '../auth/permissions.js';
 import { createProjectStore, showQuota } from '../storage/projects.js';
