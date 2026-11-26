@@ -27,6 +27,14 @@ Russian version: [`HANDOVER-SESSION-2026-11-26.md`](HANDOVER-SESSION-2026-11-26.
 5. Check debt: 50 files with `// @ts-nocheck`, Firefox is not a required check yet, branches not fully merged: `design/*`, `docs/*`, `feature/*`, `feat/lab3-advanced-auth`, `lab12-hardening` (the owner decides).
 6. For the owner: the course project in Word, the questions to the teacher, the course administrator on Render, the thesis topic.
 
+## Addendum at the end of the session (stopped at the owner's request)
+
+- The first feature was started and stopped: the block properties panel and PlantUML and Mermaid export. The unfinished work (11 files, tests partly written) is saved in the branch `wip/properties-panel-and-export` (commit `1c97b807`, pushed; auto-merge skips such branches). New files: `site/js/components/editor-properties.js`, `site/js/utils/node-properties.js`, `site/js/export/text-formats.js`, the test `labs/05-javascript-interactivity/export-text-formats.test.js`. Next: create the branch `feat/properties-panel-and-export` from the latest `origin/main`, cherry-pick the `wip` commit into it, bring it to `npm run verify` and the Edge e2e.
+- Agents by difficulty: hard work (editor server, database, roles) yourself or `opus`, ordinary work `sonnet`, mechanical work `haiku`.
+- Drive E: is not finished (see item 1 above); the worktree `E:\DSLKit-Project\.claude\worktrees\feat-props-export` belongs to the stopped agent and can be removed after the `wip` is moved.
+- Browser: the Claude extension is connected to `DESKTOP-EIU7U76`, the owner confirmed it is the right browser.
+- Branches: about 40 branches remain on GitHub (list and rules in `docs/BRANCHES.en.md`), all pull requests are closed, `main` is at `6b03129f` with green checks.
+
 ## How to continue
 
 Start with `git fetch` and `git status`, read this file and open the dashboard (`dashboard` in a terminal). Then items 1 and 2, then 4, then the features of item 3, each in its own branch and with tests.
