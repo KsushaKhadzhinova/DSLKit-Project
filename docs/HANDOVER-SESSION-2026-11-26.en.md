@@ -35,6 +35,21 @@ Russian version: [`HANDOVER-SESSION-2026-11-26.md`](HANDOVER-SESSION-2026-11-26.
 - Browser: the Claude extension is connected to `DESKTOP-EIU7U76`, the owner confirmed it is the right browser.
 - Branches: about 40 branches remain on GitHub (list and rules in `docs/BRANCHES.en.md`), all pull requests are closed, `main` is at `6b03129f` with green checks.
 
+## WARNING: do not delete the old project versions on drive E: without the owner's decision
+
+The check for unpushed work (26.11.2026) found data in them that is not on GitHub:
+
+| Folder                                                      | Size    | Uncommitted changes | Unpushed commits | Stash |
+| ----------------------------------------------------------- | ------- | ------------------- | ---------------- | ----- |
+| `E:\VisualDSL-Platform`                                     | 541 MB  | 6                   | 27               | 1     |
+| `E:\VisualDSL_Project`                                      | 202 MB  | 2                   | 0                | 0     |
+| `E:\visual-dsl-modeler`                                     | 9 MB    | 1                   | 0                | 0     |
+| `E:\visualdsl-modeling-service`                             | 83 MB   | 40                  | 0                | 0     |
+| `E:\NotaCode`                                               | 2 MB    | 7                   | 0                | 0     |
+| `E:\integration-all` (worktree of branch `integration/all`) | 1487 MB | 0                   | 0                | 0     |
+
+Only `E:\integration-all` is safe to remove (`git worktree remove`, the branch stays). Push (or archive) the others first and delete them only on the owner's decision. `VisualDSL_Tools` and `VisualDSL_Env` have no git, check them by hand.
+
 ## How to continue
 
 Start with `git fetch` and `git status`, read this file and open the dashboard (`dashboard` in a terminal). Then items 1 and 2, then 4, then the features of item 3, each in its own branch and with tests.
