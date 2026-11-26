@@ -16,6 +16,12 @@ GitHub Flow and trunk-based: `main` is always green, every change is a short-liv
 | `lab12-hardening`, `feat/lab3-advanced-auth`, `integration/all`, `archive/*`, `backup/*`              | branches not fully merged and backups, not deleted without the owner's decision             |
 | `design/*`, `docs/*`, `papers/its-2026`, `chore/accelerator-skills`, `feature/*`, `work/part1-finish` | branches with their own work that is not fully merged yet                                   |
 
+## Working trees and the wip transfer (26.11.2026)
+
+- The working tree `E:\integration-all` was removed (`git worktree remove`). The branch `integration/all` is kept; the owner decides about it.
+- The working tree `E:\DSLKit-Project\.claude\worktrees\feat-props-export` was removed after a check: no unsaved changes and no stash. The branch `wip/properties-panel-and-export` (commit `1c97b807`) is kept until T03 is merged.
+- The branch `feat/properties-panel-and-export` was created from a fresh `origin/main`, and commit `1c97b807` was carried over by cherry-pick (no conflicts, 11 files). The commit was renamed to the `type: summary` rule. The branch has not been checked with `npm test`: the work is unfinished.
+
 ## What was deleted on 20.11.2026
 
 90 branches were deleted on GitHub: branches fully merged into `main` (agent work branches, merged pull requests, old `feature/*` and `fix/*`) and Dependabot branches (their pull requests are closed, the updates are applied in `main`). Nothing is lost: the last commit of every deleted branch is recorded below, a branch can be restored with `git push origin <sha>:refs/heads/<name>`.
