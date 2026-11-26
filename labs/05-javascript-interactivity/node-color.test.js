@@ -183,3 +183,21 @@ test('a notation whose text format has no colour exports without it and says so'
     assert.equal(result.text.includes('#ff8800'), false);
   }
 });
+
+test('a line with two colours ends with one: every old color= is replaced', () => {
+  const twice = DFD.replace('process 2 "Take payment"', 'process 2 "Take payment" color=#111 color=#222');
+  const next = setColor(twice, '2', '#abc');
+  assert.match(next, /^process 2 "Take payment" color=#aabbcc$/m);
+  assert.equal(next.match(/color=/g).length, 1);
+  assert.equal(setColor(twice, '2', null), DFD);
+});
+
+test('a colour that a format cannot carry is told by the structure, not by a hex that a label happens to contain', () => {
+  const state = TEMPLATES['uml-state'];
+  const id = parseDiagram(state).nodes.find((node) => node.kind === 'state').id;
+  const other = state.replace(/^state (?!${id}\b)(\w+) "([^"]*)"/m, 'state $1 "#ff8800"');
+  const result = exportText(setColor(other, id, '#ff8800'), 'mermaid');
+  assert.equal(result.text.includes('#ff8800'), true);
+  assert.equal(result.colorIgnored, true);
+  assert.equal(exportText(setColor(DFD, '2', '#ff8800'), 'plantuml').colorIgnored, false);
+});

@@ -10,7 +10,7 @@ const KEYWORD = /^(\s*)([\w-]+)(\s+)/;
 const POSITION = /(?:^|\s)pos=(\S+)/;
 const QUOTED = /"(?:[^"\\]|\\.)*"/g;
 const QUOTED_PARTS = /("(?:[^"\\]|\\.)*")/;
-const COLOR_WORD = /(^|\s)color=\S*/;
+const COLOR_WORD = /(^|\s)color=\S*/g;
 const POSITION_WORD = /(^|\s)(pos=\S+)/;
 
 const declaration = (code, id) => code.split('\n').findIndex((line) => declares(line, id));
@@ -73,8 +73,9 @@ export const setColor = (code, id, color) => {
   const at = declaration(code, id);
   const parts = lines[at].split(QUOTED_PARTS);
   const outside = (test) => parts.findIndex((part, index) => index % 2 === 0 && test.test(part));
-  const old = outside(COLOR_WORD);
-  if (old >= 0) parts[old] = parts[old].replace(COLOR_WORD, '');
+  parts.forEach((part, index) => {
+    if (index % 2 === 0) parts[index] = part.replace(COLOR_WORD, '');
+  });
   if (color !== null) {
     const value = ` color=${normalizeColor(color)}`;
     const place = outside(POSITION_WORD);
