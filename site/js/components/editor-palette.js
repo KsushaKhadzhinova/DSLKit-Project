@@ -333,6 +333,8 @@ export const initEditorPalette = ({ root = document } = {}) => {
     found?.classList.add('notation__node--picked');
     if (!found) picked = null;
     [editButton, removeButton].forEach((node) => node.setAttribute('aria-disabled', String(!found)));
+    // The properties panel shows the block that is selected here: the selection has one owner, this module.
+    page.dispatchEvent(new view.CustomEvent('dslkit:pick', { bubbles: true, detail: { id: picked } }));
   };
   const removeSelected = (id) => {
     if (id === null) return say(t('nothingPicked'));
