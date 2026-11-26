@@ -3,11 +3,13 @@
 Агент: opus или ведущий агент (сложное, безопасность). Ветка: `feat/editor-server`.
 
 ## RU
+
 **Цель.** Серверное хранение проектов с аккаунтами и ролями Гость / Пользователь / Редактор / Администратор (роли в `00-PROJECT-SPEC.md`).
 
 **Основа.** Опыт ЛР2 (Sequelize, миграции), ЛР3 (bcrypt, JWT, блокировка входа, `limits.json`), ПЗ2 (схема как единственный источник правил, единый формат ошибок). Уточнить у владельца: PostgreSQL или SQLite (открытый вопрос преподавателю), где размещать.
 
 **Требования.**
+
 - Таблицы: `users`, `roles`/поле роли, `projects`, `project_members`, журнал запросов в таблице.
 - API: регистрация, вход, обновление токена, CRUD проектов, управление ролями (только администратор), страницы и поиск.
 - Безопасность: bcrypt, короткоживущий JWT, лимиты и блокировка, проверка ввода на границе, CORS по списку, CSRF где нужен, email скрыт в общих списках, ответ 403/404 без утечки существования.
@@ -21,6 +23,7 @@
 **Вне задачи.** Совместное редактирование в реальном времени, облачный деплой.
 
 ## EN
+
 **Goal.** Server-side project storage with accounts and roles Guest / User / Editor / Admin (see `00-PROJECT-SPEC.md`).
 
 **Basis.** Lab 2 (Sequelize, migrations), Lab 3 (bcrypt, JWT, login lockout, `limits.json`), PZ2 (schema as the single source of rules, uniform error format). Confirm with the owner: PostgreSQL vs SQLite, hosting.

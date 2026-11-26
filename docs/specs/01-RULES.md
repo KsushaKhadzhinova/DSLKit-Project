@@ -7,6 +7,7 @@
 ## RU
 
 ### 1 Ведение работы
+
 1. Одна задача = одна спека в `docs/specs/` = один подчат = одна короткая ветка от свежего `origin/main` (`feat/…`, `fix/…`, `chore/…`, `docs/…`). Имена веток без упоминания инструментов и ИИ.
 2. Задачи идут строго по очереди. Следующая начинается после приёмки предыдущей.
 3. Ничего вне спеки не делать. Нашли постороннюю проблему: записать в отчёт, не чинить молча.
@@ -20,6 +21,7 @@
 11. Среда: один `npm test` за раз, один браузер, один тяжёлый агент. Выбор модели по сложности: haiku, sonnet, opus.
 
 ### 2 Правила кода
+
 1. Стиль задают `.editorconfig` (UTF-8, LF, 2 пробела), Prettier и ESLint. Форматирование не вручную: `npm run format`.
 2. Строгое сравнение, без `var`, без неиспользуемых имён, без пустых блоков. Не добавлять новые `// @ts-nocheck`; типы проверяет `npm run typecheck`.
 3. Код диаграммы остаётся единственным источником правды (положение блоков `pos=XxY`, свойства блоков в коде).
@@ -32,6 +34,7 @@
 10. Дизайн Части 2 идентичен Части 1: один пакет CSS, токены `site/css/variables.css`; новые варианты стиля не вводить.
 
 ### 3 Правила тестирования
+
 1. Сначала тест, потом код (красный → зелёный → рефакторинг). Каждая фича и каждая исправленная ошибка получает тест; для ошибки сначала тест, который её воспроизводит.
 2. Пирамида: много быстрых модульных тестов (`node --test`), интеграционные для сервера и БД, мало сквозных (e2e в Playwright/Edge, Firefox где подключён).
 3. Покрытие Части 1: 100% строк, ветвей и функций (`npm test`). Для `part-2/*` у каждой папки свой порог и свой `npm test`; не понижать.
@@ -45,6 +48,7 @@
 11. Определение «готово»: `npm run verify` зелёный, e2e пройден, проверка независимым проверяющим «принять», PR влит, `main` зелёный. Только после этого задача закрыта.
 
 ### 4 Правила проверяющего (независимого агента)
+
 - Работает только на чтение; не видел ход работы исполнителя, исходит из спеки и диффа.
 - Проверяет: соответствие спеке, нарушение правил выше, дыры в тестах (что не покрыто, что тест не поймает), безопасность, документацию RU/EN, посторонние файлы в диффе.
 - Запускает проверки сам, а не верит отчёту. Вердикт «принять» или «доработать» со списком замечаний по важности и ссылками `файл:строка`.
@@ -54,6 +58,7 @@
 ## EN
 
 ### 1 Workflow
+
 1. One task = one spec in `docs/specs/` = one sub-chat = one short branch from fresh `origin/main` (`feat/…`, `fix/…`, `chore/…`, `docs/…`); no tool or AI names in branch names.
 2. Tasks run strictly in order; the next starts after the previous is accepted.
 3. Do nothing outside the spec; report unrelated problems instead of silently fixing them.
@@ -67,6 +72,7 @@
 11. One `npm test`, one browser, one heavy agent at a time. Pick the model by difficulty.
 
 ### 2 Code rules
+
 1. Style from `.editorconfig` (UTF-8, LF, 2 spaces), Prettier, ESLint; run `npm run format`, do not hand-format.
 2. Strict equality, no `var`, no unused names, no empty blocks; no new `// @ts-nocheck`; `npm run typecheck` must pass.
 3. Diagram code stays the single source of truth (`pos=XxY`, block properties in code).
@@ -79,6 +85,7 @@
 10. Part 2 design equals Part 1; same CSS package and tokens; no new style variants.
 
 ### 3 Testing rules
+
 1. Test first, then code (red, green, refactor). Every feature and every bug fix gets a test; a bug starts with a reproducing test.
 2. Pyramid: many fast unit tests (`node --test`), integration for server and DB, few e2e (Playwright/Edge, Firefox where wired).
 3. Part 1 coverage 100% lines, branches, functions; each `part-2/*` folder keeps its own threshold; never lower it.
@@ -92,6 +99,7 @@
 11. Definition of done: `npm run verify` green, e2e passed, independent reviewer "accept", PR merged, `main` green.
 
 ### 4 Reviewer rules (independent agent)
+
 - Read-only; has not seen the executor's process, works from the spec and the diff.
 - Checks spec conformance, rule violations, test gaps, security, RU/EN docs, stray files in the diff.
 - Runs the checks itself instead of trusting the report. Verdict "accept" or "rework" with findings ranked by severity and `file:line` references.

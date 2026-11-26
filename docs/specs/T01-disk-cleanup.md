@@ -3,11 +3,13 @@
 Агент: haiku/sonnet, осторожно. Ветка: не нужна (операции вне репозитория), отчёт в `docs/` через `chore/disk-cleanup-report`.
 
 ## RU
+
 **Цель.** Удалить старые версии проекта на диске E:, не потеряв ни одного неотправленного коммита.
 
 **Объекты.** `E:\VisualDSL-Platform`, `E:\VisualDSL_Project`, `E:\visual-dsl-modeler`, `E:\visualdsl-modeling-service` (и `.worktrees`), `E:\NotaCode`, `E:\VisualDSL_Tools`, `E:\VisualDSL_Env`.
 
 **Шаги.**
+
 1. Для каждой папки: `git status`, `git stash list`, `git log @{u}..` по всем веткам, `git remote -v`, размер.
 2. Таблица: папка, remote, неотправленные коммиты, несохранённые изменения, stash, размер, вердикт (удалить / спросить).
 3. Если есть что терять: показать владельцу, спросить. Если сомнение, что считать старой версией, спросить.
@@ -19,6 +21,7 @@
 **Вне задачи.** Репозиторий `E:\DSLKit-Project`, ветки GitHub.
 
 ## EN
+
 **Goal.** Delete old project versions on drive E: without losing any unpushed commit.
 
 **Targets.** The seven folders listed above.

@@ -3,9 +3,11 @@
 Агент: sonnet. Ветка: `feat/properties-panel-and-export` (из T02). Основа: коммит `1c97b807`.
 
 ## RU
+
 **Цель.** Редактировать свойства выбранного блока в боковой панели, а диаграмму экспортировать в PlantUML и Mermaid.
 
 **Требования.**
+
 - Панель (`site/js/components/editor-properties.js`, `site/js/utils/node-properties.js`): выбор блока показывает название, тип, цвет, позицию `pos=XxY`; правка меняет код диаграммы (код остаётся единственным источником правды).
 - Экспорт (`site/js/export/text-formats.js`): пункты меню «PlantUML» и «Mermaid»; для нотаций без соответствия понятное сообщение.
 - Вывод через `textContent`, без `innerHTML` с чужими данными (строгая CSP).
@@ -18,6 +20,7 @@
 **Вне задачи.** Импорт из PlantUML/Mermaid, новые нотации.
 
 ## EN
+
 **Goal.** Edit the selected block's properties in a side panel and export diagrams to PlantUML and Mermaid.
 
 **Requirements.** Panel changes the diagram code (code stays the single source of truth); export menu entries with a clear message for notations with no mapping; `textContent` output only; RU/EN strings, keyboard access, screen-reader labels.
