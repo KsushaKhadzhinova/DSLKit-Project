@@ -1727,6 +1727,95 @@
   background: var(--color-surface);
   font: inherit;
 }
+/* The properties panel of the selected block sits on the canvas, in the top corner; on a narrow or a short screen it spans the width */
+.props {
+  position: absolute;
+  z-index: 5;
+  inset-block-start: 3rem;
+  inset-inline-end: 0.5rem;
+  box-sizing: border-box;
+  inline-size: min(18rem, calc(100% - 1rem));
+  max-block-size: calc(100% - 4rem);
+  overflow: auto;
+  display: grid;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  color: var(--color-text);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-large);
+}
+.props[hidden] {
+  display: none;
+}
+.props__heading {
+  margin: 0;
+  font-size: 1rem;
+}
+.props__field {
+  display: grid;
+  gap: 0.25rem;
+}
+.props__field[hidden] {
+  display: none;
+}
+.props__label {
+  font-size: 0.8125rem;
+  color: var(--color-text-light);
+}
+.props__id {
+  font-family: ui-monospace, Consolas, monospace;
+  overflow-wrap: anywhere;
+}
+.props__input {
+  box-sizing: border-box;
+  inline-size: 100%;
+  min-block-size: var(--target-size-small);
+  padding: 0 0.5rem;
+  border: 1px solid var(--color-border-strong);
+  border-radius: 6px;
+  color: var(--color-text);
+  background: var(--color-surface);
+  font: inherit;
+}
+.props__input:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 1px;
+}
+.props__hint,
+.props__message {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--color-text-light);
+}
+.props__message:empty {
+  display: none;
+}
+@media (orientation: landscape) and (max-height: 500px) {
+  .props {
+    inset-block-start: 0.5rem;
+    max-block-size: calc(100% - 1rem);
+    inline-size: min(16rem, calc(100% - 1rem));
+  }
+  .props__hint {
+    display: none;
+  }
+}
+.editor-menu__note {
+  margin: 0;
+  padding: 0.25rem 0.75rem;
+  max-inline-size: 16rem;
+  font-size: 0.8125rem;
+  color: var(--color-text-light);
+}
+.editor-menu__note:empty {
+  display: none;
+}
+.editor-menu [data-export][aria-disabled='true'] {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
 .canvas {
   position: relative;
 }

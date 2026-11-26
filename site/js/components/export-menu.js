@@ -1,5 +1,6 @@
 // @ts-nocheck -- type-check debt: remove this line when the file passes npm run typecheck
-import { parseDiagram } from '../notations/index.js';
+import { NOTATIONS, parseDiagram } from '../notations/index.js';
+import { exportText } from '../export/text-formats.js';
 import { drawioFile, fileName, htmlFile, rasterize, serializeSvg, sizeOf } from '../utils/exporters.js';
 import { readCode } from './code-lines.js';
 import { notify } from './toast.js';
@@ -10,9 +11,24 @@ const TEXT = {
     none: 'Нет диаграммы для экспорта: сначала нажмите «Запустить».',
     saved: (name) => `Файл ${name} сохранён.`,
     failed: 'Не удалось подготовить файл. Попробуйте ещё раз.',
+    refusal: {
+      empty: 'Нет диаграммы для экспорта в текст: введите код диаграммы.',
+      errors: (name) => `В коде диаграммы (${name}) есть ошибки: исправьте их, иначе файл был бы неполным. Экспорт в текст отключён.`,
+      notation: (name, format) => `У нотации «${name}» нет точного соответствия в ${format}: экспорт отключён, чтобы не выдать неверный файл.`,
+    },
   },
-  en: { none: 'There is no diagram to export: press Run first.', saved: (name) => `File ${name} saved.`, failed: 'The file could not be prepared. Try again.' },
+  en: {
+    none: 'There is no diagram to export: press Run first.',
+    saved: (name) => `File ${name} saved.`,
+    failed: 'The file could not be prepared. Try again.',
+    refusal: {
+      empty: 'There is no diagram to export as text: enter the diagram code.',
+      errors: (name) => `The diagram code (${name}) has errors: fix them, or the file would be incomplete. The text export is switched off.`,
+      notation: (name, format) => `The notation "${name}" has no exact mapping in ${format}: the export is switched off so that no wrong file is produced.`,
+    },
+  },
 };
+const LANGUAGE_NAME = { plantuml: 'PlantUML', mermaid: 'Mermaid' };
 
 // The browser downloads a file when a link to a temporary address of the data is clicked.
 const download = (root) => (blob, name) => {
@@ -35,6 +51,8 @@ const FORMATS = {
     make: ({ svg, window, title }) =>
       new window.Blob([drawioFile({ title, svgText: serializeSvg(svg, window), ...sizeOf(svg) })], { type: 'application/vnd.jgraph.mxfile' }),
   },
+  puml: { text: 'plantuml' },
+  mmd: { text: 'mermaid' },
   html: {
     extension: 'html',
     make: ({ svg, window, title, source, lang }) =>
@@ -54,7 +72,44 @@ export const initExport = ({ root = document, save = download(root) } = {}) => {
     notify(root, text);
   };
 
+  const sourceNow = () => readCode(page.querySelector('.code__lines'));
+  const textButtons = buttons.filter((button) => FORMATS[button.dataset.export]?.text);
+  const note = page.querySelector('[data-export-note]');
+  // The sentence that says why a text format is not offered, or '' when it is.
+  const reasonFor = (result, format) => {
+    if (result.ok) return '';
+    const name = NOTATIONS[result.notation]?.name[lang] ?? '';
+    return TEXT[lang].refusal[result.reason](name, LANGUAGE_NAME[format]);
+  };
+  // The text formats follow the code: a button that has no faithful mapping is disabled and its reason is shown.
+  const syncText = () => {
+    const source = sourceNow();
+    let shown = '';
+    textButtons.forEach((button) => {
+      const format = FORMATS[button.dataset.export].text;
+      const reason = reasonFor(exportText(source, format), format);
+      button.setAttribute('aria-disabled', String(reason !== ''));
+      button.title = reason;
+      shown ||= reason;
+    });
+    if (note) note.textContent = shown;
+    return shown;
+  };
+
+  const exportTextFile = async (format) => {
+    const result = exportText(sourceNow(), FORMATS[format].text);
+    if (!result.ok) {
+      say(reasonFor(result, FORMATS[format].text));
+      return false;
+    }
+    const name = fileName(parseDiagram(sourceNow()).title, result.extension);
+    save(new root.defaultView.Blob([result.text], { type: result.mime }), name);
+    say(TEXT[lang].saved(name));
+    return true;
+  };
+
   const exportAs = async (format) => {
+    if (FORMATS[format]?.text) return exportTextFile(format);
     const svg = page.querySelector('.canvas__remote:not([hidden]) svg');
     if (!svg || !(format in FORMATS)) {
       say(TEXT[lang].none);
@@ -74,5 +129,7 @@ export const initExport = ({ root = document, save = download(root) } = {}) => {
     }
   };
   buttons.forEach((button) => button.addEventListener('click', () => exportAs(button.dataset.export)));
-  return { exportAs };
+  page.addEventListener('dslkit:run', syncText);
+  syncText();
+  return { exportAs, syncText };
 };
