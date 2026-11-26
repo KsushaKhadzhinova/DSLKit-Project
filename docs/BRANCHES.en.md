@@ -18,7 +18,7 @@ GitHub Flow and trunk-based: `main` is always green, every change is a short-liv
 
 ## Working trees and the wip transfer (26.11.2026)
 
-- The working tree `E:\integration-all` was removed (`git worktree remove`). The branch `integration/all` is kept; the owner decides about it.
+- An extra working tree of branch `integration/all` was removed (`git worktree remove`). The branch `integration/all` is kept; the owner decides about it.
 - The working tree `E:\DSLKit-Project\.claude\worktrees\feat-props-export` was removed after a check: no unsaved changes and no stash. The branch `wip/properties-panel-and-export` (commit `1c97b807`) is kept until T03 is merged.
 - The branch `feat/properties-panel-and-export` was created from a fresh `origin/main`, and commit `1c97b807` was carried over by cherry-pick (no conflicts, 11 files). The commit was renamed to the `type: summary` rule. The branch has not been checked with `npm test`: the work is unfinished.
 

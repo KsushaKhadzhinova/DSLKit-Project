@@ -18,7 +18,7 @@ GitHub Flow и trunk-based: `main` всегда зелёный, любое из�
 
 ## Рабочие деревья и перенос wip (26.11.2026)
 
-- Убрано рабочее дерево `E:\integration-all` (`git worktree remove`). Ветка `integration/all` сохранена, решение о ней за владельцем.
+- Убрано лишнее рабочее дерево ветки `integration/all` (`git worktree remove`). Ветка `integration/all` сохранена, решение о ней за владельцем.
 - Убрано рабочее дерево `E:\DSLKit-Project\.claude\worktrees\feat-props-export` после проверки: без несохранённых изменений и без stash. Ветка `wip/properties-panel-and-export` (коммит `1c97b807`) сохранена до слияния T03.
 - Создана ветка `feat/properties-panel-and-export` от свежего `origin/main`, в неё перенесён коммит `1c97b807` (cherry-pick без конфликтов, 11 файлов). Коммит переименован под правило `type: summary`. Ветка не проверена `npm test`: работа не завершена.
 
