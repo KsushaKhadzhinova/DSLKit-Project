@@ -131,7 +131,7 @@ with sync_playwright() as p:
         open_export()
         yes("no exact mapping" in page.inner_text("[data-export-note]"), page.inner_text("[data-export-note]"))
         open_export()
-        page.click('[data-export="mmd"]')
+        page.click('[data-export="mmd"]', force=True)
         page.wait_for_timeout(300)
         yes("no exact mapping" in page.inner_text(".canvas__status"), page.inner_text(".canvas__status"))
 
@@ -160,6 +160,54 @@ with sync_playwright() as p:
 
     check("PP-09", "The panel fits a phone width", mobile)
 
+    def colour_flow():
+        load("dfd")
+        pick("2")
+        page.evaluate("""() => { const i = document.querySelector('#props-color'); i.value = '#1a3a8a'; i.dispatchEvent(new Event('change', { bubbles: true })); }""")
+        page.wait_for_timeout(600)
+        yes("process 2 \"Take payment\" color=#1a3a8a" in code(), code())
+        yes(page.locator('.canvas__remote [data-id="2"] [fill="#1a3a8a"]').count() >= 1, "the block is not painted")
+        yes(page.locator('.canvas__remote [data-id="2"] text[fill="#ffffff"]').count() >= 1, "the text on a dark colour must be white")
+        yes("changed" in page.inner_text(".props__message"), page.inner_text(".props__message"))
+        page.reload()
+        page.wait_for_selector(".canvas__remote svg")
+
+    check("PP-11", "Choosing a colour writes color=#rrggbb, paints the block with readable text", colour_flow)
+
+    def colour_export():
+        load("dfd")
+        pick("2")
+        page.evaluate("""() => { const i = document.querySelector('#props-color'); i.value = '#ffcc00'; i.dispatchEvent(new Event('change', { bubbles: true })); }""")
+        page.wait_for_timeout(500)
+        open_export()
+        with page.expect_download() as info:
+            page.click('[data-export="mmd"]')
+        text = open(info.value.path(), encoding="utf8").read()
+        yes("fill:#ffcc00,color:#000000" in text, text)
+        page.click(".props__clear", force=True)
+        page.wait_for_timeout(400)
+        yes("color=" not in code(), code())
+
+    check("PP-12", "The colour goes to the Mermaid file; Clear colour removes it from the code", colour_export)
+
+    def colour_refused():
+        load("idef0", "en")
+        pick(page.evaluate("document.querySelector('.canvas__remote .notation__node').dataset.id"))
+        yes(page.locator(".props__colornote").is_visible(), "a notation without colours must say so")
+
+    check("PP-13", "A notation without colours says so in the panel", colour_refused)
+
+    def colour_ru_dark():
+        load("dfd", "ru")
+        page.evaluate("document.documentElement.dataset.theme = 'dark'")
+        pick("2")
+        page.evaluate("""() => { const i = document.querySelector('#props-color'); i.value = '#ffee99'; i.dispatchEvent(new Event('change', { bubbles: true })); }""")
+        page.wait_for_timeout(500)
+        eq(page.inner_text(".props__clear"), "Сбросить цвет")
+        yes("Цвет блока 2 изменён" in page.inner_text(".props__message"), page.inner_text(".props__message"))
+        page.screenshot(path=str(SHOTS / "properties-color-ru-dark.png"))
+
+    check("PP-14", "Russian page, dark theme: the colour field works", colour_ru_dark)
     check("PP-10", "No errors in the browser console", lambda: yes(not errors, errors[:3]))
     b.close()
 

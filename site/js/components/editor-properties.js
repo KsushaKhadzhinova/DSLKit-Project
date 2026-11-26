@@ -1,7 +1,8 @@
 import { readCode, showCode } from './code-lines.js';
 import { notify } from './toast.js';
-import { gate } from '../utils/palette.js';
-import { propertiesOf, setKind, setLabel } from '../utils/node-properties.js';
+import { gate, kindName } from '../utils/palette.js';
+import { isColor, normalizeColor } from '../utils/color.js';
+import { propertiesOf, setColor, setKind, setLabel } from '../utils/node-properties.js';
 import { pageLanguage } from '../utils/lang.js';
 
 const TEXTS = {
@@ -10,6 +11,12 @@ const TEXTS = {
   label: { ru: 'Подпись', en: 'Label' },
   kind: { ru: 'Вид блока', en: 'Block kind' },
   position: { ru: 'Положение', en: 'Position' },
+  color: { ru: 'Цвет', en: 'Colour' },
+  clear: { ru: 'Сбросить цвет', en: 'Clear colour' },
+  colorChanged: { ru: 'Цвет блока {id} изменён: {color}.', en: 'The colour of {id} is changed: {color}.' },
+  colorCleared: { ru: 'Цвет блока {id} сброшен.', en: 'The colour of {id} is cleared.' },
+  notColor: { ru: 'Это не цвет: нужен вид #ff8800 или #f80.', en: 'This is not a colour: the form is #ff8800 or #f80.' },
+  noColors: { ru: 'У блоков этой нотации нет цвета.', en: 'Blocks of this notation are not coloured.' },
   hint: { ru: 'Изменение сразу записывается в код; «Отменить» возвращает его.', en: 'A change is written into the code at once; Undo takes it back.' },
   labelChanged: { ru: 'Подпись блока {id} изменена.', en: 'The label of {id} is changed.' },
   kindChanged: { ru: 'Вид блока {id} изменён: {kind}.', en: 'The kind of {id} is changed: {kind}.' },
@@ -17,9 +24,6 @@ const TEXTS = {
   refused: { ru: 'Не изменено: {reason}', en: 'Not changed: {reason}' },
   notRead: { ru: 'Не изменено: нотация не читает блок как «{kind}».', en: 'Not changed: the notation does not read the block as "{kind}".' },
 };
-
-// The names of the kinds of a block: a keyword is shown as it is written in the code, so the user finds it in the code too.
-const kindName = (keyword) => keyword;
 
 // The properties panel: the block that is selected on the board shows its properties as fields. Writing a field rewrites the line
 // of the code that declares the block, through the same strict gate as the palette; the code stays the one source of truth,
@@ -67,11 +71,18 @@ export const initEditorProperties = ({ root = document } = {}) => {
   const kindSelect = el('select', 'props__input');
   const labelField = field('label', labelInput);
   const kindField = field('kind', kindSelect);
+  const colorInput = el('input', 'props__input props__color');
+  colorInput.type = 'color';
+  const clearButton = el('button', 'button button--quiet props__clear', t('clear'));
+  clearButton.type = 'button';
+  const colorField = field('color', colorInput);
+  colorField.append(clearButton);
+  const colorNote = el('p', 'props__hint props__colornote', t('noColors'));
   const hint = el('p', 'props__hint', t('hint'));
   const message = el('p', 'props__message');
   message.setAttribute('role', 'status');
   message.setAttribute('aria-live', 'polite');
-  panel.append(heading, idRow, positionField, labelField, kindField, hint, message);
+  panel.append(heading, idRow, positionField, labelField, kindField, colorField, colorNote, hint, message);
   canvas.append(panel);
 
   let current = null;
@@ -100,12 +111,16 @@ export const initEditorProperties = ({ root = document } = {}) => {
     kindField.hidden = properties.kinds.length === 0;
     kindSelect.replaceChildren(
       ...properties.kinds.map((keyword) => {
-        const option = el('option', '', kindName(keyword));
+        const option = el('option', '', kindName(keyword, lang));
         option.value = keyword;
         option.selected = keyword === properties.keyword;
         return option;
       }),
     );
+    colorField.hidden = !properties.colorSupported;
+    colorNote.hidden = properties.colorSupported;
+    // A colour field only takes #rrggbb; a short or upper-case colour of the code is shown in that form, an invalid one as white.
+    colorInput.value = isColor(properties.color) ? normalizeColor(properties.color) : '#ffffff';
     return properties;
   };
 
@@ -146,6 +161,23 @@ export const initEditorProperties = ({ root = document } = {}) => {
     }
     return apply(next, t('kindChanged', { id: current, kind: keyword }));
   };
+  // The colour comes from a field or from a caller; only a valid #rgb or #rrggbb is ever written into the code.
+  const changeColor = (value = colorInput.value) => {
+    if (current === null) return false;
+    if (!isColor(value)) {
+      say(t('notColor'));
+      show(current);
+      return false;
+    }
+    const color = normalizeColor(value);
+    return apply(setColor(code(), current, color), t('colorChanged', { id: current, color }));
+  };
+  const clearColor = () => {
+    if (current === null || propertiesOf(code(), current)?.color === null) return false;
+    return apply(setColor(code(), current, null), t('colorCleared', { id: current }));
+  };
+  colorInput.addEventListener('change', () => changeColor());
+  clearButton.addEventListener('click', clearColor);
   labelInput.addEventListener('change', changeLabel);
   kindSelect.addEventListener('change', changeKind);
   // Escape in a field gives the focus back to the board, so the keyboard never stays trapped in the panel.
@@ -157,5 +189,5 @@ export const initEditorProperties = ({ root = document } = {}) => {
   // The palette announces the block that is selected; a run rewrites the lines, so the fields are read again.
   page.addEventListener('dslkit:pick', (event) => show(/** @type {CustomEvent} */ (event).detail?.id ?? null));
   page.addEventListener('dslkit:run', () => current !== null && show(current));
-  return { show, changeLabel, changeKind, current: () => current };
+  return { show, changeLabel, changeKind, changeColor, clearColor, current: () => current };
 };

@@ -11,6 +11,8 @@ const TEXT = {
     none: 'Нет диаграммы для экспорта: сначала нажмите «Запустить».',
     saved: (name) => `Файл ${name} сохранён.`,
     failed: 'Не удалось подготовить файл. Попробуйте ещё раз.',
+    colorDropped: 'Цвет блоков не попадёт в файл.',
+    colorNote: 'У этой нотации цвет блоков не попадёт в PlantUML и Mermaid: файл будет без цвета.',
     refusal: {
       empty: 'Нет диаграммы для экспорта в текст: введите код диаграммы.',
       errors: (name) => `В коде диаграммы (${name}) есть ошибки: исправьте их, иначе файл был бы неполным. Экспорт в текст отключён.`,
@@ -21,6 +23,8 @@ const TEXT = {
     none: 'There is no diagram to export: press Run first.',
     saved: (name) => `File ${name} saved.`,
     failed: 'The file could not be prepared. Try again.',
+    colorDropped: 'The colour of blocks is not in the file.',
+    colorNote: 'In this notation the colours of blocks are not carried to PlantUML and Mermaid: the file has no colour.',
     refusal: {
       empty: 'There is no diagram to export as text: enter the diagram code.',
       errors: (name) => `The diagram code (${name}) has errors: fix them, or the file would be incomplete. The text export is switched off.`,
@@ -93,6 +97,9 @@ export const initExport = ({ root = document, save = download(root) } = {}) => {
       button.title = reason;
       shown ||= reason;
     });
+    // Not an error: the file is made, only the colour is left out, so the note says it in advance.
+    const dropsColor = shown === '' && textButtons.some((button) => exportText(source, FORMATS[button.dataset.export].text).colorIgnored);
+    if (dropsColor) shown = TEXT[lang].colorNote;
     if (note) note.textContent = shown;
     return shown;
   };
@@ -105,7 +112,7 @@ export const initExport = ({ root = document, save = download(root) } = {}) => {
     }
     const name = fileName(parseDiagram(sourceNow()).title, result.extension);
     save(new root.defaultView.Blob([result.text], { type: result.mime }), name);
-    say(TEXT[lang].saved(name));
+    say(result.colorIgnored ? `${TEXT[lang].saved(name)} ${TEXT[lang].colorDropped}` : TEXT[lang].saved(name));
     return true;
   };
 

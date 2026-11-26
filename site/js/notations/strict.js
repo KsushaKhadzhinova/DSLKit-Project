@@ -1,4 +1,5 @@
 import { problem } from './common.js';
+import { isColor } from '../utils/color.js';
 
 // Strict conformance rules that every notation shares, on top of the rules of the notation itself.
 // A rule here never replaces a rule of the notation: it catches what a hand-written or hand-drawn diagram most often gets wrong.
@@ -30,6 +31,10 @@ const graphRules = (notation, model) => {
     if (typeof node.attrs.pos === 'string' && !POSITION.test(node.attrs.pos))
       out.push(problem(node.line, 'error', 'strict-pos', { id: node.id, value: node.attrs.pos }));
     if (node.attrs.pos === true) out.push(problem(node.line, 'error', 'strict-pos', { id: node.id, value: '' }));
+  });
+  model.nodes.forEach((node) => {
+    if (node.attrs.color !== undefined && !isColor(node.attrs.color))
+      out.push(problem(node.line, 'error', 'strict-color', { id: node.id, value: node.attrs.color === true ? '' : node.attrs.color }));
   });
   const lower = new Map();
   model.nodes.forEach((node) => {

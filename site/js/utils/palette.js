@@ -150,6 +150,9 @@ const OWN_LINKS = {
 
 const nameOf = (keyword) => NAMES[keyword] ?? [keyword, keyword];
 
+// The name of a kind of block in a language; a keyword without a name is shown as it is written in the code.
+export const kindName = (keyword, lang = 'en') => nameOf(keyword)[languageIndex(lang)];
+
 // The elements that can be put on the board of a notation.
 // The new element is written in the language of the interface: a Russian page puts Russian names into the code.
 export const paletteFor = (notation, lang = 'en') => {
