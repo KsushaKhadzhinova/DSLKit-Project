@@ -131,7 +131,7 @@ with sync_playwright() as p:
         open_export()
         yes("no exact mapping" in page.inner_text("[data-export-note]"), page.inner_text("[data-export-note]"))
         open_export()
-        page.click('[data-export="mmd"]')
+        page.click('[data-export="mmd"]', force=True)
         page.wait_for_timeout(300)
         yes("no exact mapping" in page.inner_text(".canvas__status"), page.inner_text(".canvas__status"))
 

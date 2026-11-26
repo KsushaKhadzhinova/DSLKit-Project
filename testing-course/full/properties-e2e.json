@@ -1,0 +1,75 @@
+{
+  "results": [
+    {
+      "id": "PP-01",
+      "kind": "properties",
+      "title": "Picking a block opens the panel with its id, label and kind",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "PP-02",
+      "kind": "properties",
+      "title": "Changing the label rewrites the code and the drawing",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "PP-03",
+      "kind": "properties",
+      "title": "Changing the kind rewrites the keyword in the code",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "PP-04",
+      "kind": "properties",
+      "title": "A change the strict gate refuses leaves the code and says why",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "PP-05",
+      "kind": "properties",
+      "title": "Keyboard: Escape returns to the board; the panel is a labelled region",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "PP-06",
+      "kind": "properties",
+      "title": "PlantUML and Mermaid files download with the right extension and content",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "PP-07",
+      "kind": "properties",
+      "title": "A notation without a mapping is refused with a clear message",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "PP-08",
+      "kind": "properties",
+      "title": "Russian page speaks Russian; both themes render the panel",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "PP-09",
+      "kind": "properties",
+      "title": "The panel fits a phone width",
+      "status": "Passed",
+      "note": ""
+    },
+    {
+      "id": "PP-10",
+      "kind": "properties",
+      "title": "No errors in the browser console",
+      "status": "Passed",
+      "note": ""
+    }
+  ],
+  "console_errors": []
+}
