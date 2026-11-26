@@ -2,6 +2,8 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
 import { JSDOM } from 'jsdom';
+import { showCode } from '../../site/js/components/code-lines.js';
+import { TEMPLATES } from '../../site/js/notations/index.js';
 import { initExport } from '../../site/js/components/export-menu.js';
 import { drawioFile, fileName, htmlFile, rasterize, serializeSvg, sizeOf } from '../../site/js/utils/exporters.js';
 
@@ -204,7 +206,7 @@ test('the buttons of the menu start the export and the English page speaks Engli
   context.document.querySelector('[data-export="svg"]').click();
   await new Promise((resolve) => setTimeout(resolve, 0));
   assert.equal(context.saved.length, 1);
-  assert.equal(context.document.querySelectorAll('[data-export]').length, 5);
+  assert.equal(context.document.querySelectorAll('[data-export]').length, 7);
   const english = editor(editorHtmlEn);
   english.remote.hidden = true;
   await english.api.exportAs('svg');
@@ -212,7 +214,7 @@ test('the buttons of the menu start the export and the English page speaks Engli
   draw(english);
   await english.api.exportAs('svg');
   assert.match(english.status.textContent, /^File .*\.svg saved\.$/);
-  assert.equal(english.document.querySelectorAll('[data-export]').length, 5);
+  assert.equal(english.document.querySelectorAll('[data-export]').length, 7);
 });
 
 test('the file is handed to the browser as a download link', () => {
@@ -250,4 +252,86 @@ test('the export works on a page without a status line', async () => {
   window.document.querySelector('.canvas__remote').replaceChildren(svgOf(window));
   assert.equal(await api.exportAs('svg'), true);
   assert.deepEqual(saved, ['a.svg']);
+});
+
+const textButtons = (context) => [...context.document.querySelectorAll('[data-export="puml"], [data-export="mmd"]')];
+const writeCode = (context, code) => {
+  showCode(context.document, context.document.querySelector('.code__lines'), code);
+  context.document.querySelector('.app-page--editor').dispatchEvent(new context.window.CustomEvent('dslkit:run', { bubbles: true }));
+};
+
+test('the text formats are switched off with a reason for a notation that has no faithful mapping', () => {
+  const context = editor();
+  writeCode(context, TEMPLATES.idef0);
+  for (const button of textButtons(context)) {
+    assert.equal(button.getAttribute('aria-disabled'), 'true');
+    assert.match(button.title, /^У нотации «.+» нет точного соответствия в (PlantUML|Mermaid)/);
+  }
+  assert.match(context.document.querySelector('[data-export-note]').textContent, /нет точного соответствия/);
+  assert.equal(context.document.querySelector('[data-export="puml"]').getAttribute('aria-describedby'), 'export-text-note');
+});
+
+test('the text formats follow the code: a notation with a mapping switches them on and clears the note', () => {
+  const context = editor();
+  writeCode(context, TEMPLATES.idef0);
+  writeCode(context, TEMPLATES.gost);
+  for (const button of textButtons(context)) {
+    assert.equal(button.getAttribute('aria-disabled'), 'false');
+    assert.equal(button.title, '');
+  }
+  assert.equal(context.document.querySelector('[data-export-note]').textContent, '');
+});
+
+test('PlantUML and Mermaid files are saved as plain text with their own extension, the status is shown', async () => {
+  const context = editor();
+  writeCode(context, TEMPLATES['uml-sequence']);
+  assert.equal(await context.api.exportAs('puml'), true);
+  assert.equal(await context.api.exportAs('mmd'), true);
+  assert.deepEqual(
+    context.saved.map((item) => item.name.split('.').pop()),
+    ['puml', 'mmd'],
+  );
+  assert.equal(context.saved[0].blob.type, 'text/plain;charset=utf-8');
+  assert.equal(await context.saved[0].blob.text().then((text) => text.startsWith('@startuml')), true);
+  assert.equal(await context.saved[1].blob.text().then((text) => text.startsWith('sequenceDiagram')), true);
+  assert.match(context.status.textContent, /^Файл .+.mmd сохранён.$/);
+});
+
+test('the text export needs no drawing on the board, only code', async () => {
+  const context = editor();
+  context.remote.hidden = true;
+  writeCode(context, TEMPLATES.dfd);
+  assert.equal(await context.api.exportAs('puml'), true);
+});
+
+test('a refused text export saves nothing and says why, in both languages', async () => {
+  const ru = editor();
+  writeCode(ru, TEMPLATES.idef0);
+  assert.equal(await ru.api.exportAs('puml'), false);
+  assert.match(ru.status.textContent, /нет точного соответствия в PlantUML/);
+  writeCode(ru, '');
+  assert.equal(await ru.api.exportAs('mmd'), false);
+  assert.equal(ru.status.textContent, 'Нет диаграммы для экспорта в текст: введите код диаграммы.');
+  writeCode(
+    ru,
+    `${TEMPLATES['uml-sequence']}
+ghost -> nobody : lost`,
+  );
+  assert.equal(await ru.api.exportAs('mmd'), false);
+  assert.match(ru.status.textContent, /есть ошибки/);
+  assert.equal(ru.saved.length, 0);
+  const en = editor(editorHtmlEn);
+  writeCode(en, TEMPLATES.idef0);
+  assert.equal(await en.api.exportAs('mmd'), false);
+  assert.match(en.status.textContent, /has no exact mapping in Mermaid/);
+  writeCode(en, '');
+  await en.api.exportAs('mmd');
+  assert.equal(en.status.textContent, 'There is no diagram to export as text: enter the diagram code.');
+  writeCode(
+    en,
+    `${TEMPLATES['uml-sequence']}
+ghost -> nobody : lost`,
+  );
+  await en.api.exportAs('puml');
+  assert.match(en.status.textContent, /has errors/);
 });

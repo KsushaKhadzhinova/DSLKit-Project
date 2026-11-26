@@ -16,6 +16,13 @@ What was added to the Part 1 editor in October 2026, how it works and how to sho
 - **Show it.** Menu "⋯" → "Export PNG".
 - **Limit (honestly):** `.drawio` cannot be edited shape by shape.
 
+## 2a Properties panel and export to PlantUML/Mermaid
+
+- **Properties panel.** Picking a block on the board opens a panel: identifier, position `pos=XxY` (when the block was moved), label and kind. Changing the label or kind rewrites the declaration line of the block through the same strict gate as the palette; the code stays the single source of truth and Undo works as usual. Escape returns the focus to the block. Output goes through `textContent` only.
+- **Text export.** The entries "Export PlantUML (.puml)" and "Export Mermaid (.mmd)" (`export/text-formats.js`, `components/export-menu.js`) work from the code, not from the drawing. GOST, UML activity, BPMN, IDEF3, DFD, sequence, class, ER and state diagrams have an exact mapping; for other notations the button is `aria-disabled`, the reason is shown as a tooltip and under the menu, and no file is produced.
+- **Limits (honest).** The colour of a block is not editable: no notation writes colour into the code. The position is shown only (it is changed by mouse or arrows).
+- **Show.** DFD template → click "Take payment" → change the label; Sequence template → menu "⋯" → "Export Mermaid".
+
 ## 3 Import of Mermaid and PlantUML
 
 - **What it understands.** Mermaid flowcharts (`graph`/`flowchart`), sequence and state diagrams (Mermaid and PlantUML). The result is DSLKit code that the editor accepts without errors. Other kinds (classes, ER, Gantt) are named as unsupported, skipped constructs are listed.

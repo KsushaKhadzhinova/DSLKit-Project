@@ -142,6 +142,7 @@ import { initEditor } from './components/editor.js';
 import { initCodeInput } from './components/code-input.js';
 import { initEditorActions } from './components/editor-actions.js';
 import { initEditorPalette } from './components/editor-palette.js';
+import { initEditorProperties } from './components/editor-properties.js';
 import { initEditorProjects } from './components/editor-projects.js';
 import { initEditorTools } from './components/editor-tools.js';
 import { initExport } from './components/export-menu.js';
@@ -194,6 +195,7 @@ export const COMPONENTS = [
   initClarify,
   initReviewPanel,
   initEditorPalette,
+  initEditorProperties,
   initExport,
   initImport,
   initTour,

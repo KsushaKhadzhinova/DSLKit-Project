@@ -19,7 +19,10 @@ test('every supported notation exports to both languages from its own template',
       assert.equal(result.notation, key);
       assert.equal(result.extension, TEXT_FORMATS[format].extension);
       assert.ok(result.text.endsWith('\n'));
-      assert.ok(format === 'plantuml' ? result.text.startsWith('@startuml') : /^(flowchart|sequenceDiagram|classDiagram|erDiagram|stateDiagram)/.test(result.text), `${key} ${format}`);
+      assert.ok(
+        format === 'plantuml' ? result.text.startsWith('@startuml') : /^(flowchart|sequenceDiagram|classDiagram|erDiagram|stateDiagram)/.test(result.text),
+        `${key} ${format}`,
+      );
     }
   }
 });
@@ -36,7 +39,10 @@ test('an unknown format, an empty code and a code with errors are refused', () =
   assert.deepEqual(exportText('diagram uml sequence "Empty"', 'plantuml'), { ok: false, reason: 'empty' });
   assert.deepEqual(exportText('diagram nothing "x"', 'plantuml'), { ok: false, reason: 'empty' });
   const broken = `${TEMPLATES['uml-sequence']}\nghost -> nobody : lost`;
-  assert.equal(parseDiagram(broken).problems.some((item) => item.severity === 'error'), true);
+  assert.equal(
+    parseDiagram(broken).problems.some((item) => item.severity === 'error'),
+    true,
+  );
   assert.deepEqual(exportText(broken, 'mermaid'), { ok: false, reason: 'errors', notation: 'uml-sequence' });
 });
 
@@ -51,7 +57,11 @@ test('the Mermaid text of a flowchart keeps every node and link, and the importe
     assert.equal(result.ok, true, key);
     assert.equal(result.kind, 'flowchart');
     const back = parseDiagram(result.dsl);
-    assert.deepEqual(back.problems.filter((item) => item.severity === 'error'), [], key);
+    assert.deepEqual(
+      back.problems.filter((item) => item.severity === 'error'),
+      [],
+      key,
+    );
     assert.equal(back.vertices.length, model.nodes.length, `${key} nodes`);
     assert.equal(back.edges.length, model.edges.length, `${key} edges`);
     assert.deepEqual(back.vertices.map((vertex) => vertex.label ?? vertex.id).sort(), model.nodes.map((node) => node.label).sort(), `${key} labels`);
@@ -65,9 +75,21 @@ test('sequence diagrams come back from both languages with the same participants
     assert.equal(result.ok, true, format);
     assert.equal(result.kind, 'sequence');
     const back = parseDiagram(result.dsl);
-    assert.deepEqual(back.problems.filter((item) => item.severity === 'error'), [], format);
-    assert.deepEqual(back.participants.map((item) => item.label), model.participants.map((item) => item.label), format);
-    assert.deepEqual(back.messages.map((item) => [item.kind, item.text]), model.messages.map((item) => [item.kind, item.text]), format);
+    assert.deepEqual(
+      back.problems.filter((item) => item.severity === 'error'),
+      [],
+      format,
+    );
+    assert.deepEqual(
+      back.participants.map((item) => item.label),
+      model.participants.map((item) => item.label),
+      format,
+    );
+    assert.deepEqual(
+      back.messages.map((item) => [item.kind, item.text]),
+      model.messages.map((item) => [item.kind, item.text]),
+      format,
+    );
   }
 });
 
@@ -78,8 +100,16 @@ test('state diagrams come back from both languages with the same states and tran
     assert.equal(result.ok, true, format);
     assert.equal(result.kind, 'state');
     const back = parseDiagram(result.dsl);
-    assert.deepEqual(back.problems.filter((item) => item.severity === 'error'), [], format);
-    const states = (nodes) => nodes.filter((node) => node.kind === 'state').map((node) => node.label).sort();
+    assert.deepEqual(
+      back.problems.filter((item) => item.severity === 'error'),
+      [],
+      format,
+    );
+    const states = (nodes) =>
+      nodes
+        .filter((node) => node.kind === 'state')
+        .map((node) => node.label)
+        .sort();
     assert.deepEqual(states(back.nodes), states(model.nodes), format);
     assert.equal(back.nodes.length, model.nodes.length, format);
     assert.equal(back.edges.length, model.edges.length, format);
@@ -90,6 +120,10 @@ test('the round trip table lists only exported notations; the importer refuses a
   for (const keys of Object.values(ROUND_TRIP)) keys.forEach((key) => assert.ok(SUPPORTED_NOTATIONS.includes(key), key));
   for (const format of FORMATS) {
     assert.equal(ROUND_TRIP[format].includes('uml-class'), false);
-    assert.deepEqual(importDiagram(exportText(TEMPLATES['uml-class'], format).text), { ok: false, reason: 'unsupported', name: 'class' });
+    assert.deepEqual(importDiagram(exportText(TEMPLATES['uml-class'], format).text), {
+      ok: false,
+      reason: 'unsupported',
+      name: format === 'mermaid' ? 'classDiagram' : 'class',
+    });
   }
 });

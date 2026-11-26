@@ -1,4 +1,3 @@
-// @ts-nocheck -- type-check debt: remove this line when the file passes npm run typecheck
 import { readCode, showCode } from './code-lines.js';
 import { notify } from './toast.js';
 import { gate } from '../utils/palette.js';
@@ -10,6 +9,7 @@ const TEXTS = {
   id: { ru: 'Идентификатор', en: 'Identifier' },
   label: { ru: 'Подпись', en: 'Label' },
   kind: { ru: 'Вид блока', en: 'Block kind' },
+  position: { ru: 'Положение', en: 'Position' },
   hint: { ru: 'Изменение сразу записывается в код; «Отменить» возвращает его.', en: 'A change is written into the code at once; Undo takes it back.' },
   labelChanged: { ru: 'Подпись блока {id} изменена.', en: 'The label of {id} is changed.' },
   kindChanged: { ru: 'Вид блока {id} изменён: {kind}.', en: 'The kind of {id} is changed: {kind}.' },
@@ -57,6 +57,10 @@ export const initEditorProperties = ({ root = document } = {}) => {
   const idRow = el('div', 'props__field');
   const idLabel = el('span', 'props__label', t('id'));
   idRow.append(idLabel, idOutput);
+  const positionOutput = el('output', 'props__id');
+  positionOutput.id = 'props-position';
+  const positionField = el('div', 'props__field');
+  positionField.append(el('span', 'props__label', t('position')), positionOutput);
   const labelInput = el('input', 'props__input');
   labelInput.type = 'text';
   labelInput.autocomplete = 'off';
@@ -67,7 +71,7 @@ export const initEditorProperties = ({ root = document } = {}) => {
   const message = el('p', 'props__message');
   message.setAttribute('role', 'status');
   message.setAttribute('aria-live', 'polite');
-  panel.append(heading, idRow, labelField, kindField, hint, message);
+  panel.append(heading, idRow, positionField, labelField, kindField, hint, message);
   canvas.append(panel);
 
   let current = null;
@@ -89,6 +93,8 @@ export const initEditorProperties = ({ root = document } = {}) => {
     panel.hidden = properties === null;
     if (properties === null) return null;
     idOutput.textContent = id;
+    positionField.hidden = properties.position === null;
+    positionOutput.textContent = properties.position ?? '';
     labelField.hidden = properties.label === null;
     labelInput.value = properties.label === null ? '' : properties.label.replace(/\n/g, ' ');
     kindField.hidden = properties.kinds.length === 0;
@@ -145,11 +151,11 @@ export const initEditorProperties = ({ root = document } = {}) => {
   // Escape in a field gives the focus back to the board, so the keyboard never stays trapped in the panel.
   panel.addEventListener('keydown', (event) => {
     if (event.key !== 'Escape') return;
-    page.querySelector('.canvas__remote .notation__node--picked')?.focus({ preventScroll: true });
+    /** @type {HTMLElement | null} */ (page.querySelector('.canvas__remote .notation__node--picked'))?.focus({ preventScroll: true });
   });
 
   // The palette announces the block that is selected; a run rewrites the lines, so the fields are read again.
-  page.addEventListener('dslkit:pick', (event) => show(event.detail?.id ?? null));
+  page.addEventListener('dslkit:pick', (event) => show(/** @type {CustomEvent} */ (event).detail?.id ?? null));
   page.addEventListener('dslkit:run', () => current !== null && show(current));
   return { show, changeLabel, changeKind, current: () => current };
 };

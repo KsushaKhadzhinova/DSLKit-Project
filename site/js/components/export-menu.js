@@ -79,7 +79,8 @@ export const initExport = ({ root = document, save = download(root) } = {}) => {
   const reasonFor = (result, format) => {
     if (result.ok) return '';
     const name = NOTATIONS[result.notation]?.name[lang] ?? '';
-    return TEXT[lang].refusal[result.reason](name, LANGUAGE_NAME[format]);
+    const sentence = TEXT[lang].refusal[result.reason];
+    return typeof sentence === 'function' ? sentence(name, LANGUAGE_NAME[format]) : sentence;
   };
   // The text formats follow the code: a button that has no faithful mapping is disabled and its reason is shown.
   const syncText = () => {
