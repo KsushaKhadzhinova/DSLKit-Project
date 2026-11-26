@@ -7,6 +7,7 @@ export default [
     ignores: [
       'node_modules/**',
       'part-2/**',
+      'server/**',
       'course-project/**',
       'react-app/**',
       'site/dist/**',

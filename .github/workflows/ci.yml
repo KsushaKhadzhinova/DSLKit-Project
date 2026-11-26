@@ -66,6 +66,28 @@ jobs:
         working-directory: part-2/${{ matrix.folder }}
         run: if [ -f package-lock.json ]; then npm audit --omit=dev --audit-level=high; fi
 
+  editor-server:
+    name: Editor server
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - name: Install the server
+        working-directory: server
+        run: npm ci
+      - name: Lint the server
+        working-directory: server
+        run: npm run lint
+      - name: Test the server (coverage thresholds are set in package.json)
+        working-directory: server
+        run: npm test
+      - name: Known vulnerabilities in the production libraries
+        working-directory: server
+        run: npm audit --omit=dev --audit-level=high
+
   build:
     name: Production build of the site
     runs-on: ubuntu-latest
