@@ -70,6 +70,15 @@ jobs:
     name: Editor server
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 10
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -83,6 +92,11 @@ jobs:
         run: npm run lint
       - name: Test the server (coverage thresholds are set in package.json)
         working-directory: server
+        run: npm test
+      - name: Test the server on PostgreSQL
+        working-directory: server
+        env:
+          TEST_PG_URL: postgres://postgres@localhost:5432/postgres
         run: npm test
       - name: Known vulnerabilities in the production libraries
         working-directory: server

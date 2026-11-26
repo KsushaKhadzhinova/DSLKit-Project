@@ -2,6 +2,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const { Sequelize, DataTypes } = require('sequelize');
+const { normalize } = require('./search');
 
 function defineModels(sequelize) {
   const User = sequelize.define(
@@ -14,8 +15,16 @@ function defineModels(sequelize) {
       role: { type: DataTypes.STRING(10), allowNull: false, defaultValue: 'user' },
       failedAttempts: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 },
       lockedUntil: { type: DataTypes.DATE, allowNull: true },
+      searchText: { type: DataTypes.STRING(300), allowNull: false, defaultValue: '' },
     },
-    { tableName: 'users' },
+    {
+      tableName: 'users',
+      hooks: {
+        beforeSave: (u) => {
+          u.searchText = normalize(`${u.displayName} ${u.email}`);
+        },
+      },
+    },
   );
 
   const Project = sequelize.define(
@@ -27,8 +36,16 @@ function defineModels(sequelize) {
       notation: { type: DataTypes.STRING(40), allowNull: false },
       source: { type: DataTypes.TEXT, allowNull: false, defaultValue: '' },
       visibility: { type: DataTypes.STRING(10), allowNull: false, defaultValue: 'private' },
+      searchText: { type: DataTypes.STRING(1000), allowNull: false, defaultValue: '' },
     },
-    { tableName: 'projects' },
+    {
+      tableName: 'projects',
+      hooks: {
+        beforeSave: (p) => {
+          p.searchText = normalize(`${p.title} ${p.description}`);
+        },
+      },
+    },
   );
 
   const ProjectMember = sequelize.define(

@@ -2,15 +2,18 @@
 const { HttpError, unauthorized, forbidden, notFound } = require('./errors');
 const { can } = require('./permissions');
 
-function securityHeaders(_req, res, next) {
-  res.set({
-    'X-Content-Type-Options': 'nosniff',
-    'X-Frame-Options': 'DENY',
-    'Cache-Control': 'no-store',
-    'Referrer-Policy': 'no-referrer',
-    'Content-Security-Policy': "default-src 'none'; frame-ancestors 'none'",
-  });
-  next();
+function securityHeaders(production) {
+  return (_req, res, next) => {
+    res.set({
+      'X-Content-Type-Options': 'nosniff',
+      'X-Frame-Options': 'DENY',
+      'Cache-Control': 'no-store',
+      'Referrer-Policy': 'no-referrer',
+      'Content-Security-Policy': "default-src 'none'; frame-ancestors 'none'",
+    });
+    if (production) res.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+    next();
+  };
 }
 
 // Only origins from the allow-list are echoed; the API uses bearer tokens, not cookies, so CSRF does not apply.
@@ -47,6 +50,8 @@ function requestLog({ db, now, logger }) {
     const started = now();
     const url = req.originalUrl.split('?')[0].slice(0, 200);
     res.on('finish', () => {
+      // Probes of unknown paths would only fill the table; known routes (also their 404s) are logged.
+      if (res.statusCode === 404 && !req.route) return;
       db.RequestLog.create({
         method: req.method,
         path: url,
@@ -93,6 +98,12 @@ function errorHandler(logger) {
     } else if (err.type === 'entity.parse.failed') {
       status = 400;
       body = { code: 'invalid_json', message: 'Body is not valid JSON' };
+    } else if (err.type === 'charset.unsupported' || err.type === 'encoding.unsupported') {
+      status = 415;
+      body = { code: 'unsupported_media_type', message: 'Unsupported charset or encoding' };
+    } else if (err.status >= 400 && err.status < 500) {
+      status = err.status;
+      body = { code: 'bad_request', message: 'Bad request' };
     } else logger.error(err);
     res.status(status).json({ error: body });
   };

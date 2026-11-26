@@ -41,3 +41,10 @@ test('port must be a valid number', () => {
   assert.throws(() => loadConfig({ ...base(), PORT: '70000' }), /PORT/);
   assert.equal(loadConfig({ ...base(), PORT: '0' }).port, 0);
 });
+
+test('tables are synced automatically outside production only, unless DB_SYNC says otherwise', () => {
+  assert.equal(loadConfig(base()).dbSync, true);
+  assert.equal(loadConfig({ ...base(), NODE_ENV: 'production', BCRYPT_ROUNDS: '12' }).dbSync, false);
+  assert.equal(loadConfig({ ...base(), DB_SYNC: 'false' }).dbSync, false);
+  assert.equal(loadConfig({ ...base(), NODE_ENV: 'production', DB_SYNC: 'true' }).dbSync, true);
+});

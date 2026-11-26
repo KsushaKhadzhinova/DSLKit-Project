@@ -47,6 +47,12 @@ describe('users, roles and request log', () => {
     assert.equal((await s.api('GET', '/api/users?pageSize=1000', { token: admin.token })).status, 400);
   });
 
+  test('admin finds users by a Cyrillic name in any case', async () => {
+    await s.signup('user', 'Ёжик Иванов');
+    for (const q of ['ёжик', 'ИВАНОВ'])
+      assert.equal((await s.api('GET', `/api/users?q=${encodeURIComponent(q)}`, { token: admin.token })).body.items.length, 1, q);
+  });
+
   test('a role change applies to the next request, without a new login', async () => {
     const u = await s.signup('user', 'Promoted');
     const shared = (await s.api('POST', '/api/projects', { token: user.token, body: validProject({ visibility: 'shared' }) })).body.project;
@@ -78,7 +84,7 @@ describe('users, roles and request log', () => {
   test('admin unlocks a locked account, which can then log in again', async () => {
     const u = await s.signup();
     for (let i = 0; i < 5; i++) await s.api('POST', '/api/auth/login', { body: { email: u.email, password: strongPassword() } });
-    assert.equal((await s.api('POST', '/api/auth/login', { body: { email: u.email, password: u.password } })).status, 429);
+    assert.equal((await s.api('POST', '/api/auth/login', { body: { email: u.email, password: u.password } })).status, 401);
     assert.equal((await s.api('POST', `/api/users/${u.id}/unlock`, { token: admin.token })).status, 200);
     assert.equal((await s.api('POST', '/api/auth/login', { body: { email: u.email, password: u.password } })).status, 200);
     assert.equal((await s.api('POST', `/api/users/${missingId}/unlock`, { token: admin.token })).status, 404);
@@ -97,7 +103,13 @@ describe('users, roles and request log', () => {
       const pw = strongPassword();
       await s.api('POST', '/api/auth/login', { body: { email: 'nobody@example.test', password: pw } });
       await s.api('GET', '/api/me', { token: user.token });
-      const res = await s.api('GET', '/api/logs?pageSize=200', { token: admin.token });
+      // The log row is written after the response, so wait until the last request shows up.
+      let res;
+      for (let i = 0; i < 40; i++) {
+        res = await s.api('GET', '/api/logs?pageSize=200', { token: admin.token });
+        if (res.body.items.some((e) => e.path === '/api/me' && e.userId === user.id)) break;
+        await new Promise((r) => setTimeout(r, 25));
+      }
       assert.equal(res.status, 200);
       const entry = res.body.items.find((e) => e.path === '/api/auth/login' && e.status === 401);
       assert.ok(entry);
@@ -110,6 +122,7 @@ describe('users, roles and request log', () => {
 
     test('the query string is not stored in the log path', async () => {
       await s.api('GET', '/api/projects?q=secret-search-term', { token: user.token });
+      await new Promise((r) => setTimeout(r, 100));
       const res = await s.api('GET', '/api/logs?pageSize=200', { token: admin.token });
       assert.equal(res.text.includes('secret-search-term'), false);
     });

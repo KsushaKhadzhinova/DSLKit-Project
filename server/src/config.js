@@ -38,7 +38,8 @@ function loadConfig(env, limitsOverride = {}) {
     dialect,
     storage: env.DB_STORAGE || './data/dslkit.sqlite',
     databaseUrl: env.DATABASE_URL || '',
-    dbSync: env.DB_SYNC !== 'false',
+    // Outside production tables may be created by sync(); production must use `npm run migrate`.
+    dbSync: env.DB_SYNC === undefined || env.DB_SYNC === '' ? !production : env.DB_SYNC === 'true',
     jwtSecret,
     bcryptRounds,
     corsOrigins,

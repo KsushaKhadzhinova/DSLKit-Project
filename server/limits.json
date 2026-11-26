@@ -24,5 +24,6 @@
   "registerRateWindowMinutes": 60,
   "refreshRateMax": 60,
   "refreshRateWindowMinutes": 15,
-  "logPageMax": 200
+  "logPageMax": 200,
+  "logRetentionDays": 30
 }

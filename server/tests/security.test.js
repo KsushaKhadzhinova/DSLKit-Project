@@ -3,6 +3,7 @@ const { test, describe, before, after } = require('node:test');
 const assert = require('node:assert/strict');
 const { startServer, strongPassword, uniqueEmail } = require('./helpers');
 const { bootstrapAdmin } = require('../src/bootstrap-admin');
+const { purgeOldRecords } = require('../src/retention');
 
 describe('http security', () => {
   let s;
@@ -83,6 +84,72 @@ describe('http security', () => {
     const res = await s.api('GET', '/api/health');
     assert.equal(res.status, 200);
     assert.deepEqual(res.body, { status: 'ok' });
+  });
+});
+
+describe('hardening details', () => {
+  test('an unsupported charset is a 415, not a 500', async () => {
+    const s = await startServer();
+    const res = await s.api('POST', '/api/auth/login', { raw: '{}', headers: { 'content-type': 'application/json; charset=foo' } });
+    assert.equal(res.status, 415);
+    assert.equal(res.body.error.code, 'unsupported_media_type');
+    await s.close();
+  });
+
+  test('other client errors from the parser stay 4xx', async () => {
+    const s = await startServer();
+    const res = await s.api('POST', '/api/auth/login', { raw: '{}', headers: { 'content-type': 'application/json', 'content-encoding': 'br' } });
+    assert.ok(res.status >= 400 && res.status < 500, String(res.status));
+    await s.close();
+  });
+
+  test('HSTS is sent in production only', async () => {
+    const dev = await startServer();
+    assert.equal((await dev.api('GET', '/api/health')).headers.get('strict-transport-security'), null);
+    await dev.close();
+    const prod = await startServer({ env: { NODE_ENV: 'production', BCRYPT_ROUNDS: '10', DB_SYNC: 'true' } });
+    assert.match((await prod.api('GET', '/api/health')).headers.get('strict-transport-security'), /max-age=\d+/);
+    await prod.close();
+  });
+
+  test('unknown paths are not written to the request log, known routes are', async () => {
+    const s = await startServer();
+    const admin = await s.signup('admin');
+    await s.api('GET', '/api/does-not-exist-probe');
+    await s.api('GET', '/api/projects/00000000-0000-4000-8000-000000000000', { token: admin.token });
+    await new Promise((r) => setTimeout(r, 50));
+    const paths = (await s.db.RequestLog.findAll()).map((r) => r.path);
+    assert.equal(paths.includes('/api/does-not-exist-probe'), false);
+    assert.ok(paths.includes('/api/projects/00000000-0000-4000-8000-000000000000'));
+    await s.close();
+  });
+
+  test('retention removes old log rows and expired refresh tokens only', async () => {
+    const s = await startServer();
+    const u = await s.signup();
+    const old = new Date(s.clock.now - 31 * 86400_000);
+    await s.db.RequestLog.create({ method: 'GET', path: '/old', status: 200, durationMs: 1, createdAt: old });
+    await s.db.RequestLog.create({ method: 'GET', path: '/fresh', status: 200, durationMs: 1, createdAt: new Date(s.clock.now) });
+    s.clock.advance(8 * 86400_000);
+    const out = await purgeOldRecords({ db: s.db, config: s.config, now: () => s.clock.now });
+    assert.ok(out.logs >= 1);
+    assert.equal(out.tokens, 1);
+    assert.equal(await s.db.RefreshToken.count({ where: { userId: u.id } }), 0);
+    const paths = (await s.db.RequestLog.findAll()).map((r) => r.path);
+    assert.equal(paths.includes('/old'), false);
+    assert.ok(paths.includes('/fresh'));
+    await s.close();
+  });
+
+  test('expired rate-limit windows are dropped and the client can try again', async () => {
+    const s = await startServer({ limits: { loginRateMax: 2 } });
+    const attempt = () => s.api('POST', '/api/auth/login', { body: { email: uniqueEmail('x'), password: strongPassword() } });
+    await attempt();
+    await attempt();
+    assert.equal((await attempt()).status, 429);
+    s.clock.advance(16 * 60_000);
+    assert.equal((await attempt()).status, 401);
+    await s.close();
   });
 });
 

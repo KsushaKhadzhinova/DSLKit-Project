@@ -112,13 +112,43 @@ describe('auth', () => {
       assert.equal(r.status, 401, `attempt ${i + 1}`);
     }
     const locked = await s.api('POST', '/api/auth/login', { body: { email: u.email, password: u.password } });
-    assert.equal(locked.status, 429);
-    assert.equal(locked.body.error.code, 'account_locked');
-    assert.ok(Number(locked.headers.get('retry-after')) > 0);
+    // A locked account answers exactly like a wrong password, so the lock does not reveal the account.
+    const wrong = await s.api('POST', '/api/auth/login', { body: { email: uniqueEmail('ghost'), password: strongPassword() } });
+    assert.equal(locked.status, 401);
+    assert.deepEqual(locked.body, wrong.body);
+    assert.equal(locked.headers.get('retry-after'), null);
     s.clock.advance(14 * 60 * 1000);
-    assert.equal((await s.api('POST', '/api/auth/login', { body: { email: u.email, password: u.password } })).status, 429);
+    assert.equal((await s.api('POST', '/api/auth/login', { body: { email: u.email, password: u.password } })).status, 401);
     s.clock.advance(2 * 60 * 1000);
     assert.equal((await s.api('POST', '/api/auth/login', { body: { email: u.email, password: u.password } })).status, 200);
+  });
+
+  test('parallel wrong passwords cannot dodge the lockout (atomic counter)', async () => {
+    const u = await s.signup();
+    const results = await Promise.all(
+      Array.from({ length: 20 }, () => s.api('POST', '/api/auth/login', { body: { email: u.email, password: strongPassword() } })),
+    );
+    assert.ok(results.every((r) => r.status === 401));
+    const row = await s.db.User.findByPk(u.id);
+    assert.ok(row.lockedUntil, 'the account must be locked');
+    assert.equal((await s.api('POST', '/api/auth/login', { body: { email: u.email, password: u.password } })).status, 401);
+  });
+
+  test('parallel refresh with one token succeeds exactly once and the replay ends every session', async () => {
+    const u = await s.signup();
+    const results = await Promise.all(Array.from({ length: 3 }, () => s.api('POST', '/api/auth/refresh', { body: { refreshToken: u.refreshToken } })));
+    assert.equal(results.filter((r) => r.status === 200).length, 1);
+    assert.equal(results.filter((r) => r.status === 401).length, 2);
+    const winner = results.find((r) => r.status === 200);
+    assert.equal((await s.api('POST', '/api/auth/refresh', { body: { refreshToken: u.refreshToken } })).status, 401);
+    assert.equal((await s.api('POST', '/api/auth/refresh', { body: { refreshToken: winner.body.refreshToken } })).status, 401);
+  });
+
+  test('parallel registrations of one email give one account and conflicts', async () => {
+    const body = reg();
+    const results = await Promise.all(Array.from({ length: 4 }, () => s.api('POST', '/api/auth/register', { body })));
+    assert.equal(results.filter((r) => r.status === 201).length, 1);
+    assert.ok(results.filter((r) => r.status !== 201).every((r) => r.status === 409));
   });
 
   test('a successful login resets the failure counter', async () => {

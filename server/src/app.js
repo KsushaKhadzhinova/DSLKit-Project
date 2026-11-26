@@ -17,7 +17,7 @@ function createApp({ config, db, now = Date.now, logger = console }) {
   const auth = authenticate({ db, tokens });
   const { limits } = config;
 
-  app.use(securityHeaders);
+  app.use(securityHeaders(config.production));
   app.use(cors(config.corsOrigins));
   app.use(requestLog({ db, now, logger }));
   app.use(limit({ name: 'general', max: limits.generalRateMax, windowMinutes: limits.generalRateWindowMinutes }));

@@ -2,9 +2,9 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
 const crypto = require('node:crypto');
-const { UniqueConstraintError } = require('sequelize');
+const { UniqueConstraintError, Op } = require('sequelize');
 const { validateBody } = require('./schema');
-const { conflict, unauthorized, tooMany } = require('./errors');
+const { conflict, unauthorized } = require('./errors');
 
 const ownUser = (u) => ({ id: u.id, email: u.email, displayName: u.displayName, role: u.role });
 
@@ -14,6 +14,15 @@ function authRoutes({ config, db, tokens, now, limit, authenticate }) {
   // Compared against when the email is unknown, so timing does not reveal which emails exist.
   const dummyHash = bcrypt.hashSync(crypto.randomBytes(16).toString('hex'), config.bcryptRounds);
   const invalid = () => unauthorized('invalid_credentials', 'Wrong email or password');
+
+  // Atomic: concurrent wrong guesses are all counted, none can slip past the lock.
+  async function registerFailure(userId, t) {
+    await db.User.increment({ failedAttempts: 1 }, { where: { id: userId } });
+    await db.User.update(
+      { failedAttempts: 0, lockedUntil: new Date(t + limits.loginLockMinutes * 60_000) },
+      { where: { id: userId, failedAttempts: { [Op.gte]: limits.loginMaxAttempts } } },
+    );
+  }
 
   async function session(user) {
     const access = tokens.signAccess(user.id);
@@ -43,12 +52,13 @@ function authRoutes({ config, db, tokens, now, limit, authenticate }) {
       throw invalid();
     }
     const t = now();
-    if (user.lockedUntil && user.lockedUntil.getTime() > t)
-      throw tooMany('account_locked', 'Account is temporarily locked', Math.ceil((user.lockedUntil.getTime() - t) / 1000));
+    // A locked account answers like a wrong password: the lock must not reveal that the account exists.
+    if (user.lockedUntil && user.lockedUntil.getTime() > t) {
+      await bcrypt.compare(input.password, dummyHash);
+      throw invalid();
+    }
     if (!(await bcrypt.compare(input.password, user.passwordHash))) {
-      const attempts = user.failedAttempts + 1;
-      const lock = attempts >= limits.loginMaxAttempts;
-      await user.update({ failedAttempts: lock ? 0 : attempts, lockedUntil: lock ? new Date(t + limits.loginLockMinutes * 60_000) : null });
+      await registerFailure(user.id, t);
       throw invalid();
     }
     if (user.failedAttempts || user.lockedUntil) await user.update({ failedAttempts: 0, lockedUntil: null });

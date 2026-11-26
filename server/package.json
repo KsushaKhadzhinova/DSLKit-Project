@@ -8,7 +8,8 @@
   "scripts": {
     "start": "node --env-file-if-exists=.env src/server.js",
     "test": "node --test --experimental-test-coverage --test-coverage-include=\"src/**\" --test-coverage-lines=97 --test-coverage-branches=93 --test-coverage-functions=97 \"tests/*.test.js\"",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "migrate": "node --env-file-if-exists=.env src/migrate-cli.js"
   },
   "engines": {
     "node": ">=22.9"

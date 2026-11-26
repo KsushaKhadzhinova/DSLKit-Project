@@ -4,6 +4,25 @@ const { createApp } = require('../src/app');
 const { loadConfig } = require('../src/config');
 const { createDatabase } = require('../src/db');
 
+// With TEST_PG_URL (an admin connection string) every test server gets its own throw-away PostgreSQL database.
+async function pgDatabase() {
+  const { Client } = require('pg');
+  const name = `dslkit_t_${crypto.randomBytes(6).toString('hex')}`;
+  const admin = new Client({ connectionString: process.env.TEST_PG_URL });
+  await admin.connect();
+  await admin.query(`CREATE DATABASE ${name}`);
+  await admin.end();
+  const url = new URL(process.env.TEST_PG_URL);
+  url.pathname = `/${name}`;
+  const drop = async () => {
+    const c = new Client({ connectionString: process.env.TEST_PG_URL });
+    await c.connect();
+    await c.query(`DROP DATABASE IF EXISTS ${name} WITH (FORCE)`);
+    await c.end();
+  };
+  return { url: url.toString(), drop };
+}
+
 // Every secret and password is generated per run, nothing sensitive is a literal.
 const randomSecret = () => crypto.randomBytes(24).toString('hex');
 const strongPassword = () => `Aa1-${crypto.randomBytes(9).toString('hex')}`;
@@ -19,11 +38,13 @@ async function startServer({ env = {}, limits = {} } = {}) {
       this.now += ms;
     },
   };
+  const pg = process.env.TEST_PG_URL ? await pgDatabase() : null;
   const config = loadConfig(
     {
       NODE_ENV: 'test',
-      DB_DIALECT: 'sqlite',
+      DB_DIALECT: pg ? 'postgres' : 'sqlite',
       DB_STORAGE: ':memory:',
+      DATABASE_URL: pg ? pg.url : '',
       JWT_SECRET: randomSecret(),
       CORS_ORIGINS: 'http://localhost:5173,http://127.0.0.1:5173',
       BCRYPT_ROUNDS: '4',
@@ -71,10 +92,11 @@ async function startServer({ env = {}, limits = {} } = {}) {
     server.closeAllConnections?.();
     await new Promise((resolve) => server.close(resolve));
     await db.sequelize.close().catch(() => {});
+    if (pg) await pg.drop();
   };
   return { api, base, clock, config, db, signup, close };
 }
 
 const validProject = (over = {}) => ({ title: 'Flow', description: 'demo', notation: 'flowchart', source: 'a -> b', visibility: 'private', ...over });
 
-module.exports = { startServer, strongPassword, randomSecret, uniqueEmail, validProject };
+module.exports = { pgDatabase, startServer, strongPassword, randomSecret, uniqueEmail, validProject };

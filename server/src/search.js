@@ -1,13 +1,16 @@
 'use strict';
 const { Sequelize } = require('sequelize');
 
+// Search text is normalised in code (NFC + lower case), because SQL lower() in SQLite handles only ASCII.
+const normalize = (s) => s.normalize('NFC').toLowerCase();
+
 // LIKE needs an explicit escape character: sqlite has none by default. "!" avoids backslash quoting differences.
 const escapeLike = (s) => s.replace(/[!%_]/g, (c) => `!${c}`);
 
-// Case-insensitive "contains" over several columns; `sequelize.escape` quotes the value for the dialect.
-function containsAny(sequelize, columns, q) {
-  const pattern = sequelize.escape(`%${escapeLike(q.toLowerCase())}%`);
-  return Sequelize.literal(`(${columns.map((c) => `lower(${c}) LIKE ${pattern} ESCAPE '!'`).join(' OR ')})`);
+// "Contains" over the precomputed searchText column; `sequelize.escape` quotes the value for the dialect.
+function containsText(sequelize, column, q) {
+  const pattern = sequelize.escape(`%${escapeLike(normalize(q))}%`);
+  return Sequelize.literal(`${column} LIKE ${pattern} ESCAPE '!'`);
 }
 
-module.exports = { containsAny, escapeLike };
+module.exports = { containsText, escapeLike, normalize };

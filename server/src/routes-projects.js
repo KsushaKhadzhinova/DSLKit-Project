@@ -4,7 +4,7 @@ const { Op } = require('sequelize');
 const { validateBody, parseListQuery, isUuid } = require('./schema');
 const { badRequest, forbidden, notFound } = require('./errors');
 const { projectAccess } = require('./permissions');
-const { containsAny } = require('./search');
+const { containsText } = require('./search');
 
 const serialize = (p, access, { source = true } = {}) => ({
   id: p.id,
@@ -54,7 +54,7 @@ function projectRoutes({ db, authenticate }) {
     }
     if (mine === 'true') and.push({ ownerId: req.user.id });
     if (visibility) and.push({ visibility });
-    if (q) and.push(containsAny(sequelize, ['"Project"."title"', '"Project"."description"'], q));
+    if (q) and.push(containsText(sequelize, '"Project"."searchText"', q));
 
     const { rows, count } = await Project.findAndCountAll({
       where: { [Op.and]: and },

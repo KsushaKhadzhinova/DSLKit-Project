@@ -262,6 +262,22 @@ describe('projects: role x action', () => {
       assert.equal((await list(a, `?q=${encodeURIComponent('50%_off')}`)).body.items.length, 1);
     });
 
+    test('search works for Cyrillic in any letter case, with accents folded only by case', async () => {
+      await create(a, { title: 'Привет Мир', description: 'Ёлка и ÉCOLE' });
+      for (const q of ['привет', 'ПРИВЕТ', 'мир', 'ёлка', 'Ёлка', 'école', 'ÉCOLE']) {
+        assert.equal((await list(a, `?q=${encodeURIComponent(q)}`)).body.items.length, 1, q);
+      }
+      assert.equal((await list(a, `?q=${encodeURIComponent('привет мир')}`)).body.items.length, 1);
+      assert.equal((await list(a, `?q=${encodeURIComponent('приве!')}`)).body.items.length, 0);
+    });
+
+    test('a renamed project is found under its new name only', async () => {
+      const p = await create(a, { title: 'Oldname' });
+      await s.api('PATCH', `/api/projects/${p.id}`, { token: a.token, body: { title: 'Новое имя' } });
+      assert.equal((await list(a, '?q=oldname')).body.items.length, 0);
+      assert.equal((await list(a, `?q=${encodeURIComponent('НОВОЕ')}`)).body.items.length, 1);
+    });
+
     test('SQL injection in search returns nothing and does not fail', async () => {
       const res = await list(a, `?q=${encodeURIComponent("' OR '1'='1")}`);
       assert.equal(res.status, 200);

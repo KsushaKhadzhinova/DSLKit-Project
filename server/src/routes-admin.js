@@ -4,7 +4,7 @@ const { Op } = require('sequelize');
 const { validateBody, parseListQuery, isUuid } = require('./schema');
 const { conflict, notFound } = require('./errors');
 const { requireAction } = require('./middleware');
-const { containsAny } = require('./search');
+const { containsText } = require('./search');
 const limits = require('../limits.json');
 
 function adminRoutes({ db, authenticate, now }) {
@@ -27,7 +27,7 @@ function adminRoutes({ db, authenticate, now }) {
 
   router.get('/users', authenticate, requireAction('users.list'), async (req, res) => {
     const { page, pageSize, q, sort, order, offset } = parseListQuery(req.query, { sorts: ['createdAt', 'displayName'] });
-    const where = q ? { [Op.and]: [containsAny(sequelize, ['"User"."displayName"', '"User"."email"'], q)] } : {};
+    const where = q ? { [Op.and]: [containsText(sequelize, '"User"."searchText"', q)] } : {};
     const { rows, count } = await User.findAndCountAll({
       where,
       order: [
