@@ -1,4 +1,5 @@
 import { escapeXml, textWidth, wrap } from './common.js';
+import { inkOn, isColor, normalizeColor } from '../utils/color.js';
 
 export const INK = '#1e293b';
 export const MUTED = '#475569';
@@ -236,13 +237,31 @@ export const applyPositions = (placed, size) => {
 };
 
 // size(node) -> {w, h, outline, lines}; draw(placedItem) -> SVG; style(edge) -> {start, end, dash}.
+const TEXT = /<text\b[^>]*>[\s\S]*?<\/text>/g;
+const WHITE_FILL = /fill="#ffffff"(?! fill-opacity)/g;
+const INK_FILL = new RegExp(`fill="(?:${INK}|${MUTED})"`, 'g');
+
+// Paints the block with its colour: white and dark fills become the colour, the text gets black or white, whichever reads better.
+// A value that is not a colour paints nothing, so no foreign text ever reaches the markup.
+export const paint = (markup, color) => {
+  if (!isColor(color)) return markup;
+  const fill = normalizeColor(color);
+  const ink = inkOn(fill);
+  const texts = markup.match(TEXT) ?? [];
+  const shapes = markup.split(TEXT).map((part) => part.replace(WHITE_FILL, `fill="${fill}"`).replace(INK_FILL, `fill="${fill}"`));
+  return shapes.map((part, index) => part + (texts[index] ? texts[index].replace(INK_FILL, `fill="${ink}"`) : '')).join('');
+};
+
 export const renderLayout = ({ title, nodes, edges, size, draw, style, labelOf }) => {
   const known = edges.filter(({ from, to }) => nodes.some((n) => n.id === from) && nodes.some((n) => n.id === to));
   const laid = layout(nodes, known, size);
   const { placed } = laid;
   const { width, height } = applyPositions(placed, laid);
   const shapes = [...placed.values()]
-    .map((item) => `<g class="notation__node" data-id="${escapeXml(item.node.id)}" data-cx="${round(item.cx)}" data-cy="${round(item.cy)}">${draw(item)}</g>`)
+    .map(
+      (item) =>
+        `<g class="notation__node" data-id="${escapeXml(item.node.id)}" data-cx="${round(item.cx)}" data-cy="${round(item.cy)}">${paint(draw(item), item.node.attrs?.color)}</g>`,
+    )
     .join('');
   return svgDocument(width, height, title, edgeMarkup(placed, known, style, labelOf) + shapes);
 };

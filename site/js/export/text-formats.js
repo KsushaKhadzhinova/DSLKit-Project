@@ -1,4 +1,5 @@
 import { NOTATIONS, parseDiagram } from '../notations/index.js';
+import { isColor, normalizeColor } from '../utils/color.js';
 
 // The text formats the editor can export a diagram to. The converters are the generators that every notation already owns
 // (the same ones that feed Kroki), put behind a gate: a diagram is exported only where the mapping loses nothing, never as a guess.
@@ -29,5 +30,7 @@ export const exportText = (source, format) => {
   if (!SUPPORTED_NOTATIONS.includes(model.notation)) return refuse('notation', { notation: model.notation });
   if (model.problems.some((item) => item.severity === 'error')) return refuse('errors', { notation: model.notation });
   const text = NOTATIONS[model.notation].generators[format](model);
-  return { ok: true, text: `${text}\n`, notation: model.notation, extension: TEXT_FORMATS[format].extension, mime: TEXT_FORMATS[format].mime };
+  const colored = model.nodes?.filter((node) => isColor(node.attrs?.color)) ?? [];
+  const colorIgnored = colored.some((node) => !text.includes(normalizeColor(node.attrs.color)));
+  return { ok: true, colorIgnored, text: `${text}\n`, notation: model.notation, extension: TEXT_FORMATS[format].extension, mime: TEXT_FORMATS[format].mime };
 };

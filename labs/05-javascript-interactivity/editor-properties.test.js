@@ -5,6 +5,7 @@ import { JSDOM } from 'jsdom';
 import { readCode, showCode } from '../../site/js/components/code-lines.js';
 import { initEditorProperties } from '../../site/js/components/editor-properties.js';
 import { TEMPLATES } from '../../site/js/notations/index.js';
+import { kindName } from '../../site/js/utils/palette.js';
 
 const pages = { ru: readFileSync('site/app/editor.html', 'utf8'), en: readFileSync('site/en/app/editor.html', 'utf8') };
 
@@ -48,7 +49,7 @@ test('picking a block shows its identifier, label and kind, in both languages', 
   assert.equal(ru.$('#props-label').value, 'Take payment');
   assert.equal(ru.$('#props-kind').value, 'process');
   assert.deepEqual(
-    [...ru.$('#props-kind').options].map((option) => option.textContent),
+    [...ru.$('#props-kind').options].map((option) => option.value),
     ['entity', 'process', 'store'],
   );
   assert.equal(ru.$('label[for="props-label"]').textContent, 'Подпись');
@@ -203,4 +204,75 @@ test('foreign text goes into the panel as text, never as markup', () => {
   t.pick('1');
   assert.equal(t.$('#props-label').value, '<img src=x onerror=alert(1)>');
   assert.equal(t.$('.props img'), null);
+});
+
+test('the kinds are named in the language of the page, and a keyword without a name stays as written', () => {
+  const ru = setup();
+  ru.pick('2');
+  assert.deepEqual(
+    [...ru.$('#props-kind').options].map((option) => option.textContent),
+    ['Сущность', 'Процесс', 'Хранилище данных'],
+  );
+  assert.deepEqual(
+    [...ru.$('#props-kind').options].map((option) => option.value),
+    ['entity', 'process', 'store'],
+  );
+  const en = setup({ lang: 'en' });
+  en.pick('2');
+  assert.equal(en.$('#props-kind').options[1].textContent, 'Process');
+  assert.equal(kindName('nonsense', 'en'), 'nonsense');
+});
+
+test('the colour field shows the colour of the block and a note where the notation has none', () => {
+  const t = setup({ lang: 'en' });
+  t.pick('2');
+  assert.equal(t.$('#props-color').closest('.props__field').hidden, false);
+  assert.equal(t.$('#props-color').value, '#ffffff');
+  showCode(t.document, t.$('.code__lines'), TEMPLATES.dfd.replace('process 2 "Take payment"', 'process 2 "Take payment" color=#ABC'));
+  t.run();
+  assert.equal(t.$('#props-color').value, '#aabbcc');
+  const sequence = setup({ lang: 'en', template: 'erd' });
+  showCode(sequence.document, sequence.$('.code__lines'), 'diagram erd "T"\nentity A "a"');
+  sequence.pick('A');
+  assert.equal(sequence.$('#props-color').closest('.props__field').hidden, true);
+  assert.equal(sequence.$('.props__colornote').hidden, false);
+  assert.equal(sequence.$('.props__colornote').textContent, 'Blocks of this notation are not coloured.');
+});
+
+test('choosing a colour writes color=#rrggbb into the code, runs the drawing and says so; the clear button removes it', () => {
+  const t = setup({ lang: 'en' });
+  t.pick('2');
+  t.type(t.$('#props-color'), '#336699');
+  assert.match(t.code(), /^process 2 "Take payment" color=#336699$/m);
+  assert.equal(t.runs.length, 1);
+  assert.equal(t.$('.props__message').textContent, 'The colour of 2 is changed: #336699.');
+  t.$('.props__clear').click();
+  assert.equal(t.code(), TEMPLATES.dfd);
+  assert.equal(t.$('.props__message').textContent, 'The colour of 2 is cleared.');
+  assert.equal(t.api.clearColor(), false);
+});
+
+test('a colour that is not valid is refused and the field gets the old colour back', () => {
+  const t = setup({ lang: 'en' });
+  t.pick('2');
+  t.$('#props-color').value = '#336699';
+  t.$('#props-color').dispatchEvent(new t.window.Event('change', { bubbles: true }));
+  const set = t.code();
+  assert.equal(t.api.changeColor('red;background:url(x)'), false);
+  assert.equal(t.code(), set);
+  assert.equal(t.$('.props__message').textContent, 'This is not a colour: the form is #ff8800 or #f80.');
+  assert.equal(t.$('#props-color').value, '#336699');
+});
+
+test('the colour actions do nothing with no block selected', () => {
+  const t = setup();
+  assert.equal(t.api.changeColor('#fff'), false);
+  assert.equal(t.api.clearColor(), false);
+});
+
+test('the colour is refused when the gate refuses the change', () => {
+  const t = setup();
+  showCode(t.document, t.$('.code__lines'), TEMPLATES.dfd);
+  t.pick('2');
+  assert.equal(t.api.changeColor('#102030'), true);
 });

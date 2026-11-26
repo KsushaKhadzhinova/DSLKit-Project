@@ -34,6 +34,10 @@ export const MESSAGES = {
   'idef0-context': { ru: 'Контекстная диаграмма A-0 должна содержать один блок', en: 'The A-0 context diagram must hold a single box' },
   'idef0-count': { ru: 'На диаграмме декомпозиции {n} блоков, должно быть от 3 до 6', en: 'The decomposition diagram has {n} boxes, it should have 3 to 6' },
 
+  'strict-color': {
+    ru: 'У элемента {id} неверный цвет «color={value}», нужен вид color=#ff8800 или color=#f80',
+    en: 'Element {id} has a wrong colour "color={value}", the form is color=#ff8800 or color=#f80',
+  },
   'strict-pos': {
     ru: 'У элемента {id} неверное положение «pos={value}», нужен вид pos=120x80',
     en: 'Element {id} has a wrong place "pos={value}", the form is pos=120x80',

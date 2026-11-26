@@ -1,7 +1,8 @@
 import { ID, LETTERS, STR, parseAttrs, problem, quoteDot, unquote } from './common.js';
 import { SHAPES, renderLayout } from './svg.js';
+import { inkOn, isColor, normalizeColor } from '../utils/color.js';
 
-const ATTRS = `((?:\\s+[\\w${LETTERS}.-]+(?:=[\\w${LETTERS}.-]+)?)*)`;
+const ATTRS = `((?:\\s+[\\w${LETTERS}.-]+(?:=[\\w${LETTERS}.#-]+)?)*)`;
 const plain = (node) => node.label;
 const identity = (node) => node;
 
@@ -64,6 +65,12 @@ export const defineGraph = (spec) => {
       const [open, close] = kindOf(node).mermaid;
       lines.push(`  ${names.get(node.id)}${open}"${text(kindOf(node).text(node))}"${close}`);
     });
+    model.nodes
+      .filter((node) => isColor(node.attrs.color))
+      .forEach((node) => {
+        const fill = normalizeColor(node.attrs.color);
+        lines.push(`  style ${names.get(node.id)} fill:${fill},color:${inkOn(fill)}`);
+      });
     model.edges.forEach((edge) => {
       const label = edgeLabel(edge);
       lines.push(`  ${names.get(edge.from)} ${spec.edgeKinds[edge.kind].mermaid}${label ? `|"${text(label)}"|` : ''} ${names.get(edge.to)}`);
@@ -76,7 +83,11 @@ export const defineGraph = (spec) => {
     const text = (value) => String(value).replace(/"/g, "'").replace(/\r?\n/g, '\\n');
     const lines = ['@startuml', 'left to right direction'];
     if (model.title) lines.push(`title ${text(model.title)}`);
-    model.nodes.forEach((node) => lines.push(`${kindOf(node).plantuml} "${text(kindOf(node).text(node))}" as ${names.get(node.id)}`));
+    model.nodes.forEach((node) =>
+      lines.push(
+        `${kindOf(node).plantuml} "${text(kindOf(node).text(node))}" as ${names.get(node.id)}${isColor(node.attrs.color) ? ` ${normalizeColor(node.attrs.color)}` : ''}`,
+      ),
+    );
     model.edges.forEach((edge) => {
       const label = edgeLabel(edge);
       lines.push(`${names.get(edge.from)} ${spec.edgeKinds[edge.kind].plantuml} ${names.get(edge.to)}${label ? ` : ${text(label)}` : ''}`);

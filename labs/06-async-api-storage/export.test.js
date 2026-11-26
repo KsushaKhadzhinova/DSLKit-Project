@@ -335,3 +335,21 @@ ghost -> nobody : lost`,
   await en.api.exportAs('puml');
   assert.match(en.status.textContent, /has errors/);
 });
+
+test('a colour that a text format cannot carry is dropped without an error and the note says so; a carried colour needs no note', async () => {
+  const state = TEMPLATES['uml-state'];
+  const context = editor();
+  writeCode(context, state.replace(/^state (\w+) "([^"]*)"/m, 'state $1 "$2" color=#ff8800'));
+  assert.equal(context.document.querySelector('[data-export="mmd"]').getAttribute('aria-disabled'), 'false');
+  assert.match(context.document.querySelector('[data-export-note]').textContent, /цвет блоков не попадёт в PlantUML и Mermaid/);
+  assert.equal(await context.api.exportAs('mmd'), true);
+  assert.match(context.status.textContent, /^Файл .+ сохранён\. Цвет блоков не попадёт в файл\.$/);
+  const en = editor(editorHtmlEn);
+  writeCode(en, state.replace(/^state (\w+) "([^"]*)"/m, 'state $1 "$2" color=#ff8800'));
+  assert.match(en.document.querySelector('[data-export-note]').textContent, /colours of blocks are not carried to PlantUML and Mermaid/);
+  await en.api.exportAs('puml');
+  assert.match(en.status.textContent, /colour of blocks is not in the file\.$/);
+  const plain = editor();
+  writeCode(plain, TEMPLATES.dfd.replace('process 2 "Take payment"', 'process 2 "Take payment" color=#ff8800'));
+  assert.equal(plain.document.querySelector('[data-export-note]').textContent, '');
+});

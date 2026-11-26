@@ -13,6 +13,8 @@ test('a block with a label and several kinds reports its keyword, kinds and labe
     kinds: ['entity', 'process', 'store'],
     label: 'Take payment',
     position: null,
+    color: null,
+    colorSupported: true,
   });
 });
 
