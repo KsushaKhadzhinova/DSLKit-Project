@@ -1,14 +1,14 @@
-import { readFileSync } from 'node:fs';
 import express from 'express';
 import { ApiError, errorBody, notFound } from './errors.js';
 import { createResourceRouter, listItems, methodsOnly, parseId } from './resource.js';
 import { logSafe, rateLimit, securityHeaders } from './security.js';
 import { buildOpenApi } from './openapi.js';
+import { createJournal, journaling } from './journal.js';
+import { LIMITS } from './limits.js';
 import { createStores } from './store.js';
 import { normalizeEmail } from './validation.js';
 
-// All sizes live in limits.json, not in the code.
-export const LIMITS = JSON.parse(readFileSync(new URL('../limits.json', import.meta.url), 'utf8'));
+export { LIMITS };
 
 export const NOTATIONS = ['UML', 'BPMN', 'ERD', 'DFD', 'IDEF0', 'Petri'];
 
@@ -47,8 +47,13 @@ const CLIENT_ERRORS = {
   415: ['unsupported_media_type', 'The request encoding or charset is not supported'],
 };
 
-const missingReference = (field, collection, value) =>
-  value !== undefined && !collection.find(value) ? [{ field, message: `${field} refers to a record that does not exist` }] : [];
+// A reference to a record that is gone (deleted a moment ago, or never existed) is a conflict with the current state
+// of the data, not a malformed body: 409, one error format, nothing is stored.
+const missingReference = (field, collection, value) => {
+  if (value === undefined || collection.find(value)) return [];
+  const message = `${field} refers to a record that does not exist`;
+  throw new ApiError(409, 'parent_missing', message, [{ field, message }]);
+};
 
 const conflict = (message) => new ApiError(409, 'conflict', message);
 
@@ -61,6 +66,7 @@ export const createApp = ({
   writeError = console.error,
   limit = { windowMs: LIMITS.rateWindowMs, max: LIMITS.rateMax, maxClients: LIMITS.rateMaxClients },
   now = Date.now,
+  journal = createJournal(),
 } = {}) => {
   const { users, projects, diagrams } = stores;
   const app = express();
@@ -70,6 +76,8 @@ export const createApp = ({
   app.get('/health', (req, res) => res.json({ status: 'ok' }));
   // Refused before the body is read, so a flood costs little.
   app.use(rateLimit({ ...limit, now }));
+  // Every request is written to the journal table before it runs; a failed write answers 500 and nothing else happens.
+  app.use(journaling(journal, writeError));
   // This API answers only JSON; a client that explicitly asks for something else gets 406 instead of JSON it
   // did not ask for. A request with no Accept header, or "*/*", is always welcome.
   app.use((req, res, next) => {

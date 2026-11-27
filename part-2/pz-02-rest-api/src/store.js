@@ -29,7 +29,18 @@ export const createCollection = (seed = [], now = () => new Date().toISOString()
   };
 };
 
-export const createStores = (now, maxItems = Infinity) => ({
+// A clock whose every answer is later than the previous one, even inside one millisecond. The teacher wants each
+// record to show its own creation time, so no two records may look the same; one shared clock covers the seeds
+// and everything created later, in all three collections.
+export const monotonicClock = (real = Date.now) => {
+  let last = -Infinity;
+  return () => {
+    last = Math.max(real(), last + 1);
+    return new Date(last).toISOString();
+  };
+};
+
+export const createStores = (now = monotonicClock(), maxItems = Infinity) => ({
   users: createCollection(
     [
       { id: 1, name: 'Ada Lovelace', email: 'ada@example.com', role: 'owner' },

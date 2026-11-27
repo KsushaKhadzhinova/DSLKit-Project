@@ -1,8 +1,9 @@
 ### VS Code REST Client (extension humao.rest-client). Start the server first: npm start
-@base = http://localhost:3000/api
+@root = http://localhost:3000
+@base = {{root}}/api
 
 ### Health check -> 200
-GET http://localhost:3000/health
+GET {{root}}/health
 
 ### List users -> 200
 GET {{base}}/users
@@ -91,3 +92,16 @@ PUT {{base}}/users/2
 Content-Type: application/json
 
 { "name": "Alan Turing", "email": "alan@example.com" }
+
+### Allowed methods -> 204
+OPTIONS {{base}}/users
+
+### Headers only -> 200
+HEAD {{base}}/users
+
+### Stale update refused -> 412
+PATCH {{base}}/users/2
+Content-Type: application/json
+If-Match: W/"0000000000000000"
+
+{ "name": "Alan T." }

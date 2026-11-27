@@ -6,6 +6,10 @@
   },
   "variable": [
     {
+      "key": "root",
+      "value": "http://localhost:3000"
+    },
+    {
       "key": "base",
       "value": "http://localhost:3000/api"
     }
@@ -28,9 +32,9 @@
         "method": "GET",
         "header": [],
         "url": {
-          "raw": "http://localhost:3000/health",
+          "raw": "{{root}}/health",
           "host": [
-            "http://localhost:3000"
+            "{{root}}"
           ],
           "path": [
             "health"
@@ -638,6 +642,101 @@
           "path": [
             "nothing"
           ]
+        }
+      }
+    },
+    {
+      "name": "Allowed methods with OPTIONS -> 204",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 204', () => pm.response.to.have.status(204));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "OPTIONS",
+        "header": [],
+        "url": {
+          "raw": "{{base}}/users",
+          "host": [
+            "{{base}}"
+          ],
+          "path": [
+            "users"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Headers only with HEAD -> 200",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "HEAD",
+        "header": [],
+        "url": {
+          "raw": "{{base}}/users",
+          "host": [
+            "{{base}}"
+          ],
+          "path": [
+            "users"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Stale PATCH with If-Match -> 412",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 412', () => pm.response.to.have.status(412));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "If-Match",
+            "value": "W/\"0000000000000000\""
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{base}}/users/2",
+          "host": [
+            "{{base}}"
+          ],
+          "path": [
+            "users",
+            "2"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{ \"name\": \"Alan T.\" }"
         }
       }
     }

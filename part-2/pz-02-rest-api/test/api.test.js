@@ -96,10 +96,10 @@ withApi('POST validation reports every problem', async ({ call }) => {
 
 withApi('references must exist', async ({ call }) => {
   const res = await call('POST', '/diagrams', { title: 't', notation: 'UML', projectId: 99 });
-  assert.equal(res.status, 400);
+  assert.equal(res.status, 409);
   assert.match(res.json.error.details[0].message, /does not exist/);
-  assert.equal((await call('POST', '/projects', { name: 'p', ownerId: 99 })).status, 400);
-  assert.equal((await call('PATCH', '/diagrams/1', { projectId: 99 })).status, 400);
+  assert.equal((await call('POST', '/projects', { name: 'p', ownerId: 99 })).status, 409);
+  assert.equal((await call('PATCH', '/diagrams/1', { projectId: 99 })).status, 409);
 });
 
 withApi('PUT replaces the whole record and keeps id and createdAt', async ({ call }) => {

@@ -7,7 +7,7 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",
-    "test": "node --test --experimental-test-coverage \"test/*.test.js\" report.test.mjs",
+    "test": "node --test --experimental-test-coverage --test-coverage-include=\"src/**\" --test-coverage-lines=100 --test-coverage-branches=100 --test-coverage-functions=100 \"test/*.test.js\" report.test.mjs",
     "test:leaks": "node --expose-gc --test --test-concurrency=1 \"test/leaks/*.leak.js\"",
     "lint": "eslint ."
   },
@@ -15,7 +15,7 @@
     "express": "^5.1.0"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=22.5"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",

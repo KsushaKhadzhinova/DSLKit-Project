@@ -21,13 +21,13 @@ Each resource has the same six operations, shown for `{res}` = `users`, `project
 | Method   | URL          | Purpose                                | Success            | Errors        |
 | -------- | ------------ | -------------------------------------- | ------------------ | ------------- |
 | `GET`    | `/{res}`     | List with filter, search, sort, paging | 200 `{data, meta}` | 400           |
-| `GET`    | `/{res}/:id` | One record                             | 200                | 400, 404      |
+| `GET`    | `/{res}/:id` | One record, with an `ETag` header     | 200                | 400, 404      |
 | `POST`   | `/{res}`     | Create                                 | 201 and `Location` | 400, 409\*, 413 |
 | `PUT`    | `/{res}/:id` | Replace the whole record               | 200                | 400, 404, 409\* |
 | `PATCH`  | `/{res}/:id` | Change only the sent fields            | 200                | 400, 404, 409\* |
 | `DELETE` | `/{res}/:id` | Delete                                 | 204 without a body | 400, 404, 409\*\* |
 
-\* 409 on write only for `users` (an email already taken). `projects` and `diagrams` never 409 on `POST`, `PUT` or `PATCH`; a reference to a record that does not exist (`ownerId`, `projectId`) is 400, not 409.
+\* 409 on write: `users` (an email already taken). `projects` and `diagrams` answer 409 `parent_missing` when `ownerId` or `projectId` points to a record that does not exist (deleted a moment ago, or never there); nothing is stored. A `PUT`, `PATCH` or `DELETE` with a stale `If-Match` tag answers 412 `precondition_failed`.
 \*\* 409 on delete for `users` (still owns a project) and `projects` (still has a diagram); `diagrams` never 409 on delete. Any `POST`/`PUT`/`PATCH`/`DELETE` can also answer 409 `quota_exceeded` once its collection holds 5000 records (`POST` and `/duplicate` only).
 
 A full `PUT` replaces every field the schema knows, except: a field the body leaves out keeps the record's **current** value instead of resetting to the field's default (sending `{"name": "...", "email": "..."}` to replace a user does not quietly lower an `owner` back to the default `viewer`). Send the field explicitly, with the value you want, to actually change or reset it.
@@ -72,7 +72,7 @@ Every error has one shape. `details` appears for validation errors.
 
 | Status | `code`                                        | When                                                                                                                                |
 | ------ | --------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| 400    | `validation_failed`                           | Missing or wrong field, unknown field, a control/invisible character or an unpaired surrogate in a string field, empty `PATCH` body, reference to a missing record |
+| 400    | `validation_failed`                           | Missing or wrong field, unknown field, a control/invisible character or an unpaired surrogate in a string field, empty `PATCH` body |
 | 400    | `invalid_json`, `invalid_id`, `invalid_query` | Broken JSON, id is not a positive integer, bad or unknown `page`, `limit`, `sort` or filter, a repeated query key                   |
 | 404    | `not_found`                                   | Unknown record or route                                                                                                             |
 | 405    | `method_not_allowed`                          | Method not supported on a known path; the `Allow` header lists the right ones                                                       |
@@ -81,9 +81,12 @@ Every error has one shape. `details` appears for validation errors.
 | 409    | `quota_exceeded`                              | The collection already holds 5000 records (`POST`, or `/diagrams/:id/duplicate`)                                                    |
 | 400    | `bad_request`                                 | Malformed URL, for example a broken percent escape                                                                                  |
 | 415    | `unsupported_media_type`                      | Unknown `Content-Encoding`, or a charset other than UTF-8                                                                           |
+| 409    | `parent_missing`                              | `ownerId` or `projectId` refers to a record that does not exist (for example the parent was deleted a moment ago); nothing is stored |
+| 412    | `precondition_failed`                        | `PUT`, `PATCH` or `DELETE` with an `If-Match` tag that no longer matches the record (it changed or was replaced since the client read it) |
 | 413    | `payload_too_large`                           | Body over 100 KB                                                                                                                    |
 | 429    | `too_many_requests`                           | More than 300 requests per minute from one address (`RATE_LIMIT_MAX`), the `Retry-After` header says when to retry                  |
 | 500    | `internal_error`                              | Unexpected failure, logged on the server                                                                                            |
+| 500    | `journal_unavailable`                         | The request could not be written to the journal table; the request was not carried out (see README)                                 |
 
 ## Examples (curl)
 

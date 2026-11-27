@@ -1,9 +1,12 @@
 import { createApp, LIMITS } from './app.js';
+import { createJournal } from './journal.js';
 
 const port = Number(process.env.PORT) || 3000;
 // Requests per minute and client address; a wrong or missing value keeps the default from limits.json.
 const max = Number(process.env.RATE_LIMIT_MAX) > 0 ? Number(process.env.RATE_LIMIT_MAX) : LIMITS.rateMax;
-const server = createApp({ limit: { windowMs: LIMITS.rateWindowMs, max } }).listen(port, () => console.log(`DSLKit REST API listens on http://localhost:${port}/api`));
+// The request journal table (SQLite file). No journal, no server: working without it is forbidden.
+const journalFile = process.env.JOURNAL_FILE || 'journal.sqlite';
+const server = createApp({ limit: { windowMs: LIMITS.rateWindowMs, max }, journal: createJournal(journalFile) }).listen(port, () => console.log(`DSLKit REST API listens on http://localhost:${port}/api`));
 
 // Node's own defaults (60 s to finish the headers, 5 minutes to finish the whole request) let a client that
 // trickles bytes in slowly occupy a socket for minutes; the per-IP rate limiter only counts requests that
