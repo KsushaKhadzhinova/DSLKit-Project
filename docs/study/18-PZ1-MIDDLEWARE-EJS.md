@@ -28,7 +28,7 @@ src/middleware/security.js     заголовки, CSRF, ограничител�
 src/middleware/requestLogger.js  запись запроса в таблицу до выполнения маршрута
 src/middleware/fakeAuth.js     имитация входа: ?auth=1
 src/middleware/errorHandlers.js  страницы 404 и 500
-src/data/diagrams.js           массив диаграмм и проверка формы
+src/data/diagrams.js           таблица diagrams (SQLite) и проверка формы
 src/data/requestLog.js         таблица request_log в SQLite
 src/limits.js, limits.json     пределы в одном месте
 views/                         шаблоны EJS: index, item, add (и для правки), log, login, 404, 500

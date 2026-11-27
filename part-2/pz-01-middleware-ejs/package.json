@@ -6,7 +6,7 @@
   "description": "DSLKit, practical 1: Express middleware and EJS templates",
   "scripts": {
     "start": "node src/server.js",
-    "test": "node --test --experimental-test-coverage \"test/*.test.js\" report.test.mjs",
+    "test": "node --test --experimental-test-coverage --test-coverage-include=\"src/**\" --test-coverage-lines=100 --test-coverage-branches=100 --test-coverage-functions=100 \"test/*.test.js\" report.test.mjs",
     "test:leaks": "node --expose-gc --test --test-concurrency=1 \"test/leaks/*.leak.js\"",
     "lint": "eslint ."
   },

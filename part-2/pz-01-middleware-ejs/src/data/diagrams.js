@@ -1,3 +1,7 @@
+import { DatabaseSync } from 'node:sqlite';
+import { existsSync, mkdirSync, statSync } from 'node:fs';
+import { dirname } from 'node:path';
+import { UserError, fileFailure } from '../errors.js';
 import { translate } from '../i18n.js';
 
 export const NOTATIONS = ['UML', 'BPMN', 'ERD', 'DFD', 'IDEF0', 'Petri'];
@@ -32,40 +36,105 @@ const seed = () => [
   },
 ];
 
-// Nothing deletes a record on its own, so without a ceiling the store would grow for as long as the
-// server runs; one write every few seconds, forever, is still only a few megabytes a year, but a cap
-// keeps that true instead of assumed. The oldest record is dropped first, like a ring buffer.
+// A ceiling on the table: the oldest record is dropped first, like a ring buffer.
 const MAX_ITEMS = 5000;
 
-// Data lives in memory only, as the practical requires: no database for the diagrams.
+// The diagrams live in a table of the same SQLite database as the request log (variant 26 is even: the data are
+// kept in the database). The connection opens lazily, the schema is created on first use and the three sample
+// records are seeded into an empty table; a database that cannot be reached fails the request (the styled 500 page),
+// not the whole server. Without a file name the table is private to this store and lives in memory (tests).
 // Every record gets its own creation time: it is always later than the previous one, even within one millisecond.
-export const createDiagramStore = (now = Date.now) => {
-  const items = seed();
-  let nextId = items.length + 1;
-  let last = Math.max(...items.map((item) => Date.parse(item.createdAt)));
+const CREATE_TABLE = `
+  CREATE TABLE IF NOT EXISTS diagrams (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT NOT NULL,
+    notation TEXT NOT NULL,
+    description TEXT NOT NULL,
+    code TEXT NOT NULL,
+    revision INTEGER NOT NULL CHECK (revision >= 0),
+    created_at TEXT NOT NULL
+  )`;
+const COLUMNS = 'id, title, notation, description, code, revision, created_at AS createdAt';
+
+export const createDiagramStore = (now = Date.now, file = ':memory:') => {
+  let db = null;
+  let sql = null;
+  const connect = () => {
+    if (sql) return sql;
+    if (file !== ':memory:' && !existsSync(dirname(file))) mkdirSync(dirname(file), { recursive: true });
+    if (file !== ':memory:' && existsSync(file) && statSync(file).isDirectory()) throw Object.assign(new Error('a folder stands in the place of the file'), { code: 'EISDIR' });
+    const opened = new DatabaseSync(file);
+    try {
+      opened.exec(CREATE_TABLE);
+      if (file !== ':memory:') opened.exec('PRAGMA journal_mode = WAL; PRAGMA synchronous = NORMAL; PRAGMA busy_timeout = 2000;');
+      const insert = opened.prepare('INSERT INTO diagrams (title, notation, description, code, revision, created_at) VALUES (?, ?, ?, ?, ?, ?)');
+      if (opened.prepare('SELECT COUNT(*) AS n FROM diagrams').get().n === 0) {
+        for (const one of seed()) insert.run(one.title, one.notation, one.description, one.code, one.revision, one.createdAt);
+      }
+      sql = {
+        insert,
+        all: opened.prepare(`SELECT ${COLUMNS} FROM diagrams ORDER BY id`),
+        find: opened.prepare(`SELECT ${COLUMNS} FROM diagrams WHERE id = ?`),
+        latest: opened.prepare('SELECT created_at AS createdAt FROM diagrams ORDER BY id DESC LIMIT 1'),
+        update: opened.prepare('UPDATE diagrams SET title = ?, notation = ?, description = ?, code = ?, revision = ? WHERE id = ?'),
+        remove: opened.prepare('DELETE FROM diagrams WHERE id = ?'),
+        trim: opened.prepare('DELETE FROM diagrams WHERE id IN (SELECT id FROM diagrams ORDER BY id LIMIT MAX(0, (SELECT COUNT(*) FROM diagrams) - ?))'),
+        exec: (text) => opened.exec(text),
+      };
+    } catch (error) {
+      opened.close();
+      throw error;
+    }
+    db = opened;
+    return sql;
+  };
+  // Any failure of the database becomes the error page about the database (the same page as for the request log).
+  const guard =
+    (action) =>
+    (...args) => {
+      try {
+        return action(...args);
+      } catch (error) {
+        throw error instanceof UserError ? error : new UserError(fileFailure(error, 'log-database-unavailable'), error);
+      }
+    };
+  // A row that does not look like a record (a damaged file) is a failure of the database, not a crash of the page.
+  const asItem = (row) => {
+    if (!row || typeof row.title !== 'string' || !Number.isSafeInteger(row.revision)) throw new Error('damaged diagram row');
+    return { ...row };
+  };
   return {
-    all: () => [...items],
-    find: (id) => items.find((item) => item.id === id),
-    add: ({ title, notation, description, code, revision }) => {
-      last = Math.max(now(), last + 1);
-      const item = { id: nextId, title, notation, description, code, revision, createdAt: new Date(last).toISOString() };
-      nextId += 1;
-      items.push(item);
-      if (items.length > MAX_ITEMS) items.shift();
-      return item;
-    },
+    all: guard(() => connect().all.all().map(asItem)),
+    find: guard((id) => {
+      const row = connect().find.get(id);
+      return row ? asItem(row) : undefined;
+    }),
+    add: guard(({ title, notation, description, code, revision }) => {
+      const q = connect();
+      // The time is read and the row is written in one transaction, so two writers cannot take the same time.
+      q.exec('BEGIN IMMEDIATE');
+      try {
+        const previous = q.latest.get();
+        const last = Math.max(now(), previous ? Date.parse(previous.createdAt) + 1 : 0);
+        const id = Number(q.insert.run(title, notation, description, code, revision, new Date(last).toISOString()).lastInsertRowid);
+        q.trim.run(MAX_ITEMS);
+        q.exec('COMMIT');
+        return asItem(q.find.get(id));
+      } catch (error) {
+        q.exec('ROLLBACK');
+        throw error;
+      }
+    }),
     // Edit keeps the id and the creation time, only the form fields change.
-    update: (id, { title, notation, description, code, revision }) => {
-      const item = items.find((one) => one.id === id);
-      if (!item) return undefined;
-      Object.assign(item, { title, notation, description, code, revision });
-      return item;
-    },
-    remove: (id) => {
-      const index = items.findIndex((one) => one.id === id);
-      if (index < 0) return false;
-      items.splice(index, 1);
-      return true;
+    update: guard((id, { title, notation, description, code, revision }) => {
+      const q = connect();
+      return q.update.run(title, notation, description, code, revision, id).changes ? asItem(q.find.get(id)) : undefined;
+    }),
+    remove: guard((id) => connect().remove.run(id).changes > 0),
+    close: () => {
+      if (db) db.close();
+      db = null;
+      sql = null;
     },
   };
 };

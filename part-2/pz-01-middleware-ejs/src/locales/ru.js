@@ -79,6 +79,7 @@ export default {
   'page.login.continueAsOwner': 'Войти как владелец',
 
   'error.codeLabel': 'Код ошибки:',
+  'error.requestId': 'Номер запроса (назовите его владельцу, он есть в журнале сервера):',
   'error.whatHeading': 'Что это',
   'error.whyHeading': 'Почему это произошло',
   'error.fixHeading': 'Как это исправить',
