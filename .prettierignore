@@ -24,3 +24,5 @@ testing-course/db.json
 testing-course/documents/04-full-test-documentation.md
 part-2/
 course-project/
+docs/eval/BASELINE*.md
+docs/eval/*.json

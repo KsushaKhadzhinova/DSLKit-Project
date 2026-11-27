@@ -76,9 +76,9 @@ const weakSpots = (report, lang) => {
   const classes = Object.entries(report.detection).flatMap(([code, part]) =>
     Object.entries(part.perClass).map(([name, item]) => ({ code, name, f1: item.f1 })),
   );
-  const worstClasses = classes.sort((a, b) => a.f1 - b.f1 || a.name.localeCompare(b.name)).slice(0, 3);
+  const worstClasses = classes.sort((a, b) => a.f1 - b.f1).slice(0, 3);
   const categories = Object.entries(report.check.seeded.perCategory)
-    .sort((a, b) => a[1].recall - b[1].recall || a[0].localeCompare(b[0]))
+    .sort((a, b) => a[1].recall - b[1].recall)
     .slice(0, 3);
   const say = lang === 'ru' ? ['Нотация', 'категория проверки', 'полнота'] : ['Notation', 'check category', 'recall'];
   return [

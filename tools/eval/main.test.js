@@ -16,6 +16,7 @@ const files = {
   'check.json': {
     cases: [
       { id: 's1', kind: 'seeded', category: 'dangling', notation: 'bpmn', line: 3, askable: false, code: 'diagram bpmn "T"\nstart s\nflow s -> t9' },
+      { id: 's2', kind: 'seeded', category: 'unreachable', notation: 'bpmn', line: 1, askable: false, code: 'diagram bpmn "T"' },
       { id: 'c1', kind: 'clean', notation: 'bpmn', code: 'diagram bpmn "T"\nstart s\ntask a "A"\nend e\nflow s -> a\nflow a -> e' },
     ],
   },
@@ -40,8 +41,8 @@ test('main prints a summary and writes nothing by default', () => {
   const { written, logs, run } = setup([]);
   assert.equal(run(), 0);
   assert.deepEqual(written, {});
-  assert.match(logs[0], /descriptions: ru=1 en=1, seeded=1, clean=1, imports=1/);
-  assert.match(logs[0], /check: recall=1 falseAlarms=0/);
+  assert.match(logs[0], /descriptions: ru=1 en=1, seeded=2, clean=1, imports=1/);
+  assert.match(logs[0], /check: recall=0.5 falseAlarms=0/);
 });
 
 test('--write stores the baseline and both reports, without the time', () => {

@@ -161,3 +161,12 @@ test('topErrors groups the reasons, most frequent first', () => {
   ]);
   assert.equal(topErrors([{ reason: 'z', example: 'q' }]).length, 1);
 });
+
+test('matchElements breaks a tie by the order of the elements', () => {
+  const gold = [{ label: 'Same thing', type: '' }];
+  const built = [
+    { label: 'Same thing', type: '' },
+    { label: 'Same thing', type: '' },
+  ];
+  assert.deepEqual([...matchElements(gold, built)], [[0, 0]]);
+});

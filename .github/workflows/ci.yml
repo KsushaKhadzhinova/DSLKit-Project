@@ -102,6 +102,21 @@ jobs:
         working-directory: server
         run: npm audit --omit=dev --audit-level=high
 
+  accuracy-eval:
+    name: Accuracy eval against the baseline (informational)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # Not a required check: it reports a worse metric but never blocks a merge.
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run eval:check
+
   build:
     name: Production build of the site
     runs-on: ubuntu-latest

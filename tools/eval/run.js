@@ -1,4 +1,4 @@
-import { CATEGORY_RULES, CONFIG, FLAGGING } from './config.js';
+import { CATEGORY_RULES, FLAGGING } from './config.js';
 import { goldGraph } from './graph.js';
 import { calibration, checkRecall, classification, compareGraphs, falsePositiveRate, prf, rate, stability, sumCounts, timing, topErrors } from './metrics.js';
 
@@ -223,7 +223,7 @@ export const evaluateImports = (file, adapters, config, clock) => {
 };
 
 // ----- the whole run
-export const runOnce = (data, adapters, config = CONFIG, clock = () => 0) => {
+export const runOnce = (data, adapters, config, clock) => {
   const langs = data.descriptions.map((file) => evaluateDescriptions(file, adapters, config, clock));
   const checks = evaluateChecks(data.check, adapters, clock);
   const imports = evaluateImports(data.imports, adapters, config, clock);
@@ -254,7 +254,7 @@ export const runOnce = (data, adapters, config = CONFIG, clock = () => 0) => {
 };
 
 // The run repeated: the stability is the share of identical answers between the first and the last run.
-export const runEval = (data, adapters, config = CONFIG, clock = () => 0) => {
+export const runEval = (data, adapters, config, clock) => {
   const first = runOnce(data, adapters, config, clock);
   const last = Array.from({ length: config.stabilityRuns - 1 }, () => runOnce(data, adapters, config, clock)).at(-1) ?? first;
   const flat = (run) => [...run.rows.descriptions.flatMap((part) => [...part.detect, ...part.auto, ...part.gold]), ...run.rows.check, ...run.rows.imports];

@@ -59,3 +59,9 @@ test('roundTrip exports a code to Mermaid and imports it again', () => {
   assert.equal(result.first.elements.length, 2);
   assert.equal(result.back.ok, true);
 });
+
+test('build counts the validator errors of a code that is not clean', () => {
+  const result = build('The verification process reads data from the users database and passes the result to the administrator.', 'en', 'dfd');
+  assert.equal(result.valid, false);
+  assert.equal(result.errors, 1);
+});
