@@ -36,7 +36,7 @@ const ru = `## 1 Цель работы
 
 ## Заключение
 
-Работа выполнена за 10 %.
+Работа выполнена за 10\u00a0%.
 
 ## Приложение А (обязательное) Листинг
 
@@ -82,7 +82,7 @@ Figure 1 – Chart
 
 ## Conclusion
 
-Done in 10 ms.
+Done in 10\u00a0ms.
 
 ## Appendix A (mandatory) Listing
 
@@ -122,7 +122,7 @@ test('appendix letters and their order', () => {
 });
 
 test('invisible characters, extra spaces and empty paragraphs', () => {
-  only(ru.replace('Изучить', 'Изу​чить'), 'ru', 'Невидимые');
+  only(ru.replace('Изучить', 'Изу\u200bчить'), 'ru', 'Невидимые');
   only(ru.replace('Изучить сеть.', 'Изучить  сеть.'), 'ru', 'Лишние пробелы');
   only(ru.replace('Изучить сеть.', 'Изучить сеть. '), 'ru', 'Лишние пробелы');
   only(ru.replace('Изучить сеть.', 'Изучить\tсеть.'), 'ru', 'Лишние пробелы');
@@ -172,4 +172,14 @@ test('control questions must be n-1, n, n+1', () => {
   const tail = ru.slice(0, ru.indexOf('## Заключение'));
   assert.deepEqual(extraErrors(tail, 'ru', opts), []);
   assert.deepEqual(extraErrors(tail, 'ru', { variant: 1, questions: 30 }), ['Номера контрольных вопросов должны быть n−1, n, n+1 варианта']);
+});
+
+test('italics and numerals below ten', () => {
+  only(ru.replace('Изучить сеть.', 'Изучить *сеть*.'), 'ru', 'Курсив');
+  only(en.replace('Study the network.', 'Study _the_ network.'), 'en', 'Italics');
+  assert.deepEqual(extraErrors(ru.replace('Изучить сеть.', 'Изучить **сеть** и `a_b_c`.'), 'ru'), []);
+  only(ru.replace('Изучить сеть.', 'Сервер вернул 3 ошибки.'), 'ru', 'словом');
+  only(ru.replace('Изучить сеть.', '3 ошибки найдено.'), 'ru', 'словом');
+  assert.deepEqual(extraErrors(ru.replace('Изучить сеть.', 'Сервер Express 5 и Части 1 готовы, рисунок 2 показан, вариант 3 принят.'), 'ru'), []);
+  assert.deepEqual(extraErrors(ru.replace('Изучить сеть.', 'Взято 12 записей и 500a0%.'), 'ru'), []);
 });

@@ -10,7 +10,7 @@
 
 **Шаблонизатор EJS.** Шаблон содержит HTML и вставки на JavaScript. Запись `<%= value %>` выводит значение с экранированием, запись `<% code %>` выполняет код, запись `<%- include() %>` подключает частичный шаблон. Данные передаются вторым аргументом `res.render()`.
 
-**Хранение данных.** Записи каталога лежат в массиве в памяти процесса и пропадают при перезапуске сервера. Журнал запросов хранится в таблице базы данных SQLite, которую даёт встроенный модуль `node:sqlite`, поэтому установка отдельных пакетов для него не нужна.
+**Хранение данных.** Вариант 26 чётный, поэтому и записи каталога, и журнал запросов лежат в базе данных SQLite, которую даёт встроенный модуль `node:sqlite`. Записи хранятся в таблице `diagrams`, журнал в таблице `request_log`, и установка отдельных пакетов для них не нужна. Таблицы создаются при первом обращении, а пустая таблица заполняется тремя начальными записями. Если база недоступна, запрос завершается оформленной страницей 500, а сервер продолжает работать.
 
 ## 3 Ход работы
 
@@ -29,7 +29,7 @@
 | `src/middleware/errorHandlers.js` | Обработчики ошибок 404 и 500 |
 | `src/middleware/security.js` | Заголовки безопасности, токен CSRF, ограничение частоты запросов, экранирование журнала |
 | `src/data/requestLog.js` | Таблица `request_log` в SQLite |
-| `src/data/diagrams.js` | Хранилище записей в памяти и проверка полей формы |
+| `src/data/diagrams.js` | Таблица `diagrams` в базе данных и проверка полей формы |
 | `limits.json` | Все пределы длины и чисел |
 | `views/` | Шаблоны EJS и частичные шаблоны |
 | `public/` | Стили и логотип из Части 1 проекта, переключатель темы |
@@ -52,10 +52,10 @@ Middleware `fakeAuth` проверяет параметр `?auth=1`. Если о
 
 | Маршрут | Результат |
 |---|---|
-| `GET /` | Список диаграмм из массива с временем создания каждой записи |
+| `GET /` | Список диаграмм из таблицы базы данных с временем создания каждой записи |
 | `GET /item/:id` | Детальная страница, неизвестный номер ведёт на страницу 404 |
 | `GET /add` | Форма добавления, доступна с `?auth=1` |
-| `POST /add` | Проверка полей, добавление в массив и переход на главную, при ошибке код 400 и форма с сохранёнными значениями |
+| `POST /add` | Проверка полей, добавление в таблицу и переход на главную, при ошибке код 400 и форма с сохранёнными значениями |
 | `GET /item/:id/edit` | Форма изменения записи с текущими значениями, доступна с `?auth=1` |
 | `POST /item/:id/edit` | Проверка полей и изменение записи, номер и время создания не меняются, при ошибке код 400 |
 | `POST /item/:id/delete` | Удаление записи и переход на главную, повторное удаление даёт 404 |
@@ -156,21 +156,53 @@ Middleware `fakeAuth` проверяет параметр `?auth=1`. Если о
 
 Рисунок 10 – Детальная страница первой диаграммы после изменения
 
+Кроме страниц 404 и 500 сайт показывает оформленные страницы для кодов 400, 403, 405, 413 и 429. Каждая страница объясняет, что произошло, почему и что сделать, а все тексты лежат в одном каталоге `src/errors.js`. Коды и случаи их показа сведены в таблице 4.
+
+Таблица 4 – Страницы ошибок сайта
+
+| Код | Заголовок страницы | Когда показывается |
+| --- | --- | --- |
+| 400 | Некорректный запрос | Адрес или данные формы нельзя прочитать |
+| 403 | Запрос отклонён | В форме нет токена защиты или пользователь не вошёл |
+| 404 | Страница не найдена | По адресу нет страницы или записи |
+| 405 | Метод не разрешён | Адрес существует, но не для этого метода запроса |
+| 413 | Запрос слишком большой | Тело запроса больше предела из `limits.json` |
+| 429 | Слишком много запросов | С одного адреса пришло больше запросов, чем разрешено |
+| 500 | Ошибка сервера | Сбой сервера, в том числе недоступная база журнала или каталога |
+
+Страница 403 при форме без токена защиты показана на рисунке 11.
+
+![Страница 403](figures/owner-403.png)
+
+Рисунок 11 – Страница ошибки 403 после отправки формы без токена защиты
+
+Страница 429 при превышении числа запросов показана на рисунке 12.
+
+![Страница 429](figures/owner-429.png)
+
+Рисунок 12 – Страница ошибки 429 при слишком частых запросах
+
+Сбой журнала проверен остановкой базы: запрос получает страницу 500 с пояснением, что база журнала недоступна, а в консоль попадает строка об ошибке. Таблицы базы данных показаны на рисунке 13.
+
+![Таблицы базы данных](figures/owner-db-tables.png)
+
+Рисунок 13 – Таблицы diagrams и request_log в базе данных SQLite
+
 ### 3.9 Автоматическая проверка
 
 Автоматические тесты на встроенном `node:test` запускают сервер на свободном порту и проверяют страницы, перенаправление гостя, добавление записи, проверку полей, экранирование, таблицу журнала, недоступную базу, уникальное время создания, изменение и удаление записи с токеном CSRF, обе страницы ошибок, токен CSRF, заголовки безопасности, ограничение частоты, экранирование журнала и огромные значения. Команда запуска: `npm test` в каталоге проекта.
 
-Консоль сервера при запуске командой `npm start` и после запросов показана на рисунке 11.
+Консоль сервера при запуске командой `npm start` и после запросов показана на рисунке 14.
 
 ![Консоль сервера](figures/console.png)
 
-Рисунок 11 – Вывод консоли сервера со строками журнала запросов (вывод процесса, снятый как текст)
+Рисунок 14 – Вывод консоли сервера со строками журнала запросов (вывод процесса, снятый как текст)
 
-Результат команды `npm test` с числом тестов и покрытием кода показан на рисунке 12.
+Результат команды `npm test` с числом тестов и покрытием кода показан на рисунке 15.
 
 ![Результат тестов](figures/tests.png)
 
-Рисунок 12 – Конец вывода команды npm test: число пройденных тестов и таблица покрытия (вывод процесса, снятый как текст)
+Рисунок 15 – Конец вывода команды npm test: число пройденных тестов и таблица покрытия (вывод процесса, снятый как текст)
 
 ## 4 Ответы на контрольные вопросы
 
@@ -245,7 +277,7 @@ export const requestLogger =
       } catch (error) {
         write(`[log] could not finish row ${id}: ${error.message}`);
       }
-      write(`[${new Date(startedAt).toISOString()}] ${req.method} ${url} ${res.statusCode} ${ms}ms`);
+      write(`[${new Date(startedAt).toISOString()}] ${res.locals?.requestId ?? '-'} ${req.method} ${url} ${res.statusCode} ${ms}ms`);
     });
     return next();
   };
@@ -399,7 +431,7 @@ export const serverError =
     const status = err.status >= 400 && err.status < 600 ? err.status : 500;
     // An ordinary 4xx (a bad address, a missing token, too many requests) is one line with no stack:
     // it is expected traffic, not a server fault, and a flood of them must not flood the console.
-    const line = `[error] ${safeLogText(req.method)} ${safeLogText(req.originalUrl)} ${status}`;
+    const line = `[error] ${res.locals?.requestId ?? '-'} ${safeLogText(req.method)} ${safeLogText(req.originalUrl)} ${status}`;
     if (status >= 500) write(line, err);
     else write(line);
     if (res.headersSent) return res.end();
@@ -437,6 +469,10 @@ export const serverError =
 ## Приложение Д (обязательное) Листинг файла diagrams.js с проверкой формы
 
 ```js
+import { DatabaseSync } from 'node:sqlite';
+import { existsSync, mkdirSync, statSync } from 'node:fs';
+import { dirname } from 'node:path';
+import { UserError, fileFailure } from '../errors.js';
 import { translate } from '../i18n.js';
 
 export const NOTATIONS = ['UML', 'BPMN', 'ERD', 'DFD', 'IDEF0', 'Petri'];
@@ -471,40 +507,105 @@ const seed = () => [
   },
 ];
 
-// Nothing deletes a record on its own, so without a ceiling the store would grow for as long as the
-// server runs; one write every few seconds, forever, is still only a few megabytes a year, but a cap
-// keeps that true instead of assumed. The oldest record is dropped first, like a ring buffer.
+// A ceiling on the table: the oldest record is dropped first, like a ring buffer.
 const MAX_ITEMS = 5000;
 
-// Data lives in memory only, as the practical requires: no database for the diagrams.
+// The diagrams live in a table of the same SQLite database as the request log (variant 26 is even: the data are
+// kept in the database). The connection opens lazily, the schema is created on first use and the three sample
+// records are seeded into an empty table; a database that cannot be reached fails the request (the styled 500 page),
+// not the whole server. Without a file name the table is private to this store and lives in memory (tests).
 // Every record gets its own creation time: it is always later than the previous one, even within one millisecond.
-export const createDiagramStore = (now = Date.now) => {
-  const items = seed();
-  let nextId = items.length + 1;
-  let last = Math.max(...items.map((item) => Date.parse(item.createdAt)));
+const CREATE_TABLE = `
+  CREATE TABLE IF NOT EXISTS diagrams (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT NOT NULL,
+    notation TEXT NOT NULL,
+    description TEXT NOT NULL,
+    code TEXT NOT NULL,
+    revision INTEGER NOT NULL CHECK (revision >= 0),
+    created_at TEXT NOT NULL
+  )`;
+const COLUMNS = 'id, title, notation, description, code, revision, created_at AS createdAt';
+
+export const createDiagramStore = (now = Date.now, file = ':memory:') => {
+  let db = null;
+  let sql = null;
+  const connect = () => {
+    if (sql) return sql;
+    if (file !== ':memory:' && !existsSync(dirname(file))) mkdirSync(dirname(file), { recursive: true });
+    if (file !== ':memory:' && existsSync(file) && statSync(file).isDirectory()) throw Object.assign(new Error('a folder stands in the place of the file'), { code: 'EISDIR' });
+    const opened = new DatabaseSync(file);
+    try {
+      opened.exec(CREATE_TABLE);
+      if (file !== ':memory:') opened.exec('PRAGMA journal_mode = WAL; PRAGMA synchronous = NORMAL; PRAGMA busy_timeout = 2000;');
+      const insert = opened.prepare('INSERT INTO diagrams (title, notation, description, code, revision, created_at) VALUES (?, ?, ?, ?, ?, ?)');
+      if (opened.prepare('SELECT COUNT(*) AS n FROM diagrams').get().n === 0) {
+        for (const one of seed()) insert.run(one.title, one.notation, one.description, one.code, one.revision, one.createdAt);
+      }
+      sql = {
+        insert,
+        all: opened.prepare(`SELECT ${COLUMNS} FROM diagrams ORDER BY id`),
+        find: opened.prepare(`SELECT ${COLUMNS} FROM diagrams WHERE id = ?`),
+        latest: opened.prepare('SELECT created_at AS createdAt FROM diagrams ORDER BY id DESC LIMIT 1'),
+        update: opened.prepare('UPDATE diagrams SET title = ?, notation = ?, description = ?, code = ?, revision = ? WHERE id = ?'),
+        remove: opened.prepare('DELETE FROM diagrams WHERE id = ?'),
+        trim: opened.prepare('DELETE FROM diagrams WHERE id IN (SELECT id FROM diagrams ORDER BY id LIMIT MAX(0, (SELECT COUNT(*) FROM diagrams) - ?))'),
+        exec: (text) => opened.exec(text),
+      };
+    } catch (error) {
+      opened.close();
+      throw error;
+    }
+    db = opened;
+    return sql;
+  };
+  // Any failure of the database becomes the error page about the database (the same page as for the request log).
+  const guard =
+    (action) =>
+    (...args) => {
+      try {
+        return action(...args);
+      } catch (error) {
+        throw error instanceof UserError ? error : new UserError(fileFailure(error, 'log-database-unavailable'), error);
+      }
+    };
+  // A row that does not look like a record (a damaged file) is a failure of the database, not a crash of the page.
+  const asItem = (row) => {
+    if (!row || typeof row.title !== 'string' || !Number.isSafeInteger(row.revision)) throw new Error('damaged diagram row');
+    return { ...row };
+  };
   return {
-    all: () => [...items],
-    find: (id) => items.find((item) => item.id === id),
-    add: ({ title, notation, description, code, revision }) => {
-      last = Math.max(now(), last + 1);
-      const item = { id: nextId, title, notation, description, code, revision, createdAt: new Date(last).toISOString() };
-      nextId += 1;
-      items.push(item);
-      if (items.length > MAX_ITEMS) items.shift();
-      return item;
-    },
+    all: guard(() => connect().all.all().map(asItem)),
+    find: guard((id) => {
+      const row = connect().find.get(id);
+      return row ? asItem(row) : undefined;
+    }),
+    add: guard(({ title, notation, description, code, revision }) => {
+      const q = connect();
+      // The time is read and the row is written in one transaction, so two writers cannot take the same time.
+      q.exec('BEGIN IMMEDIATE');
+      try {
+        const previous = q.latest.get();
+        const last = Math.max(now(), previous ? Date.parse(previous.createdAt) + 1 : 0);
+        const id = Number(q.insert.run(title, notation, description, code, revision, new Date(last).toISOString()).lastInsertRowid);
+        q.trim.run(MAX_ITEMS);
+        q.exec('COMMIT');
+        return asItem(q.find.get(id));
+      } catch (error) {
+        q.exec('ROLLBACK');
+        throw error;
+      }
+    }),
     // Edit keeps the id and the creation time, only the form fields change.
-    update: (id, { title, notation, description, code, revision }) => {
-      const item = items.find((one) => one.id === id);
-      if (!item) return undefined;
-      Object.assign(item, { title, notation, description, code, revision });
-      return item;
-    },
-    remove: (id) => {
-      const index = items.findIndex((one) => one.id === id);
-      if (index < 0) return false;
-      items.splice(index, 1);
-      return true;
+    update: guard((id, { title, notation, description, code, revision }) => {
+      const q = connect();
+      return q.update.run(title, notation, description, code, revision, id).changes ? asItem(q.find.get(id)) : undefined;
+    }),
+    remove: guard((id) => connect().remove.run(id).changes > 0),
+    close: () => {
+      if (db) db.close();
+      db = null;
+      sql = null;
     },
   };
 };
@@ -607,6 +708,7 @@ export const validateDiagram = (input, limits, t = defaultT) => {
 ## Приложение И (обязательное) Листинг файла app.js
 
 ```js
+import { randomBytes } from 'node:crypto';
 import express from 'express';
 import { fileURLToPath } from 'node:url';
 import { createDiagramStore, validateDiagram, NOTATIONS } from './data/diagrams.js';
@@ -655,6 +757,12 @@ export const createApp = ({
   // and hand over to the error handler), the body parser and the CSRF check (the token is a form field), then the routes.
   // The two error handlers are the very last, so every failure ends on a styled page.
   app.use(securityHeaders);
+  // A short identifier of this request: shown on every error page, sent as a header and written to the server log, so a visitor's report can be found.
+  app.use((req, res, next) => {
+    res.locals.requestId = randomBytes(4).toString('hex');
+    res.set('X-Request-Id', res.locals.requestId);
+    next();
+  });
   // Liveness probe for Docker and monitoring: placed before the rate limit and the log, so probes neither use up the quota nor fill the table.
   app.get('/health', (req, res) => res.json({ status: 'ok' }));
   app.use(express.static(dir('../public')));

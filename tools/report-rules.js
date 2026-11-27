@@ -33,6 +33,8 @@ const R = {
       sectionOrder: 'Номера разделов идут не по порядку',
       questions: 'Нет раздела «Ответы на контрольные вопросы» с номерами вопросов',
       questionSet: 'Номера контрольных вопросов должны быть n−1, n, n+1 варианта',
+      numeral: 'Число от 1 до 9 без единицы измерения пишется словом (СТП 2.3.12)',
+      italic: 'Курсив в тексте, его не используют',
     },
   },
   en: {
@@ -40,7 +42,7 @@ const R = {
     altQuotes: null,
     tableRef: (n) => new RegExp(`table ${n}(?!\\d)`, 'i'),
     units: /\d [%‰]|\d (?:ms|kB|KB|MB|GB|mm|cm|pt|px)(?![a-z])/,
-    questions: /^#{2,3} (?:\d+ )?(?:\d+\.\d+ )?Answers to (?:the )?Control Questions$/mi,
+    questions: /^#{2,3} (?:\d+ )?(?:\d+\.\d+ )?Answers to (?:the )?Control Questions$/im,
     letter: /^## Appendix ([A-Z])\b/,
     messages: {
       seeRef: 'The word "see" next to a figure or table reference',
@@ -60,9 +62,19 @@ const R = {
       sectionOrder: 'Section numbers are not consecutive',
       questions: 'No section "Answers to the Control Questions" with question numbers',
       questionSet: 'Control question numbers must be n−1, n, n+1 of the variant',
+      italic: 'Italics in the text are not used',
     },
   },
 };
+
+// A digit 1-9 followed by a lower case word is a counted noun ("3 ресурса") and must be a word; a digit after a capitalised
+// word ("Express 5", "Части 1") or after a reference word ("рисунке 1", "вариант 26") is a name or a number.
+const REFERENCE = /(?:рисун|таблиц|приложени|раздел|пункт|вопрос|номер|код|версии|порт|вариант|шаг|строк|страниц|ответ|пз|лр)\p{L}*$/iu;
+const numerals = (prose) =>
+  [...prose.matchAll(/(?<![\p{L}\d.,№§/–:-])[1-9](?![\d.,:/%-]) (?!%|мс|кБ|КБ|МБ|ГБ|мм|см|пт|px)\p{Ll}+/gu)].some((x) => {
+    const before = /(\p{L}+) $/u.exec(prose.slice(0, x.index));
+    return !before || (!/^\p{Lu}/u.test(before[1]) && !REFERENCE.test(before[1]));
+  });
 
 const mask = (s) => s.replace(/^```[\s\S]*?^```/gm, 'CODE');
 
@@ -86,11 +98,13 @@ export const extraErrors = (text, lang, { variant, questions } = {}) => {
     letters.some((c, i) => order.includes(c) && c !== order[i]),
     m.appendixOrder,
   );
-  check(/[​-‍⁠­﻿]/.test(flat), m.invisible);
+  check(/[\u200b-\u200d\u2060\u00ad\ufeff]/.test(flat), m.invisible);
   check(/\t|[^\S\n]$|(?<=\S)  +(?=\S)/m.test(flat.replace(/^(?:\||\s{4}).*$/gm, '')), m.spaces);
   check(/\n{3,}/.test(flat), m.emptyParagraph);
   check(/\s-\s|\d-\d/.test(prose.replace(/\d{4}-\d{2}-\d{2}/g, '')), m.dash);
   check(r.units.test(prose), m.nbsp);
+  check(/(?<![*\w])\*[^*\s][^*\n]*\*(?!\*)|(?<!\w)_[^_\s]+_(?!\w)/.test(prose), m.italic);
+  check(lang === 'ru' && numerals(prose), m.numeral);
   let rows = 0;
   let tbl = 0;
   const endTable = () => {
@@ -107,7 +121,13 @@ export const extraErrors = (text, lang, { variant, questions } = {}) => {
       rows += 1;
     } else if (rows) endTable();
     if (line.startsWith('|') && !/^\|[-|\s:]+\|$/.test(line)) {
-      check(line.split('|').slice(1, -1).some((c) => !c.trim()), m.emptyCell);
+      check(
+        line
+          .split('|')
+          .slice(1, -1)
+          .some((c) => !c.trim()),
+        m.emptyCell,
+      );
     }
     if (line.startsWith('![')) check(lines[i - 1]?.trim() !== '' || lines[i + 1]?.trim() !== '', m.figureGap);
     if (/^(?:Рисунок|Figure|Таблица|Table) \d+ – /.test(line)) check(/\.$/.test(line.trim()), m.captionDot);
@@ -115,7 +135,10 @@ export const extraErrors = (text, lang, { variant, questions } = {}) => {
   });
   if (rows) endTable();
 
-  const sections = lines.map((l) => /^## (\d+) \S/.exec(l)).filter(Boolean).map((x) => Number(x[1]));
+  const sections = lines
+    .map((l) => /^## (\d+) \S/.exec(l))
+    .filter(Boolean)
+    .map((x) => Number(x[1]));
   check(
     sections.some((n, i) => n !== i + 1),
     m.sectionOrder,

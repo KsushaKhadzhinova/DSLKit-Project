@@ -10,7 +10,7 @@ To learn the middleware concept in Express.js, to write custom middleware for re
 
 **EJS template engine.** A template holds HTML with inserted JavaScript. The tag `<%= value %>` prints a value with escaping, the tag `<% code %>` runs code, and the tag `<%- include() %>` inserts a partial template. Data is passed as the second argument of `res.render()`.
 
-**Data storage.** The catalogue records live in an array in the process memory and disappear when the server restarts. The request log is stored in a SQLite database table provided by the built-in module `node:sqlite`, so no extra package is needed for it.
+**Data storage.** Variant 26 is even, so both the catalogue records and the request log live in an SQLite database provided by the built-in `node:sqlite` module. The records are kept in the table `diagrams` and the log in the table `request_log`, and no extra packages are needed. The tables are created on first use, and an empty table is filled with three sample records. If the database is unreachable, the request ends with the styled 500 page and the server keeps running.
 
 ## 3 Course of the Work
 
@@ -29,7 +29,7 @@ Table 1 – Structure of the practical session 1 project
 | `src/middleware/errorHandlers.js` | 404 and 500 error handlers |
 | `src/middleware/security.js` | Security headers, CSRF token, rate limit, log escaping |
 | `src/data/requestLog.js` | The `request_log` table in SQLite |
-| `src/data/diagrams.js` | In-memory record store and form field validation |
+| `src/data/diagrams.js` | The table `diagrams` in the database and form field validation |
 | `limits.json` | All length and number limits |
 | `views/` | EJS templates and partial templates |
 | `public/` | Styles and logo from Part 1 of the project, theme switch |
@@ -52,10 +52,10 @@ Table 2 – Application routes
 
 | Route | Result |
 |---|---|
-| `GET /` | List of diagrams from the array with the creation time of every record |
+| `GET /` | List of diagrams from the database table with the creation time of every record |
 | `GET /item/:id` | Detail page, an unknown id leads to the 404 page |
 | `GET /add` | Add form, available with `?auth=1` |
-| `POST /add` | Field validation, adding to the array and redirect to the home page, on an error status 400 and the form with the entered values |
+| `POST /add` | Field validation, adding to the table and redirect to the home page, on an error status 400 and the form with the entered values |
 | `GET /item/:id/edit` | Form for editing a record with the current values, available with `?auth=1` |
 | `POST /item/:id/edit` | Field validation and update of the record, the id and the creation time stay, status 400 on an error |
 | `POST /item/:id/delete` | Deletes the record and goes to the home page, a repeated delete gives 404 |
@@ -156,21 +156,53 @@ After the changes are saved the detail page opens with the new revision, and the
 
 Figure 10 – Detail page of the first diagram after editing
 
+Besides the pages 404 and 500 the site shows styled pages for the codes 400, 403, 405, 413 and 429. Each page explains what happened, why and what to do, and all texts are kept in one catalogue, `src/errors.js`. The codes and the cases are listed in table 4.
+
+Table 4 – Error pages of the site
+
+| Code | Page heading | When it is shown |
+| --- | --- | --- |
+| 400 | Bad request | The address or the form data cannot be read |
+| 403 | Request refused | The form has no protection token or the user is not signed in |
+| 404 | Page not found | There is no page or record at the address |
+| 405 | Method not allowed | The address exists, but not for this request method |
+| 413 | Request too large | The request body is bigger than the limit in `limits.json` |
+| 429 | Too many requests | One address sent more requests than allowed |
+| 500 | Server error | A server failure, including an unreachable log or catalogue database |
+
+The page 403 for a form without the protection token is shown in figure 11.
+
+![Page 403](figures/owner-403.png)
+
+Figure 11 – The error page 403 after a form is sent without the protection token
+
+The page 429 for too many requests is shown in figure 12.
+
+![Page 429](figures/owner-429.png)
+
+Figure 12 – The error page 429 after too frequent requests
+
+The log failure was checked by stopping the database: the request gets the page 500 with an explanation that the log database is unavailable, and a line about the error goes to the console. The database tables are shown in figure 13.
+
+![Database tables](figures/owner-db-tables.png)
+
+Figure 13 – The tables diagrams and request_log in the SQLite database
+
 ### 3.9 Automatic verification
 
 Automatic tests on the built-in `node:test` start the server on a free port and check the pages, the guest redirect, adding an item, field validation, escaping, the log table, an unavailable database, the unique creation time, editing and deleting a record with the CSRF token, both error pages, the CSRF token, the security headers, the rate limit, log escaping and huge values. The command is `npm test` in the project folder.
 
-The console of the server started with `npm start` and after the requests is shown in figure 11.
+The console of the server started with `npm start` and after the requests is shown in figure 14.
 
 ![Server console](figures/console.png)
 
-Figure 11 – Console output of the server with the request log lines (process output captured as text)
+Figure 14 – Console output of the server with the request log lines (process output captured as text)
 
-The result of the `npm test` command with the number of tests and the code coverage is shown in figure 12.
+The result of the `npm test` command with the number of tests and the code coverage is shown in figure 15.
 
 ![Test result](figures/tests.png)
 
-Figure 12 – End of the npm test output: the number of passed tests and the coverage table (process output captured as text)
+Figure 15 – End of the npm test output: the number of passed tests and the coverage table (process output captured as text)
 
 ## 4 Answers to the Control Questions
 

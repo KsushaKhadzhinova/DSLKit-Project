@@ -39,6 +39,6 @@ for (const shot of shots) {
   const target = path.join(out, shot[0]);
   if (existsSync(target)) continue;
   writeFileSync(tmp, page(shot));
-  execFileSync(edge, ['--headless', '--disable-gpu', '--hide-scrollbars', `--screenshot=${target}`, '--window-size=1100,480', `file:///${tmp.replace(/\\/g, '/')}`], { stdio: 'ignore' });
+  execFileSync(edge, ['--headless', '--disable-gpu', `--user-data-dir=${path.join(tmpdir(), 'pz-edge-profile')}`, '--hide-scrollbars', `--screenshot=${target}`, '--window-size=1100,480', `file:///${tmp.replace(/\\/g, '/')}`], { stdio: 'ignore' });
 }
 rmSync(tmp, { force: true });
