@@ -1,3 +1,5 @@
+import { extraErrors } from '../report-rules.js';
+
 const L = {
   ru: {
     goal: /^## 1 Цель работы$/m,
@@ -77,7 +79,7 @@ const strip = (s) =>
     .replace(/`[^`\n]*`/g, '');
 
 // strict adds the rules from the teacher's remarks for Part 2: appendix format, references, no semicolons.
-export const lintReport = (text, lang = 'ru', { strict = false } = {}) => {
+export const lintReport = (text, lang = 'ru', { strict = false, variant, questions = 30 } = {}) => {
   const r = L[lang];
   const m = r.messages;
   const errors = [];
@@ -108,6 +110,7 @@ export const lintReport = (text, lang = 'ru', { strict = false } = {}) => {
     });
     check(/;/.test(prose), m.semicolon);
     check(r.startsWithRef.test(prose), m.startsWithRef);
+    errors.push(...extraErrors(text, lang, { variant, questions }));
   }
   const lines = text.split('\n');
   const at = (i, step) => {

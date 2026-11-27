@@ -171,3 +171,13 @@ test('strict mode rejects semicolons and sentences that start with a figure or t
 test('the default mode keeps the old appendix format and ignores the strict rules', () => {
   assert.deepEqual(lintReport(strictRu.replace(' (обязательное)', ' –').replace('Текст.', 'Первое; второе.'), 'ru'), []);
 });
+
+test('strict mode adds the level A and B rules and checks the control questions on request', () => {
+  has(lintReport(strictRu.replace('Текст.', 'Видно см. рис. 1.'), 'ru', { strict: true }), 'см.');
+  has(lintReport(strictRu.replace('Текст.', 'Изучить  сеть.'), 'ru', { strict: true }), 'Лишние пробелы');
+  const questions = ['## 2 Ответы на контрольные вопросы', '', '25. А?', '', '26. Б?', '', '27. В?', ''].join(String.fromCharCode(10));
+  const withQuestions = strictRu.replace('## Заключение', `${questions}\n## Заключение`);
+  assert.deepEqual(lintReport(withQuestions, 'ru', { strict: true, variant: 26 }), []);
+  has(lintReport(withQuestions.replace('27. В?', '28. В?'), 'ru', { strict: true, variant: 26, questions: 30 }), 'n−1, n, n+1');
+  assert.deepEqual(lintReport(withQuestions.replace('27. В?', '28. В?'), 'ru', { strict: true }), []);
+});

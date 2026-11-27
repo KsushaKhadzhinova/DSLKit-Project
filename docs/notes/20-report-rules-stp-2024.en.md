@@ -1,0 +1,68 @@
+# Report formatting rules (STP 01-2024): three levels
+
+Context: the teacher checks the reports strictly against STP 01-2024 and the teacher's own remarks. The rules are split because the structure of a practical or lab report differs from the structure of coursework.
+
+- **A. General.** Apply to any report (practical, lab, coursework). Sources: STP 01-2024 section 2, appendices Л, М, Н, П; GOST.
+- **B. Practicals and labs.** The teacher's requirements and the task conditions (`docs/notes/06-teacher-requirements.md`). When they conflict with the coursework checklist, B wins.
+- **C. Coursework only.** Report structure and size, the code, the sources, and so on. Full text: `docs/notes/21-course-report-checklist.en.md`. Not part of the practical or lab check.
+
+Check: `tools/part2/lint-report.js` (strict mode `strict: true`, used by the Part 2 reports) calls `tools/report-rules.js`, which holds the new mechanical A and B rules. The base `tools/lint-report.js` (Part 1 reports) was not changed. The linter does not check level C and has no `course` profile: the coursework will be built separately.
+
+## Rule table
+
+Column "Linter": yes = checked mechanically; no = needs a human eye or Word (page layout).
+
+| No. | Rule | Source | Lvl | Linter |
+|---|---|---|---|---|
+| A1 | Times New Roman 14 pt, justified, indent 1.25 cm, margins 30/15/20/20 mm | STP 2.1.1, app. Л | A | no |
+| A2 | One line spacing across the whole document (STP: 1.0, see D1) | STP 2.1.1; teacher remark | A | no |
+| A3 | Unnumbered part headings centred without indent, in capitals; section and subsection headings left-aligned, bold, no full stop, no hyphenation | STP 2.1.1, 2.2.5 | A | partly: full stop at the end of a heading yes |
+| A4 | Page numbers in arabic digits, bottom right, the title page counted but unnumbered | STP 2.2.8, app. Л | A | no |
+| A5 | En dash "–", guillemets, decimal comma, range "20–30" | STP 2.3; GOST 7.9 | A | yes: guillemets (straight and curly quotes), hyphen instead of a dash |
+| A6 | Non-breaking space before units and "%" | checklist D; STP 2.3 | A | yes (%, ms, kB, KB, MB, GB, mm, cm, pt, px) |
+| A7 | Numbers 1–9 without units in words, above 9 in digits; ordinals with an ending ("2-м") | STP 2.3.12 | A, B | no |
+| A8 | A figure is separated by a blank line before and after; caption under the figure "Figure N – Title", capitalised, no full stop | STP 2.5.3–2.5.5, app. Н | A | yes |
+| A9 | Table: title above "Table N – Title", empty cells "—", a table no longer than 30 rows (longer cannot fit one page unbroken) | STP 2.6; checklist E | A | yes |
+| A10 | Every table and figure is referenced in the text before the object | STP 2.5, 2.6 | A | yes |
+| A11 | Formulas centred, the number on the right in brackets | STP 2.4, app. М | A | no (the reports have no formulas) |
+| A12 | Listings as text, Courier New 12 pt, with a number and a title | checklist F | A | no |
+| A13 | Appendices: three-line heading, letters without Ё, З, Й, О, Ч, Ъ, Ы, Ь, in order, each referenced | STP 2.7.3, app. П | A | yes (format, letter, order, reference) |
+| A14 | No invisible characters (zero width, soft hyphen, BOM), extra spaces, tabs or empty paragraphs | checklist K | A | yes |
+| A15 | Section numbers `## 1`, `## 2`, … are consecutive | STP 2.2 | A | yes |
+| B1 | "1 Purpose of the Work" is numbered, the section is "Conclusion", not "Conclusions" | teacher (06, report item 1) | B | yes (existing) |
+| B2 | Figures in the text, not in an appendix; a description with a worded reference before each figure | teacher (06, items 3–4) | B | yes (existing) |
+| B3 | No "(see fig. 1)" and no words "see" next to a figure or table reference | teacher (06, item 5) | B | yes |
+| B4 | A sentence does not start with a figure or table reference | teacher (06, extra item 6) | B | yes (existing) |
+| B5 | No semicolons in the text | teacher (06, extra item 7) | B | yes (existing) |
+| B6 | No filler words "also", "were" | teacher (06, item 9) | B | yes (existing) |
+| B7 | Code in the text at most one page in total, the rest in appendices, at least one appendix; appendix title "Appendix A (mandatory) Title" | teacher (06, extra items 1–2) | B | yes: no code blocks in the text at all (stricter than one page), an appendix is required |
+| B8 | Figure and table numbering is continuous "Figure N" | teacher; `tools/lint-report.js` | B | yes (existing) |
+| B9 | Control questions only n−1, n, n+1 of the variant (variant 26: 25, 26, 27 of 30) | teacher (06, report item 12) | B | yes: options `variant` and `questions` (set in the PZ1 and PZ2 tests) |
+| B10 | Do not forget the "Checked by" line and similar | teacher (06, item 10) | B | no (the title page is built in Word) |
+| C1 | Structure: title, assignment, contents, abbreviations, introduction, chapters 1–3, conclusion, sources 15–20, appendices А–Г | checklist B, report structure | C | no, not for practicals |
+| C2 | Size 20–30 pages; 8–10 slides; originality at least 50% | checklist B, I, J | C | no |
+| C3 | Code `БГУИР КР 6-05-0612-03 XX ПЗ`, topic without "development" | checklist C | C | no |
+| C4 | Per-section figure numbering ("Figure 2.3"), references "(см. рисунок 2.1)" | checklist E | C | no; B3 and B8 forbid them for practicals and labs |
+| C5 | Sources: books not older than 5 years, articles 2022–2026, [12] in the text | checklist G | C | no |
+| C6 | Appendices А–Г by purpose, Courier New 12 pt, a listing of at most one page | checklist F, H | C | no |
+
+## Conflicts
+
+- The coursework checklist wants "(см. рисунок 2.1)" and per-section numbering, the teacher for practicals wants no "см. рис." and continuous numbering. For practicals and labs the teacher wins (B3, B8). For coursework the checklist wins (C4). The coursework decision stays with the owner.
+
+## Differences between the checklist and the STP 01-2024 text
+
+Checked against the local copy `materials/text/part-1/00. Методические указания и общая информация/Стандарт предприятия.txt` (the owner's PDF link was not downloaded). The STP wins.
+
+| No. | STP item | What the STP says | What the checklist says (section) | Adopted |
+|---|---|---|---|---|
+| D1 | 2.1.1, app. Л | line spacing 1.0 (18 pt) | 1.15 (D) | 1.0 per STP; the teacher allows 1 or 1.15 but one across the document. The value is the owner's call; keep it uniform in practicals and labs |
+| D2 | app. Л | page number 10 mm from the bottom edge | 17 mm (D) | 10 mm per STP. The T38 spec and the checklist say 17 mm: ask the owner; the linter does not check this in Word |
+| D3 | 2.1.1 | font in titles and text Times New Roman 14 pt; CONTENTS 14–16 pt (2.2.7) | part and section headings 16 pt (D) | 14 pt for section and subsection headings; 14–16 pt is allowed for unnumbered part headings |
+| D4 | 2.2.5 | section headings in capitals, subsections lower case with a capital first letter; items usually without headings | item headings 14 pt, 6 pt before (D) | no item headings in practicals and labs |
+| D5 | 2.1.1, app. Л | section headings left-aligned, no indent in the example; unnumbered ones centred | section headings "with a 1.25 cm indent" (D) | no indent per STP, settled by the example in appendix Л |
+| D6 | 2.5.5 | the examples of captions use the en dash "–"; caption and title centred to the figure | "dash (—)" in text (D) | "–" in captions and text, as in the STP and the linter |
+| D7 | 2.6.8 | a table may be divided, the next part after "Продолжение таблицы …" | a table does not break (E) | avoid breaking when possible, otherwise "Продолжение таблицы N" per STP |
+| D8 | 2.5.5 | figure numbering continuous or per section | per section (E) | practicals and labs continuous (teacher), coursework per section |
+
+The rest of the checklist (captions 6/12 pt, Courier New 12 pt listings, 12 pt tables, lettered appendices, no colon after "где") does not contradict the STP, and some of it is absent from the STP text (the font of tables and listings) and was taken from the checklist.
