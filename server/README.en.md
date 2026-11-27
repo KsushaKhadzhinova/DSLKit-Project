@@ -66,3 +66,5 @@ Search uses the precomputed `searchText` column (lower case, NFC and "ё = е" c
 - `title` and `description` are stored verbatim, including `<` and `>`: the client must render them with `textContent`, never `innerHTML`.
 
 When the lock triggers, the counter is reset to 0; during a burst of parallel wrong passwords a small remainder (up to the burst size) can be left in the counter at that moment. The lock is already set; the remainder only brings the next lock closer.
+
+Search only finds what fits into `searchText`: the tail of a very long title (beyond the column size: 1000 characters for projects, 300 for users) takes no part in search.

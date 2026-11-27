@@ -42,19 +42,17 @@ function createTokens({ config, db, now }) {
     if (!row) throw unauthorized('invalid_refresh', 'Invalid refresh token');
     const reject = () => unauthorized('invalid_refresh', 'Invalid refresh token');
     const revokeAll = () => db.RefreshToken.update({ revokedAt: new Date(now()) }, { where: { userId: row.userId, revokedAt: null } });
-    if (row.revokedAt) {
-      await revokeAll();
-      throw reject();
-    }
-    if (row.expiresAt.getTime() <= now()) throw reject();
-    // Conditional update: of several parallel uses of one token only one can win; the rest are replays.
-    const [won] = await db.RefreshToken.update({ revokedAt: new Date(now()) }, { where: { id: row.id, revokedAt: null } });
-    if (won !== 1) {
-      // Mark the replay first, then end every session: the winner checks this mark after issuing its new token.
+    // Every replay marks the token first, then ends all sessions: a winner still issuing its token sees the mark.
+    const replay = async () => {
       await db.RefreshToken.update({ replayedAt: new Date(now()) }, { where: { id: row.id } });
       await revokeAll();
       throw reject();
-    }
+    };
+    if (row.revokedAt) await replay();
+    if (row.expiresAt.getTime() <= now()) throw reject();
+    // Conditional update: of several parallel uses of one token only one can win; the rest are replays.
+    const [won] = await db.RefreshToken.update({ revokedAt: new Date(now()) }, { where: { id: row.id, revokedAt: null } });
+    if (won !== 1) await replay();
     const refreshToken = await issueRefresh(row.userId);
     const replayed = await db.RefreshToken.count({ where: { id: row.id, replayedAt: { [Op.ne]: null } } });
     if (replayed) {

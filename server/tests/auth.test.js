@@ -146,6 +146,34 @@ describe('auth', () => {
     }
   });
 
+  test('a replay that lands between the winning update and the new token still kills the new token', async () => {
+    const u = await s.signup();
+    const original = s.db.RefreshToken.create.bind(s.db.RefreshToken);
+    let reached;
+    const atCreate = new Promise((resolve) => (reached = resolve));
+    let release;
+    const gate = new Promise((resolve) => (release = resolve));
+    // Pause the winner right before it stores its new token: the exact window of the race.
+    s.db.RefreshToken.create = async (...args) => {
+      reached();
+      await gate;
+      return original(...args);
+    };
+    try {
+      const winner = s.api('POST', '/api/auth/refresh', { body: { refreshToken: u.refreshToken } });
+      await atCreate;
+      s.db.RefreshToken.create = original;
+      const replay = await s.api('POST', '/api/auth/refresh', { body: { refreshToken: u.refreshToken } });
+      assert.equal(replay.status, 401);
+      release();
+      const won = await winner;
+      if (won.status === 200) assert.equal((await s.api('POST', '/api/auth/refresh', { body: { refreshToken: won.body.refreshToken } })).status, 401);
+      assert.equal(await s.db.RefreshToken.count({ where: { userId: u.id, revokedAt: null } }), 0);
+    } finally {
+      s.db.RefreshToken.create = original;
+    }
+  });
+
   test('registration copes with names and emails whose lower-case form is longer', async () => {
     const email = `${'a'.repeat(64)}@${'b'.repeat(63)}.${'c'.repeat(63)}.${'d'.repeat(56)}.test`;
     assert.equal(email.length, 254);

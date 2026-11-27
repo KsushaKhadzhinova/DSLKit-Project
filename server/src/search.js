@@ -6,7 +6,15 @@ const { Sequelize } = require('sequelize');
 const normalize = (s) => s.normalize('NFC').toLowerCase().replaceAll('\u0451', '\u0435');
 
 // Lower-casing can lengthen text (one letter may become two), so the stored value is cut to the column size.
-const fit = (s, max) => (s.length <= max ? s : [...s].slice(0, max).join('').slice(0, max));
+const fit = (s, max) => {
+  // Whole code points only, counted in UTF-16 units like the database column: a surrogate pair is never split.
+  let out = '';
+  for (const ch of s) {
+    if (out.length + ch.length > max) break;
+    out += ch;
+  }
+  return out;
+};
 
 // LIKE needs an explicit escape character: sqlite has none by default. "!" avoids backslash quoting differences.
 const escapeLike = (s) => s.replace(/[!%_]/g, (c) => `!${c}`);
