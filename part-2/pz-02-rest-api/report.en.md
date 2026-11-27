@@ -30,128 +30,174 @@ Every record has the service fields `id` and `createdAt`, which the client canno
 
 ### 3.2 Endpoints
 
-Each resource has six standard operations, and diagrams and projects have three extra ones. All addresses are listed in table 2. The application assembly is shown in appendix A, the shared resource logic in appendix B and the field checks in appendix C.
+Each resource has six standard operations, and diagrams and projects have three extra ones. Every operation with its method, address, description, example request body and expected answer is listed in table 2. The address `/api/users` serves as the example, and `projects` and `diagrams` have the same operations. The application assembly is shown in appendix A, the shared resource logic in appendix B and the field checks in appendix C.
 
-Table 2 – API endpoints
+Table 2 – API endpoints with request and response examples
 
-| Method and address                 | Purpose                                   | Success |
-| ---------------------------------- | ----------------------------------------- | ------- |
-| `GET /api/{resource}`              | List with filter, search, sort and paging | 200     |
-| `GET /api/{resource}/:id`          | One record                                | 200     |
-| `POST /api/{resource}`             | Create                                    | 201     |
-| `PUT /api/{resource}/:id`          | Full replacement                          | 200     |
-| `PATCH /api/{resource}/:id`        | Partial change                            | 200     |
-| `DELETE /api/{resource}/:id`       | Delete                                    | 204     |
-| `GET /api/users/:id/projects`      | Projects of one user                      | 200     |
-| `GET /api/projects/:id/diagrams`   | Diagrams of one project                   | 200     |
-| `POST /api/diagrams/:id/publish`   | Publish, repeating changes nothing        | 200     |
-| `POST /api/diagrams/:id/duplicate` | Copy of a diagram as a draft              | 201     |
+| Method | URL | Description | Example request body | Expected answer |
+| --- | --- | --- | --- | --- |
+| `GET` | `/api/users` | List of users | none | 200, `{"data":[{…},{…}],"meta":{"page":1,"limit":20,"total":2}}` |
+| `GET` | `/api/users/1` | One record | none | 200, the user object |
+| `POST` | `/api/users` | Create a user | `{"name":"Anna","email":"anna@example.com","role":"owner"}` | 201, `{"id":3,"name":"Anna","email":"anna@example.com","role":"owner","createdAt":"…"}` |
+| `PUT` | `/api/users/1` | Replace the whole record | `{"name":"Anna","email":"anna@example.com","role":"editor"}` | 200, the user with the new fields |
+| `PATCH` | `/api/users/1` | Partial change | `{"role":"editor"}` | 200, the user with `"role":"editor"` |
+| `DELETE` | `/api/users/1` | Delete a user | none | 409, `{"error":{"code":"conflict","message":"User still owns projects"}}` |
+| `GET` | `/api/diagrams?q=billing&sort=-title` | List with search and sorting | none | 200, `{"data":[{…},{…}],"meta":{"page":1,"limit":20,"total":2}}` |
+| `POST` | `/api/diagrams` | Create a diagram | `{"title":"Billing schema","notation":"ERD","code":"invoice -> payment","projectId":1}` | 201, the diagram with `"status":"draft"` and `"createdAt":"…"` |
+| `DELETE` | `/api/diagrams/2` | Delete a diagram | none | 204, no body |
+| `GET` | `/api/users/1/projects` | Projects of one user | none | 200, the list of projects with `meta` |
+| `GET` | `/api/projects/1/diagrams` | Diagrams of one project | none | 200, the list of diagrams with `meta` |
+| `POST` | `/api/diagrams/1/publish` | Publish, a repeat changes nothing | none | 200, the diagram with `"status":"published"` |
+| `POST` | `/api/diagrams/1/duplicate` | Copy of a diagram as a draft | none | 201, the copy with `"title":"Checkout sequence (copy)"` and `"status":"draft"` |
+| `POST` | `/api/users` | Invalid data | `{"name":"","email":"x"}` | 400, `{"error":{"code":"validation_failed","message":"Request body is invalid","details":[{…}]}}` |
 
-Examples of the request body and the expected response for the main operations are in table 3. The data come from `API.md` and match the answers of the running server (port 3962). The `createdAt` field is shortened to `…`, and `id` depends on the number of records already created.
-
-Table 3 – Request and response examples
-
-| Request | Request body | Expected response |
-| ------- | ------------ | ----------------- |
-| `POST /api/users` | `{"name":"Anna","email":"anna@example.com","role":"owner"}` | 201, `{"id":3,"name":"Anna","email":"anna@example.com","role":"owner","createdAt":"…"}` |
-| `POST /api/diagrams` | `{"title":"Billing schema","notation":"ERD","code":"invoice -> payment","projectId":1}` | 201, `{"id":4,"title":"Billing schema","notation":"ERD","code":"invoice -> payment","projectId":1,"status":"draft","createdAt":"…"}` |
-| `GET /api/diagrams?q=billing&sort=-title` | none | 200, `{"data":[{…},{…}],"meta":{"page":1,"limit":20,"total":2}}` |
-| `PATCH /api/users/1` | `{"role":"editor"}` | 200, the user with `"role":"editor"` |
-| `POST /api/diagrams/1/publish` | none | 200, the diagram with `"status":"published"` |
-| `POST /api/diagrams/1/duplicate` | none | 201, a copy with `"title":"Checkout sequence (copy)"` and `"status":"draft"` |
-| `DELETE /api/diagrams/2` | none | 204, no body |
-| `DELETE /api/users/1` | none | 409, `{"error":{"code":"conflict","message":"User still owns projects"}}` |
-| `POST /api/users` | `{"name":"","email":"x"}` | 400, `{"error":{"code":"validation_failed","message":"Request body is invalid","details":[{"field":"name",…},{"field":"email",…}]}}` |
-
-Lists accept `page` and `limit` for paging, `sort` for sorting (a minus sign means descending), `q` for search in text fields and any field name for an exact filter. A list response holds the array `data` and the object `meta` with the total count. The route `GET /api/users/:id/projects` returns the projects of one user with the same list parameters and answers 404 for an unknown user. The file `API.md` collects detailed request and response examples.
+The field `createdAt` is shortened to `…`, and `id` depends on the number of records already created. The data come from `API.md` and match the answers of a running server. Lists accept `page` and `limit` for paging, `sort` for sorting (a minus sign means descending), `q` for search over text fields and any field name for an exact filter. A list answer holds the array `data` and the object `meta` with the total number of records. The route `GET /api/users/:id/projects` answers 404 for an unknown user. Detailed examples are collected in the file `API.md`.
 
 ### 3.3 Validation and errors
 
 The schema of every resource sets the type, whether the field is required, the maximum length, the list of allowed values and the default. Validation returns all problems at once, rejects unknown fields and checks that `ownerId` and `projectId` point to existing records. The `PATCH` method checks only the sent fields. Deleting a user who owns projects or a project that has diagrams is rejected with code 409. All errors, including broken JSON, an unknown address and an unexpected failure, come back in one format with the fields `code` and `message`. Appendices A and B hold the listings.
 
-### 3.4 Verification
+### 3.4 API documentation
+
+The route `GET /api/openapi.json` returns the description of the API in the OpenAPI 3.0 format. It is built from the same schemas that validate the requests, so field lengths, lists of allowed values and required fields in the document match the code. The `email` field is not offered as a filter of the user list. The document can be opened in Swagger UI or imported into Postman.
+
+A fragment of the API documentation is shown in figure 1.
+
+![API documentation](figures/14-api-docs.png)
+
+Figure 1 – A fragment of the file `API.md` and of the answer of `GET /api/openapi.json` (text captured by the script `shots/docs-shot.mjs`, not a Swagger UI window)
+
+The same document is opened in Swagger UI. The page is drawn by Swagger UI 5.17.14 loaded from a CDN by the script `shots/swagger-shot.mjs`: the document is taken from the running server and passed to the page as an object. The list of all operations is shown in figure 2.
+
+![Swagger UI: list of operations](figures/15-swagger-ui.png)
+
+Figure 2 – Swagger UI: all API operations from `GET /api/openapi.json`
+
+The `POST /users` operation with the request body and the response codes is shown in figure 3.
+
+![Swagger UI: the POST /users operation](figures/16-swagger-ui-post.png)
+
+Figure 3 – Swagger UI: the `POST /users` operation, the request body and the response codes
+
+The operation reference is built from the same document by the script `tools/gen-api-md.mjs` into the files `API.generated.ru.md` and `API.generated.en.md`. A test compares them with the answer of the server, so they cannot drift from the code.
+
+### 3.5 Checking requests in Postman
+
+All operations are checked in Postman with the collection `postman_collection.json`, and the same set of requests is in the file `requests.http`. Five different operations are shown in the figures below: reading a list, creating, a partial change, rejected data and a delete conflict.
+
+The request `GET /api/users` was sent from Postman, and the answer 200 with the list of users is shown in figure 4.
+
+![GET /api/users](figures/postman-01-get-users.png)
+
+Figure 4 – Users list: the request GET /api/users and the answer 200 in Postman
+
+Creating a diagram with `POST /api/diagrams` and a JSON body is shown in figure 5.
+
+![POST /api/diagrams](figures/postman-02-post-diagram.png)
+
+Figure 5 – Creating a diagram: the request POST /api/diagrams, the body and the answer 201 in Postman
+
+Partial change of a user with `PATCH /api/users/1` is shown in figure 6.
+
+![PATCH /api/users/1](figures/postman-03-patch-user.png)
+
+Figure 6 – Changing the role of a user: the request PATCH /api/users/1 and the answer 200 in Postman
+
+The request `POST /api/users` with an empty name and a wrong email is rejected, as in figure 7.
+
+![POST /api/users](figures/postman-04-post-invalid.png)
+
+Figure 7 – Invalid data: the request POST /api/users and the answer 400 with the list of field problems in Postman
+
+Deleting a user who still owns projects is rejected with the code 409, as in figure 8.
+
+![DELETE /api/users/1](figures/postman-05-delete-conflict.png)
+
+Figure 8 – Delete conflict: the request DELETE /api/users/1 and the answer 409 in Postman
+
+### 3.6 Checking with tests and browser requests
 
 Automatic tests start the server on a free port and check every method, the status codes, filters, sorting, paging, validation errors, the links between resources, the extra operations and the 500 response. Line and function coverage is 100 percent and branch coverage is above 98 percent. The command is `npm test` in the project folder. Manual checks in Postman or Insomnia can use the requests from `API.md`.
 
-The server is started with `npm start`, and the console message is shown in figure 1.
+The server is started with `npm start`, and the console message is shown in figure 9.
 
 ![Server console](figures/01-server-start.png)
 
-Figure 1 – Console message after the server starts on port 3000 (process output captured as text)
+Figure 9 – Console message after the server starts on port 3000 (process output captured as text)
 
-A browser does not send `POST`, `PUT`, `PATCH` and `DELETE` from the address bar, so the script `shots/shots.mjs` sent such requests, and the real requests and server answers are drawn on a page. Creating a user, a project and a diagram is shown in figure 2.
+A browser does not send `POST`, `PUT`, `PATCH` and `DELETE` from the address bar, so the script `shots/shots.mjs` sent such requests, and the real requests and server answers are drawn on a page. Creating a user, a project and a diagram is shown in figure 10.
 
 ![Creating resources](figures/08-post-create.png)
 
-Figure 2 – POST requests and the answers 201 for a user, a project and a diagram, recorded by a script (not a Postman window)
+Figure 10 – POST requests and the answers 201 for a user, a project and a diagram, recorded by a script (not a Postman window)
 
-The `GET /api/users` request is opened in the browser at `http://localhost:3000/api/users`, and the answer is shown in figure 3.
+The `GET /api/users` request is opened in the browser at `http://localhost:3000/api/users`, and the answer is shown in figure 11.
 
 ![List of users](figures/02-users-list.png)
 
-Figure 3 – Answer to GET /api/users in a browser window: an array of users
+Figure 11 – Answer to GET /api/users in a browser window: an array of users
 
-A single record at `http://localhost:3000/api/users/1` is shown in figure 4.
+A single record at `http://localhost:3000/api/users/1` is shown in figure 12.
 
 ![One user](figures/03-user-one.png)
 
-Figure 4 – Answer to GET /api/users/1 in a browser window: the object of one user
+Figure 12 – Answer to GET /api/users/1 in a browser window: the object of one user
 
-A request for a missing record at `http://localhost:3000/api/users/999` gives the error shown in figure 5.
+A request for a missing record at `http://localhost:3000/api/users/999` gives the error shown in figure 13.
 
 ![Answer 404](figures/04-user-404.png)
 
-Figure 5 – Answer to GET /api/users/999 in a browser window: JSON with the code not_found (code 404)
+Figure 13 – Answer to GET /api/users/999 in a browser window: JSON with the code not_found (code 404)
 
-A wrong id in the address `http://localhost:3000/api/users/abc` is refused, as in figure 6.
+A wrong id in the address `http://localhost:3000/api/users/abc` is refused, as in figure 14.
 
 ![Answer 400](figures/05-user-400.png)
 
-Figure 6 – Answer to GET /api/users/abc in a browser window: JSON with a message about a wrong id (code 400)
+Figure 14 – Answer to GET /api/users/abc in a browser window: JSON with a message about a wrong id (code 400)
 
-Search, sorting and paging work through the address parameters `?q=billing&sort=-title&page=1&limit=10`, and the result is shown in figure 7.
+Search, sorting and paging work through the address parameters `?q=billing&sort=-title&page=1&limit=10`, and the result is shown in figure 15.
 
 ![Search and sorting](figures/06-diagrams-search.png)
 
-Figure 7 – Answer to GET /api/diagrams with the q, sort, page and limit parameters in a browser window
+Figure 15 – Answer to GET /api/diagrams with the q, sort, page and limit parameters in a browser window
 
-The additional route `GET /api/users/1/projects` returns the projects of one user, as in figure 8.
+The additional route `GET /api/users/1/projects` returns the projects of one user, as in figure 16.
 
 ![Projects of a user](figures/07-user-projects.png)
 
-Figure 8 – Answer to GET /api/users/1/projects in a browser window: the projects of the user
+Figure 16 – Answer to GET /api/users/1/projects in a browser window: the projects of the user
 
-The data validation errors, including an unknown field and a project that does not exist, are shown in figure 9.
+The data validation errors, including an unknown field and a project that does not exist, are shown in figure 17.
 
 ![Wrong data](figures/09-validation-400.png)
 
-Figure 9 – Answers 400 with the list of field problems, recorded by a script (not a Postman window)
+Figure 17 – Answers 400 with the list of field problems, recorded by a script (not a Postman window)
 
-A partial change and a full replacement of a record are shown in figure 10.
+A partial change and a full replacement of a record are shown in figure 18.
 
 ![PATCH and PUT requests](figures/10-patch-put.png)
 
-Figure 10 – PATCH and PUT requests and the server answers, recorded by a script (not a Postman window)
+Figure 18 – PATCH and PUT requests and the server answers, recorded by a script (not a Postman window)
 
-The additional operations of a diagram are shown in figure 11: publishing again changes nothing, and the copy is created as a draft.
+The additional operations of a diagram are shown in figure 19: publishing again changes nothing, and the copy is created as a draft.
 
 ![Publish and duplicate](figures/11-publish-duplicate.png)
 
-Figure 11 – Publish and duplicate requests and the server answers, recorded by a script (not a Postman window)
+Figure 19 – Publish and duplicate requests and the server answers, recorded by a script (not a Postman window)
 
-Deleting a user with projects is refused, and deleting a diagram passes, as in figure 12.
+Deleting a user with projects is refused, and deleting a diagram passes, as in figure 20.
 
 ![Deleting](figures/12-delete-409-204.png)
 
-Figure 12 – DELETE requests: the answer 409 for a user with projects and the answer 204 for a diagram, recorded by a script (not a Postman window)
+Figure 20 – DELETE requests: the answer 409 for a user with projects and the answer 204 for a diagram, recorded by a script (not a Postman window)
 
-The result of the `npm test` command with the number of tests and the code coverage is shown in figure 13.
+The result of the `npm test` command with the number of tests and the code coverage is shown in figure 21.
 
 ![Test result](figures/13-tests.png)
 
-Figure 13 – End of the npm test output: the number of passed tests and the coverage table (process output captured as text)
+Figure 21 – End of the npm test output: the number of passed tests and the coverage table (process output captured as text)
 
-### 3.5 Answers to the control questions
+## 4 Answers to the Control Questions
 
 25. What are "cross-resource links" and how are they implemented in a REST API (for example, getting the orders of a user)?
 
@@ -165,35 +211,9 @@ Figure 13 – End of the npm test output: the number of passed tests and the cov
 
     In OpenAPI each operation lists the codes in its `responses` section, for example `400`, `404` and `409`, and gives a description and a body schema for each. The common error schema is described once in `components` and attached by reference. In the work the documentation lives in `API.md`: the table of each route has a column with the possible error codes, and the "Errors" section shows the single response shape `{ "error": { "code", "message", "details" } }` and lists the `code` values with their status codes. That way a client knows which errors to expect and how to parse them.
 
-### 3.6 OpenAPI description
-
-The route `GET /api/openapi.json` returns the description of the API in the OpenAPI 3.0 format. It is built from the same schemas that validate the requests, so field lengths, lists of allowed values and required fields in the document match the code. The `email` field is not offered as a filter of the user list. The document can be opened in Swagger UI or imported into Postman.
-
-A fragment of the API documentation is shown in figure 14.
-
-![API documentation](figures/14-api-docs.png)
-
-Figure 14 – A fragment of the file `API.md` and of the answer of `GET /api/openapi.json` (text captured by the script `shots/docs-shot.mjs`, not a Swagger UI window)
-
-The same document is opened in Swagger UI. The page is drawn by Swagger UI 5.17.14 loaded from a CDN by the script `shots/swagger-shot.mjs`: the document is taken from the running server and passed to the page as an object. The list of all operations is shown in figure 15.
-
-![Swagger UI: list of operations](figures/15-swagger-ui.png)
-
-Figure 15 – Swagger UI: all API operations from `GET /api/openapi.json`
-
-The `POST /users` operation with the request body and the response codes is shown in figure 16.
-
-![Swagger UI: the POST /users operation](figures/16-swagger-ui-post.png)
-
-Figure 16 – Swagger UI: the `POST /users` operation, the request body and the response codes
-
-The operation reference is built from the same document by the script `tools/gen-api-md.mjs` into the files `API.generated.ru.md` and `API.generated.en.md`. A test compares them with the answer of the server, so they cannot drift from the code.
-
-No Postman window was captured in this work: real screenshots of the program window cannot be produced here, so a script sent the requests in figures 2 and 9–12, and the captions say so. The ready collection `postman_collection.json` and the file `requests.http` allow repeating the check and taking such screenshots by hand.
-
 ## Conclusion
 
-For the DSLKit project a REST API with three related resources was designed and implemented. It supports CRUD operations, filtering, search, sorting, paging, publishing and copying of diagrams, validates input and the links between records, and answers with errors in one format. `API.md` holds the API description and request examples, and automatic tests cover all the code. Postman screenshots and documentation excerpts remain to be attached.
+For the DSLKit project a REST API with three related resources was designed and implemented. It supports CRUD operations, filtering, search, sorting, paging, publishing and copying of diagrams, validates input and the links between records, and answers with errors in one format. `API.md` holds the API description and request examples, and automatic tests cover all the code. The requests are checked in Postman, and the API description is shown in Swagger UI.
 
 ## Appendix A (mandatory) Listing of the file app.js
 
