@@ -27,7 +27,7 @@ Total: done 13, fixed 1 (data in the DB), owner only 1, out of scope 1; decision
 
 ## Owner decisions: two options each
 
-**(a) Data in DB or array.** Array: no change, 0 h; risk: the teacher's 16 Oct note expects a table. DB: move `createDiagramStore` to SQLite, same interface `all/find/add/update/remove`; about 3-4 h with tests; risk: the task text says "no database", the report needs a remark. The request log is already a DB table.
+**(a) Data in DB or array (decided 27 Nov: DB, implemented).** Array: no change, 0 h; risk: the teacher's 16 Oct note expects a table. DB: move `createDiagramStore` to SQLite, same interface `all/find/add/update/remove`; about 3-4 h with tests; risk: the task text says "no database", the report needs a remark. The request log is already a DB table.
 
 **(b) 500 page.** Now a real failure (unreachable DB file, DB stopped at runtime), no button. Option with a debug route `/boom`: about 30 min; risk: a dedicated route in production code and "500 was staged". Recommendation: keep the real failure.
 
@@ -35,9 +35,6 @@ Total: done 13, fixed 1 (data in the DB), owner only 1, out of scope 1; decision
 
 Console with the request log; browser: list, detail, form with errors, 404, 500 (start with `DB_FILE=package.json/blocked/log.db npm start`); the `request_log` table in a SQLite viewer.
 
-## For T38
-
-Screens and behaviour are unchanged; the report needs no update.
 
 ## What changed and what T38 must update
 
