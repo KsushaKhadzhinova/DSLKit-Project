@@ -172,7 +172,7 @@ The result of the `npm test` command with the number of tests and the code cover
 
 Figure 12 – End of the npm test output: the number of passed tests and the coverage table (process output captured as text)
 
-## 4 Answers to Control Questions
+## 4 Answers to the Control Questions
 
 25. How do you protect an Express application from CSRF with middleware (in theory)?
 
