@@ -25,9 +25,11 @@ $env:TEST_PG_URL = "postgres://postgres:<пароль>@127.0.0.1:55432/postgres"
 
 ## База данных
 
-`DB_DIALECT=sqlite` (разработка и тесты, файл `DB_STORAGE`) или `postgres` (боевой режим, `DATABASE_URL`). Таблицы: `users` (роль в поле `role`), `projects`, `project_members`, `refresh_tokens` (только хэши), `request_logs` (журнал запросов: метод, путь без query, статус, пользователь, IP, время). Таблицы: вне production создаются через `sequelize.sync()` (`DB_SYNC` по умолчанию `true`), в production `DB_SYNC` по умолчанию `false`, схему создаёт миграция: `npm run migrate` (применяет `migrations/*.js` по порядку, журнал в таблице `schema_migrations`, повторный запуск ничего не делает). Тест сверяет, что миграция даёт ту же схему, что и модели (SQLite и PostgreSQL).
+`DB_DIALECT=sqlite` (разработка и тесты, файл `DB_STORAGE`) или `postgres` (боевой режим, `DATABASE_URL`). Таблицы: `users` (роль в поле `role`), `projects`, `project_members`, `refresh_tokens` (только хэши), `request_logs` (журнал запросов: метод, путь без query, статус, пользователь, IP, время).
 
-Поиск идёт по предвычисленному полю `searchText` (нижний регистр и NFC считаются в коде), поэтому кириллица и регистр работают одинаково в SQLite и PostgreSQL.
+Создание схемы: вне production создаются через `sequelize.sync()` (`DB_SYNC` по умолчанию `true`), в production `DB_SYNC` по умолчанию `false`, схему создаёт миграция: `npm run migrate` (применяет `migrations/*.js` по порядку, журнал в таблице `schema_migrations`, повторный запуск ничего не делает). Тест сверяет, что миграция даёт ту же схему, что и модели (SQLite и PostgreSQL).
+
+Поиск идёт по предвычисленному полю `searchText` (нижний регистр, NFC и «ё = е» считаются в коде, значение обрезается до размера колонки), поэтому кириллица и регистр работают одинаково в SQLite и PostgreSQL.
 
 ## API (префикс `/api`, ошибки: `{"error":{"code","message","details?"}}`)
 
@@ -62,3 +64,5 @@ $env:TEST_PG_URL = "postgres://postgres:<пароль>@127.0.0.1:55432/postgres"
 - HTTPS: сервер сам TLS не терминирует, держите его за обратным прокси с TLS; в production шлётся `Strict-Transport-Security`.
 - Хранение: журнал запросов хранится `logRetentionDays` (30) дней, просроченные refresh-токены удаляются раз в час.
 - Тексты `title` и `description` хранятся как есть, включая `<` и `>`: клиент обязан выводить их через `textContent`, не через `innerHTML`.
+
+После срабатывания блокировки счётчик сбрасывается в 0; при залпе параллельных неверных паролей в этот момент в счётчике может остаться небольшой остаток (до числа запросов залпа). Блокировка при этом уже стоит, остаток только приближает следующую.

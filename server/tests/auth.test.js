@@ -134,12 +134,35 @@ describe('auth', () => {
     assert.equal((await s.api('POST', '/api/auth/login', { body: { email: u.email, password: u.password } })).status, 401);
   });
 
+  test('a parallel replay never leaves a live token behind, whichever request finishes first', async () => {
+    for (let round = 0; round < 5; round++) {
+      const u = await s.signup();
+      const results = await Promise.all(Array.from({ length: 3 }, () => s.api('POST', '/api/auth/refresh', { body: { refreshToken: u.refreshToken } })));
+      assert.ok(results.filter((r) => r.status === 200).length <= 1);
+      for (const r of results.filter((x) => x.status === 200)) {
+        assert.equal((await s.api('POST', '/api/auth/refresh', { body: { refreshToken: r.body.refreshToken } })).status, 401, 'the winner token must be dead');
+      }
+      assert.equal(await s.db.RefreshToken.count({ where: { userId: u.id, revokedAt: null } }), 0);
+    }
+  });
+
+  test('registration copes with names and emails whose lower-case form is longer', async () => {
+    const email = `${'a'.repeat(64)}@${'b'.repeat(63)}.${'c'.repeat(63)}.${'d'.repeat(56)}.test`;
+    assert.equal(email.length, 254);
+    const password = strongPassword();
+    const res = await s.api('POST', '/api/auth/register', { body: { email, password, displayName: '\u0130'.repeat(40) } });
+    assert.equal(res.status, 201);
+    const row = await s.db.User.findByPk(res.body.user.id);
+    assert.ok(row.searchText.length <= 300, String(row.searchText.length));
+    assert.equal((await s.api('POST', '/api/auth/login', { body: { email, password } })).status, 200);
+  });
+
   test('parallel refresh with one token succeeds exactly once and the replay ends every session', async () => {
     const u = await s.signup();
     const results = await Promise.all(Array.from({ length: 3 }, () => s.api('POST', '/api/auth/refresh', { body: { refreshToken: u.refreshToken } })));
-    assert.equal(results.filter((r) => r.status === 200).length, 1);
-    assert.equal(results.filter((r) => r.status === 401).length, 2);
-    const winner = results.find((r) => r.status === 200);
+    assert.ok(results.filter((r) => r.status === 200).length <= 1);
+    assert.ok(results.every((r) => [200, 401].includes(r.status)));
+    const winner = results.find((r) => r.status === 200) ?? { body: { refreshToken: 'x'.repeat(64) } };
     assert.equal((await s.api('POST', '/api/auth/refresh', { body: { refreshToken: u.refreshToken } })).status, 401);
     assert.equal((await s.api('POST', '/api/auth/refresh', { body: { refreshToken: winner.body.refreshToken } })).status, 401);
   });

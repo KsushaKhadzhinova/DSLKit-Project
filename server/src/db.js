@@ -2,7 +2,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const { Sequelize, DataTypes } = require('sequelize');
-const { normalize } = require('./search');
+const { normalize, fit } = require('./search');
 
 function defineModels(sequelize) {
   const User = sequelize.define(
@@ -21,7 +21,7 @@ function defineModels(sequelize) {
       tableName: 'users',
       hooks: {
         beforeSave: (u) => {
-          u.searchText = normalize(`${u.displayName} ${u.email}`);
+          u.searchText = fit(normalize(`${u.displayName} ${u.email}`), 300);
         },
       },
     },
@@ -42,7 +42,7 @@ function defineModels(sequelize) {
       tableName: 'projects',
       hooks: {
         beforeSave: (p) => {
-          p.searchText = normalize(`${p.title} ${p.description}`);
+          p.searchText = fit(normalize(`${p.title} ${p.description}`), 1000);
         },
       },
     },
@@ -67,6 +67,7 @@ function defineModels(sequelize) {
       tokenHash: { type: DataTypes.STRING(64), allowNull: false, unique: true },
       expiresAt: { type: DataTypes.DATE, allowNull: false },
       revokedAt: { type: DataTypes.DATE, allowNull: true },
+      replayedAt: { type: DataTypes.DATE, allowNull: true },
     },
     { tableName: 'refresh_tokens', timestamps: false },
   );

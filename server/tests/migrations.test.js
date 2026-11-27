@@ -19,7 +19,7 @@ async function shape(sequelize) {
     out[t] = Object.fromEntries(
       Object.entries(cols).map(([name, c]) => [
         name,
-        { type: c.type.replace(/s+/g, ' ').toUpperCase(), allowNull: c.primaryKey ? false : c.allowNull, primaryKey: c.primaryKey },
+        { type: c.type.replace(/\s+/g, ' ').toUpperCase(), allowNull: c.primaryKey ? false : c.allowNull, primaryKey: c.primaryKey },
       ]),
     );
   }
@@ -30,8 +30,13 @@ test('the migration builds exactly the schema the models describe', async () => 
   const synced = await createDatabase(config(true));
   const migrated = await createDatabase(config(false));
   assert.deepEqual(await migrated.sequelize.getQueryInterface().showAllTables(), []);
-  assert.deepEqual(await runMigrations(migrated.sequelize), ['001-init']);
-  assert.deepEqual(await shape(migrated.sequelize), await shape(synced.sequelize));
+  assert.deepEqual(await runMigrations(migrated.sequelize), ['001-init', '002-refresh-replayed']);
+  const migratedShape = await shape(migrated.sequelize);
+  assert.deepEqual(migratedShape, await shape(synced.sequelize));
+  // Guards against a comparison that silently compares nothing.
+  assert.match(migratedShape.users.email.type, /254/);
+  assert.equal(migratedShape.users.email.allowNull, false);
+  assert.equal(migratedShape.users.id.primaryKey, true);
   await synced.sequelize.close();
   await migrated.sequelize.close();
 });
@@ -58,7 +63,7 @@ if (process.env.TEST_PG_URL) {
       loadConfig({ NODE_ENV: 'test', DB_DIALECT: 'postgres', DATABASE_URL: url, JWT_SECRET: randomSecret(), BCRYPT_ROUNDS: '4', DB_SYNC: String(dbSync) });
     const synced = await createDatabase(pgConfig(a.url, true));
     const migrated = await createDatabase(pgConfig(b.url, false));
-    assert.deepEqual(await runMigrations(migrated.sequelize), ['001-init']);
+    assert.deepEqual(await runMigrations(migrated.sequelize), ['001-init', '002-refresh-replayed']);
     assert.deepEqual(await runMigrations(migrated.sequelize), []);
     assert.deepEqual(await shape(migrated.sequelize), await shape(synced.sequelize));
     await synced.sequelize.close();

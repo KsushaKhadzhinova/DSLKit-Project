@@ -271,6 +271,20 @@ describe('projects: role x action', () => {
       assert.equal((await list(a, `?q=${encodeURIComponent('приве!')}`)).body.items.length, 0);
     });
 
+    test('yo and ye are treated as the same letter in search', async () => {
+      await create(a, { title: '\u0401\u0436\u0438\u043a \u041c\u0451\u0434' });
+      for (const q of ['\u0435\u0436\u0438\u043a', '\u0451\u0436\u0438\u043a', '\u043c\u0435\u0434', '\u041c\u0401\u0414']) {
+        assert.equal((await list(a, `?q=${encodeURIComponent(q)}`)).body.items.length, 1, q);
+      }
+    });
+
+    test('a long title and description are searchable and fit the search column', async () => {
+      const p = await create(a, { title: '\u0130'.repeat(80), description: '\u0130'.repeat(500) });
+      const row = await s.db.Project.findByPk(p.id);
+      assert.ok(row.searchText.length <= 1000, String(row.searchText.length));
+      assert.ok((await list(a, `?q=${encodeURIComponent('\u0130\u0130')}`)).body.items.some((x) => x.id === p.id));
+    });
+
     test('a renamed project is found under its new name only', async () => {
       const p = await create(a, { title: 'Oldname' });
       await s.api('PATCH', `/api/projects/${p.id}`, { token: a.token, body: { title: 'Новое имя' } });

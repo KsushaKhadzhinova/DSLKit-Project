@@ -25,9 +25,11 @@ $env:TEST_PG_URL = "postgres://postgres:<password>@127.0.0.1:55432/postgres"; np
 
 ## Database
 
-`DB_DIALECT=sqlite` (development and tests, file `DB_STORAGE`) or `postgres` (production, `DATABASE_URL`). Tables: `users` (role in the `role` column), `projects`, `project_members`, `refresh_tokens` (hashes only), `request_logs` (request log: method, path without query, status, user, IP, duration). Tables: outside production they are created by `sequelize.sync()` (`DB_SYNC` defaults to `true`); in production `DB_SYNC` defaults to `false` and the schema comes from the migration: `npm run migrate` (applies `migrations/*.js` in order, tracked in `schema_migrations`, a second run does nothing). A test checks that the migration yields the same schema as the models (SQLite and PostgreSQL).
+`DB_DIALECT=sqlite` (development and tests, file `DB_STORAGE`) or `postgres` (production, `DATABASE_URL`). Tables: `users` (role in the `role` column), `projects`, `project_members`, `refresh_tokens` (hashes only), `request_logs` (request log: method, path without query, status, user, IP, duration).
 
-Search uses the precomputed `searchText` column (lower case and NFC computed in code), so Cyrillic and letter case behave the same on SQLite and PostgreSQL.
+Schema creation: outside production they are created by `sequelize.sync()` (`DB_SYNC` defaults to `true`); in production `DB_SYNC` defaults to `false` and the schema comes from the migration: `npm run migrate` (applies `migrations/*.js` in order, tracked in `schema_migrations`, a second run does nothing). A test checks that the migration yields the same schema as the models (SQLite and PostgreSQL).
+
+Search uses the precomputed `searchText` column (lower case, NFC and "ё = е" computed in code, cut to the column size), so Cyrillic and letter case behave the same on SQLite and PostgreSQL.
 
 ## API (prefix `/api`, errors: `{"error":{"code","message","details?"}}`)
 
@@ -62,3 +64,5 @@ Search uses the precomputed `searchText` column (lower case and NFC computed in 
 - HTTPS: the server does not terminate TLS itself, keep it behind a TLS reverse proxy; in production it sends `Strict-Transport-Security`.
 - Retention: the request log is kept `logRetentionDays` (30) days, expired refresh tokens are deleted hourly.
 - `title` and `description` are stored verbatim, including `<` and `>`: the client must render them with `textContent`, never `innerHTML`.
+
+When the lock triggers, the counter is reset to 0; during a burst of parallel wrong passwords a small remainder (up to the burst size) can be left in the counter at that moment. The lock is already set; the remainder only brings the next lock closer.
