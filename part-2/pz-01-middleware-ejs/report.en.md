@@ -2,7 +2,7 @@
 
 ## 1 Purpose of the Work
 
-To learn the middleware concept in Express.js, to write custom middleware for request logging, simulated authorization and error handling, and to study the EJS template engine for generating dynamic pages on the server, using the DSLKit project, a diagram-as-code web editor whose theme matches the SaaS direction and the future course project. Variant 26 is even, so the request log is kept not in a file but in a database table.
+The purpose is to learn the middleware concept in Express.js and the EJS template engine using the DSLKit project, a diagram-as-code web editor whose theme matches the SaaS direction and the future course project. To reach it, custom middleware for request logging, simulated authorization and error handling must be written, EJS templates for four routes and the error pages must be connected, the server must check the entered values and all limits of length and numbers must be moved to a separate file. Variant 26 is even, so both the request log and the catalogue data are kept in database tables, not in a file. Every record must have a unique creation time so that records do not look alike. The 500 page must open on a real failure of the log, not by a button, so the report describes how to reproduce such a failure. The source code lies in the repository https://github.com/KsushaKhadzhinova/DSLKit-Project in the branch pz21.
 
 ## 2 Brief Theory
 
@@ -28,25 +28,30 @@ Table 1 – Structure of the practical session 1 project
 | `src/middleware/fakeAuth.js` | Simulated authorization |
 | `src/middleware/errorHandlers.js` | 404 and 500 error handlers |
 | `src/middleware/security.js` | Security headers, CSRF token, rate limit, log escaping |
+| `src/errors.js` | Texts of the error pages: what happened, why and how to fix it |
+| `src/i18n.js` | Choice of the interface language by the `lang` parameter and cookie |
+| `src/locales/` | Dictionaries of English and Russian |
+| `src/limits.js` | Reading the file `limits.json` |
 | `src/data/requestLog.js` | The `request_log` table in SQLite |
 | `src/data/diagrams.js` | The table `diagrams` in the database and form field validation |
+| `src/data/logFile.js` | Export of the log to a file and sending the file with streams |
 | `limits.json` | All length and number limits |
 | `views/` | EJS templates and partial templates |
 | `public/` | Styles and logo from Part 1 of the project, theme switch |
 
-EJS is configured in `src/app.js`, where the view engine and the views folder are set. The common page frame is moved into the partial templates `header` and `footer`, which are included at the start and at the end of every page. Appendix G holds the list template, and Appendix H holds the application assembly.
+EJS is configured in `src/app.js`, where the view engine and the views folder are set. The common page frame is moved into the partial templates `header` and `footer`, which are included at the start and at the end of every page. Appendix A holds the list template, and Appendix B holds the application assembly.
 
 ### 3.2 Request log in a database table
 
-The logging middleware is mounted after the static files and the simulated authorization. Before the route runs it inserts a row with the time, the method and the URL into the `request_log` table, and when the response finishes it adds the status code and the duration to the same row. The same result goes to the console. This order is deliberate: the write happens before the route, so its failure can still be shown to the user as a 500 page, while after the response is sent that is no longer possible. The table is created on first use if it does not exist, and the database connection opens lazily, so an unavailable database does not stop the server from starting and shows up as a request error instead. The `/log` page shows the latest rows of the table, and `limits.json` sets how many. Appendix A holds the listing and Appendix B holds the table description.
+The logging middleware is mounted after the static files and the simulated authorization. Before the route runs it inserts a row with the time, the method and the URL into the `request_log` table, and when the response finishes it adds the status code and the duration to the same row. The same result goes to the console. This order is deliberate: the write happens before the route, so its failure can still be shown to the user as a 500 page, while after the response is sent that is no longer possible. The table is created on first use if it does not exist, and the database connection opens lazily, so an unavailable database does not stop the server from starting and shows up as a request error instead. The `/log` page shows the latest rows of the table, and `limits.json` sets how many. Appendix C holds the listing and Appendix D holds the table description.
 
 ### 3.3 Simulated authorization
 
-The `fakeAuth` middleware checks the parameter `?auth=1`. When it is present, the owner is placed in `req.user`, otherwise a guest, and the templates receive the user name and the query tail for links. The `/add` routes are guarded by `requireAuth`: a guest is redirected to the `/login` page, which explains how to "sign in". Appendix C holds the listing.
+The `fakeAuth` middleware checks the parameter `?auth=1`. When it is present, the owner is placed in `req.user`, otherwise a guest, and the templates receive the user name and the query tail for links. The `/add` routes are guarded by `requireAuth`: a guest is redirected to the `/login` page, which explains how to "sign in". Appendix E holds the listing.
 
 ### 3.4 Routes and pages
 
-The four routes from the task and three service routes are implemented, and Table 2 lists them.
+The four routes from the task and three service routes are implemented, and Table 2 lists them. The code of the routes is given in appendix F.
 
 Table 2 – Application routes
 
@@ -64,13 +69,13 @@ Table 2 – Application routes
 
 The templates print every value with escaping, so markup typed into the form is shown as text. Every record has a "creation time" field. It is set when the record is added and is always later than the previous one, even if two records are created in the same millisecond, so records never look identical.
 
-On the detail page a signed-in user sees the buttons "Edit" and "Delete". Editing opens the same form as adding, but filled with the current values, and checks the fields with the same rules. Deleting is a form with the `POST` method rather than a link, because a link opened with `GET` must not change data. Both forms carry the hidden `_csrf` field, without it the server answers 403, and a guest goes to the sign-in page. The id of a deleted record is never reused. Listing of the item.ejs template is given in appendix J.
+On the detail page a signed-in user sees the buttons "Edit" and "Delete". Editing opens the same form as adding, but filled with the current values, and checks the fields with the same rules. Deleting is a form with the `POST` method rather than a link, because a link opened with `GET` must not change data. Both forms carry the hidden `_csrf` field, without it the server answers 403 even to a signed-in user. A guest who opens a protected page by a plain link goes to the sign-in page. The id of a deleted record is never reused. Listing of the item.ejs template is given in appendix G.
 
-The request log page has a "Clear the log" button. It is a form with the POST method and a hidden CSRF field, not a link. A guest who tries it is redirected to the login page, a request without the token gets 403, and for a signed-in user the `request_log` table is emptied.
+The request log page has a "Clear the log" button. It is a form with the POST method and a hidden CSRF field, not a link. A request without the token gets 403, a guest with a valid token is redirected to the login page, and for a signed-in user the `request_log` table is emptied.
 
 ### 3.5 The 500 page and the order of handlers
 
-The 500 page is shown when a request ends with a server error. The error handler has four parameters and is mounted after all routes and all middleware, so any exception, whether a log write failure, a route error or a broken request body, reaches it. The handler writes the error to the error log, chooses the status code and renders the `500.ejs` template in the common site design: with the header, the footer and the style sheet. When the error carries its own code, for example 413 for an oversized form, the code is kept and the page gets its own heading, for example "Request too large". When the error comes from an unavailable log database, the page shows a clear explanation. For a failure before the simulated authorization the handler supplies a guest itself so that the header can be drawn. If even the 500 template fails to render, a fallback page with the same styling is sent, so the user never sees bare text on a black background. The 500 page is caused by a real failure, not by a button. To show it at the defence, start the server with `DB_FILE=package.json/blocked/log.db npm start`: the database file cannot be created, so every request ends with the 500 page. The second way is to stop the database while the server is running. The 404 page works the same way and is mounted before the 500 handler. Appendix D holds the listing.
+The 500 page is shown when a request ends with a server error. The error handler has four parameters and is mounted after all routes and all middleware, so any exception, whether a log write failure, a route error or a broken request body, reaches it. The handler writes the error to the error log, chooses the status code and renders the `500.ejs` template in the common site design: with the header, the footer and the style sheet. When the error carries its own code, for example 413 for an oversized form, the code is kept and the page gets its own heading, for example "Request too large". When the error comes from an unavailable log database, the page shows a clear explanation. For a failure before the simulated authorization the handler supplies a guest itself so that the header can be drawn. If even the 500 template fails to render, a fallback page with the same styling is sent, so the user never sees bare text on a black background. The 500 page is caused by a real failure, not by a button. To show it at the defence, start the server with `DB_FILE=package.json/blocked/log.db npm start`: the database file cannot be created, so every request ends with the 500 page. The second way is to stop the database while the server is running. The 404 page works the same way and is mounted before the 500 handler. Appendix H holds the listing.
 
 ### 3.6 Form field checks
 
@@ -86,11 +91,11 @@ Table 3 – Checks of the add form fields
 | Diagram code | Optional, not longer than the limit in `limits.json` |
 | Revision | Required, a whole number from 0 to the limit in `limits.json`, negative and fractional values are rejected |
 
-On an error the server answers with status 400, shows the form again, keeps the entered values and prints a message under every wrong field. A missing request body and repeated form keys give status 400 instead of 500. All limits live in the file `limits.json`, not in the code. Appendix E holds the validation listing and appendix F holds the limits file.
+On an error the server answers with status 400, shows the form again, keeps the entered values and prints a message under every wrong field. A missing request body and repeated form keys give status 400 instead of 500. All limits live in the file `limits.json`, not in the code. Appendix I holds the validation listing. The record store in the `diagrams` table is in appendix J and in appendix K, and the limits file is in appendix L.
 
 ### 3.7 Protection of the form and the server
 
-The form and the server are protected against common attacks, all by hand and without new packages. To stop cross-site request forgery the server puts a random token into the `dslkit_csrf` cookie with the flags `HttpOnly` and `SameSite=Strict` and into a hidden form field. A request that changes data is accepted only when both values match and the `Origin` header, when present, points to this very site. Otherwise a page with status 403 is shown. Every response carries the headers `Content-Security-Policy`, `X-Content-Type-Options`, `X-Frame-Options` and `Referrer-Policy`, and the framework name is hidden from the headers. The policy forbids inline scripts and styles, so the templates have none. The rate limit answers with status 429, a page in the common design and the `Retry-After` header: the general limit and a stricter limit for form submissions live in `limits.json`. The size of the form body and the number of its fields are limited by the same file, so huge values give a page with status 400 or 413 instead of a crash. The request URL goes through escaping before it reaches the log: line breaks and control characters are replaced with the notation \uXXXX and the length is cut, so an attacker cannot forge log lines. The `/log` page opens only with `?auth=1`, because it shows the addresses of other requests. Appendix I holds the listing.
+The form and the server are protected against common attacks, all by hand and without new packages. To stop cross-site request forgery the server puts a signed random token into the `dslkit_csrf` cookie with the flags `HttpOnly` and `SameSite=Strict` and into a hidden form field. A request that changes data is accepted only when both values match and the `Origin` header, when present, points to this very site. Otherwise a page with status 403 is shown. Every response carries the headers `Content-Security-Policy`, `X-Content-Type-Options`, `X-Frame-Options` and `Referrer-Policy`, and the framework name is hidden from the headers. The policy forbids inline scripts and styles, so the templates have none. The rate limit answers with status 429, a page in the common design and the `Retry-After` header: the general limit and a stricter limit for form submissions live in `limits.json`. The size of the form body and the number of its fields are limited by the same file, so huge values give a page with status 400 or 413 instead of a crash. The request URL goes through escaping before it reaches the log: line breaks and control characters are replaced with the notation \uXXXX and the length is cut, so an attacker cannot forge log lines. The `/log` page opens only with `?auth=1`, because it shows the addresses of other requests. Appendix M holds the headers and the CSRF check, and appendix N holds the rate limit and the log escaping.
 
 ### 3.8 Appearance of the pages
 
@@ -136,7 +141,7 @@ The 500 page during a real failure is shown in figure 7. The server was started 
 
 Figure 7 – The 500 error page with an explanation about the unavailable log table
 
-The log can be exported to a text file and downloaded. The button "Export the log to a file" writes the rows of the table through a stream (`pipeline` with `createWriteStream`) into a temporary file and renames it to the final one only when the whole file is written, so a failure in the middle does not damage the earlier file. The button "Download the file" sends the file through `createReadStream`. If the file is deleted, moved or unreadable, the person sees a page that explains what happened, why and how to fix it, not a cut connection and not an unnamed 500 error. A failure in the middle of the transfer closes the connection and is written to the console of the server, and the server goes on working. The texts of all error pages live in one catalogue, `src/errors.js`, and each page answers three questions: what it is, why it happened and how to fix it.
+The log can be exported to a text file and downloaded. The button "Export the log to a file" writes the rows of the table through a stream (`pipeline` with `createWriteStream`) into a temporary file and renames it to the final one only when the whole file is written, so a failure in the middle does not damage the earlier file. The code of the streams is in appendix O. The button "Download the file" sends the file through `createReadStream`. If the file is deleted, moved or unreadable, the person sees a page that explains what happened, why and how to fix it, not a cut connection and not an unnamed 500 error. A failure in the middle of the transfer closes the connection and is written to the console of the server, and the server goes on working. The texts of all error pages live in one catalogue, `src/errors.js`, and each page answers three questions: what it is, why it happened and how to fix it.
 
 The same form with correct values saves the record, and the home page shows the new card with its own creation time, as in figure 8.
 
@@ -148,13 +153,13 @@ The «Edit» button on the detail page opens the edit form with the current fiel
 
 ![Edit form](figures/edit.png)
 
-Figure 9 – Edit form of the first diagram with the current values and a new revision
+Figure 9 – Edit form of the added diagram with the current values and a new revision
 
 After the changes are saved the detail page opens with the new revision, and the creation time stays the same, as in figure 10.
 
 ![Record after editing](figures/edited.png)
 
-Figure 10 – Detail page of the first diagram after editing
+Figure 10 – Detail page of the diagram after editing with the new revision
 
 Besides the pages 404 and 500 the site shows styled pages for the codes 400, 403, 405, 413 and 429. Each page explains what happened, why and what to do, and all texts are kept in one catalogue, `src/errors.js`. The codes and the cases are listed in table 4.
 
@@ -163,7 +168,7 @@ Table 4 – Error pages of the site
 | Code | Page heading | When it is shown |
 | --- | --- | --- |
 | 400 | Bad request | The address or the form data cannot be read |
-| 403 | Request refused | The form has no protection token or the user is not signed in |
+| 403 | Request refused | The form has no protection token or it does not match the cookie, or the `Origin` header points to another site |
 | 404 | Page not found | There is no page or record at the address |
 | 405 | Method not allowed | The address exists, but not for this request method |
 | 413 | Request too large | The request body is bigger than the limit in `limits.json` |
@@ -172,19 +177,19 @@ Table 4 – Error pages of the site
 
 The page 403 for a form without the protection token is shown in figure 11.
 
-![Page 403](figures/owner-403.png)
+![Page 403](figures/error-403.png)
 
 Figure 11 – The error page 403 after a form is sent without the protection token
 
 The page 429 for too many requests is shown in figure 12.
 
-![Page 429](figures/owner-429.png)
+![Page 429](figures/error-429.png)
 
 Figure 12 – The error page 429 after too frequent requests
 
 The log failure was checked by stopping the database: the request gets the page 500 with an explanation that the log database is unavailable, and a line about the error goes to the console. The database tables are shown in figure 13.
 
-![Database tables](figures/owner-db-tables.png)
+![Database tables](figures/db-tables.png)
 
 Figure 13 – The tables diagrams and request_log in the SQLite database
 
@@ -208,7 +213,7 @@ Figure 15 – End of the npm test output: the number of passed tests and the cov
 
 25. How do you protect an Express application from CSRF with middleware (in theory)?
 
-    A browser attaches cookies to a request to our site by itself, even when the form was sent by a page of another site, so a cookie alone is not enough. The middleware issues a random token and puts it into a cookie with the `HttpOnly` and `SameSite=Strict` flags and into a hidden field of every form. A request that changes data (`POST`, `PUT`, `PATCH`, `DELETE`) is accepted only when the field value matches the cookie and the `Origin` header, when present, points to this very site. A page of another site can neither read the cookie nor guess the token. The comparison uses `timingSafeEqual`. The order matters: the middleware is mounted after the form parser, because the token is in the body, and before the routes. In the work this is the `csrf` function in `security.js`, and the add, edit and delete forms carry the hidden field.
+    A browser attaches cookies to a request to our site by itself, even when the form was sent by a page of another site, so a cookie alone is not enough. The middleware issues a random token and puts it into a cookie with the `HttpOnly` and `SameSite=Strict` flags and into a hidden field of every form. A request that changes data (`POST`, `PUT`, `PATCH`, `DELETE`) is accepted only when the field value matches the cookie and the `Origin` header, when present, points to this very site. A page of another site can neither read the cookie nor guess the token. The comparison uses `timingSafeEqual`. The order matters: the middleware is mounted after the form parser, because the token is in the body, and before the routes. In the work this is the `csrf` function in `security.js`, and the add, edit and delete forms carry the hidden field. The scheme is a double submit cookie together with the check of the `Origin` header, and the token is signed with a key made at the start of the server, so a value planted into the cookie from a sibling subdomain fails the signature check. Safe methods such as `GET` are not checked, so they must not change data. The package `csurf` is deprecated and its successor `csrf-csrf` uses the same scheme, so here it is written by hand. The token is not bound to a session, because the application has none: it separates this site from another site, not one user from another. After a server restart the key changes and open forms must be loaded again.
 
 26. How do you use a helper function (for example, a date formatter) in an EJS template?
 
@@ -216,13 +221,126 @@ Figure 15 – End of the npm test output: the number of passed tests and the cov
 
 27. Why is the static files middleware usually mounted before all routes?
 
-    A request for a style sheet or a logo should be answered at once, without passing authorization, the log, the form parser and the search through the routes. The page loads faster, and the log does not get a row for every file. If static files came after the routes, a template route or the 404 handler could grab the address of a file first. In the work `express.static` comes after the security headers, so files get them too, and before everything else. The price of this order is that static files are available without signing in, so nothing private may be put into `public`.
+    A request for a style sheet or a logo should be answered at once, without passing authorization, the log, the form parser and the search through the routes. The page loads faster, and the log does not get a row for every file. If static files came after the routes, a template route or the 404 handler could grab the address of a file first. In the work `express.static` stands after the security headers, the request id generator and the `/health` probe, but before the simulated authorization, the rate limit, the log, the form parser and the routes. If the file is missing, `express.static` calls `next()` and the request goes on, so an address without a file gets the 404 page from the `notFound` handler. The price of this order is that static files are available without signing in, so nothing private may be put into `public`.
 
 ## Conclusion
 
-For the DSLKit project an Express application with EJS templates was built: the list of diagrams, the detail page and the add form take data from an array in memory. By the rules of the even variant the request log is written to a SQLite table, and its failure is shown with a styled 500 page. The form rejects empty and whitespace values, text that is too long and negative numbers using limits from a separate file, and every record has a unique creation time. Records can be edited and deleted with buttons on the detail page. The form is protected by a CSRF token, and the server by security headers and a rate limit. The design is taken from Part 1 of the project. Automatic tests cover all the code, and screenshots of the pages are given in the text.
+For the DSLKit project an Express application with EJS templates was built: the list of diagrams, the detail page and the add form take data from the `diagrams` table of a SQLite database. By the rules of the even variant the request log is written to the `request_log` table of the same database, and its failure is shown by the styled 500 page while the action is not done. The form rejects empty and whitespace values, too long text and negative numbers by the limits from the separate file `limits.json`, and every record has a unique creation time. Records can be edited and deleted with the buttons on the detail page, and deleting is a `POST` form. The form is protected by a CSRF token, and the server by security headers and a rate limit. The error pages 400, 403, 404, 405, 413, 429 and 500 follow the site style and explain what happened, why and how to fix it. The look is taken from Part 1 of the project. The automatic tests on `node:test` check the pages, the forms, the protection and the log failure, and the application code is covered by the tests completely, as figure 15 shows. The screenshots are given in the text and the listings in the appendices. The answers to the control questions 25, 26 and 27 are given in section 4. The work was done in the branch pz21 of the project repository.
 
-## Appendix A (mandatory) Listing of the file requestLogger.js
+## Appendix A (mandatory) Listing of the template index.ejs
+
+```ejs
+<%- include('partials/header') %>
+<section class="section" aria-labelledby="page-title">
+  <h1 class="section__title" id="page-title"><%= t('page.index.heading') %></h1>
+  <p class="section__lead"><%= t('page.index.lead') %></p>
+  <% if (items.length === 0) { %>
+    <p class="note"><%= t('page.index.empty') %></p>
+  <% } else { %>
+    <ul class="cards">
+      <% items.forEach((item) => { %>
+        <li class="cards__item">
+          <article class="card">
+            <h2 class="card__title"><%= item.title %></h2>
+            <p class="card__meta">
+              <span class="badge"><%= item.notation %></span>
+              <span>#<%= item.id %></span>
+              <span><%= t('page.index.created') %> <time datetime="<%= item.createdAt %>"><%= formatTime(item.createdAt) %></time></span>
+            </p>
+            <p class="card__text"><%= item.description %></p>
+            <a class="card__link" href="/item/<%= item.id %><%= authQuery %>"><%= t('page.index.open') %><span class="visually-hidden"> <%= item.title %></span></a>
+          </article>
+        </li>
+      <% }) %>
+    </ul>
+  <% } %>
+  <div class="page-actions">
+    <a class="button button--primary" href="/add<%= authQuery %>"><%= t('page.index.addButton') %></a>
+  </div>
+</section>
+<%- include('partials/footer') %>
+```
+
+## Appendix B (mandatory) Listing of the file app.js, assembly and the order of the middleware
+
+```js
+import { randomBytes } from 'node:crypto';
+import express from 'express';
+import { fileURLToPath } from 'node:url';
+import { createDiagramStore, validateDiagram, NOTATIONS } from './data/diagrams.js';
+import { describeFile, exportLog, sendLogFile } from './data/logFile.js';
+import { openRequestLog } from './data/requestLog.js';
+import { requestLogger } from './middleware/requestLogger.js';
+import { loadLimits } from './limits.js';
+import { fakeAuth, requireAuth } from './middleware/fakeAuth.js';
+import { notFound, serverError } from './middleware/errorHandlers.js';
+import { csrf, rateLimit, securityHeaders } from './middleware/security.js';
+import { i18n } from './i18n.js';
+
+const dir = (path) => fileURLToPath(new URL(path, import.meta.url));
+
+const DEFAULT_DB_FILE = dir('../data/requests.db');
+const DEFAULT_LOG_FILE = dir('../data/request-log.txt');
+
+export const createApp = ({
+  store = createDiagramStore(),
+  limits = loadLimits(),
+  log = openRequestLog(DEFAULT_DB_FILE),
+  logFile = process.env.LOG_EXPORT_FILE || DEFAULT_LOG_FILE,
+  write = console.log,
+  writeError = console.error,
+  now = Date.now,
+} = {}) => {
+  const app = express();
+  app.set('view engine', 'ejs');
+  app.set('views', dir('../views'));
+
+  app.disable('x-powered-by');
+  // Off by default (the server cannot tell a real client address or a real HTTPS request from a forged header
+  // unless it is told which hop to trust). Behind a reverse proxy, set TRUST_PROXY to the number of hops to
+  // trust (usually 1), to an IP/subnet, or to "true"; then req.ip, req.secure, the Secure cookie and HSTS all
+  // follow the proxy's X-Forwarded-* headers instead of the raw socket.
+  if (process.env.TRUST_PROXY) {
+    const value = process.env.TRUST_PROXY;
+    app.set('trust proxy', value === 'true' ? true : value === 'false' ? false : /^\d+$/.test(value) ? Number(value) : value);
+  }
+  app.locals.limits = limits;
+  // Records keep the exact ISO time for the machine; people read "2026-10-01 09:00:00.000 UTC".
+  app.locals.formatTime = (iso) => String(iso).replace('T', ' ').replace('Z', ' UTC');
+
+  // Order matters: headers first so every answer has them, then static files and the pure checks,
+  // then the rate limits (a flood is refused before it reaches the database), then the logger (which can fail
+  // and hand over to the error handler), the body parser and the CSRF check (the token is a form field), then the routes.
+  // The two error handlers are the very last, so every failure ends on a styled page.
+  app.use(securityHeaders);
+  // A short identifier of this request: shown on every error page, sent as a header and written to the server log, so a visitor's report can be found.
+  app.use((req, res, next) => {
+    res.locals.requestId = randomBytes(4).toString('hex');
+    res.set('X-Request-Id', res.locals.requestId);
+    next();
+  });
+  // Liveness probe for Docker and monitoring: placed before the rate limit and the log, so probes neither use up the quota nor fill the table.
+  app.get('/health', (req, res) => res.json({ status: 'ok' }));
+  app.use(express.static(dir('../public')));
+  app.use((req, res, next) => {
+    res.locals.path = req.path;
+    next();
+  });
+  // Language before everything else that can render a page or build an error message, so even an
+  // early refusal (CSRF, rate limit) can show its text in the visitor's chosen language.
+  app.use(i18n);
+  app.use(fakeAuth);
+  app.use(rateLimit({ ...limits.rateLimit.all, now }));
+  app.use(rateLimit({ ...limits.rateLimit.write, only: ['POST'], now }));
+  app.use(requestLogger(log, write, limits.logUrlMax));
+  app.use(express.urlencoded({ extended: false, limit: limits.bodyLimit, parameterLimit: limits.parameterLimit }));
+  // body-parser answers too many form fields with 413 ("payload too large"), but the body itself can be tiny:
+  // the actual problem is a malformed request, so it is turned into the 400 it should have been.
+  app.use((err, req, res, next) => next(err?.type === 'parameters.too.many' ? Object.assign(err, { status: 400, statusCode: 400 }) : err));
+  app.use(csrf);
+```
+
+## Appendix C (mandatory) Listing of the file requestLogger.js
 
 ```js
 import { UserError } from '../errors.js';
@@ -283,7 +401,7 @@ export const requestLogger =
   };
 ```
 
-## Appendix B (mandatory) Listing of the file requestLog.js with the log table
+## Appendix D (mandatory) Listing of the file requestLog.js with the log table
 
 ```js
 import { DatabaseSync } from 'node:sqlite';
@@ -382,7 +500,7 @@ export const openRequestLog = (file = ':memory:') => {
 };
 ```
 
-## Appendix C (mandatory) Listing of the file fakeAuth.js
+## Appendix E (mandatory) Listing of the file fakeAuth.js
 
 ```js
 // Simulated authorization: ?auth=1 means "signed in as the owner", anything else is a guest.
@@ -403,386 +521,9 @@ export const requireAuth = (req, res, next) => {
 };
 ```
 
-## Appendix D (mandatory) Listing of the file errorHandlers.js
+## Appendix F (mandatory) Listing of the file app.js, routes of the application
 
 ```js
-import { entryFor } from '../errors.js';
-import { safeLogText } from './security.js';
-import { translate } from '../i18n.js';
-
-export const notFound = (req, res) => {
-  const lang = res.locals.lang ?? 'en';
-  const t = res.locals.t ?? ((key, vars) => translate(lang, key, vars));
-  const entry = entryFor({ userCode: undefined }, 404, lang);
-  res.status(404).render('404', { title: t('title.notFound'), url: req.originalUrl, ...entry });
-};
-
-// Last resort when even the 500 template fails: still a styled page, never a bare text screen.
-const fallbackPage = (status) =>
-  `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>${status} – DSLKit</title><link rel="stylesheet" href="/dslkit.css"><link rel="stylesheet" href="/pz.css"></head>` +
-  `<body class="page"><main class="main"><section class="error"><p class="error__code">Error code: ${status}</p><h1 class="error__title">${status} – server error</h1><p class="error__text">The error page could not be drawn. The error was logged.</p><a class="button button--primary" href="/">Back to the list</a></section></main></body></html>`;
-
-// Four parameters mark this as the error-handling middleware. It is mounted after every route and
-// middleware, so any failure ends on the 500 page (or the 4xx variant for client errors).
-export const serverError =
-  (write = console.error) =>
-  (err, req, res, _next) => {
-    // Errors from body-parser and others carry their own 4xx/5xx status.
-    const status = err.status >= 400 && err.status < 600 ? err.status : 500;
-    // An ordinary 4xx (a bad address, a missing token, too many requests) is one line with no stack:
-    // it is expected traffic, not a server fault, and a flood of them must not flood the console.
-    const line = `[error] ${res.locals?.requestId ?? '-'} ${safeLogText(req.method)} ${safeLogText(req.originalUrl)} ${status}`;
-    if (status >= 500) write(line, err);
-    else write(line);
-    if (res.headersSent) return res.end();
-    if (err.retryAfter) res.set('Retry-After', String(err.retryAfter));
-    // The failure may happen before the i18n middleware ran (a very early crash), so the page needs its own default.
-    const lang = res.locals.lang ?? 'en';
-    // The page tells what the error is, why it happened and how to solve it (see errors.js).
-    const { heading, what, why, fix } = entryFor(err, status, lang);
-    const locals = {
-      title: heading,
-      heading,
-      status,
-      message: err.publicMessage ?? '',
-      what,
-      why,
-      fix,
-      // The failure may happen before fakeAuth ran, so the page needs its own defaults.
-      user: res.locals.user ?? { name: 'Guest', guest: true },
-      authQuery: res.locals.authQuery ?? '',
-      path: '',
-      lang,
-      t: res.locals.t ?? ((key, vars) => translate(lang, key, vars)),
-      langHref: res.locals.langHref ?? { ru: `${req.originalUrl}?lang=ru`, en: `${req.originalUrl}?lang=en` },
-    };
-    return res.status(status).render('500', locals, (renderError, html) => {
-      if (renderError) {
-        write('[error] the 500 page failed to render', renderError);
-        return res.type('html').send(fallbackPage(status));
-      }
-      return res.send(html);
-    });
-  };
-```
-
-## Appendix E (mandatory) Listing of the file diagrams.js with the form checks
-
-```js
-import { DatabaseSync } from 'node:sqlite';
-import { existsSync, mkdirSync, statSync } from 'node:fs';
-import { dirname } from 'node:path';
-import { UserError, fileFailure } from '../errors.js';
-import { translate } from '../i18n.js';
-
-export const NOTATIONS = ['UML', 'BPMN', 'ERD', 'DFD', 'IDEF0', 'Petri'];
-
-const seed = () => [
-  {
-    id: 1,
-    title: 'Order service sequence',
-    notation: 'UML',
-    description: 'Sequence diagram of a checkout request passing through the API gateway.',
-    code: 'sequenceDiagram\n  Client->>API: POST /orders\n  API->>DB: insert order\n  API-->>Client: 201 Created',
-    revision: 3,
-    createdAt: '2026-10-01T09:00:00.000Z',
-  },
-  {
-    id: 2,
-    title: 'Approval workflow',
-    notation: 'BPMN',
-    description: 'Business process: a diagram goes from draft to review to published.',
-    code: 'start -> draft -> review -> published',
-    revision: 1,
-    createdAt: '2026-10-02T10:30:00.000Z',
-  },
-  {
-    id: 3,
-    title: 'Project database',
-    notation: 'ERD',
-    description: 'Entities user, project and diagram with one-to-many links.',
-    code: 'user 1--* project\nproject 1--* diagram',
-    revision: 0,
-    createdAt: '2026-10-03T14:15:00.000Z',
-  },
-];
-
-// A ceiling on the table: the oldest record is dropped first, like a ring buffer.
-const MAX_ITEMS = 5000;
-
-// The diagrams live in a table of the same SQLite database as the request log (variant 26 is even: the data are
-// kept in the database). The connection opens lazily, the schema is created on first use and the three sample
-// records are seeded into an empty table; a database that cannot be reached fails the request (the styled 500 page),
-// not the whole server. Without a file name the table is private to this store and lives in memory (tests).
-// Every record gets its own creation time: it is always later than the previous one, even within one millisecond.
-const CREATE_TABLE = `
-  CREATE TABLE IF NOT EXISTS diagrams (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    title TEXT NOT NULL,
-    notation TEXT NOT NULL,
-    description TEXT NOT NULL,
-    code TEXT NOT NULL,
-    revision INTEGER NOT NULL CHECK (revision >= 0),
-    created_at TEXT NOT NULL
-  )`;
-const COLUMNS = 'id, title, notation, description, code, revision, created_at AS createdAt';
-
-export const createDiagramStore = (now = Date.now, file = ':memory:') => {
-  let db = null;
-  let sql = null;
-  const connect = () => {
-    if (sql) return sql;
-    if (file !== ':memory:' && !existsSync(dirname(file))) mkdirSync(dirname(file), { recursive: true });
-    if (file !== ':memory:' && existsSync(file) && statSync(file).isDirectory()) throw Object.assign(new Error('a folder stands in the place of the file'), { code: 'EISDIR' });
-    const opened = new DatabaseSync(file);
-    try {
-      opened.exec(CREATE_TABLE);
-      if (file !== ':memory:') opened.exec('PRAGMA journal_mode = WAL; PRAGMA synchronous = NORMAL; PRAGMA busy_timeout = 2000;');
-      const insert = opened.prepare('INSERT INTO diagrams (title, notation, description, code, revision, created_at) VALUES (?, ?, ?, ?, ?, ?)');
-      if (opened.prepare('SELECT COUNT(*) AS n FROM diagrams').get().n === 0) {
-        for (const one of seed()) insert.run(one.title, one.notation, one.description, one.code, one.revision, one.createdAt);
-      }
-      sql = {
-        insert,
-        all: opened.prepare(`SELECT ${COLUMNS} FROM diagrams ORDER BY id`),
-        find: opened.prepare(`SELECT ${COLUMNS} FROM diagrams WHERE id = ?`),
-        latest: opened.prepare('SELECT created_at AS createdAt FROM diagrams ORDER BY id DESC LIMIT 1'),
-        update: opened.prepare('UPDATE diagrams SET title = ?, notation = ?, description = ?, code = ?, revision = ? WHERE id = ?'),
-        remove: opened.prepare('DELETE FROM diagrams WHERE id = ?'),
-        trim: opened.prepare('DELETE FROM diagrams WHERE id IN (SELECT id FROM diagrams ORDER BY id LIMIT MAX(0, (SELECT COUNT(*) FROM diagrams) - ?))'),
-        exec: (text) => opened.exec(text),
-      };
-    } catch (error) {
-      opened.close();
-      throw error;
-    }
-    db = opened;
-    return sql;
-  };
-  // Any failure of the database becomes the error page about the database (the same page as for the request log).
-  const guard =
-    (action) =>
-    (...args) => {
-      try {
-        return action(...args);
-      } catch (error) {
-        throw error instanceof UserError ? error : new UserError(fileFailure(error, 'log-database-unavailable'), error);
-      }
-    };
-  // A row that does not look like a record (a damaged file) is a failure of the database, not a crash of the page.
-  const asItem = (row) => {
-    if (!row || typeof row.title !== 'string' || !Number.isSafeInteger(row.revision)) throw new Error('damaged diagram row');
-    return { ...row };
-  };
-  return {
-    all: guard(() => connect().all.all().map(asItem)),
-    find: guard((id) => {
-      const row = connect().find.get(id);
-      return row ? asItem(row) : undefined;
-    }),
-    add: guard(({ title, notation, description, code, revision }) => {
-      const q = connect();
-      // The time is read and the row is written in one transaction, so two writers cannot take the same time.
-      q.exec('BEGIN IMMEDIATE');
-      try {
-        const previous = q.latest.get();
-        const last = Math.max(now(), previous ? Date.parse(previous.createdAt) + 1 : 0);
-        const id = Number(q.insert.run(title, notation, description, code, revision, new Date(last).toISOString()).lastInsertRowid);
-        q.trim.run(MAX_ITEMS);
-        q.exec('COMMIT');
-        return asItem(q.find.get(id));
-      } catch (error) {
-        q.exec('ROLLBACK');
-        throw error;
-      }
-    }),
-    // Edit keeps the id and the creation time, only the form fields change.
-    update: guard((id, { title, notation, description, code, revision }) => {
-      const q = connect();
-      return q.update.run(title, notation, description, code, revision, id).changes ? asItem(q.find.get(id)) : undefined;
-    }),
-    remove: guard((id) => connect().remove.run(id).changes > 0),
-    close: () => {
-      if (db) db.close();
-      db = null;
-      sql = null;
-    },
-  };
-};
-
-const CONTROL = /[\p{Cc}\u2028\u2029\u202a-\u202e\u2066-\u2069]/u;
-// Code keeps its line breaks and tabs (code is written on more than one line); every other control
-// character and direction override is refused, the same as for the title and the description.
-const CONTROL_IN_CODE = /[\u0000-\u0008\u000b-\u001f\u007f-\u009f\u2028\u2029\u202a-\u202e\u2066-\u2069]/u;
-// Zero-width and filler characters look like nothing: a title made only of them would be an empty-looking line in every list.
-const INVISIBLE_ONLY = /^[\p{Z}\p{Cf}\u115f\u1160\u3164\uffa0]*$/u;
-
-// The default translator is plain English, byte-for-byte the text this module always returned before
-// the translation layer existed, so a caller that does not pass `t` (every existing test, for one) sees
-// no change at all.
-const defaultT = (key, vars) => translate('en', key, vars);
-
-const required = (t, field, value, max) => {
-  if (value === '') return t(`validation.${field}.required`);
-  if (value.length > max) return t(`validation.${field}.maxLength`, { max });
-  return null;
-};
-
-// Values arrive already trimmed, so a whitespace-only value is an empty one.
-// Returns an object of field errors, empty when the input is valid. Limits come from limits.json.
-// `t` is the translator of the request (res.locals.t); callers that omit it get English, as before.
-export const validateDiagram = (input, limits, t = defaultT) => {
-  const errors = {};
-  const set = (field, message) => message && (errors[field] = message);
-  set('title', required(t, 'title', input.title, limits.title.maxLength));
-  // Control characters (NUL, escape) and text-direction overrides are not part of a title: they break lists and can flip the text around it.
-  if (!errors.title && CONTROL.test(input.title)) errors.title = t('validation.title.control');
-  if (!errors.title && INVISIBLE_ONLY.test(input.title)) errors.title = t('validation.title.invisible');
-  set('description', required(t, 'description', input.description, limits.description.maxLength));
-  if (!errors.description && CONTROL.test(input.description)) errors.description = t('validation.description.control');
-  if (input.code.length > limits.code.maxLength) errors.code = t('validation.code.maxLength', { max: limits.code.maxLength });
-  if (!errors.code && CONTROL_IN_CODE.test(input.code)) errors.code = t('validation.code.control');
-  if (!NOTATIONS.includes(input.notation)) errors.notation = t('validation.notation.invalid');
-  const { min, max } = limits.revision;
-  if (input.revision === '') errors.revision = t('validation.revision.required');
-  else if (!/^\d+$/.test(input.revision) || Number(input.revision) < min || Number(input.revision) > max) {
-    errors.revision = t('validation.revision.range', { min, max });
-  }
-  return errors;
-};
-```
-
-## Appendix F (mandatory) The limits file limits.json
-
-```json
-{
-  "title": { "maxLength": 80 },
-  "description": { "maxLength": 500 },
-  "code": { "maxLength": 5000 },
-  "revision": { "min": 0, "max": 100000 },
-  "bodyLimit": "20kb",
-  "parameterLimit": 20,
-  "logRows": 100,
-  "logUrlMax": 500,
-  "rateLimit": {
-    "all": { "windowMs": 60000, "max": 300 },
-    "write": { "windowMs": 60000, "max": 20 }
-  }
-}
-```
-
-## Appendix G (mandatory) Listing of the template index.ejs
-
-```ejs
-<%- include('partials/header') %>
-<section class="section" aria-labelledby="page-title">
-  <h1 class="section__title" id="page-title"><%= t('page.index.heading') %></h1>
-  <p class="section__lead"><%= t('page.index.lead') %></p>
-  <% if (items.length === 0) { %>
-    <p class="note"><%= t('page.index.empty') %></p>
-  <% } else { %>
-    <ul class="cards">
-      <% items.forEach((item) => { %>
-        <li class="cards__item">
-          <article class="card">
-            <h2 class="card__title"><%= item.title %></h2>
-            <p class="card__meta">
-              <span class="badge"><%= item.notation %></span>
-              <span>#<%= item.id %></span>
-              <span><%= t('page.index.created') %> <time datetime="<%= item.createdAt %>"><%= formatTime(item.createdAt) %></time></span>
-            </p>
-            <p class="card__text"><%= item.description %></p>
-            <a class="card__link" href="/item/<%= item.id %><%= authQuery %>"><%= t('page.index.open') %><span class="visually-hidden"> <%= item.title %></span></a>
-          </article>
-        </li>
-      <% }) %>
-    </ul>
-  <% } %>
-  <div class="page-actions">
-    <a class="button button--primary" href="/add<%= authQuery %>"><%= t('page.index.addButton') %></a>
-  </div>
-</section>
-<%- include('partials/footer') %>
-```
-
-## Appendix H (mandatory) Listing of the file app.js
-
-```js
-import { randomBytes } from 'node:crypto';
-import express from 'express';
-import { fileURLToPath } from 'node:url';
-import { createDiagramStore, validateDiagram, NOTATIONS } from './data/diagrams.js';
-import { describeFile, exportLog, sendLogFile } from './data/logFile.js';
-import { openRequestLog } from './data/requestLog.js';
-import { requestLogger } from './middleware/requestLogger.js';
-import { loadLimits } from './limits.js';
-import { fakeAuth, requireAuth } from './middleware/fakeAuth.js';
-import { notFound, serverError } from './middleware/errorHandlers.js';
-import { csrf, rateLimit, securityHeaders } from './middleware/security.js';
-import { i18n } from './i18n.js';
-
-const dir = (path) => fileURLToPath(new URL(path, import.meta.url));
-
-const DEFAULT_DB_FILE = dir('../data/requests.db');
-const DEFAULT_LOG_FILE = dir('../data/request-log.txt');
-
-export const createApp = ({
-  store = createDiagramStore(),
-  limits = loadLimits(),
-  log = openRequestLog(DEFAULT_DB_FILE),
-  logFile = process.env.LOG_EXPORT_FILE || DEFAULT_LOG_FILE,
-  write = console.log,
-  writeError = console.error,
-  now = Date.now,
-} = {}) => {
-  const app = express();
-  app.set('view engine', 'ejs');
-  app.set('views', dir('../views'));
-
-  app.disable('x-powered-by');
-  // Off by default (the server cannot tell a real client address or a real HTTPS request from a forged header
-  // unless it is told which hop to trust). Behind a reverse proxy, set TRUST_PROXY to the number of hops to
-  // trust (usually 1), to an IP/subnet, or to "true"; then req.ip, req.secure, the Secure cookie and HSTS all
-  // follow the proxy's X-Forwarded-* headers instead of the raw socket.
-  if (process.env.TRUST_PROXY) {
-    const value = process.env.TRUST_PROXY;
-    app.set('trust proxy', value === 'true' ? true : value === 'false' ? false : /^\d+$/.test(value) ? Number(value) : value);
-  }
-  app.locals.limits = limits;
-  // Records keep the exact ISO time for the machine; people read "2026-10-01 09:00:00.000 UTC".
-  app.locals.formatTime = (iso) => String(iso).replace('T', ' ').replace('Z', ' UTC');
-
-  // Order matters: headers first so every answer has them, then static files and the pure checks,
-  // then the rate limits (a flood is refused before it reaches the database), then the logger (which can fail
-  // and hand over to the error handler), the body parser and the CSRF check (the token is a form field), then the routes.
-  // The two error handlers are the very last, so every failure ends on a styled page.
-  app.use(securityHeaders);
-  // A short identifier of this request: shown on every error page, sent as a header and written to the server log, so a visitor's report can be found.
-  app.use((req, res, next) => {
-    res.locals.requestId = randomBytes(4).toString('hex');
-    res.set('X-Request-Id', res.locals.requestId);
-    next();
-  });
-  // Liveness probe for Docker and monitoring: placed before the rate limit and the log, so probes neither use up the quota nor fill the table.
-  app.get('/health', (req, res) => res.json({ status: 'ok' }));
-  app.use(express.static(dir('../public')));
-  app.use((req, res, next) => {
-    res.locals.path = req.path;
-    next();
-  });
-  // Language before everything else that can render a page or build an error message, so even an
-  // early refusal (CSRF, rate limit) can show its text in the visitor's chosen language.
-  app.use(i18n);
-  app.use(fakeAuth);
-  app.use(rateLimit({ ...limits.rateLimit.all, now }));
-  app.use(rateLimit({ ...limits.rateLimit.write, only: ['POST'], now }));
-  app.use(requestLogger(log, write, limits.logUrlMax));
-  app.use(express.urlencoded({ extended: false, limit: limits.bodyLimit, parameterLimit: limits.parameterLimit }));
-  // body-parser answers too many form fields with 413 ("payload too large"), but the body itself can be tiny:
-  // the actual problem is a malformed request, so it is turned into the 400 it should have been.
-  app.use((err, req, res, next) => next(err?.type === 'parameters.too.many' ? Object.assign(err, { status: 400, statusCode: 400 }) : err));
-  app.use(csrf);
-
   app.get('/', (req, res) => res.render('index', { title: res.locals.t('title.diagrams'), items: store.all() }));
 
   // Only plain digits are a number: Number() would also accept "0x1" or "1e0". A leading zero is refused
@@ -907,7 +648,318 @@ export const createApp = ({
 };
 ```
 
-## Appendix I (mandatory) Listing of the file security.js
+## Appendix G (mandatory) Listing of the template item.ejs
+
+```ejs
+<%- include('partials/header') %>
+<section class="section" aria-labelledby="page-title">
+  <h1 class="section__title" id="page-title"><%= item.title %></h1>
+  <p><span class="badge"><%= item.notation %></span></p>
+  <p class="section__lead"><%= item.description %></p>
+  <dl class="facts">
+    <dt><%= t('page.item.number') %></dt>
+    <dd><%= item.id %></dd>
+    <dt><%= t('page.item.revision') %></dt>
+    <dd><%= item.revision %></dd>
+    <dt><%= t('page.item.created') %></dt>
+    <dd><time datetime="<%= item.createdAt %>"><%= formatTime(item.createdAt) %></time></dd>
+  </dl>
+  <% if (item.code) { %>
+    <h2><%= t('page.item.source') %></h2>
+    <pre class="code"><%= item.code %></pre>
+  <% } %>
+  <div class="page-actions">
+    <a class="button button--primary" href="/<%= authQuery %>"><%= t('page.item.back') %></a>
+    <% if (!user.guest) { %>
+      <a class="button button--tonal" href="/item/<%= item.id %>/edit<%= authQuery %>"><%= t('page.item.edit') %><span class="visually-hidden"> <%= item.title %></span></a>
+      <form class="inline-form" method="post" action="/item/<%= item.id %>/delete<%= authQuery %>">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+        <button class="button button--quiet" type="submit"><%= t('page.item.delete') %><span class="visually-hidden"> <%= item.title %></span></button>
+      </form>
+    <% } %>
+  </div>
+</section>
+<%- include('partials/footer') %>
+```
+
+## Appendix H (mandatory) Listing of the file errorHandlers.js
+
+```js
+import { entryFor } from '../errors.js';
+import { safeLogText } from './security.js';
+import { translate } from '../i18n.js';
+
+export const notFound = (req, res) => {
+  const lang = res.locals.lang ?? 'en';
+  const t = res.locals.t ?? ((key, vars) => translate(lang, key, vars));
+  const entry = entryFor({ userCode: undefined }, 404, lang);
+  res.status(404).render('404', { title: t('title.notFound'), url: req.originalUrl, ...entry });
+};
+
+// Last resort when even the 500 template fails: still a styled page, never a bare text screen.
+const fallbackPage = (status) =>
+  `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>${status} – DSLKit</title><link rel="stylesheet" href="/dslkit.css"><link rel="stylesheet" href="/pz.css"></head>` +
+  `<body class="page"><main class="main"><section class="error"><p class="error__code">Error code: ${status}</p><h1 class="error__title">${status} – server error</h1><p class="error__text">The error page could not be drawn. The error was logged.</p><a class="button button--primary" href="/">Back to the list</a></section></main></body></html>`;
+
+// Four parameters mark this as the error-handling middleware. It is mounted after every route and
+// middleware, so any failure ends on the 500 page (or the 4xx variant for client errors).
+export const serverError =
+  (write = console.error) =>
+  (err, req, res, _next) => {
+    // Errors from body-parser and others carry their own 4xx/5xx status.
+    const status = err.status >= 400 && err.status < 600 ? err.status : 500;
+    // An ordinary 4xx (a bad address, a missing token, too many requests) is one line with no stack:
+    // it is expected traffic, not a server fault, and a flood of them must not flood the console.
+    const line = `[error] ${res.locals?.requestId ?? '-'} ${safeLogText(req.method)} ${safeLogText(req.originalUrl)} ${status}`;
+    if (status >= 500) write(line, err);
+    else write(line);
+    if (res.headersSent) return res.end();
+    if (err.retryAfter) res.set('Retry-After', String(err.retryAfter));
+    // The failure may happen before the i18n middleware ran (a very early crash), so the page needs its own default.
+    const lang = res.locals.lang ?? 'en';
+    // The page tells what the error is, why it happened and how to solve it (see errors.js).
+    const { heading, what, why, fix } = entryFor(err, status, lang);
+    const locals = {
+      title: heading,
+      heading,
+      status,
+      message: err.publicMessage ?? '',
+      what,
+      why,
+      fix,
+      // The failure may happen before fakeAuth ran, so the page needs its own defaults.
+      user: res.locals.user ?? { name: 'Guest', guest: true },
+      authQuery: res.locals.authQuery ?? '',
+      path: '',
+      lang,
+      t: res.locals.t ?? ((key, vars) => translate(lang, key, vars)),
+      langHref: res.locals.langHref ?? { ru: `${req.originalUrl}?lang=ru`, en: `${req.originalUrl}?lang=en` },
+    };
+    return res.status(status).render('500', locals, (renderError, html) => {
+      if (renderError) {
+        write('[error] the 500 page failed to render', renderError);
+        return res.type('html').send(fallbackPage(status));
+      }
+      return res.send(html);
+    });
+  };
+```
+
+## Appendix I (mandatory) Listing of the file diagrams.js, form field checks
+
+```js
+const CONTROL = /[\p{Cc}\u2028\u2029\u202a-\u202e\u2066-\u2069]/u;
+// Code keeps its line breaks and tabs (code is written on more than one line); every other control
+// character and direction override is refused, the same as for the title and the description.
+const CONTROL_IN_CODE = /[\u0000-\u0008\u000b-\u001f\u007f-\u009f\u2028\u2029\u202a-\u202e\u2066-\u2069]/u;
+// Zero-width and filler characters look like nothing: a title made only of them would be an empty-looking line in every list.
+const INVISIBLE_ONLY = /^[\p{Z}\p{Cf}\u115f\u1160\u3164\uffa0]*$/u;
+
+// The default translator is plain English, byte-for-byte the text this module always returned before
+// the translation layer existed, so a caller that does not pass `t` (every existing test, for one) sees
+// no change at all.
+const defaultT = (key, vars) => translate('en', key, vars);
+
+const required = (t, field, value, max) => {
+  if (value === '') return t(`validation.${field}.required`);
+  if (value.length > max) return t(`validation.${field}.maxLength`, { max });
+  return null;
+};
+
+// Values arrive already trimmed, so a whitespace-only value is an empty one.
+// Returns an object of field errors, empty when the input is valid. Limits come from limits.json.
+// `t` is the translator of the request (res.locals.t); callers that omit it get English, as before.
+export const validateDiagram = (input, limits, t = defaultT) => {
+  const errors = {};
+  const set = (field, message) => message && (errors[field] = message);
+  set('title', required(t, 'title', input.title, limits.title.maxLength));
+  // Control characters (NUL, escape) and text-direction overrides are not part of a title: they break lists and can flip the text around it.
+  if (!errors.title && CONTROL.test(input.title)) errors.title = t('validation.title.control');
+  if (!errors.title && INVISIBLE_ONLY.test(input.title)) errors.title = t('validation.title.invisible');
+  set('description', required(t, 'description', input.description, limits.description.maxLength));
+  if (!errors.description && CONTROL.test(input.description)) errors.description = t('validation.description.control');
+  if (input.code.length > limits.code.maxLength) errors.code = t('validation.code.maxLength', { max: limits.code.maxLength });
+  if (!errors.code && CONTROL_IN_CODE.test(input.code)) errors.code = t('validation.code.control');
+  if (!NOTATIONS.includes(input.notation)) errors.notation = t('validation.notation.invalid');
+  const { min, max } = limits.revision;
+  if (input.revision === '') errors.revision = t('validation.revision.required');
+  else if (!/^\d+$/.test(input.revision) || Number(input.revision) < min || Number(input.revision) > max) {
+    errors.revision = t('validation.revision.range', { min, max });
+  }
+  return errors;
+};
+```
+
+## Appendix J (mandatory) Listing of the file diagrams.js, initial records and table
+
+```js
+import { DatabaseSync } from 'node:sqlite';
+import { existsSync, mkdirSync, statSync } from 'node:fs';
+import { dirname } from 'node:path';
+import { UserError, fileFailure } from '../errors.js';
+import { translate } from '../i18n.js';
+
+export const NOTATIONS = ['UML', 'BPMN', 'ERD', 'DFD', 'IDEF0', 'Petri'];
+
+const seed = () => [
+  {
+    id: 1,
+    title: 'Order service sequence',
+    notation: 'UML',
+    description: 'Sequence diagram of a checkout request passing through the API gateway.',
+    code: 'sequenceDiagram\n  Client->>API: POST /orders\n  API->>DB: insert order\n  API-->>Client: 201 Created',
+    revision: 3,
+    createdAt: '2026-10-01T09:00:00.000Z',
+  },
+  {
+    id: 2,
+    title: 'Approval workflow',
+    notation: 'BPMN',
+    description: 'Business process: a diagram goes from draft to review to published.',
+    code: 'start -> draft -> review -> published',
+    revision: 1,
+    createdAt: '2026-10-02T10:30:00.000Z',
+  },
+  {
+    id: 3,
+    title: 'Project database',
+    notation: 'ERD',
+    description: 'Entities user, project and diagram with one-to-many links.',
+    code: 'user 1--* project\nproject 1--* diagram',
+    revision: 0,
+    createdAt: '2026-10-03T14:15:00.000Z',
+  },
+];
+
+// A ceiling on the table: the oldest record is dropped first, like a ring buffer.
+const MAX_ITEMS = 5000;
+
+// The diagrams live in a table of the same SQLite database as the request log (variant 26 is even: the data are
+// kept in the database). The connection opens lazily, the schema is created on first use and the three sample
+// records are seeded into an empty table; a database that cannot be reached fails the request (the styled 500 page),
+// not the whole server. Without a file name the table is private to this store and lives in memory (tests).
+// Every record gets its own creation time: it is always later than the previous one, even within one millisecond.
+const CREATE_TABLE = `
+  CREATE TABLE IF NOT EXISTS diagrams (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT NOT NULL,
+    notation TEXT NOT NULL,
+    description TEXT NOT NULL,
+    code TEXT NOT NULL,
+    revision INTEGER NOT NULL CHECK (revision >= 0),
+    created_at TEXT NOT NULL
+  )`;
+const COLUMNS = 'id, title, notation, description, code, revision, created_at AS createdAt';
+
+```
+
+## Appendix K (mandatory) Listing of the file diagrams.js, record store
+
+```js
+export const createDiagramStore = (now = Date.now, file = ':memory:') => {
+  let db = null;
+  let sql = null;
+  const connect = () => {
+    if (sql) return sql;
+    if (file !== ':memory:' && !existsSync(dirname(file))) mkdirSync(dirname(file), { recursive: true });
+    if (file !== ':memory:' && existsSync(file) && statSync(file).isDirectory()) throw Object.assign(new Error('a folder stands in the place of the file'), { code: 'EISDIR' });
+    const opened = new DatabaseSync(file);
+    try {
+      opened.exec(CREATE_TABLE);
+      if (file !== ':memory:') opened.exec('PRAGMA journal_mode = WAL; PRAGMA synchronous = NORMAL; PRAGMA busy_timeout = 2000;');
+      const insert = opened.prepare('INSERT INTO diagrams (title, notation, description, code, revision, created_at) VALUES (?, ?, ?, ?, ?, ?)');
+      if (opened.prepare('SELECT COUNT(*) AS n FROM diagrams').get().n === 0) {
+        for (const one of seed()) insert.run(one.title, one.notation, one.description, one.code, one.revision, one.createdAt);
+      }
+      sql = {
+        insert,
+        all: opened.prepare(`SELECT ${COLUMNS} FROM diagrams ORDER BY id`),
+        find: opened.prepare(`SELECT ${COLUMNS} FROM diagrams WHERE id = ?`),
+        latest: opened.prepare('SELECT created_at AS createdAt FROM diagrams ORDER BY id DESC LIMIT 1'),
+        update: opened.prepare('UPDATE diagrams SET title = ?, notation = ?, description = ?, code = ?, revision = ? WHERE id = ?'),
+        remove: opened.prepare('DELETE FROM diagrams WHERE id = ?'),
+        trim: opened.prepare('DELETE FROM diagrams WHERE id IN (SELECT id FROM diagrams ORDER BY id LIMIT MAX(0, (SELECT COUNT(*) FROM diagrams) - ?))'),
+        exec: (text) => opened.exec(text),
+      };
+    } catch (error) {
+      opened.close();
+      throw error;
+    }
+    db = opened;
+    return sql;
+  };
+  // Any failure of the database becomes the error page about the database (the same page as for the request log).
+  const guard =
+    (action) =>
+    (...args) => {
+      try {
+        return action(...args);
+      } catch (error) {
+        throw error instanceof UserError ? error : new UserError(fileFailure(error, 'log-database-unavailable'), error);
+      }
+    };
+  // A row that does not look like a record (a damaged file) is a failure of the database, not a crash of the page.
+  const asItem = (row) => {
+    if (!row || typeof row.title !== 'string' || !Number.isSafeInteger(row.revision)) throw new Error('damaged diagram row');
+    return { ...row };
+  };
+  return {
+    all: guard(() => connect().all.all().map(asItem)),
+    find: guard((id) => {
+      const row = connect().find.get(id);
+      return row ? asItem(row) : undefined;
+    }),
+    add: guard(({ title, notation, description, code, revision }) => {
+      const q = connect();
+      // The time is read and the row is written in one transaction, so two writers cannot take the same time.
+      q.exec('BEGIN IMMEDIATE');
+      try {
+        const previous = q.latest.get();
+        const last = Math.max(now(), previous ? Date.parse(previous.createdAt) + 1 : 0);
+        const id = Number(q.insert.run(title, notation, description, code, revision, new Date(last).toISOString()).lastInsertRowid);
+        q.trim.run(MAX_ITEMS);
+        q.exec('COMMIT');
+        return asItem(q.find.get(id));
+      } catch (error) {
+        q.exec('ROLLBACK');
+        throw error;
+      }
+    }),
+    // Edit keeps the id and the creation time, only the form fields change.
+    update: guard((id, { title, notation, description, code, revision }) => {
+      const q = connect();
+      return q.update.run(title, notation, description, code, revision, id).changes ? asItem(q.find.get(id)) : undefined;
+    }),
+    remove: guard((id) => connect().remove.run(id).changes > 0),
+    close: () => {
+      if (db) db.close();
+      db = null;
+      sql = null;
+    },
+  };
+};
+```
+
+## Appendix L (mandatory) The limits file limits.json
+
+```json
+{
+  "title": { "maxLength": 80 },
+  "description": { "maxLength": 500 },
+  "code": { "maxLength": 5000 },
+  "revision": { "min": 0, "max": 100000 },
+  "bodyLimit": "20kb",
+  "parameterLimit": 20,
+  "logRows": 100,
+  "logUrlMax": 500,
+  "rateLimit": {
+    "all": { "windowMs": 60000, "max": 300 },
+    "write": { "windowMs": 60000, "max": 20 }
+  }
+}
+```
+
+## Appendix M (mandatory) Listing of the file security.js, headers and CSRF protection
 
 ```js
 import { randomBytes, timingSafeEqual, createHmac } from 'node:crypto';
@@ -1004,7 +1056,11 @@ export const csrf = (req, res, next) => {
   res.locals.csrfToken = token;
   next();
 };
+```
 
+## Appendix N (mandatory) Listing of the file security.js, rate limit and log escaping
+
+```js
 const tooMany = (retryAfter, t) => Object.assign(new Error('Too many requests'), { status: 429, retryAfter, publicMessage: t('error.tooManyRequests', { retryAfter }) });
 
 // Fixed-window rate limit per client address, kept in memory. `only` limits it to some methods.
@@ -1042,36 +1098,103 @@ export const safeLogText = (text, max = 500) => {
 };
 ```
 
-## Appendix J (mandatory) Listing of the template item.ejs
+## Appendix O (mandatory) Listing of the file logFile.js, log export with streams
 
-```ejs
-<%- include('partials/header') %>
-<section class="section" aria-labelledby="page-title">
-  <h1 class="section__title" id="page-title"><%= item.title %></h1>
-  <p><span class="badge"><%= item.notation %></span></p>
-  <p class="section__lead"><%= item.description %></p>
-  <dl class="facts">
-    <dt><%= t('page.item.number') %></dt>
-    <dd><%= item.id %></dd>
-    <dt><%= t('page.item.revision') %></dt>
-    <dd><%= item.revision %></dd>
-    <dt><%= t('page.item.created') %></dt>
-    <dd><time datetime="<%= item.createdAt %>"><%= formatTime(item.createdAt) %></time></dd>
-  </dl>
-  <% if (item.code) { %>
-    <h2><%= t('page.item.source') %></h2>
-    <pre class="code"><%= item.code %></pre>
-  <% } %>
-  <div class="page-actions">
-    <a class="button button--primary" href="/<%= authQuery %>"><%= t('page.item.back') %></a>
-    <% if (!user.guest) { %>
-      <a class="button button--tonal" href="/item/<%= item.id %>/edit<%= authQuery %>"><%= t('page.item.edit') %><span class="visually-hidden"> <%= item.title %></span></a>
-      <form class="inline-form" method="post" action="/item/<%= item.id %>/delete<%= authQuery %>">
-        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-        <button class="button button--quiet" type="submit"><%= t('page.item.delete') %><span class="visually-hidden"> <%= item.title %></span></button>
-      </form>
-    <% } %>
-  </div>
-</section>
-<%- include('partials/footer') %>
+```js
+import { createReadStream, createWriteStream } from 'node:fs';
+import { mkdir, rename, rm, stat } from 'node:fs/promises';
+import { dirname } from 'node:path';
+import { Readable } from 'node:stream';
+import { pipeline } from 'node:stream/promises';
+import { UserError, fileFailure } from '../errors.js';
+
+// The request log lives in the database (the even variant), and it can also be exported to a text file and downloaded.
+// Both steps work with streams, so a big log is never held in memory as one string, and every failure ends in a page that the person can understand.
+
+const ROW_LIMIT = 100000;
+
+const lineOf = (row) => `${row.time}\t${row.method}\t${String(row.url).replace(/[\u0000-\u001f\u007f-\u009f]/g, '?')}\t${row.status ?? ''}\t${row.ms ?? ''}\n`;
+
+// One export at a time per destination file: two requests racing to write and rename the very same
+// `${file}.part` otherwise step on each other (one renames the file out from under the other, which then
+// fails with ENOENT and a 500 the person did not cause). A second export for the same file waits its turn
+// instead of racing; an export to another file is never held up by this one.
+const queues = new Map();
+const exclusive = (key, task) => {
+  const previous = queues.get(key) ?? Promise.resolve();
+  const current = previous.then(task, task);
+  queues.set(key, current.then(() => undefined, () => undefined));
+  return current;
+};
+
+// Writes the rows to a temporary file through a stream and renames it over the old file only when the whole file is written,
+// so a failure in the middle never leaves a half-written log in the place of a good one. The rows are read from the
+// database and written to the file one at a time (see requestLog.js's `iterate`), so even the full table is
+// never held in memory as one array, unlike a plain `log.recent(ROW_LIMIT)` would be.
+export const exportLog = (log, file) => exclusive(file, () => doExport(log, file));
+
+const doExport = async (log, file) => {
+  const temporary = `${file}.part`;
+  // Reading the table happens before the try: a database failure here is "the log database could not be
+  // reached" (see requestLog.js), not "the export failed", and the two have different pages to explain them.
+  const rows = log.iterate(ROW_LIMIT);
+  let count = 0;
+  const lines = async function* () {
+    yield 'time\tmethod\turl\tstatus\tms\n';
+    for (const row of rows) {
+      count += 1;
+      yield lineOf(row);
+    }
+  };
+  try {
+    // A deleted folder is made again; a folder with the name of the file is refused with its own page.
+    await mkdir(dirname(file), { recursive: true });
+    if ((await describeFile(file))?.folder) throw Object.assign(new Error('a folder stands in the place of the file'), { code: 'EISDIR' });
+    await pipeline(Readable.from(lines()), createWriteStream(temporary, { flags: 'w' }));
+    await rename(temporary, file);
+  } catch (error) {
+    await rm(temporary, { force: true }).catch(() => {});
+    throw new UserError(fileFailure(error, 'log-export-failed'), error);
+  }
+  return count;
+};
+
+// Size and time of the exported file, null when there is no file (never made, deleted or renamed), { folder: true } when a folder has its name.
+export const describeFile = async (file) => {
+  try {
+    const info = await stat(file);
+    return info.isFile() ? { size: info.size, time: info.mtime.toISOString() } : { folder: true };
+  } catch {
+    return null;
+  }
+};
+
+// Sends the file to the browser through a stream. A missing file is a page for the person (404), not a crash.
+// An error in the middle of the transfer cannot become a page, because the answer has begun: then the connection is closed and the failure goes to the console.
+// `open` opens the file for reading; a test replaces it to make the file fail in the middle of the transfer.
+export const sendLogFile = async (res, file, writeError, open = createReadStream) => {
+  const info = await describeFile(file);
+  if (!info) throw new UserError('log-file-missing');
+  if (info.folder) throw new UserError('log-path-is-folder');
+  const input = open(file);
+  // The file can disappear between the check and the opening: the open event decides.
+  await new Promise((resolve, reject) => {
+    input.once('open', resolve);
+    input.once('error', reject);
+  }).catch((error) => {
+    throw new UserError(error.code === 'ENOENT' ? 'log-file-missing' : fileFailure(error, 'log-file-unreadable'), error);
+  });
+  res.set({
+    'Content-Type': 'text/plain; charset=utf-8',
+    'Content-Disposition': 'attachment; filename="request-log.txt"',
+    'Content-Length': String(info.size),
+    'Cache-Control': 'no-store',
+  });
+  try {
+    await pipeline(input, res);
+  } catch (error) {
+    writeError('[error] the log file transfer failed', error);
+    res.destroy();
+  }
+};
 ```

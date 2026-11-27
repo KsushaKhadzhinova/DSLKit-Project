@@ -181,3 +181,18 @@ test('strict mode adds the level A and B rules and checks the control questions 
   has(lintReport(withQuestions.replace('27. В?', '28. В?'), 'ru', { strict: true, variant: 26, questions: 30 }), 'n−1, n, n+1');
   assert.deepEqual(lintReport(withQuestions.replace('27. В?', '28. В?'), 'ru', { strict: true }), []);
 });
+
+test('strict final refuses placeholder figures, plain strict only reports them as data', () => {
+  const placeholders = ['figures/owner-403.png'];
+  assert.deepEqual(lintReport(strictRu, 'ru', { strict: true, placeholders }), []);
+  assert.deepEqual(lintReport(strictRu, 'ru', { strict: 'final', placeholders: [] }), []);
+  has(lintReport(strictRu, 'ru', { strict: 'final', placeholders }), 'заглушки вместо снимков: figures/owner-403.png');
+  has(lintReport(strictEn, 'en', { strict: 'final', placeholders }), 'Placeholder figures are left in the final report');
+});
+
+test('strict mode passes the database, repository and branch rules on', () => {
+  const link = 'https://example.org/p';
+  has(lintReport(strictRu.replace('Текст.', 'Данные в массиве.'), 'ru', { strict: true, database: true }), 'массив');
+  has(lintReport(strictRu, 'ru', { strict: true, repository: link, branch: 'pz21' }), 'репозиторий');
+  assert.deepEqual(lintReport(strictRu.replace('Текст.', `Код в ${link} в ветке pz21.`), 'ru', { strict: true, repository: link, branch: 'pz21' }), []);
+});

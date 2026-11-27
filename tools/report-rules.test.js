@@ -118,7 +118,7 @@ test('appendix letters and their order', () => {
   only(ru.replace('Приложение А', 'Приложение З'), 'ru', 'Запрещённая');
   only(`${ru}\n## Приложение В (обязательное) Лишнее\n`, 'ru', 'не по порядку');
   only(`${en}\n## Appendix D (mandatory) Third\n`, 'en', 'not in letter order');
-  assert.deepEqual(extraErrors(`${ru}\n## Приложение Б (обязательное) Второе\n`, 'ru'), []);
+  assert.deepEqual(extraErrors(`${ru}\n## Приложение Б (обязательное) Дополнительное\n`, 'ru'), []);
 });
 
 test('invisible characters, extra spaces and empty paragraphs', () => {
@@ -182,4 +182,35 @@ test('italics and numerals below ten', () => {
   only(ru.replace('Изучить сеть.', '3 ошибки найдено.'), 'ru', 'словом');
   assert.deepEqual(extraErrors(ru.replace('Изучить сеть.', 'Сервер Express 5 и Части 1 готовы, рисунок 2 показан, вариант 3 принят.'), 'ru'), []);
   assert.deepEqual(extraErrors(ru.replace('Изучить сеть.', 'Взято 12 записей и 500a0%.'), 'ru'), []);
+});
+
+test('an ordinal number must be a digit with an ending, quotes and question texts excepted', () => {
+  only(ru.replace('Изучить сеть.', 'Передаётся вторым аргументом.'), 'ru', 'Порядковое');
+  only(ru.replace('Изучить сеть.', 'Это первой диаграммы.'), 'ru', 'Порядковое');
+  assert.deepEqual(extraErrors(ru.replace('Изучить сеть.', 'Передаётся 2-м аргументом, а «второй способ» цитата.'), 'ru'), []);
+  assert.deepEqual(extraErrors(ru.replace('Изучить сеть.', 'Первичный и второстепенный пятно.'), 'ru'), []);
+  assert.deepEqual(extraErrors(en.replace('Study the network.', 'The second way.'), 'en'), []);
+  assert.deepEqual(extraErrors(ru.replace('Изучить сеть.', 'Передаётся вторым аргументом.'), 'ru', { ordinals: false }), []);
+});
+
+test('the words of an in-memory store are forbidden when the variant keeps data in the database', () => {
+  const text = (s) => ru.replace('Изучить сеть.', s);
+  only(text('Данные лежат в массиве.'), 'ru', 'массив', { database: true });
+  only(text('Данные лежат в памяти.'), 'ru', 'массив', { database: true });
+  only(en.replace('Study the network.', 'The data are an array in memory.'), 'en', 'array', { database: true });
+  only(en.replace('Study the network.', 'The data live in-memory.'), 'en', 'array', { database: true });
+  assert.deepEqual(extraErrors(text('Данные лежат в массиве.'), 'ru'), []);
+  assert.deepEqual(extraErrors(text('Данные в таблице, а `массив` в коде.'), 'ru', { database: true }), []);
+  assert.deepEqual(extraErrors(text('Массивная работа.'), 'ru', { database: true }), [
+    'Слова «массив» или «в памяти» в отчёте о работе с базой данных (чётный вариант хранит данные в БД)',
+  ]);
+});
+
+test('the repository and the branch must be named', () => {
+  const link = 'https://example.org/p';
+  has(extraErrors(ru, 'ru', { repository: link, branch: 'pz21' }), 'ссылки на репозиторий');
+  only(ru.replace('Изучить сеть.', `Код в ${link} в ветке pz21.`), 'ru', 'Нет ссылки на репозиторий', { repository: 'https://other.org', branch: 'pz21' });
+  only(ru.replace('Изучить сеть.', `Код в ${link}.`), 'ru', 'названия ветки', { repository: link, branch: 'pz21' });
+  only(ru.replace('Изучить сеть.', `Код в ${link} в ветке pz210.`), 'ru', 'названия ветки', { repository: link, branch: 'pz21' });
+  assert.deepEqual(extraErrors(ru.replace('Изучить сеть.', `Код в ${link} в ветке pz21.`), 'ru', { repository: link, branch: 'pz21' }), []);
 });

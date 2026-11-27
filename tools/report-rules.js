@@ -14,6 +14,7 @@ const R = {
     units: /\d [%‰]|\d (?:мс|кБ|КБ|МБ|ГБ|мм|см|пт|px)(?![а-яёa-z])/,
     questions: /^#{2,3} (?:\d+ )?(?:\d+\.\d+ )?Ответы на контрольные вопросы$/m,
     letter: /^## Приложение ([А-Я])(?![А-Яа-яё])/,
+    storage: /(?<![а-яё])(?:массив[а-яё]*|в памяти)(?![а-яё])/i,
     messages: {
       seeRef: 'Слова «см.» или «смотри» рядом со ссылкой на рисунок или таблицу',
       altQuotes: 'Лапки вместо «ёлочек»',
@@ -35,6 +36,10 @@ const R = {
       questionSet: 'Номера контрольных вопросов должны быть n−1, n, n+1 варианта',
       numeral: 'Число от 1 до 9 без единицы измерения пишется словом (СТП 2.3.12)',
       italic: 'Курсив в тексте, его не используют',
+      storage: 'Слова «массив» или «в памяти» в отчёте о работе с базой данных (чётный вариант хранит данные в БД)',
+      ordinal: 'Порядковое числительное словами, нужна цифра с наращением («2-м», «1-й»)',
+      repository: 'Нет ссылки на репозиторий',
+      branch: 'Нет названия ветки репозитория',
     },
   },
   en: {
@@ -44,6 +49,7 @@ const R = {
     units: /\d [%‰]|\d (?:ms|kB|KB|MB|GB|mm|cm|pt|px)(?![a-z])/,
     questions: /^#{2,3} (?:\d+ )?(?:\d+\.\d+ )?Answers to (?:the )?Control Questions$/im,
     letter: /^## Appendix ([A-Z])\b/,
+    storage: /\barrays?\b|\bin[ -]memory\b/i,
     messages: {
       seeRef: 'The word "see" next to a figure or table reference',
       appendixLetter: 'Forbidden appendix letter',
@@ -63,6 +69,9 @@ const R = {
       questions: 'No section "Answers to the Control Questions" with question numbers',
       questionSet: 'Control question numbers must be n−1, n, n+1 of the variant',
       italic: 'Italics in the text are not used',
+      storage: 'The words "array" or "in memory" in a report on database work (an even variant keeps its data in the database)',
+      repository: 'No link to the repository',
+      branch: 'No branch name of the repository',
     },
   },
 };
@@ -76,10 +85,15 @@ const numerals = (prose) =>
     return !before || (!/^\p{Lu}/u.test(before[1]) && !REFERENCE.test(before[1]));
   });
 
+// An ordinal number is written as a digit with an ending (2-м, 1-й), not as a word. Quoted text is left alone.
+const ORDINAL =
+  /(?<![а-яё])(?:перв|втор|трет|четв[её]рт|пят|шест|седьм|восьм|девят)(?:ый|ий|ой|ого|ому|ым|им|ом|ая|яя|ую|юю|ей|ое|ее|ые|ие|ых|их|ыми|ими|ья|ье|ьи|ью|ьего|ьему|ьим|ьем|ьей|ьих|ьими)(?![а-яё])/i;
+
 const mask = (s) => s.replace(/^```[\s\S]*?^```/gm, 'CODE');
 
-// opts.variant and opts.questions (the number of questions in the task) enable the question-set check.
-export const extraErrors = (text, lang, { variant, questions } = {}) => {
+// opts.variant and opts.questions (the number of questions in the task) enable the question-set check;
+// opts.ordinals (default true) turns the ordinal numeral rule off for old reports; opts.database forbids the words of an in-memory store, opts.repository and opts.branch must appear in the report.
+export const extraErrors = (text, lang, { variant, questions, database, repository, branch, ordinals = true } = {}) => {
   const r = R[lang];
   const m = r.messages;
   const errors = [];
@@ -105,6 +119,11 @@ export const extraErrors = (text, lang, { variant, questions } = {}) => {
   check(r.units.test(prose), m.nbsp);
   check(/(?<![*\w])\*[^*\s][^*\n]*\*(?!\*)|(?<!\w)_[^_\s]+_(?!\w)/.test(prose), m.italic);
   check(lang === 'ru' && numerals(prose), m.numeral);
+  // The text of a control question is quoted from the task and left alone, like the quoted text.
+  check(ordinals && lang === 'ru' && ORDINAL.test(prose.replace(/«[^»]*»/g, '').replace(/^\d+\. .*\?$/gm, '')), m.ordinal);
+  check(database && r.storage.test(prose), m.storage);
+  check(repository && !raw.includes(repository), m.repository);
+  check(branch && !new RegExp(`(?<![\\w-])${branch}(?![\\w-])`).test(raw), m.branch);
   let rows = 0;
   let tbl = 0;
   const endTable = () => {

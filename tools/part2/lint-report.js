@@ -34,6 +34,7 @@ const L = {
       appendixRef: 'Нет ссылки в тексте на приложение',
       semicolon: 'Точка с запятой в тексте, сложное предложение разбить',
       startsWithRef: 'Предложение начинается со ссылки на рисунок или таблицу',
+      placeholder: 'В итоговом отчёте остались рисунки-заглушки вместо снимков',
     },
   },
   en: {
@@ -68,6 +69,7 @@ const L = {
       appendixRef: 'No reference to the appendix in the text',
       semicolon: 'Semicolon in the text, split the sentence',
       startsWithRef: 'A sentence starts with a figure or table reference',
+      placeholder: 'Placeholder figures are left in the final report',
     },
   },
 };
@@ -79,7 +81,9 @@ const strip = (s) =>
     .replace(/`[^`\n]*`/g, '');
 
 // strict adds the rules from the teacher's remarks for Part 2: appendix format, references, no semicolons.
-export const lintReport = (text, lang = 'ru', { strict = false, variant, questions = 30 } = {}) => {
+// strict: 'final' also refuses placeholder figures (the list of them comes in `placeholders`).
+// database, repository and branch are passed on to the extra rules of report-rules.js.
+export const lintReport = (text, lang = 'ru', { strict = false, variant, questions = 30, database, repository, branch, ordinals, placeholders = [] } = {}) => {
   const r = L[lang];
   const m = r.messages;
   const errors = [];
@@ -110,7 +114,8 @@ export const lintReport = (text, lang = 'ru', { strict = false, variant, questio
     });
     check(/;/.test(prose), m.semicolon);
     check(r.startsWithRef.test(prose), m.startsWithRef);
-    errors.push(...extraErrors(text, lang, { variant, questions }));
+    errors.push(...extraErrors(text, lang, { variant, questions, database, repository, branch, ordinals }));
+    check(strict === 'final' && placeholders.length > 0, `${m.placeholder}: ${placeholders.join(', ')}`);
   }
   const lines = text.split('\n');
   const at = (i, step) => {

@@ -10,7 +10,9 @@ const png = (w, h) => {
   b.writeUInt32BE(h, 20);
   return b;
 };
-const read = (p) => (p === 'big.png' ? png(3000, 4000) : png(400, 300));
+const read = (p) => (p === 'big.png' ? png(3000, 2000) : p === 'tall.png' ? png(1000, 1400) : png(400, 300));
+const PAGES = [3, 3, 4, 5, 6, 7, 8];
+const NBSP = String.fromCharCode(160);
 
 const ru = [
   '# Практическое занятие №3. Тема работы',
@@ -22,7 +24,7 @@ const ru = [
   '',
   '### 1.1 Подраздел',
   '',
-  'Таблица описана в таблице 1.',
+  'Таблица описана в таблице 1. Листинги приведены в приложении А, в приложении Б и в приложении В.',
   '',
   'Таблица 1 – Данные',
   '',
@@ -77,10 +79,14 @@ const en = ru
   .replace('## Заключение', '## Conclusion')
   .replace(/Приложение (.) \(обязательное\) Листинг файла/, 'Appendix $1 (mandatory) Listing of the file')
   .replace(/Приложение (.) \(обязательное\) Листинг шаблона/, 'Appendix $1 (mandatory) Listing of the template')
-  .replace(/Приложение (.) \(обязательное\) Прочее/, 'Appendix $1 (mandatory) Other');
+  .replace(/Приложение (.) \(обязательное\) Прочее/, 'Appendix $1 (mandatory) Other')
+  .replace('Листинги приведены в приложении А, в приложении Б и в приложении В.', 'Listings are given in appendix A, in appendix B and in appendix C.')
+  .replace('Appendix А', 'Appendix A')
+  .replace('Appendix Б', 'Appendix B')
+  .replace('Appendix В', 'Appendix C');
 
 const xmlOf = (buf, name = 'word/document.xml') => unzip(buf)[name].toString('utf8');
-const build = (md, lang = 'ru') => markdownToDocx(md, { lang, variant: 26, read });
+const build = (md, lang = 'ru', extra = {}) => markdownToDocx(md, { lang, variant: 26, read, pages: PAGES, ...extra });
 const rezip = (buf, change) => {
   const files = unzip(buf);
   for (const [name, fn] of Object.entries(change)) files[name] = Buffer.from(fn(files[name].toString('utf8')));
@@ -172,7 +178,7 @@ test('the package has the parts, the page setup and the styles the rules ask for
   assert.match(styles, /w:styleId="Normal"[\s\S]*?w:firstLine="709"[\s\S]*?w:jc w:val="both"/);
   assert.match(styles, /w:styleId="Heading1"[\s\S]*?<w:pageBreakBefore\/>/);
   assert.match(styles, /Courier New/);
-  assert.match(xmlOf(buf, 'word/settings.xml'), /updateFields/);
+  assert.doesNotMatch(xmlOf(buf, 'word/settings.xml'), /updateFields/);
   assert.match(xmlOf(buf, 'word/footer1.xml'), / PAGE /);
   assert.ok(!xmlOf(buf, 'word/footer2.xml').includes('PAGE'));
   assert.deepEqual(lintDocx(buf), []);
@@ -184,18 +190,97 @@ test('the unnumbered part is centred, the images are scaled into the text area',
   assert.match(xml, /<w:jc w:val="center"\/><\/w:pPr><w:r><w:rPr><\/w:rPr><w:t xml:space="preserve">ЗАКЛЮЧЕНИЕ/);
   const extents = [...xml.matchAll(/<wp:extent cx="(\d+)" cy="(\d+)"\/>/g)].map((m) => [Number(m[1]), Number(m[2])]);
   assert.equal(extents.length, 2);
-  assert.ok(extents.every(([cx, cy]) => cx <= 5940000 && cy <= 7920000));
+  assert.ok(extents.every(([cx, cy]) => cx <= 5940000 && cy <= 6415200));
   assert.deepEqual(extents[0], [3810000, 2857500]);
   assert.ok(xml.includes('keepNext'));
   assert.ok(xml.includes('cantSplit'));
 });
 
-test('code lines keep their indent as non-breaking spaces and the listing caption names the appendix', () => {
+test('code lines keep their indent as ordinary spaces, long lines get a hanging indent', () => {
   const xml = xmlOf(build(ru));
-  assert.ok(xml.includes('  if (a) {'));
-  assert.ok(!/<w:t[^>]*> +[a-z]/.test(xml));
+  assert.ok(xml.includes('  if (a) {'));
+  assert.ok(!xml.includes(`${NBSP} `));
+  assert.ok(!/<w:rFonts w:ascii="Courier New"/.test(xml));
+  const long = `${' '.repeat(4)}${'x'.repeat(90)}`;
+  assert.deepEqual(lintDocx(build(ru.replace('const a = 1;', 'const a = 1;\n\nconst b = 2;'))), []);
+  const wrapped = xmlOf(build(ru.replace('const a = 1;', long)));
+  assert.match(wrapped, /<w:pStyle w:val="Code"\/><w:ind w:left="720" w:hanging="720"\/>/);
+  assert.match(xmlOf(build(ru.replace('const a = 1;', `a\tb${NBSP}c `)), 'word/document.xml'), /a {2}b c<\/w:t>/);
 });
 
+test('the contents carry page numbers and the appendix lines name the subsection', () => {
+  const xml = xmlOf(build(ru));
+  const toc = [...xml.matchAll(/<w:p><w:pPr><w:pStyle w:val="TOC([12])"\/><\/w:pPr>([\s\S]*?)<\/w:p>/g)];
+  assert.equal(toc.length, 7);
+  assert.match(toc[0][2], /<w:t xml:space="preserve">1 ЦЕЛЬ РАБОТЫ<\/w:t><\/w:r><w:r><w:tab\/><\/w:r><w:r><w:rPr><\/w:rPr><w:t xml:space="preserve">3<\/w:t>/);
+  assert.equal(toc[1][1], '2');
+  assert.match(toc[4][2], /Приложение А \(обязательное\) Листинг файла app\.js \(к подразделу 1\.1\)<\/w:t>/);
+  assert.match(toc[6][2], /<w:t xml:space="preserve">8<\/w:t><\/w:r><w:r><w:fldChar w:fldCharType="end"\/>/);
+  const styles = xmlOf(build(ru), 'word/styles.xml');
+  assert.match(styles, /w:styleId="TOC1"[\s\S]*?<w:ind w:left="709" w:right="567" w:hanging="709"\/>/);
+  assert.ok(!xmlOf(build(ru, 'ru', { pages: undefined })).includes('<w:tab/>'));
+  assert.match(xmlOf(build(en, 'en')), /Appendix A \(mandatory\) Listing of the file app\.js \(to subsection 1\.1\)/);
+});
+
+test('an appendix that no subsection mentions has no place in the contents', () => {
+  const none = build(ru.replace(' Листинги приведены в приложении А, в приложении Б и в приложении В.', ''));
+  assert.doesNotMatch(xmlOf(none), /\(к подразделу/);
+  const inSection = build(
+    ru
+      .replace(
+        '### 1.1 Подраздел\n\nТаблица описана в таблице 1. Листинги приведены в приложении А, в приложении Б и в приложении В.',
+        '### 1.1 Подраздел\n\nТекст.',
+      )
+      .replace('## 1 Цель работы\n\n', '## 1 Цель работы\n\nПриложение А описано здесь.\n\n'),
+  );
+  assert.match(xmlOf(inSection), /Приложение А \(обязательное\) Листинг файла app\.js \(к разделу 1\)/);
+  assert.match(
+    xmlOf(build(en.replace('Listings are given in appendix A, in appendix B and in appendix C.', 'Nothing.').replace('## 1 Purpose', '## 1 Purpose'), 'en')),
+    /Appendix A \(mandatory\)/,
+  );
+});
+
+test('the title page takes the student and the group from the meta data, blanks stay lines', () => {
+  const xml = xmlOf(build(ru, 'ru', { meta: { group: '123456', student: 'Иванов И. И.' } }));
+  assert.match(xml, /Выполнил\(а\): студент гр\. 123456 Иванов И\. И\./);
+  assert.match(xmlOf(build(ru)), /студент гр\. ________ ______________________/);
+  assert.match(xmlOf(build(en, 'en', { meta: { group: 'G1', student: 'A. B.' } })), /Completed by: student of group G1 A\. B\./);
+  assert.match(xmlOf(build(en, 'en')), /student of group ________/);
+  assert.match(xml, /Проверил: ______________________/);
+});
+
+test('words that name a numbered thing stay on one line with the number, the sentence before a figure stays with it', () => {
+  const xml = xmlOf(build(ru));
+  assert.ok(xml.includes(`рисунке${NBSP}1.`));
+  assert.ok(xml.includes(`Рисунок${NBSP}1 – Схема`));
+  assert.ok(xml.includes(`в таблице${NBSP}1.`));
+  assert.ok(xml.includes(`в приложении${NBSP}А,`));
+  assert.match(xml, new RegExp(`<w:pStyle w:val="Normal"/><w:keepNext/>[^]*?рисунке${NBSP}1\\.`));
+  assert.match(xml, /<\/w:tbl><w:p><w:pPr><w:pStyle w:val="Normal"\/><w:keepNext\/><w:spacing w:before="240"\/>/);
+  assert.ok(!/<w:p><w:pPr><w:pStyle w:val="\w+"\/>(?:<w:keepNext\/>)?<\/w:pPr><\/w:p>/.test(xml.replace(/<w:pStyle w:val="Code"\/><\/w:pPr><\/w:p>/g, '')));
+});
+
+test('table columns follow the length of their text and fill the text width', () => {
+  const table = [
+    '| Код | Название | Когда показывается |',
+    '|---|---|---|',
+    '| 400 | Некорректный запрос | Адрес или данные формы нельзя прочитать, потому что они не разобрались сервером |',
+  ].join('\n');
+  const xml = xmlOf(build(ru.replace('| a | b |\n|---|---|\n| 1 | 2 |\n| 3 | 4 |', table)));
+  const widths = [...xml.match(/<w:tblGrid>([\s\S]*?)<\/w:tblGrid>/)[1].matchAll(/w:w="(\d+)"/g)].map((m) => Number(m[1]));
+  assert.equal(widths.length, 3);
+  assert.equal(
+    widths.reduce((a, b) => a + b, 0),
+    9355,
+  );
+  assert.ok(widths[0] < widths[1] && widths[1] < widths[2]);
+  const equal = [
+    ...xmlOf(build(ru))
+      .match(/<w:tblGrid>([\s\S]*?)<\/w:tblGrid>/)[1]
+      .matchAll(/w:w="(\d+)"/g),
+  ].map((m) => Number(m[1]));
+  assert.deepEqual(equal, [4677, 4678]);
+});
 test('the English build uses the English title page and names', () => {
   const buf = build(en, 'en');
   const xml = xmlOf(buf);
@@ -228,7 +313,29 @@ test('lintDocx reports every rule it knows', () => {
   has(rezip(base, { 'word/document.xml': (x) => x.replace('<w:titlePg/>', '') }), 'title page');
   has(rezip(base, { 'word/document.xml': (x) => x.replace('TOC \\o', 'XX \\o') }), 'table of contents');
   has(rezip(base, { 'word/styles.xml': (x) => x.replace('Times New Roman', 'Calibri') }), 'Fonts');
-  has(rezip(base, { 'word/styles.xml': (x) => x.replace('<w:pageBreakBefore/>', '') }), 'new page');
+  has(rezip(base, { 'word/styles.xml': (x) => x.replace(/(w:styleId="Heading1">[\s\S]*?)<w:pageBreakBefore\/>/, '$1') }), 'new page');
+  const noPages = build(ru, 'ru', { pages: undefined });
+  has(noPages, 'page number');
+  assert.deepEqual(lintDocx(noPages, { pages: false }), []);
+  has(rezip(base, { 'word/settings.xml': (x) => x.replace('<w:zoom', '<w:updateFields w:val="true"/><w:zoom') }), 'updateFields');
+  has(rezip(base, { 'word/document.xml': (x) => x.replace('Приложение А (обязательное) ', 'Приложение А ') }), '(обязательное)');
+  has(build(ru.replace(' Листинги приведены в приложении А, в приложении Б и в приложении В.', '')), '(к подразделу N.N)');
+  has(
+    rezip(base, { 'word/document.xml': (x) => x.replace('<w:sectPr>', '<w:p><w:pPr><w:pStyle w:val="Normal"/></w:pPr></w:p><w:sectPr>') }),
+    'Empty paragraph',
+  );
+  has(
+    rezip(base, {
+      'word/document.xml': (x) =>
+        x.replace('<w:rPr></w:rPr><w:t xml:space="preserve">Изучить', '<w:rPr><w:rFonts w:ascii="Courier New"/></w:rPr><w:t xml:space="preserve">Изучить'),
+    }),
+    'Courier New outside',
+  );
+  has(rezip(base, { 'word/document.xml': (x) => x.replace('const a = 1;', `const${NBSP}a = 1;`) }), 'Non-breaking');
+  has(rezip(base, { 'word/document.xml': (x) => x.replace('const a = 1;', `const a = ${'1'.repeat(90)};`) }), 'hanging indent');
+  has(build(ru.replace('![Большая](big.png)', '![Высокая](tall.png)')), 'taller than 60 percent');
+  assert.deepEqual(lintDocx(build(ru.replace('![Большая](big.png)', '![Высокая](tall.png)')), { figureHeight: false }), []);
+  assert.deepEqual(lintDocx(build(ru.replace('![Большая](big.png)', '![Широкая](a.png)'))), []);
   has(rezip(base, { 'word/document.xml': (x) => x.replace('Вторая строка', ' Вторая  строка') }), 'Spaces');
   has(rezip(base, { 'word/document.xml': (x) => x.replace('Вторая строка', 'Вторая строка ') }), 'Spaces');
 });
