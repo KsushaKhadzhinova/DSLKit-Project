@@ -2,7 +2,7 @@
 
 The DSLKit project (diagrams as code, SaaS). Assignment: `materials/text/part-2/Модуль 01…/36. Лабораторная работа 1…`. Reports: [`report.md`](report.md) in Russian, [`report.en.md`](report.en.md) in English (templates `report.tpl.md` and `report.en.tpl.md`, built with `node tools/build.js part-2/lab-01-node-server` from the repository root). The Russian version of this file is [`README.md`](README.md).
 
-By the assignment the branch of this work is called `lab21`; here the work lives in the working branch of the server part, and the owner picks the branch name for submission.
+The submission branch by the assignment is `lab21` (do not rename). The working branch of this change is `wip/t37-lab1`.
 
 ## 1 What is done
 
@@ -71,7 +71,7 @@ The store is passed to `createApp` as a parameter, so tests work with clean data
 
 `npm test` runs 64 tests on the built-in `node:test` with real HTTP requests to a server on a free port: 35 in `diagrams.test.js`, 5 in `paging.test.js`, 1 in `health.test.js`, 21 in `negative.test.js` and 2 in `report.test.mjs`, which checks that the reports build and follow the formatting rules.
 
-A known remark: `npm audit` shows a vulnerability of the `braces` dependency in the `nodemon` chain. It is a development tool and does not reach the production run.
+A known remark: `npm audit` reports a moderate `minimatch` vulnerability in the `nodemon` chain. It is a development tool and does not reach the production run (`npm start`).
 
 ## 5 Limits and protocol
 

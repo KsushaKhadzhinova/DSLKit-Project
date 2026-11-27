@@ -119,3 +119,7 @@ npm start
 ```
 
 Requests from `requests.http` or `postman_collection.json`: list, one record, 404 on `/diagrams/999`, 400 on `/diagrams/abc`, POST with an empty title, PUT, PATCH, DELETE and a repeated DELETE. Postman screenshots for the report are taken on your machine.
+
+## 8 If asked about the database (owner decision pending)
+
+The Lab 1 condition requires an in-memory array, while the teacher's 16 Oct remark for even variants speaks of a DB. Answer at the defence: the storage is isolated in `createDiagramStore` and `createApp(store)` takes it as a parameter, so the array can be replaced by a DB table without touching routes or validation; only the model changes and the controller becomes async (Express 5 passes rejected promises to `errorHandler`). Move to a DB when data must survive restarts, grows large or is used by several processes. The 500 in this work is JSON `{ "error": "Internal server error" }`; the failure is reproduced only by replacing the store in a test. Details and option estimates: `docs/audit/part2/lab-01-AUDIT.en.md`.
