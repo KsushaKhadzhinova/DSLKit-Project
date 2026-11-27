@@ -37,7 +37,7 @@ DB_FILE=package.json/blocked/log.db npm start
 | `GET /`            | Список диаграмм с временем создания каждой записи                                       |
 | `GET /item/:id`    | Детальная страница, неизвестный или некорректный номер даёт страницу 404                |
 | `GET /add?auth=1`  | Форма добавления, гостя без `?auth=1` перенаправляет на `/login`                        |
-| `POST /add?auth=1` | Проверка полей, добавление в массив, переход на главную, ошибка полей даёт код 400      |
+| `POST /add?auth=1` | Проверка полей, добавление строкой в таблицу `diagrams`, переход на главную, ошибка полей даёт код 400      |
 | `GET /item/:id/edit?auth=1` | Форма изменения записи с текущими значениями |
 | `POST /item/:id/edit?auth=1` | Проверка полей и изменение записи, номер и время создания не меняются, ошибка даёт 400 |
 | `POST /item/:id/delete?auth=1` | Удаление записи и переход на главную, повтор даёт 404. Кнопки «Edit» и «Delete» на детальной странице, форма удаления несёт скрытое поле `_csrf` |
@@ -73,7 +73,7 @@ DB_FILE=package.json/blocked/log.db npm start
 | `src/middleware/security.js`      | Заголовки безопасности, токен CSRF, ограничение частоты, экранирование журнала  |
 | `src/middleware/errorHandlers.js` | Обработчики 404 и 500 (четыре параметра, ошибка пишется в журнал ошибок)        |
 | `src/i18n.js`, `src/locales/*.js` | Выбор языка (`?lang`/cookie `lang`), функция перевода `t`, словари en/ru        |
-| `src/data/diagrams.js`            | Хранилище в памяти и проверка полей                                             |
+| `src/data/diagrams.js`            | Таблица `diagrams` в SQLite (схема и примеры создаются при первом запуске) и проверка полей                                             |
 | `src/data/requestLog.js`          | Таблица `request_log` в SQLite                                                  |
 | `views/`                          | Шаблоны EJS: `index`, `item`, `add`, `login`, `log`, `404`, `500`, `partials/`  |
 | `public/`                         | `dslkit.css` (собран из стилей Части 1), `pz.css` (несколько правил), логотип, тема |
@@ -81,10 +81,18 @@ DB_FILE=package.json/blocked/log.db npm start
 
 ---
 
-**English.** Branch: `pz21`. Express 5 + EJS server for the DSLKit diagram catalogue. Catalogue data is in memory (as the task requires), the request log is a SQLite table (variant 26 is even). The look comes from Part 1 of the project (same header, footer, buttons, cards, form fields and theme switch). Run `npm install && npm start` (Node.js 22.13 or newer, port 3000; `PORT` and `DB_FILE` are in `.env.example`, load them with `node --env-file=.env src/server.js`), test with `npm test`. Records can be edited and deleted with the buttons on the detail page (the delete button is a `POST` form with the CSRF field). Simulated auth: add `?auth=1` to open `/add` and `/log`, guests are redirected to `/login`. The 500 page is caused by a real failure, not by a button: start with `DB_FILE=package.json/blocked/log.db npm start` and every request ends with the styled 500 page. Limits live in `limits.json`. Protection: CSRF token, security headers with a strict Content-Security-Policy, rate limit, escaped log lines. Audit notes: `AUDIT.md`.
+**English.** Branch: `pz21`. Express 5 + EJS server for the DSLKit diagram catalogue. Diagrams and the request log are tables of one SQLite database (owner decision of 2026-11-27) (variant 26 is even). The look comes from Part 1 of the project (same header, footer, buttons, cards, form fields and theme switch). Run `npm install && npm start` (Node.js 22.13 or newer, port 3000; `PORT` and `DB_FILE` are in `.env.example`, load them with `node --env-file=.env src/server.js`), test with `npm test`. Records can be edited and deleted with the buttons on the detail page (the delete button is a `POST` form with the CSRF field). Simulated auth: add `?auth=1` to open `/add` and `/log`, guests are redirected to `/login`. The 500 page is caused by a real failure, not by a button: start with `DB_FILE=package.json/blocked/log.db npm start` and every request ends with the styled 500 page. Limits live in `limits.json`. Protection: CSRF token, security headers with a strict Content-Security-Policy, rate limit, escaped log lines. Audit notes: `AUDIT.md`.
 
 **Russian interface.** The whole interface has a Russian translation: add `?lang=ru` to the address (`?lang=en` goes back). The choice is kept in a plain `lang` cookie (not security-critical, not `HttpOnly`) until the next request names a language explicitly; with neither the parameter nor the cookie the server answers in English exactly as before, so the 151 existing tests stay unaffected. A RU/EN switch sits in the header of every page, next to the theme switch, and keeps the current address and its other parameters (such as `?auth=1`). Dictionaries live in `src/locales/en.js` and `src/locales/ru.js`, the translator in `src/i18n.js`; terms come from the project's own Russian site (`site/`, Part 1). Notation and technology names (UML, BPMN, ERD, DFD, IDEF0, Petri, CSRF, HTTP, SQLite, DSLKit) are left untranslated.
 
 ## Проверка стиля
 
 `npm run lint` запускает ESLint. Конфигурация лежит в `eslint.config.js`.
+
+## Сбой журнала: как воспроизвести / Log failure: how to reproduce
+
+Журнал обязателен: если запись в таблицу `request_log` не удалась, запрос заканчивается оформленной страницей 500, а действие (добавление, правка, удаление) не выполняется. Проверка: `DB_FILE=package.json/blocked/log.db npm start` и открыть любую страницу; или остановить базу во время работы (тест `when the request log cannot be written, the action is NOT done`). Данные диаграмм лежат в той же базе, при её отказе список тоже даёт 500.
+
+The log is mandatory: when the write into `request_log` fails, the request ends on the styled 500 page and the action (add, edit, delete) is not performed. Reproduce with `DB_FILE=package.json/blocked/log.db npm start` and open any page. Diagram data live in the same database, so its failure also gives 500.
+
+Тесты: `npm test` (порог 100 % строк, ветвей и функций по `src/**`, золотые страницы в `test/golden/`, обновление: `UPDATE_GOLDEN=1 npm test`). `report.test.mjs` сверяет отчёт с шаблоном и листингами: после изменения кода отчёт пересобирает T38.

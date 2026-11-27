@@ -39,7 +39,7 @@ export const i18n = (req, res, next) => {
   res.locals.lang = lang;
   res.locals.t = (key, vars) => translate(lang, key, vars);
   // Hrefs for the RU/EN switch in the header: the current path and query, only the "lang" parameter changed.
-  const asText = (value) => (Array.isArray(value) ? String(value[0] ?? '') : String(value ?? ''));
+  const asText = (value) => String(Array.isArray(value) ? value[0] : value);
   const hrefFor = (target) => {
     const params = new URLSearchParams();
     for (const [key, value] of Object.entries(req.query)) {

@@ -11,19 +11,19 @@ Folder `part-2/pz-01-middleware-ejs`, work branch `pz21`, executor branch `wip/t
 | 5 | Routes `GET /`, `GET /item/:id`, `GET/POST /add` with redirect | `src/app.js` | `test/app.test.js`, `edit-delete.test.js` | done |
 | 6 | Separate styled 404 and 500 pages, error logged | `views/404.ejs`, `500.ejs`, `errorHandlers.js` | `negative*.test.js`, report figures | done |
 | 7 | 500 page from a real failure, not a button | server started with an unreachable `DB_FILE`; test "database that stops" | `test/log-sabotage.test.js`, README | done (owner decision b) |
-| 8 | Data in an array (task) and a DB table for even variants | diagrams in an array, request log in SQLite | `src/data/` | awaiting decision (a) |
+| 8 | Data and request log in DB tables (owner decision of 27 Nov) | `src/data/diagrams.js` (table `diagrams`, schema and samples on first start, transactions, rollback), `requestLog.js` | `test/store-db.test.js`, `units.test.js` | fixed |
 | 9 | Form validation: blanks, lengths, number not below zero | `validateDiagram`, `limits.json` | `test/negative*.test.js`, `stress.test.js` | done |
 | 10 | Limits in a separate file | `limits.json`, `src/limits.js` | boundary tests | done |
 | 11 | Unique creation time per record | `createdAt`, strictly increasing | `diagrams.js`, store tests | done |
 | 12 | CSRF, headers, rate limit | `middleware/security.js` | `test/security.test.js` | done |
-| 13 | Tests, coverage, ESLint | `npm test` 166 of 166, 99.59 % lines; `npm run lint` clean | run on 2026-11-27 | done |
+| 13 | Tests, 100 % coverage, ESLint | `npm test`, `npm run lint` | run on 2026-11-27 | done |
 | 14 | Run from scratch by README | `npm install`, `npm start`, `.env.example` | `npm install` and `npm test` in a clean worktree | done (server not opened by hand in a browser) |
 | 15 | README RU and EN, branch, how to run | `README.md` | reading | done |
 | 16 | Defence study guide | `docs/study/18-PZ1-MIDDLEWARE-EJS(.en).md` | reading | done |
 | 17 | Report, questions 25-27 | handled by sub-chat T38 | untouched | out of my scope |
 | 18 | Screenshots of console, browser, log table | `figures/` | - | owner only (list below) |
 
-Total: done 14, fixed 0 (no code defects found), awaiting decision 1, owner only 1, out of scope 1.
+Total: done 13, fixed 1 (data in the DB), owner only 1, out of scope 1; decision (a) taken, (b) the 500 page stays a real failure. Coverage of `src/**`: 100 % lines, branches and functions (threshold in `npm test`), 185 tests including golden pages in `test/golden/`. `report.test.mjs` is red until the report is rebuilt (listings changed): T38 task.
 
 ## Owner decisions: two options each
 
@@ -38,3 +38,11 @@ Console with the request log; browser: list, detail, form with errors, 404, 500 
 ## For T38
 
 Screens and behaviour are unchanged; the report needs no update.
+
+## What changed and what T38 must update
+
+- Diagrams are now rows of table `diagrams` in the same SQLite database (`DB_FILE`), not an array; `request_log` is unchanged. A diagram write runs in a `BEGIN IMMEDIATE` transaction, creation time strictly increases. A DB failure and a damaged row both give the styled 500.
+- When the log write fails the action is not performed (the log is written before the route): test `when the request log cannot be written, the action is NOT done`.
+- Report: replace the store listing (`diagrams.js`, `server.js`), drop "data in an array", add table `diagrams` (id, title, notation, description, code, revision, created_at) and "how to reproduce a log failure" (`DB_FILE=package.json/blocked/log.db npm start`); the report quotes 166 tests and 99.59 %: now 185 and 100 %.
+- Owner screenshots: `diagrams-table`, `request-log-table` (SQLite viewer), `server-error` (500 after starting with an unreachable `DB_FILE`), `not-found`, `list`, `detail`, `form-errors`, `log`.
+- Cheat sheet: `docs/study/18b-PZ1-NEW-METRIC.md`. Not verified: the server by hand in a browser, Stryker (mutation testing was not run).

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#2563eb" />
+    <meta name="description" content="DSLKit diagram catalogue: a small Express and EJS practical application." />
+    <title>A folder stands in the place of the log file – DSLKit</title>
+    <link rel="icon" href="/images/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/dslkit.css" />
+    <link rel="stylesheet" href="/pz.css" />
+    <script src="/theme.js"></script>
+  </head>
+  <body class="page">
+    <a class="skip-link" href="#main">Skip to the main content</a>
+    <header class="header">
+      <div class="header__inner">
+        <a class="header__logo" href="/">
+          <img class="header__logo-image" src="/images/logo.svg" alt="" width="32" height="32" />
+          <span class="header__logo-text">DSLKit</span>
+        </a>
+        <input class="burger__input" type="checkbox" id="burger-toggle" />
+        <label class="burger__button" for="burger-toggle">
+          <span class="burger__label">Menu</span>
+          <span class="burger__icon" aria-hidden="true"></span>
+        </label>
+        <nav class="nav" aria-label="Main navigation">
+          <ul class="nav__list">
+            <li class="nav__item"><a class="nav__link" href="/">Diagrams</a></li>
+            <li class="nav__item"><a class="nav__link" href="/add">Add</a></li>
+            <li class="nav__item"><a class="nav__link" href="/log">Request log</a></li>
+            
+              <li class="nav__item"><a class="nav__link" href="/login">Sign in</a></li>
+            
+          </ul>
+        </nav>
+        <div class="header__tools">
+          <span class="header__user">Guest</span>
+          <nav class="lang" aria-label="Language">
+            <a class="header__lang" href="/?lang=en" hreflang="en" lang="en" aria-current="true">EN</a>
+            <a class="header__lang" href="/?lang=ru" hreflang="ru" lang="ru">RU</a>
+          </nav>
+          <input class="theme__input" type="checkbox" id="theme-toggle" />
+          <label class="theme__button" for="theme-toggle" data-tip="Dark theme"
+            ><svg class="theme__icon theme__icon--moon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">
+              <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z" /></svg
+            ><svg class="theme__icon theme__icon--sun" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">
+              <circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2" />
+              <path
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"
+              /></svg
+            ><span class="theme__label">Dark theme</span></label
+          >
+        </div>
+      </div>
+    </header>
+    <main class="main" id="main">
+
+<section class="error" aria-labelledby="page-title">
+  <p class="error__code">Error code: 500</p>
+  <h1 class="error__title" id="page-title">A folder stands in the place of the log file</h1>
+  <h2 class="error__heading">What this is</h2>
+  <p class="error__text">The server needs a file at this place to keep the log, and there is a folder with the same name instead, so it cannot read or write the log here.</p>
+  <p class="error__notice" role="alert">The request log table could not be written. Check the database file and try again.</p>
+  <h2 class="error__heading">Why it happened</h2>
+  <ul class="error__list"><li>Somebody created a folder with the name of the log file inside the folder of the logs.</li><li>The file was deleted or renamed and a folder was made in its place.</li></ul>
+  <h2 class="error__heading">How to fix it</h2>
+  <ol class="error__list error__list--steps"><li>Delete or rename the folder that has the name of the log file, then press &#34;Export the log to a file&#34; again.</li><li>Or choose another place of the file with the settings LOG_EXPORT_FILE and DB_FILE.</li></ol>
+  <a class="button button--primary" href="/">Back to the list</a>
+</section>
+    </main>
+    <footer class="footer">
+      <div class="footer__inner">
+        <nav class="footer__nav" aria-label="Footer navigation">
+          <ul class="footer__list">
+            <li class="footer__item"><a class="footer__link" href="/">Diagrams</a></li>
+            <li class="footer__item"><a class="footer__link" href="/log">Request log</a></li>
+            
+              <li class="footer__item"><a class="footer__link" href="/login">Sign in</a></li>
+            
+          </ul>
+        </nav>
+        <p class="footer__copy"><small>© 2026 DSLKit. Practical 1: Express middleware and EJS.</small></p>
+      </div>
+    </footer>
+  </body>
+</html>
+

@@ -271,7 +271,7 @@ export class UserError extends Error {
 // is read from the English catalog, since CATALOG_RU only repeats it for the entries that need one.
 export const entryFor = (err, status, lang) => {
   const base = lang === 'ru' ? CATALOG_RU : CATALOG;
-  return base[err.userCode] ?? base[status] ?? CATALOG[err.userCode] ?? CATALOG[status] ?? base[status >= 500 ? 500 : 400] ?? CATALOG[status >= 500 ? 500 : 400];
+  return base[err.userCode] ?? base[status] ?? CATALOG[err.userCode] ?? CATALOG[status] ?? base[status >= 500 ? 500 : 400];
 };
 
 const NOT_A_FILE = new Set(['EISDIR']);

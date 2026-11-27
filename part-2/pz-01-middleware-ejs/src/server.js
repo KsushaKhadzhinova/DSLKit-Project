@@ -1,10 +1,13 @@
 import { fileURLToPath } from 'node:url';
 import { createApp } from './app.js';
 import { openRequestLog } from './data/requestLog.js';
+import { createDiagramStore } from './data/diagrams.js';
 
 const port = Number(process.env.PORT) || 3000;
-const log = openRequestLog(process.env.DB_FILE || fileURLToPath(new URL('../data/requests.db', import.meta.url)));
-const server = createApp({ log }).listen(port, () => console.log(`DSLKit practical 1 listens on http://localhost:${port}`));
+const dbFile = process.env.DB_FILE || fileURLToPath(new URL('../data/requests.db', import.meta.url));
+const log = openRequestLog(dbFile);
+const store = createDiagramStore(Date.now, dbFile);
+const server = createApp({ log, store }).listen(port, () => console.log(`DSLKit practical 1 listens on http://localhost:${port}`));
 
 // Graceful stop: no new connections, requests in flight finish, the log database closes, then the process ends.
 const SHUTDOWN_GRACE_MS = 5000;
@@ -12,6 +15,7 @@ const stop = (signal) => {
   console.log(`${signal} received, closing the server`);
   server.close(() => {
     log.close();
+    store.close();
     process.exit(0);
   });
   server.closeIdleConnections();
