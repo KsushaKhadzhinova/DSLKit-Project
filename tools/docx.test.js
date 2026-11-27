@@ -242,11 +242,15 @@ test('an appendix that no subsection mentions has no place in the contents', () 
 
 test('the title page takes the student and the group from the meta data, blanks stay lines', () => {
   const xml = xmlOf(build(ru, 'ru', { meta: { group: '123456', student: 'Иванов И. И.' } }));
-  assert.match(xml, /Выполнил\(а\): студент гр\. 123456 Иванов И\. И\./);
+  assert.match(xml, /Выполнила: студент гр\. 123456 Иванов И\. И\./);
   assert.match(xmlOf(build(ru)), /студент гр\. ________ ______________________/);
   assert.match(xmlOf(build(en, 'en', { meta: { group: 'G1', student: 'A. B.' } })), /Completed by: student of group G1 A\. B\./);
   assert.match(xmlOf(build(en, 'en')), /student of group ________/);
-  assert.match(xml, /Проверил: ______________________/);
+  assert.match(xml, /Проверил\(а\): ______________________/);
+  const filled = xmlOf(build(ru, 'ru', { meta: { reviewer: 'А. Б. Иванов', reviewerCaption: 'Проверила', doneCaption: 'Выполнил', titleVariant: '100' } }));
+  assert.match(filled, /Проверила: А\. Б\. Иванов/);
+  assert.match(filled, /Выполнил: студент/);
+  assert.match(filled, /Вариант № 100/);
 });
 
 test('words that name a numbered thing stay on one line with the number, the sentence before a figure stays with it', () => {

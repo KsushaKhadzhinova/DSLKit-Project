@@ -2,7 +2,7 @@
 
 ## 1 Purpose of the Work
 
-The purpose is to learn the middleware concept in Express.js and the EJS template engine using the DSLKit project, a diagram-as-code web editor whose theme matches the SaaS direction and the future course project. To reach it, custom middleware for request logging, simulated authorization and error handling must be written, EJS templates for four routes and the error pages must be connected, the server must check the entered values and all limits of length and numbers must be moved to a separate file. Variant 26 is even, so both the request log and the catalogue data are kept in database tables, not in a file. Every record must have a unique creation time so that records do not look alike. The 500 page must open on a real failure of the log, not by a button, so the report describes how to reproduce such a failure. The source code lies in the repository https://github.com/KsushaKhadzhinova/DSLKit-Project in the branch pz21.
+The purpose is to learn the middleware concept in Express.js and the EJS template engine using the DSLKit project, a diagram-as-code web editor whose theme matches the SaaS direction and the future course project. To reach it, custom middleware for request logging, simulated authorization and error handling must be written, EJS templates for four routes and the error pages must be connected, the server must check the entered values and all limits of length and numbers must be moved to a separate file. Variant 100 (number 26 in the group list) is even, so both the request log and the catalogue data are kept in database tables, not in a file. Every record must have a unique creation time so that records do not look alike. The 500 page must open on a real failure of the log, not by a button, so the report describes how to reproduce such a failure. The source code lies in the repository https://github.com/KsushaKhadzhinova/DSLKit-Project in the branch pz21.
 
 ## 2 Brief Theory
 
@@ -10,7 +10,7 @@ The purpose is to learn the middleware concept in Express.js and the EJS templat
 
 **EJS template engine.** A template holds HTML with inserted JavaScript. The tag `<%= value %>` prints a value with escaping, the tag `<% code %>` runs code, and the tag `<%- include() %>` inserts a partial template. Data is passed as the second argument of `res.render()`.
 
-**Data storage.** Variant 26 is even, so both the catalogue records and the request log live in an SQLite database provided by the built-in `node:sqlite` module. The records are kept in the table `diagrams` and the log in the table `request_log`, and no extra packages are needed. The tables are created on first use, and an empty table is filled with three sample records. If the database is unreachable, the request ends with the styled 500 page and the server keeps running.
+**Data storage.** Variant 100 (number 26 in the group list) is even, so both the catalogue records and the request log live in an SQLite database provided by the built-in `node:sqlite` module. The records are kept in the table `diagrams` and the log in the table `request_log`, and no extra packages are needed. The tables are created on first use, and an empty table is filled with three sample records. If the database is unreachable, the request ends with the styled 500 page and the server keeps running.
 
 ## 3 Course of the Work
 
@@ -210,6 +210,8 @@ The result of the `npm test` command with the number of tests and the code cover
 Figure 15 – End of the npm test output: the number of passed tests and the coverage table (process output captured as text)
 
 ## 4 Answers to the Control Questions
+
+The number in the group list is 26, so the answers are given to the questions 25, 26 and 27.
 
 25. How do you protect an Express application from CSRF with middleware (in theory)?
 

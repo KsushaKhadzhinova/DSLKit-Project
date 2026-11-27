@@ -1,6 +1,13 @@
 {
-  "student": "",
-  "group": "",
+  "student": "К. А. Хаджинова",
+  "group": "320604",
+  "doneCaption": "Выполнила",
+  "reviewer": "А. Л. Гончаревич",
+  "reviewerCaption": "Проверил",
+  "reviewerLab": "Н. В. Хаджинова",
+  "reviewerLabCaption": "Проверила",
+  "titleVariant": "100",
+  "listNumber": "26",
   "repository": "https://github.com/KsushaKhadzhinova/DSLKit-Project",
   "branch": "pz21"
 }
