@@ -78,6 +78,7 @@ export default {
   'page.login.continueAsOwner': 'Continue as Owner',
 
   'error.codeLabel': 'Error code:',
+  'error.requestId': 'Request ID (quote it to the owner, it is in the server log):',
   'error.whatHeading': 'What this is',
   'error.whyHeading': 'Why it happened',
   'error.fixHeading': 'How to fix it',

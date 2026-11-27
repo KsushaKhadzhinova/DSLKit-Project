@@ -16,6 +16,7 @@ const normalize = (html) =>
   html
     .replace(/name="_csrf" value="[0-9a-f]+"/g, 'name="_csrf" value="TOKEN"')
     .replace(/\d{4}-\d\d-\d\d \d\d:\d\d:\d\d\.\d{3} UTC/g, 'TIME')
+    .replace(/<code>[0-9a-f]{8}<\/code>/g, '<code>REQUEST-ID</code>')
     .replace(/\r\n/g, '\n');
 
 const check = (name, actual) => {

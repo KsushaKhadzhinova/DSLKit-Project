@@ -50,7 +50,7 @@ export const requestLogger =
       } catch (error) {
         write(`[log] could not finish row ${id}: ${error.message}`);
       }
-      write(`[${new Date(startedAt).toISOString()}] ${req.method} ${url} ${res.statusCode} ${ms}ms`);
+      write(`[${new Date(startedAt).toISOString()}] ${res.locals?.requestId ?? '-'} ${req.method} ${url} ${res.statusCode} ${ms}ms`);
     });
     return next();
   };

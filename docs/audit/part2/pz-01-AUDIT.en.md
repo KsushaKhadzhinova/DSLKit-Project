@@ -43,3 +43,7 @@ Console with the request log; browser: list, detail, form with errors, 404, 500 
 - Report: replace the store listing (`diagrams.js`, `server.js`), drop "data in an array", add table `diagrams` (id, title, notation, description, code, revision, created_at) and "how to reproduce a log failure" (`DB_FILE=package.json/blocked/log.db npm start`); the report quotes 166 tests and 99.59 %: now 185 and 100 %.
 - Owner screenshots: `diagrams-table`, `request-log-table` (SQLite viewer), `server-error` (500 after starting with an unreachable `DB_FILE`), `not-found`, `list`, `detail`, `form-errors`, `log`.
 - Cheat sheet: `docs/study/18b-PZ1-NEW-METRIC.md`. Not verified: the server by hand in a browser, Stryker (mutation testing was not run).
+
+## Error pages (owner requirement)
+
+Pages 400, 403, 404, 405, 413, 429 and 500 (and the log error codes) show: code and name, "what happened", "why", "what to do", a link home and the request number (also in the `X-Request-Id` header and the server log lines). No stack, paths, SQL or table names. Tests: `test/error-pages.test.js`, golden copies in `test/golden/`. Screens to add for T38 and the owner: `error-400`, `error-403`, `error-404`, `error-405`, `error-413`, `error-429`, `error-500-real-failure`. There are no JSON API answers except `/health`.

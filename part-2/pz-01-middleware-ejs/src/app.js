@@ -1,3 +1,4 @@
+import { randomBytes } from 'node:crypto';
 import express from 'express';
 import { fileURLToPath } from 'node:url';
 import { createDiagramStore, validateDiagram, NOTATIONS } from './data/diagrams.js';
@@ -46,6 +47,12 @@ export const createApp = ({
   // and hand over to the error handler), the body parser and the CSRF check (the token is a form field), then the routes.
   // The two error handlers are the very last, so every failure ends on a styled page.
   app.use(securityHeaders);
+  // A short identifier of this request: shown on every error page, sent as a header and written to the server log, so a visitor's report can be found.
+  app.use((req, res, next) => {
+    res.locals.requestId = randomBytes(4).toString('hex');
+    res.set('X-Request-Id', res.locals.requestId);
+    next();
+  });
   // Liveness probe for Docker and monitoring: placed before the rate limit and the log, so probes neither use up the quota nor fill the table.
   app.get('/health', (req, res) => res.json({ status: 'ok' }));
   app.use(express.static(dir('../public')));
