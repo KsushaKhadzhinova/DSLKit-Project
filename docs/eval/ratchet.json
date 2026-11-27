@@ -1,0 +1,7 @@
+{
+  "note": "A metric that is worse than the baseline by more than its tolerance is flagged by npm run eval:check. Tolerances are absolute (0.01 = one percentage point).",
+  "tolerance": 0.01,
+  "overrides": {
+    "stability.rate": 0
+  }
+}

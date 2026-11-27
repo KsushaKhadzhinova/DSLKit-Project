@@ -1,0 +1,1509 @@
+{
+  "version": 1,
+  "sizes": {
+    "descriptions": {
+      "ru": 150,
+      "en": 150
+    },
+    "seeded": 102,
+    "clean": 116,
+    "imports": 45
+  },
+  "detection": {
+    "ru": {
+      "total": 150,
+      "top1": 0.5933,
+      "topK": 0.7733,
+      "k": 3,
+      "macroF1": 0.595,
+      "perClass": {
+        "bpmn": {
+          "tp": 17,
+          "fp": 18,
+          "fn": 13,
+          "precision": 0.4857,
+          "recall": 0.5667,
+          "f1": 0.5231,
+          "support": 30
+        },
+        "gost": {
+          "tp": 7,
+          "fp": 3,
+          "fn": 23,
+          "precision": 0.7,
+          "recall": 0.2333,
+          "f1": 0.35,
+          "support": 30
+        },
+        "erd": {
+          "tp": 24,
+          "fp": 5,
+          "fn": 6,
+          "precision": 0.8276,
+          "recall": 0.8,
+          "f1": 0.8136,
+          "support": 30
+        },
+        "uml-sequence": {
+          "tp": 23,
+          "fp": 21,
+          "fn": 7,
+          "precision": 0.5227,
+          "recall": 0.7667,
+          "f1": 0.6216,
+          "support": 30
+        },
+        "dfd": {
+          "tp": 18,
+          "fp": 6,
+          "fn": 12,
+          "precision": 0.75,
+          "recall": 0.6,
+          "f1": 0.6667,
+          "support": 30
+        }
+      },
+      "matrix": {
+        "bpmn": {
+          "bpmn": 17,
+          "gost": 2,
+          "erd": 1,
+          "uml-sequence": 9,
+          "dfd": 1,
+          "null": 0
+        },
+        "gost": {
+          "bpmn": 16,
+          "gost": 7,
+          "erd": 2,
+          "uml-sequence": 2,
+          "dfd": 0,
+          "null": 3
+        },
+        "erd": {
+          "bpmn": 0,
+          "gost": 0,
+          "erd": 24,
+          "uml-sequence": 1,
+          "dfd": 0,
+          "null": 5
+        },
+        "uml-sequence": {
+          "bpmn": 0,
+          "gost": 0,
+          "erd": 2,
+          "uml-sequence": 23,
+          "dfd": 5,
+          "null": 0
+        },
+        "dfd": {
+          "bpmn": 2,
+          "gost": 1,
+          "erd": 0,
+          "uml-sequence": 9,
+          "dfd": 18,
+          "null": 0
+        },
+        "null": {
+          "bpmn": 0,
+          "gost": 0,
+          "erd": 0,
+          "uml-sequence": 0,
+          "dfd": 0,
+          "null": 0
+        }
+      },
+      "calibration": {
+        "ece": 0.021,
+        "n": 150,
+        "bins": [
+          {
+            "from": 0,
+            "to": 0.1,
+            "n": 8,
+            "confidence": 0,
+            "accuracy": 0
+          },
+          {
+            "from": 0.3,
+            "to": 0.4,
+            "n": 3,
+            "confidence": 0.303,
+            "accuracy": 0.3333
+          },
+          {
+            "from": 0.4,
+            "to": 0.5,
+            "n": 39,
+            "confidence": 0.4412,
+            "accuracy": 0.4359
+          },
+          {
+            "from": 0.6,
+            "to": 0.7,
+            "n": 71,
+            "confidence": 0.6422,
+            "accuracy": 0.662
+          },
+          {
+            "from": 0.7,
+            "to": 0.8,
+            "n": 29,
+            "confidence": 0.7779,
+            "accuracy": 0.8276
+          }
+        ]
+      },
+      "byLevel": {
+        "easy": {
+          "n": 52,
+          "top1": 0.4615
+        },
+        "hard": {
+          "n": 34,
+          "top1": 0.7647
+        },
+        "medium": {
+          "n": 64,
+          "top1": 0.6094
+        }
+      }
+    },
+    "en": {
+      "total": 150,
+      "top1": 0.6333,
+      "topK": 0.8,
+      "k": 3,
+      "macroF1": 0.6497,
+      "perClass": {
+        "bpmn": {
+          "tp": 14,
+          "fp": 15,
+          "fn": 16,
+          "precision": 0.4828,
+          "recall": 0.4667,
+          "f1": 0.4746,
+          "support": 30
+        },
+        "gost": {
+          "tp": 15,
+          "fp": 4,
+          "fn": 15,
+          "precision": 0.7895,
+          "recall": 0.5,
+          "f1": 0.6122,
+          "support": 30
+        },
+        "erd": {
+          "tp": 25,
+          "fp": 2,
+          "fn": 5,
+          "precision": 0.9259,
+          "recall": 0.8333,
+          "f1": 0.8772,
+          "support": 30
+        },
+        "uml-sequence": {
+          "tp": 23,
+          "fp": 20,
+          "fn": 7,
+          "precision": 0.5349,
+          "recall": 0.7667,
+          "f1": 0.6301,
+          "support": 30
+        },
+        "dfd": {
+          "tp": 18,
+          "fp": 7,
+          "fn": 12,
+          "precision": 0.72,
+          "recall": 0.6,
+          "f1": 0.6545,
+          "support": 30
+        }
+      },
+      "matrix": {
+        "bpmn": {
+          "bpmn": 14,
+          "gost": 4,
+          "erd": 2,
+          "uml-sequence": 9,
+          "dfd": 1,
+          "null": 0
+        },
+        "gost": {
+          "bpmn": 11,
+          "gost": 15,
+          "erd": 0,
+          "uml-sequence": 1,
+          "dfd": 0,
+          "null": 3
+        },
+        "erd": {
+          "bpmn": 0,
+          "gost": 0,
+          "erd": 25,
+          "uml-sequence": 1,
+          "dfd": 0,
+          "null": 4
+        },
+        "uml-sequence": {
+          "bpmn": 1,
+          "gost": 0,
+          "erd": 0,
+          "uml-sequence": 23,
+          "dfd": 6,
+          "null": 0
+        },
+        "dfd": {
+          "bpmn": 3,
+          "gost": 0,
+          "erd": 0,
+          "uml-sequence": 9,
+          "dfd": 18,
+          "null": 0
+        },
+        "null": {
+          "bpmn": 0,
+          "gost": 0,
+          "erd": 0,
+          "uml-sequence": 0,
+          "dfd": 0,
+          "null": 0
+        }
+      },
+      "calibration": {
+        "ece": 0.0505,
+        "n": 150,
+        "bins": [
+          {
+            "from": 0,
+            "to": 0.1,
+            "n": 7,
+            "confidence": 0,
+            "accuracy": 0
+          },
+          {
+            "from": 0.3,
+            "to": 0.4,
+            "n": 4,
+            "confidence": 0.303,
+            "accuracy": 0.25
+          },
+          {
+            "from": 0.4,
+            "to": 0.5,
+            "n": 32,
+            "confidence": 0.44,
+            "accuracy": 0.4375
+          },
+          {
+            "from": 0.6,
+            "to": 0.7,
+            "n": 80,
+            "confidence": 0.6457,
+            "accuracy": 0.6875
+          },
+          {
+            "from": 0.7,
+            "to": 0.8,
+            "n": 27,
+            "confidence": 0.78,
+            "accuracy": 0.9259
+          }
+        ]
+      },
+      "byLevel": {
+        "easy": {
+          "n": 52,
+          "top1": 0.5
+        },
+        "hard": {
+          "n": 34,
+          "top1": 0.7941
+        },
+        "medium": {
+          "n": 64,
+          "top1": 0.6563
+        }
+      }
+    }
+  },
+  "build": {
+    "ru": {
+      "auto": {
+        "n": 150,
+        "built": 141,
+        "valid": 123,
+        "validRate": 0.82,
+        "elements": {
+          "tp": 323,
+          "fp": 119,
+          "fn": 202,
+          "precision": 0.7308,
+          "recall": 0.6152,
+          "f1": 0.668
+        },
+        "relations": {
+          "tp": 197,
+          "fp": 161,
+          "fn": 266,
+          "precision": 0.5503,
+          "recall": 0.4255,
+          "f1": 0.4799
+        },
+        "meanElementF1": 0.6277,
+        "meanRelationF1": 0.402,
+        "exactRate": 0.2467,
+        "byNotation": {
+          "bpmn": {
+            "n": 30,
+            "built": 30,
+            "valid": 30,
+            "validRate": 1,
+            "elements": {
+              "tp": 69,
+              "fp": 37,
+              "fn": 53,
+              "precision": 0.6509,
+              "recall": 0.5656,
+              "f1": 0.6053
+            },
+            "relations": {
+              "tp": 45,
+              "fp": 48,
+              "fn": 56,
+              "precision": 0.4839,
+              "recall": 0.4455,
+              "f1": 0.4639
+            },
+            "meanElementF1": 0.537,
+            "meanRelationF1": 0.4215,
+            "exactRate": 0.1667
+          },
+          "dfd": {
+            "n": 30,
+            "built": 30,
+            "valid": 15,
+            "validRate": 0.5,
+            "elements": {
+              "tp": 52,
+              "fp": 31,
+              "fn": 57,
+              "precision": 0.6265,
+              "recall": 0.4771,
+              "f1": 0.5417
+            },
+            "relations": {
+              "tp": 12,
+              "fp": 46,
+              "fn": 84,
+              "precision": 0.2069,
+              "recall": 0.125,
+              "f1": 0.1558
+            },
+            "meanElementF1": 0.5102,
+            "meanRelationF1": 0.1233,
+            "exactRate": 0.0333
+          },
+          "erd": {
+            "n": 30,
+            "built": 25,
+            "valid": 25,
+            "validRate": 0.8333,
+            "elements": {
+              "tp": 51,
+              "fp": 18,
+              "fn": 24,
+              "precision": 0.7391,
+              "recall": 0.68,
+              "f1": 0.7083
+            },
+            "relations": {
+              "tp": 13,
+              "fp": 13,
+              "fn": 30,
+              "precision": 0.5,
+              "recall": 0.3023,
+              "f1": 0.3768
+            },
+            "meanElementF1": 0.6679,
+            "meanRelationF1": 0.2944,
+            "exactRate": 0.2667
+          },
+          "gost": {
+            "n": 30,
+            "built": 26,
+            "valid": 26,
+            "validRate": 0.8667,
+            "elements": {
+              "tp": 82,
+              "fp": 14,
+              "fn": 46,
+              "precision": 0.8542,
+              "recall": 0.6406,
+              "f1": 0.7321
+            },
+            "relations": {
+              "tp": 53,
+              "fp": 28,
+              "fn": 62,
+              "precision": 0.6543,
+              "recall": 0.4609,
+              "f1": 0.5408
+            },
+            "meanElementF1": 0.643,
+            "meanRelationF1": 0.5048,
+            "exactRate": 0.3
+          },
+          "uml-sequence": {
+            "n": 30,
+            "built": 30,
+            "valid": 27,
+            "validRate": 0.9,
+            "elements": {
+              "tp": 69,
+              "fp": 19,
+              "fn": 22,
+              "precision": 0.7841,
+              "recall": 0.7582,
+              "f1": 0.7709
+            },
+            "relations": {
+              "tp": 74,
+              "fp": 26,
+              "fn": 34,
+              "precision": 0.74,
+              "recall": 0.6852,
+              "f1": 0.7115
+            },
+            "meanElementF1": 0.7806,
+            "meanRelationF1": 0.6658,
+            "exactRate": 0.4667
+          }
+        },
+        "byLevel": {
+          "easy": {
+            "n": 52,
+            "built": 46,
+            "valid": 40,
+            "validRate": 0.7692,
+            "elements": {
+              "tp": 67,
+              "fp": 32,
+              "fn": 62,
+              "precision": 0.6768,
+              "recall": 0.5194,
+              "f1": 0.5877
+            },
+            "relations": {
+              "tp": 33,
+              "fp": 35,
+              "fn": 50,
+              "precision": 0.4853,
+              "recall": 0.3976,
+              "f1": 0.4371
+            },
+            "meanElementF1": 0.5587,
+            "meanRelationF1": 0.3365,
+            "exactRate": 0.3654
+          },
+          "hard": {
+            "n": 34,
+            "built": 34,
+            "valid": 28,
+            "validRate": 0.8235,
+            "elements": {
+              "tp": 108,
+              "fp": 41,
+              "fn": 61,
+              "precision": 0.7248,
+              "recall": 0.6391,
+              "f1": 0.6792
+            },
+            "relations": {
+              "tp": 69,
+              "fp": 60,
+              "fn": 116,
+              "precision": 0.5349,
+              "recall": 0.373,
+              "f1": 0.4395
+            },
+            "meanElementF1": 0.6632,
+            "meanRelationF1": 0.3699,
+            "exactRate": 0.0588
+          },
+          "medium": {
+            "n": 64,
+            "built": 61,
+            "valid": 55,
+            "validRate": 0.8594,
+            "elements": {
+              "tp": 148,
+              "fp": 46,
+              "fn": 79,
+              "precision": 0.7629,
+              "recall": 0.652,
+              "f1": 0.7031
+            },
+            "relations": {
+              "tp": 95,
+              "fp": 66,
+              "fn": 100,
+              "precision": 0.5901,
+              "recall": 0.4872,
+              "f1": 0.5337
+            },
+            "meanElementF1": 0.665,
+            "meanRelationF1": 0.4722,
+            "exactRate": 0.25
+          }
+        }
+      },
+      "gold": {
+        "n": 150,
+        "built": 146,
+        "valid": 120,
+        "validRate": 0.8,
+        "elements": {
+          "tp": 384,
+          "fp": 74,
+          "fn": 141,
+          "precision": 0.8384,
+          "recall": 0.7314,
+          "f1": 0.7813
+        },
+        "relations": {
+          "tp": 244,
+          "fp": 122,
+          "fn": 219,
+          "precision": 0.6667,
+          "recall": 0.527,
+          "f1": 0.5887
+        },
+        "meanElementF1": 0.7592,
+        "meanRelationF1": 0.506,
+        "exactRate": 0.32,
+        "byNotation": {
+          "bpmn": {
+            "n": 30,
+            "built": 30,
+            "valid": 30,
+            "validRate": 1,
+            "elements": {
+              "tp": 99,
+              "fp": 9,
+              "fn": 23,
+              "precision": 0.9167,
+              "recall": 0.8115,
+              "f1": 0.8609
+            },
+            "relations": {
+              "tp": 62,
+              "fp": 25,
+              "fn": 39,
+              "precision": 0.7126,
+              "recall": 0.6139,
+              "f1": 0.6596
+            },
+            "meanElementF1": 0.8497,
+            "meanRelationF1": 0.6323,
+            "exactRate": 0.3333
+          },
+          "dfd": {
+            "n": 30,
+            "built": 30,
+            "valid": 4,
+            "validRate": 0.1333,
+            "elements": {
+              "tp": 55,
+              "fp": 29,
+              "fn": 54,
+              "precision": 0.6548,
+              "recall": 0.5046,
+              "f1": 0.5699
+            },
+            "relations": {
+              "tp": 17,
+              "fp": 44,
+              "fn": 79,
+              "precision": 0.2787,
+              "recall": 0.1771,
+              "f1": 0.2166
+            },
+            "meanElementF1": 0.5401,
+            "meanRelationF1": 0.17,
+            "exactRate": 0.0333
+          },
+          "erd": {
+            "n": 30,
+            "built": 26,
+            "valid": 26,
+            "validRate": 0.8667,
+            "elements": {
+              "tp": 52,
+              "fp": 19,
+              "fn": 23,
+              "precision": 0.7324,
+              "recall": 0.6933,
+              "f1": 0.7123
+            },
+            "relations": {
+              "tp": 14,
+              "fp": 12,
+              "fn": 29,
+              "precision": 0.5385,
+              "recall": 0.3256,
+              "f1": 0.4058
+            },
+            "meanElementF1": 0.6913,
+            "meanRelationF1": 0.3278,
+            "exactRate": 0.3
+          },
+          "gost": {
+            "n": 30,
+            "built": 30,
+            "valid": 30,
+            "validRate": 1,
+            "elements": {
+              "tp": 94,
+              "fp": 13,
+              "fn": 34,
+              "precision": 0.8785,
+              "recall": 0.7344,
+              "f1": 0.8
+            },
+            "relations": {
+              "tp": 57,
+              "fp": 30,
+              "fn": 58,
+              "precision": 0.6552,
+              "recall": 0.4957,
+              "f1": 0.5644
+            },
+            "meanElementF1": 0.7808,
+            "meanRelationF1": 0.5648,
+            "exactRate": 0.3333
+          },
+          "uml-sequence": {
+            "n": 30,
+            "built": 30,
+            "valid": 30,
+            "validRate": 1,
+            "elements": {
+              "tp": 84,
+              "fp": 4,
+              "fn": 7,
+              "precision": 0.9545,
+              "recall": 0.9231,
+              "f1": 0.9385
+            },
+            "relations": {
+              "tp": 94,
+              "fp": 11,
+              "fn": 14,
+              "precision": 0.8952,
+              "recall": 0.8704,
+              "f1": 0.8826
+            },
+            "meanElementF1": 0.9341,
+            "meanRelationF1": 0.8352,
+            "exactRate": 0.6
+          }
+        },
+        "byLevel": {
+          "easy": {
+            "n": 52,
+            "built": 50,
+            "valid": 40,
+            "validRate": 0.7692,
+            "elements": {
+              "tp": 96,
+              "fp": 9,
+              "fn": 33,
+              "precision": 0.9143,
+              "recall": 0.7442,
+              "f1": 0.8205
+            },
+            "relations": {
+              "tp": 46,
+              "fp": 19,
+              "fn": 37,
+              "precision": 0.7077,
+              "recall": 0.5542,
+              "f1": 0.6216
+            },
+            "meanElementF1": 0.7817,
+            "meanRelationF1": 0.468,
+            "exactRate": 0.5
+          },
+          "hard": {
+            "n": 34,
+            "built": 34,
+            "valid": 28,
+            "validRate": 0.8235,
+            "elements": {
+              "tp": 121,
+              "fp": 33,
+              "fn": 48,
+              "precision": 0.7857,
+              "recall": 0.716,
+              "f1": 0.7492
+            },
+            "relations": {
+              "tp": 86,
+              "fp": 52,
+              "fn": 99,
+              "precision": 0.6232,
+              "recall": 0.4649,
+              "f1": 0.5325
+            },
+            "meanElementF1": 0.7373,
+            "meanRelationF1": 0.4588,
+            "exactRate": 0.0882
+          },
+          "medium": {
+            "n": 64,
+            "built": 62,
+            "valid": 52,
+            "validRate": 0.8125,
+            "elements": {
+              "tp": 167,
+              "fp": 32,
+              "fn": 60,
+              "precision": 0.8392,
+              "recall": 0.7357,
+              "f1": 0.784
+            },
+            "relations": {
+              "tp": 112,
+              "fp": 51,
+              "fn": 83,
+              "precision": 0.6871,
+              "recall": 0.5744,
+              "f1": 0.6257
+            },
+            "meanElementF1": 0.7525,
+            "meanRelationF1": 0.562,
+            "exactRate": 0.2969
+          }
+        }
+      },
+      "roundTrip": {
+        "n": 146,
+        "ok": 120,
+        "exact": 9,
+        "exactRate": 0.0616
+      }
+    },
+    "en": {
+      "auto": {
+        "n": 150,
+        "built": 143,
+        "valid": 126,
+        "validRate": 0.84,
+        "elements": {
+          "tp": 315,
+          "fp": 128,
+          "fn": 210,
+          "precision": 0.7111,
+          "recall": 0.6,
+          "f1": 0.6508
+        },
+        "relations": {
+          "tp": 180,
+          "fp": 187,
+          "fn": 283,
+          "precision": 0.4905,
+          "recall": 0.3888,
+          "f1": 0.4337
+        },
+        "meanElementF1": 0.6208,
+        "meanRelationF1": 0.3843,
+        "exactRate": 0.2533,
+        "byNotation": {
+          "bpmn": {
+            "n": 30,
+            "built": 30,
+            "valid": 30,
+            "validRate": 1,
+            "elements": {
+              "tp": 60,
+              "fp": 39,
+              "fn": 62,
+              "precision": 0.6061,
+              "recall": 0.4918,
+              "f1": 0.543
+            },
+            "relations": {
+              "tp": 36,
+              "fp": 49,
+              "fn": 65,
+              "precision": 0.4235,
+              "recall": 0.3564,
+              "f1": 0.3871
+            },
+            "meanElementF1": 0.476,
+            "meanRelationF1": 0.3393,
+            "exactRate": 0.1667
+          },
+          "dfd": {
+            "n": 30,
+            "built": 30,
+            "valid": 15,
+            "validRate": 0.5,
+            "elements": {
+              "tp": 54,
+              "fp": 27,
+              "fn": 55,
+              "precision": 0.6667,
+              "recall": 0.4954,
+              "f1": 0.5684
+            },
+            "relations": {
+              "tp": 15,
+              "fp": 42,
+              "fn": 81,
+              "precision": 0.2632,
+              "recall": 0.1563,
+              "f1": 0.1961
+            },
+            "meanElementF1": 0.5345,
+            "meanRelationF1": 0.1539,
+            "exactRate": 0.0333
+          },
+          "erd": {
+            "n": 30,
+            "built": 26,
+            "valid": 26,
+            "validRate": 0.8667,
+            "elements": {
+              "tp": 54,
+              "fp": 20,
+              "fn": 21,
+              "precision": 0.7297,
+              "recall": 0.72,
+              "f1": 0.7248
+            },
+            "relations": {
+              "tp": 17,
+              "fp": 17,
+              "fn": 26,
+              "precision": 0.5,
+              "recall": 0.3953,
+              "f1": 0.4416
+            },
+            "meanElementF1": 0.6943,
+            "meanRelationF1": 0.3667,
+            "exactRate": 0.3333
+          },
+          "gost": {
+            "n": 30,
+            "built": 27,
+            "valid": 27,
+            "validRate": 0.9,
+            "elements": {
+              "tp": 81,
+              "fp": 22,
+              "fn": 47,
+              "precision": 0.7864,
+              "recall": 0.6328,
+              "f1": 0.7013
+            },
+            "relations": {
+              "tp": 42,
+              "fp": 46,
+              "fn": 73,
+              "precision": 0.4773,
+              "recall": 0.3652,
+              "f1": 0.4138
+            },
+            "meanElementF1": 0.6495,
+            "meanRelationF1": 0.4454,
+            "exactRate": 0.3
+          },
+          "uml-sequence": {
+            "n": 30,
+            "built": 30,
+            "valid": 28,
+            "validRate": 0.9333,
+            "elements": {
+              "tp": 66,
+              "fp": 20,
+              "fn": 25,
+              "precision": 0.7674,
+              "recall": 0.7253,
+              "f1": 0.7458
+            },
+            "relations": {
+              "tp": 70,
+              "fp": 33,
+              "fn": 38,
+              "precision": 0.6796,
+              "recall": 0.6481,
+              "f1": 0.6635
+            },
+            "meanElementF1": 0.7497,
+            "meanRelationF1": 0.6164,
+            "exactRate": 0.4333
+          }
+        },
+        "byLevel": {
+          "easy": {
+            "n": 52,
+            "built": 46,
+            "valid": 40,
+            "validRate": 0.7692,
+            "elements": {
+              "tp": 71,
+              "fp": 29,
+              "fn": 58,
+              "precision": 0.71,
+              "recall": 0.5504,
+              "f1": 0.6201
+            },
+            "relations": {
+              "tp": 36,
+              "fp": 33,
+              "fn": 47,
+              "precision": 0.5217,
+              "recall": 0.4337,
+              "f1": 0.4737
+            },
+            "meanElementF1": 0.5824,
+            "meanRelationF1": 0.3622,
+            "exactRate": 0.3846
+          },
+          "hard": {
+            "n": 34,
+            "built": 34,
+            "valid": 29,
+            "validRate": 0.8529,
+            "elements": {
+              "tp": 103,
+              "fp": 46,
+              "fn": 66,
+              "precision": 0.6913,
+              "recall": 0.6095,
+              "f1": 0.6478
+            },
+            "relations": {
+              "tp": 61,
+              "fp": 74,
+              "fn": 124,
+              "precision": 0.4519,
+              "recall": 0.3297,
+              "f1": 0.3813
+            },
+            "meanElementF1": 0.6452,
+            "meanRelationF1": 0.3388,
+            "exactRate": 0.0882
+          },
+          "medium": {
+            "n": 64,
+            "built": 63,
+            "valid": 57,
+            "validRate": 0.8906,
+            "elements": {
+              "tp": 141,
+              "fp": 53,
+              "fn": 86,
+              "precision": 0.7268,
+              "recall": 0.6211,
+              "f1": 0.6698
+            },
+            "relations": {
+              "tp": 83,
+              "fp": 80,
+              "fn": 112,
+              "precision": 0.5092,
+              "recall": 0.4256,
+              "f1": 0.4637
+            },
+            "meanElementF1": 0.639,
+            "meanRelationF1": 0.4265,
+            "exactRate": 0.2344
+          }
+        }
+      },
+      "gold": {
+        "n": 150,
+        "built": 148,
+        "valid": 122,
+        "validRate": 0.8133,
+        "elements": {
+          "tp": 379,
+          "fp": 81,
+          "fn": 146,
+          "precision": 0.8239,
+          "recall": 0.7219,
+          "f1": 0.7695
+        },
+        "relations": {
+          "tp": 230,
+          "fp": 143,
+          "fn": 233,
+          "precision": 0.6166,
+          "recall": 0.4968,
+          "f1": 0.5502
+        },
+        "meanElementF1": 0.7579,
+        "meanRelationF1": 0.4935,
+        "exactRate": 0.32,
+        "byNotation": {
+          "bpmn": {
+            "n": 30,
+            "built": 30,
+            "valid": 30,
+            "validRate": 1,
+            "elements": {
+              "tp": 96,
+              "fp": 11,
+              "fn": 26,
+              "precision": 0.8972,
+              "recall": 0.7869,
+              "f1": 0.8384
+            },
+            "relations": {
+              "tp": 58,
+              "fp": 28,
+              "fn": 43,
+              "precision": 0.6744,
+              "recall": 0.5743,
+              "f1": 0.6203
+            },
+            "meanElementF1": 0.8195,
+            "meanRelationF1": 0.5757,
+            "exactRate": 0.3333
+          },
+          "dfd": {
+            "n": 30,
+            "built": 30,
+            "valid": 4,
+            "validRate": 0.1333,
+            "elements": {
+              "tp": 58,
+              "fp": 24,
+              "fn": 51,
+              "precision": 0.7073,
+              "recall": 0.5321,
+              "f1": 0.6073
+            },
+            "relations": {
+              "tp": 20,
+              "fp": 40,
+              "fn": 76,
+              "precision": 0.3333,
+              "recall": 0.2083,
+              "f1": 0.2564
+            },
+            "meanElementF1": 0.5738,
+            "meanRelationF1": 0.2006,
+            "exactRate": 0.0333
+          },
+          "erd": {
+            "n": 30,
+            "built": 28,
+            "valid": 28,
+            "validRate": 0.9333,
+            "elements": {
+              "tp": 57,
+              "fp": 21,
+              "fn": 18,
+              "precision": 0.7308,
+              "recall": 0.76,
+              "f1": 0.7451
+            },
+            "relations": {
+              "tp": 19,
+              "fp": 16,
+              "fn": 24,
+              "precision": 0.5429,
+              "recall": 0.4419,
+              "f1": 0.4872
+            },
+            "meanElementF1": 0.751,
+            "meanRelationF1": 0.4333,
+            "exactRate": 0.4
+          },
+          "gost": {
+            "n": 30,
+            "built": 30,
+            "valid": 30,
+            "validRate": 1,
+            "elements": {
+              "tp": 86,
+              "fp": 22,
+              "fn": 42,
+              "precision": 0.7963,
+              "recall": 0.6719,
+              "f1": 0.7288
+            },
+            "relations": {
+              "tp": 44,
+              "fp": 45,
+              "fn": 71,
+              "precision": 0.4944,
+              "recall": 0.3826,
+              "f1": 0.4314
+            },
+            "meanElementF1": 0.7225,
+            "meanRelationF1": 0.4721,
+            "exactRate": 0.3
+          },
+          "uml-sequence": {
+            "n": 30,
+            "built": 30,
+            "valid": 30,
+            "validRate": 1,
+            "elements": {
+              "tp": 82,
+              "fp": 3,
+              "fn": 9,
+              "precision": 0.9647,
+              "recall": 0.9011,
+              "f1": 0.9318
+            },
+            "relations": {
+              "tp": 89,
+              "fp": 14,
+              "fn": 19,
+              "precision": 0.8641,
+              "recall": 0.8241,
+              "f1": 0.8436
+            },
+            "meanElementF1": 0.9228,
+            "meanRelationF1": 0.7859,
+            "exactRate": 0.5333
+          }
+        },
+        "byLevel": {
+          "easy": {
+            "n": 52,
+            "built": 51,
+            "valid": 41,
+            "validRate": 0.7885,
+            "elements": {
+              "tp": 99,
+              "fp": 9,
+              "fn": 30,
+              "precision": 0.9167,
+              "recall": 0.7674,
+              "f1": 0.8354
+            },
+            "relations": {
+              "tp": 48,
+              "fp": 19,
+              "fn": 35,
+              "precision": 0.7164,
+              "recall": 0.5783,
+              "f1": 0.64
+            },
+            "meanElementF1": 0.8055,
+            "meanRelationF1": 0.4968,
+            "exactRate": 0.5192
+          },
+          "hard": {
+            "n": 34,
+            "built": 34,
+            "valid": 28,
+            "validRate": 0.8235,
+            "elements": {
+              "tp": 122,
+              "fp": 35,
+              "fn": 47,
+              "precision": 0.7771,
+              "recall": 0.7219,
+              "f1": 0.7485
+            },
+            "relations": {
+              "tp": 82,
+              "fp": 62,
+              "fn": 103,
+              "precision": 0.5694,
+              "recall": 0.4432,
+              "f1": 0.4985
+            },
+            "meanElementF1": 0.7477,
+            "meanRelationF1": 0.4479,
+            "exactRate": 0.0882
+          },
+          "medium": {
+            "n": 64,
+            "built": 63,
+            "valid": 53,
+            "validRate": 0.8281,
+            "elements": {
+              "tp": 158,
+              "fp": 37,
+              "fn": 69,
+              "precision": 0.8103,
+              "recall": 0.696,
+              "f1": 0.7488
+            },
+            "relations": {
+              "tp": 100,
+              "fp": 62,
+              "fn": 95,
+              "precision": 0.6173,
+              "recall": 0.5128,
+              "f1": 0.5602
+            },
+            "meanElementF1": 0.7247,
+            "meanRelationF1": 0.5151,
+            "exactRate": 0.2813
+          }
+        }
+      },
+      "roundTrip": {
+        "n": 148,
+        "ok": 120,
+        "exact": 35,
+        "exactRate": 0.2365
+      }
+    }
+  },
+  "check": {
+    "seeded": {
+      "n": 102,
+      "found": 91,
+      "recall": 0.8922,
+      "perCategory": {
+        "dangling": {
+          "n": 18,
+          "found": 18,
+          "recall": 1
+        },
+        "deadend": {
+          "n": 16,
+          "found": 13,
+          "recall": 0.8125
+        },
+        "level-balance": {
+          "n": 16,
+          "found": 16,
+          "recall": 1
+        },
+        "notation-rule": {
+          "n": 18,
+          "found": 15,
+          "recall": 0.8333
+        },
+        "syntax": {
+          "n": 18,
+          "found": 15,
+          "recall": 0.8333
+        },
+        "unreachable": {
+          "n": 16,
+          "found": 14,
+          "recall": 0.875
+        }
+      },
+      "recallAtLine": 0.7745,
+      "anyFindingRate": 0.9706
+    },
+    "clean": {
+      "n": 116,
+      "flagged": 0,
+      "rate": 0
+    },
+    "questions": {
+      "askableN": 16,
+      "askedRate": 1,
+      "cleanAsked": 48,
+      "cleanN": 116
+    }
+  },
+  "import": {
+    "n": 45,
+    "ok": 40,
+    "valid": 40,
+    "exact": 32,
+    "elements": {
+      "tp": 112,
+      "fp": 6,
+      "fn": 24,
+      "precision": 0.9492,
+      "recall": 0.8235,
+      "f1": 0.8819
+    },
+    "relations": {
+      "tp": 87,
+      "fp": 16,
+      "fn": 33,
+      "precision": 0.8447,
+      "recall": 0.725,
+      "f1": 0.7803
+    },
+    "byFormat": {
+      "dot": {
+        "n": 6,
+        "ok": 1,
+        "elements": {
+          "tp": 2,
+          "fp": 0,
+          "fn": 16,
+          "precision": 1,
+          "recall": 0.1111,
+          "f1": 0.2
+        },
+        "relations": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 13,
+          "precision": 0,
+          "recall": 0,
+          "f1": 0
+        }
+      },
+      "mermaid": {
+        "n": 29,
+        "ok": 29,
+        "elements": {
+          "tp": 87,
+          "fp": 6,
+          "fn": 7,
+          "precision": 0.9355,
+          "recall": 0.9255,
+          "f1": 0.9305
+        },
+        "relations": {
+          "tp": 62,
+          "fp": 16,
+          "fn": 18,
+          "precision": 0.7949,
+          "recall": 0.775,
+          "f1": 0.7848
+        }
+      },
+      "plantuml": {
+        "n": 10,
+        "ok": 10,
+        "elements": {
+          "tp": 23,
+          "fp": 0,
+          "fn": 1,
+          "precision": 1,
+          "recall": 0.9583,
+          "f1": 0.9787
+        },
+        "relations": {
+          "tp": 25,
+          "fp": 0,
+          "fn": 2,
+          "precision": 1,
+          "recall": 0.9259,
+          "f1": 0.9615
+        }
+      }
+    }
+  },
+  "topErrors": [
+    {
+      "reason": "build(auto) dfd: expected elements are missing",
+      "count": 58,
+      "example": "ru-dfd-01"
+    },
+    {
+      "reason": "build(auto) dfd: expected relations are missing",
+      "count": 58,
+      "example": "ru-dfd-01"
+    },
+    {
+      "reason": "build(gold notation) dfd: expected elements are missing",
+      "count": 58,
+      "example": "ru-dfd-01"
+    },
+    {
+      "reason": "build(gold notation) dfd: expected relations are missing",
+      "count": 58,
+      "example": "ru-dfd-01"
+    },
+    {
+      "reason": "build(gold notation) dfd: extra relations",
+      "count": 55,
+      "example": "ru-dfd-01"
+    },
+    {
+      "reason": "build(gold notation): the built code has validator errors",
+      "count": 52,
+      "example": "ru-dfd-02"
+    },
+    {
+      "reason": "build(auto) dfd: extra relations",
+      "count": 51,
+      "example": "ru-dfd-01"
+    },
+    {
+      "reason": "build(auto) bpmn: expected relations are missing",
+      "count": 50,
+      "example": "ru-bpmn-01"
+    },
+    {
+      "reason": "build(auto) bpmn: expected elements are missing",
+      "count": 44,
+      "example": "ru-bpmn-01"
+    },
+    {
+      "reason": "build(auto) dfd: extra elements",
+      "count": 44,
+      "example": "ru-dfd-01"
+    },
+    {
+      "reason": "build(auto) bpmn: extra relations",
+      "count": 39,
+      "example": "ru-bpmn-01"
+    },
+    {
+      "reason": "build(gold notation) bpmn: expected relations are missing",
+      "count": 38,
+      "example": "ru-bpmn-04"
+    },
+    {
+      "reason": "build(gold notation) dfd: extra elements",
+      "count": 38,
+      "example": "ru-dfd-01"
+    },
+    {
+      "reason": "build(auto) bpmn: extra elements",
+      "count": 37,
+      "example": "ru-bpmn-01"
+    },
+    {
+      "reason": "build(gold notation) gost: expected elements are missing",
+      "count": 37,
+      "example": "ru-gost-03"
+    },
+    {
+      "reason": "build(gold notation) gost: expected relations are missing",
+      "count": 37,
+      "example": "ru-gost-03"
+    },
+    {
+      "reason": "build(auto): the built code has validator errors",
+      "count": 35,
+      "example": "ru-uml-sequence-12"
+    },
+    {
+      "reason": "build(auto) uml-sequence: expected relations are missing",
+      "count": 33,
+      "example": "ru-uml-sequence-02"
+    },
+    {
+      "reason": "build(gold notation) bpmn: expected elements are missing",
+      "count": 32,
+      "example": "ru-bpmn-04"
+    },
+    {
+      "reason": "build(auto) gost: expected elements are missing",
+      "count": 31,
+      "example": "ru-gost-01"
+    }
+  ],
+  "stability": {
+    "n": 1163,
+    "same": 1163,
+    "rate": 1
+  }
+}

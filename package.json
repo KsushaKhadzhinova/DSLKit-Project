@@ -39,6 +39,9 @@
     "typecheck": "tsc -p tsconfig.check.json",
     "hooks:install": "git config core.hooksPath .githooks",
     "guard": "node .github/scripts/check-files.mjs && node .github/scripts/check-commits.mjs origin/main HEAD",
+    "eval": "node tools/eval/cli.js",
+    "eval:baseline": "node tools/eval/cli.js --write",
+    "eval:check": "node tools/eval/cli.js --check",
     "mutation": "stryker run"
   },
   "dependencies": {
