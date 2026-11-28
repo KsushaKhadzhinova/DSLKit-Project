@@ -7,7 +7,7 @@ import { zip, unzip } from './zip.js';
 // captions under figures and above tables, listings in Courier New 10 with a hanging indent for long lines.
 // Headings are 14 pt (STP 2.1.1). Every Latin letter is italic (the rule of the teacher), no tab characters, no empty paragraphs, no non-breaking spaces, no manual line breaks, no long dashes.
 const TEXT_WIDTH = 9355; // twips: 21 cm minus 3 cm and 1.5 cm
-const MAX_EMU_WIDTH = 5940000; // 16.5 cm
+const MAX_EMU_WIDTH = 3780000; // 10.5 cm: with the sections flowing on, narrow figures leave the fewest gaps on the pages
 const PAGE_EMU_HEIGHT = 10692000; // 29.7 cm
 const MAX_EMU_HEIGHT = Math.round(PAGE_EMU_HEIGHT * 0.6); // a figure may take 60 percent of the page height
 const CODE_CHAR = 120; // twips: one Courier New 10 pt character
@@ -25,7 +25,7 @@ const T = {
     faculty: 'Факультет информационных технологий и управления',
     department: 'Кафедра информационных технологий автоматизированных систем',
     discipline: 'Дисциплина: Интернет-технологии и веб-программирование',
-    report: 'ОТЧЁТ',
+    report: 'ОТЧЕТ',
     on: (n) => `по практическому занятию № ${n}`,
     variant: (v) => `Вариант № ${v}`,
     // The signature block follows the samples: the caption «Выполнила:» (or «Выполнил:») on the left, then «ст. гр. N» and the initials in the right column.
@@ -87,6 +87,8 @@ const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, 
 const run = (text, { bold = false, size } = {}) =>
   text
     .replace(/[\u00a0\u202f]/g, ' ')
+    .replace(/ё/g, 'е')
+    .replace(/Ё/g, 'Е')
     .split(/([A-Za-z]+)/)
     .filter(Boolean)
     .map((part) => {
@@ -152,10 +154,10 @@ export const markdownToDocx = (md, { lang = 'ru', variant, read, meta = {}, page
   let letter = '';
   let gap = false; // the next paragraph follows a table and is set apart by spacing, not by an empty paragraph
 
-  const para = (style, content, { keepNext = false, jc = '', ind = '' } = {}) => {
+  const para = (style, content, { keepNext = false, jc = '', ind = '', pageBreak = false } = {}) => {
     const spacing = gap ? '<w:spacing w:before="240"/>' : '';
     gap = false;
-    return `<w:p><w:pPr><w:pStyle w:val="${style}"/>${keepNext ? '<w:keepNext/>' : ''}${spacing}${ind}${jc ? `<w:jc w:val="${jc}"/>` : ''}</w:pPr>${content}</w:p>`;
+    return `<w:p><w:pPr><w:pStyle w:val="${style}"/>${keepNext ? '<w:keepNext/>' : ''}${pageBreak ? '<w:pageBreakBefore/>' : ''}${spacing}${ind}${jc ? `<w:jc w:val="${jc}"/>` : ''}</w:pPr>${content}</w:p>`;
   };
 
   const image = (alt, src) => {
@@ -201,11 +203,16 @@ export const markdownToDocx = (md, { lang = 'ru', variant, read, meta = {}, page
     return `<w:tbl><w:tblPr><w:tblW w:w="${TEXT_WIDTH}" w:type="dxa"/><w:tblBorders>${b}</w:tblBorders><w:tblLayout w:type="fixed"/><w:tblCellMar><w:left w:w="85" w:type="dxa"/><w:right w:w="85" w:type="dxa"/></w:tblCellMar></w:tblPr><w:tblGrid>${grid}</w:tblGrid>${tr}</w:tbl>`;
   };
 
+  // The titles of the sections stand in capital letters in the body, the contents keeps the normal case. Only the first section (after the
+  // contents) and the appendices start a new page, the other sections follow on.
+  let firstSection = true;
   const h1 = (text, lines3, centered, entry = text) => {
     toc.push([1, lines3 ? entry : text]);
     // The three lines of an appendix title are three paragraphs (no manual line break): the first one is the heading of the contents.
-    if (lines3) return lines3.map((l, i) => para(i ? 'HeadingNext' : 'Heading1', run(l), { jc: 'center' })).join('');
-    return para('Heading1', run(text), { jc: centered ? 'center' : '' });
+    if (lines3) return lines3.map((l, i) => para(i ? 'HeadingNext' : 'Heading1', run(l), { jc: 'center', pageBreak: i === 0 })).join('');
+    const first = firstSection;
+    firstSection = false;
+    return para('Heading1', run(text.toUpperCase()), { jc: centered ? 'center' : '', pageBreak: first });
   };
 
   // One listing line: real spaces for the indent (a copy into an editor stays code), a hanging indent when the line wraps.
@@ -244,7 +251,7 @@ export const markdownToDocx = (md, { lang = 'ru', variant, read, meta = {}, page
       i += 1;
     } else if (line.startsWith('### ')) {
       toc.push([2, line.slice(4)]);
-      body.push(para('Heading2', run(line.slice(4))));
+      body.push(para('Heading2', run(line.slice(4).toUpperCase())));
       i += 1;
     } else if (line.startsWith('```')) {
       const code = [];
@@ -333,7 +340,7 @@ export const markdownToDocx = (md, { lang = 'ru', variant, read, meta = {}, page
   const styles = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:styles ${NS}><w:docDefaults><w:rPrDefault><w:rPr>${font}<w:sz w:val="28"/><w:szCs w:val="28"/><w:lang w:val="${lang === 'ru' ? 'ru-RU' : 'en-US'}"/></w:rPr></w:rPrDefault></w:docDefaults>
 <w:style w:type="paragraph" w:default="1" w:styleId="Plain"><w:name w:val="Plain"/><w:pPr><w:spacing w:after="0" w:line="240" w:lineRule="auto"/></w:pPr></w:style>
 <w:style w:type="paragraph" w:styleId="Normal"><w:name w:val="Normal Text"/><w:basedOn w:val="Plain"/><w:qFormat/><w:pPr><w:spacing w:after="0" w:line="276" w:lineRule="auto"/><w:ind w:firstLine="709"/><w:jc w:val="both"/></w:pPr></w:style>
-${ps('Heading1', 'heading 1', '<w:keepNext/><w:pageBreakBefore/><w:spacing w:after="360" w:line="276" w:lineRule="auto"/><w:outlineLvl w:val="0"/>', '<w:b/><w:sz w:val="28"/>')}
+${ps('Heading1', 'heading 1', '<w:keepNext/><w:spacing w:before="240" w:after="240" w:line="276" w:lineRule="auto"/><w:outlineLvl w:val="0"/>', '<w:b/><w:sz w:val="28"/>')}
 ${ps('HeadingNext', 'Heading continued', '<w:keepNext/><w:spacing w:after="0" w:line="276" w:lineRule="auto"/>', '<w:b/><w:sz w:val="28"/>')}
 ${ps('Heading2', 'heading 2', '<w:keepNext/><w:spacing w:before="240" w:after="240" w:line="276" w:lineRule="auto"/><w:outlineLvl w:val="1"/>', '<w:b/>')}
 ${ps('Heading3', 'heading 3', '<w:keepNext/><w:spacing w:before="120" w:after="0" w:line="276" w:lineRule="auto"/><w:outlineLvl w:val="2"/>', '<w:b/>')}
@@ -425,7 +432,14 @@ export const lintDocx = (buf, { pages = true, figureHeight = true } = {}) => {
   );
   check(settings.includes('updateFields'), 'updateFields makes Word ask to update the fields on opening');
   check(/Calibri|Arial/.test(xml + styles), 'Fonts other than Times New Roman and Courier New');
-  check(!/w:styleId="Heading1">(?:(?!<\/w:style>)[\s\S])*?<w:pageBreakBefore\/>/.test(styles), 'Parts must start on a new page');
+  // The sections flow on: no forced page break in the style, only the first section and the appendices start a page.
+  check(/w:styleId="Heading1">(?:(?!<\/w:style>)[\s\S])*?<w:pageBreakBefore\/>/.test(styles), 'Sections must not start a new page by their style');
+  const heads = all.filter((p) => /<w:pStyle w:val="Heading[12]"\/>/.test(p) && !/^(?:Приложение|Appendix) /i.test(textOf(p)));
+  check(
+    heads.some((p) => textOf(p) !== textOf(p).toUpperCase()),
+    'Titles of sections and subsections must be in capital letters in the body',
+  );
+  check(/[ёЁ]/.test(xml), 'The letter ё must be written as е');
   check(
     all.some((p) => !/<w:drawing>|<w:fldChar|<w:br/.test(p) && !p.includes('<w:r>') && style(p) !== 'Code' && style(p) !== 'Footer'),
     'Empty paragraph',

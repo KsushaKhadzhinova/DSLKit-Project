@@ -16,6 +16,8 @@ The purpose of the work is the study of the principles of designing a RESTful AP
 
 ## 3 Course of the Work
 
+The work is carried out in the following order: the resources and endpoints are designed, data validation, roles and the request journal are added, the error pages and the API documentation are described, after which the requests are checked in Postman, from a browser and by automatic tests. The subsections follow the order of execution.
+
 ### 3.1 API design
 
 Three linked resources are chosen: users `users`, projects `projects` and diagrams `diagrams`. A user owns projects and a project contains diagrams. The fields and validation rules are collected in table 1.
@@ -271,28 +273,28 @@ A REST API with three linked resources is designed and implemented for the DSLKi
 
 The limits of the work are named directly. The data of the resources is kept in in-memory arrays and is lost when the server restarts, as the task requires, and only the request journal is kept in a database. The identity of a user is set by the headers `X-User-Id` and `X-Role` and is trusted, so in a real system it must be taken from a verified session or token. The error texts are written in English. The journal write and the action on the data are not in one transaction, and this is solved by the order of the steps: first the journal row, then the action, and if the journal fails the action is not carried out. These limits are described in the text of the work and in the file `README.md` of the project.
 
-## Appendix A (mandatory) Listing of the file app.js, application assembly
+## Appendix A (mandatory) Assembly of app.js
 
 The comments in the listings of all appendices are written in English, as in the source files of the project.
 
 {{code:part-2/pz-02-rest-api/src/app.js#65-124}}
 
-## Appendix B (mandatory) Listing of the file app.js, routes and error handler
+## Appendix B (mandatory) Routes of app.js
 
 {{code:part-2/pz-02-rest-api/src/app.js#125-268}}
 
-## Appendix C (mandatory) Listing of the file resource.js, common routes of a resource
+## Appendix C (mandatory) resource.js
 
 {{code:part-2/pz-02-rest-api/src/resource.js#17-165}}
 
-## Appendix D (mandatory) Listing of the file validation.js, field validation
+## Appendix D (mandatory) validation.js
 
 {{code:part-2/pz-02-rest-api/src/validation.js}}
 
-## Appendix E (mandatory) Listing of the file security.js, roles and protection
+## Appendix E (mandatory) security.js
 
 {{code:part-2/pz-02-rest-api/src/security.js}}
 
-## Appendix F (mandatory) Listing of the file journal.js, request journal
+## Appendix F (mandatory) journal.js
 
 {{code:part-2/pz-02-rest-api/src/journal.js#9-51}}

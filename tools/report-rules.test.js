@@ -189,12 +189,12 @@ test('italics and numerals below ten', () => {
 });
 
 test('an ordinal number must be a digit with an ending, quotes and question texts excepted', () => {
-  only(ru.replace('Изучить сеть.', 'Передаётся вторым аргументом.'), 'ru', 'Порядковое');
+  only(ru.replace('Изучить сеть.', 'Передается вторым аргументом.'), 'ru', 'Порядковое');
   only(ru.replace('Изучить сеть.', 'Это первой диаграммы.'), 'ru', 'Порядковое');
-  assert.deepEqual(extraErrors(ru.replace('Изучить сеть.', 'Передаётся 2-м аргументом, а «второй способ» цитата.'), 'ru'), []);
+  assert.deepEqual(extraErrors(ru.replace('Изучить сеть.', 'Передается 2-м аргументом, а «второй способ» цитата.'), 'ru'), []);
   assert.deepEqual(extraErrors(ru.replace('Изучить сеть.', 'Первичный и второстепенный пятно.'), 'ru'), []);
   assert.deepEqual(extraErrors(en.replace('Study the network.', 'The second way.'), 'en'), []);
-  assert.deepEqual(extraErrors(ru.replace('Изучить сеть.', 'Передаётся вторым аргументом.'), 'ru', { ordinals: false }), []);
+  assert.deepEqual(extraErrors(ru.replace('Изучить сеть.', 'Передается вторым аргументом.'), 'ru', { ordinals: false }), []);
 });
 
 test('the words of an in-memory store are forbidden when the variant keeps data in the database', () => {

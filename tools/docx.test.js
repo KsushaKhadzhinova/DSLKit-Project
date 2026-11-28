@@ -10,7 +10,7 @@ const png = (w, h) => {
   b.writeUInt32BE(h, 20);
   return b;
 };
-const read = (p) => (p === 'big.png' ? png(3000, 2000) : p === 'tall.png' ? png(1000, 1400) : png(400, 300));
+const read = (p) => (p === 'big.png' ? png(3000, 2000) : p === 'tall.png' ? png(1000, 2000) : png(400, 300));
 const PAGES = [3, 3, 4, 5, 6, 7, 8];
 const NBSP = String.fromCharCode(160);
 
@@ -194,12 +194,12 @@ test('the package has the parts, the page setup and the styles the rules ask for
 
 test('the unnumbered part is centred, the images are scaled into the text area', () => {
   const xml = xmlOf(build(ru));
-  assert.match(xml, /Заключение/);
-  assert.match(xml, /<w:jc w:val="center"\/><\/w:pPr><w:r><w:rPr><\/w:rPr><w:t xml:space="preserve">Заключение/);
+  assert.match(xml, /ЗАКЛЮЧЕНИЕ/);
+  assert.match(xml, /<w:jc w:val="center"\/><\/w:pPr><w:r><w:rPr><\/w:rPr><w:t xml:space="preserve">ЗАКЛЮЧЕНИЕ/);
   const extents = [...xml.matchAll(/<wp:extent cx="(\d+)" cy="(\d+)"\/>/g)].map((m) => [Number(m[1]), Number(m[2])]);
   assert.equal(extents.length, 2);
-  assert.ok(extents.every(([cx, cy]) => cx <= 5940000 && cy <= 6415200));
-  assert.deepEqual(extents[0], [3810000, 2857500]);
+  assert.ok(extents.every(([cx, cy]) => cx <= 3780000 && cy <= 6415200));
+  assert.deepEqual(extents[0], [3780000, 2835000]);
   assert.ok(xml.includes('keepNext'));
   assert.ok(xml.includes('cantSplit'));
 });
@@ -331,7 +331,7 @@ test('lintDocx reports every rule it knows', () => {
   has(rezip(base, { 'word/document.xml': (x) => x.replace('<w:titlePg/>', '') }), 'title page');
   has(rezip(base, { 'word/document.xml': (x) => x.replace('TOC \\o', 'XX \\o') }), 'table of contents');
   has(rezip(base, { 'word/styles.xml': (x) => x.replace('Times New Roman', 'Calibri') }), 'Fonts');
-  has(rezip(base, { 'word/styles.xml': (x) => x.replace(/(w:styleId="Heading1">[\s\S]*?)<w:pageBreakBefore\/>/, '$1') }), 'new page');
+  has(rezip(base, { 'word/styles.xml': (x) => x.replace(/(w:styleId="Heading1">[^]*?)<w:pPr>/, '$1<w:pPr><w:pageBreakBefore/>') }), 'must not start a new page');
   const noPages = build(ru, 'ru', { pages: undefined });
   has(noPages, 'page number');
   assert.deepEqual(lintDocx(noPages, { pages: false }), []);

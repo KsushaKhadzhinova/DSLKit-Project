@@ -25,6 +25,9 @@ const R = {
       emptyParagraph: 'Пустой абзац: подряд больше одной пустой строки',
       dash: 'Дефис вместо тире «–» (в паузе или диапазоне)',
       noNbsp: 'Неразрывные пробелы не используются, нужен обычный пробел',
+      yo: 'Буква «ё» не используется, нужна «е»',
+      tocLong: 'Название слишком длинное для одной строки содержания, нужно сократить',
+      noIntro: 'После заголовка раздела и до первого подраздела нужен абзац текста',
       longDash: 'Длинное тире «—» не используется, нужно короткое «–»',
       softBreak: 'Ручной перенос строки не используется, нужен новый абзац',
       tableRows: `Таблица длиннее ${MAX_TABLE_ROWS} строк, её нужно сократить или перенести`,
@@ -61,6 +64,9 @@ const R = {
       emptyParagraph: 'Empty paragraph: more than one blank line in a row',
       dash: 'Hyphen instead of the en dash "–" (pause or range)',
       noNbsp: 'Non-breaking spaces are not used, use a plain space',
+      yo: 'The letter ё is not used, write е',
+      tocLong: 'A title is too long for one line of the contents, shorten it',
+      noIntro: 'A paragraph of text is needed between a section title and its first subsection',
       longDash: 'The long dash is not used, use the short dash',
       softBreak: 'A manual line break is not used, start a new paragraph',
       tableRows: `Table longer than ${MAX_TABLE_ROWS} rows, shorten or move it`,
@@ -121,6 +127,13 @@ export const extraErrors = (text, lang, { variant, questions, database, reposito
   check(/\n{3,}/.test(flat), m.emptyParagraph);
   check(/\s-\s|\d-\d/.test(prose.replace(/\d{4}-\d{2}-\d{2}/g, '')), m.dash);
   check(/[\u00a0\u202f]/.test(text), m.noNbsp);
+  check(/[ёЁ]/.test(text), m.yo);
+  // a line of the contents has to fit one line: the title, and for an appendix also the place «(к подразделу N.N)»
+  check(
+    text.split('\n').some((l) => /^##+ /.test(l) && l.replace(/^#+ /, '').length + (/^## (?:Приложение|Appendix) /.test(l) ? 19 : 0) > 62),
+    m.tocLong,
+  );
+  check(/^## [^\n]*\n\n### /m.test(text.replace(/^```[^]*?^```/gm, '')), m.noIntro);
   check(/[\u2014\u2015\u2012]/.test(text), m.longDash);
   check(/[\u2028]|<br ?\/?>/.test(text), m.softBreak);
   check(/(?<![*\w])\*[^*\s][^*\n]*\*(?!\*)|(?<!\w)_[^_\s]+_(?!\w)/.test(prose), m.italic);
