@@ -28,12 +28,9 @@ const T = {
     report: 'ОТЧЁТ',
     on: (n) => `по практическому занятию № ${n}`,
     variant: (v) => `Вариант № ${v}`,
-    // The noun follows the caption: «Выполнила» is a student (female), «Выполнил» a student (male).
-    done: (group, student, caption = 'Выполнила') => [
-      `${caption}: ${caption.endsWith('а') ? 'студентка' : 'студент'} гр. ${group || '________'}`,
-      student || '______________________',
-    ],
-    checked: (reviewer, caption = 'Проверил(а)') => `${caption}: ${reviewer || '______________________'}`,
+    // The signature block follows the samples: the caption «Выполнила:» (or «Выполнил:») on the left, then «ст. гр. N» and the initials in the right column.
+    done: (group, student, caption = 'Выполнила') => [`${caption}:`, `ст. гр. ${group || '________'}`, student || '______________________'],
+    checked: (reviewer, caption = 'Проверил(а)') => [`${caption}:`, reviewer || '______________________'],
     inAppendix: 'к подразделу',
     inSection: 'к разделу',
     appendixRef: (l) => new RegExp(`приложени\\S* ${l}(?![А-Яа-яЁё])`, 'i'),
@@ -61,8 +58,8 @@ const T = {
     report: 'REPORT',
     on: (n) => `on practical work No. ${n}`,
     variant: (v) => `Variant No. ${v}`,
-    done: (group, student, caption = 'Completed by') => [`${caption}: student of group ${group || '________'}`, student || '______________________'],
-    checked: (reviewer, caption = 'Checked by') => `${caption}: ${reviewer || '______________________'}`,
+    done: (group, student, caption = 'Completed by') => [`${caption}:`, `group ${group || '________'}`, student || '______________________'],
+    checked: (reviewer, caption = 'Checked by') => [`${caption}:`, reviewer || '______________________'],
     inAppendix: 'to subsection',
     inSection: 'to section',
     appendixRef: (l) => new RegExp(`appendix ${l}\\b`, 'i'),
@@ -106,6 +103,8 @@ const inline = (text, base = {}) =>
 
 const center = (text, { bold = false, size, after = 0, before = 0 } = {}) =>
   `<w:p><w:pPr><w:pStyle w:val="Plain"/><w:spacing w:before="${before}" w:after="${after}"/><w:jc w:val="center"/></w:pPr>${run(text, { bold, size })}</w:p>`;
+
+const left = (text, { after = 0 } = {}) => `<w:p><w:pPr><w:pStyle w:val="Plain"/><w:spacing w:before="0" w:after="${after}"/></w:pPr>${run(text)}</w:p>`;
 
 const pngSize = (buf) => ({ w: buf.readUInt32BE(16), h: buf.readUInt32BE(20) });
 
@@ -279,20 +278,26 @@ export const markdownToDocx = (md, { lang = 'ru', variant, read, meta = {}, page
 
   const n = t.number.exec(title)?.[1] ?? '1';
   const name = title.includes('. ') ? title.slice(title.indexOf('. ') + 2) : title;
+  // The signature block of the samples (пз1.docx): a table without borders, the caption in the left column, the group and the name in the right one.
+  const signatures = ([doneCaption, group, student], [checkedCaption, reviewer]) => {
+    const widths = [6522, 2833];
+    const paras = (lines, before) => lines.map((text, k) => `<w:p><w:pPr><w:pStyle w:val="Plain"/><w:spacing w:before="${k === 0 ? before : 0}"/></w:pPr>${run(text)}</w:p>`).join('');
+    const row = (caption, lines, before) =>
+      `<w:tr><w:trPr><w:cantSplit/></w:trPr><w:tc><w:tcPr><w:tcW w:w="${widths[0]}" w:type="dxa"/></w:tcPr>${paras([caption], before)}</w:tc><w:tc><w:tcPr><w:tcW w:w="${widths[1]}" w:type="dxa"/></w:tcPr>${paras(lines, before)}</w:tc></w:tr>`;
+    return `<w:tbl><w:tblPr><w:tblW w:w="${TEXT_WIDTH}" w:type="dxa"/><w:tblLayout w:type="fixed"/></w:tblPr><w:tblGrid>${widths.map((w) => `<w:gridCol w:w="${w}"/>`).join('')}</w:tblGrid>${row(doneCaption, [group, student], 0)}${row(checkedCaption, [reviewer], 600)}</w:tbl>`;
+  };
   const titlePage = [
     ...t.lines.map((l, k) => center(l, { after: k === 2 ? 240 : 0 })),
-    center(t.faculty),
-    center(t.department, { after: 600 }),
-    center(t.discipline, { after: 1200 }),
+    // As in the samples, the faculty, the department and the discipline are left-aligned lines; only the university lines and the title are centred.
+    left(t.faculty, { after: 240 }),
+    left(t.department, { after: 240 }),
+    left(t.discipline, { after: 1200 }),
     center(t.report, { bold: true, size: 32, after: 120 }),
     center(t.on(n), { after: 240 }),
     center(`«${name}»`, { after: 480 }),
     center(t.variant(meta.titleVariant ?? variant), { after: 1200 }),
-    ...t
-      .done(meta.group, meta.student, meta.doneCaption)
-      .map((line, k, all) => `<w:p><w:pPr><w:pStyle w:val="Plain"/><w:spacing w:after="${k === all.length - 1 ? 240 : 0}"/></w:pPr>${run(line)}</w:p>`),
-    `<w:p><w:pPr><w:pStyle w:val="Plain"/><w:spacing w:after="2400"/></w:pPr>${run(t.checked(meta.reviewer, meta.reviewerCaption))}</w:p>`,
-    center(t.city),
+    signatures(t.done(meta.group, meta.student, meta.doneCaption), t.checked(meta.reviewer, meta.reviewerCaption)),
+    `<w:p><w:pPr><w:pStyle w:val="Plain"/><w:spacing w:before="2000"/><w:jc w:val="center"/></w:pPr>${run(t.city)}</w:p>`,
   ].join('');
 
   const tocLine = ([level, text], k, all) => {

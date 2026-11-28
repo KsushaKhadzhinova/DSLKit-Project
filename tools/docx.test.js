@@ -242,14 +242,15 @@ test('an appendix that no subsection mentions has no place in the contents', () 
 
 test('the title page takes the student and the group from the meta data, blanks stay lines', () => {
   const xml = xmlOf(build(ru, 'ru', { meta: { group: '123456', student: 'Иванов И. И.' } }));
-  assert.match(xml, /Выполнила: студентка гр\. 123456<[^]*?>Иванов И\. И\./);
-  assert.match(xmlOf(build(ru)), /студентка гр\. ________<[^]*?>______________________/);
-  assert.match(xmlOf(build(en, 'en', { meta: { group: 'G1', student: 'A. B.' } })), /Completed by: student of group G1<[^]*?>A\. B\./);
-  assert.match(xmlOf(build(en, 'en')), /student of group ________/);
-  assert.match(xml, /Проверил\(а\): ______________________/);
+  assert.match(xml, /Выполнила:<[^]*?>ст\. гр\. 123456<[^]*?>Иванов И\. И\./);
+  assert.match(xml, /<w:tbl><w:tblPr><w:tblW w:w="9355"[^]*?Выполнила:[^]*?Проверил\(а\):/);
+  assert.match(xmlOf(build(ru)), /ст\. гр\. ________<[^]*?>______________________/);
+  assert.match(xmlOf(build(en, 'en', { meta: { group: 'G1', student: 'A. B.' } })), /Completed by:<[^]*?>group G1<[^]*?>A\. B\./);
+  assert.match(xmlOf(build(en, 'en')), /group ________/);
+  assert.match(xml, /Проверил\(а\):<[^]*?>______________________/);
   const filled = xmlOf(build(ru, 'ru', { meta: { reviewer: 'А. Б. Иванов', reviewerCaption: 'Проверила', doneCaption: 'Выполнил', titleVariant: '100' } }));
-  assert.match(filled, /Проверила: А\. Б\. Иванов/);
-  assert.match(filled, /Выполнил: студент гр/);
+  assert.match(filled, /Проверила:<[^]*?>А\. Б\. Иванов/);
+  assert.match(filled, /Выполнил:<[^]*?>ст\. гр\./);
   assert.match(filled, /Вариант № 100/);
 });
 
@@ -271,7 +272,8 @@ test('table columns follow the length of their text and fill the text width', ()
     '| 400 | Некорректный запрос | Адрес или данные формы нельзя прочитать, потому что они не разобрались сервером |',
   ].join('\n');
   const xml = xmlOf(build(ru.replace('| a | b |\n|---|---|\n| 1 | 2 |\n| 3 | 4 |', table)));
-  const widths = [...xml.match(/<w:tblGrid>([\s\S]*?)<\/w:tblGrid>/)[1].matchAll(/w:w="(\d+)"/g)].map((m) => Number(m[1]));
+  // the first table is the signature block of the title page
+  const widths = [...[...xml.matchAll(/<w:tblGrid>([\s\S]*?)<\/w:tblGrid>/g)].at(-1)[1].matchAll(/w:w="(\d+)"/g)].map((m) => Number(m[1]));
   assert.equal(widths.length, 3);
   assert.equal(
     widths.reduce((a, b) => a + b, 0),
@@ -279,8 +281,8 @@ test('table columns follow the length of their text and fill the text width', ()
   );
   assert.ok(widths[0] < widths[1] && widths[1] < widths[2]);
   const equal = [
-    ...xmlOf(build(ru))
-      .match(/<w:tblGrid>([\s\S]*?)<\/w:tblGrid>/)[1]
+    ...[...xmlOf(build(ru)).matchAll(/<w:tblGrid>([\s\S]*?)<\/w:tblGrid>/g)]
+      .at(-1)[1]
       .matchAll(/w:w="(\d+)"/g),
   ].map((m) => Number(m[1]));
   assert.deepEqual(equal, [4677, 4678]);
