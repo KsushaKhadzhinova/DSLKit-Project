@@ -191,7 +191,7 @@ The log failure was checked by stopping the database: the request gets the page 
 
 ![Database tables](figures/db-tables.png)
 
-Figure 13 – The tables diagrams and request_log in the SQLite database
+Figure 13 – Rows of the tables diagrams and request_log read with SELECT queries from the SQLite database file
 
 ### 3.9 Automatic verification
 
@@ -201,13 +201,13 @@ The console of the server started with `npm start` and after the requests is sho
 
 ![Server console](figures/console.png)
 
-Figure 14 – Console output of the server with the request log lines (process output captured as text)
+Figure 14 – Console of the server: requests with the statuses 200, 404 and 403, then the error line 500 when the database file is unavailable (window capture)
 
 The result of the `npm test` command with the number of tests and the code coverage is shown in figure 15.
 
 ![Test result](figures/tests.png)
 
-Figure 15 – End of the npm test output: the number of passed tests and the coverage table (process output captured as text)
+Figure 15 – End of the npm test output: the number of passed tests and the coverage table (window capture)
 
 ## 4 Answers to the Control Questions
 
