@@ -104,6 +104,8 @@ export const listItems = (items, schema, query, hidden = []) => {
 // and may throw a conflict; current is the record being changed, undefined on create.
 //
 // hooks.beforeRemove(item) may throw.
+// hooks.authorize(actor, action, item) may throw 403 for 'change' or 'remove' of an existing record, before anything
+// else is checked; hooks.authorizeData(actor, data) may throw 403 for the validated data of a create or an update.
 export const createResourceRouter = ({ label, collection, schema, hooks = {}, hiddenInList = [] }) => {
   const router = Router();
   const body = (req, partial, current) => {
@@ -126,23 +128,32 @@ export const createResourceRouter = ({ label, collection, schema, hooks = {}, hi
     res.set('ETag', etagOf(item)).json(item);
   });
   router.post('/', (req, res) => {
-    const item = collection.create(body(req, false));
+    const data = body(req, false);
+    hooks.authorizeData?.(req.actor, data);
+    const item = collection.create(data);
     res.status(201).location(`${req.baseUrl}/${item.id}`).json(item);
   });
   router.put('/:id', (req, res) => {
     const item = load(req);
+    hooks.authorize?.(req.actor, 'change', item);
     requireFresh(req, item);
-    const saved = collection.replace(item, body(req, false, item));
+    const data = body(req, false, item);
+    hooks.authorizeData?.(req.actor, data);
+    const saved = collection.replace(item, data);
     res.set('ETag', etagOf(saved)).json(saved);
   });
   router.patch('/:id', (req, res) => {
     const item = load(req);
+    hooks.authorize?.(req.actor, 'change', item);
     requireFresh(req, item);
-    const saved = collection.update(item, body(req, true, item));
+    const data = body(req, true, item);
+    hooks.authorizeData?.(req.actor, data);
+    const saved = collection.update(item, data);
     res.set('ETag', etagOf(saved)).json(saved);
   });
   router.delete('/:id', (req, res) => {
     const item = load(req);
+    hooks.authorize?.(req.actor, 'remove', item);
     requireFresh(req, item);
     hooks.beforeRemove?.(item);
     collection.remove(item);

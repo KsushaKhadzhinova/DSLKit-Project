@@ -156,7 +156,7 @@ withApi('broken JSON, oversized body and unknown routes get JSON errors', async 
   assert.equal(big.status, 413);
   const unknown = await fetch(`${base}/nothing`);
   assert.equal(unknown.status, 404);
-  assert.equal((await unknown.json()).error.code, 'not_found');
+  assert.equal((await unknown.json()).error.code, 'route_not_found');
 });
 
 withApi('unexpected errors become a 500 JSON response and are logged', async ({ call, errors }) => {

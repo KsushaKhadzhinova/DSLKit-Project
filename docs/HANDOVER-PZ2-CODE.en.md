@@ -49,3 +49,11 @@ $env:PORT = 4210; node src/server.js
 - Error pages in a browser: 404 (`/nope`), 429 (refresh the list quickly with `RATE_LIMIT_MAX=3`), 500 (instructions above), 405 (send POST to `/api/users/1` in Postman).
 - Table `request_log` in DBeaver or DB Browser for SQLite (with the `request_id` column).
 - `npm test` output with 100 % coverage.
+
+## Addendum after the review (2026-11-28)
+
+- Roles: `X-User-Id` and `X-Role` (`user` by default or `admin`), rule table in `part-2/pz-02-rest-api/README.md`; changing another user's record or a plain user deleting a project gives a real 403 with a description and Request ID. A request without `X-User-Id` is anonymous and unrestricted (otherwise every older test and collection would need rewriting); it can be tightened by a separate decision.
+- Journal: the order "row before the action, refusal when the write fails, status afterwards" is explained in plain words in the README; `/health` and 429 answers are not journalled.
+- `Accept: text/html` without `*/*` no longer gives 406 (a page for an address, data for `/api`).
+- A dedicated text for an unknown address (`route_not_found`) and a test that starts `server.js`.
+- For the 403 screenshot: `DELETE /api/projects/1` with header `X-User-Id: 1` in Postman.

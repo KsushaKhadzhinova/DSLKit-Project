@@ -199,9 +199,9 @@ For the DSLKit project a REST API with three related resources was designed and 
 
 ```js
 import express from 'express';
-import { ApiError, errorBody, notFound } from './errors.js';
+import { ApiError, errorBody, forbidden, notFound, routeNotFound } from './errors.js';
 import { createResourceRouter, listItems, methodsOnly, parseId } from './resource.js';
-import { logSafe, rateLimit, requestId, securityHeaders } from './security.js';
+import { identify, logSafe, rateLimit, requestId, securityHeaders } from './security.js';
 import { PAGE_CSP, renderErrorPage, wantsHtml } from './error-page.js';
 import { buildOpenApi } from './openapi.js';
 import { createJournal, journaling } from './journal.js';
@@ -287,7 +287,7 @@ export const createApp = ({
     if (!accept) return next();
     const acceptsJson = accept.split(',').some((part) => {
       const type = part.split(';')[0].trim().toLowerCase();
-      return type === '*/*' || type === 'application/*' || type === 'application/json';
+      return type === '*/*' || type === 'application/*' || type === 'application/json' || type === 'text/html';
     });
     if (!acceptsJson) return next(new ApiError(406, 'not_acceptable', 'This API only returns application/json'));
     return next();
@@ -309,6 +309,17 @@ export const createApp = ({
     if (hasBody && req.body === undefined) return next(new ApiError(415, 'unsupported_media_type', 'Content-Type must be application/json'));
     return next();
   });
+
+  app.use(identify((id) => users.find(id)));
+
+  // Ownership rules for a caller who named itself with X-User-Id. A "restricted" caller is a non-admin user; an
+  // anonymous caller and an administrator are not restricted. A project belongs to its owner and a diagram to the
+  // owner of its project.
+  const restricted = (actor) => actor.userId !== undefined && actor.role !== 'admin';
+  const ownsProject = (actor, projectId) => !restricted(actor) || projects.find(projectId)?.ownerId === actor.userId;
+  const deny = (what) => {
+    throw forbidden(`You may not ${what}`);
+  };
 
   const api = express.Router();
   // The machine-readable description of the API, built from the schemas above.
@@ -336,6 +347,9 @@ export const createApp = ({
       // The email is personal data: the list shows id, name and role, the email only comes with one user.
       hiddenInList: ['email'],
       hooks: {
+        authorize: (actor, action, user) => {
+          if (restricted(actor) && actor.userId !== user.id) deny(`${action} another user's record`);
+        },
         check: (data, current) => {
           const taken = data.email !== undefined && users.all().some((user) => user !== current && user.email.toLowerCase() === data.email.toLowerCase());
           if (taken) throw conflict('A user with this email already exists');
@@ -368,6 +382,13 @@ export const createApp = ({
       collection: projects,
       schema: schemas.projects,
       hooks: {
+        authorize: (actor, action, project) => {
+          if (action === 'remove' && restricted(actor)) deny('delete a project, only an administrator may');
+          if (restricted(actor) && project.ownerId !== actor.userId) deny("change another user's project");
+        },
+        authorizeData: (actor, data) => {
+          if (restricted(actor) && data.ownerId !== undefined && data.ownerId !== actor.userId) deny('give a project to another user');
+        },
         check: (data) => missingReference('ownerId', users, data.ownerId),
         beforeRemove: (project) => {
           if (diagrams.all().some((diagram) => diagram.projectId === project.id)) throw conflict('Project still has diagrams');
@@ -381,9 +402,14 @@ export const createApp = ({
     if (!found) throw notFound('Diagram');
     return found;
   };
-  api.post('/diagrams/:id/publish', (req, res) => res.json(diagrams.update(diagram(req), { status: 'published' })));
+  const ownDiagram = (req, what) => {
+    const found = diagram(req);
+    if (!ownsProject(req.actor, found.projectId)) deny(`${what} a diagram of another user's project`);
+    return found;
+  };
+  api.post('/diagrams/:id/publish', (req, res) => res.json(diagrams.update(ownDiagram(req, 'publish'), { status: 'published' })));
   api.post('/diagrams/:id/duplicate', (req, res) => {
-    const { id, createdAt, ...rest } = diagram(req);
+    const { id, createdAt, ...rest } = ownDiagram(req, 'copy');
     // Cut by code points, not by UTF-16 units: slicing a surrogate pair in half would store (and re-serve) a
     // lone surrogate, which is not valid Unicode text.
     const title = [...`${rest.title} (copy)`].slice(0, LIMITS.diagramTitle).join('');
@@ -397,12 +423,20 @@ export const createApp = ({
       label: 'Diagram',
       collection: diagrams,
       schema: schemas.diagrams,
-      hooks: { check: (data) => missingReference('projectId', projects, data.projectId) },
+      hooks: {
+        authorize: (actor, action, item) => {
+          if (!ownsProject(actor, item.projectId)) deny(`${action} a diagram of another user's project`);
+        },
+        authorizeData: (actor, data) => {
+          if (data.projectId !== undefined && !ownsProject(actor, data.projectId)) deny("put a diagram into another user's project");
+        },
+        check: (data) => missingReference('projectId', projects, data.projectId),
+      },
     }),
   );
 
   app.use('/api', api);
-  app.use((req, res, next) => next(notFound('Route')));
+  app.use((req, res, next) => next(routeNotFound()));
 
   // Turns any thrown value into the ApiError that describes it. Anything unknown is a server failure (500).
   const toApiError = (err, req, res) => {
@@ -543,6 +577,8 @@ export const listItems = (items, schema, query, hidden = []) => {
 // and may throw a conflict; current is the record being changed, undefined on create.
 //
 // hooks.beforeRemove(item) may throw.
+// hooks.authorize(actor, action, item) may throw 403 for 'change' or 'remove' of an existing record, before anything
+// else is checked; hooks.authorizeData(actor, data) may throw 403 for the validated data of a create or an update.
 export const createResourceRouter = ({ label, collection, schema, hooks = {}, hiddenInList = [] }) => {
   const router = Router();
   const body = (req, partial, current) => {
@@ -565,23 +601,32 @@ export const createResourceRouter = ({ label, collection, schema, hooks = {}, hi
     res.set('ETag', etagOf(item)).json(item);
   });
   router.post('/', (req, res) => {
-    const item = collection.create(body(req, false));
+    const data = body(req, false);
+    hooks.authorizeData?.(req.actor, data);
+    const item = collection.create(data);
     res.status(201).location(`${req.baseUrl}/${item.id}`).json(item);
   });
   router.put('/:id', (req, res) => {
     const item = load(req);
+    hooks.authorize?.(req.actor, 'change', item);
     requireFresh(req, item);
-    const saved = collection.replace(item, body(req, false, item));
+    const data = body(req, false, item);
+    hooks.authorizeData?.(req.actor, data);
+    const saved = collection.replace(item, data);
     res.set('ETag', etagOf(saved)).json(saved);
   });
   router.patch('/:id', (req, res) => {
     const item = load(req);
+    hooks.authorize?.(req.actor, 'change', item);
     requireFresh(req, item);
-    const saved = collection.update(item, body(req, true, item));
+    const data = body(req, true, item);
+    hooks.authorizeData?.(req.actor, data);
+    const saved = collection.update(item, data);
     res.set('ETag', etagOf(saved)).json(saved);
   });
   router.delete('/:id', (req, res) => {
     const item = load(req);
+    hooks.authorize?.(req.actor, 'remove', item);
     requireFresh(req, item);
     hooks.beforeRemove?.(item);
     collection.remove(item);

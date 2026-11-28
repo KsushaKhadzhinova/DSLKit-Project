@@ -739,6 +739,119 @@
           "raw": "{ \"name\": \"Alan T.\" }"
         }
       }
+    },
+    {
+      "name": "Roles: user changes another user's project -> 403",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 403', () => pm.response.to.have.status(403));",
+              "pm.test('has a Request ID', () => pm.expect(pm.response.json().error.requestId).to.be.a('string'));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "X-User-Id",
+            "value": "1"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"name\":\"Not mine\"}"
+        },
+        "url": {
+          "raw": "{{base}}/projects/2",
+          "host": [
+            "{{base}}"
+          ],
+          "path": [
+            "projects",
+            "2"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Roles: user deletes a project -> 403",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 403', () => pm.response.to.have.status(403));",
+              "pm.test('has a Request ID', () => pm.expect(pm.response.json().error.requestId).to.be.a('string'));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "X-User-Id",
+            "value": "1"
+          }
+        ],
+        "url": {
+          "raw": "{{base}}/projects/1",
+          "host": [
+            "{{base}}"
+          ],
+          "path": [
+            "projects",
+            "1"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Roles: administrator deletes a diagram -> 204",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 204', () => pm.response.to.have.status(204));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "X-User-Id",
+            "value": "1"
+          },
+          {
+            "key": "X-Role",
+            "value": "admin"
+          }
+        ],
+        "url": {
+          "raw": "{{base}}/diagrams/3",
+          "host": [
+            "{{base}}"
+          ],
+          "path": [
+            "diagrams",
+            "3"
+          ]
+        }
+      }
     }
   ]
 }
