@@ -38,6 +38,7 @@ Table 2 – Files of the project of practical session No. 2
 | `src/resource.js` | Common routes of a resource and parsing of list parameters |
 | `src/validation.js` | Request body validation against a schema |
 | `src/store.js` | Array storage and the initial records |
+| `src/server.js`, `src/start.js` | Server start: reading the environment settings, the port, the graceful stop and the time limits for slow clients |
 | `src/journal.js` | The table `request_log` and the journal middleware |
 | `src/security.js` | Security headers, rate limit, roles, console output without line breaks |
 | `src/errors.js`, `src/error-catalog.js`, `src/error-page.js` | The error class, error texts and the error page for a browser |
@@ -236,7 +237,7 @@ Figure 19 – The answer to GET /api/users/1/projects in a browser window: the p
 
 ### 3.10 Automatic checks
 
-Automatic tests are written that start the server on a free port and check every method, the status codes, filters, sorting, pages, validation errors, links between resources, extra operations, roles with the answer 403, the order "journal record before the action", a journal failure with the answer 500, the exclusion of `/health` and of the answer 429 from the journal, races when a parent is deleted, and the error pages. There are 173 server tests, 176 together with the report checks, and the coverage of lines, branches and functions is 100 percent. The command is `npm test` in the project folder. The console message at server start is shown in figure 20.
+Automatic tests are written that start the server on a free port and check every method, the status codes, filters, sorting, pages, validation errors, links between resources, extra operations, roles with the answer 403, the order "journal record before the action", a journal failure with the answer 500, the exclusion of `/health` and of the answer 429 from the journal, races when a parent is deleted, and the error pages. There are 176 server tests, 179 together with the report checks, and the coverage of lines, branches and functions is 100 percent. The command is `npm test` in the project folder. The console message at server start is shown in figure 20.
 
 ![Server console](figures/console.png)
 
@@ -244,7 +245,7 @@ Figure 20 – A PowerShell window with the server message after the start with n
 
 The result of `npm test` with the number of tests and the code coverage is shown in figure 21.
 
-![Test result](figures/owner-tests.png)
+![Test result](figures/tests.png)
 
 Figure 21 – The end of the npm test output: the number of passed tests and the coverage table
 

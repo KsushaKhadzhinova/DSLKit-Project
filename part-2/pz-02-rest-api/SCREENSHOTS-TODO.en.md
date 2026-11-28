@@ -1,20 +1,12 @@
-# Figures of the practical 2 report: what is done, what is left
+# Figures of the practical 2 report: all 21 are shots of real windows
 
-Russian version (the exact steps): [`SCREENSHOTS-TODO.md`](SCREENSHOTS-TODO.md).
+Russian version: [`SCREENSHOTS-TODO.md`](SCREENSHOTS-TODO.md). There are no placeholders, `"final": true` is set in `report.meta.json`, so the report test rejects any placeholder.
 
-## Done from the real server (20 figures of 21)
+- Figures 1 and 20 (`journal-table.png`, `console.png`) and 21 (`tests.png`): PowerShell in Windows Terminal. Figure 21 shows the end of `npm test` with `pass 179`, `fail 0` and the coverage table at 100 percent for every file of `src`, including `server.js` and `start.js`.
+- Figures 2 to 4 and 6 (`error-404.png`, `error-429.png`, `error-500.png`, `api-docs.png`) and 14 to 19 (`02-users-list.png` to `07-user-projects.png`): Chrome with the address bar, a guest profile.
+- Figures 5 and 7 to 13 (`postman-403.png`, `postman-get.png` to `postman-validation.png`): the Postman window, the top of the window (workspace name, banner, tabs) is cropped. The Body tab is open for POST, PUT and PATCH, the Headers tab for the 403.
 
-All of these are shots of real windows, nothing is drawn by a script: figure 1 `journal-table.png` and figure 20 `console.png` (PowerShell in Windows Terminal), figures 2 to 4 and 6 `error-404.png`, `error-429.png`, `error-500.png`, `api-docs.png` and figures 14 to 19 `02-users-list.png` to `07-user-projects.png` (Chrome with the address bar, an empty profile), figures 5 and 7 to 13 `postman-403.png`, `postman-get.png` to `postman-validation.png` (the Postman window).
-
-How: `node shots/real-shots.mjs` (ports 4230 to 4236, an unlocked screen is needed, `shots/window-shot.ps1` captures the window). The Postman requests were made by driving the Postman window: a cURL command was pasted into the address field and Send was pressed. The top of the Postman window (title bar with the workspace name, banner and tabs) is cropped and no tab of the owner was touched; the Body tab is open for POST, PUT and PATCH and the Headers tab with `X-User-Id` for the 403. Chrome shots use a guest profile, and the console and the journal table are shot from `E:DSLKitpart-2pz-02-rest-api` (a copy without the worktree path).
-
-## Left for the owner (1 placeholder file)
-
-`owner-tests.png` (figure 21): `npm test` in `part-2/pz-02-rest-api`, the end of the output with the test counts and the coverage table. The file is a **placeholder** (orange card with the mark `dslkit-placeholder`), not a screenshot. It was not captured because in a Windows Terminal window (PowerShell 5.1 and 7) `server.js` coverage is 84.62 percent in 8 runs of 8, so `npm test` misses the 100 percent threshold there while the report says 100 percent; `"final": true` is therefore not set yet. Check `npm test` in your own window. After replacing it add `"final": true` to `report.meta.json` and run `node tools/docx-cli.js part-2/pz-02-rest-api` from the repository root. The number of tests in the window should be 176; otherwise fix it in section 3.10 of both templates and rebuild.
-
-## Finding for the owner of the PZ2 code: unstable coverage
-
-`npm test` sometimes misses the 100 percent branch threshold (99.75 percent in 3 of 9 runs). In a Windows Terminal window `server.js` gave 84.62 percent every time (lines 20 to 23, the signal handlers), in the tool shell without a console 100. A likely cause is the test `server.js starts on the given port`, which starts the server as a child process and ends it by force, so the child coverage is not always written. The PZ2 code was not changed in this task.
+How: `node shots/real-shots.mjs` (ports 4230 to 4236, an unlocked screen is needed, `shots/window-shot.ps1` captures the window). The console shots are taken from `E:\DSLKit\part-2\pz-02-rest-api` (a copy without the worktree path). The Postman requests were made by pasting a cURL command into the address field and pressing Send. Figure 21 was taken after the fix of the server start test (`src/start.js`); the earlier version showed `server.js` at 84.62 percent in a console window.
 
 ## Open questions
 
@@ -22,3 +14,4 @@ How: `node shots/real-shots.mjs` (ports 4230 to 4236, an unlocked screen is need
 2. Figure numbers run through the report; the samples number them by section.
 3. The branch `pz22` comes from `report.meta.json`; the owner creates it.
 4. Swagger UI is not part of the app; figure 6 shows the OpenAPI document itself.
+5. Figure 21 does not show the first line `tests 179`: it scrolled off the top of the window.
