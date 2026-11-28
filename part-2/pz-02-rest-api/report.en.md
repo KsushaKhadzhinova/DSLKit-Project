@@ -91,7 +91,7 @@ Deleting a user with projects or a project with diagrams is rejected with code 4
 
 ### 3.4 Roles and the answer 403
 
-There is no sign-in in the work, and the identity is set by headers. The header `X-User-Id` holds the number of a user, and `X-Role` is `user` by default or `admin`. A request without `X-User-Id` is anonymous and not restricted, as it was before roles appeared. The rules for a request with `X-User-Id` are collected in table 5.
+There is no sign-in in the work, and the identity is set by headers. The header `X-User-Id` holds the number of a user, and `X-Role` is `user` by default or `admin`. A request without `X-User-Id` is anonymous and not restricted, as before the roles. The rules for a request with `X-User-Id` are collected in table 5.
 
 Table 5 – Rights of the roles
 

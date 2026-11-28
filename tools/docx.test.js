@@ -166,14 +166,14 @@ test('the package has the parts, the page setup and the styles the rules ask for
   assert.match(xml, /<w:pgSz w:w="11906" w:h="16838"\/>/);
   assert.ok(xml.includes('<w:titlePg/>'));
   assert.ok(xml.includes('TOC \\o "1-2"'));
-  assert.match(xml, /ПРИЛОЖЕНИЕ А/);
+  assert.match(xml, /Приложение А/);
   assert.match(xml, /Листинг А\.1 – Файл app\.js/);
   assert.match(xml, /Листинг Б\.1 – Шаблон index\.ejs/);
   assert.match(xml, /Листинг В\.1 – Прочее/);
   assert.match(xml, /«Тема работы»/);
   assert.match(xml, /по практическому занятию № 3/);
   assert.match(xml, /Ответ &amp; &lt;теги&gt;\./);
-  assert.match(xml, /ЦЕЛЬ РАБОТЫ/);
+  assert.match(xml, /Цель работы/);
   const styles = xmlOf(buf, 'word/styles.xml');
   assert.match(styles, /w:styleId="Normal"[\s\S]*?w:firstLine="709"[\s\S]*?w:jc w:val="both"/);
   assert.match(styles, /w:styleId="Heading1"[\s\S]*?<w:pageBreakBefore\/>/);
@@ -186,8 +186,8 @@ test('the package has the parts, the page setup and the styles the rules ask for
 
 test('the unnumbered part is centred, the images are scaled into the text area', () => {
   const xml = xmlOf(build(ru));
-  assert.match(xml, /ЗАКЛЮЧЕНИЕ/);
-  assert.match(xml, /<w:jc w:val="center"\/><\/w:pPr><w:r><w:rPr><\/w:rPr><w:t xml:space="preserve">ЗАКЛЮЧЕНИЕ/);
+  assert.match(xml, /Заключение/);
+  assert.match(xml, /<w:jc w:val="center"\/><\/w:pPr><w:r><w:rPr><\/w:rPr><w:t xml:space="preserve">Заключение/);
   const extents = [...xml.matchAll(/<wp:extent cx="(\d+)" cy="(\d+)"\/>/g)].map((m) => [Number(m[1]), Number(m[2])]);
   assert.equal(extents.length, 2);
   assert.ok(extents.every(([cx, cy]) => cx <= 5940000 && cy <= 6415200));
@@ -212,7 +212,7 @@ test('the contents carry page numbers and the appendix lines name the subsection
   const xml = xmlOf(build(ru));
   const toc = [...xml.matchAll(/<w:p><w:pPr><w:pStyle w:val="TOC([12])"\/><\/w:pPr>([\s\S]*?)<\/w:p>/g)];
   assert.equal(toc.length, 7);
-  assert.match(toc[0][2], /<w:t xml:space="preserve">1 ЦЕЛЬ РАБОТЫ<\/w:t><\/w:r><w:r><w:tab\/><\/w:r><w:r><w:rPr><\/w:rPr><w:t xml:space="preserve">3<\/w:t>/);
+  assert.match(toc[0][2], /<w:t xml:space="preserve">1 Цель работы<\/w:t><\/w:r><w:r><w:tab\/><\/w:r><w:r><w:rPr><\/w:rPr><w:t xml:space="preserve">3<\/w:t>/);
   assert.equal(toc[1][1], '2');
   assert.match(toc[4][2], /Приложение А \(обязательное\) Листинг файла app\.js \(к подразделу 1\.1\)<\/w:t>/);
   assert.match(toc[6][2], /<w:t xml:space="preserve">8<\/w:t><\/w:r><w:r><w:fldChar w:fldCharType="end"\/>/);
@@ -293,8 +293,8 @@ test('the English build uses the English title page and names', () => {
   assert.match(xml, /on practical work No\. 3/);
   assert.match(xml, /Listing ..1 – File app\.js/);
   assert.match(xml, /Listing ..1 – Template index\.ejs/);
-  assert.match(xml, /APPENDIX ./);
-  assert.match(xml, /CONCLUSION/);
+  assert.match(xml, /Appendix ./);
+  assert.match(xml, /Conclusion/);
   assert.match(xml, /Variant No\. 26/);
   assert.deepEqual(lintDocx(buf), []);
 });

@@ -76,8 +76,8 @@ test('russian rules', () => {
   has(lintReport('## Выводы\n', 'ru'), 'Цель работы');
   has(lintReport('## Выводы\n', 'ru'), 'Заключение');
   has(lintReport('## Выводы\n', 'ru'), 'нужно назвать');
-  has(lintReport(`${ru}Мы также проверили.\n`, 'ru'), 'также');
-  has(lintReport(`${ru}Пакеты были загружены.\n`, 'ru'), 'также');
+  has(lintReport(`${ru}Пакеты были загружены.
+`, 'ru'), 'также');
   has(lintReport(`${ru}Это видно (см. рис. 1).\n`, 'ru'), 'скобках');
   has(lintReport(`${ru}Он сказал "да".\n`, 'ru'), 'кавычки');
   assert.deepEqual(lintReport(`${ru}Слово табличка и забыли.\n`, 'ru'), []);
@@ -195,4 +195,15 @@ test('strict mode passes the database, repository and branch rules on', () => {
   has(lintReport(strictRu.replace('Текст.', 'Данные в массиве.'), 'ru', { strict: true, database: true }), 'массив');
   has(lintReport(strictRu, 'ru', { strict: true, repository: link, branch: 'pz21' }), 'репозиторий');
   assert.deepEqual(lintReport(strictRu.replace('Текст.', `Код в ${link} в ветке pz21.`), 'ru', { strict: true, repository: link, branch: 'pz21' }), []);
+});
+
+test('strict mode applies the language rules of the owner: no «я, мы, вы», no imperative, little Latin', () => {
+  const strict = { strict: true };
+  has(lintReport(strictRu.replace('Текст.', 'Мы проверили сервер.'), 'ru', strict), 'первого и второго лица');
+  has(lintReport(strictRu.replace('Текст.', 'Затем реализуем маршрут.'), 'ru', strict), 'Глагол первого лица');
+  has(lintReport(strictRu.replace('Текст.', 'Запустите сервер и откройте страницу.'), 'ru', strict), 'Повелительное наклонение');
+  has(lintReport(strictRu.replace('Текст.', 'Здесь middleware вызывает handler и пишет request в журнал.'), 'ru', strict), 'латиницы');
+  // quotations, identifiers in code marks and the allowed terms are not counted, the short passive participle is the style
+  assert.deepEqual(lintReport(strictRu.replace('Текст.', 'Пакет установлен, а ответ «What happened» разобран для API и JSON через `request`.'), 'ru', strict), []);
+  assert.deepEqual(lintReport(`${ru}Мы запустите.`, 'ru'), []);
 });

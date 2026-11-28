@@ -35,11 +35,11 @@ const T = {
     inSection: 'к разделу',
     appendixRef: (l) => new RegExp(`приложени\\S* ${l}(?![А-Яа-яЁё])`, 'i'),
     city: 'Минск 2026',
-    contents: 'СОДЕРЖАНИЕ',
+    contents: 'Содержание',
     unnumbered: /^(Заключение)$/,
     appendix: /^Приложение (\S) \(обязательное\) (.+)$/,
     appendixName: 'Приложение',
-    appendixWord: 'ПРИЛОЖЕНИЕ',
+    appendixWord: 'Приложение',
     mandatory: '(обязательное)',
     figure: 'Рисунок',
     table: 'Таблица',
@@ -64,11 +64,11 @@ const T = {
     inSection: 'to section',
     appendixRef: (l) => new RegExp(`appendix ${l}\\b`, 'i'),
     city: 'Minsk 2026',
-    contents: 'CONTENTS',
+    contents: 'Contents',
     unnumbered: /^(Conclusion)$/,
     appendix: /^Appendix (\S) \(mandatory\) (.+)$/,
     appendixName: 'Appendix',
-    appendixWord: 'APPENDIX',
+    appendixWord: 'Appendix',
     mandatory: '(mandatory)',
     figure: 'Figure',
     table: 'Table',
@@ -229,7 +229,7 @@ export const markdownToDocx = (md, { lang = 'ru', variant, read, meta = {}, page
             `${t.appendixName} ${letter} ${t.mandatory} ${ap[2]}${place ? ` (${place})` : ''}`,
           ),
         );
-      } else body.push(h1(text.toUpperCase(), null, t.unnumbered.test(text)));
+      } else body.push(h1(text, null, t.unnumbered.test(text)));
       i += 1;
     } else if (line.startsWith('### ')) {
       toc.push([2, line.slice(4)]);
