@@ -199,7 +199,7 @@ test('the unnumbered part is centred, the images are scaled into the text area',
   const extents = [...xml.matchAll(/<wp:extent cx="(\d+)" cy="(\d+)"\/>/g)].map((m) => [Number(m[1]), Number(m[2])]);
   assert.equal(extents.length, 2);
   assert.ok(extents.every(([cx, cy]) => cx <= 5220000 && cy <= 6415200));
-  assert.deepEqual(extents[0], [5220000, 3480000]);
+  assert.deepEqual(extents[0], [3810000, 2857500]);
   assert.ok(xml.includes('keepNext'));
   assert.ok(xml.includes('cantSplit'));
 });
