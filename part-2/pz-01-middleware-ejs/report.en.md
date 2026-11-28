@@ -14,7 +14,7 @@ The purpose is to learn the middleware concept in Express.js and the EJS templat
 
 ## 3 Course of the Work
 
-The work was done in nine steps: the structure of the project is described, then the request log, the simulated authorization, the routes, the 500 page, the field checks and the protection are implemented, and finally the pages are styled and the automatic verification is run. The results of each step are given in subsections 3.1–3.9.
+The work consists of nine steps: the structure of the project is described, then the request log, the simulated authorization, the routes, the 500 page, the field checks and the protection are implemented, and finally the pages are styled and the automatic verification is run. The results of each step are given in subsections 3.1–3.9.
 
 ### 3.1 Project structure
 
@@ -137,7 +137,7 @@ The 404 page for an unknown address is shown in figure 6.
 
 Figure 6 – The 404 error page in the site design
 
-The 500 page during a real failure is shown in figure 7. The server was started with a database file that cannot be created, so the log write failed.
+The 500 page during a real failure is shown in figure 7. The server is started with a database file that cannot be created, so the log write failed.
 
 ![500 page](figures/server-error.png)
 
@@ -189,7 +189,7 @@ The page 429 for too many requests is shown in figure 12.
 
 Figure 12 – The error page 429 after too frequent requests
 
-The log failure was checked by stopping the database: the request gets the page 500 with an explanation that the log database is unavailable, and a line about the error goes to the console. The database tables are shown in figure 13.
+The log failure is checked by stopping the database: the request gets the page 500 with an explanation that the log database is unavailable, and a line about the error goes to the console. The database tables are shown in figure 13.
 
 ![Database tables](figures/db-tables.png)
 
@@ -215,11 +215,11 @@ Figure 15 – End of the npm test output: the number of passed tests and the cov
 
 The number in the group list is 26, so the answers are given to the questions 25, 26 and 27.
 
-25. How do you protect an Express application from CSRF with middleware (in theory)?
+25. How is an Express application protected from CSRF with middleware (in theory)?
 
-    A browser attaches cookies to a request to our site by itself, even when the form was sent by a page of another site, so a cookie alone is not enough. The middleware issues a random token and puts it into a cookie with the `HttpOnly` and `SameSite=Strict` flags and into a hidden field of every form. A request that changes data (`POST`, `PUT`, `PATCH`, `DELETE`) is accepted only when the field value matches the cookie and the `Origin` header, when present, points to this very site. A page of another site can neither read the cookie nor guess the token. The comparison uses `timingSafeEqual`. The order matters: the middleware is mounted after the form parser, because the token is in the body, and before the routes. In the work this is the `csrf` function in `security.js`, and the add, edit and delete forms carry the hidden field. The scheme is a double submit cookie together with the check of the `Origin` header, and the token is signed with a key made at the start of the server, so a home-made value planted into the cookie fails the signature check. Safe methods such as `GET` are not checked, so they must not change data. The package `csurf` is deprecated and its successor `csrf-csrf` uses the same scheme, so here it is written by hand. The token is not bound to a session, because the application has none: it separates this site from another site, not one user from another. For this reason an attacker on a sibling subdomain could plant a genuine signed token that the site gave to the attacker and put the same value into the form: the signature does not reject it, and only the `Origin` check and `SameSite=Strict` protect against that. After a server restart the key changes and open forms must be loaded again.
+    A browser attaches cookies to a request to the site by itself, even when the form is sent by a page of another site, so a cookie alone is not enough. The middleware issues a random token and puts it into a cookie with the `HttpOnly` and `SameSite=Strict` flags and into a hidden field of every form. A request that changes data (`POST`, `PUT`, `PATCH`, `DELETE`) is accepted only when the field value matches the cookie and the `Origin` header, when present, points to this very site. A page of another site can neither read the cookie nor guess the token. The comparison uses `timingSafeEqual`. The order matters: the middleware is mounted after the form parser, because the token is in the body, and before the routes. In the work this is the `csrf` function in `security.js`, and the add, edit and delete forms carry the hidden field. The scheme is a double submit cookie together with the check of the `Origin` header, and the token is signed with a key made at the start of the server, so a home-made value planted into the cookie fails the signature check. Safe methods such as `GET` are not checked, so they must not change data. The package `csurf` is deprecated and its successor `csrf-csrf` uses the same scheme, so here it is written by hand. The token is not bound to a session, because the application has none: it separates this site from another site, not one user from another. For this reason an attacker on a sibling subdomain could plant a genuine signed token that the site gave to the attacker and put the same value into the form: the signature does not reject it, and only the `Origin` check and `SameSite=Strict` protect against that. After a server restart the key changes and open forms must be loaded again.
 
-26. How do you use a helper function (for example, a date formatter) in an EJS template?
+26. How is a helper function (for example, a date formatter) used in an EJS template?
 
     The function is put into `app.locals` and becomes available in all templates, or into `res.locals` for one request, or it is passed as the second argument of `res.render()`. In the work `app.locals.formatTime` turns an ISO string such as `2026-10-01T09:00:00.000Z` into the readable "2026-10-01 09:00:00.000 UTC". In the template the call looks like this: `<%= formatTime(item.createdAt) %>`. The `<%=` tag escapes the result, and the exact machine value stays in the `datetime` attribute of the `time` element.
 
@@ -229,9 +229,9 @@ The number in the group list is 26, so the answers are given to the questions 25
 
 ## Conclusion
 
-For the DSLKit project an Express application with EJS templates was built: the list of diagrams, the detail page and the add form take data from the `diagrams` table of a SQLite database. By the rules of the even variant the request log is written to the `request_log` table of the same database, and its failure is shown by the styled 500 page while the action is not done. The form rejects empty and whitespace values, too long text and negative numbers by the limits from the separate file `limits.json`, and every record has a unique creation time. Records can be edited and deleted with the buttons on the detail page, and deleting is a `POST` form. The form is protected by a CSRF token, and the server by security headers and a rate limit. The error pages 400, 403, 404, 405, 413, 429 and 500 follow the site style and explain what happened, why and how to fix it. The look is taken from Part 1 of the project. The automatic tests on `node:test` check the pages, the forms, the protection and the log failure, and the application code is covered by the tests completely, as figure 15 shows. The screenshots are given in the text and the listings in the appendices. The answers to the control questions 25, 26 and 27 are given in section 4. The work was done in the branch pz21 of the project repository.
+For the DSLKit project an Express application with EJS templates is built: the list of diagrams, the detail page and the add form take data from the `diagrams` table of a SQLite database. By the rules of the even variant the request log is written to the `request_log` table of the same database, and its failure is shown by the styled 500 page while the action is not done. The form rejects empty and whitespace values, too long text and negative numbers by the limits from the separate file `limits.json`, and every record has a unique creation time. Records can be edited and deleted with the buttons on the detail page, and deleting is a `POST` form. The form is protected by a CSRF token, and the server by security headers and a rate limit. The error pages 400, 403, 404, 405, 413, 429 and 500 follow the site style and explain what happened, why and how to fix it. The look is taken from Part 1 of the project. The automatic tests on `node:test` check the pages, the forms, the protection and the log failure, and the application code is covered by the tests completely, as figure 15 shows. The screenshots are given in the text and the listings in the appendices. The answers to the control questions 25, 26 and 27 are given in section 4. The work is done in the branch pz21 of the project repository.
 
-## Appendix A (mandatory) Listing of index.ejs
+## Appendix A (mandatory) index.ejs
 
 The comments in the listings of all appendices are in English, as in the source files of the project.
 
@@ -267,7 +267,7 @@ The comments in the listings of all appendices are in English, as in the source 
 <%- include('partials/footer') %>
 ```
 
-## Appendix B (mandatory) Listing of app.js, assembly
+## Appendix B (mandatory) app.js, assembly
 
 ```js
 import { randomBytes } from 'node:crypto';
@@ -369,7 +369,7 @@ export const createApp = ({
   };
 ```
 
-## Appendix C (mandatory) Listing of requestLogger.js
+## Appendix C (mandatory) requestLogger.js
 
 ```js
 export const hideAuth = (url) => {
@@ -420,7 +420,7 @@ export const requestLogger =
   };
 ```
 
-## Appendix D (mandatory) Listing of requestLog.js
+## Appendix D (mandatory) requestLog.js
 
 ```js
 import { DatabaseSync } from 'node:sqlite';
@@ -519,7 +519,7 @@ export const openRequestLog = (file = ':memory:') => {
 };
 ```
 
-## Appendix E (mandatory) Listing of fakeAuth.js
+## Appendix E (mandatory) fakeAuth.js
 
 ```js
 // Simulated authorization: ?auth=1 means "signed in as the owner", anything else is a guest.
@@ -540,7 +540,7 @@ export const requireAuth = (req, res, next) => {
 };
 ```
 
-## Appendix F (mandatory) Listing of app.js, routes
+## Appendix F (mandatory) app.js, routes
 
 ```js
   app.get('/item/:id', (req, res, next) => {
@@ -644,7 +644,7 @@ export const requireAuth = (req, res, next) => {
 };
 ```
 
-## Appendix G (mandatory) Listing of item.ejs
+## Appendix G (mandatory) item.ejs
 
 ```ejs
 <%- include('partials/header') %>
@@ -678,7 +678,7 @@ export const requireAuth = (req, res, next) => {
 <%- include('partials/footer') %>
 ```
 
-## Appendix H (mandatory) Listing of errorHandlers.js
+## Appendix H (mandatory) errorHandlers.js
 
 ```js
 import { entryFor } from '../errors.js';
@@ -742,7 +742,7 @@ export const serverError =
   };
 ```
 
-## Appendix I (mandatory) Listing of diagrams.js, checks
+## Appendix I (mandatory) diagrams.js, checks
 
 ```js
 const CONTROL = /[\p{Cc}\u2028\u2029\u202a-\u202e\u2066-\u2069]/u;
@@ -787,7 +787,7 @@ export const validateDiagram = (input, limits, t = defaultT) => {
 };
 ```
 
-## Appendix J (mandatory) Listing of diagrams.js, data
+## Appendix J (mandatory) diagrams.js, data
 
 ```js
 
@@ -825,7 +825,7 @@ const seed = () => [
 const MAX_ITEMS = 5000;
 ```
 
-## Appendix K (mandatory) Listing of diagrams.js, store
+## Appendix K (mandatory) diagrams.js, store
 
 ```js
 
@@ -930,7 +930,7 @@ export const createDiagramStore = (now = Date.now, file = ':memory:') => {
 };
 ```
 
-## Appendix L (mandatory) The limits file limits.json
+## Appendix L (mandatory) limits.json
 
 ```json
 {
@@ -949,7 +949,7 @@ export const createDiagramStore = (now = Date.now, file = ':memory:') => {
 }
 ```
 
-## Appendix M (mandatory) Listing of security.js, headers
+## Appendix M (mandatory) security.js, headers
 
 ```js
 import { randomBytes, timingSafeEqual, createHmac } from 'node:crypto';
@@ -1048,7 +1048,7 @@ export const csrf = (req, res, next) => {
 };
 ```
 
-## Appendix N (mandatory) Listing of security.js, limits
+## Appendix N (mandatory) security.js, limits
 
 ```js
 const tooMany = (retryAfter, t) => Object.assign(new Error('Too many requests'), { status: 429, retryAfter, publicMessage: t('error.tooManyRequests', { retryAfter }) });
@@ -1088,7 +1088,7 @@ export const safeLogText = (text, max = 500) => {
 };
 ```
 
-## Appendix O (mandatory) Listing of logFile.js
+## Appendix O (mandatory) logFile.js
 
 ```js
 import { createReadStream, createWriteStream } from 'node:fs';
