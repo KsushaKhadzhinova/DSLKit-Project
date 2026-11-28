@@ -36,7 +36,7 @@ const ru = `## 1 Цель работы
 
 ## Заключение
 
-Работа выполнена за 10\u00a0%.
+Работа выполнена за 10 %.
 
 ## Приложение А (обязательное) Листинг
 
@@ -82,7 +82,7 @@ Figure 1 – Chart
 
 ## Conclusion
 
-Done in 10\u00a0ms.
+Done in 10 ms.
 
 ## Appendix A (mandatory) Listing
 
@@ -130,14 +130,18 @@ test('invisible characters, extra spaces and empty paragraphs', () => {
   assert.deepEqual(extraErrors(ru.replace('| 1 | 2 |', '|  1  |    2 |'), 'ru'), []);
 });
 
-test('dashes and non-breaking spaces', () => {
+test('dashes, non-breaking spaces, long dashes and manual line breaks', () => {
   only(ru.replace('Изучить сеть.', 'Изучить сеть - быстро.'), 'ru', 'Дефис');
   only(ru.replace('Изучить сеть.', 'Изучить 20-30 пакетов.'), 'ru', 'Дефис');
   assert.deepEqual(extraErrors(ru.replace('Изучить сеть.', 'Изучить 2026-10-01 пакеты.'), 'ru'), []);
-  only(ru.replace('Изучить сеть.', 'Изучить 10 % пакетов.'), 'ru', 'неразрывный');
-  only(ru.replace('Изучить сеть.', 'Изучить 12 пт шрифт.'), 'ru', 'неразрывный');
-  only(en.replace('Study the network.', 'Study 10 ms of traffic.'), 'en', 'non-breaking');
-  assert.deepEqual(extraErrors(ru.replace('Изучить сеть.', 'Изучить 12 пунктов.'), 'ru'), []);
+  // a unit after a plain space is the rule now, a non-breaking space is an error
+  assert.deepEqual(extraErrors(ru.replace('Изучить сеть.', 'Изучить 10 % пакетов и 12 пт шрифт.'), 'ru'), []);
+  only(ru.replace('Изучить сеть.', 'Изучить 10' + String.fromCharCode(160) + '% пакетов.'), 'ru', 'Неразрывные');
+  only(ru.replace('Изучить сеть.', 'Изучить 10' + String.fromCharCode(0x202f) + 'мс.'), 'ru', 'Неразрывные');
+  only(en.replace('Study the network.', 'Study 10' + String.fromCharCode(160) + 'ms of traffic.'), 'en', 'Non-breaking');
+  only(ru.replace('Изучить сеть.', 'Изучить сеть ' + String.fromCharCode(0x2014) + ' быстро.'), 'ru', 'Длинное тире');
+  only(en.replace('Study the network.', 'Study the network ' + String.fromCharCode(0x2014) + ' fast.'), 'en', 'long dash');
+  only(ru.replace('Изучить сеть.', 'Изучить<br>сеть.'), 'ru', 'Ручной перенос');
 });
 
 test('tables: length, empty cells, reference and caption', () => {

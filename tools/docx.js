@@ -5,7 +5,7 @@ import { zip, unzip } from './zip.js';
 // 1.25 cm set by the paragraph style, a title page without a number, a TOC field whose cached lines carry the page numbers
 // (from report.toc.json, made with Word by tools/docx-pages.ps1), every part on a new page, the page number bottom right,
 // captions under figures and above tables, listings in Courier New 10 with a hanging indent for long lines.
-// Headings are 14 pt (STP 2.1.1). No italics, no tab characters in the text, no empty paragraphs, no non-breaking spaces in code.
+// Headings are 14 pt (STP 2.1.1). Every Latin letter is italic (the rule of the teacher), no tab characters, no empty paragraphs, no non-breaking spaces, no manual line breaks, no long dashes.
 const TEXT_WIDTH = 9355; // twips: 21 cm minus 3 cm and 1.5 cm
 const MAX_EMU_WIDTH = 5940000; // 16.5 cm
 const PAGE_EMU_HEIGHT = 10692000; // 29.7 cm
@@ -82,14 +82,24 @@ const T = {
 };
 
 const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+// Every Latin letter is set in italic (the rule of the teacher: a Word replace of [a-zA-Z] with italic), so a text is cut into
+// runs at the border of Latin and other characters. Non-breaking spaces never reach the file: they become plain spaces.
 const run = (text, { bold = false, size } = {}) =>
-  `<w:r><w:rPr>${bold ? '<w:b/>' : ''}${size ? `<w:sz w:val="${size}"/>` : ''}</w:rPr><w:t xml:space="preserve">${esc(text)}</w:t></w:r>`;
+  text
+    .replace(/[\u00a0\u202f]/g, ' ')
+    .split(/([A-Za-z]+)/)
+    .filter(Boolean)
+    .map((part) => {
+      const latin = /^[A-Za-z]/.test(part);
+      return `<w:r><w:rPr>${bold ? '<w:b/>' : ''}${latin ? '<w:i/><w:iCs/>' : ''}${size ? `<w:sz w:val="${size}"/>` : ''}</w:rPr><w:t xml:space="preserve">${esc(part)}</w:t></w:r>`;
+    })
+    .join('');
 
 const NBSP = String.fromCharCode(160);
 
 // A word that names a numbered thing stays on one line with its number.
 const NAMED = /(рисун\p{L}*|таблиц\p{L}*|приложени\p{L}*|раздел\p{L}*|подраздел\p{L}*|figure|table|appendix|section) (?=\d|[А-ЯA-Z](?![\p{L}]))/giu;
-const nb = (text) => text.replace(NAMED, `$1${NBSP}`);
+const nb = (text) => text; // no non-breaking spaces (rule of the teacher): a word and its number may be split at the end of a line
 
 // `code` is set as plain text in the font of the paragraph (Courier is kept for the listings) and **text** is bold.
 const inline = (text, base = {}) =>
@@ -193,8 +203,9 @@ export const markdownToDocx = (md, { lang = 'ru', variant, read, meta = {}, page
 
   const h1 = (text, lines3, centered, entry = text) => {
     toc.push([1, lines3 ? entry : text]);
-    const content = lines3 ? lines3.map((l, i) => (i ? '<w:r><w:br/></w:r>' : '') + run(l)).join('') : run(text);
-    return para('Heading1', content, { jc: lines3 || centered ? 'center' : '' });
+    // The three lines of an appendix title are three paragraphs (no manual line break): the first one is the heading of the contents.
+    if (lines3) return lines3.map((l, i) => para(i ? 'HeadingNext' : 'Heading1', run(l), { jc: 'center' })).join('');
+    return para('Heading1', run(text), { jc: centered ? 'center' : '' });
   };
 
   // One listing line: real spaces for the indent (a copy into an editor stays code), a hanging indent when the line wraps.
@@ -323,6 +334,7 @@ export const markdownToDocx = (md, { lang = 'ru', variant, read, meta = {}, page
 <w:style w:type="paragraph" w:default="1" w:styleId="Plain"><w:name w:val="Plain"/><w:pPr><w:spacing w:after="0" w:line="240" w:lineRule="auto"/></w:pPr></w:style>
 <w:style w:type="paragraph" w:styleId="Normal"><w:name w:val="Normal Text"/><w:basedOn w:val="Plain"/><w:qFormat/><w:pPr><w:spacing w:after="0" w:line="276" w:lineRule="auto"/><w:ind w:firstLine="709"/><w:jc w:val="both"/></w:pPr></w:style>
 ${ps('Heading1', 'heading 1', '<w:keepNext/><w:pageBreakBefore/><w:spacing w:after="360" w:line="276" w:lineRule="auto"/><w:outlineLvl w:val="0"/>', '<w:b/><w:sz w:val="28"/>')}
+${ps('HeadingNext', 'Heading continued', '<w:keepNext/><w:spacing w:after="0" w:line="276" w:lineRule="auto"/>', '<w:b/><w:sz w:val="28"/>')}
 ${ps('Heading2', 'heading 2', '<w:keepNext/><w:spacing w:before="240" w:after="240" w:line="276" w:lineRule="auto"/><w:outlineLvl w:val="1"/>', '<w:b/>')}
 ${ps('Heading3', 'heading 3', '<w:keepNext/><w:spacing w:before="120" w:after="0" w:line="276" w:lineRule="auto"/><w:outlineLvl w:val="2"/>', '<w:b/>')}
 ${ps('Figure', 'Figure', '<w:keepNext/><w:keepLines/><w:spacing w:before="0" w:after="0" w:line="240" w:lineRule="auto"/><w:jc w:val="center"/>')}
@@ -378,7 +390,16 @@ export const lintDocx = (buf, { pages = true, figureHeight = true } = {}) => {
   const inToc = (p) => /<w:pStyle w:val="TOC[12]"\/>/.test(p);
   const ordinary = all.filter((p) => !inToc(p));
   const style = (p) => /<w:pStyle w:val="(\w+)"\/>/.exec(p)?.[1];
-  check(/<w:i[ />]/.test(xml + styles), 'Italic text');
+  // Every Latin letter is italic, no non-breaking space, no manual line break, no long dash (the rules of the teacher).
+  const runs = [...xml.matchAll(/<w:r>(<w:rPr>[^]*?<\/w:rPr>)?<w:t[^>]*>([^<]*)<\/w:t><\/w:r>/g)];
+  check(
+    runs.some(([, pr, text]) => /[A-Za-z]/.test(text.replace(/&[a-z]+;/g, '')) && !/<w:i\/>/.test(pr ?? '')),
+    'Latin letters that are not in italic',
+  );
+  check(/[\u00a0\u202f]/.test(xml), 'Non-breaking spaces in the text');
+  check(/<w:br\/>|<w:br w:clear/.test(xml), 'Manual line breaks, use a paragraph break');
+  check(/[\u2014\u2015\u2012]/.test(xml), 'Long dash, use the short dash');
+  check(/<w:i[ />]/.test(styles), 'Italic in a style, the italic is set in the runs');
   check(
     ordinary.some((p) => p.includes('<w:tab/>')),
     'Tab characters in the text',
@@ -414,7 +435,7 @@ export const lintDocx = (buf, { pages = true, figureHeight = true } = {}) => {
     'Courier New outside the listings',
   );
   check(
-    all.some((p) => style(p) === 'Code' && textOf(p).includes(NBSP)),
+    false,
     'Non-breaking spaces in a listing',
   );
   check(
