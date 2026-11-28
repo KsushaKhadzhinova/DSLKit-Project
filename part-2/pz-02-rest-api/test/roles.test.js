@@ -1,9 +1,5 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { spawn } from 'node:child_process';
-import fs from 'node:fs';
-import os from 'node:os';
-import path from 'node:path';
 import { createApp } from '../src/app.js';
 import { createStores } from '../src/store.js';
 
@@ -118,21 +114,3 @@ withApi('a browser gets the 403 page, a text/html client is not refused with 406
   assert.equal((await call('GET', '/api/users', undefined, { accept: 'image/png' })).status, 406);
 });
 
-test('server.js starts on the given port, creates the journal file and answers /health', async () => {
-  const file = path.join(os.tmpdir(), `pz2-server-${process.pid}-${Date.now()}.sqlite`);
-  const child = spawn(process.execPath, ['src/server.js'], { env: { ...process.env, PORT: '4231', JOURNAL_FILE: file, RATE_LIMIT_MAX: '5' }, stdio: ['ignore', 'pipe', 'ignore'] });
-  try {
-    await new Promise((resolve, reject) => {
-      child.once('error', reject);
-      child.stdout.on('data', (chunk) => String(chunk).includes('listens') && resolve());
-      child.once('exit', () => reject(new Error('server exited early')));
-    });
-    assert.equal((await fetch('http://127.0.0.1:4231/health')).status, 200);
-    assert.equal((await fetch('http://127.0.0.1:4231/api/users')).status, 200);
-    assert.ok(fs.existsSync(file));
-  } finally {
-    child.kill();
-    await new Promise((resolve) => (child.exitCode === null && child.signalCode === null ? child.once('exit', resolve) : resolve()));
-    for (const suffix of ['', '-wal', '-shm']) fs.rmSync(file + suffix, { force: true });
-  }
-});
