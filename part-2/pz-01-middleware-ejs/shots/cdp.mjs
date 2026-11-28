@@ -1,10 +1,11 @@
 // A very small browser driver for the report screenshots: Edge or Chrome started headless and talked to over the DevTools
 // protocol with the WebSocket of Node itself, so no package has to be installed. It does what the shots need: open an
 // address, set a form value, click, wait for the page and save a PNG of the page (cropped to a fixed maximum height).
-import { spawn } from 'node:child_process';
+import { execFileSync, spawn } from 'node:child_process';
 import { existsSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const browsers = [
   process.env.CHROME_PATH,
@@ -15,11 +16,15 @@ const browsers = [
 
 const pause = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-export const launch = async () => {
+// windowed: a real browser window (Russian interface, address bar visible) is captured from the screen with
+// windows/capture-window.ps1; otherwise a headless browser renders the page.
+export const launch = async ({ windowed = false } = {}) => {
   const executable = browsers.find((p) => existsSync(p));
   if (!executable) throw new Error('No Edge or Chrome found, set CHROME_PATH');
   const profile = mkdtempSync(path.join(tmpdir(), 'pz-shots-'));
-  const child = spawn(executable, ['--headless=new', '--disable-gpu', '--hide-scrollbars', '--no-first-run', '--force-device-scale-factor=1', '--remote-debugging-port=0', `--user-data-dir=${profile}`, 'about:blank'], { stdio: 'ignore' });
+  const shown = ['--lang=ru', '--window-position=0,0', '--window-size=1296,1032', '--blink-settings=preferredColorScheme=0', '--no-default-browser-check', '--disable-sync', '--disable-extensions'];
+  const args = windowed ? shown : ['--headless=new', '--disable-gpu', '--hide-scrollbars'];
+  const child = spawn(executable, [...args, '--no-first-run', '--force-device-scale-factor=1', '--remote-debugging-port=0', `--user-data-dir=${profile}`, 'about:blank'], { stdio: 'ignore' });
   let port;
   for (let i = 0; i < 100 && !port; i += 1) {
     await pause(200);
@@ -64,7 +69,7 @@ export const launch = async () => {
     });
 
   await send('Page.enable');
-  await send('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-color-scheme', value: 'light' }] });
+  if (!windowed) await send('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-color-scheme', value: 'light' }] });
 
   const evaluate = async (expression) => {
     const { result, exceptionDetails } = await send('Runtime.evaluate', { expression, awaitPromise: true, returnByValue: true });
@@ -102,6 +107,33 @@ export const launch = async () => {
     // Saves the page at the given width, as tall as its content (or down to the bottom of the element `until`) but not taller than maxHeight pixels.
     // 1380 pixels at 1280 wide is 60 percent of the page height when the picture is 16.5 cm wide.
     async shot(file, { width = 1280, maxHeight = 1380, height, until, margin = 40 } = {}) {
+      if (windowed) {
+        // The window is as tall as the content (down to the element `until`), not taller than the screen allows.
+        const { windowId } = await send('Browser.getWindowForTarget');
+        const { bounds } = await send('Browser.getWindowBounds', { windowId });
+        const inner = await evaluate('[window.innerWidth, window.innerHeight]');
+        // A page taller than the window is shown at the next browser zoom step (90, 80, 75, 67 percent) until it fits.
+        const measure = async () => {
+          const content = await evaluate('Math.ceil(document.documentElement.getBoundingClientRect().height)');
+          const bottom = until ? await evaluate(`Math.ceil(document.querySelector(${JSON.stringify(until)}).getBoundingClientRect().bottom + window.scrollY)`) : content;
+          return { content, need: Math.min(content, bottom + (until ? margin : 0)) };
+        };
+        let measured = await measure();
+        for (const zoom of [0.9, 0.8, 0.75, 0.67]) {
+          if (measured.need <= 940) break;
+          await evaluate(`document.documentElement.style.zoom = '${zoom}'`);
+          measured = await measure();
+        }
+        const { content } = measured;
+        const tall = height ?? Math.min(Math.max(measured.need, 300), 940);
+        await send('Browser.setWindowBounds', { windowId, bounds: { windowState: 'normal', left: 0, top: 0, width: bounds.width + width - inner[0], height: bounds.height + tall - inner[1] } });
+        await send('Page.bringToFront');
+        await pause(500);
+        execFileSync('powershell', ['-NoProfile', '-File', fileURLToPath(new URL('./windows/capture-window.ps1', import.meta.url)), '-ProcId', String(child.pid), '-Out', file]);
+        await evaluate("document.documentElement.style.zoom = ''");
+        console.log(path.basename(file), `window capture (content ${content})`);
+        return { width, height: tall, content };
+      }
       await send('Emulation.setDeviceMetricsOverride', { width, height: 800, deviceScaleFactor: 1, mobile: false });
       const content = await evaluate('Math.ceil(document.documentElement.scrollHeight)');
       const bottom = until ? await evaluate(`Math.ceil(document.querySelector(${JSON.stringify(until)}).getBoundingClientRect().bottom + window.scrollY)`) : content;

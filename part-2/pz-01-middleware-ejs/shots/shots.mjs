@@ -36,7 +36,7 @@ const waitUp = async () => {
   throw new Error(`No answer from ${ORIGIN}`);
 };
 
-const { page, close } = await launch();
+const { page, close } = await launch({ windowed: process.env.SHOTS_WINDOW === '1' });
 try {
   {
     const tmp = mkdtempSync(path.join(tmpdir(), 'pz1-'));
