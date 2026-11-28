@@ -75,7 +75,7 @@ Middleware `fakeAuth` проверяет параметр `?auth=1`. Если о
 
 ### 3.5 Страница 500 и порядок обработчиков
 
-Страница 500 показывается, когда запрос завершился ошибкой сервера. Обработчик ошибок имеет четыре параметра и подключён после всех маршрутов и всех middleware, поэтому любое исключение, будь то сбой записи в журнал, ошибка маршрута или сломанное тело запроса, попадает именно в него. Обработчик записывает ошибку в журнал ошибок, выбирает код ответа и рендерит шаблон `500.ejs` в общем оформлении сайта: с шапкой, подвалом и таблицей стилей. Если у ошибки есть собственный код, например 413 для слишком большой формы, он сохраняется, а страница получает собственный заголовок, например «Request too large». Если ошибку вызвала недоступная база журнала, на странице появляется понятное пояснение. Для сбоя до имитации авторизации обработчик сам подставляет гостя, чтобы шапка отрисовалась. Если даже шаблон 500 не удалось отрисовать, отправляется запасная страница с тем же оформлением, поэтому пользователь никогда не видит голый текст на чёрном фоне. Страницу 500 вызывает настоящий сбой журнала, а не кнопка на сайте. Сбой воспроизводится в PowerShell командой `$env:DB_FILE='package.json/blocked/log.db'; npm start`: переменная окружения `DB_FILE` указывает на путь внутри файла, поэтому базу создать нельзя, и любой запрос заканчивается страницей 500. После проверки переменная удаляется командой `Remove-Item Env:DB_FILE`. Другой способ состоит в остановке базы во время работы сервера. Страница 404 устроена так же и подключена перед обработчиком 500. Листинг приведён в приложении И.
+Страница 500 показывается, когда запрос завершился ошибкой сервера. Обработчик ошибок имеет четыре параметра и подключён после всех маршрутов и всех middleware, поэтому любое исключение, будь то сбой записи в журнал, ошибка маршрута или сломанное тело запроса, попадает именно в него. Обработчик записывает ошибку в журнал ошибок, выбирает код ответа и рендерит шаблон `500.ejs` в общем оформлении сайта: с шапкой, подвалом и таблицей стилей. Если у ошибки есть собственный код, например 413 для слишком большой формы, он сохраняется, а страница получает собственный заголовок, например «Request too large». Если ошибку вызвала недоступная база журнала, на странице появляется понятное пояснение. Для сбоя до имитации авторизации обработчик сам подставляет гостя, чтобы шапка отрисовалась. Если даже шаблон 500 не удалось отрисовать, отправляется запасная страница с тем же оформлением, поэтому пользователь никогда не видит голый текст на чёрном фоне. Страницу 500 вызывает настоящий сбой журнала, а не действие на странице сайта. Сбой воспроизводится в PowerShell командой `$env:DB_FILE='package.json/blocked/log.db'; npm start`: переменная окружения `DB_FILE` указывает на путь внутри файла, поэтому базу создать нельзя, и любой запрос заканчивается страницей 500. После проверки переменная удаляется командой `Remove-Item Env:DB_FILE`. Другой способ состоит в остановке базы во время работы сервера. Страница 404 устроена так же и подключена перед обработчиком 500. Листинг приведён в приложении И.
 
 ### 3.6 Проверка полей формы
 
@@ -215,7 +215,7 @@ Middleware `fakeAuth` проверяет параметр `?auth=1`. Если о
 
 25. Как в Express реализовать защиту от CSRF с помощью middleware (теоретически)?
 
-    Браузер сам прикладывает cookie к запросу на наш сайт, даже если форму отправила страница чужого сайта, поэтому одной cookie для защиты мало. В работе применена схема двойной отправки cookie (double submit cookie) вместе с проверкой заголовка `Origin`. Middleware выдаёт токен, кладёт его в cookie `dslkit_csrf` с флагами `HttpOnly` и `SameSite=Strict` и в скрытое поле `_csrf` каждой формы. Токен состоит из случайной части и подписи HMAC, а ключ подписи создаётся при запуске сервера, поэтому значение, которое злоумышленник подставил в cookie, например с родственного поддомена, не проходит проверку подписи. Запрос, меняющий данные (`POST`, `PUT`, `PATCH`, `DELETE`), принимается, только если значение поля совпадает с cookie, а заголовок `Origin`, когда он есть, указывает на этот же сайт. Безопасные методы, например `GET`, токен не проверяют, поэтому они не должны менять данные, и удаление сделано формой `POST`. Сравнение делается функцией `timingSafeEqual`. Порядок важен: middleware подключается после разбора формы, потому что токен лежит в теле, и до маршрутов. Пакет `csurf` снят с поддержки, а его преемник `csrf-csrf` строится на той же схеме, поэтому в работе она написана вручную без новых пакетов. Токен не привязан к сессии: у приложения нет сессий, и защита отделяет свой сайт от чужого, но не одного пользователя от другого. После перезапуска сервера ключ меняется, и открытые формы приходится загружать заново.
+    Браузер сам прикладывает cookie к запросу на наш сайт, даже если форму отправила страница чужого сайта, поэтому одной cookie для защиты мало. В работе применена схема двойной отправки cookie (double submit cookie) вместе с проверкой заголовка `Origin`. Middleware выдаёт токен, кладёт его в cookie `dslkit_csrf` с флагами `HttpOnly` и `SameSite=Strict` и в скрытое поле `_csrf` каждой формы. Токен состоит из случайной части и подписи HMAC, а ключ подписи создаётся при запуске сервера, поэтому самодельное значение, которое злоумышленник подставил в cookie, не проходит проверку подписи. Запрос, меняющий данные (`POST`, `PUT`, `PATCH`, `DELETE`), принимается, только если значение поля совпадает с cookie, а заголовок `Origin`, когда он есть, указывает на этот же сайт. Безопасные методы, например `GET`, токен не проверяют, поэтому они не должны менять данные, и удаление сделано формой `POST`. Сравнение делается функцией `timingSafeEqual`. Порядок важен: middleware подключается после разбора формы, потому что токен лежит в теле, и до маршрутов. Пакет `csurf` снят с поддержки, а его преемник `csrf-csrf` строится на той же схеме, поэтому в работе она написана вручную без новых пакетов. Токен не привязан к сессии: у приложения нет сессий, и защита отделяет свой сайт от чужого, но не одного пользователя от другого. Из-за этого злоумышленник с родственного поддомена мог бы положить в cookie настоящий подписанный токен, который он сам получил от сайта, и вставить то же значение в форму: подпись такой токен не отвергнет, и защищают от этого только проверка заголовка `Origin` и флаг `SameSite=Strict`. После перезапуска сервера ключ меняется, и открытые формы приходится загружать заново.
 
 26. Как в EJS использовать функцию helper (например, для форматирования даты) в шаблоне?
 
@@ -229,7 +229,9 @@ Middleware `fakeAuth` проверяет параметр `?auth=1`. Если о
 
 Для проекта DSLKit собрано приложение на Express с шаблонами EJS: список диаграмм, детальная страница и форма добавления получают данные из таблицы `diagrams` базы данных SQLite. Журнал запросов по правилам чётного варианта пишется в таблицу `request_log` той же базы, а его сбой показывается оформленной страницей 500, при этом действие не выполняется. Форма отвергает пустые и пробельные значения, слишком длинный текст и отрицательные числа по пределам из отдельного файла `limits.json`, а у каждой записи есть уникальное время создания. Записи можно изменять и удалять кнопками на детальной странице, а удаление выполняется формой `POST`. Форма защищена токеном CSRF, а сервер заголовками безопасности и ограничением частоты запросов. Страницы ошибок 400, 403, 404, 405, 413, 429 и 500 оформлены в стиле сайта и объясняют, что произошло, почему и как это исправить. Оформление взято из Части 1 проекта. Автоматические тесты на `node:test` проверяют страницы, формы, защиту и сбой журнала, а код приложения покрыт тестами полностью, что видно на рисунке 15. Снимки страниц приведены в тексте, а листинги в приложениях. Ответы на контрольные вопросы 25, 26 и 27 даны в разделе 4. Работа выполнена в ветке pz21 репозитория проекта.
 
-## Приложение А (обязательное) Листинг шаблона index.ejs
+## Приложение А (обязательное) Листинг index.ejs
+
+Комментарии в листингах всех приложений написаны по-английски, как в исходных файлах проекта.
 
 ```ejs
 <%- include('partials/header') %>
@@ -263,7 +265,7 @@ Middleware `fakeAuth` проверяет параметр `?auth=1`. Если о
 <%- include('partials/footer') %>
 ```
 
-## Приложение Б (обязательное) Листинг файла app.js, сборка приложения и порядок middleware
+## Приложение Б (обязательное) Листинг app.js, middleware и общие функции
 
 ```js
 import { randomBytes } from 'node:crypto';
@@ -340,21 +342,34 @@ export const createApp = ({
   // the actual problem is a malformed request, so it is turned into the 400 it should have been.
   app.use((err, req, res, next) => next(err?.type === 'parameters.too.many' ? Object.assign(err, { status: 400, statusCode: 400 }) : err));
   app.use(csrf);
+
+  app.get('/', (req, res) => res.render('index', { title: res.locals.t('title.diagrams'), items: store.all() }));
+
+  // Only plain digits are a number: Number() would also accept "0x1" or "1e0". A leading zero is refused
+  // (except "0" itself), so "/item/01" is not a second, hidden address for "/item/1".
+  const ITEM_ID = /^(0|[1-9]\d{0,8})$/;
+  const findItem = (req) => (ITEM_ID.test(req.params.id) ? store.find(Number(req.params.id)) : undefined);
+
+  // Adding and editing share one template, only the texts and the address differ.
+  const formView = (t) => ({ notations: NOTATIONS, heading: t('form.headingAdd'), action: '/add', submit: t('form.submitAdd') });
+  const editView = (item, t) => ({ ...formView(t), heading: t('form.headingEdit'), action: `/item/${item.id}/edit`, submit: t('form.submitEdit') });
+
+  // Repeated keys (arrays) must not crash: only plain strings count.
+  const readForm = (body) => {
+    const text = (value) => (typeof value === 'string' ? value.trim() : '');
+    return {
+      title: text(body.title),
+      notation: text(body.notation),
+      description: text(body.description),
+      code: text(body.code),
+      revision: text(body.revision),
+    };
+  };
 ```
 
-## Приложение В (обязательное) Листинг файла requestLogger.js
+## Приложение В (обязательное) Листинг requestLogger.js
 
 ```js
-import { UserError } from '../errors.js';
-import { safeLogText } from './security.js';
-import { translate } from '../i18n.js';
-
-// Writes the request into the request_log table BEFORE the route runs, so a database failure
-// reaches the error handler and the user sees the styled 500 page. Status and duration are added
-// to the same row when the response finishes.
-// The sign-in flag of the imitation must not be copied into the log, so a reader of the log cannot reuse it.
-// Express decodes the query string before it looks at parameter names, so "%61uth=1" signs a visitor in just
-// like "auth=1" does; masking has to work on the decoded name too, not on the raw text of the address.
 export const hideAuth = (url) => {
   const text = String(url);
   const mark = text.indexOf('?');
@@ -403,7 +418,7 @@ export const requestLogger =
   };
 ```
 
-## Приложение Г (обязательное) Листинг файла requestLog.js с таблицей журнала
+## Приложение Г (обязательное) Листинг requestLog.js с таблицей журнала
 
 ```js
 import { DatabaseSync } from 'node:sqlite';
@@ -502,7 +517,7 @@ export const openRequestLog = (file = ':memory:') => {
 };
 ```
 
-## Приложение Д (обязательное) Листинг файла fakeAuth.js
+## Приложение Д (обязательное) Листинг fakeAuth.js
 
 ```js
 // Simulated authorization: ?auth=1 means "signed in as the owner", anything else is a guest.
@@ -523,32 +538,9 @@ export const requireAuth = (req, res, next) => {
 };
 ```
 
-## Приложение Е (обязательное) Листинг файла app.js, маршруты приложения
+## Приложение Е (обязательное) Листинг app.js, маршруты приложения
 
 ```js
-  app.get('/', (req, res) => res.render('index', { title: res.locals.t('title.diagrams'), items: store.all() }));
-
-  // Only plain digits are a number: Number() would also accept "0x1" or "1e0". A leading zero is refused
-  // (except "0" itself), so "/item/01" is not a second, hidden address for "/item/1".
-  const ITEM_ID = /^(0|[1-9]\d{0,8})$/;
-  const findItem = (req) => (ITEM_ID.test(req.params.id) ? store.find(Number(req.params.id)) : undefined);
-
-  // Adding and editing share one template, only the texts and the address differ.
-  const formView = (t) => ({ notations: NOTATIONS, heading: t('form.headingAdd'), action: '/add', submit: t('form.submitAdd') });
-  const editView = (item, t) => ({ ...formView(t), heading: t('form.headingEdit'), action: `/item/${item.id}/edit`, submit: t('form.submitEdit') });
-
-  // Repeated keys (arrays) must not crash: only plain strings count.
-  const readForm = (body) => {
-    const text = (value) => (typeof value === 'string' ? value.trim() : '');
-    return {
-      title: text(body.title),
-      notation: text(body.notation),
-      description: text(body.description),
-      code: text(body.code),
-      revision: text(body.revision),
-    };
-  };
-
   app.get('/item/:id', (req, res, next) => {
     const item = findItem(req);
     return item ? res.render('item', { title: item.title, item }) : next();
@@ -650,7 +642,7 @@ export const requireAuth = (req, res, next) => {
 };
 ```
 
-## Приложение Ж (обязательное) Листинг шаблона item.ejs
+## Приложение Ж (обязательное) Листинг item.ejs
 
 ```ejs
 <%- include('partials/header') %>
@@ -684,12 +676,13 @@ export const requireAuth = (req, res, next) => {
 <%- include('partials/footer') %>
 ```
 
-## Приложение И (обязательное) Листинг файла errorHandlers.js
+## Приложение И (обязательное) Листинг errorHandlers.js
 
 ```js
 import { entryFor } from '../errors.js';
 import { safeLogText } from './security.js';
 import { translate } from '../i18n.js';
+import { hideAuth } from './requestLogger.js';
 
 export const notFound = (req, res) => {
   const lang = res.locals.lang ?? 'en';
@@ -712,7 +705,7 @@ export const serverError =
     const status = err.status >= 400 && err.status < 600 ? err.status : 500;
     // An ordinary 4xx (a bad address, a missing token, too many requests) is one line with no stack:
     // it is expected traffic, not a server fault, and a flood of them must not flood the console.
-    const line = `[error] ${res.locals?.requestId ?? '-'} ${safeLogText(req.method)} ${safeLogText(req.originalUrl)} ${status}`;
+    const line = `[error] ${res.locals?.requestId ?? '-'} ${safeLogText(req.method)} ${safeLogText(hideAuth(req.originalUrl))} ${status}`;
     if (status >= 500) write(line, err);
     else write(line);
     if (res.headersSent) return res.end();
@@ -747,7 +740,7 @@ export const serverError =
   };
 ```
 
-## Приложение К (обязательное) Листинг файла diagrams.js, проверка полей формы
+## Приложение К (обязательное) Листинг diagrams.js, проверка полей формы
 
 ```js
 const CONTROL = /[\p{Cc}\u2028\u2029\u202a-\u202e\u2066-\u2069]/u;
@@ -792,16 +785,9 @@ export const validateDiagram = (input, limits, t = defaultT) => {
 };
 ```
 
-## Приложение Л (обязательное) Листинг файла diagrams.js, начальные записи и таблица
+## Приложение Л (обязательное) Листинг diagrams.js, начальные записи
 
 ```js
-import { DatabaseSync } from 'node:sqlite';
-import { existsSync, mkdirSync, statSync } from 'node:fs';
-import { dirname } from 'node:path';
-import { UserError, fileFailure } from '../errors.js';
-import { translate } from '../i18n.js';
-
-export const NOTATIONS = ['UML', 'BPMN', 'ERD', 'DFD', 'IDEF0', 'Petri'];
 
 const seed = () => [
   {
@@ -835,6 +821,11 @@ const seed = () => [
 
 // A ceiling on the table: the oldest record is dropped first, like a ring buffer.
 const MAX_ITEMS = 5000;
+```
+
+## Приложение М (обязательное) Листинг diagrams.js, таблица и хранилище записей
+
+```js
 
 // The diagrams live in a table of the same SQLite database as the request log (variant 26 is even: the data are
 // kept in the database). The connection opens lazily, the schema is created on first use and the three sample
@@ -853,11 +844,6 @@ const CREATE_TABLE = `
   )`;
 const COLUMNS = 'id, title, notation, description, code, revision, created_at AS createdAt';
 
-```
-
-## Приложение М (обязательное) Листинг файла diagrams.js, хранилище записей
-
-```js
 export const createDiagramStore = (now = Date.now, file = ':memory:') => {
   let db = null;
   let sql = null;
@@ -961,7 +947,7 @@ export const createDiagramStore = (now = Date.now, file = ':memory:') => {
 }
 ```
 
-## Приложение П (обязательное) Листинг файла security.js, заголовки и защита CSRF
+## Приложение П (обязательное) Листинг security.js, заголовки и защита CSRF
 
 ```js
 import { randomBytes, timingSafeEqual, createHmac } from 'node:crypto';
@@ -1060,7 +1046,7 @@ export const csrf = (req, res, next) => {
 };
 ```
 
-## Приложение Р (обязательное) Листинг файла security.js, ограничение частоты и экранирование журнала
+## Приложение Р (обязательное) Листинг security.js, ограничение частоты и экранирование
 
 ```js
 const tooMany = (retryAfter, t) => Object.assign(new Error('Too many requests'), { status: 429, retryAfter, publicMessage: t('error.tooManyRequests', { retryAfter }) });
@@ -1100,7 +1086,7 @@ export const safeLogText = (text, max = 500) => {
 };
 ```
 
-## Приложение С (обязательное) Листинг файла logFile.js, выгрузка журнала потоками
+## Приложение С (обязательное) Листинг logFile.js, выгрузка журнала потоками
 
 ```js
 import { createReadStream, createWriteStream } from 'node:fs';

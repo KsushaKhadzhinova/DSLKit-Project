@@ -22,13 +22,19 @@ npm test
 
 ## Как вызвать страницу 500
 
-Страницу 500 вызывает настоящий сбой, а не кнопка. Запустите сервер с файлом базы, который нельзя создать:
+Страницу 500 вызывает настоящий сбой журнала. Сервер запускается с файлом базы, который нельзя создать. В PowerShell:
 
-```bash
-DB_FILE=package.json/blocked/log.db npm start
+```powershell
+$env:DB_FILE='package.json/blocked/log.db'; npm start
 ```
 
-Запись в журнал не удаётся, и любой запрос заканчивается оформленной страницей 500 с пояснением. Второй способ: остановить базу во время работы сервера (тест `a database that stops while the server runs` делает именно это).
+После проверки переменная окружения удаляется:
+
+```powershell
+Remove-Item Env:DB_FILE
+```
+
+В bash то же задаётся строкой `DB_FILE=package.json/blocked/log.db npm start`. Путь указывает внутрь файла `package.json`, поэтому папку создать нельзя. Запись в журнал не удаётся, и любой запрос заканчивается оформленной страницей 500 с пояснением и номером запроса; сервер при этом продолжает работать. Страница 500 сама подсказывает, что место файла задаёт настройка `DB_FILE`. Второй способ: остановить базу во время работы сервера (тест `a database that stops while the server runs` делает именно это).
 
 ## Страницы
 
@@ -93,6 +99,6 @@ DB_FILE=package.json/blocked/log.db npm start
 
 Журнал обязателен: если запись в таблицу `request_log` не удалась, запрос заканчивается оформленной страницей 500, а действие (добавление, правка, удаление) не выполняется. Проверка: `DB_FILE=package.json/blocked/log.db npm start` и открыть любую страницу; или остановить базу во время работы (тест `when the request log cannot be written, the action is NOT done`). Данные диаграмм лежат в той же базе, при её отказе список тоже даёт 500.
 
-The log is mandatory: when the write into `request_log` fails, the request ends on the styled 500 page and the action (add, edit, delete) is not performed. Reproduce with `DB_FILE=package.json/blocked/log.db npm start` and open any page. Diagram data live in the same database, so its failure also gives 500.
+The log is mandatory: when the write into `request_log` fails, the request ends on the styled 500 page and the action (add, edit, delete) is not performed. Reproduce it in PowerShell with `$env:DB_FILE='package.json/blocked/log.db'; npm start`, open any page, then clean up with `Remove-Item Env:DB_FILE` (in bash: `DB_FILE=package.json/blocked/log.db npm start`). Diagram data live in the same database, so its failure also gives 500.
 
 Тесты: `npm test` (порог 100 % строк, ветвей и функций по `src/**`, золотые страницы в `test/golden/`, обновление: `UPDATE_GOLDEN=1 npm test`). `report.test.mjs` сверяет отчёт с шаблоном и листингами: после изменения кода отчёт пересобирает T38.

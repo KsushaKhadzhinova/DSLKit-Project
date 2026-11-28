@@ -75,7 +75,7 @@ The request log page has a "Clear the log" button. It is a form with the POST me
 
 ### 3.5 The 500 page and the order of handlers
 
-The 500 page is shown when a request ends with a server error. The error handler has four parameters and is mounted after all routes and all middleware, so any exception, whether a log write failure, a route error or a broken request body, reaches it. The handler writes the error to the error log, chooses the status code and renders the `500.ejs` template in the common site design: with the header, the footer and the style sheet. When the error carries its own code, for example 413 for an oversized form, the code is kept and the page gets its own heading, for example "Request too large". When the error comes from an unavailable log database, the page shows a clear explanation. For a failure before the simulated authorization the handler supplies a guest itself so that the header can be drawn. If even the 500 template fails to render, a fallback page with the same styling is sent, so the user never sees bare text on a black background. The 500 page is caused by a real failure, not by a button. To show it at the defence, start the server with `DB_FILE=package.json/blocked/log.db npm start`: the database file cannot be created, so every request ends with the 500 page. The second way is to stop the database while the server is running. The 404 page works the same way and is mounted before the 500 handler. Appendix H holds the listing.
+The 500 page is shown when a request ends with a server error. The error handler has four parameters and is mounted after all routes and all middleware, so any exception, whether a log write failure, a route error or a broken request body, reaches it. The handler writes the error to the error log, chooses the status code and renders the `500.ejs` template in the common site design: with the header, the footer and the style sheet. When the error carries its own code, for example 413 for an oversized form, the code is kept and the page gets its own heading, for example "Request too large". When the error comes from an unavailable log database, the page shows a clear explanation. For a failure before the simulated authorization the handler supplies a guest itself so that the header can be drawn. If even the 500 template fails to render, a fallback page with the same styling is sent, so the user never sees bare text on a black background. The 500 page is caused by a real failure, not by an action on a page of the site. To show it at the defence, start the server in PowerShell with `$env:DB_FILE='package.json/blocked/log.db'; npm start` and remove the variable afterwards with `Remove-Item Env:DB_FILE`: the database file cannot be created, so every request ends with the 500 page. The second way is to stop the database while the server is running. The 404 page works the same way and is mounted before the 500 handler. Appendix H holds the listing.
 
 ### 3.6 Form field checks
 
@@ -215,7 +215,7 @@ The number in the group list is 26, so the answers are given to the questions 25
 
 25. How do you protect an Express application from CSRF with middleware (in theory)?
 
-    A browser attaches cookies to a request to our site by itself, even when the form was sent by a page of another site, so a cookie alone is not enough. The middleware issues a random token and puts it into a cookie with the `HttpOnly` and `SameSite=Strict` flags and into a hidden field of every form. A request that changes data (`POST`, `PUT`, `PATCH`, `DELETE`) is accepted only when the field value matches the cookie and the `Origin` header, when present, points to this very site. A page of another site can neither read the cookie nor guess the token. The comparison uses `timingSafeEqual`. The order matters: the middleware is mounted after the form parser, because the token is in the body, and before the routes. In the work this is the `csrf` function in `security.js`, and the add, edit and delete forms carry the hidden field. The scheme is a double submit cookie together with the check of the `Origin` header, and the token is signed with a key made at the start of the server, so a value planted into the cookie from a sibling subdomain fails the signature check. Safe methods such as `GET` are not checked, so they must not change data. The package `csurf` is deprecated and its successor `csrf-csrf` uses the same scheme, so here it is written by hand. The token is not bound to a session, because the application has none: it separates this site from another site, not one user from another. After a server restart the key changes and open forms must be loaded again.
+    A browser attaches cookies to a request to our site by itself, even when the form was sent by a page of another site, so a cookie alone is not enough. The middleware issues a random token and puts it into a cookie with the `HttpOnly` and `SameSite=Strict` flags and into a hidden field of every form. A request that changes data (`POST`, `PUT`, `PATCH`, `DELETE`) is accepted only when the field value matches the cookie and the `Origin` header, when present, points to this very site. A page of another site can neither read the cookie nor guess the token. The comparison uses `timingSafeEqual`. The order matters: the middleware is mounted after the form parser, because the token is in the body, and before the routes. In the work this is the `csrf` function in `security.js`, and the add, edit and delete forms carry the hidden field. The scheme is a double submit cookie together with the check of the `Origin` header, and the token is signed with a key made at the start of the server, so a home-made value planted into the cookie fails the signature check. Safe methods such as `GET` are not checked, so they must not change data. The package `csurf` is deprecated and its successor `csrf-csrf` uses the same scheme, so here it is written by hand. The token is not bound to a session, because the application has none: it separates this site from another site, not one user from another. For this reason an attacker on a sibling subdomain could plant a genuine signed token that the site gave to the attacker and put the same value into the form: the signature does not reject it, and only the `Origin` check and `SameSite=Strict` protect against that. After a server restart the key changes and open forms must be loaded again.
 
 26. How do you use a helper function (for example, a date formatter) in an EJS template?
 
@@ -229,62 +229,64 @@ The number in the group list is 26, so the answers are given to the questions 25
 
 For the DSLKit project an Express application with EJS templates was built: the list of diagrams, the detail page and the add form take data from the `diagrams` table of a SQLite database. By the rules of the even variant the request log is written to the `request_log` table of the same database, and its failure is shown by the styled 500 page while the action is not done. The form rejects empty and whitespace values, too long text and negative numbers by the limits from the separate file `limits.json`, and every record has a unique creation time. Records can be edited and deleted with the buttons on the detail page, and deleting is a `POST` form. The form is protected by a CSRF token, and the server by security headers and a rate limit. The error pages 400, 403, 404, 405, 413, 429 and 500 follow the site style and explain what happened, why and how to fix it. The look is taken from Part 1 of the project. The automatic tests on `node:test` check the pages, the forms, the protection and the log failure, and the application code is covered by the tests completely, as figure 15 shows. The screenshots are given in the text and the listings in the appendices. The answers to the control questions 25, 26 and 27 are given in section 4. The work was done in the branch {{meta:branch}} of the project repository.
 
-## Appendix A (mandatory) Listing of the template index.ejs
+## Appendix A (mandatory) Listing of index.ejs
+
+The comments in the listings of all appendices are in English, as in the source files of the project.
 
 {{code:part-2/pz-01-middleware-ejs/views/index.ejs}}
 
-## Appendix B (mandatory) Listing of the file app.js, assembly and the order of the middleware
+## Appendix B (mandatory) Listing of app.js, middleware and shared functions
 
-{{code:part-2/pz-01-middleware-ejs/src/app.js#1-74}}
+{{code:part-2/pz-01-middleware-ejs/src/app.js#1-97}}
 
-## Appendix C (mandatory) Listing of the file requestLogger.js
+## Appendix C (mandatory) Listing of requestLogger.js
 
-{{code:part-2/pz-01-middleware-ejs/src/middleware/requestLogger.js}}
+{{code:part-2/pz-01-middleware-ejs/src/middleware/requestLogger.js#11-56}}
 
-## Appendix D (mandatory) Listing of the file requestLog.js with the log table
+## Appendix D (mandatory) Listing of requestLog.js with the log table
 
 {{code:part-2/pz-01-middleware-ejs/src/data/requestLog.js}}
 
-## Appendix E (mandatory) Listing of the file fakeAuth.js
+## Appendix E (mandatory) Listing of fakeAuth.js
 
 {{code:part-2/pz-01-middleware-ejs/src/middleware/fakeAuth.js}}
 
-## Appendix F (mandatory) Listing of the file app.js, routes of the application
+## Appendix F (mandatory) Listing of app.js, routes of the application
 
-{{code:part-2/pz-01-middleware-ejs/src/app.js#76-197}}
+{{code:part-2/pz-01-middleware-ejs/src/app.js#99-197}}
 
-## Appendix G (mandatory) Listing of the template item.ejs
+## Appendix G (mandatory) Listing of item.ejs
 
 {{code:part-2/pz-01-middleware-ejs/views/item.ejs}}
 
-## Appendix H (mandatory) Listing of the file errorHandlers.js
+## Appendix H (mandatory) Listing of errorHandlers.js
 
 {{code:part-2/pz-01-middleware-ejs/src/middleware/errorHandlers.js}}
 
-## Appendix I (mandatory) Listing of the file diagrams.js, form field checks
+## Appendix I (mandatory) Listing of diagrams.js, form field checks
 
 {{code:part-2/pz-01-middleware-ejs/src/data/diagrams.js#142-181}}
 
-## Appendix J (mandatory) Listing of the file diagrams.js, initial records and table
+## Appendix J (mandatory) Listing of diagrams.js, initial records
 
-{{code:part-2/pz-01-middleware-ejs/src/data/diagrams.js#1-58}}
+{{code:part-2/pz-01-middleware-ejs/src/data/diagrams.js#8-40}}
 
-## Appendix K (mandatory) Listing of the file diagrams.js, record store
+## Appendix K (mandatory) Listing of diagrams.js, table and record store
 
-{{code:part-2/pz-01-middleware-ejs/src/data/diagrams.js#59-140}}
+{{code:part-2/pz-01-middleware-ejs/src/data/diagrams.js#41-140}}
 
 ## Appendix L (mandatory) The limits file limits.json
 
 {{code:part-2/pz-01-middleware-ejs/limits.json}}
 
-## Appendix M (mandatory) Listing of the file security.js, headers and CSRF protection
+## Appendix M (mandatory) Listing of security.js, headers and CSRF protection
 
 {{code:part-2/pz-01-middleware-ejs/src/middleware/security.js#1-94}}
 
-## Appendix N (mandatory) Listing of the file security.js, rate limit and log escaping
+## Appendix N (mandatory) Listing of security.js, rate limit and escaping
 
 {{code:part-2/pz-01-middleware-ejs/src/middleware/security.js#96-130}}
 
-## Appendix O (mandatory) Listing of the file logFile.js, log export with streams
+## Appendix O (mandatory) Listing of logFile.js, log export with streams
 
 {{code:part-2/pz-01-middleware-ejs/src/data/logFile.js}}

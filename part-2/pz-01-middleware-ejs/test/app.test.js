@@ -253,6 +253,14 @@ test('a 4xx error writes one line with no error object, a 5xx error still carrie
   assert.match(lines[0][0], /GET \/ 500/);
 });
 
+test('the error line of the console hides the sign-in flag like the request log does', () => {
+  const lines = [];
+  const res = { locals: {}, status: () => res, render: (view, locals, done) => done(null, 'page'), send: () => {}, set: () => {} };
+  serverError((line) => lines.push(line))(Object.assign(new Error('no token'), { status: 403 }), { method: 'POST', originalUrl: '/add?auth=1' }, res);
+  assert.match(lines[0], /POST \/add\?auth=\*\*\* 403/);
+  assert.doesNotMatch(lines[0], /auth=1/);
+});
+
 test('store hands out a unique, increasing creation time', () => {
   const store = createDiagramStore(() => Date.parse('2026-10-05T00:00:00.000Z'));
   const first = store.add({ title: 'a', notation: 'UML', description: 'd', code: '', revision: 0 });

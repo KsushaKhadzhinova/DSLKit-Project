@@ -28,7 +28,11 @@ const T = {
     report: 'ОТЧЁТ',
     on: (n) => `по практическому занятию № ${n}`,
     variant: (v) => `Вариант № ${v}`,
-    done: (group, student, caption = 'Выполнила') => `${caption}: студент гр. ${group || '________'} ${student || '______________________'}`,
+    // The noun follows the caption: «Выполнила» is a student (female), «Выполнил» a student (male).
+    done: (group, student, caption = 'Выполнила') => [
+      `${caption}: ${caption.endsWith('а') ? 'студентка' : 'студент'} гр. ${group || '________'}`,
+      student || '______________________',
+    ],
     checked: (reviewer, caption = 'Проверил(а)') => `${caption}: ${reviewer || '______________________'}`,
     inAppendix: 'к подразделу',
     inSection: 'к разделу',
@@ -57,7 +61,7 @@ const T = {
     report: 'REPORT',
     on: (n) => `on practical work No. ${n}`,
     variant: (v) => `Variant No. ${v}`,
-    done: (group, student, caption = 'Completed by') => `${caption}: student of group ${group || '________'} ${student || '______________________'}`,
+    done: (group, student, caption = 'Completed by') => [`${caption}: student of group ${group || '________'}`, student || '______________________'],
     checked: (reviewer, caption = 'Checked by') => `${caption}: ${reviewer || '______________________'}`,
     inAppendix: 'to subsection',
     inSection: 'to section',
@@ -199,7 +203,8 @@ export const markdownToDocx = (md, { lang = 'ru', variant, read, meta = {}, page
     const text = raw.replace(/\t/g, '  ').replaceAll(NBSP, ' ').trimEnd();
     const indent = /^ */.exec(text)[0].length;
     const wrapped = text.length > CODE_MAX ? `<w:ind w:left="${(indent + 2) * CODE_CHAR}" w:hanging="${(indent + 2) * CODE_CHAR}"/>` : '';
-    return para('Code', text ? run(text) : '', { ind: wrapped });
+    // A blank line of a listing is half a line high, so blank lines do not push a few lines onto an almost empty page.
+    return para('Code', text ? run(text) : '', { ind: text ? wrapped : '<w:spacing w:line="120" w:lineRule="exact"/>' });
   };
 
   let title = '';
@@ -283,7 +288,9 @@ export const markdownToDocx = (md, { lang = 'ru', variant, read, meta = {}, page
     center(t.on(n), { after: 240 }),
     center(`«${name}»`, { after: 480 }),
     center(t.variant(meta.titleVariant ?? variant), { after: 1200 }),
-    `<w:p><w:pPr><w:pStyle w:val="Plain"/><w:spacing w:after="240"/></w:pPr>${run(t.done(meta.group, meta.student, meta.doneCaption))}</w:p>`,
+    ...t
+      .done(meta.group, meta.student, meta.doneCaption)
+      .map((line, k, all) => `<w:p><w:pPr><w:pStyle w:val="Plain"/><w:spacing w:after="${k === all.length - 1 ? 240 : 0}"/></w:pPr>${run(line)}</w:p>`),
     `<w:p><w:pPr><w:pStyle w:val="Plain"/><w:spacing w:after="2400"/></w:pPr>${run(t.checked(meta.reviewer, meta.reviewerCaption))}</w:p>`,
     center(t.city),
   ].join('');
@@ -318,10 +325,10 @@ ${ps('TableCaption', 'Table caption', '<w:keepNext/><w:spacing w:before="240" w:
 ${ps('ListingCaption', 'Listing caption', '<w:keepNext/><w:spacing w:before="240" w:after="120" w:line="276" w:lineRule="auto"/>')}
 ${ps('Question', 'Question', '<w:keepNext/><w:spacing w:before="120" w:after="0" w:line="276" w:lineRule="auto"/><w:jc w:val="both"/>')}
 ${ps('TableText', 'Table text', '<w:spacing w:after="0" w:line="240" w:lineRule="auto"/>', '<w:sz w:val="24"/>')}
-${ps('Code', 'Code', '<w:spacing w:after="0" w:line="240" w:lineRule="auto"/>', '<w:rFonts w:ascii="Courier New" w:hAnsi="Courier New" w:cs="Courier New"/><w:sz w:val="20"/>')}
+${ps('Code', 'Code', '<w:spacing w:after="0" w:line="215" w:lineRule="exact"/>', '<w:rFonts w:ascii="Courier New" w:hAnsi="Courier New" w:cs="Courier New"/><w:sz w:val="20"/>')}
 ${ps('TOCHeading', 'TOC Heading', '<w:pageBreakBefore/><w:spacing w:after="360"/><w:jc w:val="center"/>', '<w:b/><w:sz w:val="28"/>')}
-${ps('TOC1', 'toc 1', `${tab}<w:spacing w:after="0" w:line="276" w:lineRule="auto"/><w:ind w:left="709" w:right="567" w:hanging="709"/>`)}
-${ps('TOC2', 'toc 2', `${tab}<w:spacing w:after="0" w:line="276" w:lineRule="auto"/><w:ind w:left="1134" w:right="567" w:hanging="709"/>`)}
+${ps('TOC1', 'toc 1', `${tab}<w:spacing w:after="0" w:line="240" w:lineRule="auto"/><w:ind w:left="709" w:right="567" w:hanging="709"/>`)}
+${ps('TOC2', 'toc 2', `${tab}<w:spacing w:after="0" w:line="240" w:lineRule="auto"/><w:ind w:left="1134" w:right="567" w:hanging="709"/>`)}
 ${ps('Footer', 'footer', '<w:jc w:val="right"/>', '<w:sz w:val="24"/>')}
 </w:styles>`;
 

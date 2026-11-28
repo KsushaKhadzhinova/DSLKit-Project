@@ -43,7 +43,7 @@ test('without a stored contents cache the DOCX is not current and has no page nu
   assert.equal(result.current, false);
   assert.equal(result.docx, null);
   assert.deepEqual(result.errors, []);
-  assert.match(unzip(result.base)['word/document.xml'].toString('utf8'), /студент гр\. 123 Иванов/);
+  assert.match(unzip(result.base)['word/document.xml'].toString('utf8'), /студентка гр\. 123<[^]*?>Иванов/);
 });
 
 test('a cache made for this document gives the numbers, a stale or broken one does not', () => {

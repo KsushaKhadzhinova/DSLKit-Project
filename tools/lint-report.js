@@ -9,7 +9,7 @@ const L = {
     figure: 'Рисунок',
     table: 'Таблица',
     ref: 'рисунк\\S*',
-    appendix: /^## Приложение [А-Я] – \S/,
+    appendix: /^## Приложение [А-Я] (– |\(обязательное\) )\S/,
     appendixAny: /^## Приложение/m,
     messages: {
       goal: 'Раздел «1 Цель работы» отсутствует или не пронумерован',
@@ -36,7 +36,7 @@ const L = {
     figure: 'Figure',
     table: 'Table',
     ref: 'figure',
-    appendix: /^## Appendix [A-Z] – \S/,
+    appendix: /^## Appendix [A-Z] (– |\(mandatory\) )\S/,
     appendixAny: /^## Appendix/m,
     messages: {
       goal: 'Section "1 Purpose of the Work" is missing',

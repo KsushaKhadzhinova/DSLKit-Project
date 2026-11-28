@@ -1,6 +1,7 @@
 import { entryFor } from '../errors.js';
 import { safeLogText } from './security.js';
 import { translate } from '../i18n.js';
+import { hideAuth } from './requestLogger.js';
 
 export const notFound = (req, res) => {
   const lang = res.locals.lang ?? 'en';
@@ -23,7 +24,7 @@ export const serverError =
     const status = err.status >= 400 && err.status < 600 ? err.status : 500;
     // An ordinary 4xx (a bad address, a missing token, too many requests) is one line with no stack:
     // it is expected traffic, not a server fault, and a flood of them must not flood the console.
-    const line = `[error] ${res.locals?.requestId ?? '-'} ${safeLogText(req.method)} ${safeLogText(req.originalUrl)} ${status}`;
+    const line = `[error] ${res.locals?.requestId ?? '-'} ${safeLogText(req.method)} ${safeLogText(hideAuth(req.originalUrl))} ${status}`;
     if (status >= 500) write(line, err);
     else write(line);
     if (res.headersSent) return res.end();

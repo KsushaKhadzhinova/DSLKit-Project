@@ -11,13 +11,10 @@ export const CATALOG = {
     heading: 'Request refused',
     what: 'The server understood the request and refused it. Nothing was changed.',
     why: [
-      'The form token is missing or old: a form opened a long time ago, in another tab, or a page of another site sent it.',
-      'The page needs a signed-in user and the request came without one.',
+      'The form token is missing or old: a form opened a long time ago, or in another tab.',
+      'The request came from a page of another site, so its origin does not match this site.',
     ],
-    fix: [
-      'Open the form again and send it once more.',
-      'Add ?auth=1 to the address of the page to work as the owner (this is the simulated sign-in of the practical).',
-    ],
+    fix: ['Open the form again from the page of this site and send it once more.', 'Do not send the form from a saved copy of the page or from another site.'],
   },
   404: {
     heading: 'Page not found',
@@ -140,13 +137,10 @@ export const CATALOG_RU = {
     heading: 'Запрос отклонён',
     what: 'Сервер понял запрос и отклонил его. Ничего не изменилось.',
     why: [
-      'Токен формы отсутствует или устарел: форма была открыта давно, в другой вкладке, или запрос пришёл с другого сайта.',
-      'Страница требует входа, а запрос пришёл без него.',
+      'Токен формы отсутствует или устарел: форма была открыта давно или в другой вкладке.',
+      'Запрос пришёл со страницы другого сайта, поэтому его источник не совпадает с этим сайтом.',
     ],
-    fix: [
-      'Откройте форму снова и отправьте её ещё раз.',
-      'Добавьте ?auth=1 к адресу страницы, чтобы работать как владелец (это имитация входа для практического занятия).',
-    ],
+    fix: ['Откройте форму снова на странице этого сайта и отправьте её ещё раз.', 'Не отправляйте форму из сохранённой копии страницы или с другого сайта.'],
   },
   404: {
     heading: 'Страница не найдена',

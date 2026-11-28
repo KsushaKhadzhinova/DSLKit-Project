@@ -87,6 +87,9 @@ test('code, images and appendices placement', () => {
   has(lintReport(ru.replace('## Заключение', '```\nx\n```\n## Заключение'), 'ru'), 'Код в основном');
   has(lintReport(`${ru}\n![Ещё](b.svg)\n\nРисунок 2 – Ещё\n`, 'ru'), 'Рисунок в приложении');
   has(lintReport(`${ru}\n## Приложение Б Название\n`, 'ru'), 'Название приложения');
+  // The practical form "(обязательное)" is accepted next to the dash form.
+  assert.ok(!lintReport(`${ru}\n## Приложение Б (обязательное) Название\n`, 'ru').some((e) => e.includes('Название приложения')));
+  assert.ok(!lintReport(`${en}\n## Appendix B (mandatory) Name\n`, 'en').some((e) => e.includes('Appendix title')));
 });
 
 test('figure and table captions', () => {
