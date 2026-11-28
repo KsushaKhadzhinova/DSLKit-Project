@@ -14,6 +14,8 @@ The purpose is to learn the middleware concept in Express.js and the EJS templat
 
 ## 3 Course of the Work
 
+The work was done in nine steps: the structure of the project is described, then the request log, the simulated authorization, the routes, the 500 page, the field checks and the protection are implemented, and finally the pages are styled and the automatic verification is run. The results of each step are given in subsections 3.1–3.9.
+
 ### 3.1 Project structure
 
 The project lives in `part-2/pz-01-middleware-ejs` and runs on Express 5 with the EJS template engine. The structure is shown in table 1.
@@ -265,7 +267,7 @@ The comments in the listings of all appendices are in English, as in the source 
 <%- include('partials/footer') %>
 ```
 
-## Appendix B (mandatory) Listing of app.js, middleware and shared functions
+## Appendix B (mandatory) Listing of app.js, assembly
 
 ```js
 import { randomBytes } from 'node:crypto';
@@ -418,7 +420,7 @@ export const requestLogger =
   };
 ```
 
-## Appendix D (mandatory) Listing of requestLog.js with the log table
+## Appendix D (mandatory) Listing of requestLog.js
 
 ```js
 import { DatabaseSync } from 'node:sqlite';
@@ -538,7 +540,7 @@ export const requireAuth = (req, res, next) => {
 };
 ```
 
-## Appendix F (mandatory) Listing of app.js, routes of the application
+## Appendix F (mandatory) Listing of app.js, routes
 
 ```js
   app.get('/item/:id', (req, res, next) => {
@@ -740,7 +742,7 @@ export const serverError =
   };
 ```
 
-## Appendix I (mandatory) Listing of diagrams.js, form field checks
+## Appendix I (mandatory) Listing of diagrams.js, checks
 
 ```js
 const CONTROL = /[\p{Cc}\u2028\u2029\u202a-\u202e\u2066-\u2069]/u;
@@ -785,7 +787,7 @@ export const validateDiagram = (input, limits, t = defaultT) => {
 };
 ```
 
-## Appendix J (mandatory) Listing of diagrams.js, initial records
+## Appendix J (mandatory) Listing of diagrams.js, data
 
 ```js
 
@@ -823,7 +825,7 @@ const seed = () => [
 const MAX_ITEMS = 5000;
 ```
 
-## Appendix K (mandatory) Listing of diagrams.js, table and record store
+## Appendix K (mandatory) Listing of diagrams.js, store
 
 ```js
 
@@ -947,7 +949,7 @@ export const createDiagramStore = (now = Date.now, file = ':memory:') => {
 }
 ```
 
-## Appendix M (mandatory) Listing of security.js, headers and CSRF protection
+## Appendix M (mandatory) Listing of security.js, headers
 
 ```js
 import { randomBytes, timingSafeEqual, createHmac } from 'node:crypto';
@@ -1046,7 +1048,7 @@ export const csrf = (req, res, next) => {
 };
 ```
 
-## Appendix N (mandatory) Listing of security.js, rate limit and escaping
+## Appendix N (mandatory) Listing of security.js, limits
 
 ```js
 const tooMany = (retryAfter, t) => Object.assign(new Error('Too many requests'), { status: 429, retryAfter, publicMessage: t('error.tooManyRequests', { retryAfter }) });
@@ -1086,7 +1088,7 @@ export const safeLogText = (text, max = 500) => {
 };
 ```
 
-## Appendix O (mandatory) Listing of logFile.js, log export with streams
+## Appendix O (mandatory) Listing of logFile.js
 
 ```js
 import { createReadStream, createWriteStream } from 'node:fs';

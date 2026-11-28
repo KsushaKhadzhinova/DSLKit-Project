@@ -14,6 +14,8 @@ The purpose is to learn the middleware concept in Express.js and the EJS templat
 
 ## 3 Course of the Work
 
+The work was done in nine steps: the structure of the project is described, then the request log, the simulated authorization, the routes, the 500 page, the field checks and the protection are implemented, and finally the pages are styled and the automatic verification is run. The results of each step are given in subsections 3.1–3.9.
+
 ### 3.1 Project structure
 
 The project lives in `part-2/pz-01-middleware-ejs` and runs on Express 5 with the EJS template engine. The structure is shown in table 1.
@@ -235,7 +237,7 @@ The comments in the listings of all appendices are in English, as in the source 
 
 {{code:part-2/pz-01-middleware-ejs/views/index.ejs}}
 
-## Appendix B (mandatory) Listing of app.js, middleware and shared functions
+## Appendix B (mandatory) Listing of app.js, assembly
 
 {{code:part-2/pz-01-middleware-ejs/src/app.js#1-97}}
 
@@ -243,7 +245,7 @@ The comments in the listings of all appendices are in English, as in the source 
 
 {{code:part-2/pz-01-middleware-ejs/src/middleware/requestLogger.js#11-56}}
 
-## Appendix D (mandatory) Listing of requestLog.js with the log table
+## Appendix D (mandatory) Listing of requestLog.js
 
 {{code:part-2/pz-01-middleware-ejs/src/data/requestLog.js}}
 
@@ -251,7 +253,7 @@ The comments in the listings of all appendices are in English, as in the source 
 
 {{code:part-2/pz-01-middleware-ejs/src/middleware/fakeAuth.js}}
 
-## Appendix F (mandatory) Listing of app.js, routes of the application
+## Appendix F (mandatory) Listing of app.js, routes
 
 {{code:part-2/pz-01-middleware-ejs/src/app.js#99-197}}
 
@@ -263,15 +265,15 @@ The comments in the listings of all appendices are in English, as in the source 
 
 {{code:part-2/pz-01-middleware-ejs/src/middleware/errorHandlers.js}}
 
-## Appendix I (mandatory) Listing of diagrams.js, form field checks
+## Appendix I (mandatory) Listing of diagrams.js, checks
 
 {{code:part-2/pz-01-middleware-ejs/src/data/diagrams.js#142-181}}
 
-## Appendix J (mandatory) Listing of diagrams.js, initial records
+## Appendix J (mandatory) Listing of diagrams.js, data
 
 {{code:part-2/pz-01-middleware-ejs/src/data/diagrams.js#8-40}}
 
-## Appendix K (mandatory) Listing of diagrams.js, table and record store
+## Appendix K (mandatory) Listing of diagrams.js, store
 
 {{code:part-2/pz-01-middleware-ejs/src/data/diagrams.js#41-140}}
 
@@ -279,14 +281,14 @@ The comments in the listings of all appendices are in English, as in the source 
 
 {{code:part-2/pz-01-middleware-ejs/limits.json}}
 
-## Appendix M (mandatory) Listing of security.js, headers and CSRF protection
+## Appendix M (mandatory) Listing of security.js, headers
 
 {{code:part-2/pz-01-middleware-ejs/src/middleware/security.js#1-94}}
 
-## Appendix N (mandatory) Listing of security.js, rate limit and escaping
+## Appendix N (mandatory) Listing of security.js, limits
 
 {{code:part-2/pz-01-middleware-ejs/src/middleware/security.js#96-130}}
 
-## Appendix O (mandatory) Listing of logFile.js, log export with streams
+## Appendix O (mandatory) Listing of logFile.js
 
 {{code:part-2/pz-01-middleware-ejs/src/data/logFile.js}}
