@@ -1,5 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { core } from './helpers.js';
 import { createApp } from '../src/app.js';
 import { createStores } from '../src/store.js';
 
@@ -65,7 +66,7 @@ withApi('changing or deleting an already deleted record answers 404, deleting tw
   ]) {
     const res = await call(method, path, body);
     assert.equal(res.status, 404, `${method} ${path}`);
-    assert.deepEqual(res.json, { error: { code: 'not_found', message: 'Diagram not found' } });
+    assert.deepEqual(core(res.json), { error: { code: 'not_found', message: 'Diagram not found' } });
   }
 });
 
@@ -129,7 +130,7 @@ withApi('a conditional update with If-Match refuses stale data with 412', async 
   assert.notEqual(first.headers.get('etag'), etag);
   const stale = await call('PATCH', '/projects/1', { name: 'Second' }, { 'if-match': etag });
   assert.equal(stale.status, 412);
-  assert.deepEqual(stale.json, { error: { code: 'precondition_failed', message: 'The record changed since you read it, read it again' } });
+  assert.deepEqual(core(stale.json), { error: { code: 'precondition_failed', message: 'The record changed since you read it, read it again' } });
   assert.equal((await call('PUT', '/projects/1', { name: 'Third', ownerId: 1 }, { 'if-match': etag })).status, 412);
   assert.equal((await call('DELETE', '/diagrams/1', undefined, { 'if-match': '"nope"' })).status, 412);
   assert.equal((await call('GET', '/projects/1')).json.name, 'First');

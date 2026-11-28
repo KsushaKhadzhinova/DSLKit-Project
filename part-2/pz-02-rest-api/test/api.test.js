@@ -1,5 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { core } from './helpers.js';
 import { createApp, schemas } from '../src/app.js';
 import { listItems } from '../src/resource.js';
 import { createStores } from '../src/store.js';
@@ -63,7 +64,7 @@ withApi('GET one item, unknown and malformed ids', async ({ call }) => {
   assert.equal((await call('GET', '/users/1')).json.name, 'Ada Lovelace');
   const missing = await call('GET', '/users/99');
   assert.equal(missing.status, 404);
-  assert.deepEqual(missing.json, { error: { code: 'not_found', message: 'User not found' } });
+  assert.deepEqual(core(missing.json), { error: { code: 'not_found', message: 'User not found' } });
   assert.equal((await call('GET', '/users/abc')).json.error.code, 'invalid_id');
   assert.equal((await call('GET', '/users/0')).status, 400);
 });
@@ -171,7 +172,7 @@ withApi('unexpected errors become a 500 JSON response and are logged', async ({ 
     const res = await call('GET', '/diagrams/1');
     assert.equal(res.status, 500);
     assert.equal(res.json.error.code, 'internal_error');
-    assert.equal(errors[0][0], '[error] "GET" "/api/diagrams/1"');
+    assert.match(errors[0][0], /^\[error\] request [0-9a-f-]{36} "GET" "\/api\/diagrams\/1"$/);
   } finally {
     JSON.stringify = original;
   }

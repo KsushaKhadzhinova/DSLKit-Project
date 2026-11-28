@@ -14,13 +14,16 @@ export const createJournal = (file = ':memory:') => {
     method TEXT NOT NULL,
     path TEXT NOT NULL,
     ip TEXT NOT NULL,
-    status INTEGER
+    status INTEGER,
+    request_id TEXT
   )`);
-  const insert = db.prepare('INSERT INTO request_log (created_at, method, path, ip) VALUES (?, ?, ?, ?)');
+  // A journal file made before the Request ID existed gets the column added instead of failing on every insert.
+  if (!db.prepare('PRAGMA table_info(request_log)').all().some((column) => column.name === 'request_id')) db.exec('ALTER TABLE request_log ADD COLUMN request_id TEXT');
+  const insert = db.prepare('INSERT INTO request_log (created_at, method, path, ip, request_id) VALUES (?, ?, ?, ?, ?)');
   const finish = db.prepare('UPDATE request_log SET status = ? WHERE id = ?');
-  const recent = db.prepare('SELECT id, created_at, method, path, ip, status FROM request_log ORDER BY id DESC LIMIT ?');
+  const recent = db.prepare('SELECT id, created_at, method, path, ip, status, request_id FROM request_log ORDER BY id DESC LIMIT ?');
   return {
-    begin: ({ method, path, ip, at = new Date().toISOString() }) => Number(insert.run(at, method, path, ip).lastInsertRowid),
+    begin: ({ method, path, ip, requestId = null, at = new Date().toISOString() }) => Number(insert.run(at, method, path, ip, requestId).lastInsertRowid),
     finish: (id, status) => finish.run(status, id),
     recent: (count = 20) => recent.all(count),
     close: () => db.close(),
@@ -31,9 +34,9 @@ export const createJournal = (file = ':memory:') => {
 export const journaling = (journal, writeError = console.error) => (req, res, next) => {
   let id;
   try {
-    id = journal.begin({ method: req.method, path: req.originalUrl.slice(0, 300), ip: req.ip ?? 'unknown' });
+    id = journal.begin({ method: req.method, path: req.originalUrl.slice(0, 300), ip: req.ip ?? 'unknown', requestId: res.locals.requestId });
   } catch (err) {
-    writeError(`[journal] cannot write ${logSafe(req.method)} ${logSafe(req.originalUrl)}`, err);
+    writeError(`[journal] cannot write ${logSafe(req.method)} ${logSafe(req.originalUrl)} request ${res.locals.requestId}`, err);
     return next(new ApiError(500, 'journal_unavailable', 'The request journal is unavailable, the request was not carried out'));
   }
   // The answer is already gone when this runs, so a failure here can only be reported, not turned into a 500.

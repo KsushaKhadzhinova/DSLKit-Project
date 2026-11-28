@@ -1,5 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { core } from './helpers.js';
 import { EventEmitter } from 'node:events';
 import { createApp } from '../src/app.js';
 import { createJournal, journaling } from '../src/journal.js';
@@ -70,12 +71,12 @@ test('a failed journal write answers 500 and the action is not carried out', asy
     const res = await fetch(`${base}/api/users`, { method: 'POST', headers: json, body: JSON.stringify({ name: 'Grace', email: 'grace@example.com' }) });
     assert.equal(res.status, 500);
     const text = await res.text();
-    assert.deepEqual(JSON.parse(text), { error: { code: 'journal_unavailable', message: 'The request journal is unavailable, the request was not carried out' } });
+    assert.deepEqual(core(JSON.parse(text)), { error: { code: 'journal_unavailable', message: 'The request journal is unavailable, the request was not carried out' } });
     assert.ok(!text.includes('disk is full'));
     assert.ok(!text.includes(' at '));
     assert.equal(stores.users.all().length, before);
     assert.equal(errors.length, 1);
-    assert.match(errors[0][0], /^\[journal\] cannot write "POST" "\/api\/users"$/);
+    assert.match(errors[0][0], /^\[journal\] cannot write "POST" "\/api\/users" request [0-9a-f-]{36}$/);
     assert.equal(errors[0][1].message, 'disk is full');
     // reads, unknown routes and bad requests are refused too: nothing runs without a journal entry
     for (const path of ['/api/users', '/api/nothing', '/api/users/abc']) assert.equal((await fetch(base + path)).status, 500, path);
@@ -115,7 +116,7 @@ test('a failure to record the final status is reported but the answer is not cha
 
 test('a very long path is cut before it is stored', () => {
   const journal = createJournal();
-  const res = new EventEmitter();
+  const res = Object.assign(new EventEmitter(), { locals: {} });
   journaling(journal)({ method: 'GET', originalUrl: `/${'a'.repeat(1000)}`, ip: '1.2.3.4' }, res, () => {});
   assert.equal(journal.recent(1)[0].path.length, 300);
   journal.close();
@@ -123,7 +124,7 @@ test('a very long path is cut before it is stored', () => {
 
 test('a request without an address is journaled as unknown', () => {
   const journal = createJournal();
-  const res = Object.assign(new EventEmitter(), { statusCode: 204 });
+  const res = Object.assign(new EventEmitter(), { statusCode: 204, locals: {} });
   journaling(journal)({ method: 'GET', originalUrl: '/x' }, res, () => {});
   res.emit('finish');
   assert.deepEqual(

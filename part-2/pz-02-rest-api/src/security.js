@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import { ApiError } from './errors.js';
 
 // Headers for a JSON-only API, set by hand without extra packages. The API sends no HTML, so the policy forbids everything.
@@ -67,3 +68,11 @@ export const rateLimit = ({ windowMs, max, now = Date.now, maxClients = 50000 })
 
 // Request data in a log line could carry line breaks and forge extra lines, so it is written as a JSON string (escaped and quoted).
 export const logSafe = (text) => JSON.stringify(String(text)).slice(0, 300);
+
+// Every request gets its own id, always generated here (a client-supplied value could forge or collide with log
+// lines). It travels in the X-Request-Id header, in the journal row and in every error answer.
+export const requestId = (req, res, next) => {
+  res.locals.requestId = randomUUID();
+  res.set('X-Request-Id', res.locals.requestId);
+  next();
+};

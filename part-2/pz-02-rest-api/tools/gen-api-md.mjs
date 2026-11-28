@@ -88,6 +88,7 @@ export const RU = {
   'Invalid data': 'Неверные данные',
   'Not found': 'Не найдено',
   'The client does not accept application/json': 'Клиент не принимает application/json',
+  'The record changed since it was read (If-Match)': 'Запись изменилась после того, как её прочитали (If-Match)',
   Conflict: 'Конфликт',
   'Body too large': 'Тело слишком большое',
   'The body is not JSON': 'Тело не в формате JSON',

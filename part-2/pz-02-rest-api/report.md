@@ -198,17 +198,18 @@
 ## Приложение А (обязательное) Листинг файла app.js
 
 ```js
-import { readFileSync } from 'node:fs';
 import express from 'express';
 import { ApiError, errorBody, notFound } from './errors.js';
 import { createResourceRouter, listItems, methodsOnly, parseId } from './resource.js';
-import { logSafe, rateLimit, securityHeaders } from './security.js';
+import { logSafe, rateLimit, requestId, securityHeaders } from './security.js';
+import { PAGE_CSP, renderErrorPage, wantsHtml } from './error-page.js';
 import { buildOpenApi } from './openapi.js';
+import { createJournal, journaling } from './journal.js';
+import { LIMITS } from './limits.js';
 import { createStores } from './store.js';
 import { normalizeEmail } from './validation.js';
 
-// All sizes live in limits.json, not in the code.
-export const LIMITS = JSON.parse(readFileSync(new URL('../limits.json', import.meta.url), 'utf8'));
+export { LIMITS };
 
 export const NOTATIONS = ['UML', 'BPMN', 'ERD', 'DFD', 'IDEF0', 'Petri'];
 
@@ -247,8 +248,13 @@ const CLIENT_ERRORS = {
   415: ['unsupported_media_type', 'The request encoding or charset is not supported'],
 };
 
-const missingReference = (field, collection, value) =>
-  value !== undefined && !collection.find(value) ? [{ field, message: `${field} refers to a record that does not exist` }] : [];
+// A reference to a record that is gone (deleted a moment ago, or never existed) is a conflict with the current state
+// of the data, not a malformed body: 409, one error format, nothing is stored.
+const missingReference = (field, collection, value) => {
+  if (value === undefined || collection.find(value)) return [];
+  const message = `${field} refers to a record that does not exist`;
+  throw new ApiError(409, 'parent_missing', message, [{ field, message }]);
+};
 
 const conflict = (message) => new ApiError(409, 'conflict', message);
 
@@ -261,15 +267,19 @@ export const createApp = ({
   writeError = console.error,
   limit = { windowMs: LIMITS.rateWindowMs, max: LIMITS.rateMax, maxClients: LIMITS.rateMaxClients },
   now = Date.now,
+  journal = createJournal(),
 } = {}) => {
   const { users, projects, diagrams } = stores;
   const app = express();
   app.disable('x-powered-by');
+  app.use(requestId);
   app.use(securityHeaders);
   // Liveness probe, before the rate limit so monitoring never uses up the quota.
   app.get('/health', (req, res) => res.json({ status: 'ok' }));
   // Refused before the body is read, so a flood costs little.
   app.use(rateLimit({ ...limit, now }));
+  // Every request is written to the journal table before it runs; a failed write answers 500 and nothing else happens.
+  app.use(journaling(journal, writeError));
   // This API answers only JSON; a client that explicitly asks for something else gets 406 instead of JSON it
   // did not ask for. A request with no Accept header, or "*/*", is always welcome.
   app.use((req, res, next) => {
@@ -394,20 +404,31 @@ export const createApp = ({
   app.use('/api', api);
   app.use((req, res, next) => next(notFound('Route')));
 
-  // Four parameters: the single place where every error becomes JSON.
-  app.use((err, req, res, _next) => {
-    if (err instanceof ApiError) return res.status(err.status).json(errorBody(err));
-    if (err.type === 'entity.parse.failed') return res.status(400).json(errorBody(new ApiError(400, 'invalid_json', 'Request body is not valid JSON')));
-    if (err.type === 'entity.too.large') return res.status(413).json(errorBody(new ApiError(413, 'payload_too_large', 'Request body is too large')));
+  // Turns any thrown value into the ApiError that describes it. Anything unknown is a server failure (500).
+  const toApiError = (err, req, res) => {
+    if (err instanceof ApiError) return err;
+    if (err.type === 'entity.parse.failed') return new ApiError(400, 'invalid_json', 'Request body is not valid JSON');
+    if (err.type === 'entity.too.large') return new ApiError(413, 'payload_too_large', 'Request body is too large');
     // Errors of the framework and of the body parser that blame the client keep their 4xx status: a broken
     // percent escape in the URL is 400 and an unsupported Content-Encoding is 415, neither is a server failure.
     const status = err.status ?? err.statusCode;
     if (status >= 400 && status < 500) {
       const known = CLIENT_ERRORS[status] ?? ['bad_request', 'The request cannot be processed'];
-      return res.status(status).json(errorBody(new ApiError(status, known[0], known[1])));
+      return new ApiError(status, known[0], known[1]);
     }
-    writeError(`[error] ${logSafe(req.method)} ${logSafe(req.originalUrl)}`, err);
-    return res.status(500).json(errorBody(new ApiError(500, 'internal_error', 'Internal server error')));
+    writeError(`[error] request ${res.locals.requestId} ${logSafe(req.method)} ${logSafe(req.originalUrl)}`, err);
+    return new ApiError(500, 'internal_error', 'Internal server error');
+  };
+
+  // Four parameters: the single place where every error is answered, as JSON for a client and as a described page
+  // for a browser, always with the Request ID.
+  app.use((err, req, res, _next) => {
+    const apiError = toApiError(err, req, res);
+    if (wantsHtml(req)) {
+      const page = renderErrorPage({ status: apiError.status, code: apiError.code, message: apiError.message, details: apiError.details, requestId: res.locals.requestId });
+      return res.status(apiError.status).set('Content-Security-Policy', PAGE_CSP).type('html').send(page);
+    }
+    return res.status(apiError.status).json(errorBody(apiError, res.locals.requestId));
   });
   return app;
 };
@@ -416,8 +437,10 @@ export const createApp = ({
 ## Приложение Б (обязательное) Листинг файла resource.js
 
 ```js
+import { createHash } from 'node:crypto';
 import { Router } from 'express';
 import { ApiError, notFound, validationFailed } from './errors.js';
+import { LIMITS } from './limits.js';
 import { applyDefaults, trimStrings, validate } from './validation.js';
 
 // Answers 405 with an Allow header for methods a known path does not support; OPTIONS lists them.
@@ -428,6 +451,18 @@ export const methodsOnly = (...methods) => {
     if (req.method === 'OPTIONS') return res.status(204).end();
     return next(new ApiError(405, 'method_not_allowed', `${req.method} is not allowed here, use: ${allow}`));
   };
+};
+
+// A weak tag computed from the record itself, so it changes exactly when the record changes and needs no extra field.
+export const etagOf = (item) => `W/"${createHash('sha1').update(JSON.stringify(item)).digest('hex').slice(0, 16)}"`;
+
+// Optional conditional update: with If-Match the write only happens if the record is still the one the client read;
+// otherwise 412, so a stale form cannot silently overwrite a newer change. Without the header the write is unconditional.
+const requireFresh = (req, item) => {
+  const header = req.headers['if-match'];
+  if (header === undefined || header.trim() === '*') return;
+  const tags = header.split(',').map((tag) => tag.trim().replace(/^W\//, ''));
+  if (!tags.includes(etagOf(item).replace(/^W\//, ''))) throw new ApiError(412, 'precondition_failed', 'The record changed since you read it, read it again');
 };
 
 const DIGITS = /^[1-9]\d{0,14}$/;
@@ -463,7 +498,7 @@ export const listItems = (items, schema, query, hidden = []) => {
     if (!known.has(key)) throw new ApiError(400, 'invalid_query', `${key} is not a known query parameter`);
   }
   const page = parsePositive(query.page, 'page', 1);
-  const limit = parsePositive(query.limit, 'limit', 20, 100);
+  const limit = parsePositive(query.limit, 'limit', LIMITS.defaultPageSize, LIMITS.maxPageSize);
   let result = items.filter((item) =>
     Object.keys(schema).every((field) => {
       if (hidden.includes(field) || query[field] === undefined) return true;
@@ -525,21 +560,29 @@ export const createResourceRouter = ({ label, collection, schema, hooks = {}, hi
   };
 
   router.get('/', (req, res) => res.json(listItems(collection.all(), schema, req.query, hiddenInList)));
-  router.get('/:id', (req, res) => res.json(load(req)));
+  router.get('/:id', (req, res) => {
+    const item = load(req);
+    res.set('ETag', etagOf(item)).json(item);
+  });
   router.post('/', (req, res) => {
     const item = collection.create(body(req, false));
     res.status(201).location(`${req.baseUrl}/${item.id}`).json(item);
   });
   router.put('/:id', (req, res) => {
     const item = load(req);
-    res.json(collection.replace(item, body(req, false, item)));
+    requireFresh(req, item);
+    const saved = collection.replace(item, body(req, false, item));
+    res.set('ETag', etagOf(saved)).json(saved);
   });
   router.patch('/:id', (req, res) => {
     const item = load(req);
-    res.json(collection.update(item, body(req, true, item)));
+    requireFresh(req, item);
+    const saved = collection.update(item, body(req, true, item));
+    res.set('ETag', etagOf(saved)).json(saved);
   });
   router.delete('/:id', (req, res) => {
     const item = load(req);
+    requireFresh(req, item);
     hooks.beforeRemove?.(item);
     collection.remove(item);
     res.status(204).end();

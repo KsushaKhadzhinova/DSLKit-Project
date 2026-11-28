@@ -102,6 +102,7 @@ Replace the whole record; a field left out of the body keeps its current value i
 | 404 | Not found | Error |
 | 406 | The client does not accept application/json | Error |
 | 409 | Conflict | Error |
+| 412 | The record changed since it was read (If-Match) | Error |
 | 415 | The body is not JSON | Error |
 | 429 | Too many requests | Error |
 | other statuses | An unexpected error | Error |
@@ -133,6 +134,7 @@ Change only the sent fields
 | 404 | Not found | Error |
 | 406 | The client does not accept application/json | Error |
 | 409 | Conflict | Error |
+| 412 | The record changed since it was read (If-Match) | Error |
 | 415 | The body is not JSON | Error |
 | 429 | Too many requests | Error |
 | other statuses | An unexpected error | Error |
@@ -156,6 +158,7 @@ Delete
 | 404 | Not found | Error |
 | 406 | The client does not accept application/json | Error |
 | 409 | Conflict | Error |
+| 412 | The record changed since it was read (If-Match) | Error |
 | 429 | Too many requests | Error |
 | other statuses | An unexpected error | Error |
 
@@ -204,6 +207,7 @@ Create a record of projects
 | 201 | Created | Project |
 | 400 | Invalid data | Error |
 | 406 | The client does not accept application/json | Error |
+| 409 | Conflict | Error |
 | 413 | Body too large | Error |
 | 415 | The body is not JSON | Error |
 | 429 | Too many requests | Error |
@@ -256,6 +260,8 @@ Replace the whole record; a field left out of the body keeps its current value i
 | 400 | Invalid data | Error |
 | 404 | Not found | Error |
 | 406 | The client does not accept application/json | Error |
+| 409 | Conflict | Error |
+| 412 | The record changed since it was read (If-Match) | Error |
 | 415 | The body is not JSON | Error |
 | 429 | Too many requests | Error |
 | other statuses | An unexpected error | Error |
@@ -286,6 +292,8 @@ Change only the sent fields
 | 400 | Invalid data | Error |
 | 404 | Not found | Error |
 | 406 | The client does not accept application/json | Error |
+| 409 | Conflict | Error |
+| 412 | The record changed since it was read (If-Match) | Error |
 | 415 | The body is not JSON | Error |
 | 429 | Too many requests | Error |
 | other statuses | An unexpected error | Error |
@@ -309,6 +317,7 @@ Delete
 | 404 | Not found | Error |
 | 406 | The client does not accept application/json | Error |
 | 409 | Conflict | Error |
+| 412 | The record changed since it was read (If-Match) | Error |
 | 429 | Too many requests | Error |
 | other statuses | An unexpected error | Error |
 
@@ -361,6 +370,7 @@ Create a record of diagrams
 | 201 | Created | Diagram |
 | 400 | Invalid data | Error |
 | 406 | The client does not accept application/json | Error |
+| 409 | Conflict | Error |
 | 413 | Body too large | Error |
 | 415 | The body is not JSON | Error |
 | 429 | Too many requests | Error |
@@ -415,6 +425,8 @@ Replace the whole record; a field left out of the body keeps its current value i
 | 400 | Invalid data | Error |
 | 404 | Not found | Error |
 | 406 | The client does not accept application/json | Error |
+| 409 | Conflict | Error |
+| 412 | The record changed since it was read (If-Match) | Error |
 | 415 | The body is not JSON | Error |
 | 429 | Too many requests | Error |
 | other statuses | An unexpected error | Error |
@@ -447,6 +459,8 @@ Change only the sent fields
 | 400 | Invalid data | Error |
 | 404 | Not found | Error |
 | 406 | The client does not accept application/json | Error |
+| 409 | Conflict | Error |
+| 412 | The record changed since it was read (If-Match) | Error |
 | 415 | The body is not JSON | Error |
 | 429 | Too many requests | Error |
 | other statuses | An unexpected error | Error |
@@ -469,6 +483,7 @@ Delete
 | 400 | Invalid data | Error |
 | 404 | Not found | Error |
 | 406 | The client does not accept application/json | Error |
+| 412 | The record changed since it was read (If-Match) | Error |
 | 429 | Too many requests | Error |
 | other statuses | An unexpected error | Error |
 
