@@ -2,7 +2,7 @@
 
 ## 1 Purpose of the Work
 
-The purpose of the work is to learn the principles of designing a RESTful API using the DSLKit project, a diagram-as-code web editor whose theme matches the SaaS direction and the future course project. To reach it, three linked resources are designed, CRUD and extra operations are implemented for them, and input validation, one error format and an API description are added. Variant 100 (number 26 in the group list) is even, so the request journal is kept in a database table, not in a file, and a request is written to it before the action is carried out. The data of the resources lies in in-memory arrays, as the task requires. The source code is in the repository {{meta:repository}}, branch {{meta:branch}}.
+The purpose of the work is the study of the principles of designing a RESTful API using the DSLKit project, a diagram-as-code web editor whose theme matches the SaaS direction and the future course project. To reach it, three linked resources are designed, CRUD and extra operations are implemented for them, and input validation, one error format and an API description are added. Variant 100 (number 26 in the group list) is even, so the request journal is kept in a database table, not in a file, and a request is recorded in it before the action. The data of the resources is kept in in-memory arrays, as the task requires. The source code is placed in the repository {{meta:repository}}, branch {{meta:branch}}.
 
 ## 2 Brief Theory
 
@@ -12,7 +12,7 @@ The purpose of the work is to learn the principles of designing a RESTful API us
 
 **Data validation.** The server does not trust the client: required fields, types, length and allowed values are checked before writing, and an error answer has one format.
 
-**Request journal.** For an even variant the journal is kept in a database table. A record of the request is written before the action, so if the journal is unavailable the action is not carried out and the client gets the answer 500.
+**Request journal.** For an even variant the journal is kept in a database table. A record of the request is written before the action, so with an unavailable journal the action is not carried out and the answer 500 is returned to the client.
 
 ## 3 Course of the Work
 
@@ -28,7 +28,7 @@ Table 1 – API resources and fields
 | `projects` | `name`, `description`, `ownerId` |
 | `diagrams` | `title`, `notation`, `code`, `projectId`, `status` (`draft`, `published`) |
 
-Every record has the service fields `id` and `createdAt`, which a client cannot change. The data of the resources lies in in-memory arrays, as the task requires, so after a server restart the initial records return: two users, two projects and three diagrams. The request journal is kept in the table `request_log` of an SQLite database. The files of the project and their purpose are listed in table 2.
+Every record has the service fields `id` and `createdAt`, which a client cannot change. The data of the resources is kept in in-memory arrays, as the task requires, so after a server restart the initial records are restored: two users, two projects and three diagrams. The request journal is kept in the table `request_log` of an SQLite database. The files of the project and their purpose are listed in table 2.
 
 Table 2 – Files of the project of practical session No. 2
 
@@ -46,7 +46,7 @@ Table 2 – Files of the project of practical session No. 2
 
 ### 3.2 Endpoints
 
-For every resource six standard operations are implemented, and extra operations for diagrams and projects. All operations with the method, address, description, request body example and expected answer are given in table 3. The address `/api/users` stands for an example, the same operations exist for `projects` and `diagrams`. The application assembly is shown in appendix A, the routes and the error handler in appendix B, the common logic of resources in appendix C and the field validation in appendix D.
+For every resource six standard operations are implemented, and extra operations for diagrams and projects. All operations with the method, address, description, request body example and expected answer are given in table 3. The address `/api/users` is given as an example, the same operations are implemented for `projects` and `diagrams`. The application assembly is shown in appendix A, the routes and the error handler in appendix B, the common logic of resources in appendix C and the field validation in appendix D.
 
 Table 3 – API endpoints with request and response examples
 
@@ -71,7 +71,7 @@ The field `createdAt` is unique for every record: the clock is strictly increasi
 
 ### 3.3 Input validation and errors
 
-The schema of every resource sets the type, whether the field is required, the maximum length, the list of allowed values and the default value. The validation returns all problems found at once, rejects unknown fields and whitespace-only values, and checks that `ownerId` and `projectId` point to existing records. The `PATCH` method validates only the fields that come in the request. All limits are kept in the file `limits.json`. All errors, including invalid JSON, an unknown address and an unexpected failure, are returned in one format with the fields `code`, `message`, `title`, `description` and `requestId`. The error codes are collected in table 4.
+The schema of every resource sets the type, whether the field is required, the maximum length, the list of allowed values and the default value. The validation is implemented so that all problems found are returned at once, unknown fields and whitespace-only values are rejected, and the references `ownerId` and `projectId` are matched with existing records. For `PATCH` only the fields present in the request are validated. All limits are kept in the file `limits.json`. All errors, including invalid JSON, an unknown address and an unexpected failure, are returned in one format with the fields `code`, `message`, `title`, `description` and `requestId`. The error codes are collected in table 4.
 
 Table 4 – API error codes
 
@@ -87,11 +87,11 @@ Table 4 – API error codes
 | 429 | More requests than allowed arrive within a minute |
 | 500 | A server failure, including an unavailable request journal |
 
-Deleting a user with projects or a project with diagrams is rejected with code 409 instead of silently deleting the linked records. If a parent is deleted at the moment a child record is added to it, the outcome is always one of three: 201, 404 or 409. A 5xx answer and a dangling record without a parent never happen. One test creates a project while its owner is deleted, in both orders, and another sends twenty parallel requests of every kind and checks that there is no 5xx answer and the ids stay unique. A conditional request with the `If-Match` header protects against a lost update: if the record has already been changed, the answer is 412.
+Deleting a user with projects or a project with diagrams is rejected with code 409 instead of silently deleting the linked records. If a parent is deleted at the moment a child record is added to it, the outcome is always one of three: 201, 404 or 409. A 5xx answer and a dangling record without a parent never happen. One test checks the creation of a project while its owner is deleted, in both orders, and another one checks twenty parallel requests of every kind: there is no 5xx answer and the ids stay unique. A conditional request with the `If-Match` header protects against a lost update: if the record has already been changed, the answer is 412.
 
 ### 3.4 Roles and the answer 403
 
-There is no sign-in in the work, and the identity is set by headers. The header `X-User-Id` holds the number of a user, and `X-Role` is `user` by default or `admin`. A request without `X-User-Id` is anonymous and not restricted, as before the roles. The rules for a request with `X-User-Id` are collected in table 5.
+Sign-in is not implemented in the work, the identity is set by headers. The header `X-User-Id` holds the number of a user, and `X-Role` is `user` by default or `admin`. A request without `X-User-Id` is anonymous and not restricted, as before the roles. The rules for a request with `X-User-Id` are collected in table 5.
 
 Table 5 – Rights of the roles
 
@@ -104,15 +104,15 @@ Table 5 – Rights of the roles
 | Delete a project | 403 | yes |
 | Change, delete, publish, copy a diagram and create one | only in one's own project, otherwise 403 | yes |
 
-A wrong header value gives 400, and the number of a non-existent user in `X-User-Id` gives 403. First it is checked that the record exists (404), then the rights (403), then the request body. The headers are trusted: this is a teaching simplification, and a real system takes the identity from a verified session or token. The listing is given in appendix E.
+A wrong header value gives 400, and the number of a non-existent user in `X-User-Id` gives 403. First it is checked that the record exists (404), then the rights (403), then the request body. The headers are trusted: this is a teaching simplification, in a real system the identity is taken from a verified session or token. The listing is given in appendix E.
 
 ### 3.5 Request journal and the order of actions
 
-The journal is kept in the table `request_log` of an SQLite database with the columns time, method, path, client address, status code and request number `request_id`. The order for every request is as follows. First the server assigns a number to the request and returns it in the header `X-Request-Id`. Then, before the action is carried out, a row with the time, method, path, client address and request number is inserted into the table. If the insert fails, the action is not carried out and the client gets the answer 500 with the code `journal_unavailable`: working without a journal is forbidden. If the insert succeeds, the action is carried out and the final status code is added to the row. Failed attempts with codes 400, 403, 404, 409 and 412 stay in the journal too.
+The journal is kept in the table `request_log` of an SQLite database with the columns time, method, path, client address, status code and request number `request_id`. The order for every request is as follows. First a number is assigned to the request and returned in the header `X-Request-Id`. Then, before the action, a row with the time, method, path, client address and request number is inserted into the table. After a failed insert the action is not carried out and the answer 500 with the code `journal_unavailable` is returned: work without a journal is forbidden. After a successful insert the action is carried out and the final status code is added to the row. Failed attempts with codes 400, 403, 404, 409 and 412 stay in the journal too.
 
-Two groups of requests do not reach the journal: the health check `GET /health` and the requests rejected by the rate limit with code 429. The health check goes before the journal so that monitoring does not fill the table or use up the limit. Excess requests are rejected before the journal so that their flow does not fill the table. The journal write and the action on the data are not in one transaction, because the data of the resources lives in an array, so the atomicity "no record, no action" is kept by the order of the steps: a journal failure cancels the action. If a failure happens after the action, while the final code is written, the answer to the client does not change and the error is written to the server console. The listing is given in appendix F.
+Two groups of requests do not reach the journal: the health check `GET /health` and the requests rejected by the rate limit with code 429. The health check goes before the journal so that monitoring does not fill the table or use up the limit. Excess requests are rejected before the journal so that their flow does not fill the table. The journal write and the action on the data are not in one transaction, because the data of the resources is kept in an array, so the atomicity "no record, no action" is provided by the order of the steps: a journal failure cancels the action. A failure after the action, while the final code is written, does not change the answer to the client, the error is written to the server console. The listing is given in appendix F.
 
-A journal failure is reproduced while the server runs, not by a button. The server is started with `$env:JOURNAL_FILE='demo.sqlite'; npm start`, then in another window the command `node tools/break-journal.mjs demo.sqlite` drops the journal table, and every request gets the answer 500. The table is restored by `node tools/break-journal.mjs demo.sqlite --restore`. The environment variable is removed by `Remove-Item Env:JOURNAL_FILE`. The journal table with real rows is shown in figure 1.
+A journal failure is reproduced while the server runs, not by a button. The server is started with `$env:JOURNAL_FILE='demo.sqlite'; npm start`, then in another window the journal table is dropped by the command `node tools/break-journal.mjs demo.sqlite`, after which every request received the answer 500. The table is restored by `node tools/break-journal.mjs demo.sqlite --restore`. The environment variable is removed by `Remove-Item Env:JOURNAL_FILE`. The journal table with real rows is shown in figure 1.
 
 ![The request_log table](figures/journal-table.png)
 
@@ -120,13 +120,13 @@ Figure 1 – The table request_log of the SQLite database printed in a PowerShel
 
 ### 3.6 Error pages
 
-A browser gets an arranged page instead of JSON, with the code, a title, three blocks "What happened", "Likely cause" and "What to do", and the request number. The same number is in the header `X-Request-Id`, in the error body, in the journal table and in the server console line, so the request is easy to find by it. The error texts are written in English, like the other API texts. The 404 page for an unknown address is shown in figure 2.
+For a browser an arranged page is returned instead of JSON, with the code, a title, three blocks "What happened", "Likely cause" and "What to do", and the request number. The same number is given in the header `X-Request-Id`, in the error body, in the journal table and in the server console line, so the request is easy to find by it. The error texts are written in English, like the other API texts. The 404 page for an unknown address is shown in figure 2.
 
 ![The 404 page](figures/error-404.png)
 
 Figure 2 – The 404 error page for an address that does not exist in the API, with the explanation blocks and the request number
 
-The 429 page appears when more requests are sent within a minute than `limits.json` allows. For the shot the limit is lowered to three requests by the variable `RATE_LIMIT_MAX`. The page is shown in figure 3.
+The 429 page is returned when the limit of requests per minute set in `limits.json` is exceeded. For the shot the limit is lowered to three requests by the variable `RATE_LIMIT_MAX`. The page is shown in figure 3.
 
 ![The 429 page](figures/error-429.png)
 
@@ -138,7 +138,7 @@ The 500 page for an unavailable journal is shown in figure 4. It comes from a re
 
 Figure 4 – The 500 error page for an unavailable request journal, the action is not carried out
 
-The 403 page appears when an ordinary user tries to delete a project. A browser cannot send the `X-User-Id` header and `DELETE` from the address bar, so the shot is taken in Postman and shown in figure 5.
+The 403 page is returned when an ordinary user tries to delete a project. The `X-User-Id` header and `DELETE` cannot be sent from the address bar of a browser, so the shot is taken in Postman and shown in figure 5.
 
 ![The answer 403](figures/postman-403.png)
 
@@ -146,7 +146,7 @@ Figure 5 – The answer 403 to the request DELETE /api/projects/1 with the X-Use
 
 ### 3.7 API documentation
 
-The route `GET /api/openapi.json` returns the API description in the OpenAPI 3.0 format. It is built from the same schemas that validate requests, so field lengths, lists of allowed values and required fields in the document match the code. The document can be opened in Swagger UI or imported into Postman. The description is opened in a browser window at `http://localhost:4230/api/openapi.json`, and a fragment is shown in figure 6. In it the change and delete operations have the headers `X-User-Id` and `X-Role` and the answer 403. The reference of operations is generated from the same document by the script `tools/gen-api-md.mjs` into the files `API.generated.ru.md` and `API.generated.en.md`. A test compares them with the server answer, so they do not drift from the code. The possible error codes are listed in the reference for every operation.
+The route `GET /api/openapi.json` returns the API description in the OpenAPI 3.0 format. It is built from the same schemas that validate requests, so field lengths, lists of allowed values and required fields in the document match the code. The document is suitable for opening in Swagger UI and for import into Postman. The description is opened in a browser window at `http://localhost:4230/api/openapi.json`, and a fragment is shown in figure 6. In it the change and delete operations have the headers `X-User-Id` and `X-Role` and the answer 403. The reference of operations is generated from the same document by the script `tools/gen-api-md.mjs` into the files `API.generated.ru.md` and `API.generated.en.md`. A test compares them with the server answer, so they do not drift from the code. The possible error codes are listed in the reference for every operation.
 
 ![API description](figures/api-docs.png)
 
@@ -154,7 +154,7 @@ Figure 6 – The API description in the OpenAPI format at GET /api/openapi.json 
 
 ### 3.8 Checking requests in Postman
 
-The requests of every method are sent in Postman by hand, and the same set of requests is collected in the collection `postman_collection.json` for import and in the file `requests.http`. A separate window shot is made for every method: the request, the status code and the response body. Reading the list with `GET /api/users` is shown in figure 7.
+The requests of every method are sent in Postman by hand, and the same set of requests is collected in the collection `postman_collection.json` for import and in the file `requests.http`. A separate window shot is obtained for every method: the request, the status code and the response body. Reading the list with `GET /api/users` is shown in figure 7.
 
 ![GET /api/users](figures/postman-get.png)
 
@@ -198,7 +198,7 @@ Figure 13 – The request POST /api/users with invalid data and the answer 400 w
 
 ### 3.9 Checking requests from a browser
 
-A browser sends only `GET` requests from the address bar, and the other methods are shown above in Postman. The server is started with `npm start` and the variable `PORT` set to 4230, and the requests are opened in a Chrome window with the address bar. The answer to `GET /api/users` at `http://localhost:4230/api/users` is shown in figure 14.
+Only `GET` requests are sent from the address bar of a browser, the other methods are shown above in Postman. The server is started with `npm start` and the variable `PORT` set to 4230, and the requests are opened in a Chrome window with the address bar. The answer to `GET /api/users` at `http://localhost:4230/api/users` is shown in figure 14.
 
 ![List of users](figures/02-users-list.png)
 
@@ -236,7 +236,7 @@ Figure 19 – The answer to GET /api/users/1/projects in a browser window: the p
 
 ### 3.10 Automatic checks
 
-The automatic tests start the server on a free port and check every method, the status codes, filters, sorting, pages, validation errors, links between resources, extra operations, roles with the answer 403, the order "journal record before the action", a journal failure with the answer 500, the exclusion of `/health` and of the answer 429 from the journal, races when a parent is deleted, and the error pages. There are 173 server tests, 176 together with the report checks, and the coverage of lines, branches and functions is 100 percent. The command is `npm test` in the project folder. The console message at server start is shown in figure 20.
+Automatic tests are written that start the server on a free port and check every method, the status codes, filters, sorting, pages, validation errors, links between resources, extra operations, roles with the answer 403, the order "journal record before the action", a journal failure with the answer 500, the exclusion of `/health` and of the answer 429 from the journal, races when a parent is deleted, and the error pages. There are 173 server tests, 176 together with the report checks, and the coverage of lines, branches and functions is 100 percent. The command is `npm test` in the project folder. The console message at server start is shown in figure 20.
 
 ![Server console](figures/console.png)
 
@@ -254,21 +254,21 @@ The number in the group list is 26, so the answers are given to questions 25, 26
 
 25. What are "cross-resource links" and how are they implemented in a REST API (for example, getting the orders of a user)?
 
-    These are links between records of different resources, for example a project belongs to a user and a diagram belongs to a project. An API expresses a link in three ways. By way 1 the link is a reference field in the record, in this work `ownerId` of a project and `projectId` of a diagram, and the server checks that such a record exists, otherwise it answers 409. By way 2 a nested route is used for reading, for example `GET /api/users/:id/projects` returns the projects of a user and `GET /api/projects/:id/diagrams` the diagrams of a project. By way 3 a list filter is used, and `GET /api/projects?ownerId=1` gives the same. A link protects deletion as well: a user with projects and a project with diagrams are not deleted, the answer is 409.
+    These are links between records of different resources, for example a project belongs to a user and a diagram belongs to a project. A link is expressed in an API in three ways. By way 1 the link is a reference field in the record, in this work `ownerId` of a project and `projectId` of a diagram, and the existence of such a record is checked by the server, otherwise 409 is returned. By way 2 a nested route is used for reading, for example `GET /api/users/:id/projects` returns the projects of a user and `GET /api/projects/:id/diagrams` the diagrams of a project. By way 3 a list filter is used, and `GET /api/projects?ownerId=1` gives the same. A link protects deletion as well: a user with projects and a project with diagrams are not deleted, the answer is 409.
 
 26. Which status codes are used for redirects (3xx)? Are they needed in a REST API?
 
-    Code 301 means a permanent move of an address, 302 a temporary one, codes 307 and 308 do the same but keep the request method, code 303 sends the client to another address with the `GET` method, and code 304 says that the cached answer is still valid. In Express a redirect is made by `res.redirect(status, url)`. In a REST API redirects are rarely needed: after `POST` the server returns 201 with the `Location` header and the record itself instead of redirecting the client. They are used when an address or an API version moves, and code 304 is used for conditional requests with `ETag`. There are no redirects in this work, and the server returns `ETag` in its answers.
+    Code 301 means a permanent move of an address, 302 a temporary one, codes 307 and 308 do the same but keep the request method, code 303 sends the client to another address with the `GET` method, and code 304 says that the cached answer is still valid. In Express a redirect is performed by the call `res.redirect(status, url)`. In a REST API redirects are rarely needed: after `POST` the server returns 201 with the `Location` header and the record itself instead of redirecting the client. They are used when an address or an API version moves, and code 304 is used for conditional requests with `ETag`. Redirects are not used in this work, and `ETag` is returned in the answers.
 
 27. How do you state the possible error codes and their descriptions in the API documentation?
 
-    In OpenAPI the codes are listed for every operation in the `responses` section, for example `400`, `403`, `404` and `409`, and each gets a description and a body schema. The common error schema is described once in `components` and linked by reference. In this work the documentation is available at `GET /api/openapi.json` and in the file `API.md`: every route has a column with the possible error codes, and the section "Errors" shows the single answer shape `{ "error": { "code", "message", "title", "description", "requestId", "details" } }` and lists the `code` values. So a client knows which errors to expect.
+    In OpenAPI the codes are listed for every operation in the `responses` section, for example `400`, `403`, `404` and `409`, and each gets a description and a body schema. The common error schema is described once in `components` and linked by reference. In this work the documentation is available at `GET /api/openapi.json` and in the file `API.md`: every route has a column with the possible error codes, and the section "Errors" shows the single answer shape `{ "error": { "code", "message", "title", "description", "requestId", "details" } }` and lists the `code` values. The expected errors are thus known to the client.
 
 ## Conclusion
 
-A REST API with three linked resources is designed and implemented for the DSLKit project. It supports CRUD operations, filtering, search, sorting, pages, publishing and copying of diagrams, validates the input data and the links between records, and answers with errors of one format with a request number. Roles tell an ordinary user from an administrator and give a real answer 403. The request journal is kept in a database table by the rules of the even variant and is written before the action, and its failure gives the answer 500 without carrying out the action. The API description is collected in `API.md` and in `GET /api/openapi.json`, the automatic tests cover all the code, and the requests of every method are checked in Postman.
+A REST API with three linked resources is designed and implemented for the DSLKit project. CRUD operations, filtering, search, sorting, pages, publishing and copying of diagrams, validation of the input data and of the links between records, and errors of one format with a request number are implemented. Roles distinguish an ordinary user and an administrator and give a real answer 403. The request journal is kept in a database table by the rules of the even variant and is written before the action, and its failure gives the answer 500 without carrying out the action. The API description is collected in `API.md` and in `GET /api/openapi.json`, the automatic tests cover all the code, and the requests of every method are checked in Postman.
 
-The work has limits that must be named directly. The data of the resources lies in in-memory arrays and disappears when the server restarts, as the task requires, and only the request journal is kept in a database. The identity of a user is set by the headers `X-User-Id` and `X-Role` and is trusted, so a real system has to take it from a verified session or token. The error texts are written in English. The journal write and the action on the data are not in one transaction, and this is solved by the order of the steps: first the journal row, then the action, and if the journal fails the action is not carried out. These limits are described in the text of the work and in the file `README.md` of the project.
+The limits of the work are named directly. The data of the resources is kept in in-memory arrays and is lost when the server restarts, as the task requires, and only the request journal is kept in a database. The identity of a user is set by the headers `X-User-Id` and `X-Role` and is trusted, so in a real system it must be taken from a verified session or token. The error texts are written in English. The journal write and the action on the data are not in one transaction, and this is solved by the order of the steps: first the journal row, then the action, and if the journal fails the action is not carried out. These limits are described in the text of the work and in the file `README.md` of the project.
 
 ## Appendix A (mandatory) Listing of the file app.js, application assembly
 

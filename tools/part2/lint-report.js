@@ -103,6 +103,8 @@ export const lintReport = (text, lang = 'ru', { strict = false, variant, questio
   const appendixAt = text.search(r.appendixAny);
   const body = appendixAt < 0 ? text : text.slice(0, appendixAt);
   const prose = strip(text);
+  // The whole text for the language rules: tables, captions, headings and answers count, listings, inline code, image lines and the questions of the task (they are quotations) do not.
+  const whole = text.replace(/^\d+\. .+\?$/gm, '').replace(/^```[\s\S]*?^```/gm, '').replace(/^!\[.*$/gm, '').replace(/`[^`\n]*`/g, '');
   check(!r.goal.test(text), m.goal);
   check(!r.conclusion.test(text), m.conclusion);
   check(r.conclusionWord.test(text), m.conclusionWord);
@@ -125,9 +127,15 @@ export const lintReport = (text, lang = 'ru', { strict = false, variant, questio
       check(!r.appendixRef(letter).test(strip(body)), `${m.appendixRef} ${letter}`);
     });
     check(/;/.test(prose), m.semicolon);
+    check(r.forbidden.test(whole), m.forbidden);
+    if (lang === 'en') {
+      const said = whole.replace(/"[^"\n]*"/g, '');
+      check(/(?<![A-Za-z])(I|we|you|our|your|my)(?![A-Za-z])/i.test(said), 'First or second person (I, we, you), use the passive voice');
+      check(/(?:^|[.!?]\s+)(Run|Add|Open|Start|Check|Set|Use|Press|Install|Create|Enter|Send|Click|Go|See|Note|Make|Take|Replace|Remove)\s/m.test(said), 'Imperative, the text describes work that is done');
+    }
     if (lang === 'ru') {
       // addresses and names with digits (branches, versions) are identifiers, not words
-      const spoken = prose.replace(/https?:\S+/g, '').replace(/[A-Za-z][A-Za-z-]*\d\w*/g, '').replace(/^#.*$/gm, '').replace(/«[^»\n]*»/g, '');
+      const spoken = whole.replace(/https?:\S+/g, '').replace(/[A-Za-z][A-Za-z-]*\d\w*/g, '').replace(/^#.*$/gm, '').replace(/«[^»\n]*»/g, '');
       const found = (re) => [...new Set([...spoken.matchAll(re)].map((x) => x[0].toLowerCase()))];
       for (const key of ['person', 'verb1', 'imperative']) {
         const words = found(r[key]);

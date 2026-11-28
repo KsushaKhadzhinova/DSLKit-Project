@@ -207,3 +207,22 @@ test('strict mode applies the language rules of the owner: no «я, мы, вы»
   assert.deepEqual(lintReport(strictRu.replace('Текст.', 'Пакет установлен, а ответ «What happened» разобран для API и JSON через `request`.'), 'ru', strict), []);
   assert.deepEqual(lintReport(`${ru}Мы запустите.`, 'ru'), []);
 });
+
+test('the language rules reach tables, captions, headings and answers to the questions, not the listings and the quoted questions', () => {
+  const strict = { strict: true };
+  const answers = ['## 2 Ответы на контрольные вопросы', '', '25. Что такое связи, как вы их реализуете?', '', '    Ответ.', ''].join(String.fromCharCode(10));
+  const withAnswers = strictRu.replace('## Заключение', answers + String.fromCharCode(10) + '## Заключение');
+  // a quoted question may hold «вы», the answer may not
+  assert.deepEqual(lintReport(withAnswers, 'ru', strict), []);
+  has(lintReport(withAnswers.replace('    Ответ.', '    Мы реализовали связи.'), 'ru', strict), 'первого и второго лица');
+  has(lintReport(withAnswers.replace('    Ответ.', '    Связь была реализована.'), 'ru', strict), 'краткими страдательными причастиями');
+  const table = ['| Поле | Значение |', '| --- | --- |', '| а | Запустите сервер |'].join(String.fromCharCode(10));
+  has(lintReport(strictRu.replace('Текст.', 'Текст.' + String.fromCharCode(10, 10) + table), 'ru', strict), 'Повелительное наклонение');
+  has(lintReport(strictRu.replace('Текст.', 'Рисунок 1 – Мы запустили сервер'), 'ru', strict), 'первого и второго лица');
+  // the English version has the same rules
+  has(lintReport(strictEn.replace('Text.', 'We started the server and the answer was returned.'), 'en', strict), 'First or second person');
+  has(lintReport(strictEn.replace('Text.', 'The server was started.'), 'en', strict), 'Filler words');
+  has(lintReport(strictEn.replace('Text.', 'Open the page.'), 'en', strict), 'Imperative');
+  // listings are not checked
+  assert.deepEqual(lintReport(strictRu.replace('Текст приложения.', ['Текст приложения.', '', '```', '// we was here, запустите', '```'].join(String.fromCharCode(10))), 'ru', strict), []);
+});
