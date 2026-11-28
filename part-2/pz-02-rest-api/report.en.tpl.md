@@ -154,7 +154,7 @@ Figure 6 – The API description in the OpenAPI format at GET /api/openapi.json 
 
 ### 3.8 Checking requests in Postman
 
-All operations are checked in Postman with the collection `postman_collection.json`, and the same set of requests is in the file `requests.http`. A separate window shot is made for every method: the request, the status code and the response body. Reading the list with `GET /api/users` is shown in figure 7.
+The requests of every method are sent in Postman by hand, and the same set of requests is collected in the collection `postman_collection.json` for import and in the file `requests.http`. A separate window shot is made for every method: the request, the status code and the response body. Reading the list with `GET /api/users` is shown in figure 7.
 
 ![GET /api/users](figures/postman-get.png)
 

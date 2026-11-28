@@ -1,7 +1,7 @@
 # Captures a real window (title bar, address bar and content) into a PNG from the screen after the window is brought to the front.
 # Usage: powershell -NoProfile -File window-shot.ps1 -Out file.png -TitleLike "*part of the title*"
 # Nothing is drawn: the pixels are the ones the real window paints.
-param([Parameter(Mandatory)][string]$Out, [Parameter(Mandatory)][string]$TitleLike, [int]$MaxWidth = 0)
+param([Parameter(Mandatory)][string]$Out, [Parameter(Mandatory)][string]$TitleLike, [int]$MaxWidth = 0, [int]$CropTop = 0, [int]$Trim = 0, [switch]$Escape)
 Add-Type -AssemblyName System.Drawing
 Add-Type @'
 using System; using System.Collections.Generic; using System.Runtime.InteropServices; using System.Text;
@@ -22,18 +22,23 @@ public static class W {
 '@
 [void][W]::SetProcessDPIAware()
 Add-Type -AssemblyName System.Windows.Forms
-[System.Windows.Forms.Cursor]::Position = New-Object System.Drawing.Point(20, 20)
+[System.Windows.Forms.Cursor]::Position = New-Object System.Drawing.Point(1700, 950)
 $found = [W]::All() | Where-Object { (([W]::Title($_)) -like $TitleLike) } | Select-Object -First 1
 if (-not $found) { Write-Error "No window with a title like '$TitleLike'"; exit 2 }
 $r = New-Object W+RECT
 [void][W]::GetWindowRect($found, [ref]$r)
 $w = $r.R - $r.L; $hh = $r.B - $r.T
 [void][W]::ShowWindow($found, 9); [void][W]::SetForegroundWindow($found); Start-Sleep -Milliseconds 700
+if ($Escape) { [System.Windows.Forms.SendKeys]::SendWait('{ESC}'); Start-Sleep -Milliseconds 500 }
 [void][W]::GetWindowRect($found, [ref]$r)
 $bmp = New-Object System.Drawing.Bitmap $w, $hh
 $g = [System.Drawing.Graphics]::FromImage($bmp)
 $g.CopyFromScreen($r.L, $r.T, 0, 0, $bmp.Size)
 $g.Dispose()
+if ($CropTop -gt 0 -or $Trim -gt 0) {
+  $rect = New-Object System.Drawing.Rectangle $Trim, $CropTop, ($bmp.Width - 2 * $Trim), ($bmp.Height - $CropTop - $Trim)
+  $cropped = $bmp.Clone($rect, $bmp.PixelFormat); $bmp.Dispose(); $bmp = $cropped
+}
 if ($MaxWidth -gt 0 -and $bmp.Width -gt $MaxWidth) {
   $nh = [int]($bmp.Height * $MaxWidth / $bmp.Width)
   $small = New-Object System.Drawing.Bitmap $MaxWidth, $nh

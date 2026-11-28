@@ -4,7 +4,7 @@
 // Run from the folder of the work, with the screen unlocked: node shots/real-shots.mjs [name ...]
 // Console windows and Postman windows are not made here: a console window cannot be opened from a tool process, see SCREENSHOTS-TODO.md.
 import { spawn, spawnSync, execFileSync } from 'node:child_process';
-import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { copyFileSync, existsSync, readFileSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -28,19 +28,28 @@ const start = async (port, env = {}) => {
   }
   throw new Error(`No answer on port ${port}`);
 };
-const capture = (file, title) => {
-  const result = spawnSync('powershell', ['-NoProfile', '-File', path.join(work, 'shots', 'window-shot.ps1'), '-Out', path.join(out, file), '-TitleLike', title, '-MaxWidth', '1280'], { encoding: 'utf8' });
+const capture = (file, title, extra = []) => {
+  const result = spawnSync('powershell', ['-NoProfile', '-File', path.join(work, 'shots', 'window-shot.ps1'), '-Out', path.join(out, file), '-TitleLike', title, '-MaxWidth', '1280', '-Trim', '8', ...extra], { encoding: 'utf8' });
   if (result.status !== 0) throw new Error(`${file}: ${result.stderr || result.stdout}`);
   console.log(result.stdout.trim());
 };
 let n = 0;
-const browser = async (file, url, height, width = 1100) => {
+// title: how the title of this window starts, so a Chrome window of the user is never taken by mistake.
+const browser = async (file, url, height, title, width = 1100, prettify = false) => {
   if (!wanted(file)) return;
   n += 1;
-  const child = spawn(chrome, ['--new-window', '--no-first-run', '--no-default-browser-check', '--disable-sync', '--disable-features=SigninIntercept,ChromeWhatsNewUI', `--user-data-dir=${path.join(tmp, `profile${n}`)}`, '--window-position=0,0', `--window-size=${width},${height}`, url], { stdio: 'ignore' });
+  const child = spawn(chrome, ['--new-window', '--no-first-run', '--no-default-browser-check', '--guest', '--disable-translate', '--disable-features=Translate,TranslateUI,SigninIntercept,ChromeWhatsNewUI', '--lang=ru', '--disable-sync', `--user-data-dir=${path.join(tmp, `profile${n}`)}`, '--window-position=260,40', '--accept-lang=ru,en-US,en', `--window-size=${width},${height}`, ...(prettify ? ['--remote-debugging-port=9333'] : []), url], { stdio: 'ignore' });
   await pause(4500);
+  if (prettify) {
+    const pages = await (await fetch('http://localhost:9333/json')).json();
+    const ws = new WebSocket(pages.find((p) => p.type === 'page').webSocketDebuggerUrl);
+    await new Promise((resolve) => ws.addEventListener('open', resolve));
+    for (const [id, type] of [[1, 'mousePressed'], [2, 'mouseReleased']]) ws.send(JSON.stringify({ id, method: 'Input.dispatchMouseEvent', params: { type, x: 125, y: 10, button: 'left', clickCount: 1 } }));
+    await pause(1500);
+    ws.close();
+  }
   try {
-    capture(file, '*Google Chrome*');
+    capture(file, `${title}*Google Chrome*`, ['-Escape']);
   } finally {
     kill(child);
     await pause(700);
@@ -54,7 +63,7 @@ const terminal = async (file, title, command, wait, size = '') => {
 Set-Location '${work}'
 ${command}
 `);
-  spawn('cmd.exe', ['/c', 'start', '', 'powershell.exe', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-NoExit', '-File', scriptFile], { stdio: 'ignore' });
+  spawn('cmd.exe', ['/c', 'start', '', process.env.SHOT_SHELL ?? 'powershell.exe', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-NoExit', '-File', scriptFile], { stdio: 'ignore' });
   await pause(wait);
   try {
     capture(file, `*${title}*`);
@@ -79,31 +88,37 @@ try {
   await send('POST', '/users', {}, { name: '', email: 'x' });
   await fetch('http://localhost:4230/health');
 
-  await browser('02-users-list.png', `${api}/users`, 330);
-  await browser('03-user-one.png', `${api}/users/1`, 300);
-  await browser('04-user-404.png', `${api}/users/999`, 660);
-  await browser('05-user-400.png', `${api}/users/abc`, 660);
-  await browser('06-diagrams-search.png', `${api}/diagrams?q=billing&sort=-title&page=1&limit=10`, 360);
-  await browser('07-user-projects.png', `${api}/users/1/projects`, 330);
-  await browser('error-404.png', 'http://localhost:4230/nope', 660);
-  await browser('api-docs.png', `${api}/openapi.json`, 760);
+  await browser('02-users-list.png', `${api}/users`, 330, 'localhost:4230/api*');
+  await browser('03-user-one.png', `${api}/users/1`, 300, 'localhost:4230/api*');
+  await browser('04-user-404.png', `${api}/users/999`, 660, '404 *');
+  await browser('05-user-400.png', `${api}/users/abc`, 660, '400 *');
+  await browser('06-diagrams-search.png', `${api}/diagrams?q=billing&sort=-title&page=1&limit=10`, 360, 'localhost:4230/api*');
+  await browser('07-user-projects.png', `${api}/users/1/projects`, 330, 'localhost:4230/api*');
+  await browser('error-404.png', 'http://localhost:4230/nope', 660, '404 *');
+  await browser('api-docs.png', `${api}/openapi.json`, 760, 'localhost:4230/api*', 1100, true);
 
   servers.push(await start(4231, { JOURNAL_FILE: path.join(tmp, 'limited.sqlite'), RATE_LIMIT_MAX: '3' }));
   for (let i = 0; i < 3; i += 1) await fetch('http://localhost:4231/api/users');
-  await browser('error-429.png', 'http://localhost:4231/api/users', 660);
+  await browser('error-429.png', 'http://localhost:4231/api/users', 660, '429 *');
 
   const file = path.join(tmp, 'broken.sqlite');
   servers.push(await start(4232, { JOURNAL_FILE: file }));
   spawnSync(process.execPath, ['tools/break-journal.mjs', file], { cwd: work, stdio: 'ignore' });
-  await browser('error-500.png', 'http://localhost:4232/api/users', 660);
+  await browser('error-500.png', 'http://localhost:4232/api/users', 660, '500 *');
 
-  const db = journal.split(path.sep).join('/');
-  await terminal('journal-table.png', 'DSLKit journal', `Write-Host 'PS> SELECT id, method, path, status, request_id FROM request_log ORDER BY id DESC;'
-node --no-warnings -e "const {DatabaseSync}=require('node:sqlite'); console.table(new DatabaseSync('${db}').prepare('SELECT id, method, path, status, substr(request_id,1,8) AS request_id FROM request_log ORDER BY id DESC').all())"`, 7000);
+  copyFileSync(journal, path.join(work, 'journal.sqlite'));
+  await terminal('journal-table.png', 'DSLKit journal', "Write-Host 'PS> node tools/show-journal.mjs journal.sqlite'; node --no-warnings tools/show-journal.mjs journal.sqlite", 7000);
+  rmSync(path.join(work, 'journal.sqlite'), { force: true });
   const startLog = path.join(tmp, 'start.sqlite').split(path.sep).join('/');
   await terminal('console.png', 'npm start', `$env:PORT=4236; $env:JOURNAL_FILE='${startLog}'; npm start`, 8000);
-  // The server tests only (the same files as npm test without the report check, which compares the DOCX that holds this very figure). Under the lock of the tests (C:/Users/zheny/.claude/locks/test.lock) the caller holds it while this runs.
-  await terminal('tests.png', 'DSLKit tests', "& 'C:/Program Files/Git/bin/bash.exe' -c \"node --test --experimental-test-coverage --test-coverage-include='src/**' 'test/*.test.js' 2>&1 | tail -n 28\"; $Host.UI.RawUI.WindowTitle='DSLKit tests'", 45000);
+  // The real npm test of the work. The caller holds the test lock (C:/Users/zheny/.claude/locks/test.lock). The shot counts only
+  // when the run was green with 100 percent coverage (the start test of server.js is not stable: retry until it is).
+  const outFile = path.join(tmp, 'npm-test.txt').split(path.sep).join('/');
+  if (only.includes('tests.png')) {
+    await terminal('tests.png', 'DSLKit tests', `npm test 2>&1 | Tee-Object -FilePath '${outFile}' | Select-Object -Last 28; $Host.UI.RawUI.WindowTitle='DSLKit tests'`, 60000);
+    const text = readFileSync(outFile, 'utf8');
+    if (!/all filess+|s+100.00 |s+100.00 |s+100.00/.test(text) || !/fail 0/.test(text)) throw new Error('The run was not green with 100 percent coverage, retry');
+  }
 } finally {
   for (const s of servers) s.kill();
   await pause(500);
