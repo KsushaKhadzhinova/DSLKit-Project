@@ -175,7 +175,7 @@ withApi(
 // --- F10: content negotiation and body-on-bodyless-method inconsistencies ----------------------------------
 
 withApi('F10: an Accept header that cannot match JSON gets 406, a missing or */* Accept is fine', async ({ call }) => {
-  const rejected = await call('GET', '/users', undefined, { Accept: 'text/html' });
+  const rejected = await call('GET', '/users', undefined, { Accept: 'image/png' });
   assert.equal(rejected.status, 406);
   assert.equal(rejected.json.error.code, 'not_acceptable');
   assert.equal((await call('GET', '/users', undefined, { Accept: '*/*' })).status, 200);
@@ -256,10 +256,11 @@ withApi('F14: the user list schema does not require email, and 406/429/default a
   assert.ok(doc.paths['/users'].get.responses.default);
 });
 
-withApi('F14: 409 is no longer declared on project/diagram writes that can never produce it', async ({ call }) => {
+withApi('F14: 409 is declared exactly where the code can produce it', async ({ call }) => {
   const { json: doc } = await call('GET', '/openapi.json');
-  assert.equal(doc.paths['/projects'].post.responses['409'], undefined);
-  assert.equal(doc.paths['/diagrams/{id}'].put.responses['409'], undefined);
+  // A missing parent (owner, project) is a 409 on write; only a diagram delete can never conflict.
+  assert.ok(doc.paths['/projects'].post.responses['409']);
+  assert.ok(doc.paths['/diagrams/{id}'].put.responses['409']);
   // users can really 409 on write, projects can really 409 on delete: those stay documented.
   assert.ok(doc.paths['/users'].post.responses['409']);
   assert.ok(doc.paths['/projects/{id}'].delete.responses['409']);
@@ -299,13 +300,13 @@ test('the schemas object marks description and code as multiline, allowing a sto
 
 // --- redteam2-pz2.md, finding #2: no server-level request/header timeout (slowloris) ------------------------
 
-test('report #2 (slowloris): src/server.js sets explicit header/request timeouts well below Node\'s own defaults', async () => {
+test('report #2 (slowloris): src/start.js sets explicit header/request timeouts well below Node\'s own defaults', async () => {
   // Before this fix, src/server.js set no timeout at all: a client that sends headers and then trickles the
   // body in one byte at a time could hold a socket open for Node's default of 5 minutes (requestTimeout) with
   // only a 60 s headersTimeout, and the per-IP rate limiter only counts requests that finish, so it does
   // nothing against this. Reading the source (instead of actually waiting minutes for a timeout to fire) keeps
   // the test fast while still failing if the hardening lines are ever removed.
-  const src = await readFile(new URL('../src/server.js', import.meta.url), 'utf8');
+  const src = await readFile(new URL('../src/start.js', import.meta.url), 'utf8');
   const headersTimeout = Number(/headersTimeout\s*=\s*(\d+)/.exec(src)?.[1]);
   const requestTimeout = Number(/requestTimeout\s*=\s*(\d+)/.exec(src)?.[1]);
   assert.ok(headersTimeout > 0 && headersTimeout < 60_000, `headersTimeout (${headersTimeout}) should be set and below Node's 60 s default`);

@@ -150,7 +150,7 @@ withApi('GET one item with odd ids answers 400 invalid_id', async ({ call }) => 
 withApi('an unknown nested route answers 404 with a JSON error', async ({ call }) => {
   const res = await call('GET', '/users/1/nothing');
   assert.equal(res.status, 404);
-  assert.equal(res.json.error.code, 'not_found');
+  assert.equal(res.json.error.code, 'route_not_found');
 });
 
 withApi('a POST with text/plain content answers 415 and creates nothing', async ({ call, base }) => {

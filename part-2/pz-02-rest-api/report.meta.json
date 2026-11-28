@@ -1,7 +1,14 @@
 {
-  "student": "",
-  "group": "",
-  "figureHeight": false,
-  "ordinals": false,
-  "note": "ordinals is false until the text of this report is fixed by its executor (ordinal numerals as words). figureHeight is false because the screenshots 08, 09, 11, 14 to 16 of practical 2 are taller than 60 percent of the page: the executor of practical 2 crops them and removes this line"
+  "student": "К. А. Хаджинова",
+  "group": "320604",
+  "doneCaption": "Выполнила",
+  "reviewer": "А. Л. Гончаревич",
+  "reviewerCaption": "Проверил",
+  "reviewerLab": "Н. В. Хаджинова",
+  "reviewerLabCaption": "Проверила",
+  "titleVariant": "100",
+  "listNumber": "26",
+  "repository": "https://github.com/KsushaKhadzhinova/DSLKit-Project",
+  "branch": "pz22",
+  "final": true
 }

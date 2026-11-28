@@ -43,7 +43,7 @@ test('without a stored contents cache the DOCX is not current and has no page nu
   assert.equal(result.current, false);
   assert.equal(result.docx, null);
   assert.deepEqual(result.errors, []);
-  assert.match(unzip(result.base)['word/document.xml'].toString('utf8'), /студентка гр\. 123<[^]*?>Иванов/);
+  assert.match(unzip(result.base)['word/document.xml'].toString('utf8'), /ст\. гр\. 123<[^]*?>Иванов/);
 });
 
 test('a cache made for this document gives the numbers, a stale or broken one does not', () => {
@@ -62,7 +62,7 @@ test('a report may switch the figure height check off in its meta data', () => {
   const text = md.replace('Текст.', 'Текст.\n\n![Высокая](a.png)\n');
   const tall = Buffer.from(png);
   tall.writeUInt32BE(1000, 16);
-  tall.writeUInt32BE(1400, 20);
+  tall.writeUInt32BE(2000, 20);
   const options = (extra) => reader(files({ 'd/report.md': text, 'd/report.meta.json': JSON.stringify({ group: '1', student: 'A', ...extra }) }));
   assert.deepEqual(reportDocx('d', options({}), () => tall).errors, ['A figure is taller than 60 percent of the page: crop the screenshot']);
   assert.deepEqual(reportDocx('d', options({ figureHeight: false }), () => tall).errors, []);

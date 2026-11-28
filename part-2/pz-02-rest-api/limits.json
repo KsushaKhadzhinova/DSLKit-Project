@@ -6,6 +6,8 @@
   "diagramTitle": 80,
   "diagramCode": 10000,
   "idMax": 2147483647,
+  "defaultPageSize": 20,
+  "maxPageSize": 100,
   "bodyBytes": "100kb",
   "rateWindowMs": 60000,
   "rateMax": 300,

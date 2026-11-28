@@ -1,5 +1,7 @@
+import { createHash } from 'node:crypto';
 import { Router } from 'express';
 import { ApiError, notFound, validationFailed } from './errors.js';
+import { LIMITS } from './limits.js';
 import { applyDefaults, trimStrings, validate } from './validation.js';
 
 // Answers 405 with an Allow header for methods a known path does not support; OPTIONS lists them.
@@ -10,6 +12,18 @@ export const methodsOnly = (...methods) => {
     if (req.method === 'OPTIONS') return res.status(204).end();
     return next(new ApiError(405, 'method_not_allowed', `${req.method} is not allowed here, use: ${allow}`));
   };
+};
+
+// A weak tag computed from the record itself, so it changes exactly when the record changes and needs no extra field.
+export const etagOf = (item) => `W/"${createHash('sha1').update(JSON.stringify(item)).digest('hex').slice(0, 16)}"`;
+
+// Optional conditional update: with If-Match the write only happens if the record is still the one the client read;
+// otherwise 412, so a stale form cannot silently overwrite a newer change. Without the header the write is unconditional.
+const requireFresh = (req, item) => {
+  const header = req.headers['if-match'];
+  if (header === undefined || header.trim() === '*') return;
+  const tags = header.split(',').map((tag) => tag.trim().replace(/^W\//, ''));
+  if (!tags.includes(etagOf(item).replace(/^W\//, ''))) throw new ApiError(412, 'precondition_failed', 'The record changed since you read it, read it again');
 };
 
 const DIGITS = /^[1-9]\d{0,14}$/;
@@ -45,7 +59,7 @@ export const listItems = (items, schema, query, hidden = []) => {
     if (!known.has(key)) throw new ApiError(400, 'invalid_query', `${key} is not a known query parameter`);
   }
   const page = parsePositive(query.page, 'page', 1);
-  const limit = parsePositive(query.limit, 'limit', 20, 100);
+  const limit = parsePositive(query.limit, 'limit', LIMITS.defaultPageSize, LIMITS.maxPageSize);
   let result = items.filter((item) =>
     Object.keys(schema).every((field) => {
       if (hidden.includes(field) || query[field] === undefined) return true;
@@ -90,6 +104,8 @@ export const listItems = (items, schema, query, hidden = []) => {
 // and may throw a conflict; current is the record being changed, undefined on create.
 //
 // hooks.beforeRemove(item) may throw.
+// hooks.authorize(actor, action, item) may throw 403 for 'change' or 'remove' of an existing record, before anything
+// else is checked; hooks.authorizeData(actor, data) may throw 403 for the validated data of a create or an update.
 export const createResourceRouter = ({ label, collection, schema, hooks = {}, hiddenInList = [] }) => {
   const router = Router();
   const body = (req, partial, current) => {
@@ -107,21 +123,38 @@ export const createResourceRouter = ({ label, collection, schema, hooks = {}, hi
   };
 
   router.get('/', (req, res) => res.json(listItems(collection.all(), schema, req.query, hiddenInList)));
-  router.get('/:id', (req, res) => res.json(load(req)));
+  router.get('/:id', (req, res) => {
+    const item = load(req);
+    res.set('ETag', etagOf(item)).json(item);
+  });
   router.post('/', (req, res) => {
-    const item = collection.create(body(req, false));
+    const data = body(req, false);
+    hooks.authorizeData?.(req.actor, data);
+    const item = collection.create(data);
     res.status(201).location(`${req.baseUrl}/${item.id}`).json(item);
   });
   router.put('/:id', (req, res) => {
     const item = load(req);
-    res.json(collection.replace(item, body(req, false, item)));
+    hooks.authorize?.(req.actor, 'change', item);
+    requireFresh(req, item);
+    const data = body(req, false, item);
+    hooks.authorizeData?.(req.actor, data);
+    const saved = collection.replace(item, data);
+    res.set('ETag', etagOf(saved)).json(saved);
   });
   router.patch('/:id', (req, res) => {
     const item = load(req);
-    res.json(collection.update(item, body(req, true, item)));
+    hooks.authorize?.(req.actor, 'change', item);
+    requireFresh(req, item);
+    const data = body(req, true, item);
+    hooks.authorizeData?.(req.actor, data);
+    const saved = collection.update(item, data);
+    res.set('ETag', etagOf(saved)).json(saved);
   });
   router.delete('/:id', (req, res) => {
     const item = load(req);
+    hooks.authorize?.(req.actor, 'remove', item);
+    requireFresh(req, item);
     hooks.beforeRemove?.(item);
     collection.remove(item);
     res.status(204).end();

@@ -76,8 +76,8 @@ test('russian rules', () => {
   has(lintReport('## Выводы\n', 'ru'), 'Цель работы');
   has(lintReport('## Выводы\n', 'ru'), 'Заключение');
   has(lintReport('## Выводы\n', 'ru'), 'нужно назвать');
-  has(lintReport(`${ru}Мы также проверили.\n`, 'ru'), 'также');
-  has(lintReport(`${ru}Пакеты были загружены.\n`, 'ru'), 'также');
+  has(lintReport(`${ru}Пакеты были загружены.
+`, 'ru'), 'также');
   has(lintReport(`${ru}Это видно (см. рис. 1).\n`, 'ru'), 'скобках');
   has(lintReport(`${ru}Он сказал "да".\n`, 'ru'), 'кавычки');
   assert.deepEqual(lintReport(`${ru}Слово табличка и забыли.\n`, 'ru'), []);

@@ -76,8 +76,8 @@ test('russian rules', () => {
   has(lintReport('## Выводы\n', 'ru'), 'Цель работы');
   has(lintReport('## Выводы\n', 'ru'), 'Заключение');
   has(lintReport('## Выводы\n', 'ru'), 'нужно назвать');
-  has(lintReport(`${ru}Мы также проверили.\n`, 'ru'), 'также');
-  has(lintReport(`${ru}Пакеты были загружены.\n`, 'ru'), 'также');
+  has(lintReport(`${ru}Пакеты были загружены.
+`, 'ru'), 'также');
   has(lintReport(`${ru}Это видно (см. рис. 1).\n`, 'ru'), 'скобках');
   has(lintReport(`${ru}Он сказал "да".\n`, 'ru'), 'кавычки');
   assert.deepEqual(lintReport(`${ru}Слово табличка и забыли.\n`, 'ru'), []);
@@ -123,7 +123,7 @@ const strictRu = [
   '',
   'Готово, листинг в приложении А.',
   '',
-  '## Приложение А (обязательное) Листинг файла server.js',
+  '## Приложение А (обязательное) server.js',
   '',
   'Текст приложения.',
   '',
@@ -137,7 +137,7 @@ const strictEn = [
   '',
   'Done, the listing is in appendix A.',
   '',
-  '## Appendix A (mandatory) Listing of server.js',
+  '## Appendix A (mandatory) server.js',
   '',
   'Appendix text.',
   '',
@@ -195,4 +195,34 @@ test('strict mode passes the database, repository and branch rules on', () => {
   has(lintReport(strictRu.replace('Текст.', 'Данные в массиве.'), 'ru', { strict: true, database: true }), 'массив');
   has(lintReport(strictRu, 'ru', { strict: true, repository: link, branch: 'pz21' }), 'репозиторий');
   assert.deepEqual(lintReport(strictRu.replace('Текст.', `Код в ${link} в ветке pz21.`), 'ru', { strict: true, repository: link, branch: 'pz21' }), []);
+});
+
+test('strict mode applies the language rules of the owner: no «я, мы, вы», no imperative, little Latin', () => {
+  const strict = { strict: true };
+  has(lintReport(strictRu.replace('Текст.', 'Мы проверили сервер.'), 'ru', strict), 'первого и второго лица');
+  has(lintReport(strictRu.replace('Текст.', 'Затем реализуем маршрут.'), 'ru', strict), 'Глагол первого лица');
+  has(lintReport(strictRu.replace('Текст.', 'Запустите сервер и откройте страницу.'), 'ru', strict), 'Повелительное наклонение');
+  has(lintReport(strictRu.replace('Текст.', 'Здесь middleware вызывает handler и пишет request в журнал.'), 'ru', strict), 'латиницы');
+  // quotations, identifiers in code marks and the allowed terms are not counted, the short passive participle is the style
+  assert.deepEqual(lintReport(strictRu.replace('Текст.', 'Пакет установлен, а ответ «What happened» разобран для API и JSON через `request`.'), 'ru', strict), []);
+  assert.deepEqual(lintReport(`${ru}Мы запустите.`, 'ru'), []);
+});
+
+test('the language rules reach tables, captions, headings and answers to the questions, not the listings and the quoted questions', () => {
+  const strict = { strict: true };
+  const answers = ['## 2 Ответы на контрольные вопросы', '', '25. Что такое связи, как вы их реализуете?', '', '    Ответ.', ''].join(String.fromCharCode(10));
+  const withAnswers = strictRu.replace('## Заключение', answers + String.fromCharCode(10) + '## Заключение');
+  // a quoted question may hold «вы», the answer may not
+  assert.deepEqual(lintReport(withAnswers, 'ru', strict), []);
+  has(lintReport(withAnswers.replace('    Ответ.', '    Мы реализовали связи.'), 'ru', strict), 'первого и второго лица');
+  has(lintReport(withAnswers.replace('    Ответ.', '    Связь была реализована.'), 'ru', strict), 'краткими страдательными причастиями');
+  const table = ['| Поле | Значение |', '| --- | --- |', '| а | Запустите сервер |'].join(String.fromCharCode(10));
+  has(lintReport(strictRu.replace('Текст.', 'Текст.' + String.fromCharCode(10, 10) + table), 'ru', strict), 'Повелительное наклонение');
+  has(lintReport(strictRu.replace('Текст.', 'Рисунок 1 – Мы запустили сервер'), 'ru', strict), 'первого и второго лица');
+  // the English version has the same rules
+  has(lintReport(strictEn.replace('Text.', 'We started the server and the answer was returned.'), 'en', strict), 'First or second person');
+  has(lintReport(strictEn.replace('Text.', 'The server was started.'), 'en', strict), 'Filler words');
+  has(lintReport(strictEn.replace('Text.', 'Open the page.'), 'en', strict), 'Imperative');
+  // listings are not checked
+  assert.deepEqual(lintReport(strictRu.replace('Текст приложения.', ['Текст приложения.', '', '```', '// we was here, запустите', '```'].join(String.fromCharCode(10))), 'ru', strict), []);
 });

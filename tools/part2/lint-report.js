@@ -5,7 +5,12 @@ const L = {
     goal: /^## 1 Цель работы$/m,
     conclusion: /^## Заключение$/m,
     conclusionWord: /^#{1,6}\s+(?:\d+(?:\.\d+)*\s+)?Выводы(?![а-яё])/im,
-    forbidden: /(?<![а-яё])(также|были)(?![а-яё])/i,
+    forbidden: /(?<![а-яё])(также|был[аои]?)(?![а-яё])/i,
+    // The owner's language rules: no «я», «мы», «вы», no imperative, little Latin outside code (the text is a passive, past-tense account).
+    person: /(?<![а-яё])(я|мы|вы|мне|нам|нас|вас|меня|мной|нами|вами|наш[а-яё]*|ваш[а-яё]*|мой|моя|моё|мои)(?![а-яё])/gi,
+    verb1: /(?<![а-яё])(реализуем|добавим|создадим|рассмотрим|проверим|покажем|опишем|получим|используем|применяем|выберем|зададим|запустим|откроем|отправим|сделаем|возьмём|видим|имеем|можем|будем|реализовал[аи]?|добавил[аи]?|создал[аи]?|проверил[аи]?|сделал[аи]?)(?![а-яё])/gi,
+    imperative: /(?<![а-яё])([а-яё]{2,}(?:йте|ьте|йтесь|ьтесь)|запустите|установите|выполните|введите|перейдите|нажмите|удалите|скопируйте|отправьте|убедитесь|посмотрите|проверьте|задайте|верните)(?![а-яё])/gi,
+    latin: /(?<![A-Za-z])[A-Za-z][A-Za-z-]+(?![A-Za-z])/g,
     parens: /\(\s*(см\.?|смотри|рис|табл)/i,
     quotes: /"/,
     figure: 'Рисунок',
@@ -20,7 +25,11 @@ const L = {
       goal: 'Раздел «1 Цель работы» отсутствует или не пронумерован',
       conclusion: 'Раздел «Заключение» отсутствует',
       conclusionWord: 'Раздел «Выводы» нужно назвать «Заключение»',
-      forbidden: 'Слова-паразиты «также», «были»',
+      forbidden: 'Слова «также», «был», «была», «было», «были»: писать краткими страдательными причастиями без связки',
+      person: 'Местоимения первого и второго лица (я, мы, вы), нужен безличный оборот',
+      verb1: 'Глагол первого лица или действительного залога от лица автора, нужен страдательный залог',
+      imperative: 'Повелительное наклонение, текст описывает уже сделанную работу',
+      latin: 'Слишком много латиницы вне кода и идентификаторов, замените английские слова русскими',
       parens: 'Ссылка на рисунок или таблицу в скобках',
       quotes: 'Прямые кавычки вместо «ёлочек»',
       caption: 'Подпись рисунка',
@@ -41,7 +50,7 @@ const L = {
     goal: /^## 1 Purpose of the Work$/m,
     conclusion: /^## Conclusion$/m,
     conclusionWord: /^#{1,6}\s+(?:\d+(?:\.\d+)*\s+)?Conclusions\b/m,
-    forbidden: /(?<![a-z])(also|were)(?![a-z])/i,
+    forbidden: /(?<![a-z])(also|was|were)(?![a-z])/i,
     parens: /\(\s*(see|fig|table)/i,
     quotes: null,
     figure: 'Figure',
@@ -56,7 +65,7 @@ const L = {
       goal: 'Section "1 Purpose of the Work" is missing',
       conclusion: 'Section "Conclusion" is missing',
       conclusionWord: 'Rename "Conclusions" to "Conclusion"',
-      forbidden: 'Filler words "also", "were"',
+      forbidden: 'Filler words "also", "was", "were"',
       parens: 'Figure or table reference in parentheses',
       caption: 'Figure caption',
       mention: 'No description with a worded reference before the figure',
@@ -73,6 +82,9 @@ const L = {
     },
   },
 };
+
+// Latin words that cannot be written in Russian: names of products, formats and methods. The rest counts against the text.
+export const LATIN_OK = new Set(['api', 'rest', 'restful', 'sql', 'sqlite', 'http', 'https', 'json', 'url', 'crud', 'id', 'dslkit', 'openapi', 'swagger', 'ui', 'postman', 'chrome', 'powershell', 'express', 'node', 'js', 'javascript', 'ejs', 'get', 'post', 'put', 'patch', 'delete', 'head', 'options', 'saas', 'cors', 'npm', 'etag', 'html', 'css', 'xml', 'uuid', 'md', 'docx', 'pdf', 'git', 'github']);
 
 const strip = (s) =>
   s
@@ -91,6 +103,8 @@ export const lintReport = (text, lang = 'ru', { strict = false, variant, questio
   const appendixAt = text.search(r.appendixAny);
   const body = appendixAt < 0 ? text : text.slice(0, appendixAt);
   const prose = strip(text);
+  // The whole text for the language rules: tables, captions, headings and answers count, listings, inline code, image lines and the questions of the task (they are quotations) do not.
+  const whole = text.replace(/^\d+\. .+\?$/gm, '').replace(/^```[\s\S]*?^```/gm, '').replace(/^!\[.*$/gm, '').replace(/`[^`\n]*`/g, '');
   check(!r.goal.test(text), m.goal);
   check(!r.conclusion.test(text), m.conclusion);
   check(r.conclusionWord.test(text), m.conclusionWord);
@@ -113,6 +127,24 @@ export const lintReport = (text, lang = 'ru', { strict = false, variant, questio
       check(!r.appendixRef(letter).test(strip(body)), `${m.appendixRef} ${letter}`);
     });
     check(/;/.test(prose), m.semicolon);
+    check(r.forbidden.test(whole), m.forbidden);
+    if (lang === 'en') {
+      const said = whole.replace(/"[^"\n]*"/g, '');
+      check(/(?<![A-Za-z])(I|we|you|our|your|my)(?![A-Za-z])/i.test(said), 'First or second person (I, we, you), use the passive voice');
+      check(/(?:^|[.!?]\s+)(Run|Add|Open|Start|Check|Set|Use|Press|Install|Create|Enter|Send|Click|Go|See|Note|Make|Take|Replace|Remove)\s/m.test(said), 'Imperative, the text describes work that is done');
+    }
+    if (lang === 'ru') {
+      // addresses and names with digits (branches, versions) are identifiers, not words
+      const spoken = whole.replace(/https?:\S+/g, '').replace(/[A-Za-z][A-Za-z-]*\d\w*/g, '').replace(/^#.*$/gm, '').replace(/«[^»\n]*»/g, '');
+      const found = (re) => [...new Set([...spoken.matchAll(re)].map((x) => x[0].toLowerCase()))];
+      for (const key of ['person', 'verb1', 'imperative']) {
+        const words = found(r[key]);
+        check(words.length > 0, `${m[key]}: ${words.slice(0, 8).join(', ')}`);
+      }
+      const all = spoken.match(/[A-Za-zА-Яа-яЁё][A-Za-zА-Яа-яЁё-]+/g) ?? [];
+      const latin = (spoken.match(r.latin) ?? []).filter((w) => !LATIN_OK.has(w.toLowerCase()));
+      check(latin.length > 0.02 * all.length, `${m.latin}: ${[...new Set(latin.map((w) => w.toLowerCase()))].slice(0, 12).join(', ')}`);
+    }
     check(r.startsWithRef.test(prose), m.startsWithRef);
     errors.push(...extraErrors(text, lang, { variant, questions, database, repository, branch, ordinals }));
     check(strict === 'final' && placeholders.length > 0, `${m.placeholder}: ${placeholders.join(', ')}`);

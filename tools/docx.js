@@ -5,9 +5,9 @@ import { zip, unzip } from './zip.js';
 // 1.25 cm set by the paragraph style, a title page without a number, a TOC field whose cached lines carry the page numbers
 // (from report.toc.json, made with Word by tools/docx-pages.ps1), every part on a new page, the page number bottom right,
 // captions under figures and above tables, listings in Courier New 10 with a hanging indent for long lines.
-// Headings are 14 pt (STP 2.1.1). No italics, no tab characters in the text, no empty paragraphs, no non-breaking spaces in code.
+// Headings are 14 pt (STP 2.1.1). Every Latin letter is italic (the rule of the teacher), no tab characters, no empty paragraphs, no non-breaking spaces, no manual line breaks, no long dashes.
 const TEXT_WIDTH = 9355; // twips: 21 cm minus 3 cm and 1.5 cm
-const MAX_EMU_WIDTH = 5940000; // 16.5 cm
+const MAX_EMU_WIDTH = 3780000; // 10.5 cm: with the sections flowing on, narrow figures leave the fewest gaps on the pages
 const PAGE_EMU_HEIGHT = 10692000; // 29.7 cm
 const MAX_EMU_HEIGHT = Math.round(PAGE_EMU_HEIGHT * 0.6); // a figure may take 60 percent of the page height
 const CODE_CHAR = 120; // twips: one Courier New 10 pt character
@@ -25,24 +25,21 @@ const T = {
     faculty: 'Факультет информационных технологий и управления',
     department: 'Кафедра информационных технологий автоматизированных систем',
     discipline: 'Дисциплина: Интернет-технологии и веб-программирование',
-    report: 'ОТЧЁТ',
+    report: 'ОТЧЕТ',
     on: (n) => `по практическому занятию № ${n}`,
     variant: (v) => `Вариант № ${v}`,
-    // The noun follows the caption: «Выполнила» is a student (female), «Выполнил» a student (male).
-    done: (group, student, caption = 'Выполнила') => [
-      `${caption}: ${caption.endsWith('а') ? 'студентка' : 'студент'} гр. ${group || '________'}`,
-      student || '______________________',
-    ],
-    checked: (reviewer, caption = 'Проверил(а)') => `${caption}: ${reviewer || '______________________'}`,
+    // The signature block follows the samples: the caption «Выполнила:» (or «Выполнил:») on the left, then «ст. гр. N» and the initials in the right column.
+    done: (group, student, caption = 'Выполнила') => [`${caption}:`, `ст. гр. ${group || '________'}`, student || '______________________'],
+    checked: (reviewer, caption = 'Проверил(а)') => [`${caption}:`, reviewer || '______________________'],
     inAppendix: 'к подразделу',
     inSection: 'к разделу',
     appendixRef: (l) => new RegExp(`приложени\\S* ${l}(?![А-Яа-яЁё])`, 'i'),
     city: 'Минск 2026',
-    contents: 'СОДЕРЖАНИЕ',
+    contents: 'Содержание',
     unnumbered: /^(Заключение)$/,
     appendix: /^Приложение (\S) \(обязательное\) (.+)$/,
     appendixName: 'Приложение',
-    appendixWord: 'ПРИЛОЖЕНИЕ',
+    appendixWord: 'Приложение',
     mandatory: '(обязательное)',
     figure: 'Рисунок',
     table: 'Таблица',
@@ -61,17 +58,17 @@ const T = {
     report: 'REPORT',
     on: (n) => `on practical work No. ${n}`,
     variant: (v) => `Variant No. ${v}`,
-    done: (group, student, caption = 'Completed by') => [`${caption}: student of group ${group || '________'}`, student || '______________________'],
-    checked: (reviewer, caption = 'Checked by') => `${caption}: ${reviewer || '______________________'}`,
+    done: (group, student, caption = 'Completed by') => [`${caption}:`, `group ${group || '________'}`, student || '______________________'],
+    checked: (reviewer, caption = 'Checked by') => [`${caption}:`, reviewer || '______________________'],
     inAppendix: 'to subsection',
     inSection: 'to section',
     appendixRef: (l) => new RegExp(`appendix ${l}\\b`, 'i'),
     city: 'Minsk 2026',
-    contents: 'CONTENTS',
+    contents: 'Contents',
     unnumbered: /^(Conclusion)$/,
     appendix: /^Appendix (\S) \(mandatory\) (.+)$/,
     appendixName: 'Appendix',
-    appendixWord: 'APPENDIX',
+    appendixWord: 'Appendix',
     mandatory: '(mandatory)',
     figure: 'Figure',
     table: 'Table',
@@ -85,14 +82,26 @@ const T = {
 };
 
 const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+// Every Latin letter is set in italic (the rule of the teacher: a Word replace of [a-zA-Z] with italic), so a text is cut into
+// runs at the border of Latin and other characters. Non-breaking spaces never reach the file: they become plain spaces.
 const run = (text, { bold = false, size } = {}) =>
-  `<w:r><w:rPr>${bold ? '<w:b/>' : ''}${size ? `<w:sz w:val="${size}"/>` : ''}</w:rPr><w:t xml:space="preserve">${esc(text)}</w:t></w:r>`;
+  text
+    .replace(/[\u00a0\u202f]/g, ' ')
+    .replace(/ё/g, 'е')
+    .replace(/Ё/g, 'Е')
+    .split(/([A-Za-z]+)/)
+    .filter(Boolean)
+    .map((part) => {
+      const latin = /^[A-Za-z]/.test(part);
+      return `<w:r><w:rPr>${bold ? '<w:b/>' : ''}${latin ? '<w:i/><w:iCs/>' : ''}${size ? `<w:sz w:val="${size}"/>` : ''}</w:rPr><w:t xml:space="preserve">${esc(part)}</w:t></w:r>`;
+    })
+    .join('');
 
 const NBSP = String.fromCharCode(160);
 
 // A word that names a numbered thing stays on one line with its number.
 const NAMED = /(рисун\p{L}*|таблиц\p{L}*|приложени\p{L}*|раздел\p{L}*|подраздел\p{L}*|figure|table|appendix|section) (?=\d|[А-ЯA-Z](?![\p{L}]))/giu;
-const nb = (text) => text.replace(NAMED, `$1${NBSP}`);
+const nb = (text) => text; // no non-breaking spaces (rule of the teacher): a word and its number may be split at the end of a line
 
 // `code` is set as plain text in the font of the paragraph (Courier is kept for the listings) and **text** is bold.
 const inline = (text, base = {}) =>
@@ -106,6 +115,8 @@ const inline = (text, base = {}) =>
 
 const center = (text, { bold = false, size, after = 0, before = 0 } = {}) =>
   `<w:p><w:pPr><w:pStyle w:val="Plain"/><w:spacing w:before="${before}" w:after="${after}"/><w:jc w:val="center"/></w:pPr>${run(text, { bold, size })}</w:p>`;
+
+const left = (text, { after = 0 } = {}) => `<w:p><w:pPr><w:pStyle w:val="Plain"/><w:spacing w:before="0" w:after="${after}"/></w:pPr>${run(text)}</w:p>`;
 
 const pngSize = (buf) => ({ w: buf.readUInt32BE(16), h: buf.readUInt32BE(20) });
 
@@ -143,10 +154,10 @@ export const markdownToDocx = (md, { lang = 'ru', variant, read, meta = {}, page
   let letter = '';
   let gap = false; // the next paragraph follows a table and is set apart by spacing, not by an empty paragraph
 
-  const para = (style, content, { keepNext = false, jc = '', ind = '' } = {}) => {
+  const para = (style, content, { keepNext = false, jc = '', ind = '', pageBreak = false } = {}) => {
     const spacing = gap ? '<w:spacing w:before="240"/>' : '';
     gap = false;
-    return `<w:p><w:pPr><w:pStyle w:val="${style}"/>${keepNext ? '<w:keepNext/>' : ''}${spacing}${ind}${jc ? `<w:jc w:val="${jc}"/>` : ''}</w:pPr>${content}</w:p>`;
+    return `<w:p><w:pPr><w:pStyle w:val="${style}"/>${keepNext ? '<w:keepNext/>' : ''}${pageBreak ? '<w:pageBreakBefore/>' : ''}${spacing}${ind}${jc ? `<w:jc w:val="${jc}"/>` : ''}</w:pPr>${content}</w:p>`;
   };
 
   const image = (alt, src) => {
@@ -192,10 +203,16 @@ export const markdownToDocx = (md, { lang = 'ru', variant, read, meta = {}, page
     return `<w:tbl><w:tblPr><w:tblW w:w="${TEXT_WIDTH}" w:type="dxa"/><w:tblBorders>${b}</w:tblBorders><w:tblLayout w:type="fixed"/><w:tblCellMar><w:left w:w="85" w:type="dxa"/><w:right w:w="85" w:type="dxa"/></w:tblCellMar></w:tblPr><w:tblGrid>${grid}</w:tblGrid>${tr}</w:tbl>`;
   };
 
+  // The titles of the sections stand in capital letters in the body, the contents keeps the normal case. Only the first section (after the
+  // contents) and the appendices start a new page, the other sections follow on.
+  let firstSection = true;
   const h1 = (text, lines3, centered, entry = text) => {
     toc.push([1, lines3 ? entry : text]);
-    const content = lines3 ? lines3.map((l, i) => (i ? '<w:r><w:br/></w:r>' : '') + run(l)).join('') : run(text);
-    return para('Heading1', content, { jc: lines3 || centered ? 'center' : '' });
+    // The three lines of an appendix title are three paragraphs (no manual line break): the first one is the heading of the contents.
+    if (lines3) return lines3.map((l, i) => para(i ? 'HeadingNext' : 'Heading1', run(l), { jc: 'center', pageBreak: i === 0 })).join('');
+    const first = firstSection;
+    firstSection = false;
+    return para('Heading1', run(text.toUpperCase()), { jc: centered ? 'center' : '', pageBreak: first });
   };
 
   // One listing line: real spaces for the indent (a copy into an editor stays code), a hanging indent when the line wraps.
@@ -230,11 +247,11 @@ export const markdownToDocx = (md, { lang = 'ru', variant, read, meta = {}, page
             `${t.appendixName} ${letter} ${t.mandatory} ${ap[2]}${place ? ` (${place})` : ''}`,
           ),
         );
-      } else body.push(h1(text.toUpperCase(), null, t.unnumbered.test(text)));
+      } else body.push(h1(text, null, t.unnumbered.test(text)));
       i += 1;
     } else if (line.startsWith('### ')) {
       toc.push([2, line.slice(4)]);
-      body.push(para('Heading2', run(line.slice(4))));
+      body.push(para('Heading2', run(line.slice(4).toUpperCase())));
       i += 1;
     } else if (line.startsWith('```')) {
       const code = [];
@@ -279,20 +296,27 @@ export const markdownToDocx = (md, { lang = 'ru', variant, read, meta = {}, page
 
   const n = t.number.exec(title)?.[1] ?? '1';
   const name = title.includes('. ') ? title.slice(title.indexOf('. ') + 2) : title;
+  // The signature block of the samples (пз1.docx): a table without borders, the caption in the left column, the group and the name in the right one.
+  const signatures = ([doneCaption, group, student], [checkedCaption, reviewer]) => {
+    const widths = [6522, 2833];
+    const paras = (lines, before) => lines.map((text, k) => `<w:p><w:pPr><w:pStyle w:val="Plain"/><w:spacing w:before="${k === 0 ? before : 0}"/></w:pPr>${run(text)}</w:p>`).join('');
+    const row = (caption, lines, before) =>
+      `<w:tr><w:trPr><w:cantSplit/></w:trPr><w:tc><w:tcPr><w:tcW w:w="${widths[0]}" w:type="dxa"/></w:tcPr>${paras([caption], before)}</w:tc><w:tc><w:tcPr><w:tcW w:w="${widths[1]}" w:type="dxa"/></w:tcPr>${paras(lines, before)}</w:tc></w:tr>`;
+    return `<w:tbl><w:tblPr><w:tblW w:w="${TEXT_WIDTH}" w:type="dxa"/><w:tblLayout w:type="fixed"/></w:tblPr><w:tblGrid>${widths.map((w) => `<w:gridCol w:w="${w}"/>`).join('')}</w:tblGrid>${row(doneCaption, [group, student], 0)}${row(checkedCaption, [reviewer], 600)}</w:tbl>`;
+  };
   const titlePage = [
     ...t.lines.map((l, k) => center(l, { after: k === 2 ? 240 : 0 })),
-    center(t.faculty),
-    center(t.department, { after: 600 }),
-    center(t.discipline, { after: 1200 }),
+    // As in the samples, the faculty, the department and the discipline are left-aligned lines; only the university lines and the title are centred.
+    left(t.faculty, { after: 240 }),
+    left(t.department, { after: 240 }),
+    left(t.discipline, { after: 1200 }),
     center(t.report, { bold: true, size: 32, after: 120 }),
     center(t.on(n), { after: 240 }),
     center(`«${name}»`, { after: 480 }),
-    center(t.variant(meta.titleVariant ?? variant), { after: 1200 }),
-    ...t
-      .done(meta.group, meta.student, meta.doneCaption)
-      .map((line, k, all) => `<w:p><w:pPr><w:pStyle w:val="Plain"/><w:spacing w:after="${k === all.length - 1 ? 240 : 0}"/></w:pPr>${run(line)}</w:p>`),
-    `<w:p><w:pPr><w:pStyle w:val="Plain"/><w:spacing w:after="2400"/></w:pPr>${run(t.checked(meta.reviewer, meta.reviewerCaption))}</w:p>`,
-    center(t.city),
+    // the signature block stands two lines lower than the plain gap (a line is about 320 twips)
+    center(t.variant(meta.titleVariant ?? variant), { after: 1850 }),
+    signatures(t.done(meta.group, meta.student, meta.doneCaption), t.checked(meta.reviewer, meta.reviewerCaption)),
+    `<w:p><w:pPr><w:pStyle w:val="Plain"/><w:framePr w:w="${TEXT_WIDTH}" w:hRule="auto" w:wrap="around" w:vAnchor="margin" w:hAnchor="margin" w:xAlign="center" w:yAlign="bottom"/><w:jc w:val="center"/></w:pPr>${run(t.city)}</w:p>`,
   ].join('');
 
   const tocLine = ([level, text], k, all) => {
@@ -316,7 +340,8 @@ export const markdownToDocx = (md, { lang = 'ru', variant, read, meta = {}, page
   const styles = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:styles ${NS}><w:docDefaults><w:rPrDefault><w:rPr>${font}<w:sz w:val="28"/><w:szCs w:val="28"/><w:lang w:val="${lang === 'ru' ? 'ru-RU' : 'en-US'}"/></w:rPr></w:rPrDefault></w:docDefaults>
 <w:style w:type="paragraph" w:default="1" w:styleId="Plain"><w:name w:val="Plain"/><w:pPr><w:spacing w:after="0" w:line="240" w:lineRule="auto"/></w:pPr></w:style>
 <w:style w:type="paragraph" w:styleId="Normal"><w:name w:val="Normal Text"/><w:basedOn w:val="Plain"/><w:qFormat/><w:pPr><w:spacing w:after="0" w:line="276" w:lineRule="auto"/><w:ind w:firstLine="709"/><w:jc w:val="both"/></w:pPr></w:style>
-${ps('Heading1', 'heading 1', '<w:keepNext/><w:pageBreakBefore/><w:spacing w:after="360" w:line="276" w:lineRule="auto"/><w:outlineLvl w:val="0"/>', '<w:b/><w:sz w:val="28"/>')}
+${ps('Heading1', 'heading 1', '<w:keepNext/><w:spacing w:before="240" w:after="240" w:line="276" w:lineRule="auto"/><w:outlineLvl w:val="0"/>', '<w:b/><w:sz w:val="28"/>')}
+${ps('HeadingNext', 'Heading continued', '<w:keepNext/><w:spacing w:after="0" w:line="276" w:lineRule="auto"/>', '<w:b/><w:sz w:val="28"/>')}
 ${ps('Heading2', 'heading 2', '<w:keepNext/><w:spacing w:before="240" w:after="240" w:line="276" w:lineRule="auto"/><w:outlineLvl w:val="1"/>', '<w:b/>')}
 ${ps('Heading3', 'heading 3', '<w:keepNext/><w:spacing w:before="120" w:after="0" w:line="276" w:lineRule="auto"/><w:outlineLvl w:val="2"/>', '<w:b/>')}
 ${ps('Figure', 'Figure', '<w:keepNext/><w:keepLines/><w:spacing w:before="0" w:after="0" w:line="240" w:lineRule="auto"/><w:jc w:val="center"/>')}
@@ -372,7 +397,16 @@ export const lintDocx = (buf, { pages = true, figureHeight = true } = {}) => {
   const inToc = (p) => /<w:pStyle w:val="TOC[12]"\/>/.test(p);
   const ordinary = all.filter((p) => !inToc(p));
   const style = (p) => /<w:pStyle w:val="(\w+)"\/>/.exec(p)?.[1];
-  check(/<w:i[ />]/.test(xml + styles), 'Italic text');
+  // Every Latin letter is italic, no non-breaking space, no manual line break, no long dash (the rules of the teacher).
+  const runs = [...xml.matchAll(/<w:r>(<w:rPr>[^]*?<\/w:rPr>)?<w:t[^>]*>([^<]*)<\/w:t><\/w:r>/g)];
+  check(
+    runs.some(([, pr, text]) => /[A-Za-z]/.test(text.replace(/&[a-z]+;/g, '')) && !/<w:i\/>/.test(pr ?? '')),
+    'Latin letters that are not in italic',
+  );
+  check(/[\u00a0\u202f]/.test(xml), 'Non-breaking spaces in the text');
+  check(/<w:br\/>|<w:br w:clear/.test(xml), 'Manual line breaks, use a paragraph break');
+  check(/[\u2014\u2015\u2012]/.test(xml), 'Long dash, use the short dash');
+  check(/<w:i[ />]/.test(styles), 'Italic in a style, the italic is set in the runs');
   check(
     ordinary.some((p) => p.includes('<w:tab/>')),
     'Tab characters in the text',
@@ -398,7 +432,14 @@ export const lintDocx = (buf, { pages = true, figureHeight = true } = {}) => {
   );
   check(settings.includes('updateFields'), 'updateFields makes Word ask to update the fields on opening');
   check(/Calibri|Arial/.test(xml + styles), 'Fonts other than Times New Roman and Courier New');
-  check(!/w:styleId="Heading1">(?:(?!<\/w:style>)[\s\S])*?<w:pageBreakBefore\/>/.test(styles), 'Parts must start on a new page');
+  // The sections flow on: no forced page break in the style, only the first section and the appendices start a page.
+  check(/w:styleId="Heading1">(?:(?!<\/w:style>)[\s\S])*?<w:pageBreakBefore\/>/.test(styles), 'Sections must not start a new page by their style');
+  const heads = all.filter((p) => /<w:pStyle w:val="Heading[12]"\/>/.test(p) && !/^(?:Приложение|Appendix) /i.test(textOf(p)));
+  check(
+    heads.some((p) => textOf(p) !== textOf(p).toUpperCase()),
+    'Titles of sections and subsections must be in capital letters in the body',
+  );
+  check(/[ёЁ]/.test(xml), 'The letter ё must be written as е');
   check(
     all.some((p) => !/<w:drawing>|<w:fldChar|<w:br/.test(p) && !p.includes('<w:r>') && style(p) !== 'Code' && style(p) !== 'Footer'),
     'Empty paragraph',
@@ -408,7 +449,7 @@ export const lintDocx = (buf, { pages = true, figureHeight = true } = {}) => {
     'Courier New outside the listings',
   );
   check(
-    all.some((p) => style(p) === 'Code' && textOf(p).includes(NBSP)),
+    false,
     'Non-breaking spaces in a listing',
   );
   check(

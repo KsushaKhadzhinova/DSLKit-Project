@@ -24,9 +24,14 @@ const R = {
       spaces: 'Лишние пробелы в тексте (двойные, в конце строки, табуляция)',
       emptyParagraph: 'Пустой абзац: подряд больше одной пустой строки',
       dash: 'Дефис вместо тире «–» (в паузе или диапазоне)',
-      nbsp: 'Перед единицей измерения или знаком % нужен неразрывный пробел',
+      noNbsp: 'Неразрывные пробелы не используются, нужен обычный пробел',
+      yo: 'Буква «ё» не используется, нужна «е»',
+      tocLong: 'Название слишком длинное для одной строки содержания, нужно сократить',
+      noIntro: 'После заголовка раздела и до первого подраздела нужен абзац текста',
+      longDash: 'Длинное тире «—» не используется, нужно короткое «–»',
+      softBreak: 'Ручной перенос строки не используется, нужен новый абзац',
       tableRows: `Таблица длиннее ${MAX_TABLE_ROWS} строк, её нужно сократить или перенести`,
-      emptyCell: 'Пустая ячейка таблицы, нужен прочерк «—»',
+      emptyCell: 'Пустая ячейка таблицы, нужен прочерк «–»',
       tableRef: 'Нет ссылки в тексте на таблицу',
       figureGap: 'Рисунок отделяется пустой строкой до и после',
       captionDot: 'Точка в конце подписи рисунка или таблицы',
@@ -58,9 +63,14 @@ const R = {
       spaces: 'Extra spaces in the text (double, trailing, tab)',
       emptyParagraph: 'Empty paragraph: more than one blank line in a row',
       dash: 'Hyphen instead of the en dash "–" (pause or range)',
-      nbsp: 'A non-breaking space is required before a unit or the % sign',
+      noNbsp: 'Non-breaking spaces are not used, use a plain space',
+      yo: 'The letter ё is not used, write е',
+      tocLong: 'A title is too long for one line of the contents, shorten it',
+      noIntro: 'A paragraph of text is needed between a section title and its first subsection',
+      longDash: 'The long dash is not used, use the short dash',
+      softBreak: 'A manual line break is not used, start a new paragraph',
       tableRows: `Table longer than ${MAX_TABLE_ROWS} rows, shorten or move it`,
-      emptyCell: 'Empty table cell, use the dash "—"',
+      emptyCell: 'Empty table cell, use the dash "–"',
       tableRef: 'No reference to the table in the text',
       figureGap: 'A figure is separated by a blank line before and after',
       captionDot: 'Full stop at the end of a figure or table caption',
@@ -116,7 +126,16 @@ export const extraErrors = (text, lang, { variant, questions, database, reposito
   check(/\t|[^\S\n]$|(?<=\S)  +(?=\S)/m.test(flat.replace(/^(?:\||\s{4}).*$/gm, '')), m.spaces);
   check(/\n{3,}/.test(flat), m.emptyParagraph);
   check(/\s-\s|\d-\d/.test(prose.replace(/\d{4}-\d{2}-\d{2}/g, '')), m.dash);
-  check(r.units.test(prose), m.nbsp);
+  check(/[\u00a0\u202f]/.test(text), m.noNbsp);
+  check(/[ёЁ]/.test(text), m.yo);
+  // a line of the contents has to fit one line: the title, and for an appendix also the place «(к подразделу N.N)»
+  check(
+    text.split('\n').some((l) => /^##+ /.test(l) && l.replace(/^#+ /, '').length + (/^## (?:Приложение|Appendix) /.test(l) ? 19 : 0) > 62),
+    m.tocLong,
+  );
+  check(/^## [^\n]*\n\n### /m.test(text.replace(/^```[^]*?^```/gm, '')), m.noIntro);
+  check(/[\u2014\u2015\u2012]/.test(text), m.longDash);
+  check(/[\u2028]|<br ?\/?>/.test(text), m.softBreak);
   check(/(?<![*\w])\*[^*\s][^*\n]*\*(?!\*)|(?<!\w)_[^_\s]+_(?!\w)/.test(prose), m.italic);
   check(lang === 'ru' && numerals(prose), m.numeral);
   // The text of a control question is quoted from the task and left alone, like the quoted text.

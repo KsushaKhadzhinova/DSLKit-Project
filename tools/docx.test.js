@@ -10,7 +10,7 @@ const png = (w, h) => {
   b.writeUInt32BE(h, 20);
   return b;
 };
-const read = (p) => (p === 'big.png' ? png(3000, 2000) : p === 'tall.png' ? png(1000, 1400) : png(400, 300));
+const read = (p) => (p === 'big.png' ? png(3000, 2000) : p === 'tall.png' ? png(1000, 2000) : png(400, 300));
 const PAGES = [3, 3, 4, 5, 6, 7, 8];
 const NBSP = String.fromCharCode(160);
 
@@ -85,7 +85,15 @@ const en = ru
   .replace('Appendix Б', 'Appendix B')
   .replace('Appendix В', 'Appendix C');
 
-const xmlOf = (buf, name = 'word/document.xml') => unzip(buf)[name].toString('utf8');
+const rawXmlOf = (buf, name = 'word/document.xml') => unzip(buf)[name].toString('utf8');
+// The text runs of Latin letters are cut out of their line by the italic. For the other tests the italic marks are removed and the
+// neighbouring runs of one look are joined again, so a phrase with a file name is one run as it was before.
+const xmlOf = (buf, name = 'word/document.xml') => {
+  let x = rawXmlOf(buf, name).split('<w:i/><w:iCs/>').join('');
+  const join = /(<w:rPr>([^]*?)<\/w:rPr><w:t xml:space="preserve">[^<]*)<\/w:t><\/w:r><w:r><w:rPr>\2<\/w:rPr><w:t xml:space="preserve">/;
+  while (join.test(x)) x = x.replace(join, '$1');
+  return x;
+};
 const build = (md, lang = 'ru', extra = {}) => markdownToDocx(md, { lang, variant: 26, read, pages: PAGES, ...extra });
 const rezip = (buf, change) => {
   const files = unzip(buf);
@@ -166,14 +174,14 @@ test('the package has the parts, the page setup and the styles the rules ask for
   assert.match(xml, /<w:pgSz w:w="11906" w:h="16838"\/>/);
   assert.ok(xml.includes('<w:titlePg/>'));
   assert.ok(xml.includes('TOC \\o "1-2"'));
-  assert.match(xml, /ПРИЛОЖЕНИЕ А/);
+  assert.match(xml, /Приложение А/);
   assert.match(xml, /Листинг А\.1 – Файл app\.js/);
   assert.match(xml, /Листинг Б\.1 – Шаблон index\.ejs/);
   assert.match(xml, /Листинг В\.1 – Прочее/);
   assert.match(xml, /«Тема работы»/);
   assert.match(xml, /по практическому занятию № 3/);
   assert.match(xml, /Ответ &amp; &lt;теги&gt;\./);
-  assert.match(xml, /ЦЕЛЬ РАБОТЫ/);
+  assert.match(xml, /Цель работы/);
   const styles = xmlOf(buf, 'word/styles.xml');
   assert.match(styles, /w:styleId="Normal"[\s\S]*?w:firstLine="709"[\s\S]*?w:jc w:val="both"/);
   assert.match(styles, /w:styleId="Heading1"[\s\S]*?<w:pageBreakBefore\/>/);
@@ -190,8 +198,8 @@ test('the unnumbered part is centred, the images are scaled into the text area',
   assert.match(xml, /<w:jc w:val="center"\/><\/w:pPr><w:r><w:rPr><\/w:rPr><w:t xml:space="preserve">ЗАКЛЮЧЕНИЕ/);
   const extents = [...xml.matchAll(/<wp:extent cx="(\d+)" cy="(\d+)"\/>/g)].map((m) => [Number(m[1]), Number(m[2])]);
   assert.equal(extents.length, 2);
-  assert.ok(extents.every(([cx, cy]) => cx <= 5940000 && cy <= 6415200));
-  assert.deepEqual(extents[0], [3810000, 2857500]);
+  assert.ok(extents.every(([cx, cy]) => cx <= 3780000 && cy <= 6415200));
+  assert.deepEqual(extents[0], [3780000, 2835000]);
   assert.ok(xml.includes('keepNext'));
   assert.ok(xml.includes('cantSplit'));
 });
@@ -212,7 +220,7 @@ test('the contents carry page numbers and the appendix lines name the subsection
   const xml = xmlOf(build(ru));
   const toc = [...xml.matchAll(/<w:p><w:pPr><w:pStyle w:val="TOC([12])"\/><\/w:pPr>([\s\S]*?)<\/w:p>/g)];
   assert.equal(toc.length, 7);
-  assert.match(toc[0][2], /<w:t xml:space="preserve">1 ЦЕЛЬ РАБОТЫ<\/w:t><\/w:r><w:r><w:tab\/><\/w:r><w:r><w:rPr><\/w:rPr><w:t xml:space="preserve">3<\/w:t>/);
+  assert.match(toc[0][2], /<w:t xml:space="preserve">1 Цель работы<\/w:t><\/w:r><w:r><w:tab\/><\/w:r><w:r><w:rPr><\/w:rPr><w:t xml:space="preserve">3<\/w:t>/);
   assert.equal(toc[1][1], '2');
   assert.match(toc[4][2], /Приложение А \(обязательное\) Листинг файла app\.js \(к подразделу 1\.1\)<\/w:t>/);
   assert.match(toc[6][2], /<w:t xml:space="preserve">8<\/w:t><\/w:r><w:r><w:fldChar w:fldCharType="end"\/>/);
@@ -242,24 +250,25 @@ test('an appendix that no subsection mentions has no place in the contents', () 
 
 test('the title page takes the student and the group from the meta data, blanks stay lines', () => {
   const xml = xmlOf(build(ru, 'ru', { meta: { group: '123456', student: 'Иванов И. И.' } }));
-  assert.match(xml, /Выполнила: студентка гр\. 123456<[^]*?>Иванов И\. И\./);
-  assert.match(xmlOf(build(ru)), /студентка гр\. ________<[^]*?>______________________/);
-  assert.match(xmlOf(build(en, 'en', { meta: { group: 'G1', student: 'A. B.' } })), /Completed by: student of group G1<[^]*?>A\. B\./);
-  assert.match(xmlOf(build(en, 'en')), /student of group ________/);
-  assert.match(xml, /Проверил\(а\): ______________________/);
+  assert.match(xml, /Выполнила:<[^]*?>ст\. гр\. 123456<[^]*?>Иванов И\. И\./);
+  assert.match(xml, /<w:tbl><w:tblPr><w:tblW w:w="9355"[^]*?Выполнила:[^]*?Проверил\(а\):/);
+  assert.match(xmlOf(build(ru)), /ст\. гр\. ________<[^]*?>______________________/);
+  assert.match(xmlOf(build(en, 'en', { meta: { group: 'G1', student: 'A. B.' } })), /Completed by:<[^]*?>group G1<[^]*?>A\. B\./);
+  assert.match(xmlOf(build(en, 'en')), /group ________/);
+  assert.match(xml, /Проверил\(а\):<[^]*?>______________________/);
   const filled = xmlOf(build(ru, 'ru', { meta: { reviewer: 'А. Б. Иванов', reviewerCaption: 'Проверила', doneCaption: 'Выполнил', titleVariant: '100' } }));
-  assert.match(filled, /Проверила: А\. Б\. Иванов/);
-  assert.match(filled, /Выполнил: студент гр/);
+  assert.match(filled, /Проверила:<[^]*?>А\. Б\. Иванов/);
+  assert.match(filled, /Выполнил:<[^]*?>ст\. гр\./);
   assert.match(filled, /Вариант № 100/);
 });
 
-test('words that name a numbered thing stay on one line with the number, the sentence before a figure stays with it', () => {
+test('the sentence before a figure stays with it, a word and its number are separated by a plain space', () => {
   const xml = xmlOf(build(ru));
-  assert.ok(xml.includes(`рисунке${NBSP}1.`));
-  assert.ok(xml.includes(`Рисунок${NBSP}1 – Схема`));
-  assert.ok(xml.includes(`в таблице${NBSP}1.`));
-  assert.ok(xml.includes(`в приложении${NBSP}А,`));
-  assert.match(xml, new RegExp(`<w:pStyle w:val="Normal"/><w:keepNext/>[^]*?рисунке${NBSP}1\\.`));
+  assert.ok(xml.includes(`рисунке 1.`));
+  assert.ok(xml.includes(`Рисунок 1 – Схема`));
+  assert.ok(xml.includes(`в таблице 1.`));
+  assert.ok(xml.includes(`в приложении А,`));
+  assert.match(xml, new RegExp(`<w:pStyle w:val="Normal"/><w:keepNext/>[^]*?рисунке 1\\.`));
   assert.match(xml, /<\/w:tbl><w:p><w:pPr><w:pStyle w:val="Normal"\/><w:keepNext\/><w:spacing w:before="240"\/>/);
   assert.ok(!/<w:p><w:pPr><w:pStyle w:val="\w+"\/>(?:<w:keepNext\/>)?<\/w:pPr><\/w:p>/.test(xml.replace(/<w:pStyle w:val="Code"\/><\/w:pPr><\/w:p>/g, '')));
 });
@@ -271,7 +280,8 @@ test('table columns follow the length of their text and fill the text width', ()
     '| 400 | Некорректный запрос | Адрес или данные формы нельзя прочитать, потому что они не разобрались сервером |',
   ].join('\n');
   const xml = xmlOf(build(ru.replace('| a | b |\n|---|---|\n| 1 | 2 |\n| 3 | 4 |', table)));
-  const widths = [...xml.match(/<w:tblGrid>([\s\S]*?)<\/w:tblGrid>/)[1].matchAll(/w:w="(\d+)"/g)].map((m) => Number(m[1]));
+  // the first table is the signature block of the title page
+  const widths = [...[...xml.matchAll(/<w:tblGrid>([\s\S]*?)<\/w:tblGrid>/g)].at(-1)[1].matchAll(/w:w="(\d+)"/g)].map((m) => Number(m[1]));
   assert.equal(widths.length, 3);
   assert.equal(
     widths.reduce((a, b) => a + b, 0),
@@ -279,8 +289,8 @@ test('table columns follow the length of their text and fill the text width', ()
   );
   assert.ok(widths[0] < widths[1] && widths[1] < widths[2]);
   const equal = [
-    ...xmlOf(build(ru))
-      .match(/<w:tblGrid>([\s\S]*?)<\/w:tblGrid>/)[1]
+    ...[...xmlOf(build(ru)).matchAll(/<w:tblGrid>([\s\S]*?)<\/w:tblGrid>/g)]
+      .at(-1)[1]
       .matchAll(/w:w="(\d+)"/g),
   ].map((m) => Number(m[1]));
   assert.deepEqual(equal, [4677, 4678]);
@@ -291,8 +301,8 @@ test('the English build uses the English title page and names', () => {
   assert.match(xml, /on practical work No\. 3/);
   assert.match(xml, /Listing ..1 – File app\.js/);
   assert.match(xml, /Listing ..1 – Template index\.ejs/);
-  assert.match(xml, /APPENDIX ./);
-  assert.match(xml, /CONCLUSION/);
+  assert.match(xml, /Appendix ./);
+  assert.match(xml, /Conclusion/);
   assert.match(xml, /Variant No\. 26/);
   assert.deepEqual(lintDocx(buf), []);
 });
@@ -311,13 +321,17 @@ test('lintDocx reports every rule it knows', () => {
       lintDocx(buf).some((e) => e.includes(part)),
       part,
     );
-  has(rezip(base, { 'word/document.xml': (x) => x.replace('<w:b/>', '<w:i/>') }), 'Italic');
+  has(rezip(base, { 'word/document.xml': (x) => x.replace('<w:i/><w:iCs/>', '') }), 'not in italic');
+  has(rezip(base, { 'word/styles.xml': (x) => x.replace('<w:b/>', '<w:i/>') }), 'Italic in a style');
+  has(rezip(base, { 'word/document.xml': (x) => x.replace('Вторая строка', 'Вторая' + String.fromCharCode(160) + 'строка') }), 'Non-breaking spaces in the text');
+  has(rezip(base, { 'word/document.xml': (x) => x.replace('Вторая строка', 'Вторая</w:t><w:br/><w:t>строка') }), 'Manual line breaks');
+  has(rezip(base, { 'word/document.xml': (x) => x.replace('Вторая строка', 'Вторая ' + String.fromCharCode(0x2014) + ' строка') }), 'Long dash');
   has(rezip(base, { 'word/document.xml': (x) => x.replace('Вторая строка', '<w:tab/>Вторая') }), 'Tab');
   has(rezip(base, { 'word/document.xml': (x) => x.replace('w:left="1701"', 'w:left="1000"') }), 'Margins');
   has(rezip(base, { 'word/document.xml': (x) => x.replace('<w:titlePg/>', '') }), 'title page');
   has(rezip(base, { 'word/document.xml': (x) => x.replace('TOC \\o', 'XX \\o') }), 'table of contents');
   has(rezip(base, { 'word/styles.xml': (x) => x.replace('Times New Roman', 'Calibri') }), 'Fonts');
-  has(rezip(base, { 'word/styles.xml': (x) => x.replace(/(w:styleId="Heading1">[\s\S]*?)<w:pageBreakBefore\/>/, '$1') }), 'new page');
+  has(rezip(base, { 'word/styles.xml': (x) => x.replace(/(w:styleId="Heading1">[^]*?)<w:pPr>/, '$1<w:pPr><w:pageBreakBefore/>') }), 'must not start a new page');
   const noPages = build(ru, 'ru', { pages: undefined });
   has(noPages, 'page number');
   assert.deepEqual(lintDocx(noPages, { pages: false }), []);
@@ -335,11 +349,30 @@ test('lintDocx reports every rule it knows', () => {
     }),
     'Courier New outside',
   );
-  has(rezip(base, { 'word/document.xml': (x) => x.replace('const a = 1;', `const${NBSP}a = 1;`) }), 'Non-breaking');
-  has(rezip(base, { 'word/document.xml': (x) => x.replace('const a = 1;', `const a = ${'1'.repeat(90)};`) }), 'hanging indent');
+  has(rezip(base, { 'word/document.xml': (x) => x.replace('</w:t></w:r></w:p>', `${NBSP}</w:t></w:r></w:p>`) }), 'Non-breaking spaces in the text');
+  has(rezip(base, { 'word/document.xml': (x) => x.replace(/(<w:pStyle w:val="Code"\/>(?:(?!<\/w:p>)[^])*?<w:t xml:space="preserve">)/, `$1${'1'.repeat(90)}`) }), 'hanging indent');
   has(build(ru.replace('![Большая](big.png)', '![Высокая](tall.png)')), 'taller than 60 percent');
   assert.deepEqual(lintDocx(build(ru.replace('![Большая](big.png)', '![Высокая](tall.png)')), { figureHeight: false }), []);
   assert.deepEqual(lintDocx(build(ru.replace('![Большая](big.png)', '![Широкая](a.png)'))), []);
   has(rezip(base, { 'word/document.xml': (x) => x.replace('Вторая строка', ' Вторая  строка') }), 'Spaces');
   has(rezip(base, { 'word/document.xml': (x) => x.replace('Вторая строка', 'Вторая строка ') }), 'Spaces');
+});
+
+test('the city line stands at the bottom of the title page, the signature block two lines lower than before', () => {
+  const xml = xmlOf(build(ru));
+  assert.match(xml, /<w:framePr [^>]*w:vAnchor="margin"[^>]*w:yAlign="bottom"\/>[^]*?Минск 2026/);
+  assert.match(xml, /Вариант № [^<]*<\/w:t><\/w:r><\/w:p>/);
+  assert.ok(xml.includes('w:after="1850"'));
+});
+
+test('every Latin letter is italic, nothing else is, spaces and line breaks are plain', () => {
+  const xml = rawXmlOf(build(ru));
+  const runs = [...xml.matchAll(/<w:r>(<w:rPr>[^]*?<\/w:rPr>)?<w:t[^>]*>([^<]*)<\/w:t><\/w:r>/g)];
+  assert.ok(runs.length > 20);
+  for (const [, pr, text] of runs) assert.equal(/<w:i\/>/.test(pr ?? ''), /[A-Za-z]/.test(text.replace(/&[a-z]+;/g, '')), text);
+  assert.ok(runs.some(([, pr, text]) => text === 'js' && pr.includes('<w:i/><w:iCs/>')));
+  assert.ok(!/[\u00a0\u202f]/.test(xml));
+  assert.ok(!xml.includes('<w:br/>'));
+  const title = rawXmlOf(build(ru.replace('## 1 Цель работы', '## Приложение А (обязательное) Листинг файла app.js\n\nТекст.\n\n## 1 Цель работы')));
+  assert.ok(!title.includes('<w:br/>'));
 });
