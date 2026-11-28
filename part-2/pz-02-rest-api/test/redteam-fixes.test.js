@@ -300,13 +300,13 @@ test('the schemas object marks description and code as multiline, allowing a sto
 
 // --- redteam2-pz2.md, finding #2: no server-level request/header timeout (slowloris) ------------------------
 
-test('report #2 (slowloris): src/server.js sets explicit header/request timeouts well below Node\'s own defaults', async () => {
+test('report #2 (slowloris): src/start.js sets explicit header/request timeouts well below Node\'s own defaults', async () => {
   // Before this fix, src/server.js set no timeout at all: a client that sends headers and then trickles the
   // body in one byte at a time could hold a socket open for Node's default of 5 minutes (requestTimeout) with
   // only a 60 s headersTimeout, and the per-IP rate limiter only counts requests that finish, so it does
   // nothing against this. Reading the source (instead of actually waiting minutes for a timeout to fire) keeps
   // the test fast while still failing if the hardening lines are ever removed.
-  const src = await readFile(new URL('../src/server.js', import.meta.url), 'utf8');
+  const src = await readFile(new URL('../src/start.js', import.meta.url), 'utf8');
   const headersTimeout = Number(/headersTimeout\s*=\s*(\d+)/.exec(src)?.[1]);
   const requestTimeout = Number(/requestTimeout\s*=\s*(\d+)/.exec(src)?.[1]);
   assert.ok(headersTimeout > 0 && headersTimeout < 60_000, `headersTimeout (${headersTimeout}) should be set and below Node's 60 s default`);
