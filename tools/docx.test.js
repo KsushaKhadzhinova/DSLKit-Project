@@ -345,3 +345,10 @@ test('lintDocx reports every rule it knows', () => {
   has(rezip(base, { 'word/document.xml': (x) => x.replace('Вторая строка', ' Вторая  строка') }), 'Spaces');
   has(rezip(base, { 'word/document.xml': (x) => x.replace('Вторая строка', 'Вторая строка ') }), 'Spaces');
 });
+
+test('the city line stands at the bottom of the title page, the signature block two lines lower than before', () => {
+  const xml = xmlOf(build(ru));
+  assert.match(xml, /<w:framePr [^>]*w:vAnchor="margin"[^>]*w:yAlign="bottom"\/>[^]*?Минск 2026/);
+  assert.match(xml, /Вариант № [^<]*<\/w:t><\/w:r><\/w:p>/);
+  assert.ok(xml.includes('w:after="1850"'));
+});

@@ -295,9 +295,10 @@ export const markdownToDocx = (md, { lang = 'ru', variant, read, meta = {}, page
     center(t.report, { bold: true, size: 32, after: 120 }),
     center(t.on(n), { after: 240 }),
     center(`«${name}»`, { after: 480 }),
-    center(t.variant(meta.titleVariant ?? variant), { after: 1200 }),
+    // the signature block stands two lines lower than the plain gap (a line is about 320 twips)
+    center(t.variant(meta.titleVariant ?? variant), { after: 1850 }),
     signatures(t.done(meta.group, meta.student, meta.doneCaption), t.checked(meta.reviewer, meta.reviewerCaption)),
-    `<w:p><w:pPr><w:pStyle w:val="Plain"/><w:spacing w:before="2000"/><w:jc w:val="center"/></w:pPr>${run(t.city)}</w:p>`,
+    `<w:p><w:pPr><w:pStyle w:val="Plain"/><w:framePr w:w="${TEXT_WIDTH}" w:hRule="auto" w:wrap="around" w:vAnchor="margin" w:hAnchor="margin" w:xAlign="center" w:yAlign="bottom"/><w:jc w:val="center"/></w:pPr>${run(t.city)}</w:p>`,
   ].join('');
 
   const tocLine = ([level, text], k, all) => {
