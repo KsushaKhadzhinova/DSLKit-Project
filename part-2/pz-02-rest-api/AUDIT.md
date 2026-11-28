@@ -12,4 +12,4 @@
 | No CORS headers | Browser pages of other origins cannot call the API | Not changed: the task has no browser client, noted in `API.md` |
 | String fields are trimmed, so the leading indent of `code` is lost | Small data change | Not changed: trimming is documented behaviour and covered by tests |
 | Rate limit uses the socket address, behind a proxy all clients look the same | Wrong limit behind a proxy | Not changed: no proxy in this practical, needs `trust proxy` when deployed |
-| No authentication | Anyone can change data | Not changed: the task says none |
+| No real authentication | Roles by trusted headers only | Teaching simplification, see API.md |

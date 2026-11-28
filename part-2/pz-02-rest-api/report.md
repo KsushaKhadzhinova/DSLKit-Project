@@ -30,7 +30,7 @@
 
 У каждой записи есть служебные поля `id` и `createdAt`, которые клиент изменить не может. Данные ресурсов лежат в массивах в памяти, как требует условие, поэтому после перезапуска сервера возвращаются начальные записи: два пользователя, два проекта и три диаграммы. Журнал запросов лежит в таблице `request_log` базы данных SQLite. Файлы проекта и их назначение перечислены в таблице 2.
 
-Таблица 2 – Файлы проекта практического занятия 2
+Таблица 2 – Файлы проекта практического занятия №2
 
 | Файл | Назначение |
 | --- | --- |
@@ -46,7 +46,7 @@
 
 ### 3.2 Эндпоинты
 
-Для каждого ресурса реализованы шесть стандартных операций, а для диаграмм и проектов дополнительные. Все операции с методом, адресом, описанием, примером тела запроса и ожидаемым ответом приведены в таблице 3. Адрес `/api/users` стоит для примера, те же операции есть у `projects` и `diagrams`. Сборка приложения показана в приложении А, маршруты и обработчик ошибок в приложении Б, общая логика ресурсов в приложении Д, а проверка полей в приложении Е.
+Для каждого ресурса реализованы шесть стандартных операций, а для диаграмм и проектов дополнительные. Все операции с методом, адресом, описанием, примером тела запроса и ожидаемым ответом приведены в таблице 3. Адрес `/api/users` стоит для примера, те же операции есть у `projects` и `diagrams`. Сборка приложения показана в приложении А, маршруты и обработчик ошибок в приложении Б, общая логика ресурсов в приложении В, а проверка полей в приложении Г.
 
 Таблица 3 – Эндпоинты API с примерами запросов и ответов
 
@@ -87,7 +87,7 @@
 | 429 | За минуту прислано больше запросов, чем разрешено |
 | 500 | Сбой сервера, в том числе недоступный журнал запросов |
 
-Удаление пользователя с проектами и проекта с диаграммами отклоняется кодом 409, а не удаляет связанные записи молча. Если родитель удаляется в тот момент, когда к нему добавляют дочернюю запись, исход всегда один из трёх: 201, 404 или 409. Ответа 5xx и «висячей» записи без родителя не бывает, это проверяют тесты гонок. Условный запрос с заголовком `If-Match` защищает от потерянного изменения: если запись уже изменили, ответ 412.
+Удаление пользователя с проектами и проекта с диаграммами отклоняется кодом 409, а не удаляет связанные записи молча. Если родитель удаляется в тот момент, когда к нему добавляют дочернюю запись, исход всегда один из трёх: 201, 404 или 409. Ответа 5xx и «висячей» записи без родителя не бывает. Тест создаёт проект и одновременно удаляет его владельца в обоих порядках, а другой тест отправляет двадцать параллельных запросов всех видов и проверяет, что нет ответов 5xx и номера не повторяются. Условный запрос с заголовком `If-Match` защищает от потерянного изменения: если запись уже изменили, ответ 412.
 
 ### 3.4 Роли и ответ 403
 
@@ -104,19 +104,19 @@
 | Удалять проект | 403 | да |
 | Изменять, удалять, публиковать, копировать диаграмму и создавать её | только в своём проекте, иначе 403 | да |
 
-Неверное значение заголовка даёт 400, а номер несуществующего пользователя в `X-User-Id` даёт 403. Сначала проверяется, что запись есть (404), потом права (403), потом тело запроса. Заголовки принимаются на веру: это учебное упрощение, настоящая система берёт личность из проверенной сессии или токена. Листинг приведён в приложении Г.
+Неверное значение заголовка даёт 400, а номер несуществующего пользователя в `X-User-Id` даёт 403. Сначала проверяется, что запись есть (404), потом права (403), потом тело запроса. Заголовки принимаются на веру: это учебное упрощение, настоящая система берёт личность из проверенной сессии или токена. Листинг приведён в приложении Д.
 
 ### 3.5 Журнал запросов и порядок действий
 
-Журнал лежит в таблице `request_log` базы данных SQLite со столбцами время, метод, путь, адрес клиента, код ответа и номер запроса `request_id`. Порядок для каждого запроса такой. Сначала сервер присваивает запросу номер и отдаёт его в заголовке `X-Request-Id`. Затем до выполнения действия в таблицу вставляется строка с временем, методом, путём, адресом клиента и номером запроса. Если вставка не удалась, действие не выполняется, а клиент получает ответ 500 с кодом `journal_unavailable`: работать без журнала запрещено. Если вставка удалась, действие выполняется, а в строку дописывается итоговый код ответа. Неудачные попытки с кодами 400, 404, 409 и 412 тоже остаются в журнале.
+Журнал лежит в таблице `request_log` базы данных SQLite со столбцами время, метод, путь, адрес клиента, код ответа и номер запроса `request_id`. Порядок для каждого запроса такой. Сначала сервер присваивает запросу номер и отдаёт его в заголовке `X-Request-Id`. Затем до выполнения действия в таблицу вставляется строка с временем, методом, путём, адресом клиента и номером запроса. Если вставка не удалась, действие не выполняется, а клиент получает ответ 500 с кодом `journal_unavailable`: работать без журнала запрещено. Если вставка удалась, действие выполняется, а в строку дописывается итоговый код ответа. Неудачные попытки с кодами 400, 403, 404, 409 и 412 тоже остаются в журнале.
 
-В журнал не попадают две группы запросов: проверка работоспособности `GET /health` и запросы, отклонённые ограничением частоты с кодом 429. Проверка работоспособности идёт до журнала, чтобы мониторинг не засорял таблицу и не расходовал лимит. Лишние запросы отклоняются до журнала, чтобы их поток не заполнял таблицу. Запись в журнал и действие над данными не лежат в одной транзакции, потому что данные ресурсов живут в массиве, поэтому правило «нет записи, нет действия» обеспечено порядком шагов. Если сбой случится уже после действия, при записи итогового кода, ответ клиенту не меняется, а ошибка пишется в консоль сервера. Листинг приведён в приложении В.
+В журнал не попадают две группы запросов: проверка работоспособности `GET /health` и запросы, отклонённые ограничением частоты с кодом 429. Проверка работоспособности идёт до журнала, чтобы мониторинг не засорял таблицу и не расходовал лимит. Лишние запросы отклоняются до журнала, чтобы их поток не заполнял таблицу. Запись в журнал и действие над данными не лежат в одной транзакции, потому что данные ресурсов живут в массиве, поэтому атомарность «нет записи, нет действия» обеспечена порядком шагов: отказ журнала отменяет действие. Если сбой случится уже после действия, при записи итогового кода, ответ клиенту не меняется, а ошибка пишется в консоль сервера. Листинг приведён в приложении Е.
 
 Сбой журнала воспроизводится при запущенном сервере, а не кнопкой. Сервер запускается командой `$env:JOURNAL_FILE='demo.sqlite'; npm start`, затем в другом окне командой `node tools/break-journal.mjs demo.sqlite` удаляется таблица журнала, и любой запрос получает ответ 500. Вернуть таблицу можно командой `node tools/break-journal.mjs demo.sqlite --restore`. Переменная окружения удаляется командой `Remove-Item Env:JOURNAL_FILE`. Таблица журнала с реальными строками показана на рисунке 1.
 
-![Таблица request_log](figures/owner-journal-table.png)
+![Таблица request_log](figures/journal-table.png)
 
-Рисунок 1 – Таблица request_log в базе данных SQLite со столбцами метода, пути, кода ответа и номера запроса
+Рисунок 1 – Таблица request_log в базе данных SQLite, выведенная в окне PowerShell: метод, путь, код ответа и номер запроса
 
 ### 3.6 Страницы ошибок
 
@@ -140,109 +140,113 @@
 
 Страница 403 появляется, когда обычный пользователь пытается удалить проект. Браузер не умеет отправлять заголовки `X-User-Id` и `DELETE` из адресной строки, поэтому снимок сделан в Postman и показан на рисунке 5.
 
-![Ответ 403](figures/owner-error-403.png)
+![Ответ 403](figures/postman-403.png)
 
 Рисунок 5 – Ответ 403 на запрос DELETE /api/projects/1 с заголовком X-User-Id обычного пользователя
 
 ### 3.7 Документация API
 
-Маршрут `GET /api/openapi.json` отдаёт описание API в формате OpenAPI 3.0. Оно строится из тех же схем, которые проверяют запросы, поэтому длины полей, списки допустимых значений и обязательные поля в документе совпадают с кодом. Документ можно открыть в Swagger UI или импортировать в Postman. Справочник по операциям собирается из того же документа скриптом `tools/gen-api-md.mjs` в файлы `API.generated.ru.md` и `API.generated.en.md`. Тест сравнивает их с ответом сервера, поэтому они не расходятся с кодом. Для каждой операции в справочнике указаны возможные коды ошибок.
+Маршрут `GET /api/openapi.json` отдаёт описание API в формате OpenAPI 3.0. Оно строится из тех же схем, которые проверяют запросы, поэтому длины полей, списки допустимых значений и обязательные поля в документе совпадают с кодом. Документ можно открыть в Swagger UI или импортировать в Postman. Описание открыто в окне браузера по адресу `http://localhost:4230/api/openapi.json`, фрагмент показан на рисунке 6. В нём у операций изменения и удаления есть заголовки `X-User-Id` и `X-Role` и ответ 403. Справочник по операциям собирается из того же документа скриптом `tools/gen-api-md.mjs` в файлы `API.generated.ru.md` и `API.generated.en.md`. Тест сравнивает их с ответом сервера, поэтому они не расходятся с кодом. Для каждой операции в справочнике указаны возможные коды ошибок.
+
+![Описание API](figures/api-docs.png)
+
+Рисунок 6 – Описание API в формате OpenAPI по адресу GET /api/openapi.json в окне браузера: пути, параметры, заголовки ролей и коды ответов
 
 ### 3.8 Проверка запросов в Postman
 
-Все операции проверены в Postman по коллекции `postman_collection.json`, а тот же набор запросов лежит в файле `requests.http`. Для каждого метода сделан отдельный снимок окна: запрос, код ответа и тело ответа. Чтение списка запросом `GET /api/users` показано на рисунке 6.
+Все операции проверены в Postman по коллекции `postman_collection.json`, а тот же набор запросов лежит в файле `requests.http`. Для каждого метода сделан отдельный снимок окна: запрос, код ответа и тело ответа. Чтение списка запросом `GET /api/users` показано на рисунке 7.
 
-![GET /api/users](figures/owner-postman-get.png)
+![GET /api/users](figures/postman-get.png)
 
-Рисунок 6 – Запрос GET /api/users и ответ 200 со списком пользователей в Postman
+Рисунок 7 – Запрос GET /api/users и ответ 200 со списком пользователей в Postman
 
-Создание диаграммы запросом `POST /api/diagrams` с телом JSON показано на рисунке 7.
+Создание диаграммы запросом `POST /api/diagrams` с телом JSON показано на рисунке 8.
 
-![POST /api/diagrams](figures/owner-postman-post.png)
+![POST /api/diagrams](figures/postman-post.png)
 
-Рисунок 7 – Запрос POST /api/diagrams с телом JSON и ответ 201 в Postman
+Рисунок 8 – Запрос POST /api/diagrams с телом JSON и ответ 201 в Postman
 
-Полная замена записи запросом `PUT /api/users/2` показана на рисунке 8.
+Полная замена записи запросом `PUT /api/users/2` показана на рисунке 9.
 
-![PUT /api/users/2](figures/owner-postman-put.png)
+![PUT /api/users/2](figures/postman-put.png)
 
-Рисунок 8 – Запрос PUT /api/users/2 с полным телом и ответ 200 с новыми полями в Postman
+Рисунок 9 – Запрос PUT /api/users/2 с полным телом и ответ 200 с новыми полями в Postman
 
-Частичное изменение запросом `PATCH /api/users/1` показано на рисунке 9.
+Частичное изменение запросом `PATCH /api/users/1` показано на рисунке 10.
 
-![PATCH /api/users/1](figures/owner-postman-patch.png)
+![PATCH /api/users/1](figures/postman-patch.png)
 
-Рисунок 9 – Запрос PATCH /api/users/1 с телом из одного поля и ответ 200 в Postman
+Рисунок 10 – Запрос PATCH /api/users/1 с телом из одного поля и ответ 200 в Postman
 
-Удаление диаграммы запросом `DELETE /api/diagrams/2` проходит без тела ответа, как на рисунке 10.
+Удаление диаграммы запросом `DELETE /api/diagrams/2` проходит без тела ответа, как на рисунке 11.
 
-![DELETE /api/diagrams/2](figures/owner-postman-delete.png)
+![DELETE /api/diagrams/2](figures/postman-delete.png)
 
-Рисунок 10 – Запрос DELETE /api/diagrams/2 и ответ 204 без тела в Postman
+Рисунок 11 – Запрос DELETE /api/diagrams/2 и ответ 204 без тела в Postman
 
-Удаление пользователя, который ещё владеет проектами, отклоняется кодом 409, как на рисунке 11.
+Удаление пользователя, который ещё владеет проектами, отклоняется кодом 409, как на рисунке 12.
 
-![DELETE /api/users/1](figures/owner-postman-delete-409.png)
+![DELETE /api/users/1](figures/postman-delete-409.png)
 
-Рисунок 11 – Запрос DELETE /api/users/1 и ответ 409 о том, что пользователь владеет проектами, в Postman
+Рисунок 12 – Запрос DELETE /api/users/1 и ответ 409 о том, что пользователь владеет проектами, в Postman
 
-Запрос `POST /api/users` с пустым именем и неверной почтой отклоняется, как на рисунке 12.
+Запрос `POST /api/users` с пустым именем и неверной почтой отклоняется, как на рисунке 13.
 
-![POST /api/users с неверными данными](figures/owner-postman-validation.png)
+![POST /api/users с неверными данными](figures/postman-validation.png)
 
-Рисунок 12 – Запрос POST /api/users с неверными данными и ответ 400 с перечнем проблем полей в Postman
+Рисунок 13 – Запрос POST /api/users с неверными данными и ответ 400 с перечнем проблем полей в Postman
 
 ### 3.9 Проверка запросов из браузера
 
-Браузер отправляет из адресной строки только запросы `GET`, остальные методы показаны в Postman выше. Сервер запущен командой `npm start`, а запросы открыты в окне браузера. Ответ `GET /api/users` по адресу `http://localhost:3000/api/users` показан на рисунке 13.
+Браузер отправляет из адресной строки только запросы `GET`, остальные методы показаны в Postman выше. Сервер запущен командой `npm start` с переменной `PORT`, равной 4230, а запросы открыты в окне браузера Chrome с адресной строкой. Ответ `GET /api/users` по адресу `http://localhost:4230/api/users` показан на рисунке 14.
 
 ![Список пользователей](figures/02-users-list.png)
 
-Рисунок 13 – Ответ GET /api/users в окне браузера: массив пользователей и объект meta
+Рисунок 14 – Ответ GET /api/users в окне браузера: массив пользователей и объект meta
 
-Одна запись по адресу `http://localhost:3000/api/users/1` показана на рисунке 14.
+Одна запись по адресу `http://localhost:4230/api/users/1` показана на рисунке 15.
 
 ![Один пользователь](figures/03-user-one.png)
 
-Рисунок 14 – Ответ GET /api/users/1 в окне браузера: объект одного пользователя
+Рисунок 15 – Ответ GET /api/users/1 в окне браузера: объект одного пользователя
 
-Запрос несуществующей записи по адресу `http://localhost:3000/api/users/999` даёт ошибку, показанную на рисунке 15.
+Запрос несуществующей записи по адресу `http://localhost:4230/api/users/999` даёт ошибку, показанную на рисунке 16.
 
 ![Ответ 404](figures/04-user-404.png)
 
-Рисунок 15 – Ответ GET /api/users/999 в окне браузера: страница ошибки 404 с номером запроса
+Рисунок 16 – Ответ GET /api/users/999 в окне браузера: страница ошибки 404 с номером запроса
 
-Неверный номер в адресе `http://localhost:3000/api/users/abc` отклоняется, как на рисунке 16.
+Неверный номер в адресе `http://localhost:4230/api/users/abc` отклоняется, как на рисунке 17.
 
 ![Ответ 400](figures/05-user-400.png)
 
-Рисунок 16 – Ответ GET /api/users/abc в окне браузера: страница ошибки 400 с пояснением
+Рисунок 17 – Ответ GET /api/users/abc в окне браузера: страница ошибки 400 с пояснением
 
-Поиск, сортировка и страницы работают через параметры адреса `?q=billing&sort=-title&page=1&limit=10`, результат показан на рисунке 17.
+Поиск, сортировка и страницы работают через параметры адреса `?q=billing&sort=-title&page=1&limit=10`, результат показан на рисунке 18.
 
 ![Поиск и сортировка](figures/06-diagrams-search.png)
 
-Рисунок 17 – Ответ GET /api/diagrams с параметрами q, sort, page и limit в окне браузера
+Рисунок 18 – Ответ GET /api/diagrams с параметрами q, sort, page и limit в окне браузера
 
-Дополнительный маршрут `GET /api/users/1/projects` возвращает проекты одного пользователя, как на рисунке 18.
+Дополнительный маршрут `GET /api/users/1/projects` возвращает проекты одного пользователя, как на рисунке 19.
 
 ![Проекты пользователя](figures/07-user-projects.png)
 
-Рисунок 18 – Ответ GET /api/users/1/projects в окне браузера: проекты пользователя
+Рисунок 19 – Ответ GET /api/users/1/projects в окне браузера: проекты пользователя
 
 ### 3.10 Автоматическая проверка
 
-Автоматические тесты запускают сервер на свободном порту и проверяют каждый метод, коды ответов, фильтры, сортировку, страницы, ошибки проверки, связи между ресурсами, дополнительные операции, роли с ответом 403, порядок «запись журнала до действия», сбой журнала с ответом 500, исключение из журнала `/health` и ответа 429, гонки при удалении родителя и страницы ошибок. Тестов сервера 173, вместе с проверками отчёта команда выводит 176, а покрытие строк, ветвей и функций равно 100 процентам. Команда запуска: `npm test` в каталоге проекта. Сообщение консоли при запуске сервера показано на рисунке 19.
+Автоматические тесты запускают сервер на свободном порту и проверяют каждый метод, коды ответов, фильтры, сортировку, страницы, ошибки проверки, связи между ресурсами, дополнительные операции, роли с ответом 403, порядок «запись журнала до действия», сбой журнала с ответом 500, исключение из журнала `/health` и ответа 429, гонки при удалении родителя и страницы ошибок. Тестов сервера 173, вместе с проверками отчёта команда выводит 176, а покрытие строк, ветвей и функций равно 100 процентам. Команда запуска: `npm test` в каталоге проекта. Сообщение консоли при запуске сервера показано на рисунке 20.
 
-![Консоль сервера](figures/owner-console.png)
+![Консоль сервера](figures/console.png)
 
-Рисунок 19 – Сообщение консоли после запуска сервера командой npm start
+Рисунок 20 – Окно PowerShell с сообщением сервера после запуска командой npm start на порту 4236
 
-Результат команды `npm test` с числом тестов и покрытием кода показан на рисунке 20.
+Результат команды `npm test` с числом тестов и покрытием кода показан на рисунке 21.
 
 ![Результат тестов](figures/owner-tests.png)
 
-Рисунок 20 – Конец вывода команды npm test: число пройденных тестов и таблица покрытия
+Рисунок 21 – Конец вывода команды npm test: число пройденных тестов и таблица покрытия
 
 ## 4 Ответы на контрольные вопросы
 
@@ -482,156 +486,7 @@ export const createApp = ({
 };
 ```
 
-## Приложение В (обязательное) Листинг journal.js, журнал запросов
-
-```js
-export const createJournal = (file = ':memory:') => {
-  const db = new DatabaseSync(file);
-  db.exec(`CREATE TABLE IF NOT EXISTS request_log (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    created_at TEXT NOT NULL,
-    method TEXT NOT NULL,
-    path TEXT NOT NULL,
-    ip TEXT NOT NULL,
-    status INTEGER,
-    request_id TEXT
-  )`);
-  // A journal file made before the Request ID existed gets the column added instead of failing on every insert.
-  if (!db.prepare('PRAGMA table_info(request_log)').all().some((column) => column.name === 'request_id')) db.exec('ALTER TABLE request_log ADD COLUMN request_id TEXT');
-  const insert = db.prepare('INSERT INTO request_log (created_at, method, path, ip, request_id) VALUES (?, ?, ?, ?, ?)');
-  const finish = db.prepare('UPDATE request_log SET status = ? WHERE id = ?');
-  const recent = db.prepare('SELECT id, created_at, method, path, ip, status, request_id FROM request_log ORDER BY id DESC LIMIT ?');
-  return {
-    begin: ({ method, path, ip, requestId = null, at = new Date().toISOString() }) => Number(insert.run(at, method, path, ip, requestId).lastInsertRowid),
-    finish: (id, status) => finish.run(status, id),
-    recent: (count = 20) => recent.all(count),
-    close: () => db.close(),
-  };
-};
-
-// Express middleware. The path is cut so one huge URL cannot fill the table.
-export const journaling = (journal, writeError = console.error) => (req, res, next) => {
-  let id;
-  try {
-    id = journal.begin({ method: req.method, path: req.originalUrl.slice(0, 300), ip: req.ip ?? 'unknown', requestId: res.locals.requestId });
-  } catch (err) {
-    writeError(`[journal] cannot write ${logSafe(req.method)} ${logSafe(req.originalUrl)} request ${res.locals.requestId}`, err);
-    return next(new ApiError(500, 'journal_unavailable', 'The request journal is unavailable, the request was not carried out'));
-  }
-  // The answer is already gone when this runs, so a failure here can only be reported, not turned into a 500.
-  res.on('finish', () => {
-    try {
-      journal.finish(id, res.statusCode);
-    } catch (err) {
-      writeError('[journal] cannot record the status', err);
-    }
-  });
-  return next();
-};
-```
-
-## Приложение Г (обязательное) Листинг security.js, роли и защита
-
-```js
-import { randomUUID } from 'node:crypto';
-import { ApiError } from './errors.js';
-
-// Headers for a JSON-only API, set by hand without extra packages. The API sends no HTML, so the policy forbids everything.
-export const securityHeaders = (req, res, next) => {
-  res.set({
-    'Content-Security-Policy': "default-src 'none'; frame-ancestors 'none'",
-    'X-Content-Type-Options': 'nosniff',
-    'X-Frame-Options': 'DENY',
-    'Referrer-Policy': 'no-referrer',
-    'Cache-Control': 'no-store',
-  });
-  next();
-};
-
-// An IPv4 client reaching a dual-stack server is seen by Node as "::ffff:<ipv4>" on some connections and as the
-// plain "<ipv4>" on others; without this the same client gets two separate buckets and can double its quota.
-const bucketKey = (ip) => (typeof ip === 'string' && ip.startsWith('::ffff:') ? ip.slice(7) : ip ?? 'unknown');
-
-// Fixed-window rate limit per client address, kept in memory. The answer is the usual JSON error with Retry-After.
-//
-// Cleanup is amortized, not a periodic full scan: every call walks at most SWEEP_BATCH map entries (resuming
-// where the previous call left off) and drops the ones that expired, so the per-request cost stays bounded
-// however large the map has grown, instead of occasionally scanning the whole thing (a CPU-cost amplifier an
-// attacker rotating addresses could lean on). maxClients is a hard ceiling on distinct addresses tracked at
-// once: once it is reached, the oldest tracked address is evicted to make room, so the map itself cannot grow
-// without bound even if the sweep never catches up (for example many different IPv6 addresses, each used once).
-const SWEEP_BATCH = 500;
-
-export const rateLimit = ({ windowMs, max, now = Date.now, maxClients = 50000 }) => {
-  const hits = new Map();
-  let cursor = null;
-
-  const sweep = (time) => {
-    const iterator = cursor ?? hits.entries();
-    for (let i = 0; i < SWEEP_BATCH; i += 1) {
-      const next = iterator.next();
-      if (next.done) {
-        cursor = null;
-        return;
-      }
-      const [key, entry] = next.value;
-      if (entry.reset <= time) hits.delete(key);
-    }
-    cursor = iterator;
-  };
-
-  return (req, res, next) => {
-    const time = now();
-    sweep(time);
-    const key = bucketKey(req.ip);
-    let entry = hits.get(key);
-    if (!entry || entry.reset <= time) {
-      if (!entry && hits.size >= maxClients) {
-        const oldest = hits.keys().next().value;
-        if (oldest !== undefined) hits.delete(oldest);
-      }
-      entry = { count: 0, reset: time + windowMs };
-      hits.set(key, entry);
-    }
-    entry.count += 1;
-    if (entry.count <= max) return next();
-    const retryAfter = Math.max(1, Math.ceil((entry.reset - time) / 1000));
-    res.set('Retry-After', String(retryAfter));
-    return next(new ApiError(429, 'too_many_requests', `Too many requests, try again in ${retryAfter} s`));
-  };
-};
-
-// Request data in a log line could carry line breaks and forge extra lines, so it is written as a JSON string (escaped and quoted).
-export const logSafe = (text) => JSON.stringify(String(text)).slice(0, 300);
-
-// Every request gets its own id, always generated here (a client-supplied value could forge or collide with log
-// lines). It travels in the X-Request-Id header, in the journal row and in every error answer.
-export const requestId = (req, res, next) => {
-  res.locals.requestId = randomUUID();
-  res.set('X-Request-Id', res.locals.requestId);
-  next();
-};
-
-// A deliberately small identity for this practical (there is no login): X-User-Id says who is acting, X-Role is
-// "user" (the default) or "admin". Without X-User-Id the caller is anonymous and is not restricted, as before roles
-// existed; with it, the ownership rules of the routes apply. The headers are trusted as they come, a real system
-// would take them from a verified session.
-export const identify = (findUser) => (req, res, next) => {
-  const role = req.headers['x-role'] ?? 'user';
-  if (role !== 'user' && role !== 'admin') return next(new ApiError(400, 'invalid_identity', 'X-Role must be user or admin'));
-  const raw = req.headers['x-user-id'];
-  if (raw === undefined) {
-    req.actor = { role };
-    return next();
-  }
-  if (!/^[1-9]\d{0,14}$/.test(raw)) return next(new ApiError(400, 'invalid_identity', 'X-User-Id must be a positive whole number'));
-  if (!findUser(Number(raw))) return next(new ApiError(403, 'forbidden', 'X-User-Id names a user that does not exist'));
-  req.actor = { userId: Number(raw), role };
-  return next();
-};
-```
-
-## Приложение Д (обязательное) Листинг resource.js, общие маршруты ресурса
+## Приложение В (обязательное) Листинг resource.js, общие маршруты ресурса
 
 ```js
 // A weak tag computed from the record itself, so it changes exactly when the record changes and needs no extra field.
@@ -785,7 +640,7 @@ export const createResourceRouter = ({ label, collection, schema, hooks = {}, hi
 };
 ```
 
-## Приложение Е (обязательное) Листинг validation.js, проверка полей
+## Приложение Г (обязательное) Листинг validation.js, проверка полей
 
 ```js
 // C0/C1 control characters (NUL, BEL, newline, ...) minus tab/newline/CR, which `multiline` fields allow.
@@ -869,5 +724,154 @@ export const trimStrings = (schema, body) => {
     result[field] = schema[field].transform ? schema[field].transform(trimmed) : trimmed;
   }
   return result;
+};
+```
+
+## Приложение Д (обязательное) Листинг security.js, роли и защита
+
+```js
+import { randomUUID } from 'node:crypto';
+import { ApiError } from './errors.js';
+
+// Headers for a JSON-only API, set by hand without extra packages. The API sends no HTML, so the policy forbids everything.
+export const securityHeaders = (req, res, next) => {
+  res.set({
+    'Content-Security-Policy': "default-src 'none'; frame-ancestors 'none'",
+    'X-Content-Type-Options': 'nosniff',
+    'X-Frame-Options': 'DENY',
+    'Referrer-Policy': 'no-referrer',
+    'Cache-Control': 'no-store',
+  });
+  next();
+};
+
+// An IPv4 client reaching a dual-stack server is seen by Node as "::ffff:<ipv4>" on some connections and as the
+// plain "<ipv4>" on others; without this the same client gets two separate buckets and can double its quota.
+const bucketKey = (ip) => (typeof ip === 'string' && ip.startsWith('::ffff:') ? ip.slice(7) : ip ?? 'unknown');
+
+// Fixed-window rate limit per client address, kept in memory. The answer is the usual JSON error with Retry-After.
+//
+// Cleanup is amortized, not a periodic full scan: every call walks at most SWEEP_BATCH map entries (resuming
+// where the previous call left off) and drops the ones that expired, so the per-request cost stays bounded
+// however large the map has grown, instead of occasionally scanning the whole thing (a CPU-cost amplifier an
+// attacker rotating addresses could lean on). maxClients is a hard ceiling on distinct addresses tracked at
+// once: once it is reached, the oldest tracked address is evicted to make room, so the map itself cannot grow
+// without bound even if the sweep never catches up (for example many different IPv6 addresses, each used once).
+const SWEEP_BATCH = 500;
+
+export const rateLimit = ({ windowMs, max, now = Date.now, maxClients = 50000 }) => {
+  const hits = new Map();
+  let cursor = null;
+
+  const sweep = (time) => {
+    const iterator = cursor ?? hits.entries();
+    for (let i = 0; i < SWEEP_BATCH; i += 1) {
+      const next = iterator.next();
+      if (next.done) {
+        cursor = null;
+        return;
+      }
+      const [key, entry] = next.value;
+      if (entry.reset <= time) hits.delete(key);
+    }
+    cursor = iterator;
+  };
+
+  return (req, res, next) => {
+    const time = now();
+    sweep(time);
+    const key = bucketKey(req.ip);
+    let entry = hits.get(key);
+    if (!entry || entry.reset <= time) {
+      if (!entry && hits.size >= maxClients) {
+        const oldest = hits.keys().next().value;
+        if (oldest !== undefined) hits.delete(oldest);
+      }
+      entry = { count: 0, reset: time + windowMs };
+      hits.set(key, entry);
+    }
+    entry.count += 1;
+    if (entry.count <= max) return next();
+    const retryAfter = Math.max(1, Math.ceil((entry.reset - time) / 1000));
+    res.set('Retry-After', String(retryAfter));
+    return next(new ApiError(429, 'too_many_requests', `Too many requests, try again in ${retryAfter} s`));
+  };
+};
+
+// Request data in a log line could carry line breaks and forge extra lines, so it is written as a JSON string (escaped and quoted).
+export const logSafe = (text) => JSON.stringify(String(text)).slice(0, 300);
+
+// Every request gets its own id, always generated here (a client-supplied value could forge or collide with log
+// lines). It travels in the X-Request-Id header, in the journal row and in every error answer.
+export const requestId = (req, res, next) => {
+  res.locals.requestId = randomUUID();
+  res.set('X-Request-Id', res.locals.requestId);
+  next();
+};
+
+// A deliberately small identity for this practical (there is no login): X-User-Id says who is acting, X-Role is
+// "user" (the default) or "admin". Without X-User-Id the caller is anonymous and is not restricted, as before roles
+// existed; with it, the ownership rules of the routes apply. The headers are trusted as they come, a real system
+// would take them from a verified session.
+export const identify = (findUser) => (req, res, next) => {
+  const role = req.headers['x-role'] ?? 'user';
+  if (role !== 'user' && role !== 'admin') return next(new ApiError(400, 'invalid_identity', 'X-Role must be user or admin'));
+  const raw = req.headers['x-user-id'];
+  if (raw === undefined) {
+    req.actor = { role };
+    return next();
+  }
+  if (!/^[1-9]\d{0,14}$/.test(raw)) return next(new ApiError(400, 'invalid_identity', 'X-User-Id must be a positive whole number'));
+  if (!findUser(Number(raw))) return next(new ApiError(403, 'forbidden', 'X-User-Id names a user that does not exist'));
+  req.actor = { userId: Number(raw), role };
+  return next();
+};
+```
+
+## Приложение Е (обязательное) Листинг journal.js, журнал запросов
+
+```js
+export const createJournal = (file = ':memory:') => {
+  const db = new DatabaseSync(file);
+  db.exec(`CREATE TABLE IF NOT EXISTS request_log (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    created_at TEXT NOT NULL,
+    method TEXT NOT NULL,
+    path TEXT NOT NULL,
+    ip TEXT NOT NULL,
+    status INTEGER,
+    request_id TEXT
+  )`);
+  // A journal file made before the Request ID existed gets the column added instead of failing on every insert.
+  if (!db.prepare('PRAGMA table_info(request_log)').all().some((column) => column.name === 'request_id')) db.exec('ALTER TABLE request_log ADD COLUMN request_id TEXT');
+  const insert = db.prepare('INSERT INTO request_log (created_at, method, path, ip, request_id) VALUES (?, ?, ?, ?, ?)');
+  const finish = db.prepare('UPDATE request_log SET status = ? WHERE id = ?');
+  const recent = db.prepare('SELECT id, created_at, method, path, ip, status, request_id FROM request_log ORDER BY id DESC LIMIT ?');
+  return {
+    begin: ({ method, path, ip, requestId = null, at = new Date().toISOString() }) => Number(insert.run(at, method, path, ip, requestId).lastInsertRowid),
+    finish: (id, status) => finish.run(status, id),
+    recent: (count = 20) => recent.all(count),
+    close: () => db.close(),
+  };
+};
+
+// Express middleware. The path is cut so one huge URL cannot fill the table.
+export const journaling = (journal, writeError = console.error) => (req, res, next) => {
+  let id;
+  try {
+    id = journal.begin({ method: req.method, path: req.originalUrl.slice(0, 300), ip: req.ip ?? 'unknown', requestId: res.locals.requestId });
+  } catch (err) {
+    writeError(`[journal] cannot write ${logSafe(req.method)} ${logSafe(req.originalUrl)} request ${res.locals.requestId}`, err);
+    return next(new ApiError(500, 'journal_unavailable', 'The request journal is unavailable, the request was not carried out'));
+  }
+  // The answer is already gone when this runs, so a failure here can only be reported, not turned into a 500.
+  res.on('finish', () => {
+    try {
+      journal.finish(id, res.statusCode);
+    } catch (err) {
+      writeError('[journal] cannot record the status', err);
+    }
+  });
+  return next();
 };
 ```

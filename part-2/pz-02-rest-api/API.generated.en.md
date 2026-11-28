@@ -33,6 +33,13 @@ List users
 
 Create a record of users
 
+**Parameters**
+
+| Name | In | Type and rules | Description |
+| --- | --- | --- | --- |
+| `X-User-Id` | header | integer, from 1 | The number of the calling user; the request is then subject to the role rules. |
+| `X-Role` | header | string, one of: `user`, `admin` | user (default) or admin. |
+
 **Request body** (`application/json`, UserInput)
 
 | Field | Required | Type and rules |
@@ -47,6 +54,7 @@ Create a record of users
 | --- | --- | --- |
 | 201 | Created | User |
 | 400 | Invalid data | Error |
+| 403 | The caller named by X-User-Id may not do this | Error |
 | 406 | The client does not accept application/json | Error |
 | 409 | Conflict | Error |
 | 413 | Body too large | Error |
@@ -84,6 +92,8 @@ Replace the whole record; a field left out of the body keeps its current value i
 | Name | In | Type and rules | Description |
 | --- | --- | --- | --- |
 | `id` | path | integer, from 1, to 999999999999999 |  |
+| `X-User-Id` | header | integer, from 1 | The number of the calling user; the request is then subject to the role rules. |
+| `X-Role` | header | string, one of: `user`, `admin` | user (default) or admin. |
 
 **Request body** (`application/json`, UserInput)
 
@@ -99,6 +109,7 @@ Replace the whole record; a field left out of the body keeps its current value i
 | --- | --- | --- |
 | 200 | The record | User |
 | 400 | Invalid data | Error |
+| 403 | The caller named by X-User-Id may not do this | Error |
 | 404 | Not found | Error |
 | 406 | The client does not accept application/json | Error |
 | 409 | Conflict | Error |
@@ -116,6 +127,8 @@ Change only the sent fields
 | Name | In | Type and rules | Description |
 | --- | --- | --- | --- |
 | `id` | path | integer, from 1, to 999999999999999 |  |
+| `X-User-Id` | header | integer, from 1 | The number of the calling user; the request is then subject to the role rules. |
+| `X-Role` | header | string, one of: `user`, `admin` | user (default) or admin. |
 
 **Request body** (`application/json`, UserInput)
 
@@ -131,6 +144,7 @@ Change only the sent fields
 | --- | --- | --- |
 | 200 | The record | User |
 | 400 | Invalid data | Error |
+| 403 | The caller named by X-User-Id may not do this | Error |
 | 404 | Not found | Error |
 | 406 | The client does not accept application/json | Error |
 | 409 | Conflict | Error |
@@ -148,6 +162,8 @@ Delete
 | Name | In | Type and rules | Description |
 | --- | --- | --- | --- |
 | `id` | path | integer, from 1, to 999999999999999 |  |
+| `X-User-Id` | header | integer, from 1 | The number of the calling user; the request is then subject to the role rules. |
+| `X-Role` | header | string, one of: `user`, `admin` | user (default) or admin. |
 
 **Responses**
 
@@ -155,6 +171,7 @@ Delete
 | --- | --- | --- |
 | 204 | Deleted |  |
 | 400 | Invalid data | Error |
+| 403 | The caller named by X-User-Id may not do this | Error |
 | 404 | Not found | Error |
 | 406 | The client does not accept application/json | Error |
 | 409 | Conflict | Error |
@@ -192,6 +209,13 @@ List projects
 
 Create a record of projects
 
+**Parameters**
+
+| Name | In | Type and rules | Description |
+| --- | --- | --- | --- |
+| `X-User-Id` | header | integer, from 1 | The number of the calling user; the request is then subject to the role rules. |
+| `X-Role` | header | string, one of: `user`, `admin` | user (default) or admin. |
+
 **Request body** (`application/json`, ProjectInput)
 
 | Field | Required | Type and rules |
@@ -206,6 +230,7 @@ Create a record of projects
 | --- | --- | --- |
 | 201 | Created | Project |
 | 400 | Invalid data | Error |
+| 403 | The caller named by X-User-Id may not do this | Error |
 | 406 | The client does not accept application/json | Error |
 | 409 | Conflict | Error |
 | 413 | Body too large | Error |
@@ -243,6 +268,8 @@ Replace the whole record; a field left out of the body keeps its current value i
 | Name | In | Type and rules | Description |
 | --- | --- | --- | --- |
 | `id` | path | integer, from 1, to 999999999999999 |  |
+| `X-User-Id` | header | integer, from 1 | The number of the calling user; the request is then subject to the role rules. |
+| `X-Role` | header | string, one of: `user`, `admin` | user (default) or admin. |
 
 **Request body** (`application/json`, ProjectInput)
 
@@ -258,6 +285,7 @@ Replace the whole record; a field left out of the body keeps its current value i
 | --- | --- | --- |
 | 200 | The record | Project |
 | 400 | Invalid data | Error |
+| 403 | The caller named by X-User-Id may not do this | Error |
 | 404 | Not found | Error |
 | 406 | The client does not accept application/json | Error |
 | 409 | Conflict | Error |
@@ -275,6 +303,8 @@ Change only the sent fields
 | Name | In | Type and rules | Description |
 | --- | --- | --- | --- |
 | `id` | path | integer, from 1, to 999999999999999 |  |
+| `X-User-Id` | header | integer, from 1 | The number of the calling user; the request is then subject to the role rules. |
+| `X-Role` | header | string, one of: `user`, `admin` | user (default) or admin. |
 
 **Request body** (`application/json`, ProjectInput)
 
@@ -290,6 +320,7 @@ Change only the sent fields
 | --- | --- | --- |
 | 200 | The record | Project |
 | 400 | Invalid data | Error |
+| 403 | The caller named by X-User-Id may not do this | Error |
 | 404 | Not found | Error |
 | 406 | The client does not accept application/json | Error |
 | 409 | Conflict | Error |
@@ -307,6 +338,8 @@ Delete
 | Name | In | Type and rules | Description |
 | --- | --- | --- | --- |
 | `id` | path | integer, from 1, to 999999999999999 |  |
+| `X-User-Id` | header | integer, from 1 | The number of the calling user; the request is then subject to the role rules. |
+| `X-Role` | header | string, one of: `user`, `admin` | user (default) or admin. |
 
 **Responses**
 
@@ -314,6 +347,7 @@ Delete
 | --- | --- | --- |
 | 204 | Deleted |  |
 | 400 | Invalid data | Error |
+| 403 | The caller named by X-User-Id may not do this | Error |
 | 404 | Not found | Error |
 | 406 | The client does not accept application/json | Error |
 | 409 | Conflict | Error |
@@ -353,6 +387,13 @@ List diagrams
 
 Create a record of diagrams
 
+**Parameters**
+
+| Name | In | Type and rules | Description |
+| --- | --- | --- | --- |
+| `X-User-Id` | header | integer, from 1 | The number of the calling user; the request is then subject to the role rules. |
+| `X-Role` | header | string, one of: `user`, `admin` | user (default) or admin. |
+
 **Request body** (`application/json`, DiagramInput)
 
 | Field | Required | Type and rules |
@@ -369,6 +410,7 @@ Create a record of diagrams
 | --- | --- | --- |
 | 201 | Created | Diagram |
 | 400 | Invalid data | Error |
+| 403 | The caller named by X-User-Id may not do this | Error |
 | 406 | The client does not accept application/json | Error |
 | 409 | Conflict | Error |
 | 413 | Body too large | Error |
@@ -406,6 +448,8 @@ Replace the whole record; a field left out of the body keeps its current value i
 | Name | In | Type and rules | Description |
 | --- | --- | --- | --- |
 | `id` | path | integer, from 1, to 999999999999999 |  |
+| `X-User-Id` | header | integer, from 1 | The number of the calling user; the request is then subject to the role rules. |
+| `X-Role` | header | string, one of: `user`, `admin` | user (default) or admin. |
 
 **Request body** (`application/json`, DiagramInput)
 
@@ -423,6 +467,7 @@ Replace the whole record; a field left out of the body keeps its current value i
 | --- | --- | --- |
 | 200 | The record | Diagram |
 | 400 | Invalid data | Error |
+| 403 | The caller named by X-User-Id may not do this | Error |
 | 404 | Not found | Error |
 | 406 | The client does not accept application/json | Error |
 | 409 | Conflict | Error |
@@ -440,6 +485,8 @@ Change only the sent fields
 | Name | In | Type and rules | Description |
 | --- | --- | --- | --- |
 | `id` | path | integer, from 1, to 999999999999999 |  |
+| `X-User-Id` | header | integer, from 1 | The number of the calling user; the request is then subject to the role rules. |
+| `X-Role` | header | string, one of: `user`, `admin` | user (default) or admin. |
 
 **Request body** (`application/json`, DiagramInput)
 
@@ -457,6 +504,7 @@ Change only the sent fields
 | --- | --- | --- |
 | 200 | The record | Diagram |
 | 400 | Invalid data | Error |
+| 403 | The caller named by X-User-Id may not do this | Error |
 | 404 | Not found | Error |
 | 406 | The client does not accept application/json | Error |
 | 409 | Conflict | Error |
@@ -474,6 +522,8 @@ Delete
 | Name | In | Type and rules | Description |
 | --- | --- | --- | --- |
 | `id` | path | integer, from 1, to 999999999999999 |  |
+| `X-User-Id` | header | integer, from 1 | The number of the calling user; the request is then subject to the role rules. |
+| `X-Role` | header | string, one of: `user`, `admin` | user (default) or admin. |
 
 **Responses**
 
@@ -481,6 +531,7 @@ Delete
 | --- | --- | --- |
 | 204 | Deleted |  |
 | 400 | Invalid data | Error |
+| 403 | The caller named by X-User-Id may not do this | Error |
 | 404 | Not found | Error |
 | 406 | The client does not accept application/json | Error |
 | 412 | The record changed since it was read (If-Match) | Error |
@@ -546,6 +597,8 @@ Set the status to published
 | Name | In | Type and rules | Description |
 | --- | --- | --- | --- |
 | `id` | path | integer, from 1, to 999999999999999 |  |
+| `X-User-Id` | header | integer, from 1 | The number of the calling user; the request is then subject to the role rules. |
+| `X-Role` | header | string, one of: `user`, `admin` | user (default) or admin. |
 
 **Responses**
 
@@ -553,6 +606,7 @@ Set the status to published
 | --- | --- | --- |
 | 200 | The record | Diagram |
 | 400 | Invalid data | Error |
+| 403 | The caller named by X-User-Id may not do this | Error |
 | 404 | Not found | Error |
 | 406 | The client does not accept application/json | Error |
 | 429 | Too many requests | Error |
@@ -567,6 +621,8 @@ Copy a diagram as a draft
 | Name | In | Type and rules | Description |
 | --- | --- | --- | --- |
 | `id` | path | integer, from 1, to 999999999999999 |  |
+| `X-User-Id` | header | integer, from 1 | The number of the calling user; the request is then subject to the role rules. |
+| `X-Role` | header | string, one of: `user`, `admin` | user (default) or admin. |
 
 **Responses**
 
@@ -574,6 +630,7 @@ Copy a diagram as a draft
 | --- | --- | --- |
 | 201 | The copy | Diagram |
 | 400 | Invalid data | Error |
+| 403 | The caller named by X-User-Id may not do this | Error |
 | 404 | Not found | Error |
 | 406 | The client does not accept application/json | Error |
 | 409 | Conflict | Error |

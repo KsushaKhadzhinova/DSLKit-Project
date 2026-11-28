@@ -1,6 +1,6 @@
 # DSLKit REST API
 
-Base URL: `http://localhost:3000/api`. Requests and responses are JSON (`Content-Type: application/json`, UTF-8 only). Data lives in memory and resets when the server restarts. There is no authentication in this practical: every record and every operation is open to anyone who can reach the server; see "Known limitations" below. Every response has the headers `Content-Security-Policy`, `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy` and `Cache-Control: no-store`. No CORS headers are sent, so browsers allow only same-origin calls. A request whose `Accept` header cannot match `application/json` gets 406; `GET`, `HEAD` and `DELETE` never read a body, whatever its `Content-Type`.
+Base URL: `http://localhost:3000/api`. Requests and responses are JSON (`Content-Type: application/json`, UTF-8 only). Data lives in memory and resets when the server restarts. There is no sign-in in this practical; the caller is named by the headers `X-User-Id` (a user number) and `X-Role` (`user` by default, or `admin`) and the server trusts them, see "Roles and 403" below. A request without `X-User-Id` is anonymous and not restricted. Every response has the headers `Content-Security-Policy`, `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy` and `Cache-Control: no-store`. No CORS headers are sent, so browsers allow only same-origin calls. A request whose `Accept` header cannot match `application/json` gets 406; `GET`, `HEAD` and `DELETE` never read a body, whatever its `Content-Type`.
 
 ## Resources
 
@@ -56,6 +56,10 @@ A query key that is none of the above and not a field of the resource (a typo, f
 
 The list response is `{ "data": [...], "meta": { "page": 1, "limit": 20, "total": 3 } }`.
 
+## Roles and 403
+
+A request with `X-User-Id` is restricted unless `X-Role` is `admin`: the caller may change or delete only their own user record and their own projects, may put diagrams only into their own projects, and may not delete a project. Anything else answers 403 `forbidden`. The order is: the record exists (404), then the rights (403), then the body. A wrong header value answers 400 `invalid_identity`. Operations that can answer 403 list the two headers in `GET /api/openapi.json`.
+
 ## Errors
 
 Every error has one shape. `details` appears for validation errors.
@@ -65,6 +69,9 @@ Every error has one shape. `details` appears for validation errors.
   "error": {
     "code": "validation_failed",
     "message": "Request body is invalid",
+    "title": "Bad request",
+    "description": "The server could not accept the request because something in it is wrong. Likely cause: ... What to do: ...",
+    "requestId": "4b67dc08-414d-45f8-bf67-6668ed409c47",
     "details": [{ "field": "title", "message": "title must not be empty" }]
   }
 }
@@ -74,6 +81,7 @@ Every error has one shape. `details` appears for validation errors.
 | ------ | --------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
 | 400    | `validation_failed`                           | Missing or wrong field, unknown field, a control/invisible character or an unpaired surrogate in a string field, empty `PATCH` body |
 | 400    | `invalid_json`, `invalid_id`, `invalid_query` | Broken JSON, id is not a positive integer, bad or unknown `page`, `limit`, `sort` or filter, a repeated query key                   |
+| 403    | `forbidden`                                   | A caller named by `X-User-Id` who is not an administrator changes or deletes a record that is not theirs, or deletes a project; an unknown user in `X-User-Id` |
 | 404    | `not_found`                                   | Unknown record or route                                                                                                             |
 | 405    | `method_not_allowed`                          | Method not supported on a known path; the `Allow` header lists the right ones                                                       |
 | 406    | `not_acceptable`                              | The `Accept` header cannot match `application/json`                                                                                 |
@@ -157,5 +165,5 @@ The last call answers 409 `conflict`, "Project still has diagrams". In Postman o
 
 ## Known limitations
 
-- **No authentication or authorization** (by design, out of scope for this practical). Every record and every field, including `role` on `users` and `ownerId` on `projects`, can be read and changed by anyone who can reach the server; there is no concept of "my own record". A real deployment needs a login and a per-request check of who is allowed to read or change what before this API is exposed beyond a classroom exercise.
-- **The hidden `email` field can still be read directly.** The user list omits `email` so a casual listing does not expose it, but `GET /api/users/:id` still returns it (there is no authorization to restrict it to the user themselves), and the 409 on `POST /api/users` with a taken email confirms, one address at a time, that it belongs to an existing account. Closing this fully needs the same authentication/authorization this practical does not implement; without it, any generic message on the 409 only hides the exact wording, not the fact that a match was found.
+- **Roles are a teaching simplification.** There is no sign-in. The headers `X-User-Id` and `X-Role` are trusted as sent, so anyone can name themselves an administrator. Without `X-User-Id` a request is anonymous and not restricted. A real deployment takes the identity from a verified session or token before this API is exposed beyond a classroom exercise.
+- **The hidden `email` field can still be read directly.** The user list omits `email` so a casual listing does not expose it, but `GET /api/users/:id` still returns it (the roles do not hide it, and an anonymous request is not restricted at all), and the 409 on `POST /api/users` with a taken email confirms, one address at a time, that it belongs to an existing account. Closing this fully needs real authentication, which this practical does not implement; without it, any generic message on the 409 only hides the exact wording, not the fact that a match was found.

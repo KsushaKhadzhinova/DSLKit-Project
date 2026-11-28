@@ -30,7 +30,7 @@ Table 1 – API resources and fields
 
 Every record has the service fields `id` and `createdAt`, which a client cannot change. The data of the resources lies in in-memory arrays, as the task requires, so after a server restart the initial records return: two users, two projects and three diagrams. The request journal is kept in the table `request_log` of an SQLite database. The files of the project and their purpose are listed in table 2.
 
-Table 2 – Files of the project of practical session 2
+Table 2 – Files of the project of practical session No. 2
 
 | File | Purpose |
 | --- | --- |
@@ -46,7 +46,7 @@ Table 2 – Files of the project of practical session 2
 
 ### 3.2 Endpoints
 
-For every resource six standard operations are implemented, and extra operations for diagrams and projects. All operations with the method, address, description, request body example and expected answer are given in table 3. The address `/api/users` stands for an example, the same operations exist for `projects` and `diagrams`. The application assembly is shown in appendix A, the routes and the error handler in appendix B, the common logic of resources in appendix E and the field validation in appendix F.
+For every resource six standard operations are implemented, and extra operations for diagrams and projects. All operations with the method, address, description, request body example and expected answer are given in table 3. The address `/api/users` stands for an example, the same operations exist for `projects` and `diagrams`. The application assembly is shown in appendix A, the routes and the error handler in appendix B, the common logic of resources in appendix C and the field validation in appendix D.
 
 Table 3 – API endpoints with request and response examples
 
@@ -87,7 +87,7 @@ Table 4 – API error codes
 | 429 | More requests than allowed arrive within a minute |
 | 500 | A server failure, including an unavailable request journal |
 
-Deleting a user with projects or a project with diagrams is rejected with code 409 instead of silently deleting the linked records. If a parent is deleted at the moment a child record is added to it, the outcome is always one of three: 201, 404 or 409. A 5xx answer and a dangling record without a parent never happen, and the race tests check it. A conditional request with the `If-Match` header protects against a lost update: if the record has already been changed, the answer is 412.
+Deleting a user with projects or a project with diagrams is rejected with code 409 instead of silently deleting the linked records. If a parent is deleted at the moment a child record is added to it, the outcome is always one of three: 201, 404 or 409. A 5xx answer and a dangling record without a parent never happen. One test creates a project while its owner is deleted, in both orders, and another sends twenty parallel requests of every kind and checks that there is no 5xx answer and the ids stay unique. A conditional request with the `If-Match` header protects against a lost update: if the record has already been changed, the answer is 412.
 
 ### 3.4 Roles and the answer 403
 
@@ -104,19 +104,19 @@ Table 5 – Rights of the roles
 | Delete a project | 403 | yes |
 | Change, delete, publish, copy a diagram and create one | only in one's own project, otherwise 403 | yes |
 
-A wrong header value gives 400, and the number of a non-existent user in `X-User-Id` gives 403. First it is checked that the record exists (404), then the rights (403), then the request body. The headers are trusted: this is a teaching simplification, and a real system takes the identity from a verified session or token. The listing is given in appendix D.
+A wrong header value gives 400, and the number of a non-existent user in `X-User-Id` gives 403. First it is checked that the record exists (404), then the rights (403), then the request body. The headers are trusted: this is a teaching simplification, and a real system takes the identity from a verified session or token. The listing is given in appendix E.
 
 ### 3.5 Request journal and the order of actions
 
-The journal is kept in the table `request_log` of an SQLite database with the columns time, method, path, client address, status code and request number `request_id`. The order for every request is as follows. First the server assigns a number to the request and returns it in the header `X-Request-Id`. Then, before the action is carried out, a row with the time, method, path, client address and request number is inserted into the table. If the insert fails, the action is not carried out and the client gets the answer 500 with the code `journal_unavailable`: working without a journal is forbidden. If the insert succeeds, the action is carried out and the final status code is added to the row. Failed attempts with codes 400, 404, 409 and 412 stay in the journal too.
+The journal is kept in the table `request_log` of an SQLite database with the columns time, method, path, client address, status code and request number `request_id`. The order for every request is as follows. First the server assigns a number to the request and returns it in the header `X-Request-Id`. Then, before the action is carried out, a row with the time, method, path, client address and request number is inserted into the table. If the insert fails, the action is not carried out and the client gets the answer 500 with the code `journal_unavailable`: working without a journal is forbidden. If the insert succeeds, the action is carried out and the final status code is added to the row. Failed attempts with codes 400, 403, 404, 409 and 412 stay in the journal too.
 
-Two groups of requests do not reach the journal: the health check `GET /health` and the requests rejected by the rate limit with code 429. The health check goes before the journal so that monitoring does not fill the table or use up the limit. Excess requests are rejected before the journal so that their flow does not fill the table. The journal write and the action on the data are not in one transaction, because the data of the resources lives in an array, so the rule "no record, no action" is kept by the order of the steps. If a failure happens after the action, while the final code is written, the answer to the client does not change and the error is written to the server console. The listing is given in appendix C.
+Two groups of requests do not reach the journal: the health check `GET /health` and the requests rejected by the rate limit with code 429. The health check goes before the journal so that monitoring does not fill the table or use up the limit. Excess requests are rejected before the journal so that their flow does not fill the table. The journal write and the action on the data are not in one transaction, because the data of the resources lives in an array, so the atomicity "no record, no action" is kept by the order of the steps: a journal failure cancels the action. If a failure happens after the action, while the final code is written, the answer to the client does not change and the error is written to the server console. The listing is given in appendix F.
 
 A journal failure is reproduced while the server runs, not by a button. The server is started with `$env:JOURNAL_FILE='demo.sqlite'; npm start`, then in another window the command `node tools/break-journal.mjs demo.sqlite` drops the journal table, and every request gets the answer 500. The table is restored by `node tools/break-journal.mjs demo.sqlite --restore`. The environment variable is removed by `Remove-Item Env:JOURNAL_FILE`. The journal table with real rows is shown in figure 1.
 
-![The request_log table](figures/owner-journal-table.png)
+![The request_log table](figures/journal-table.png)
 
-Figure 1 – The table request_log in the SQLite database with the columns of method, path, status code and request number
+Figure 1 – The table request_log of the SQLite database printed in a PowerShell window: method, path, status code and request number
 
 ### 3.6 Error pages
 
@@ -140,109 +140,113 @@ Figure 4 – The 500 error page for an unavailable request journal, the action i
 
 The 403 page appears when an ordinary user tries to delete a project. A browser cannot send the `X-User-Id` header and `DELETE` from the address bar, so the shot is taken in Postman and shown in figure 5.
 
-![The answer 403](figures/owner-error-403.png)
+![The answer 403](figures/postman-403.png)
 
 Figure 5 – The answer 403 to the request DELETE /api/projects/1 with the X-User-Id header of an ordinary user
 
 ### 3.7 API documentation
 
-The route `GET /api/openapi.json` returns the API description in the OpenAPI 3.0 format. It is built from the same schemas that validate requests, so field lengths, lists of allowed values and required fields in the document match the code. The document can be opened in Swagger UI or imported into Postman. The reference of operations is generated from the same document by the script `tools/gen-api-md.mjs` into the files `API.generated.ru.md` and `API.generated.en.md`. A test compares them with the server answer, so they do not drift from the code. The possible error codes are listed in the reference for every operation.
+The route `GET /api/openapi.json` returns the API description in the OpenAPI 3.0 format. It is built from the same schemas that validate requests, so field lengths, lists of allowed values and required fields in the document match the code. The document can be opened in Swagger UI or imported into Postman. The description is opened in a browser window at `http://localhost:4230/api/openapi.json`, and a fragment is shown in figure 6. In it the change and delete operations have the headers `X-User-Id` and `X-Role` and the answer 403. The reference of operations is generated from the same document by the script `tools/gen-api-md.mjs` into the files `API.generated.ru.md` and `API.generated.en.md`. A test compares them with the server answer, so they do not drift from the code. The possible error codes are listed in the reference for every operation.
+
+![API description](figures/api-docs.png)
+
+Figure 6 – The API description in the OpenAPI format at GET /api/openapi.json in a browser window: paths, parameters, role headers and response codes
 
 ### 3.8 Checking requests in Postman
 
-All operations are checked in Postman with the collection `postman_collection.json`, and the same set of requests is in the file `requests.http`. A separate window shot is made for every method: the request, the status code and the response body. Reading the list with `GET /api/users` is shown in figure 6.
+All operations are checked in Postman with the collection `postman_collection.json`, and the same set of requests is in the file `requests.http`. A separate window shot is made for every method: the request, the status code and the response body. Reading the list with `GET /api/users` is shown in figure 7.
 
-![GET /api/users](figures/owner-postman-get.png)
+![GET /api/users](figures/postman-get.png)
 
-Figure 6 – The request GET /api/users and the answer 200 with the list of users in Postman
+Figure 7 – The request GET /api/users and the answer 200 with the list of users in Postman
 
-Creating a diagram with `POST /api/diagrams` and a JSON body is shown in figure 7.
+Creating a diagram with `POST /api/diagrams` and a JSON body is shown in figure 8.
 
-![POST /api/diagrams](figures/owner-postman-post.png)
+![POST /api/diagrams](figures/postman-post.png)
 
-Figure 7 – The request POST /api/diagrams with a JSON body and the answer 201 in Postman
+Figure 8 – The request POST /api/diagrams with a JSON body and the answer 201 in Postman
 
-A full replacement with `PUT /api/users/2` is shown in figure 8.
+A full replacement with `PUT /api/users/2` is shown in figure 9.
 
-![PUT /api/users/2](figures/owner-postman-put.png)
+![PUT /api/users/2](figures/postman-put.png)
 
-Figure 8 – The request PUT /api/users/2 with a full body and the answer 200 with new fields in Postman
+Figure 9 – The request PUT /api/users/2 with a full body and the answer 200 with new fields in Postman
 
-A partial change with `PATCH /api/users/1` is shown in figure 9.
+A partial change with `PATCH /api/users/1` is shown in figure 10.
 
-![PATCH /api/users/1](figures/owner-postman-patch.png)
+![PATCH /api/users/1](figures/postman-patch.png)
 
-Figure 9 – The request PATCH /api/users/1 with a one-field body and the answer 200 in Postman
+Figure 10 – The request PATCH /api/users/1 with a one-field body and the answer 200 in Postman
 
-Deleting a diagram with `DELETE /api/diagrams/2` passes without a response body, as in figure 10.
+Deleting a diagram with `DELETE /api/diagrams/2` passes without a response body, as in figure 11.
 
-![DELETE /api/diagrams/2](figures/owner-postman-delete.png)
+![DELETE /api/diagrams/2](figures/postman-delete.png)
 
-Figure 10 – The request DELETE /api/diagrams/2 and the answer 204 without a body in Postman
+Figure 11 – The request DELETE /api/diagrams/2 and the answer 204 without a body in Postman
 
-Deleting a user who still owns projects is rejected with code 409, as in figure 11.
+Deleting a user who still owns projects is rejected with code 409, as in figure 12.
 
-![DELETE /api/users/1](figures/owner-postman-delete-409.png)
+![DELETE /api/users/1](figures/postman-delete-409.png)
 
-Figure 11 – The request DELETE /api/users/1 and the answer 409 saying that the user owns projects, in Postman
+Figure 12 – The request DELETE /api/users/1 and the answer 409 saying that the user owns projects, in Postman
 
-The request `POST /api/users` with an empty name and a wrong email is rejected, as in figure 12.
+The request `POST /api/users` with an empty name and a wrong email is rejected, as in figure 13.
 
-![POST /api/users with invalid data](figures/owner-postman-validation.png)
+![POST /api/users with invalid data](figures/postman-validation.png)
 
-Figure 12 – The request POST /api/users with invalid data and the answer 400 with the list of field problems in Postman
+Figure 13 – The request POST /api/users with invalid data and the answer 400 with the list of field problems in Postman
 
 ### 3.9 Checking requests from a browser
 
-A browser sends only `GET` requests from the address bar, and the other methods are shown above in Postman. The server is started with `npm start`, and the requests are opened in a browser window. The answer to `GET /api/users` at `http://localhost:3000/api/users` is shown in figure 13.
+A browser sends only `GET` requests from the address bar, and the other methods are shown above in Postman. The server is started with `npm start` and the variable `PORT` set to 4230, and the requests are opened in a Chrome window with the address bar. The answer to `GET /api/users` at `http://localhost:4230/api/users` is shown in figure 14.
 
 ![List of users](figures/02-users-list.png)
 
-Figure 13 – The answer to GET /api/users in a browser window: an array of users and the meta object
+Figure 14 – The answer to GET /api/users in a browser window: an array of users and the meta object
 
-One record at `http://localhost:3000/api/users/1` is shown in figure 14.
+One record at `http://localhost:4230/api/users/1` is shown in figure 15.
 
 ![One user](figures/03-user-one.png)
 
-Figure 14 – The answer to GET /api/users/1 in a browser window: the object of one user
+Figure 15 – The answer to GET /api/users/1 in a browser window: the object of one user
 
-A request for a non-existent record at `http://localhost:3000/api/users/999` gives the error shown in figure 15.
+A request for a non-existent record at `http://localhost:4230/api/users/999` gives the error shown in figure 16.
 
 ![The answer 404](figures/04-user-404.png)
 
-Figure 15 – The answer to GET /api/users/999 in a browser window: the 404 error page with the request number
+Figure 16 – The answer to GET /api/users/999 in a browser window: the 404 error page with the request number
 
-A wrong number in the address `http://localhost:3000/api/users/abc` is rejected, as in figure 16.
+A wrong number in the address `http://localhost:4230/api/users/abc` is rejected, as in figure 17.
 
 ![The answer 400](figures/05-user-400.png)
 
-Figure 16 – The answer to GET /api/users/abc in a browser window: the 400 error page with an explanation
+Figure 17 – The answer to GET /api/users/abc in a browser window: the 400 error page with an explanation
 
-Search, sorting and pages work through the address parameters `?q=billing&sort=-title&page=1&limit=10`, and the result is shown in figure 17.
+Search, sorting and pages work through the address parameters `?q=billing&sort=-title&page=1&limit=10`, and the result is shown in figure 18.
 
 ![Search and sorting](figures/06-diagrams-search.png)
 
-Figure 17 – The answer to GET /api/diagrams with the q, sort, page and limit parameters in a browser window
+Figure 18 – The answer to GET /api/diagrams with the q, sort, page and limit parameters in a browser window
 
-The extra route `GET /api/users/1/projects` returns the projects of one user, as in figure 18.
+The extra route `GET /api/users/1/projects` returns the projects of one user, as in figure 19.
 
 ![Projects of a user](figures/07-user-projects.png)
 
-Figure 18 – The answer to GET /api/users/1/projects in a browser window: the projects of the user
+Figure 19 – The answer to GET /api/users/1/projects in a browser window: the projects of the user
 
 ### 3.10 Automatic checks
 
-The automatic tests start the server on a free port and check every method, the status codes, filters, sorting, pages, validation errors, links between resources, extra operations, roles with the answer 403, the order "journal record before the action", a journal failure with the answer 500, the exclusion of `/health` and of the answer 429 from the journal, races when a parent is deleted, and the error pages. There are 173 server tests, 176 together with the report checks, and the coverage of lines, branches and functions is 100 percent. The command is `npm test` in the project folder. The console message at server start is shown in figure 19.
+The automatic tests start the server on a free port and check every method, the status codes, filters, sorting, pages, validation errors, links between resources, extra operations, roles with the answer 403, the order "journal record before the action", a journal failure with the answer 500, the exclusion of `/health` and of the answer 429 from the journal, races when a parent is deleted, and the error pages. There are 173 server tests, 176 together with the report checks, and the coverage of lines, branches and functions is 100 percent. The command is `npm test` in the project folder. The console message at server start is shown in figure 20.
 
-![Server console](figures/owner-console.png)
+![Server console](figures/console.png)
 
-Figure 19 – The console message after the server is started with npm start
+Figure 20 – A PowerShell window with the server message after the start with npm start on port 4236
 
-The result of `npm test` with the number of tests and the code coverage is shown in figure 20.
+The result of `npm test` with the number of tests and the code coverage is shown in figure 21.
 
 ![Test result](figures/owner-tests.png)
 
-Figure 20 – The end of the npm test output: the number of passed tests and the coverage table
+Figure 21 – The end of the npm test output: the number of passed tests and the coverage table
 
 ## 4 Answers to the Control Questions
 
@@ -482,156 +486,7 @@ export const createApp = ({
 };
 ```
 
-## Appendix C (mandatory) Listing of the file journal.js, request journal
-
-```js
-export const createJournal = (file = ':memory:') => {
-  const db = new DatabaseSync(file);
-  db.exec(`CREATE TABLE IF NOT EXISTS request_log (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    created_at TEXT NOT NULL,
-    method TEXT NOT NULL,
-    path TEXT NOT NULL,
-    ip TEXT NOT NULL,
-    status INTEGER,
-    request_id TEXT
-  )`);
-  // A journal file made before the Request ID existed gets the column added instead of failing on every insert.
-  if (!db.prepare('PRAGMA table_info(request_log)').all().some((column) => column.name === 'request_id')) db.exec('ALTER TABLE request_log ADD COLUMN request_id TEXT');
-  const insert = db.prepare('INSERT INTO request_log (created_at, method, path, ip, request_id) VALUES (?, ?, ?, ?, ?)');
-  const finish = db.prepare('UPDATE request_log SET status = ? WHERE id = ?');
-  const recent = db.prepare('SELECT id, created_at, method, path, ip, status, request_id FROM request_log ORDER BY id DESC LIMIT ?');
-  return {
-    begin: ({ method, path, ip, requestId = null, at = new Date().toISOString() }) => Number(insert.run(at, method, path, ip, requestId).lastInsertRowid),
-    finish: (id, status) => finish.run(status, id),
-    recent: (count = 20) => recent.all(count),
-    close: () => db.close(),
-  };
-};
-
-// Express middleware. The path is cut so one huge URL cannot fill the table.
-export const journaling = (journal, writeError = console.error) => (req, res, next) => {
-  let id;
-  try {
-    id = journal.begin({ method: req.method, path: req.originalUrl.slice(0, 300), ip: req.ip ?? 'unknown', requestId: res.locals.requestId });
-  } catch (err) {
-    writeError(`[journal] cannot write ${logSafe(req.method)} ${logSafe(req.originalUrl)} request ${res.locals.requestId}`, err);
-    return next(new ApiError(500, 'journal_unavailable', 'The request journal is unavailable, the request was not carried out'));
-  }
-  // The answer is already gone when this runs, so a failure here can only be reported, not turned into a 500.
-  res.on('finish', () => {
-    try {
-      journal.finish(id, res.statusCode);
-    } catch (err) {
-      writeError('[journal] cannot record the status', err);
-    }
-  });
-  return next();
-};
-```
-
-## Appendix D (mandatory) Listing of the file security.js, roles and protection
-
-```js
-import { randomUUID } from 'node:crypto';
-import { ApiError } from './errors.js';
-
-// Headers for a JSON-only API, set by hand without extra packages. The API sends no HTML, so the policy forbids everything.
-export const securityHeaders = (req, res, next) => {
-  res.set({
-    'Content-Security-Policy': "default-src 'none'; frame-ancestors 'none'",
-    'X-Content-Type-Options': 'nosniff',
-    'X-Frame-Options': 'DENY',
-    'Referrer-Policy': 'no-referrer',
-    'Cache-Control': 'no-store',
-  });
-  next();
-};
-
-// An IPv4 client reaching a dual-stack server is seen by Node as "::ffff:<ipv4>" on some connections and as the
-// plain "<ipv4>" on others; without this the same client gets two separate buckets and can double its quota.
-const bucketKey = (ip) => (typeof ip === 'string' && ip.startsWith('::ffff:') ? ip.slice(7) : ip ?? 'unknown');
-
-// Fixed-window rate limit per client address, kept in memory. The answer is the usual JSON error with Retry-After.
-//
-// Cleanup is amortized, not a periodic full scan: every call walks at most SWEEP_BATCH map entries (resuming
-// where the previous call left off) and drops the ones that expired, so the per-request cost stays bounded
-// however large the map has grown, instead of occasionally scanning the whole thing (a CPU-cost amplifier an
-// attacker rotating addresses could lean on). maxClients is a hard ceiling on distinct addresses tracked at
-// once: once it is reached, the oldest tracked address is evicted to make room, so the map itself cannot grow
-// without bound even if the sweep never catches up (for example many different IPv6 addresses, each used once).
-const SWEEP_BATCH = 500;
-
-export const rateLimit = ({ windowMs, max, now = Date.now, maxClients = 50000 }) => {
-  const hits = new Map();
-  let cursor = null;
-
-  const sweep = (time) => {
-    const iterator = cursor ?? hits.entries();
-    for (let i = 0; i < SWEEP_BATCH; i += 1) {
-      const next = iterator.next();
-      if (next.done) {
-        cursor = null;
-        return;
-      }
-      const [key, entry] = next.value;
-      if (entry.reset <= time) hits.delete(key);
-    }
-    cursor = iterator;
-  };
-
-  return (req, res, next) => {
-    const time = now();
-    sweep(time);
-    const key = bucketKey(req.ip);
-    let entry = hits.get(key);
-    if (!entry || entry.reset <= time) {
-      if (!entry && hits.size >= maxClients) {
-        const oldest = hits.keys().next().value;
-        if (oldest !== undefined) hits.delete(oldest);
-      }
-      entry = { count: 0, reset: time + windowMs };
-      hits.set(key, entry);
-    }
-    entry.count += 1;
-    if (entry.count <= max) return next();
-    const retryAfter = Math.max(1, Math.ceil((entry.reset - time) / 1000));
-    res.set('Retry-After', String(retryAfter));
-    return next(new ApiError(429, 'too_many_requests', `Too many requests, try again in ${retryAfter} s`));
-  };
-};
-
-// Request data in a log line could carry line breaks and forge extra lines, so it is written as a JSON string (escaped and quoted).
-export const logSafe = (text) => JSON.stringify(String(text)).slice(0, 300);
-
-// Every request gets its own id, always generated here (a client-supplied value could forge or collide with log
-// lines). It travels in the X-Request-Id header, in the journal row and in every error answer.
-export const requestId = (req, res, next) => {
-  res.locals.requestId = randomUUID();
-  res.set('X-Request-Id', res.locals.requestId);
-  next();
-};
-
-// A deliberately small identity for this practical (there is no login): X-User-Id says who is acting, X-Role is
-// "user" (the default) or "admin". Without X-User-Id the caller is anonymous and is not restricted, as before roles
-// existed; with it, the ownership rules of the routes apply. The headers are trusted as they come, a real system
-// would take them from a verified session.
-export const identify = (findUser) => (req, res, next) => {
-  const role = req.headers['x-role'] ?? 'user';
-  if (role !== 'user' && role !== 'admin') return next(new ApiError(400, 'invalid_identity', 'X-Role must be user or admin'));
-  const raw = req.headers['x-user-id'];
-  if (raw === undefined) {
-    req.actor = { role };
-    return next();
-  }
-  if (!/^[1-9]\d{0,14}$/.test(raw)) return next(new ApiError(400, 'invalid_identity', 'X-User-Id must be a positive whole number'));
-  if (!findUser(Number(raw))) return next(new ApiError(403, 'forbidden', 'X-User-Id names a user that does not exist'));
-  req.actor = { userId: Number(raw), role };
-  return next();
-};
-```
-
-## Appendix E (mandatory) Listing of the file resource.js, common routes of a resource
+## Appendix C (mandatory) Listing of the file resource.js, common routes of a resource
 
 ```js
 // A weak tag computed from the record itself, so it changes exactly when the record changes and needs no extra field.
@@ -785,7 +640,7 @@ export const createResourceRouter = ({ label, collection, schema, hooks = {}, hi
 };
 ```
 
-## Appendix F (mandatory) Listing of the file validation.js, field validation
+## Appendix D (mandatory) Listing of the file validation.js, field validation
 
 ```js
 // C0/C1 control characters (NUL, BEL, newline, ...) minus tab/newline/CR, which `multiline` fields allow.
@@ -869,5 +724,154 @@ export const trimStrings = (schema, body) => {
     result[field] = schema[field].transform ? schema[field].transform(trimmed) : trimmed;
   }
   return result;
+};
+```
+
+## Appendix E (mandatory) Listing of the file security.js, roles and protection
+
+```js
+import { randomUUID } from 'node:crypto';
+import { ApiError } from './errors.js';
+
+// Headers for a JSON-only API, set by hand without extra packages. The API sends no HTML, so the policy forbids everything.
+export const securityHeaders = (req, res, next) => {
+  res.set({
+    'Content-Security-Policy': "default-src 'none'; frame-ancestors 'none'",
+    'X-Content-Type-Options': 'nosniff',
+    'X-Frame-Options': 'DENY',
+    'Referrer-Policy': 'no-referrer',
+    'Cache-Control': 'no-store',
+  });
+  next();
+};
+
+// An IPv4 client reaching a dual-stack server is seen by Node as "::ffff:<ipv4>" on some connections and as the
+// plain "<ipv4>" on others; without this the same client gets two separate buckets and can double its quota.
+const bucketKey = (ip) => (typeof ip === 'string' && ip.startsWith('::ffff:') ? ip.slice(7) : ip ?? 'unknown');
+
+// Fixed-window rate limit per client address, kept in memory. The answer is the usual JSON error with Retry-After.
+//
+// Cleanup is amortized, not a periodic full scan: every call walks at most SWEEP_BATCH map entries (resuming
+// where the previous call left off) and drops the ones that expired, so the per-request cost stays bounded
+// however large the map has grown, instead of occasionally scanning the whole thing (a CPU-cost amplifier an
+// attacker rotating addresses could lean on). maxClients is a hard ceiling on distinct addresses tracked at
+// once: once it is reached, the oldest tracked address is evicted to make room, so the map itself cannot grow
+// without bound even if the sweep never catches up (for example many different IPv6 addresses, each used once).
+const SWEEP_BATCH = 500;
+
+export const rateLimit = ({ windowMs, max, now = Date.now, maxClients = 50000 }) => {
+  const hits = new Map();
+  let cursor = null;
+
+  const sweep = (time) => {
+    const iterator = cursor ?? hits.entries();
+    for (let i = 0; i < SWEEP_BATCH; i += 1) {
+      const next = iterator.next();
+      if (next.done) {
+        cursor = null;
+        return;
+      }
+      const [key, entry] = next.value;
+      if (entry.reset <= time) hits.delete(key);
+    }
+    cursor = iterator;
+  };
+
+  return (req, res, next) => {
+    const time = now();
+    sweep(time);
+    const key = bucketKey(req.ip);
+    let entry = hits.get(key);
+    if (!entry || entry.reset <= time) {
+      if (!entry && hits.size >= maxClients) {
+        const oldest = hits.keys().next().value;
+        if (oldest !== undefined) hits.delete(oldest);
+      }
+      entry = { count: 0, reset: time + windowMs };
+      hits.set(key, entry);
+    }
+    entry.count += 1;
+    if (entry.count <= max) return next();
+    const retryAfter = Math.max(1, Math.ceil((entry.reset - time) / 1000));
+    res.set('Retry-After', String(retryAfter));
+    return next(new ApiError(429, 'too_many_requests', `Too many requests, try again in ${retryAfter} s`));
+  };
+};
+
+// Request data in a log line could carry line breaks and forge extra lines, so it is written as a JSON string (escaped and quoted).
+export const logSafe = (text) => JSON.stringify(String(text)).slice(0, 300);
+
+// Every request gets its own id, always generated here (a client-supplied value could forge or collide with log
+// lines). It travels in the X-Request-Id header, in the journal row and in every error answer.
+export const requestId = (req, res, next) => {
+  res.locals.requestId = randomUUID();
+  res.set('X-Request-Id', res.locals.requestId);
+  next();
+};
+
+// A deliberately small identity for this practical (there is no login): X-User-Id says who is acting, X-Role is
+// "user" (the default) or "admin". Without X-User-Id the caller is anonymous and is not restricted, as before roles
+// existed; with it, the ownership rules of the routes apply. The headers are trusted as they come, a real system
+// would take them from a verified session.
+export const identify = (findUser) => (req, res, next) => {
+  const role = req.headers['x-role'] ?? 'user';
+  if (role !== 'user' && role !== 'admin') return next(new ApiError(400, 'invalid_identity', 'X-Role must be user or admin'));
+  const raw = req.headers['x-user-id'];
+  if (raw === undefined) {
+    req.actor = { role };
+    return next();
+  }
+  if (!/^[1-9]\d{0,14}$/.test(raw)) return next(new ApiError(400, 'invalid_identity', 'X-User-Id must be a positive whole number'));
+  if (!findUser(Number(raw))) return next(new ApiError(403, 'forbidden', 'X-User-Id names a user that does not exist'));
+  req.actor = { userId: Number(raw), role };
+  return next();
+};
+```
+
+## Appendix F (mandatory) Listing of the file journal.js, request journal
+
+```js
+export const createJournal = (file = ':memory:') => {
+  const db = new DatabaseSync(file);
+  db.exec(`CREATE TABLE IF NOT EXISTS request_log (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    created_at TEXT NOT NULL,
+    method TEXT NOT NULL,
+    path TEXT NOT NULL,
+    ip TEXT NOT NULL,
+    status INTEGER,
+    request_id TEXT
+  )`);
+  // A journal file made before the Request ID existed gets the column added instead of failing on every insert.
+  if (!db.prepare('PRAGMA table_info(request_log)').all().some((column) => column.name === 'request_id')) db.exec('ALTER TABLE request_log ADD COLUMN request_id TEXT');
+  const insert = db.prepare('INSERT INTO request_log (created_at, method, path, ip, request_id) VALUES (?, ?, ?, ?, ?)');
+  const finish = db.prepare('UPDATE request_log SET status = ? WHERE id = ?');
+  const recent = db.prepare('SELECT id, created_at, method, path, ip, status, request_id FROM request_log ORDER BY id DESC LIMIT ?');
+  return {
+    begin: ({ method, path, ip, requestId = null, at = new Date().toISOString() }) => Number(insert.run(at, method, path, ip, requestId).lastInsertRowid),
+    finish: (id, status) => finish.run(status, id),
+    recent: (count = 20) => recent.all(count),
+    close: () => db.close(),
+  };
+};
+
+// Express middleware. The path is cut so one huge URL cannot fill the table.
+export const journaling = (journal, writeError = console.error) => (req, res, next) => {
+  let id;
+  try {
+    id = journal.begin({ method: req.method, path: req.originalUrl.slice(0, 300), ip: req.ip ?? 'unknown', requestId: res.locals.requestId });
+  } catch (err) {
+    writeError(`[journal] cannot write ${logSafe(req.method)} ${logSafe(req.originalUrl)} request ${res.locals.requestId}`, err);
+    return next(new ApiError(500, 'journal_unavailable', 'The request journal is unavailable, the request was not carried out'));
+  }
+  // The answer is already gone when this runs, so a failure here can only be reported, not turned into a 500.
+  res.on('finish', () => {
+    try {
+      journal.finish(id, res.statusCode);
+    } catch (err) {
+      writeError('[journal] cannot record the status', err);
+    }
+  });
+  return next();
 };
 ```

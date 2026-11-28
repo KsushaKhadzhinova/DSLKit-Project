@@ -13,20 +13,9 @@ import { markPlaceholder } from '../../../tools/part2/figure-files.js';
 const work = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const out = path.join(work, 'figures');
 mkdirSync(out, { recursive: true });
-const BASE = 'http://localhost:3000/api';
 
 // [file, what to show, request or command, expected result]
 export const shots = [
-  ['owner-postman-get.png', 'Postman', `GET ${BASE}/users`, '200 OK, массив пользователей и объект meta'],
-  ['owner-postman-post.png', 'Postman', `POST ${BASE}/diagrams, тело raw JSON {"title":"Billing schema","notation":"ERD","code":"invoice -> payment","projectId":1}`, '201 Created, диаграмма в статусе draft'],
-  ['owner-postman-put.png', 'Postman', `PUT ${BASE}/users/2, тело {"name":"Alan T","email":"alan@example.com","role":"editor"}`, '200 OK, пользователь с новыми полями'],
-  ['owner-postman-patch.png', 'Postman', `PATCH ${BASE}/users/1, тело {"role":"editor"}`, '200 OK, пользователь с role editor'],
-  ['owner-postman-delete.png', 'Postman', `DELETE ${BASE}/diagrams/2`, '204 No Content, тела нет'],
-  ['owner-postman-delete-409.png', 'Postman', `DELETE ${BASE}/users/1`, '409 Conflict, пользователь ещё владеет проектами'],
-  ['owner-postman-validation.png', 'Postman', `POST ${BASE}/users, тело {"name":"","email":"x"}`, '400 Bad Request, validation_failed и details'],
-  ['owner-error-403.png', 'Postman', `DELETE ${BASE}/projects/1 с заголовком X-User-Id: 2`, '403 Forbidden, текст «You may not delete a project» и requestId'],
-  ['owner-journal-table.png', 'DB Browser for SQLite или DBeaver', 'файл journal.sqlite рядом с сервером, SELECT * FROM request_log ORDER BY id DESC LIMIT 15', 'строки с method, path, status, request_id; нет строк /health'],
-  ['owner-console.png', 'PowerShell', 'npm start в part-2/pz-02-rest-api, затем два запроса в браузере', 'строка «DSLKit REST API listens on http://localhost:3000/api»'],
   ['owner-tests.png', 'PowerShell', 'npm test в part-2/pz-02-rest-api', 'конец вывода: tests, pass, fail 0, таблица покрытия 100 %'],
 ];
 

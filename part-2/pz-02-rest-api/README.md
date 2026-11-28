@@ -40,7 +40,7 @@ npm start
 | `src/security.js`   | Заголовки безопасности, ограничение частоты, безопасная запись в журнал |
 | `test/api.test.js`  | Тесты на `node:test`, покрытие строк и функций 100 процентов    |
 
-Справочник по операциям собирается из `GET /api/openapi.json` командой `node tools/gen-api-md.mjs` в `API.generated.ru.md` и `API.generated.en.md` (проверка: `--check`). Рисунки отчёта: `node shots/shots.mjs` (страницы из настоящего сервера, нужен Edge или Chrome) и `node shots/placeholders.mjs` (заглушки для снимков Postman и окон консоли, см. [`SCREENSHOTS-TODO.md`](SCREENSHOTS-TODO.md)). Отчёт: `node tools/build.js part-2/pz-02-rest-api` и `node tools/docx-cli.js part-2/pz-02-rest-api` из корня репозитория.
+Справочник по операциям собирается из `GET /api/openapi.json` командой `node tools/gen-api-md.mjs` в `API.generated.ru.md` и `API.generated.en.md` (проверка: `--check`). Рисунки отчёта: `node shots/real-shots.mjs` (настоящие окна Chrome и PowerShell с адресной строкой через `shots/window-shot.ps1`, нужен разблокированный экран; снимки Postman сделаны вручную) и `node shots/placeholders.mjs` (заглушка для окна тестов, см. [`SCREENSHOTS-TODO.md`](SCREENSHOTS-TODO.md)). Отчёт: `node tools/build.js part-2/pz-02-rest-api` и `node tools/docx-cli.js part-2/pz-02-rest-api` из корня репозитория.
 
 Проверка вручную в Postman или Insomnia: импортируйте `postman_collection.json` (переменные `root` = `http://localhost:3000` и `base` = `http://localhost:3000/api`, в каждом запросе есть проверки) или откройте `requests.http` в VS Code (расширение REST Client). Документация в Swagger UI: импортируйте `http://localhost:3000/api/openapi.json`.
 

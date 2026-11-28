@@ -56,7 +56,7 @@ test and a few new ones in `test/api.test.js`, `test/negative-misuse.test.js` an
 
 ## Not fixed, by design (documented in `API.md`, "Known limitations")
 
-- **F1** no authentication or authorization at all. Out of scope for this practical; every field (including
+- **F1** no real authentication (only trusted `X-User-Id` and `X-Role` headers, see API.md). Out of scope for this practical; every field (including
   `role` and `ownerId`) is writable by anyone, and there is no ownership check on any mutation.
 - **F2** the hidden `email` can still be read via `GET /api/users/:id` and confirmed one address at a time via
   the 409 on `POST /api/users`. Both need real authentication/authorization to close properly, which this

@@ -22,7 +22,7 @@ const schemaOf = (schema) => ({
 });
 
 const ERROR = { $ref: '#/components/schemas/Error' };
-const MEANING = { 400: 'Invalid data', 404: 'Not found', 406: 'The client does not accept application/json', 409: 'Conflict', 412: 'The record changed since it was read (If-Match)', 413: 'Body too large', 415: 'The body is not JSON', 429: 'Too many requests' };
+const MEANING = { 400: 'Invalid data', 403: 'The caller named by X-User-Id may not do this', 404: 'Not found', 406: 'The client does not accept application/json', 409: 'Conflict', 412: 'The record changed since it was read (If-Match)', 413: 'Body too large', 415: 'The body is not JSON', 429: 'Too many requests' };
 const response = (description, schema) => ({ description, ...(schema && { content: { 'application/json': { schema } } }) });
 const errors = (...codes) => Object.fromEntries(codes.map((code) => [String(code), response(MEANING[code], ERROR)]));
 // Every operation can also fail in a way not tied to its own business rules (406, 429, or an unexpected 500);
@@ -32,6 +32,12 @@ const COMMON = { ...errors(406, 429), default: response('An unexpected error', E
 // The real ceiling DIGITS (src/resource.js) enforces for an id, page or limit: 15 digits, below
 // Number.MAX_SAFE_INTEGER. Kept as a literal here so the document does not import application code.
 const MAX_QUERY_INT = 999999999999999;
+
+// The identity of the caller (src/security.js): without X-User-Id the request is anonymous and not restricted.
+const identityHeaders = [
+  { name: 'X-User-Id', in: 'header', description: 'The number of the calling user; the request is then subject to the role rules.', schema: { type: 'integer', minimum: 1 } },
+  { name: 'X-Role', in: 'header', description: 'user (default) or admin.', schema: { type: 'string', enum: ['user', 'admin'] } },
+];
 
 const idParameter = { name: 'id', in: 'path', required: true, schema: { type: 'integer', minimum: 1, maximum: MAX_QUERY_INT } };
 const listParameters = [
@@ -69,13 +75,13 @@ const resourcePaths = (resource, schema, hidden) => {
   return {
     [`/${resource}`]: {
       get: { summary: `List ${resource}`, parameters: [...listParameters, ...filters], responses: { 200: response('A page of records', list(listRef)), ...errors(400), ...COMMON } },
-      post: { summary: `Create a record of ${resource}`, requestBody: input, responses: { 201: response('Created', ref), ...errors(400, 413, 415, ...(conflicts.write ? [409] : [])), ...COMMON } },
+      post: { summary: `Create a record of ${resource}`, parameters: identityHeaders, requestBody: input, responses: { 201: response('Created', ref), ...errors(400, 403, 413, 415, ...(conflicts.write ? [409] : [])), ...COMMON } },
     },
     [`/${resource}/{id}`]: {
       get: { summary: `One record of ${resource}`, parameters: [idParameter], responses: { 200: response('The record', ref), ...errors(400, 404), ...COMMON } },
-      put: { summary: 'Replace the whole record; a field left out of the body keeps its current value instead of resetting to the default', parameters: [idParameter], requestBody: input, responses: { 200: response('The record', ref), ...errors(400, 404, 412, 415, ...(conflicts.write ? [409] : [])), ...COMMON } },
-      patch: { summary: 'Change only the sent fields', parameters: [idParameter], requestBody: input, responses: { 200: response('The record', ref), ...errors(400, 404, 412, 415, ...(conflicts.write ? [409] : [])), ...COMMON } },
-      delete: { summary: 'Delete', parameters: [idParameter], responses: { 204: response('Deleted'), ...errors(400, 404, 412, ...(conflicts.remove ? [409] : [])), ...COMMON } },
+      put: { summary: 'Replace the whole record; a field left out of the body keeps its current value instead of resetting to the default', parameters: [idParameter, ...identityHeaders], requestBody: input, responses: { 200: response('The record', ref), ...errors(400, 403, 404, 412, 415, ...(conflicts.write ? [409] : [])), ...COMMON } },
+      patch: { summary: 'Change only the sent fields', parameters: [idParameter, ...identityHeaders], requestBody: input, responses: { 200: response('The record', ref), ...errors(400, 403, 404, 412, 415, ...(conflicts.write ? [409] : [])), ...COMMON } },
+      delete: { summary: 'Delete', parameters: [idParameter, ...identityHeaders], responses: { 204: response('Deleted'), ...errors(400, 403, 404, 412, ...(conflicts.remove ? [409] : [])), ...COMMON } },
     },
   };
 };
@@ -84,14 +90,14 @@ const DIAGRAM = { $ref: '#/components/schemas/Diagram' };
 const extraPaths = () => ({
   '/users/{id}/projects': { get: { summary: 'Projects of a user', parameters: [idParameter, ...listParameters], responses: { 200: response('A page of projects', list({ $ref: '#/components/schemas/Project' })), ...errors(400, 404), ...COMMON } } },
   '/projects/{id}/diagrams': { get: { summary: 'Diagrams of a project', parameters: [idParameter, ...listParameters], responses: { 200: response('A page of diagrams', list(DIAGRAM)), ...errors(400, 404), ...COMMON } } },
-  '/diagrams/{id}/publish': { post: { summary: 'Set the status to published', parameters: [idParameter], responses: { 200: response('The record', DIAGRAM), ...errors(400, 404), ...COMMON } } },
-  '/diagrams/{id}/duplicate': { post: { summary: 'Copy a diagram as a draft', parameters: [idParameter], responses: { 201: response('The copy', DIAGRAM), ...errors(400, 404, 409), ...COMMON } } },
+  '/diagrams/{id}/publish': { post: { summary: 'Set the status to published', parameters: [idParameter, ...identityHeaders], responses: { 200: response('The record', DIAGRAM), ...errors(400, 403, 404), ...COMMON } } },
+  '/diagrams/{id}/duplicate': { post: { summary: 'Copy a diagram as a draft', parameters: [idParameter, ...identityHeaders], responses: { 201: response('The copy', DIAGRAM), ...errors(400, 403, 404, 409), ...COMMON } } },
 });
 
 // hidden: { users: ['email'] } names the fields that are not offered as list filters and that a list response
 // cannot contain, so its schema (nameListItem) is generated without them.
 export const buildOpenApi = (schemas, { hidden = {} } = {}) => {
-  const components = { Error: { type: 'object', properties: { error: { type: 'object', properties: { code: { type: 'string' }, message: { type: 'string' }, details: { type: 'array', items: { type: 'object' } } } } } } };
+  const components = { Error: { type: 'object', properties: { error: { type: 'object', properties: { code: { type: 'string' }, message: { type: 'string' }, title: { type: 'string' }, description: { type: 'string' }, requestId: { type: 'string' }, details: { type: 'array', items: { type: 'object' } } } } } } };
   let paths = {};
   for (const [resource, schema] of Object.entries(schemas)) {
     const input = schemaOf(schema);
