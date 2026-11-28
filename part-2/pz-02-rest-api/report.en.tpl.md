@@ -123,7 +123,9 @@ Figure 1 – The table request_log of the SQLite database printed in a PowerShel
 
 ### 3.6 Error pages
 
-For a browser an arranged page is returned instead of JSON, with the code, a title, three blocks "What happened", "Likely cause" and "What to do", and the request number. The same number is given in the header `X-Request-Id`, in the error body, in the journal table and in the server console line, so the request is easy to find by it. The error texts are written in English, like the other API texts. The 404 page for an unknown address is shown in figure 2.
+For a browser an arranged page is returned instead of JSON, with the code, a title, three blocks "What happened", "Likely cause" and "What to do", and the request number. The same number is given in the header `X-Request-Id`, in the error body, in the journal table and in the server console line, so the request is easy to find by it. The error texts are written in English, like the other API texts.
+
+The 404 page for an unknown address is shown in figure 2.
 
 ![The 404 page](figures/error-404.png)
 
@@ -149,7 +151,9 @@ Figure 5 – The answer 403 to the request DELETE /api/projects/1 with the X-Use
 
 ### 3.7 API documentation
 
-The route `GET /api/openapi.json` returns the API description in the OpenAPI 3.0 format. It is built from the same schemas that validate requests, so field lengths, lists of allowed values and required fields in the document match the code. The document is suitable for opening in Swagger UI and for import into Postman. The description is opened in a browser window at `http://localhost:4230/api/openapi.json`, and a fragment is shown in figure 6. In it the change and delete operations have the headers `X-User-Id` and `X-Role` and the answer 403. The reference of operations is generated from the same document by the script `tools/gen-api-md.mjs` into the files `API.generated.ru.md` and `API.generated.en.md`. A test compares them with the server answer, so they do not drift from the code. The possible error codes are listed in the reference for every operation.
+The route `GET /api/openapi.json` returns the API description in the OpenAPI 3.0 format. It is built from the same schemas that validate requests, so field lengths, lists of allowed values and required fields in the document match the code. The document is suitable for opening in Swagger UI and for import into Postman. The reference of operations is generated from the same document by the script `tools/gen-api-md.mjs` into the files `API.generated.ru.md` and `API.generated.en.md`. A test compares them with the server answer, so they do not drift from the code. The possible error codes are listed in the reference for every operation.
+
+The description is opened in a browser window at `http://localhost:4230/api/openapi.json`, and a fragment is shown in figure 6. In it the change and delete operations have the headers `X-User-Id` and `X-Role` and the answer 403.
 
 ![API description](figures/api-docs.png)
 
@@ -157,7 +161,9 @@ Figure 6 – The API description in the OpenAPI format at GET /api/openapi.json 
 
 ### 3.8 Checking requests in Postman
 
-The requests of every method are sent in Postman by hand, and the same set of requests is collected in the collection `postman_collection.json` for import and in the file `requests.http`. A separate window shot is obtained for every method: the request, the status code and the response body. Reading the list with `GET /api/users` is shown in figure 7.
+The requests of every method are sent in Postman by hand, and the same set of requests is collected in the collection `postman_collection.json` for import and in the file `requests.http`. A separate window shot is obtained for every method: the request, the status code and the response body.
+
+Reading the list with `GET /api/users` is shown in figure 7.
 
 ![GET /api/users](figures/postman-get.png)
 
@@ -201,7 +207,9 @@ Figure 13 – The request POST /api/users with invalid data and the answer 400 w
 
 ### 3.9 Checking requests from a browser
 
-Only `GET` requests are sent from the address bar of a browser, the other methods are shown above in Postman. The server is started with `npm start` and the variable `PORT` set to 4230, and the requests are opened in a Chrome window with the address bar. The answer to `GET /api/users` at `http://localhost:4230/api/users` is shown in figure 14.
+Only `GET` requests are sent from the address bar of a browser, the other methods are shown above in Postman. The server is started with `npm start` and the variable `PORT` set to 4230, and the requests are opened in a Chrome window with the address bar.
+
+The answer to `GET /api/users` at `http://localhost:4230/api/users` is shown in figure 14.
 
 ![List of users](figures/02-users-list.png)
 
@@ -213,33 +221,33 @@ One record at `http://localhost:4230/api/users/1` is shown in figure 15.
 
 Figure 15 – The answer to GET /api/users/1 in a browser window: the object of one user
 
-A request for a non-existent record at `http://localhost:4230/api/users/999` gives the error shown in figure 16.
-
-![The answer 404](figures/04-user-404.png)
-
-Figure 16 – The answer to GET /api/users/999 in a browser window: the 404 error page with the request number
-
-A wrong number in the address `http://localhost:4230/api/users/abc` is rejected, as in figure 17.
-
-![The answer 400](figures/05-user-400.png)
-
-Figure 17 – The answer to GET /api/users/abc in a browser window: the 400 error page with an explanation
-
-Search, sorting and pages work through the address parameters `?q=billing&sort=-title&page=1&limit=10`, and the result is shown in figure 18.
+Search, sorting and pages work through the address parameters `?q=billing&sort=-title&page=1&limit=10`, and the result is shown in figure 16.
 
 ![Search and sorting](figures/06-diagrams-search.png)
 
-Figure 18 – The answer to GET /api/diagrams with the q, sort, page and limit parameters in a browser window
+Figure 16 – The answer to GET /api/diagrams with the q, sort, page and limit parameters in a browser window
 
-The extra route `GET /api/users/1/projects` returns the projects of one user, as in figure 19.
+The extra route `GET /api/users/1/projects` returns the projects of one user, as in figure 17.
 
 ![Projects of a user](figures/07-user-projects.png)
 
-Figure 19 – The answer to GET /api/users/1/projects in a browser window: the projects of the user
+Figure 17 – The answer to GET /api/users/1/projects in a browser window: the projects of the user
 
-### 3.10 Automatic checks
+A request for a non-existent record at `http://localhost:4230/api/users/999` gives the error shown in figure 18.
 
-Automatic tests are written that start the server on a free port and check every method, the status codes, filters, sorting, pages, validation errors, links between resources, extra operations, roles with the answer 403, the order "journal record before the action", a journal failure with the answer 500, the exclusion of `/health` and of the answer 429 from the journal, races when a parent is deleted, and the error pages. There are 176 server tests, 179 together with the report checks, and the coverage of lines, branches and functions is 100 percent. The command is `npm test` in the project folder. The console message at server start is shown in figure 20.
+![The answer 404](figures/04-user-404.png)
+
+Figure 18 – The answer to GET /api/users/999 in a browser window: the 404 error page with the request number
+
+A wrong number in the address `http://localhost:4230/api/users/abc` is rejected, as in figure 19.
+
+![The answer 400](figures/05-user-400.png)
+
+Figure 19 – The answer to GET /api/users/abc in a browser window: the 400 error page with an explanation
+
+Automatic tests are written that start the server on a free port and check every method, the status codes, filters, sorting, pages, validation errors, links between resources, extra operations, roles with the answer 403, the order "journal record before the action", a journal failure with the answer 500, the exclusion of `/health` and of the answer 429 from the journal, races when a parent is deleted, and the error pages. There are 176 server tests, 179 together with the report checks, and the coverage of lines, branches and functions is 100 percent. The command is `npm test` in the project folder.
+
+The console message at server start is shown in figure 20.
 
 ![Server console](figures/console.png)
 

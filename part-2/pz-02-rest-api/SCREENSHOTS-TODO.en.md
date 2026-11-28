@@ -15,3 +15,5 @@ How: `node shots/real-shots.mjs` (ports 4230 to 4236, an unlocked screen is need
 3. The branch `pz22` comes from `report.meta.json`; the owner creates it.
 4. Swagger UI is not part of the app; figure 6 shows the OpenAPI document itself.
 5. Figure 21 does not show the first line `tests 179`: it scrolled off the top of the window.
+
+The browser figures 14 to 19 stand in the order `02-users-list.png`, `03-user-one.png`, `06-diagrams-search.png`, `07-user-projects.png`, `04-user-404.png`, `05-user-400.png`, so that the pages fill better. `console.png` and `journal-table.png` are cropped at the bottom to the content of the window.

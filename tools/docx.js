@@ -7,7 +7,7 @@ import { zip, unzip } from './zip.js';
 // captions under figures and above tables, listings in Courier New 10 with a hanging indent for long lines.
 // Headings are 14 pt (STP 2.1.1). Every Latin letter is italic (the rule of the teacher), no tab characters, no empty paragraphs, no non-breaking spaces, no manual line breaks, no long dashes.
 const TEXT_WIDTH = 9355; // twips: 21 cm minus 3 cm and 1.5 cm
-const MAX_EMU_WIDTH = 3780000; // 10.5 cm: with the sections flowing on, narrow figures leave the fewest gaps on the pages
+const MAX_EMU_WIDTH = 5220000; // figure width limit
 const PAGE_EMU_HEIGHT = 10692000; // 29.7 cm
 const MAX_EMU_HEIGHT = Math.round(PAGE_EMU_HEIGHT * 0.6); // a figure may take 60 percent of the page height
 const CODE_CHAR = 120; // twips: one Courier New 10 pt character

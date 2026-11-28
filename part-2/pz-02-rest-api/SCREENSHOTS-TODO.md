@@ -9,7 +9,7 @@
 | `postman-403.png` | 5 | Postman | `DELETE /api/projects/1` с `X-User-Id: 2`, вкладка Headers, ответ 403 |
 | `api-docs.png` | 6 | Chrome | Описание OpenAPI по адресу `/api/openapi.json` с включённым автоформатированием |
 | `postman-get.png` … `postman-validation.png` | 7–13 | Postman | GET 200, POST 201, PUT 200, PATCH 200 (вкладка Body открыта у POST, PUT, PATCH), DELETE 204, DELETE 409, POST 400 |
-| `02-users-list.png` … `07-user-projects.png` | 14–19 | Chrome | Шесть запросов GET из адресной строки |
+| `02-users-list.png`, `03-user-one.png`, `06-diagrams-search.png`, `07-user-projects.png`, `04-user-404.png`, `05-user-400.png` | 14–19 (в этом порядке) | Chrome | Шесть запросов GET из адресной строки; порядок выбран так, чтобы страницы заполнялись плотнее |
 | `console.png` | 20 | PowerShell | Сообщение сервера после `npm start` на порту 4236 |
 | `tests.png` | 21 | PowerShell | Конец вывода `npm test`: `pass 179`, `fail 0`, таблица покрытия 100 % по всем файлам `src`, включая `server.js` и `start.js` |
 
@@ -26,3 +26,5 @@
 3. Ветку `pz22` создаёт владелица, ссылка на неё взята из `report.meta.json`.
 4. Swagger UI в приложении нет, рисунок 6 показывает сам документ OpenAPI.
 5. Рисунок 21 не показывает первую строку `tests 179`: она вышла за верхний край окна.
+
+Снимки `console.png` и `journal-table.png` обрезаны снизу по содержимому окна (пустая часть окна убрана).
