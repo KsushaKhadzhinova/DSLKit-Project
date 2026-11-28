@@ -1,5 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { core } from './helpers.js';
 import { createApp } from '../src/app.js';
 import { logSafe, rateLimit, securityHeaders } from '../src/security.js';
 
@@ -138,8 +139,8 @@ test('unexpected failures are logged with an escaped address and answered with a
   const { base, errors, close } = await start({ stores });
   const res = await fetch(`${base}/api/users?a=b`);
   assert.equal(res.status, 500);
-  assert.deepEqual(await res.json(), { error: { code: 'internal_error', message: 'Internal server error' } });
-  assert.equal(errors[0][0], '[error] "GET" "/api/users?a=b"');
+  assert.deepEqual(core(await res.json()), { error: { code: 'internal_error', message: 'Internal server error' } });
+  assert.match(errors[0][0], /^\[error\] request [0-9a-f-]{36} "GET" "\/api\/users\?a=b"$/);
   await close();
 });
 

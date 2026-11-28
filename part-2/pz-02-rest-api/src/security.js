@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import { ApiError } from './errors.js';
 
 // Headers for a JSON-only API, set by hand without extra packages. The API sends no HTML, so the policy forbids everything.
@@ -67,3 +68,29 @@ export const rateLimit = ({ windowMs, max, now = Date.now, maxClients = 50000 })
 
 // Request data in a log line could carry line breaks and forge extra lines, so it is written as a JSON string (escaped and quoted).
 export const logSafe = (text) => JSON.stringify(String(text)).slice(0, 300);
+
+// Every request gets its own id, always generated here (a client-supplied value could forge or collide with log
+// lines). It travels in the X-Request-Id header, in the journal row and in every error answer.
+export const requestId = (req, res, next) => {
+  res.locals.requestId = randomUUID();
+  res.set('X-Request-Id', res.locals.requestId);
+  next();
+};
+
+// A deliberately small identity for this practical (there is no login): X-User-Id says who is acting, X-Role is
+// "user" (the default) or "admin". Without X-User-Id the caller is anonymous and is not restricted, as before roles
+// existed; with it, the ownership rules of the routes apply. The headers are trusted as they come, a real system
+// would take them from a verified session.
+export const identify = (findUser) => (req, res, next) => {
+  const role = req.headers['x-role'] ?? 'user';
+  if (role !== 'user' && role !== 'admin') return next(new ApiError(400, 'invalid_identity', 'X-Role must be user or admin'));
+  const raw = req.headers['x-user-id'];
+  if (raw === undefined) {
+    req.actor = { role };
+    return next();
+  }
+  if (!/^[1-9]\d{0,14}$/.test(raw)) return next(new ApiError(400, 'invalid_identity', 'X-User-Id must be a positive whole number'));
+  if (!findUser(Number(raw))) return next(new ApiError(403, 'forbidden', 'X-User-Id names a user that does not exist'));
+  req.actor = { userId: Number(raw), role };
+  return next();
+};

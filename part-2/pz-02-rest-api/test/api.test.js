@@ -1,5 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { core } from './helpers.js';
 import { createApp, schemas } from '../src/app.js';
 import { listItems } from '../src/resource.js';
 import { createStores } from '../src/store.js';
@@ -63,7 +64,7 @@ withApi('GET one item, unknown and malformed ids', async ({ call }) => {
   assert.equal((await call('GET', '/users/1')).json.name, 'Ada Lovelace');
   const missing = await call('GET', '/users/99');
   assert.equal(missing.status, 404);
-  assert.deepEqual(missing.json, { error: { code: 'not_found', message: 'User not found' } });
+  assert.deepEqual(core(missing.json), { error: { code: 'not_found', message: 'User not found' } });
   assert.equal((await call('GET', '/users/abc')).json.error.code, 'invalid_id');
   assert.equal((await call('GET', '/users/0')).status, 400);
 });
@@ -96,10 +97,10 @@ withApi('POST validation reports every problem', async ({ call }) => {
 
 withApi('references must exist', async ({ call }) => {
   const res = await call('POST', '/diagrams', { title: 't', notation: 'UML', projectId: 99 });
-  assert.equal(res.status, 400);
+  assert.equal(res.status, 409);
   assert.match(res.json.error.details[0].message, /does not exist/);
-  assert.equal((await call('POST', '/projects', { name: 'p', ownerId: 99 })).status, 400);
-  assert.equal((await call('PATCH', '/diagrams/1', { projectId: 99 })).status, 400);
+  assert.equal((await call('POST', '/projects', { name: 'p', ownerId: 99 })).status, 409);
+  assert.equal((await call('PATCH', '/diagrams/1', { projectId: 99 })).status, 409);
 });
 
 withApi('PUT replaces the whole record and keeps id and createdAt', async ({ call }) => {
@@ -155,7 +156,7 @@ withApi('broken JSON, oversized body and unknown routes get JSON errors', async 
   assert.equal(big.status, 413);
   const unknown = await fetch(`${base}/nothing`);
   assert.equal(unknown.status, 404);
-  assert.equal((await unknown.json()).error.code, 'not_found');
+  assert.equal((await unknown.json()).error.code, 'route_not_found');
 });
 
 withApi('unexpected errors become a 500 JSON response and are logged', async ({ call, errors }) => {
@@ -171,7 +172,7 @@ withApi('unexpected errors become a 500 JSON response and are logged', async ({ 
     const res = await call('GET', '/diagrams/1');
     assert.equal(res.status, 500);
     assert.equal(res.json.error.code, 'internal_error');
-    assert.equal(errors[0][0], '[error] "GET" "/api/diagrams/1"');
+    assert.match(errors[0][0], /^\[error\] request [0-9a-f-]{36} "GET" "\/api\/diagrams\/1"$/);
   } finally {
     JSON.stringify = original;
   }

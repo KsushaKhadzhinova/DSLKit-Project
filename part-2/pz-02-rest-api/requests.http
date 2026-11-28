@@ -1,8 +1,9 @@
 ### VS Code REST Client (extension humao.rest-client). Start the server first: npm start
-@base = http://localhost:3000/api
+@root = http://localhost:3000
+@base = {{root}}/api
 
 ### Health check -> 200
-GET http://localhost:3000/health
+GET {{root}}/health
 
 ### List users -> 200
 GET {{base}}/users
@@ -91,3 +92,36 @@ PUT {{base}}/users/2
 Content-Type: application/json
 
 { "name": "Alan Turing", "email": "alan@example.com" }
+
+### Allowed methods -> 204
+OPTIONS {{base}}/users
+
+### Headers only -> 200
+HEAD {{base}}/users
+
+### Stale update refused -> 412
+PATCH {{base}}/users/2
+Content-Type: application/json
+If-Match: W/"0000000000000000"
+
+{ "name": "Alan T." }
+
+### Roles: Ada (user 1) changes Alan's project -> 403 with a Request ID
+PATCH {{base}}/projects/2
+Content-Type: application/json
+X-User-Id: 1
+
+{ "name": "Not mine" }
+
+### Roles: Ada deletes a project -> 403 (only an administrator may)
+DELETE {{base}}/projects/1
+X-User-Id: 1
+
+### Roles: administrator deletes a diagram of any project -> 204
+DELETE {{base}}/diagrams/3
+X-User-Id: 1
+X-Role: admin
+
+### Error page for a browser -> HTML 404 with description and Request ID
+GET {{root}}/nope
+Accept: text/html

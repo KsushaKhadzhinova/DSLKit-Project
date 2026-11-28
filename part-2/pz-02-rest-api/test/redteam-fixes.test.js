@@ -175,7 +175,7 @@ withApi(
 // --- F10: content negotiation and body-on-bodyless-method inconsistencies ----------------------------------
 
 withApi('F10: an Accept header that cannot match JSON gets 406, a missing or */* Accept is fine', async ({ call }) => {
-  const rejected = await call('GET', '/users', undefined, { Accept: 'text/html' });
+  const rejected = await call('GET', '/users', undefined, { Accept: 'image/png' });
   assert.equal(rejected.status, 406);
   assert.equal(rejected.json.error.code, 'not_acceptable');
   assert.equal((await call('GET', '/users', undefined, { Accept: '*/*' })).status, 200);
@@ -256,10 +256,11 @@ withApi('F14: the user list schema does not require email, and 406/429/default a
   assert.ok(doc.paths['/users'].get.responses.default);
 });
 
-withApi('F14: 409 is no longer declared on project/diagram writes that can never produce it', async ({ call }) => {
+withApi('F14: 409 is declared exactly where the code can produce it', async ({ call }) => {
   const { json: doc } = await call('GET', '/openapi.json');
-  assert.equal(doc.paths['/projects'].post.responses['409'], undefined);
-  assert.equal(doc.paths['/diagrams/{id}'].put.responses['409'], undefined);
+  // A missing parent (owner, project) is a 409 on write; only a diagram delete can never conflict.
+  assert.ok(doc.paths['/projects'].post.responses['409']);
+  assert.ok(doc.paths['/diagrams/{id}'].put.responses['409']);
   // users can really 409 on write, projects can really 409 on delete: those stay documented.
   assert.ok(doc.paths['/users'].post.responses['409']);
   assert.ok(doc.paths['/projects/{id}'].delete.responses['409']);
